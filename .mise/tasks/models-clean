@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Remove a downloaded model from the HuggingFace cache."""
+import shutil
+import sys
+from pathlib import Path
+
+cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
+
+models = sorted(d for d in cache_dir.iterdir() if d.is_dir() and d.name.startswith("models--"))
+entries = {d.name.removeprefix("models--").replace("--", "/"): d for d in models}
+
+if not entries:
+    print("No models downloaded.")
+    raise SystemExit(0)
+
+# If a model name was passed as argument, use it directly
+if len(sys.argv) > 1:
+    target = " ".join(sys.argv[1:])
+    if target not in entries:
+        print(f"Model not found: {target}")
+        print("Run 'mise run models-list' to see downloaded models.")
+        raise SystemExit(1)
+    selected = target
+else:
+    # Interactive selection
+    names = list(entries.keys())
+    print("\nDownloaded models:\n")
+    for i, name in enumerate(names, 1):
+        size = sum(f.stat().st_size for f in entries[name].rglob("*") if f.is_file())
+        print(f"  [{i}] {name}  ({size / (1024 ** 3):.1f} GiB)")
+
+    print("\nEnter number to delete (or q to quit): ", end="", flush=True)
+    choice = input().strip()
+    if choice.lower() == "q":
+        raise SystemExit(0)
+    try:
+        selected = names[int(choice) - 1]
+    except (ValueError, IndexError):
+        print("Invalid selection.")
+        raise SystemExit(1)
+
+model_dir = entries[selected]
+size = sum(f.stat().st_size for f in model_dir.rglob("*") if f.is_file())
+
+print(f"\nDelete '{selected}' ({size / (1024 ** 3):.1f} GiB)? [y/N] ", end="", flush=True)
+if input().strip().lower() != "y":
+    print("Aborted.")
+    raise SystemExit(0)
+
+shutil.rmtree(model_dir)
+print(f"Deleted {selected}")

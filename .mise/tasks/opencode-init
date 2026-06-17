@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Generate opencode.json from MLX_MODEL env var."""
+import json
+import os
+
+model = os.environ["MLX_MODEL"]
+config = {
+    "$schema": "https://opencode.ai/config.json",
+    "provider": {
+        "mlx": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "MLX Local",
+            "options": {
+                "baseURL": "http://localhost:8080/v1",
+                "apiKey": "mlx",
+            },
+            "models": {model: {}},
+        }
+    },
+    "model": f"mlx/{model}",
+}
+
+with open("opencode.json", "w") as f:
+    json.dump(config, f, indent=2)
+    f.write("\n")
+
+print(f"opencode.json written for model: {model}")

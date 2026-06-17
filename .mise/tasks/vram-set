@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Set GPU VRAM limit. Usage: mise run vram-set [GB]
+Defaults to 26GB (recommended for 32GB Macs, leaving ~6GB for macOS)."""
+import os
+import subprocess
+import sys
+
+def total_ram_gb():
+    try:
+        out = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True).stdout
+        return int(out.strip().split(": ", 1)[-1]) / (1024 ** 3)
+    except Exception:
+        return None
+
+# Accept GB as CLI arg or VRAM_GB env var, default 26
+if len(sys.argv) > 1:
+    gb = float(sys.argv[1])
+elif "VRAM_GB" in os.environ:
+    gb = float(os.environ["VRAM_GB"])
+else:
+    gb = 26.0
+
+mb = int(gb * 1024)
+total = total_ram_gb()
+headroom = round(total - gb, 1) if total else "?"
+
+print(f"\n  Setting VRAM limit to {gb:.0f} GB ({mb} MB)")
+if total:
+    print(f"  Total RAM: {total:.0f} GB  →  OS headroom: {headroom} GB")
+    if isinstance(headroom, float) and headroom < 4:
+        print("  ⚠️  Warning: less than 4 GB left for macOS — risk of lockup!")
+print()
+
+result = subprocess.run(["sudo", "sysctl", f"iogpu.wired_limit_mb={mb}"])
+if result.returncode == 0:
+    print(f"  ✓ VRAM limit set to {gb:.0f} GB. Resets on reboot.\n")
+else:
+    print("  ✗ Failed. Try running with sudo.\n")
+    sys.exit(1)

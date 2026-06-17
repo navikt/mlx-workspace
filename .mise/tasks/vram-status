@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Show current GPU VRAM allocation and unified memory info."""
+import subprocess
+import platform
+
+def sysctl(key):
+    try:
+        result = subprocess.run(["sysctl", key], capture_output=True, text=True)
+        return result.stdout.strip().split(": ", 1)[-1]
+    except Exception:
+        return "unavailable"
+
+def total_ram_mb():
+    try:
+        out = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True).stdout
+        return int(out.strip().split(": ", 1)[-1]) // (1024 * 1024)
+    except Exception:
+        return None
+
+limit_mb = sysctl("iogpu.wired_limit_mb")
+total_mb = total_ram_mb()
+
+print()
+if total_mb:
+    print(f"  Total RAM:       {total_mb / 1024:.0f} GB")
+
+if limit_mb == "0":
+    default_pct = 75
+    default_mb = int(total_mb * default_pct / 100) if total_mb else "?"
+    print(f"  VRAM limit:      macOS default (~{default_mb // 1024} GB / {default_pct}% of RAM)")
+else:
+    try:
+        gib = int(limit_mb) / 1024
+        print(f"  VRAM limit:      {limit_mb} MB ({gib:.1f} GB) — custom")
+    except ValueError:
+        print(f"  VRAM limit:      {limit_mb}")
+
+print(f"  macOS version:   {platform.mac_ver()[0]}")
+print()
+print("  Tip: use 'mise run vram-set' to unlock more VRAM for large models.")
+print()

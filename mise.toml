@@ -1,0 +1,96 @@
+[tools]
+python = "latest"
+pipx = "latest"
+
+[settings]
+env_shell_expand = true
+
+[env]
+# MLX_MODEL = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+# MLX_MODEL = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit" (requires 32GB+ RAM)
+MLX_MODEL = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+VIRTUAL_ENV = "{{config_root}}/.venv"
+_.path = ["{{config_root}}/.venv/bin"]
+
+# ── Setup ─────────────────────────────────────────────────────────────────────
+
+[tasks.setup]
+description = "Create and populate the Python venv and install aider"
+run = """
+python -m venv .venv
+.venv/bin/pip install --upgrade pip mlx mlx-lm
+pipx install aider-chat --python python3.12 || pipx upgrade aider-chat
+"""
+
+# ── Inference ─────────────────────────────────────────────────────────────────
+
+[tasks.run]
+description = "Run a single prompt through the model"
+depends = ["setup"]
+run = """
+mlx_lm.generate \
+  --model "$MLX_MODEL" \
+  --prompt "Explain go generics and when to use them"
+"""
+
+[tasks.chat]
+description = "Interactive chat with the model (no server needed)"
+depends = ["setup"]
+run = "mlx_lm.chat --model \"$MLX_MODEL\""
+
+[tasks.server]
+description = "Start the OpenAI-compatible HTTP server on port 8080"
+depends = ["setup"]
+run = "mlx_lm.server --model \"$MLX_MODEL\" --port 8080"
+
+# ── AI coding clients ─────────────────────────────────────────────────────────
+
+[tasks.aider]
+description = "Start aider pointed at the local MLX server"
+depends = ["setup"]
+run = """
+aider \
+  --openai-api-base http://localhost:8080/v1 \
+  --openai-api-key mlx \
+  --model "openai/$MLX_MODEL" \
+  --model-metadata-file .aider.model.metadata.json \
+  --no-check-update
+"""
+
+[tasks.opencode-init]
+description = "Generate opencode.json from current MLX_MODEL (run automatically by opencode)"
+run = ".mise/tasks/opencode-init"
+
+[tasks.opencode]
+description = "Start opencode pointed at the local MLX server"
+depends = ["opencode-init"]
+run = "opencode"
+
+[tasks.copilot]
+description = "Start GitHub Copilot CLI pointed at the local MLX server"
+run = "gh copilot"
+env = { COPILOT_PROVIDER_BASE_URL = "http://localhost:8080/v1", COPILOT_PROVIDER_TYPE = "openai", COPILOT_PROVIDER_API_KEY = "mlx", COPILOT_MODEL = "$MLX_MODEL", COPILOT_OFFLINE = "true" }
+
+# ── Model management ──────────────────────────────────────────────────────────
+
+[tasks.models-list]
+description = "List downloaded models and their sizes"
+run = ".mise/tasks/models-list"
+
+[tasks.models-clean]
+description = "Interactively remove a downloaded model from the HuggingFace cache"
+run = ".mise/tasks/models-clean"
+
+# ── VRAM management ───────────────────────────────────────────────────────────
+
+[tasks.vram-status]
+description = "Show current GPU VRAM allocation"
+run = ".mise/tasks/vram-status"
+
+[tasks.vram-set]
+description = "Set GPU VRAM limit in GB (default: 26GB). Usage: mise run vram-set [GB]"
+run = ".mise/tasks/vram-set"
+
+[tasks.vram-reset]
+description = "Reset GPU VRAM limit to macOS default (~75% of RAM)"
+run = ".mise/tasks/vram-reset"

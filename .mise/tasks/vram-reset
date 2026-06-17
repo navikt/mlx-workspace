@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+"""Reset GPU VRAM limit to macOS default."""
+import subprocess
+import sys
+
+print("\n  Resetting VRAM limit to macOS default...")
+result = subprocess.run(["sudo", "sysctl", "iogpu.wired_limit_mb=0"])
+if result.returncode == 0:
+    print("  ✓ VRAM limit restored to macOS default (~75% of RAM).\n")
+else:
+    print("  ✗ Failed. Try running with sudo.\n")
+    sys.exit(1)
