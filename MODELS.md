@@ -163,9 +163,15 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Google Gemma 4 (Jun 2026), Apache 2.0
 - Encoder-free multimodal: vision/audio fed directly into LLM backbone — lower latency than encoder-based models
 - Reported strong function-calling / JSON schema adherence
-- Tool calling via opencode requires text-only mode (mlx-lm does not support audio/vision input from CLI)
+- **Requires `mlx-vlm` server** (`model_type: gemma4_unified`) — handled automatically by `mise run server`
 
-**Verdict:** Untested locally. Promising for strict JSON tool calling. Priority for evaluation.
+**⚠️ mlx-vlm caching limitation:**
+`mlx-vlm` clears the KV cache after every completed request (`Stream finished, cleared cache`). There is no equivalent to mlx-lm's `--prompt-cache-bytes` / `--prompt-cache-size`. This means:
+- Every opencode tool call re-prefills the full conversation history from scratch
+- No cross-request prompt reuse — each turn pays the full prefill cost
+- Expect noticeably higher latency per turn compared to mlx-lm models
+
+**Verdict:** Untested locally. Promising for strict JSON tool calling, but cache penalty is significant for agentic use. Worth testing for quality; may be impractical for long sessions.
 
 ---
 
