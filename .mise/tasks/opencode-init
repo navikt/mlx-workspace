@@ -20,6 +20,11 @@ config = {
     # Instruction files opencode loads into every session's system context.
     # AGENTS.md contains project-level rules (e.g. always use rtk for shell commands).
     "instructions": ["AGENTS.md"],
+    # RTK plugin: intercepts tool.execute.before and rewrites bash commands
+    # to use rtk for token-compressed output. Installed globally via:
+    # rtk init -g --opencode → ~/.config/opencode/plugins/rtk.ts
+    # Listed here as well so the local config is self-contained.
+    "plugin": ["~/.config/opencode/plugins/rtk.ts"],
     "provider": {
         "mlx": {
             "npm": "@ai-sdk/openai-compatible",
