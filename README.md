@@ -130,4 +130,6 @@ mise run vram-reset         # restore macOS default
 
 > ⚠️ **Risks:** Allocating too much causes hard lockups, beachballs, or forced reboots. Always leave at least 4–6 GB for macOS. The setting resets on reboot.
 
+> **OOM crashes during inference:** If the server crashes with `Insufficient Memory` / `kIOGPUCommandBufferCallbackErrorOutOfMemory`, either run `mise run vram-set` before starting the server, or switch to a smaller model. The server task already caps the KV cache at 8GB and max tokens at 8192 to reduce this risk.
+
 > **macOS Ventura and older:** the sysctl key is `debug.iogpu.wired_limit` and takes bytes instead of MB — the mise tasks use the Sonoma+ key (`iogpu.wired_limit_mb`).

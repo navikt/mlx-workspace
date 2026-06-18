@@ -6,10 +6,26 @@ pipx = "latest"
 env_shell_expand = true
 
 [env]
+# ── Model ─────────────────────────────────────────────────────────────────────
+# Uncomment the model you want to use. Update server params below to match.
+#
 # MLX_MODEL = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+# MLX_CACHE_BYTES = "9663676416"   # 9GB  (model ~9GB VRAM, leaves ~8GB headroom)
+# MLX_CACHE_SIZE  = "5"
+#
 # MLX_MODEL = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
+# MLX_CACHE_BYTES = "4294967296"   # 4GB  (model ~19GB VRAM — run vram-set 26 first!)
+# MLX_CACHE_SIZE  = "3"
+#
 # MLX_MODEL = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
-MLX_MODEL ="mlx-community/Qwen3.5-9B-MLX-4bit"
+# MLX_CACHE_BYTES = "6442450944"   # 6GB  (model ~16GB VRAM, tight headroom)
+# MLX_CACHE_SIZE  = "4"
+
+MLX_MODEL       = "mlx-community/Qwen3.5-9B-MLX-4bit"
+MLX_CACHE_BYTES = "8589934592"   # 8GB  (model ~6GB VRAM, leaves ~10GB headroom)
+MLX_CACHE_SIZE  = "5"
+MLX_MAX_TOKENS  = "8192"
+
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
 
@@ -42,7 +58,16 @@ run = "mlx_lm.chat --model \"$MLX_MODEL\""
 [tasks.server]
 description = "Start the OpenAI-compatible HTTP server on port 8080"
 depends = ["setup"]
-run = "mlx_lm.server --model \"$MLX_MODEL\" --port 8080"
+run = """
+mlx_lm.server \
+  --model "$MLX_MODEL" \
+  --port 8080 \
+  --max-tokens "$MLX_MAX_TOKENS" \
+  --prompt-cache-size "$MLX_CACHE_SIZE" \
+  --prompt-cache-bytes "$MLX_CACHE_BYTES"
+"""
+# Tune MLX_CACHE_BYTES, MLX_CACHE_SIZE, MLX_MAX_TOKENS in [env] above.
+# Larger models need smaller cache values — see comments next to each model.
 
 # ── AI coding clients ─────────────────────────────────────────────────────────
 

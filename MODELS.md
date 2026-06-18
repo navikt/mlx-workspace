@@ -32,6 +32,36 @@ mise run models-list
 ¹ Context headroom = 32GB Mac unified RAM − VRAM footprint − ~7GB OS reserve  
 ² Tested as excellent per spec; local testing showed inconsistency — may be version-dependent
 
+## Recommended server parameters
+
+Switch model by uncommenting the right block in `mise.toml` `[env]`:
+
+```toml
+# Qwen3.5-9B — default, best balance
+MLX_MODEL       = "mlx-community/Qwen3.5-9B-MLX-4bit"
+MLX_CACHE_BYTES = "8589934592"   # 8 GB — model ~6GB VRAM, ~10GB headroom for cache
+MLX_CACHE_SIZE  = "5"            # 5 concurrent conversation caches
+MLX_MAX_TOKENS  = "8192"
+
+# Qwen2.5-Coder-14B — reliable fallback
+MLX_MODEL       = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+MLX_CACHE_BYTES = "9663676416"   # 9 GB — model ~9GB VRAM, ~8GB headroom
+MLX_CACHE_SIZE  = "5"
+MLX_MAX_TOKENS  = "8192"
+
+# Qwen3-Coder-30B-A3B — tight RAM, watch for OOM
+MLX_MODEL       = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+MLX_CACHE_BYTES = "6442450944"   # 6 GB — model ~16GB VRAM, only ~9GB headroom
+MLX_CACHE_SIZE  = "4"
+MLX_MAX_TOKENS  = "4096"         # lower to reduce peak memory during generation
+
+# Qwen2.5-Coder-32B — run `mise run vram-set 26` first!
+MLX_MODEL       = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
+MLX_CACHE_BYTES = "4294967296"   # 4 GB — model ~19GB VRAM, critically low headroom
+MLX_CACHE_SIZE  = "3"
+MLX_MAX_TOKENS  = "4096"
+```
+
 ---
 
 ## Models
