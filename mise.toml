@@ -9,48 +9,56 @@ env_shell_expand = true
 # ── Active model ───────────────────────────────────────────────────────────────
 # Change this block when switching models. See MODELS.md for all options.
 #
-# MLX_MODEL            — HuggingFace model ID loaded by the server
-# MLX_CACHE_BYTES      — KV-cache hard cap in bytes (sum of all open sessions; prevents OOM)
-# MLX_CACHE_SIZE       — max concurrent KV caches (one per open conversation)
-# MLX_MAX_TOKENS       — max tokens the server generates per request
-# MLX_OPENCODE_CONTEXT — context window declared to opencode; auto-compaction fires at
-#                        (MLX_OPENCODE_CONTEXT − MLX_OPENCODE_OUTPUT). Set lower than the
-#                        model's real context so compaction summarises a small history fast.
-# MLX_OPENCODE_OUTPUT  — output token reserve for opencode compaction math.
-#                        Intentionally smaller than MLX_MAX_TOKENS: compaction summaries
-#                        only need ~2-4k tokens, not the full generation budget.
+# MLX_MODEL                — HuggingFace model ID loaded by the server
+# MLX_CACHE_BYTES          — KV-cache hard cap in bytes (sum of all open sessions; prevents OOM)
+# MLX_CACHE_SIZE           — max concurrent KV caches (one per open conversation)
+# MLX_MAX_TOKENS           — max tokens the server generates per request
+# MLX_OPENCODE_CONTEXT     — context window declared to opencode; auto-compaction fires at
+#                            (MLX_OPENCODE_CONTEXT − MLX_OPENCODE_OUTPUT). Set lower than the
+#                            model's real context so compaction summarises a small history fast.
+# MLX_OPENCODE_OUTPUT      — output token reserve for opencode compaction math.
+#                            Intentionally smaller than MLX_MAX_TOKENS: compaction summaries
+#                            only need ~2-4k tokens, not the full generation budget.
+# MLX_OPENCODE_CHUNK_TIMEOUT — ms between SSE tokens before opencode drops the connection.
+#                            At large context (80k+ tokens), a single token can take minutes.
+#                            If this fires mid-generation the model returns an empty response
+#                            and opencode exits the loop silently. Raise for larger contexts.
 #
 # ── Qwen2.5-Coder-14B — reliable fallback ─────────────────────────────────────
-# MLX_MODEL            = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
-# MLX_CACHE_BYTES      = "10737418240"  # 10GB — model ~9GB VRAM, ~10GB headroom
-# MLX_CACHE_SIZE       = "6"
-# MLX_MAX_TOKENS       = "12288"
-# MLX_OPENCODE_CONTEXT = "65536"        # 64k practical limit (native 32k); compaction at ~61k
-# MLX_OPENCODE_OUTPUT  = "4096"
+# MLX_MODEL                = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+# MLX_CACHE_BYTES          = "10737418240"  # 10GB — model ~9GB VRAM, ~10GB headroom
+# MLX_CACHE_SIZE           = "6"
+# MLX_MAX_TOKENS           = "12288"
+# MLX_OPENCODE_CONTEXT     = "65536"        # 64k practical limit (native 32k); compaction at ~61k
+# MLX_OPENCODE_OUTPUT      = "4096"
+# MLX_OPENCODE_CHUNK_TIMEOUT = "300000"     # 5min — smaller context, faster tokens
 #
 # ── Qwen3-Coder-30B-A3B — slow in practice, watch OOM ────────────────────────
-# MLX_MODEL            = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
-# MLX_CACHE_BYTES      = "7516192768"   # 7GB  — model ~16GB VRAM, ~9GB headroom
-# MLX_CACHE_SIZE       = "4"
-# MLX_MAX_TOKENS       = "8192"
-# MLX_OPENCODE_CONTEXT = "65536"        # 64k (native 128k); tight RAM so keep conservative
-# MLX_OPENCODE_OUTPUT  = "4096"
+# MLX_MODEL                = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+# MLX_CACHE_BYTES          = "7516192768"   # 7GB  — model ~16GB VRAM, ~9GB headroom
+# MLX_CACHE_SIZE           = "4"
+# MLX_MAX_TOKENS           = "8192"
+# MLX_OPENCODE_CONTEXT     = "65536"        # 64k (native 128k); tight RAM so keep conservative
+# MLX_OPENCODE_OUTPUT      = "4096"
+# MLX_OPENCODE_CHUNK_TIMEOUT = "600000"     # 10min — MoE is slow, needs generous timeout
 #
 # ── Qwen2.5-Coder-32B — run `mise run vram-set 26` first; OOM risk ────────────
-# MLX_MODEL            = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
-# MLX_CACHE_BYTES      = "4294967296"   # 4GB  — model ~19GB VRAM, critically low headroom
-# MLX_CACHE_SIZE       = "3"
-# MLX_MAX_TOKENS       = "4096"
-# MLX_OPENCODE_CONTEXT = "16000"        # keep small — barely any RAM for cache
-# MLX_OPENCODE_OUTPUT  = "4096"
+# MLX_MODEL                = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
+# MLX_CACHE_BYTES          = "4294967296"   # 4GB  — model ~19GB VRAM, critically low headroom
+# MLX_CACHE_SIZE           = "3"
+# MLX_MAX_TOKENS           = "4096"
+# MLX_OPENCODE_CONTEXT     = "16000"        # keep small — barely any RAM for cache
+# MLX_OPENCODE_OUTPUT      = "4096"
+# MLX_OPENCODE_CHUNK_TIMEOUT = "600000"     # 10min — large dense model is slow
 
 # ── Qwen3.5-9B — default, best balance ────────────────────────────────────────
-MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
-MLX_CACHE_BYTES      = "15032385536"  # 14GB — 26GB GPU cap − 6GB model − 6GB activation buffer
-MLX_CACHE_SIZE       = "5"            # 5 sessions max; 6 sessions at ~3GB each = 18GB was the crash
-MLX_MAX_TOKENS       = "32768"        # max tokens generated per request
-MLX_OPENCODE_CONTEXT = "131072"       # 128k — model native is 262k; KV cache is the real limit
-MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve; compaction fires at ~127k tokens
+MLX_MODEL                = "mlx-community/Qwen3.5-9B-MLX-4bit"
+MLX_CACHE_BYTES          = "15032385536"  # 14GB — 26GB GPU cap − 6GB model − 6GB activation buffer
+MLX_CACHE_SIZE           = "5"            # 5 sessions max; 6 sessions at ~3GB each = 18GB crashed
+MLX_MAX_TOKENS           = "32768"        # max tokens generated per request
+MLX_OPENCODE_CONTEXT     = "131072"       # 128k — model native is 262k; KV cache is the real limit
+MLX_OPENCODE_OUTPUT      = "4096"         # summary reserve; compaction fires at ~127k tokens
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"     # 10min — at 96k tokens a single token took >3min (observed)
 
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
