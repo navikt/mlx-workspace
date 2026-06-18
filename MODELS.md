@@ -85,8 +85,13 @@ The values are set **lower than actual** so that compaction fires early (small h
 
 ¹ Declared context can exceed the model's native context — the KV cache bytes limit is the real safety guard; the model will hard-error before that limit is reached in practice.
 
-> **Why declare less than native?**  
-> The KV cache grows with context length. At 128k tokens on 32GB Mac, one session uses ~8-10GB of the 18GB cache cap — safe. At 262k it would exceed available RAM. The declared limit sets the compaction trigger; the `MLX_CACHE_BYTES` cap prevents OOM if a session somehow grows very large.
+> **Why declare less than native?**
+> The KV cache grows with context length. At 128k tokens, one session holds ~3–5 GB of KV state. But that's not the full picture: the **inference forward pass needs an additional 4–6 GB** for activations and Metal buffers. A session that has grown to 87k tokens with 5 other cached sessions can push the total above the GPU cap — even if each individual cache entry looks safe. `MLX_CACHE_BYTES` is the guard, but it must leave room for the forward pass overhead:
+>
+> ```
+> GPU cap  =  model weights  +  MLX_CACHE_BYTES  +  ~6GB activation buffer
+>  26 GB   =     ~6 GB       +       14 GB        +       6 GB
+> ```
 
 To update the declared context for a model, edit `MLX_OPENCODE_CONTEXT` in the model's block in `mise.toml`.
 
