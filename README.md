@@ -95,22 +95,17 @@ mise run models-clean mlx-community/Qwen2.5-Coder-32B-Instruct-4bit  # delete by
 **One place to change the model:** `MLX_MODEL` in `mise.toml`.
 
 ```toml
-MLX_MODEL = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+MLX_MODEL = "mlx-community/Qwen3.5-9B-MLX-4bit"
 ```
 
 Every mise task reads this automatically:
 
 - `server`, `chat`, `run` pass it straight to mlx-lm.
-- `aider` and `copilot` point at the local server using `$MLX_MODEL`.
+- `aider` regenerates `.aider.conf.yml` from `$MLX_MODEL` on each launch (via `aider-init`) — no manual edits needed.
 - `opencode` regenerates `opencode.json` from `$MLX_MODEL` on each launch (via `opencode-init`) — no manual edits needed.
+- `copilot` passes `$MLX_MODEL` directly via env vars.
 
-Only `.aider.conf.yml` has a hardcoded model name, used if you run `aider` directly without mise. Update it there to match.
-
-Popular options from [mlx-community](https://huggingface.co/mlx-community):
-
-- `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` (~14GB RAM) ← default
-- `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit` (~14GB RAM)
-- `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit` (~32GB RAM)
+Popular options and detailed notes in [MODELS.md](MODELS.md).
 
 ## Unlocking more VRAM (Apple Silicon)
 

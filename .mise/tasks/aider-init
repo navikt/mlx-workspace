@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Generate .aider.conf.yml from MLX_MODEL env var."""
+import os
+
+model = os.environ["MLX_MODEL"]
+config = f"""openai-api-base: http://localhost:8080/v1
+openai-api-key: mlx
+model: openai/{model}
+no-check-update: true
+model-metadata-file: .aider.model.metadata.json
+"""
+
+with open(".aider.conf.yml", "w") as f:
+    f.write(config)
+
+print(f".aider.conf.yml written for model: {model}")
