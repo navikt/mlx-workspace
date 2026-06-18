@@ -1,6 +1,7 @@
 [meta]
 name               = "Gemma-4-26B A4B MoE 4bit"
-status             = "testing"
+status             = "untested"
+spec_source        = "research"
 notes              = "Google Gemma 4 26B MoE (2026). MoE: 26B total, ~3.8–4B active per token. 256k native context. Key features: Dual RoPE (prevents context collapse at long range), Shared KV Cache (final attention layers reuse earlier KV — reduces memory per token vs standard models), hybrid local+global attention. Multimodal: text + images + video. Fast inference due to sparse activation (~4B active). 8GB KV headroom + shared KV cache may allow up to 80–100k effective context despite budget. Start conservative at 64k and expand if stable. Apache 2.0."
 model_vram_gb      = 14
 gpu_wired_limit_gb = 26

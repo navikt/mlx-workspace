@@ -1,6 +1,7 @@
 [meta]
 name               = "Qwen3-Coder-30B-A3B Instruct 4bit"
 status             = "slow"
+spec_source        = "local"
 notes              = "MoE: ~3.3B active params per token but all 30B weights stay in VRAM. Inference was noticeably slow on 32GB Mac despite low active params. Tool calling inconsistent. Worth re-evaluating on faster hardware or future mlx-lm releases."
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26

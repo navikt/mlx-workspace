@@ -1,6 +1,7 @@
 [meta]
 name               = "GLM-4.7-Flash MoE 4bit"
-status             = "testing"
+status             = "untested"
+spec_source        = "research"
 notes              = "Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB activation headroom OK; 65k tokens≈23GB total → only 3GB activation, risky. Context declared at 32k (safe). Strong coding, tool use, and long-context retention. Different training paradigm from Qwen MoE — may handle OpenCode tool calling better if Qwen MoE caused issues."
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26

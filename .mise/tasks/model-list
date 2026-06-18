@@ -9,10 +9,17 @@ import _profiles as P
 
 STATUS_ICON = {
     "daily-driver": "⭐",
+    "untested":     "🔲",
     "testing":      "🔬",
     "slow":         "🐢",
     "oom":          "💥",
     "skipped":      "⬛",
+}
+
+SPEC_ICON = {
+    "local":     "✓",   # ran on this machine
+    "research":  "🔍",  # verified via official docs / HF model cards / web search
+    "community": "💬",  # community reports, lower confidence
 }
 
 active = P.active_key()
@@ -24,11 +31,12 @@ if not keys:
 rows = []
 for k in keys:
     meta, params = P.load(k)
-    dl = "✓" if P.is_downloaded(params["MLX_MODEL"]) else "–"
-    vram = f"{meta['model_vram_gb']} GB" if "model_vram_gb" in meta else "?"
-    icon = STATUS_ICON.get(meta["status"], "  ")
-    marker = "●" if k == active else " "
-    rows.append((marker, k, meta["name"], icon, meta["status"], vram, dl))
+    dl      = "✓" if P.is_downloaded(params["MLX_MODEL"]) else "–"
+    vram    = f"{meta['model_vram_gb']} GB" if "model_vram_gb" in meta else "?"
+    icon    = STATUS_ICON.get(meta["status"], "  ")
+    spec    = SPEC_ICON.get(meta.get("spec_source", ""), "?")
+    marker  = "●" if k == active else " "
+    rows.append((marker, k, meta["name"], icon, meta["status"], vram, spec, dl))
 
 # Column widths
 w_key    = max(len(r[1]) for r in rows)
@@ -36,12 +44,14 @@ w_name   = max(len(r[2]) for r in rows)
 w_status = max(len(r[4]) for r in rows)
 
 header = (
-    f"  {'KEY':<{w_key}}  {'MODEL':<{w_name}}  {'STATUS':<{w_status+2}}  {'VRAM':>6}  DL"
+    f"  {'KEY':<{w_key}}  {'MODEL':<{w_name}}  {'STATUS':<{w_status+2}}  {'VRAM':>6}  SPECS  DL"
 )
 print()
 print(header)
 print("  " + "-" * (len(header) - 2))
-for marker, key, name, icon, status, vram, dl in rows:
+for marker, key, name, icon, status, vram, spec, dl in rows:
     status_col = f"{icon} {status}"
-    print(f"{marker} {key:<{w_key}}  {name:<{w_name}}  {status_col:<{w_status+2}}  {vram:>6}  {dl}")
+    print(f"{marker} {key:<{w_key}}  {name:<{w_name}}  {status_col:<{w_status+2}}  {vram:>6}   {spec}    {dl}")
+print()
+print("  SPECS: ✓=locally tested  🔍=externally verified  💬=community reports  ?=unknown")
 print()
