@@ -8,11 +8,12 @@ model   = os.environ["MLX_MODEL"]
 # MLX_OPENCODE_CONTEXT — context window declared to opencode (set in mise.toml).
 # Controls when auto-compaction fires: threshold = context − output.
 # Intentionally lower than model's real context so each compaction is small and fast.
-context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "24000"))
+context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "30000"))
 
-# MLX_MAX_TOKENS doubles as the output reserve for compaction math.
-# opencode reserves this many tokens for the model's reply before triggering compaction.
-output  = int(os.environ.get("MLX_MAX_TOKENS", "8192"))
+# MLX_OPENCODE_OUTPUT — output token reserve for compaction math (set in mise.toml).
+# Separate from MLX_MAX_TOKENS: compaction summaries need ~2-4k tokens, not the full
+# generation budget. Smaller reserve = higher effective threshold before compaction fires.
+output  = int(os.environ.get("MLX_OPENCODE_OUTPUT", "4096"))
 
 config = {
     "$schema": "https://opencode.ai/config.json",
@@ -50,5 +51,5 @@ with open("opencode.json", "w") as f:
 threshold = context - output
 print(f"opencode.json written for model: {model}")
 print(f"  declared context:  {context:,} tokens  (MLX_OPENCODE_CONTEXT)")
-print(f"  output reserve:    {output:,} tokens  (MLX_MAX_TOKENS)")
+print(f"  output reserve:    {output:,} tokens  (MLX_OPENCODE_OUTPUT)")
 print(f"  compaction fires:  ~{threshold:,} tokens")
