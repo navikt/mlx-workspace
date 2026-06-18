@@ -27,12 +27,12 @@ mise run server                 # restart server with new model
 | Qwen2.5-Coder-32B | Nov 2024 | mlx-lm | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
 | Qwen3-Coder-30B-A3B | Jul 2025 | mlx-lm | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
 | GLM-4.6V-Flash-9B | Dec 2025 | **mlx-vlm** ⚠️ | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
-| Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
+| Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔬 testing |
 | GLM-4.7-Flash | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
 | **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
-| Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔲 untested |
+| Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | — | — | 🔲 untested |
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
-| Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
+| Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | ⚠️ slow | ⚠️ inconclusive | ⚠️ too slow |
 | Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
 
 ¹ Headroom = 32GB − VRAM − ~7GB OS reserve  
@@ -197,7 +197,7 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 
 ---
 
-### `mlx-community/gemma-4-12B-it-4bit` 🔬 testing
+### `mlx-community/gemma-4-12B-it-4bit` ⚠️ too slow
 
 | | |
 |---|---|
@@ -215,13 +215,29 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Reported strong function-calling / JSON schema adherence
 - **Requires `mlx-vlm` server** (`model_type: gemma4_unified`) — handled automatically by `mise run server`
 
-**⚠️ mlx-vlm caching limitation:**
-`mlx-vlm` clears the KV cache after every completed request (`Stream finished, cleared cache`). There is no equivalent to mlx-lm's `--prompt-cache-bytes` / `--prompt-cache-size`. This means:
-- Every opencode tool call re-prefills the full conversation history from scratch
-- No cross-request prompt reuse — each turn pays the full prefill cost
-- Expect noticeably higher latency per turn compared to mlx-lm models
+**⚠️ mlx-vlm caching — measured impact:**
 
-**Verdict:** Untested locally. Promising for strict JSON tool calling, but cache penalty is significant for agentic use. Worth testing for quality; may be impractical for long sessions.
+Every tool call re-prefills the full conversation from scratch. What this looks like in practice (measured 2026-06-18, weather-cli opencode task):
+
+| Turn | Input tokens | Output tokens | Duration |
+|---|---|---|---|
+| 1 | 16,876 | 15 | 120s |
+| 2 | 16,912 | 215 | 116s |
+| 3 | 17,156 | 26 | 137s |
+| 4 | 17,214 | 47 | 147s |
+| 5 | 17,919 | 400 | 151s |
+| 6 | 18,334 | 81 | 140s |
+| 7 | 18,562 | 128 | 167s |
+| 8 | 18,699 | 215 | 173s |
+| 9 | 18,962 | 161 | 149s |
+| 10 | 19,125 | 162 | 165s |
+| **Avg** | | **141 tokens out** | **~136s (2m16s)** |
+
+**Result: 10 turns × 2m16s = 24 minutes → 0 files implemented** (only empty stubs created). Session aborted.
+
+Compare to qwen3.5-9b at similar context: **~5–10 seconds/turn** (persistent KV cache — only new tokens prefilled).
+
+**Verdict:** ⚠️ Inconclusive / impractical for agentic coding as of Jun 2026. The mlx-vlm per-request cache-clear makes multi-turn agentic sessions prohibitively slow on this hardware. May be usable for short single-turn queries. Re-evaluate if mlx-vlm adds persistent KV caching in a future version.
 
 ---
 

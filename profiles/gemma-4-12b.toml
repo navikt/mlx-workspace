@@ -1,9 +1,9 @@
 [meta]
 name               = "Gemma-4-12B Instruct 4bit"
 released           = "2026-05"
-status             = "untested"
-spec_source        = "research"
-notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone — no separate heavy encoders. Strong function-calling adherence reported. MLX_OPENCODE_CONTEXT declared at 64k (safe for 15GB KV budget; at 128k a single session ~8GB KV). Reduce MLX_CACHE_BYTES to 13GB if OOM occurs. REQUIRES mlx-vlm (model_type: gemma4_unified) — server auto-dispatches via MLX_SERVER_TYPE. WARNING: mlx-vlm clears KV cache after every request ('Stream finished, cleared cache') — no cross-request prompt caching. Every opencode tool call re-prefills the full prompt from scratch. Expect higher latency per turn vs mlx-lm models."
+status             = "inconclusive"
+spec_source        = "measured"
+notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone — no separate heavy encoders. Strong function-calling adherence reported. REQUIRES mlx-vlm (model_type: gemma4_unified) — server auto-dispatches via MLX_SERVER_TYPE. WARNING: mlx-vlm clears KV cache after every request ('Stream finished, cleared cache') — no cross-request prompt caching. Every opencode tool call re-prefills the full conversation from scratch. This makes agentic sessions impractically slow: 10 turns took 24 minutes, average 2m16s/turn, yet the session produced almost no output (files created empty, no implementation written). Verdict: unusable for agentic coding as of Jun 2026 due to mlx-vlm's per-request cache-clear. May be viable for short single-turn queries."
 model_vram_gb      = 7
 gpu_wired_limit_gb = 26
 
@@ -16,3 +16,21 @@ MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k; compaction fires at ~61k
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — mlx-vlm no KV cache; full re-prefill every turn
+
+[benchmarks]
+# Measured 2026-06-18, M1 Max 32GB, mlx-vlm server, opencode weather-cli task
+# Session: ses_123b9d50bffeLWg5cK6Q8XmBl3 (10 turns, aborted)
+# NOTE: mlx-vlm re-prefills full context every turn — no persistent KV cache
+
+turn_duration_min_s    = 116   # turn 2 (16.9k input, 215 output)
+turn_duration_max_s    = 173   # turn 8 (18.7k input, 215 output)
+turn_duration_avg_s    = 136   # avg over 10 turns
+
+context_start_tokens   = 16876  # turn 1 input
+context_end_tokens     = 19125  # turn 10 input (10 turns = +2249 tokens, ~225/turn growth)
+
+output_tokens_avg      = 141   # avg output tokens per turn (very low — mostly tool scaffolding)
+output_tokens_max      = 400   # turn 5 (wrote WEATHER_CLI_SPEC.md)
+
+# Agentic productivity: 10 turns × 2m16s = 24 min → 0 files implemented (empty stubs only)
+# Comparable qwen3.5-9b task at similar context: ~5-10s/turn
