@@ -88,3 +88,8 @@ npm run test:watch  # Run tests in watch mode
 ## License
 
 ISC
+
+## Built With
+
+- **Qwen3.5-9B-MLX-4bit** - AI model for code generation and assistance
+- **OpenCode** - AI coding assistant for project management and development
