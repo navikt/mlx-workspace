@@ -1,9 +1,9 @@
 [meta]
 name               = "Ministral-3-14B Instruct 4bit"
 released           = "2025-12"
-status             = "untested"
-spec_source        = "research"
-notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. MLX_OPENCODE_CONTEXT declared at 64k (safe for 14GB KV budget; larger 14B model ~160KB/token KV overhead). 3.5GB activation buffer is lean — reduce MLX_CACHE_BYTES to 12GB if OOM occurs."
+status             = "inconclusive"
+spec_source        = "measured"
+notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. KV cache works correctly (mlx-lm): after cold prefill of 17,276 tokens (~2m23s), subsequent turns only prefill new tokens (15-22 tokens, near-instant). FATAL ISSUE: Mistral strict role alternation — chat template requires user→assistant→user→assistant strict alternation. Opencode's tool-calling message format violates this, causing 'Not Found: roles must alternate' error and 404 response from mlx-lm. Model stops after first tool call. This is a fundamental incompatibility between Mistral's tokenizer and opencode's agentic tool-calling pattern. TOKENIZER WARNING: loads with incorrect regex pattern (known issue, cosmetic for code/English)."
 model_vram_gb      = 8
 gpu_wired_limit_gb = 26
 
@@ -15,3 +15,13 @@ MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k; compaction fires at ~61k
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — 14B dense at 64k; be conservative
+
+[benchmarks]
+# Measured 2026-06-18, M1 Max 32GB, mlx-lm server, opencode
+prefill_cold_tokens    = 17276   # first call context size
+prefill_cold_speed_tps = 150     # ~150 t/s (2048 tokens / ~13s chunks)
+prefill_cached_tokens  = 15      # turn 2 — only new tokens prefilled
+prefill_cached_speed_s = 0.3     # near-instant (cache hit)
+cache_size_after_turn1 = "2.83 GB"
+cache_growth_per_turn  = "~0.06 GB"
+# Session terminated after 2 turns due to Mistral role alternation error
