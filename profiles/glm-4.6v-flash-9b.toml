@@ -3,14 +3,13 @@ name               = "GLM-4.6V-Flash-9B 4bit"
 released           = "2025-12"
 status             = "untested"
 spec_source        = "research"
-notes              = "Z.AI GLM-4.6V-Flash 9B. Native context: 128k tokens. Architecture: MoE hybrid (not pure Dense). Full multimodal: text, images (up to 4K res), video frames, documents, PDFs — native vision tool use. Vision encoder adds VRAM overhead beyond the base ~5.5GB model weight; treat model_vram_gb as a lower bound. 4.5GB activation buffer at 128k context is lean — reduce MLX_CACHE_BYTES to 15GB if OOM occurs."
+notes              = "Z.AI GLM-4.6V-Flash 9B. Native context: 128k tokens. Architecture: MoE hybrid (not pure Dense). Full multimodal: text, images (up to 4K res), video frames, documents, PDFs — native vision tool use. Vision encoder adds VRAM overhead beyond the base ~5.5GB model weight; treat model_vram_gb as a lower bound. 4.5GB activation buffer at 128k context is lean — reduce MLX_CACHE_BYTES to 15GB if OOM occurs. REQUIRES mlx-vlm (model_type: glm4v). WARNING: mlx-vlm clears KV cache after every request — no cross-request prompt caching, higher latency per opencode turn."
 model_vram_gb      = 5
 gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/GLM-4.6V-Flash-4bit"
-MLX_CACHE_BYTES            = "17179869184"  # 16GB — 26GB cap − 5.5GB model − 4.5GB buffer
-MLX_CACHE_SIZE             = "5"
+MLX_SERVER_TYPE            = "mlx-vlm"
 MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "131072"       # 128k; compaction fires at ~127k
 MLX_OPENCODE_OUTPUT        = "4096"

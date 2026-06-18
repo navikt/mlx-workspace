@@ -20,22 +20,23 @@ mise run server                 # restart server with new model
 
 ## Quick comparison
 
-| Model | Released | Arch | VRAM | Native ctx | Headroom¹ | Speed | Tool calling | Status |
-|---|---|---|---|---|---|---|---|---|
-| Qwen2.5-Coder-7B | Nov 2024 | Dense | ~4.5 GB | 32k | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
-| Qwen2.5-Coder-14B | Nov 2024 | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
-| Qwen2.5-Coder-32B | Nov 2024 | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
-| Qwen3-Coder-30B-A3B | Jul 2025 | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
-| GLM-4.6V-Flash-9B | Dec 2025 | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
-| Ministral-3-14B | Dec 2025 | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
-| GLM-4.7-Flash | Jan 2026 | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
-| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
-| Gemma-4-26B-A4B | Mar 2026 | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔲 untested |
-| Qwen3.5-27B-Opus-Distilled | Mar 2026 | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
-| Gemma-4-12B | May 2026 | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
-| Granite-4.1-8B | May 2026 | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
+| Model | Released | Server | Arch | VRAM | Native ctx | Headroom¹ | Speed | Tool calling | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-Coder-7B | Nov 2024 | mlx-lm | Dense | ~4.5 GB | 32k | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
+| Qwen2.5-Coder-14B | Nov 2024 | mlx-lm | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
+| Qwen2.5-Coder-32B | Nov 2024 | mlx-lm | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
+| Qwen3-Coder-30B-A3B | Jul 2025 | mlx-lm | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
+| GLM-4.6V-Flash-9B | Dec 2025 | **mlx-vlm** ⚠️ | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
+| Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
+| GLM-4.7-Flash | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
+| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
+| Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔲 untested |
+| Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
+| Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
+| Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
 
-¹ Headroom = 32GB − VRAM − ~7GB OS reserve
+¹ Headroom = 32GB − VRAM − ~7GB OS reserve  
+⚠️ mlx-vlm = KV cache cleared after every request (see below)
 
 ### Successors & newer editions (as of Jun 2026)
 
@@ -48,6 +49,55 @@ mise run server                 # restart server with new model
 | Qwen3-Coder-30B-A3B (Jul 2025) | Qwen3-Coder-Next (Feb 2026) | ⚠️ mxfp4 only | Preview model, not standard mlx-lm 4bit |
 | Gemma-4-26B-A4B (Mar 2026) | Gemma-4-12B Unified (May 2026) | ✅ in list | Newer architecture (encoder-free) |
 | All others | No direct successor yet as of Jun 2026 | | |
+
+---
+
+## Server runtime: mlx-lm vs mlx-vlm
+
+`mise run server` automatically selects the right server based on the active model profile. The decision is driven by `MLX_SERVER_TYPE` in each profile's `[params]`.
+
+### The difference
+
+| Feature | mlx-lm | mlx-vlm |
+|---|---|---|
+| **KV cache** | Persistent across requests — shared cache up to `MLX_CACHE_BYTES` | **Cleared after every request** (`Stream finished, cleared cache`) |
+| **Prompt caching** | `--prompt-cache-bytes` / `--prompt-cache-size` | Not supported — no equivalent flags |
+| **Per-turn cost** | Re-uses prior context; only new tokens prefilled | **Full conversation re-prefilled every tool call** |
+| **Agentic impact** | Fast at steady state; grows slowly | Grows linearly — each tool call costs O(session_length) prefill |
+| **Server logs** | Detailed `Prompt processing progress` lines | Minimal; no per-chunk progress |
+| **Multimodal** | Text only (even for VLM model weights) | Text + images + audio/video |
+
+### Why some models always need mlx-vlm
+
+The MLX ecosystem splits model support across two packages. A model requires mlx-vlm when its `model_type` is **only implemented in mlx-vlm**, not in mlx-lm:
+
+| model_type | Affected models | Notes |
+|---|---|---|
+| `gemma4_unified` | All Gemma 4 `-it` / multimodal HF variants | Google unified text+vision into one arch; no text-only path in mlx-lm |
+| `glm4v` | GLM-4.6V-Flash and V-series | Z.AI vision models; `glm4v` ≠ `glm4` (text-only GLM) |
+| `glm4v_moe` | GLM-4.6V MoE variants | Same family, MoE variant |
+
+**In our workspace** (3 of 11 profiles use mlx-vlm):
+
+| Profile | model_type | Server |
+|---|---|---|
+| `gemma-4-12b` | `gemma4_unified` | mlx-vlm |
+| `gemma-4-26b-a4b` | `gemma4_unified` | mlx-vlm |
+| `glm-4.6v-flash-9b` | `glm4v` | mlx-vlm |
+| All others | `qwen3_5`, `glm4_moe_lite`, `qwen3_moe`, `qwen2`, `mistral3` | mlx-lm |
+
+> **Note:** Models with dual support (e.g., `qwen3_vl` exists in both packages) run via mlx-lm in text-only mode — no image input but full KV cache persistence.
+
+### Impact on agentic coding sessions
+
+For opencode/aider workflows where the tool sends the full conversation with every tool call:
+
+- **mlx-lm models**: The KV cache stores prior prefill. After the first message, subsequent tool calls only pay for new tokens (the diff from the cache). A 30k-token session costs ~30k prefill the first time, then ~500–2k per tool call.
+- **mlx-vlm models**: Cache is cleared after every response. Every tool call re-prefills the entire conversation. A 30k-token session costs ~30k prefill **on every single tool call** — at 200 t/s that's 150 seconds before generation can start.
+
+**Recommendation:** Use mlx-vlm models for short, focused tasks. For long multi-file agentic sessions, stick to mlx-lm models (Qwen3.5, GLM-4.7, Ministral, etc.).
+
+---
 
 ## opencode declared context limits
 
@@ -237,8 +287,12 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Vision-language model with native multimodal tool use (no conversion to text required)
 - Optimized for low-latency local deployment
 - MoE hybrid architecture — active params lower than total suggests; inference characteristics may differ from pure dense models
+- **Requires `mlx-vlm` server** (`model_type: glm4v`) — handled automatically by `mise run server`
 
-**Verdict:** Untested locally. Unique proposition: vision-native tool calling for image/document analysis tasks.
+**⚠️ mlx-vlm caching limitation:**
+`mlx-vlm` clears the KV cache after every completed request. Every opencode tool call re-prefills the full conversation from scratch. See the [Server runtime section](#server-runtime-mlx-lm-vs-mlx-vlm) for details.
+
+**Verdict:** Untested locally. Unique proposition: vision-native tool calling for image/document analysis tasks. Best suited for short focused sessions due to cache limitation.
 
 ---
 
