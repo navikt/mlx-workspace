@@ -1,5 +1,6 @@
 [meta]
 name               = "Qwen3.5-27B Claude-Opus-Distilled MLX 4bit"
+released           = "2026-03"
 status             = "untested"
 spec_source        = "research"
 notes              = "Community fine-tune: Qwen3.5-27B base distilled on Claude 4.6 Opus reasoning traces. Deep chain-of-thought reasoning, internal <think> steps, strong coding and planning. Measured on M4 Pro 64GB: ~15.7 t/s generation, ~15.6GB peak RAM. Dense 27B — tight context budget on 32GB Mac: 6GB KV headroom → ~32–40k practical context. Expect slower tokens than 9B. Apache 2.0."

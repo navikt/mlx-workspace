@@ -1,5 +1,6 @@
 [meta]
 name               = "Ministral-3-14B Instruct 4bit"
+released           = "2025-12"
 status             = "untested"
 spec_source        = "research"
 notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. MLX_OPENCODE_CONTEXT declared at 64k (safe for 14GB KV budget; larger 14B model ~160KB/token KV overhead). 3.5GB activation buffer is lean — reduce MLX_CACHE_BYTES to 12GB if OOM occurs."

@@ -1,5 +1,6 @@
 [meta]
 name               = "GLM-4.6V-Flash-9B 4bit"
+released           = "2025-12"
 status             = "untested"
 spec_source        = "research"
 notes              = "Z.AI GLM-4.6V-Flash 9B. Native context: 128k tokens. Architecture: MoE hybrid (not pure Dense). Full multimodal: text, images (up to 4K res), video frames, documents, PDFs — native vision tool use. Vision encoder adds VRAM overhead beyond the base ~5.5GB model weight; treat model_vram_gb as a lower bound. 4.5GB activation buffer at 128k context is lean — reduce MLX_CACHE_BYTES to 15GB if OOM occurs."

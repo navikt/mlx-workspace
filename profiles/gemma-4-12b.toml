@@ -1,5 +1,6 @@
 [meta]
 name               = "Gemma-4-12B Instruct 4bit"
+released           = "2026-05"
 status             = "untested"
 spec_source        = "research"
 notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone — no separate heavy encoders. Strong function-calling adherence reported. MLX_OPENCODE_CONTEXT declared at 64k (safe for 15GB KV budget; at 128k a single session ~8GB KV). Reduce MLX_CACHE_BYTES to 13GB if OOM occurs."

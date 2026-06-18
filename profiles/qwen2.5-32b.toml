@@ -1,5 +1,6 @@
 [meta]
 name               = "Qwen2.5-Coder-32B Instruct 4bit"
+released           = "2024-11"
 status             = "oom"
 spec_source        = "local"
 notes              = "Crashed with kIOGPUCommandBufferCallbackErrorOutOfMemory on 32GB Mac. Critically low activation buffer headroom. Results inconclusive — could not evaluate quality. May work on 64GB Mac. Run vram-set 26 before attempting."

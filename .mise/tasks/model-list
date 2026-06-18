@@ -36,8 +36,9 @@ for k in keys:
     vram    = f"{vram_gb} GB" if vram_gb != 999 else "?"
     icon    = STATUS_ICON.get(meta["status"], "  ")
     spec    = SPEC_ICON.get(meta.get("spec_source", ""), "?")
+    released = meta.get("released", "?")
     marker  = "●" if k == active else " "
-    rows.append((marker, k, meta["name"], icon, meta["status"], vram, vram_gb, spec, dl))
+    rows.append((marker, k, meta["name"], icon, meta["status"], vram, vram_gb, spec, released, dl))
 
 # Sort: active model first, then by VRAM ascending
 rows.sort(key=lambda r: (0 if r[0] == "●" else 1, r[6]))
@@ -48,14 +49,14 @@ w_name   = max(len(r[2]) for r in rows)
 w_status = max(len(r[4]) for r in rows)
 
 header = (
-    f"  {'KEY':<{w_key}}  {'MODEL':<{w_name}}  {'STATUS':<{w_status+2}}  {'VRAM':>6}  SPECS  DL"
+    f"  {'KEY':<{w_key}}  {'MODEL':<{w_name}}  {'RELEASED'}  {'STATUS':<{w_status+2}}  {'VRAM':>6}  SPECS  DL"
 )
 print()
 print(header)
 print("  " + "-" * (len(header) - 2))
-for marker, key, name, icon, status, vram, vram_gb, spec, dl in rows:
+for marker, key, name, icon, status, vram, vram_gb, spec, released, dl in rows:
     status_col = f"{icon} {status}"
-    print(f"{marker} {key:<{w_key}}  {name:<{w_name}}  {status_col:<{w_status+2}}  {vram:>6}   {spec}    {dl}")
+    print(f"{marker} {key:<{w_key}}  {name:<{w_name}}  {released}  {status_col:<{w_status+2}}  {vram:>6}   {spec}    {dl}")
 print()
 print("  sorted by VRAM ascending  |  SPECS: ✓=locally tested  🔍=externally verified  💬=community reports  ?=unknown")
 print()

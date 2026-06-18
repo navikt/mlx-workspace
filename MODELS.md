@@ -20,22 +20,34 @@ mise run server                 # restart server with new model
 
 ## Quick comparison
 
-| Model | Arch | VRAM | Native ctx | Headroom¹ | Speed | Tool calling | Status |
-|---|---|---|---|---|---|---|---|
-| Qwen2.5-Coder-7B | Dense | ~4.5 GB | 32k | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
-| Granite-4.1-8B | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔬 testing |
-| GLM-4.6V-Flash-9B | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔬 testing |
-| **Qwen3.5-9B-MLX** ⭐ | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
-| Gemma-4-12B | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔬 testing |
-| Ministral-3-14B | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔬 testing |
-| Qwen2.5-Coder-14B | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
-| Gemma-4-26B-A4B | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔬 testing |
-| Qwen3.5-27B-Opus-Distilled | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔬 testing |
-| Qwen3-Coder-30B-A3B | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
-| GLM-4.7-Flash | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔬 testing |
-| Qwen2.5-Coder-32B | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
+| Model | Released | Arch | VRAM | Native ctx | Headroom¹ | Speed | Tool calling | Status |
+|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-Coder-7B | Nov 2024 | Dense | ~4.5 GB | 32k | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
+| Granite-4.1-8B | May 2026 | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
+| GLM-4.6V-Flash-9B | Dec 2025 | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
+| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
+| Gemma-4-12B | May 2026 | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
+| Ministral-3-14B | Dec 2025 | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
+| Qwen2.5-Coder-14B | Nov 2024 | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
+| Gemma-4-26B-A4B | Mar 2026 | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔲 untested |
+| Qwen3.5-27B-Opus-Distilled | Mar 2026 | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
+| Qwen3-Coder-30B-A3B | Jul 2025 | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
+| GLM-4.7-Flash | Jan 2026 | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
+| Qwen2.5-Coder-32B | Nov 2024 | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
 
 ¹ Headroom = 32GB − VRAM − ~7GB OS reserve
+
+### Successors & newer editions (as of Jun 2026)
+
+| Model in list | Successor / newer edition | MLX 4bit? | Notes |
+|---|---|---|---|
+| Qwen2.5-Coder-14B (Nov 2024) | Qwen3-Coder-30B-A3B (Jul 2025) | ✅ in list | Direct successor line |
+| Qwen2.5-Coder-32B (Nov 2024) | Qwen3-Coder-480B-A35B (Jul 2025) | ❌ server-only | Way too large |
+| GLM-4.6V-Flash-9B (Dec 2025) | GLM-4.7-Flash (Jan 2026) → GLM-5.2 (Jun 2026) | ✅ 4.7 in list; GLM-5.2 no MLX yet | GLM-5 is 744B — not consumer hardware |
+| GLM-4.7-Flash (Jan 2026) | GLM-5.2 (Jun 16, 2026) | ❌ not yet | GLM-5.2 has no MLX 4bit yet; likely very large |
+| Qwen3-Coder-30B-A3B (Jul 2025) | Qwen3-Coder-Next (Feb 2026) | ⚠️ mxfp4 only | Preview model, not standard mlx-lm 4bit |
+| Gemma-4-26B-A4B (Mar 2026) | Gemma-4-12B Unified (May 2026) | ✅ in list | Newer architecture (encoder-free) |
+| All others | No direct successor yet as of Jun 2026 | | |
 
 ## opencode declared context limits
 
