@@ -6,15 +6,22 @@ mlx-lm (default): text-only models — Qwen, GLM, Mistral, Granite, etc.
 mlx-vlm:          gemma4_unified and other multimodal architectures.
 
 Set MLX_SERVER_TYPE = "mlx-vlm" in the profile [params] to use mlx-vlm.
+Set MLX_CHAT_TEMPLATE to a path to override the model's chat template.
 """
 import os
 import sys
 
-model       = os.environ["MLX_MODEL"]
-max_tokens  = os.environ.get("MLX_MAX_TOKENS", "32768")
-cache_bytes = os.environ.get("MLX_CACHE_BYTES", "")
-cache_size  = os.environ.get("MLX_CACHE_SIZE", "")
-server_type = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
+model         = os.environ["MLX_MODEL"]
+max_tokens    = os.environ.get("MLX_MAX_TOKENS", "32768")
+cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
+cache_size    = os.environ.get("MLX_CACHE_SIZE", "")
+server_type   = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
+chat_template = os.environ.get("MLX_CHAT_TEMPLATE", "").strip()
+
+# Resolve chat_template relative to workspace root if it's a relative path
+if chat_template and not os.path.isabs(chat_template):
+    workspace = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    chat_template = os.path.join(workspace, chat_template)
 
 if server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
@@ -34,6 +41,8 @@ else:
     print(f"  max-tokens:  {max_tokens}")
     print(f"  cache-bytes: {cache_bytes}")
     print(f"  cache-size:  {cache_size}")
+    if chat_template:
+        print(f"  chat-template: {chat_template}")
     print()
     cmd = [
         "mlx_lm.server",
@@ -45,5 +54,7 @@ else:
         cmd += ["--prompt-cache-size", cache_size]
     if cache_bytes:
         cmd += ["--prompt-cache-bytes", cache_bytes]
+    if chat_template:
+        cmd += ["--chat-template", chat_template]
 
 os.execvp(cmd[0], cmd)

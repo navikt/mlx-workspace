@@ -1,14 +1,15 @@
 [meta]
 name               = "Ministral-3-14B Instruct 4bit"
 released           = "2025-12"
-status             = "inconclusive"
+status             = "testing"
 spec_source        = "measured"
-notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. KV cache works correctly (mlx-lm): after cold prefill of 17,276 tokens (~2m23s), subsequent turns only prefill new tokens (15-22 tokens, near-instant). FATAL ISSUE: Mistral strict role alternation — chat template requires user→assistant→user→assistant strict alternation. Opencode's tool-calling message format violates this, causing 'Not Found: roles must alternate' error and 404 response from mlx-lm. Model stops after first tool call. This is a fundamental incompatibility between Mistral's tokenizer and opencode's agentic tool-calling pattern. TOKENIZER WARNING: loads with incorrect regex pattern (known issue, cosmetic for code/English)."
+notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. KV cache works correctly (mlx-lm): after cold prefill of 17,276 tokens (~150 t/s), subsequent turns only prefill new tokens (15-22 tokens, near-instant, 2.83 GB cache). KNOWN ISSUE: Mistral chat template has strict role alternation check that fires on opencode's tool-calling message format. FIX: MLX_CHAT_TEMPLATE points to chat_templates/ministral-3-14b-patched.jinja — identical to model template but with raise_exception removed. TOKENIZER WARNING: loads with incorrect regex pattern (known cosmetic issue for code/English)."
 model_vram_gb      = 8
 gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/Ministral-3-14B-Instruct-2512-4bit"
+MLX_CHAT_TEMPLATE          = "chat_templates/ministral-3-14b-patched.jinja"  # removes strict role alternation check
 MLX_CACHE_BYTES            = "15032385536"  # 14GB — 26GB cap − 8.5GB model − 3.5GB buffer (lean)
 MLX_CACHE_SIZE             = "4"
 MLX_MAX_TOKENS             = "8192"
