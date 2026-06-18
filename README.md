@@ -107,6 +107,40 @@ Every mise task reads this automatically:
 
 Popular options and detailed notes in [MODELS.md](MODELS.md).
 
+## opencode context compaction
+
+opencode compacts conversation history when the context window fills up — it feeds the full history back to the model for summarization, then replaces it with the summary. On a cloud model this takes ~5s; on a local 9B model it can take **2–3 minutes**.
+
+### Why local models never auto-compact (and the fix)
+
+opencode checks `model.limit.context === 0` before triggering auto-compaction. Local models served via `mlx_lm.server` are **not in opencode's model registry**, so their context limit is `0` — auto-compaction never fires. History accumulates until you hit 50k+ tokens, then manually trigger `/compact`, at which point there's a massive history to summarize.
+
+**The fix** (`opencode-init` task): we declare a `24000` token context limit in the generated `opencode.json`:
+
+```json
+"models": {
+  "mlx-community/Qwen3.5-9B-MLX-4bit": {
+    "limit": { "context": 24000, "output": 8192 }
+  }
+}
+```
+
+opencode compaction math: `usable = context − output_reserve = 24000 − 8192 ≈ 15800 tokens`.  
+Auto-compaction fires at **~16k tokens** — a small enough history that summarization takes ~30s instead of 3 minutes.
+
+> The actual model supports 32k tokens. The lower declared limit is intentional — smaller context at compaction time = faster local inference.
+
+### Tips for keeping sessions fast
+
+| Situation | What to do |
+|---|---|
+| Session just started | Compaction is cheap — keep going |
+| Approaching 30k tokens | Start a new session with `/new` to skip compaction entirely |
+| Compaction triggered | Wait it out (~30s). Don't cancel — the truncated history may confuse the model |
+| Server OOM during compaction | See "OOM crashes" note below; reduce `MLX_CACHE_SIZE` |
+
+---
+
 ## Unlocking more VRAM (Apple Silicon)
 
 Apple Silicon uses unified memory — CPU and GPU share the same physical RAM. macOS caps GPU memory at ~70–75% of total RAM by default to keep the OS stable. On a 32GB Mac that means ~22–24GB available for models.

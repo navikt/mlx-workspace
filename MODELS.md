@@ -62,6 +62,24 @@ MLX_CACHE_SIZE  = "3"
 MLX_MAX_TOKENS  = "4096"
 ```
 
+## opencode declared context limits
+
+`opencode-init` writes a `limit.context` for each model into `opencode.json`. This is what opencode uses to decide when to compact — without it the model is "unknown" and compaction never auto-triggers.
+
+The values are set **lower than actual** so that compaction fires early (small history = fast local summarization):
+
+| Model | Actual context | Declared to opencode | Auto-compact threshold |
+|---|---|---|---|
+| Qwen3.5-9B | 32k | **24k** | ~16k tokens |
+| Qwen2.5-14B | 32k | **24k** | ~16k tokens |
+| Qwen3-30B-A3B | 32k | **20k** | ~12k tokens (tight RAM — lower is safer) |
+| Qwen2.5-32B | 32k | **16k** | ~8k tokens (critically low RAM — compact aggressively) |
+
+> **Why not use the real 32k limit?**  
+> At 32k tokens, compaction feeds ~32k tokens back to the model for summarization. On a 9B local model that takes 2–3 minutes. At 16–24k it's ~30 seconds. The tradeoff is more frequent compactions that each complete quickly, vs. infrequent compactions that stall everything.
+
+To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `MODEL_OUTPUT` constants at the top of `.mise/tasks/opencode-init`.
+
 ---
 
 ## Models
