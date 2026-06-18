@@ -42,12 +42,9 @@ _.path = ["{{config_root}}/.venv/bin"]
 
 [tasks.setup]
 description = "Create and populate the Python venv and install aider"
-run = """
-python -m venv .venv
-.venv/bin/pip install --upgrade pip mlx mlx-lm mlx-vlm
-pipx install aider-chat --python python3.12 || pipx upgrade aider-chat
-mise run model-use qwen3.5-9b
-"""
+run = ".mise/tasks/setup"
+# Note: model-use qwen3.5-9b only runs on first setup — see the task file itself.
+# After first run, mise.local.toml has MLX_ACTIVE_PROFILE set and model-use is skipped.
 
 # ── Inference ─────────────────────────────────────────────────────────────────
 
