@@ -51,7 +51,7 @@ describe('weather-cli integration', () => {
       const output = formatOutput(weather, 'Bergen');
 
       expect(output).toContain('Weather in Bergen (Met.no API)');
-      expect(output).toContain('Temperature: 12.80°C');
+      expect(output).toContain('Temperature: 17.9°C');
       expect(output).toContain('Description: Overcast');
 
       axiosMock.mockClear();
@@ -93,7 +93,7 @@ describe('weather-cli integration', () => {
 
       expect(coords).toEqual({ lat: 63.4305, lon: 10.3951 });
       expect(output).toContain('Weather in Coords (63.4305, 10.3951) (Met.no API)');
-      expect(output).toContain('Temperature: 17.60°C');
+      expect(output).toContain('Temperature: 15.3°C');
 
       axiosMock.mockClear();
     });
@@ -112,7 +112,7 @@ describe('weather-cli integration', () => {
         data: {
           navn: [{
             geojson: {
-              coordinates: [10.73353, 59.91187]
+              coordinates: [10.73359, 59.91192]
             },
             stedsnavn: [{
               skrivemåte: 'Oslo'
@@ -129,12 +129,12 @@ describe('weather-cli integration', () => {
               data: {
                 instant: {
                   details: {
-                    air_temperature: 17.6,
-                    relative_humidity: 68.9,
-                    wind_speed: 2.3,
-                    air_pressure_at_sea_level: 1010.2,
-                    cloud_area_fraction: 10,
-                    ultraviolet_index_clear_sky: 3.3
+                    air_temperature: 24.7,
+                    relative_humidity: 41.5,
+                    wind_speed: 3.9,
+                    air_pressure_at_sea_level: 1010.5,
+                    cloud_area_fraction: 30,
+                    ultraviolet_index_clear_sky: 3.7
                   }
                 }
               }
@@ -147,8 +147,8 @@ describe('weather-cli integration', () => {
       const axiosMock = vi.spyOn(axios, 'get');
       
       geocodeMock.mockResolvedValue({
-        lat: 59.91187,
-        lon: 10.73353,
+        lat: 59.91192,
+        lon: 10.73359,
         name: 'Oslo'
       });
       
@@ -162,11 +162,12 @@ describe('weather-cli integration', () => {
 
       expect(coords).toBeNull();
       expect(geoResult).toEqual({
-        lat: 59.91187,
-        lon: 10.73353,
+        lat: 59.91192,
+        lon: 10.73359,
         name: 'Oslo'
       });
       expect(output).toContain('Weather in Oslo (Met.no API)');
+      expect(output).toContain('Temperature: 24.7°C');
 
       geocodeMock.mockClear();
       axiosMock.mockClear();

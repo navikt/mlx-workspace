@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { geocode } from '../geocode';
+import axios from 'axios';
+import { geocode, DEFAULT_USER_AGENT } from '../geocode';
 
 describe('geocode', () => {
   let axiosMock;
@@ -21,7 +22,7 @@ describe('geocode', () => {
               coordinates: [10.73353, 59.91187]
             }
           },
-          navn: 'Oslo'
+          navn: 'Oslo fylke'
         }]
       }
     };
@@ -33,7 +34,7 @@ describe('geocode', () => {
     expect(result).toEqual({
       lat: 59.91187,
       lon: 10.73353,
-      name: 'Oslo'
+      name: 'Oslo fylke'
     });
   });
 
@@ -43,7 +44,7 @@ describe('geocode', () => {
         navn: [{
           geojson: {
             geometry: {
-              coordinates: [10.73353, 59.91187]
+              coordinates: [10.73359, 59.91192]
             }
           },
           stedsnavn: [{
@@ -58,8 +59,8 @@ describe('geocode', () => {
     const result = await geocode('Oslo kommune');
 
     expect(result).toEqual({
-      lat: 59.91187,
-      lon: 10.73353,
+      lat: 59.91192,
+      lon: 10.73359,
       name: 'Oslo kommune'
     });
   });
@@ -145,13 +146,18 @@ describe('geocode', () => {
       }
     };
 
+    const axiosMock = vi.spyOn(axios, 'get');
     axiosMock.mockResolvedValue(mockResponse);
 
     const result = await geocode('Test Location');
 
     expect(axiosMock).toHaveBeenCalledWith(
       expect.stringContaining('sok=Test%20Location'),
-      expect.any(Object)
+      expect.objectContaining({
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      })
     );
 
     expect(result).toEqual({

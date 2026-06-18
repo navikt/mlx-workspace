@@ -198,5 +198,4 @@ describe('fetchWeather', () => {
       description: 'Clear'
     });
   });
-  });
 });
