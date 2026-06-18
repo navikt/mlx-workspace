@@ -17,6 +17,9 @@ output  = int(os.environ.get("MLX_OPENCODE_OUTPUT", "4096"))
 
 config = {
     "$schema": "https://opencode.ai/config.json",
+    # Instruction files opencode loads into every session's system context.
+    # AGENTS.md contains project-level rules (e.g. always use rtk for shell commands).
+    "instructions": ["AGENTS.md"],
     "provider": {
         "mlx": {
             "npm": "@ai-sdk/openai-compatible",
