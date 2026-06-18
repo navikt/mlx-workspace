@@ -23,17 +23,17 @@ mise run server                 # restart server with new model
 | Model | Released | Arch | VRAM | Native ctx | Headroom¹ | Speed | Tool calling | Status |
 |---|---|---|---|---|---|---|---|---|
 | Qwen2.5-Coder-7B | Nov 2024 | Dense | ~4.5 GB | 32k | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
-| Granite-4.1-8B | May 2026 | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
-| GLM-4.6V-Flash-9B | Dec 2025 | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
-| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
-| Gemma-4-12B | May 2026 | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
-| Ministral-3-14B | Dec 2025 | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
 | Qwen2.5-Coder-14B | Nov 2024 | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
+| Qwen2.5-Coder-32B | Nov 2024 | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
+| Qwen3-Coder-30B-A3B | Jul 2025 | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
+| GLM-4.6V-Flash-9B | Dec 2025 | MoE hybrid | ~5.5 GB | 128k | ~19 GB | — | — | 🔲 untested |
+| Ministral-3-14B | Dec 2025 | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔲 untested |
+| GLM-4.7-Flash | Jan 2026 | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
+| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
 | Gemma-4-26B-A4B | Mar 2026 | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔲 untested |
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
-| Qwen3-Coder-30B-A3B | Jul 2025 | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
-| GLM-4.7-Flash | Jan 2026 | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔲 untested |
-| Qwen2.5-Coder-32B | Nov 2024 | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
+| Gemma-4-12B | May 2026 | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔲 untested |
+| Granite-4.1-8B | May 2026 | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested |
 
 ¹ Headroom = 32GB − VRAM − ~7GB OS reserve
 
