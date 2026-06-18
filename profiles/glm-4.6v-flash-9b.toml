@@ -1,7 +1,7 @@
 [meta]
 name               = "GLM-4.6V-Flash-9B 4bit"
 status             = "testing"
-notes              = "Fast local reasoning and tool use. '4.6V' = vision/multimodal — vision encoder adds extra VRAM overhead beyond the base 5.5GB model weight; treat model_vram_gb as approximate. At 128k context, 4.5GB activation buffer is on the lean side; reduce MLX_CACHE_BYTES to 15GB if OOM occurs."
+notes              = "Z.AI GLM-4.6V-Flash 9B. Native context: 128k tokens. Architecture: MoE hybrid (not pure Dense). Full multimodal: text, images (up to 4K res), video frames, documents, PDFs — native vision tool use. Vision encoder adds VRAM overhead beyond the base ~5.5GB model weight; treat model_vram_gb as a lower bound. 4.5GB activation buffer at 128k context is lean — reduce MLX_CACHE_BYTES to 15GB if OOM occurs."
 model_vram_gb      = 5
 gpu_wired_limit_gb = 26
 

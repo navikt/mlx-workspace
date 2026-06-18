@@ -1,7 +1,7 @@
 [meta]
 name               = "Granite-4.1-8B Instruct 4bit"
 status             = "testing"
-notes              = "Extremely lightweight, enterprise Go focus. 128k context with 8B model leaves excellent headroom. Cache reduced from 18GB to 16GB vs original config: at 128k tokens, activation buffer needs ~5.5GB (same lesson as Qwen3.5-9B OOM at 18GB cache). Use 6 sessions only with short conversations."
+notes              = "IBM Granite 4.1 8B. Native context: 131,072 tokens (128k) — confirmed via OpenRouter and IBM docs. Dense architecture. Enterprise-reinforced for strict tool calling: Go, Java, C++, Rust, and language-server adherence. 128k context with 8B model leaves excellent headroom. Cache reduced from 18GB to 16GB vs original config: at 128k tokens, activation buffer needs ~5.5GB (same lesson as Qwen3.5-9B OOM). NOTE: HF path may be mlx-community/granite-4.1-8b-4bit (without '-instruct') — verify before downloading."
 model_vram_gb      = 4
 gpu_wired_limit_gb = 26
 

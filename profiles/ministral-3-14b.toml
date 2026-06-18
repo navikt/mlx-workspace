@@ -1,7 +1,7 @@
 [meta]
 name               = "Ministral-3-14B Instruct 4bit"
 status             = "testing"
-notes              = "Reported highly decisive, edits multiple files well. NOTE: 'Ministral-3-14B' does not match known Mistral model lineup (Ministral comes in 3B and 8B). Verify HF model exists before downloading. 3.5GB activation buffer is lean vs 6GB recommendation but acceptable at 64k context."
+notes              = "Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0). Confirmed real model: mistralai/Ministral-3-14B-Instruct-2512. Native context: 256k tokens. Dense, multimodal: built-in 410M ViT vision encoder (text + images + PDFs). Reported highly decisive agent, edits multiple files well. MLX_OPENCODE_CONTEXT declared at 64k (safe for 14GB KV budget; larger 14B model ~160KB/token KV overhead). 3.5GB activation buffer is lean — reduce MLX_CACHE_BYTES to 12GB if OOM occurs."
 model_vram_gb      = 8
 gpu_wired_limit_gb = 26
 
