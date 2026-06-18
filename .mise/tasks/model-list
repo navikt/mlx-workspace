@@ -32,11 +32,15 @@ rows = []
 for k in keys:
     meta, params = P.load(k)
     dl      = "✓" if P.is_downloaded(params["MLX_MODEL"]) else "–"
-    vram    = f"{meta['model_vram_gb']} GB" if "model_vram_gb" in meta else "?"
+    vram_gb = meta.get("model_vram_gb", 999)
+    vram    = f"{vram_gb} GB" if vram_gb != 999 else "?"
     icon    = STATUS_ICON.get(meta["status"], "  ")
     spec    = SPEC_ICON.get(meta.get("spec_source", ""), "?")
     marker  = "●" if k == active else " "
-    rows.append((marker, k, meta["name"], icon, meta["status"], vram, spec, dl))
+    rows.append((marker, k, meta["name"], icon, meta["status"], vram, vram_gb, spec, dl))
+
+# Sort: active model first, then by VRAM ascending
+rows.sort(key=lambda r: (0 if r[0] == "●" else 1, r[6]))
 
 # Column widths
 w_key    = max(len(r[1]) for r in rows)
@@ -49,9 +53,9 @@ header = (
 print()
 print(header)
 print("  " + "-" * (len(header) - 2))
-for marker, key, name, icon, status, vram, spec, dl in rows:
+for marker, key, name, icon, status, vram, vram_gb, spec, dl in rows:
     status_col = f"{icon} {status}"
     print(f"{marker} {key:<{w_key}}  {name:<{w_name}}  {status_col:<{w_status+2}}  {vram:>6}   {spec}    {dl}")
 print()
-print("  SPECS: ✓=locally tested  🔍=externally verified  💬=community reports  ?=unknown")
+print("  sorted by VRAM ascending  |  SPECS: ✓=locally tested  🔍=externally verified  💬=community reports  ?=unknown")
 print()
