@@ -1,0 +1,15 @@
+[meta]
+name               = "Qwen3-Coder-30B-A3B Instruct 4bit"
+status             = "slow"
+notes              = "MoE: ~3.3B active params per token but all 30B weights stay in VRAM. Inference was noticeably slow on 32GB Mac despite low active params. Tool calling inconsistent. Worth re-evaluating on faster hardware or future mlx-lm releases."
+model_vram_gb      = 16
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+MLX_CACHE_BYTES            = "7516192768"   # 7GB — model ~16GB VRAM, ~9GB headroom
+MLX_CACHE_SIZE             = "4"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "65536"        # 64k (native 128k); tight RAM — keep conservative
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — MoE is slow, needs generous timeout

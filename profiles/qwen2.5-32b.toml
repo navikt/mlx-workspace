@@ -1,0 +1,15 @@
+[meta]
+name               = "Qwen2.5-Coder-32B Instruct 4bit"
+status             = "oom"
+notes              = "Crashed with kIOGPUCommandBufferCallbackErrorOutOfMemory on 32GB Mac. Critically low activation buffer headroom. Results inconclusive — could not evaluate quality. May work on 64GB Mac. Run vram-set 26 before attempting."
+model_vram_gb      = 19
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
+MLX_CACHE_BYTES            = "4294967296"   # 4GB — model ~19GB VRAM, critically low headroom
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "4096"
+MLX_OPENCODE_CONTEXT       = "16000"        # keep small — barely any RAM for cache
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — large dense model is slow

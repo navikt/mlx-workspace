@@ -2,5 +2,8 @@
 .aider.input.history
 .aider.tags.cache.v4
 .aider.conf.yml
+.aider.model.metadata.json
 opencode.json
+mise.local.toml
 node_modules/
+__pycache__/

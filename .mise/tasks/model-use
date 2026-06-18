@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+# mise description="Switch active model profile. Usage: mise run model-use [<key>]"
+"""Activate a model profile: write params to mise.local.toml, regenerate configs."""
+import os
+import shutil
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+import _profiles as P
+
+
+def pick_interactive() -> str:
+    """Prompt user to choose a profile (fzf if available, else numbered list)."""
+    keys = P.list_keys()
+    if not keys:
+        raise SystemExit("No profiles found in profiles/. Add a .toml file first.")
+    active = P.active_key()
+    rows = []
+    for k in keys:
+        meta, params = P.load(k)
+        dl = "✓" if P.is_downloaded(params["MLX_MODEL"]) else "–"
+        marker = "●" if k == active else " "
+        rows.append((k, f"{marker} {k:<22} {meta['name']:<40} [{meta['status']}]  DL:{dl}"))
+
+    if shutil.which("fzf"):
+        fzf_input = "\n".join(r[1] for r in rows)
+        result = subprocess.run(
+            ["fzf", "--ansi", "--prompt=model> ", "--height=40%", "--reverse"],
+            input=fzf_input,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            raise SystemExit("Cancelled.")
+        chosen_line = result.stdout.strip()
+        # Match back to key by position
+        for i, (k, line) in enumerate(rows):
+            if line == chosen_line:
+                return k
+        raise SystemExit("Could not match fzf selection.")
+
+    print("\nAvailable model profiles:\n")
+    for i, (k, line) in enumerate(rows, 1):
+        print(f"  {i}) {line}")
+    print()
+    try:
+        sel = input("Choose number (or q to quit): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        raise SystemExit("\nCancelled.")
+    if sel.lower() == "q":
+        raise SystemExit("Cancelled.")
+    try:
+        idx = int(sel) - 1
+        return rows[idx][0]
+    except (ValueError, IndexError):
+        raise SystemExit(f"Invalid selection: {sel}")
+
+
+def current_vram_gb() -> int | None:
+    """Read current iogpu.wired_limit_mb via sysctl. Returns GB or None."""
+    try:
+        out = subprocess.run(
+            ["sysctl", "-n", "iogpu.wired_limit_mb"],
+            capture_output=True, text=True, check=True,
+        )
+        mb = int(out.stdout.strip())
+        return mb // 1024
+    except Exception:
+        return None
+
+
+def server_running() -> bool:
+    return subprocess.run(
+        ["lsof", "-iTCP:8080", "-sTCP:LISTEN"],
+        capture_output=True,
+    ).returncode == 0
+
+
+def main():
+    key = sys.argv[1] if len(sys.argv) > 1 else pick_interactive()
+    meta, params = P.load(key)
+
+    print(f"\n→ Activating profile: {meta['name']}  (status: {meta['status']})")
+    if meta.get("notes"):
+        print(f"  {meta['notes'][:120]}")
+    print()
+
+    # Write all params + active marker to mise.local.toml via mise set -E local (surgical)
+    for var in P.REQUIRED_PARAMS:
+        subprocess.run(["mise", "set", "-E", "local", f"{var}={params[var]}"], check=True)
+    subprocess.run(["mise", "set", "-E", "local", f"MLX_ACTIVE_PROFILE={key}"], check=True)
+    print(f"✓ Wrote {len(P.REQUIRED_PARAMS)} params + MLX_ACTIVE_PROFILE to mise.local.toml")
+
+    # Regenerate all dependent config files
+    for task in ("opencode-init", "aider-init"):
+        result = subprocess.run(["mise", "run", task])
+        if result.returncode != 0:
+            print(f"⚠  '{task}' failed (exit {result.returncode}) — check output above", file=sys.stderr)
+
+    # VRAM recommendation (no auto-sudo)
+    want_gb = meta.get("gpu_wired_limit_gb")
+    if want_gb:
+        cur_gb = current_vram_gb()
+        if cur_gb is not None and cur_gb != want_gb:
+            print(f"\n⚠  Profile recommends GPU wired limit {want_gb} GB (current: {cur_gb} GB).")
+            print(f"   Run:  mise run vram-set {want_gb}")
+
+    # Server notification (no auto-restart)
+    if server_running():
+        print("\n⚠  Server is running on :8080 with the previous model.")
+        print("   Stop it and run:  mise run server")
+
+    print(f"\n✓ Active model: {key}")
+
+
+if __name__ == "__main__":
+    main()

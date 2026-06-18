@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+# mise description="Show the currently active model profile and server state"
+"""Show active model profile details and server/download state."""
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+import _profiles as P
+
+
+def server_model() -> str | None:
+    """Query /v1/models on :8080. Returns model id or None."""
+    try:
+        import json, urllib.request
+        with urllib.request.urlopen("http://localhost:8080/v1/models", timeout=2) as r:
+            data = json.loads(r.read())
+            models = data.get("data", [])
+            return models[0]["id"] if models else None
+    except Exception:
+        return None
+
+
+def server_running() -> bool:
+    return subprocess.run(
+        ["lsof", "-iTCP:8080", "-sTCP:LISTEN"],
+        capture_output=True,
+    ).returncode == 0
+
+
+key = P.active_key()
+if not key:
+    print("\nNo active profile. Run:  mise run model-use\n")
+    sys.exit(0)
+
+meta, params = P.load(key)
+hf_id = params["MLX_MODEL"]
+downloaded = P.is_downloaded(hf_id)
+size_gib = P.cache_size_gib(hf_id)
+
+print(f"\nActive profile: {key}  ({meta['name']})")
+print(f"  Status:  {meta['status']}")
+if meta.get("notes"):
+    print(f"  Notes:   {meta['notes'][:120]}")
+print()
+print("  Parameters:")
+for var in P.REQUIRED_PARAMS:
+    print(f"    {var:<30} {params[var]}")
+print()
+
+# Download state
+if downloaded:
+    print(f"  Downloaded:  ✓  ({size_gib:.1f} GiB in HF cache)")
+else:
+    print("  Downloaded:  –  (not in HF cache)")
+
+# Server state
+if server_running():
+    srv = server_model()
+    if srv:
+        if srv == hf_id:
+            print(f"  Server :8080: ✓ running with correct model")
+        else:
+            print(f"  Server :8080: ⚠ running but loaded '{srv}'")
+            print(f"               Expected '{hf_id}' — restart with: mise run server")
+    else:
+        print("  Server :8080: ✓ running (model not queryable)")
+else:
+    print("  Server :8080: – not running  (start with: mise run server)")
+print()

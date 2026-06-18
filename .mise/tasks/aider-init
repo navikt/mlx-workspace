@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Generate .aider.conf.yml from MLX_MODEL env var."""
+"""Generate .aider.conf.yml and .aider.model.metadata.json from env vars."""
+import json
 import os
 
 model = os.environ["MLX_MODEL"]
+max_tokens = int(os.environ.get("MLX_MAX_TOKENS", "8192"))
+context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "32768"))
+
 config = f"""openai-api-base: http://localhost:8080/v1
 openai-api-key: mlx
 model: openai/{model}
@@ -13,4 +17,21 @@ model-metadata-file: .aider.model.metadata.json
 with open(".aider.conf.yml", "w") as f:
     f.write(config)
 
+metadata = {
+    f"openai/{model}": {
+        "max_tokens": max_tokens,
+        "max_input_tokens": context,
+        "max_output_tokens": max_tokens,
+        "input_cost_per_token": 0,
+        "output_cost_per_token": 0,
+        "litellm_provider": "openai",
+        "mode": "chat",
+    }
+}
+
+with open(".aider.model.metadata.json", "w") as f:
+    json.dump(metadata, f, indent=2)
+    f.write("\n")
+
 print(f".aider.conf.yml written for model: {model}")
+print(f".aider.model.metadata.json written (context: {context}, max_tokens: {max_tokens})")
