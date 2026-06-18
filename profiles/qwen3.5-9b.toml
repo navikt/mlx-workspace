@@ -7,6 +7,16 @@ notes              = "262k native context (MLA arch = 64KB/token KV cache). Best
 model_vram_gb      = 6
 gpu_wired_limit_gb = 26
 
+[benchmarks]
+# Hardware: Apple M1 Max 32GB, vram-set 26 (iogpu.wired_limit_mb=26624), measured 2026-06-18
+# All speeds in tokens/sec. Prefill = prompt ingestion; decode = generation.
+prefill_peak_tps      = 245   # fresh KV cache, first 2k tokens of a 44k prompt
+prefill_at_14k_tps    = 169   # fresh segment; under cache pressure drops to ~141 t/s
+prefill_at_44k_tps    = 181   # end of 44k-token prefill run; cache well-populated
+prefill_avg_44k_tps   = 205   # overall average for 44k-token prompt (from request receipt)
+prefill_avg_14k_tps   = 179   # overall average for 14k-token prompt (post-cache-fill state)
+decode_at_96k_spt     = 208   # seconds PER TOKEN at ~96k context (3m28s) — extreme degradation
+
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.5-9B-MLX-4bit"
 MLX_CACHE_BYTES            = "15032385536"  # 14GB — 26GB cap − 6GB model − 6GB activation buffer

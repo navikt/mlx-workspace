@@ -81,7 +81,27 @@ The values are set **lower than native** so that compaction fires before the ses
 
 ---
 
-## Models
+## Benchmark guide
+
+Benchmarks that matter for agentic coding on local hardware, in priority order:
+
+| # | Metric | How to measure | Why it matters |
+|---|---|---|---|
+| 1 | **Prefill speed** (t/s) | Read `Prompt processing progress` lines from server log; divide tokens by elapsed time | Determines how long you wait before generation starts on large codebases |
+| 2 | **Decode speed** (t/s) | `mlx_lm.generate --model ... --prompt "..." --verbose`; look for `Tokens per second` | The "typing" speed users feel; most sensitive to context size |
+| 3 | **Time to first token / TTFT** (s) | Time from HTTP request to first SSE token; visible in server log as gap between request line and first `progress` line | Latency for short tool-call responses; should be <2s for good UX |
+| 4 | **Context degradation** (t/s at N tokens) | Decode speed at 8k / 32k / 64k / 96k context | Tells you the practical usable ceiling before sessions feel painful |
+| 5 | **Tool call accuracy** (%) | Count tool call attempts vs valid-JSON successes in opencode session logs | Directly impacts agentic reliability; a bad model wastes all its speed on retries |
+| 6 | **Max stable context** (tokens) | Largest context that completes without OOM crash | Hard ceiling — models that OOM at 40k are unusable for large repo tasks |
+
+Measured data lives in `profiles/<key>.toml` under `[benchmarks]`. Collect decode speed with:
+```bash
+mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
+  --prompt "Write a detailed explanation of Rust's borrow checker" \
+  --max-tokens 512 --verbose
+```
+
+---
 
 ### `mlx-community/Qwen3.5-9B-MLX-4bit` ⭐ current
 
@@ -108,6 +128,22 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
 
 **Verdict:** Best balance of speed, RAM, and reliability for daily coding. Current default.
+
+**Measured benchmarks (M1 Max 32GB, vram-set 26, 2026-06-18):**
+
+| Metric | Value | Condition |
+|---|---|---|
+| Prefill — peak | ~245 t/s | First 2k tokens, fresh KV cache |
+| Prefill — 44k prompt | ~205 t/s avg | Full 44k-token prefill from cold |
+| Prefill — 14k prompt (cache-warm) | ~179 t/s avg | After a prior 44k session filled cache |
+| Prefill degradation | 258→181 t/s | 4k tokens → 44k tokens in same run |
+| Decode — extreme context | ~0.005 t/s (208 s/tok) | ~96k tokens — severe degrade, near unusable |
+
+**Missing benchmarks to measure** (none collected yet):
+- Decode t/s at 8k / 32k / 64k context (comfortable range)
+- Time to first token (TTFT) for typical opencode requests
+- Tool call JSON accuracy rate (% valid first attempt)
+- Max stable context before OOM (currently estimated ~100k)
 
 ---
 
