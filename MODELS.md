@@ -37,12 +37,12 @@ mise run models-list
 Switch model by uncommenting the right block in `mise.toml` `[env]`:
 
 ```toml
-# Qwen3.5-9B — default, best balance
+# Qwen3.5-9B — default, best balance (requires mise run vram-set 26)
 MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
-MLX_CACHE_BYTES      = "12884901888"  # 12GB — model ~6GB VRAM, ~14GB available for cache
-MLX_CACHE_SIZE       = "8"            # 8 concurrent sessions
-MLX_MAX_TOKENS       = "16384"        # 16k max generation
-MLX_OPENCODE_CONTEXT = "30000"        # compaction at ~26k tokens
+MLX_CACHE_BYTES      = "19327352832"  # 18GB — model ~6GB VRAM, 26GB cap → ~20GB headroom
+MLX_CACHE_SIZE       = "10"           # bytes cap is the real guard
+MLX_MAX_TOKENS       = "32768"        # model's actual context limit
+MLX_OPENCODE_CONTEXT = "32000"        # full model context; compaction at ~28k tokens
 MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve (separate from generation budget)
 
 # Qwen2.5-Coder-14B — reliable fallback
@@ -78,7 +78,7 @@ The values are set **lower than actual** so that compaction fires early (small h
 
 | Model | Actual context | Declared to opencode | Output reserve | Auto-compact threshold |
 |---|---|---|---|---|
-| Qwen3.5-9B | 32k | **30k** | 4k | ~26k tokens |
+| Qwen3.5-9B | 32k | **32k** | 4k | ~28k tokens |
 | Qwen2.5-14B | 32k | **28k** | 4k | ~24k tokens |
 | Qwen3-30B-A3B | 32k | **24k** | 4k | ~20k tokens |
 | Qwen2.5-32B | 32k | **16k** | 4k | ~12k tokens (aggressive — critically low RAM) |

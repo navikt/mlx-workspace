@@ -46,11 +46,11 @@ env_shell_expand = true
 
 # ── Qwen3.5-9B — default, best balance ────────────────────────────────────────
 MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
-MLX_CACHE_BYTES      = "12884901888"  # 12GB — model ~6GB VRAM, ~14GB available for cache
-MLX_CACHE_SIZE       = "8"            # 8 concurrent sessions (was 5; cache has plenty of headroom)
-MLX_MAX_TOKENS       = "16384"        # 16k max generation (was 8k; raised — RAM headroom available)
-MLX_OPENCODE_CONTEXT = "30000"        # compaction at ~26k tokens (context − output reserve)
-MLX_OPENCODE_OUTPUT  = "4096"         # summary needs ~2-4k tokens, not the full 16k budget
+MLX_CACHE_BYTES      = "19327352832"  # 18GB — model ~6GB VRAM, 26GB cap → ~20GB headroom
+MLX_CACHE_SIZE       = "10"           # bytes cap is the real guard; 10 is generous ceiling
+MLX_MAX_TOKENS       = "32768"        # model's actual context limit
+MLX_OPENCODE_CONTEXT = "32000"        # full model context; compaction at ~28k tokens
+MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve (separate from generation budget)
 
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
