@@ -1,7 +1,24 @@
 #!/usr/bin/env python3
-"""Generate opencode.json from mise env vars."""
+# mise description="Generate opencode.json. Usage: mise run opencode-init [<output-dir>]"
+"""Generate opencode.json from mise env vars.
+
+Optional first argument: directory to write opencode.json into (default: CWD).
+Used by 'mise run opencode' to write into samples/<model-key>/.
+"""
 import json
 import os
+import sys
+from pathlib import Path
+
+# Resolve output directory (default: CWD)
+if len(sys.argv) > 1:
+    out_dir = Path(sys.argv[1]).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+else:
+    out_dir = Path.cwd()
+
+# AGENTS.md path: absolute so it resolves correctly from any output dir
+agents_md = str(Path.cwd() / "AGENTS.md")
 
 model   = os.environ["MLX_MODEL"]
 
@@ -25,7 +42,8 @@ config = {
     "$schema": "https://opencode.ai/config.json",
     # Instruction files opencode loads into every session's system context.
     # AGENTS.md contains project-level rules (e.g. always use rtk for shell commands).
-    "instructions": ["AGENTS.md"],
+    # Absolute path so it resolves correctly whether opencode runs from root or samples/<key>/.
+    "instructions": [agents_md],
     # RTK plugin: intercepts tool.execute.before and rewrites bash commands
     # to use rtk for token-compressed output. Installed globally via:
     # rtk init -g --opencode → ~/.config/opencode/plugins/rtk.ts
@@ -62,12 +80,13 @@ config = {
     "small_model": f"mlx/{model}",
 }
 
-with open("opencode.json", "w") as f:
+out_file = out_dir / "opencode.json"
+with open(out_file, "w") as f:
     json.dump(config, f, indent=2)
     f.write("\n")
 
 threshold = context - output
-print(f"opencode.json written for model: {model}")
+print(f"opencode.json written → {out_file}")
 print(f"  declared context:  {context:,} tokens  (MLX_OPENCODE_CONTEXT)")
 print(f"  output reserve:    {output:,} tokens  (MLX_OPENCODE_OUTPUT)")
 print(f"  compaction fires:  ~{threshold:,} tokens")

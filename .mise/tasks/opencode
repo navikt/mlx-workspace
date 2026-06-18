@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# mise description="Start opencode in samples/<model-key>/ for per-model output isolation"
+"""Launch opencode from samples/<active-profile-key>/.
+
+Each model's sessions, generated files, and outputs stay in their own directory,
+making it easy to compare results across models later.
+"""
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+if not key:
+    print("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use", file=sys.stderr)
+    sys.exit(1)
+
+workspace = Path(__file__).resolve().parents[2]  # repo root
+samples_dir = workspace / "samples" / key
+samples_dir.mkdir(parents=True, exist_ok=True)
+
+print(f"→ Starting opencode in {samples_dir.relative_to(workspace)}/")
+
+# Write fresh opencode.json into the samples dir (AGENTS.md path is absolute)
+result = subprocess.run(
+    ["mise", "run", "opencode-init", str(samples_dir)],
+    cwd=str(workspace),
+)
+if result.returncode != 0:
+    print("✗ opencode-init failed", file=sys.stderr)
+    sys.exit(result.returncode)
+
+# Launch opencode with samples/<key> as working directory
+os.chdir(samples_dir)
+os.execvp("opencode", ["opencode"] + sys.argv[1:])
