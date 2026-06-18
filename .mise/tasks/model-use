@@ -87,10 +87,12 @@ def main():
     print()
 
     # Write all params + active marker to mise.local.toml via mise set -E local (surgical)
-    for var in P.REQUIRED_PARAMS:
-        subprocess.run(["mise", "set", "-E", "local", f"{var}={params[var]}"], check=True)
+    # Write all keys from [params] (not just REQUIRED_PARAMS) so optional fields like
+    # MLX_SERVER_TYPE are included when a profile needs them.
+    for var, val in params.items():
+        subprocess.run(["mise", "set", "-E", "local", f"{var}={val}"], check=True)
     subprocess.run(["mise", "set", "-E", "local", f"MLX_ACTIVE_PROFILE={key}"], check=True)
-    print(f"✓ Wrote {len(P.REQUIRED_PARAMS)} params + MLX_ACTIVE_PROFILE to mise.local.toml")
+    print(f"✓ Wrote {len(params)} params + MLX_ACTIVE_PROFILE to mise.local.toml")
 
     # Regenerate all dependent config files
     for task in ("opencode-init", "aider-init"):

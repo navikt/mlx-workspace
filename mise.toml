@@ -33,6 +33,7 @@ MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_SERVER_TYPE            = "mlx-lm"  # override to "mlx-vlm" in profiles that need it
 
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
@@ -43,7 +44,7 @@ _.path = ["{{config_root}}/.venv/bin"]
 description = "Create and populate the Python venv and install aider"
 run = """
 python -m venv .venv
-.venv/bin/pip install --upgrade pip mlx mlx-lm
+.venv/bin/pip install --upgrade pip mlx mlx-lm mlx-vlm
 pipx install aider-chat --python python3.12 || pipx upgrade aider-chat
 mise run model-use qwen3.5-9b
 """
@@ -67,16 +68,7 @@ run = "mlx_lm.chat --model \"$MLX_MODEL\""
 [tasks.server]
 description = "Start the OpenAI-compatible HTTP server on port 8080"
 depends = ["setup"]
-run = """
-mlx_lm.server \
-  --model "$MLX_MODEL" \
-  --port 8080 \
-  --max-tokens "$MLX_MAX_TOKENS" \
-  --prompt-cache-size "$MLX_CACHE_SIZE" \
-  --prompt-cache-bytes "$MLX_CACHE_BYTES"
-"""
-# Tune MLX_CACHE_BYTES, MLX_CACHE_SIZE, MLX_MAX_TOKENS in [env] above.
-# Larger models need smaller cache values — see comments next to each model.
+run = ".mise/tasks/server"
 
 # ── AI coding clients ─────────────────────────────────────────────────────────
 

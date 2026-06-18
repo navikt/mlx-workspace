@@ -9,6 +9,7 @@ gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/gemma-4-26b-a4b-it-4bit"
+MLX_SERVER_TYPE            = "mlx-vlm"              # gemma4_unified requires mlx-vlm, not mlx-lm
 MLX_CACHE_BYTES            = "8589934592"   # 8GB — 26GB cap − 14GB model − 4GB activation (only 4B active)
 MLX_CACHE_SIZE             = "4"
 MLX_MAX_TOKENS             = "8192"
