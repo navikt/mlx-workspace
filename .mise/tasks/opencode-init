@@ -4,6 +4,14 @@ import json
 import os
 
 model = os.environ["MLX_MODEL"]
+
+# Declare a 24k context window to opencode.
+# This makes auto-compaction trigger at ~16k tokens (24k - 8k output reserve),
+# keeping the history small enough for fast local summarization (~30s vs ~3min at 50k).
+# The actual model supports 32k but smaller declared context = earlier, cheaper compaction.
+MODEL_CONTEXT = 24_000
+MODEL_OUTPUT   = 8_192
+
 config = {
     "$schema": "https://opencode.ai/config.json",
     "provider": {
@@ -13,11 +21,24 @@ config = {
             "options": {
                 "baseURL": "http://localhost:8080/v1",
                 "apiKey": "mlx",
+                # Abort if no chunk arrives within 90s — prevents hanging during compaction
+                "chunkTimeout": 90000,
+                # Total request timeout: 5 minutes
+                "timeout": 300000,
             },
-            "models": {model: {}},
+            "models": {
+                model: {
+                    "limit": {
+                        "context": MODEL_CONTEXT,
+                        "output": MODEL_OUTPUT,
+                    }
+                }
+            },
         }
     },
     "model": f"mlx/{model}",
+    # Same model for lightweight tasks (title gen, compaction summaries)
+    "small_model": f"mlx/{model}",
 }
 
 with open("opencode.json", "w") as f:
@@ -25,3 +46,5 @@ with open("opencode.json", "w") as f:
     f.write("\n")
 
 print(f"opencode.json written for model: {model}")
+print(f"  context declared to opencode: {MODEL_CONTEXT:,} tokens (actual: 32k)")
+print(f"  auto-compaction triggers at:  ~{MODEL_CONTEXT - MODEL_OUTPUT:,} tokens")
