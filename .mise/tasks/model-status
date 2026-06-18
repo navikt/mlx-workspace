@@ -10,13 +10,20 @@ import _profiles as P
 
 
 def server_model() -> str | None:
-    """Query /v1/models on :8080. Returns model id or None."""
+    """Query /v1/models on :8080. Returns model id of the most recently loaded model.
+
+    mlx-vlm lists all previously-seen models; mlx-lm lists only the active one.
+    The currently loaded model has the highest 'created' timestamp in both cases.
+    """
     try:
         import json, urllib.request
         with urllib.request.urlopen("http://localhost:8080/v1/models", timeout=2) as r:
             data = json.loads(r.read())
             models = data.get("data", [])
-            return models[0]["id"] if models else None
+            if not models:
+                return None
+            # Most recently loaded = highest created timestamp
+            return max(models, key=lambda m: m.get("created", 0))["id"]
     except Exception:
         return None
 
