@@ -15,4 +15,4 @@ MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k; compaction fires at ~61k
 MLX_OPENCODE_OUTPUT        = "4096"
-MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — 64k context, tokens should be fast
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — mlx-vlm no KV cache; full re-prefill every turn

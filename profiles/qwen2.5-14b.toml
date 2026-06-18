@@ -14,4 +14,4 @@ MLX_CACHE_SIZE             = "6"
 MLX_MAX_TOKENS             = "12288"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k practical; compaction at ~61k
 MLX_OPENCODE_OUTPUT        = "4096"
-MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — smaller context, faster tokens
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — conservative; no downside to generous timeout
