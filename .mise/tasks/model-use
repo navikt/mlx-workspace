@@ -91,6 +91,12 @@ def main():
     # MLX_SERVER_TYPE are included when a profile needs them.
     for var, val in params.items():
         subprocess.run(["mise", "set", "-E", "local", f"{var}={val}"], check=True)
+    # Always explicitly write optional vars with defaults so switching away from a profile
+    # that set them (e.g. gemma → qwen) resets them correctly.
+    OPTIONAL_DEFAULTS = {"MLX_SERVER_TYPE": "mlx-lm"}
+    for var, default in OPTIONAL_DEFAULTS.items():
+        if var not in params:
+            subprocess.run(["mise", "set", "-E", "local", f"{var}={default}"], check=True)
     subprocess.run(["mise", "set", "-E", "local", f"MLX_ACTIVE_PROFILE={key}"], check=True)
     print(f"✓ Wrote {len(params)} params + MLX_ACTIVE_PROFILE to mise.local.toml")
 
