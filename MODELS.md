@@ -41,9 +41,9 @@ Switch model by uncommenting the right block in `mise.toml` `[env]`:
 MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
 MLX_CACHE_BYTES      = "19327352832"  # 18GB — model ~6GB VRAM, 26GB cap → ~20GB headroom
 MLX_CACHE_SIZE       = "10"           # bytes cap is the real guard
-MLX_MAX_TOKENS       = "32768"        # model's actual context limit
-MLX_OPENCODE_CONTEXT = "32000"        # full model context; compaction at ~28k tokens
-MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve (separate from generation budget)
+MLX_MAX_TOKENS       = "32768"        # max tokens generated per request
+MLX_OPENCODE_CONTEXT = "131072"       # 128k — native is 262k; KV cache is real limit
+MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve; compaction fires at ~127k tokens
 
 # Qwen2.5-Coder-14B — reliable fallback
 MLX_MODEL            = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
@@ -76,15 +76,17 @@ MLX_OPENCODE_OUTPUT  = "4096"
 
 The values are set **lower than actual** so that compaction fires early (small history = fast local summarization):
 
-| Model | Actual context | Declared to opencode | Output reserve | Auto-compact threshold |
+| Model | Native context | Declared to opencode | Output reserve | Auto-compact threshold |
 |---|---|---|---|---|
-| Qwen3.5-9B | 32k | **32k** | 4k | ~28k tokens |
-| Qwen2.5-14B | 32k | **28k** | 4k | ~24k tokens |
-| Qwen3-30B-A3B | 32k | **24k** | 4k | ~20k tokens |
-| Qwen2.5-32B | 32k | **16k** | 4k | ~12k tokens (aggressive — critically low RAM) |
+| Qwen3.5-9B | **262k** | **128k** | 4k | ~127k tokens |
+| Qwen2.5-14B | 32k | 64k¹ | 4k | ~60k tokens |
+| Qwen3-30B-A3B | 128k | 64k | 4k | ~60k tokens (tight RAM) |
+| Qwen2.5-32B | 32k | 16k | 4k | ~12k tokens (critically low RAM) |
 
-> **Why not use the real 32k limit?**  
-> At 32k tokens, compaction feeds ~32k tokens back to the model for summarization. On a 9B local model that takes 2–3 minutes. At 16–24k it's ~30 seconds. The tradeoff is more frequent compactions that each complete quickly, vs. infrequent compactions that stall everything.
+¹ Declared context can exceed the model's native context — the KV cache bytes limit is the real safety guard; the model will hard-error before that limit is reached in practice.
+
+> **Why declare less than native?**  
+> The KV cache grows with context length. At 128k tokens on 32GB Mac, one session uses ~8-10GB of the 18GB cache cap — safe. At 262k it would exceed available RAM. The declared limit sets the compaction trigger; the `MLX_CACHE_BYTES` cap prevents OOM if a session somehow grows very large.
 
 To update the declared context for a model, edit `MLX_OPENCODE_CONTEXT` in the model's block in `mise.toml`.
 
@@ -99,7 +101,8 @@ To update the declared context for a model, edit `MLX_OPENCODE_CONTEXT` in the m
 | **Architecture** | Dense |
 | **Active parameters** | 9B |
 | **VRAM footprint** | ~6 GB |
-| **Context window** | 32k tokens |
+| **Context window** | 262k tokens (native `max_position_embeddings`) |
+| **Practical context (32GB Mac)** | ~128k tokens (KV cache limit at 18GB cap) |
 | **Context headroom (32GB)** | ~19 GB |
 
 **Traits:**

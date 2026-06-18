@@ -8,7 +8,7 @@ model   = os.environ["MLX_MODEL"]
 # MLX_OPENCODE_CONTEXT — context window declared to opencode (set in mise.toml).
 # Controls when auto-compaction fires: threshold = context − output.
 # Intentionally lower than model's real context so each compaction is small and fast.
-context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "30000"))
+context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "131072"))
 
 # MLX_OPENCODE_OUTPUT — output token reserve for compaction math (set in mise.toml).
 # Separate from MLX_MAX_TOKENS: compaction summaries need ~2-4k tokens, not the full

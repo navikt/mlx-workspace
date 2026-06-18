@@ -25,7 +25,7 @@ env_shell_expand = true
 # MLX_CACHE_BYTES      = "10737418240"  # 10GB — model ~9GB VRAM, ~10GB headroom
 # MLX_CACHE_SIZE       = "6"
 # MLX_MAX_TOKENS       = "12288"
-# MLX_OPENCODE_CONTEXT = "28000"        # compaction at ~24k tokens
+# MLX_OPENCODE_CONTEXT = "65536"        # 64k practical limit (native 32k); compaction at ~61k
 # MLX_OPENCODE_OUTPUT  = "4096"
 #
 # ── Qwen3-Coder-30B-A3B — slow in practice, watch OOM ────────────────────────
@@ -33,7 +33,7 @@ env_shell_expand = true
 # MLX_CACHE_BYTES      = "7516192768"   # 7GB  — model ~16GB VRAM, ~9GB headroom
 # MLX_CACHE_SIZE       = "4"
 # MLX_MAX_TOKENS       = "8192"
-# MLX_OPENCODE_CONTEXT = "24000"        # compaction at ~20k tokens
+# MLX_OPENCODE_CONTEXT = "65536"        # 64k (native 128k); tight RAM so keep conservative
 # MLX_OPENCODE_OUTPUT  = "4096"
 #
 # ── Qwen2.5-Coder-32B — run `mise run vram-set 26` first; OOM risk ────────────
@@ -41,16 +41,16 @@ env_shell_expand = true
 # MLX_CACHE_BYTES      = "4294967296"   # 4GB  — model ~19GB VRAM, critically low headroom
 # MLX_CACHE_SIZE       = "3"
 # MLX_MAX_TOKENS       = "4096"
-# MLX_OPENCODE_CONTEXT = "16000"        # compaction at ~12k tokens (aggressive = fewer OOM risks)
+# MLX_OPENCODE_CONTEXT = "16000"        # keep small — barely any RAM for cache
 # MLX_OPENCODE_OUTPUT  = "4096"
 
 # ── Qwen3.5-9B — default, best balance ────────────────────────────────────────
 MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
 MLX_CACHE_BYTES      = "19327352832"  # 18GB — model ~6GB VRAM, 26GB cap → ~20GB headroom
 MLX_CACHE_SIZE       = "10"           # bytes cap is the real guard; 10 is generous ceiling
-MLX_MAX_TOKENS       = "32768"        # model's actual context limit
-MLX_OPENCODE_CONTEXT = "32000"        # full model context; compaction at ~28k tokens
-MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve (separate from generation budget)
+MLX_MAX_TOKENS       = "32768"        # max tokens generated per request
+MLX_OPENCODE_CONTEXT = "131072"       # 128k — model native is 262k; KV cache is the real limit
+MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve; compaction fires at ~127k tokens
 
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
