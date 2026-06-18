@@ -29,7 +29,10 @@ mise run server                 # restart server with new model
 | Gemma-4-12B | Dense | ~7 GB | 256k | ~18 GB | — | — | 🔬 testing |
 | Ministral-3-14B | Dense | ~8.5 GB | 256k | ~16 GB | — | — | 🔬 testing |
 | Qwen2.5-Coder-14B | Dense | ~9 GB | 32k | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⬛ superseded |
+| Gemma-4-26B-A4B | MoE | ~14 GB | 256k | ~11 GB | ⚡⚡ | — | 🔬 testing |
+| Qwen3.5-27B-Opus-Distilled | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔬 testing |
 | Qwen3-Coder-30B-A3B | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
+| GLM-4.7-Flash | MoE | ~16 GB | 128–200k | ~9 GB | ⚡⚡ | — | 🔬 testing |
 | Qwen2.5-Coder-32B | Dense | ~19 GB | 32k | ~6 GB | ⚡ | — | ❌ OOM |
 
 ¹ Headroom = 32GB − VRAM − ~7GB OS reserve
@@ -47,6 +50,9 @@ The values are set **lower than native** so that compaction fires before the ses
 | glm-4.6v-flash-9b | 128k | 128k | ~127k tokens |
 | gemma-4-12b | **256k** | 64k¹ | ~60k tokens |
 | ministral-3-14b | **256k** | 64k¹ | ~60k tokens |
+| gemma-4-26b-a4b | **256k** | 64k | ~60k tokens (shared KV cache may allow more) |
+| qwen3.5-27b-opus-distilled | **262k** | 32k | ~28k tokens (tight 6GB KV budget) |
+| glm-4.7-flash | 128–200k | 32k | ~28k tokens (measured: 32k=20GB total, safe) |
 | qwen2.5-14b | 32k | 64k² | ~60k tokens |
 | qwen3-30b-a3b | **256k** | 64k | ~60k tokens (tight RAM) |
 | qwen2.5-32b | 32k | 16k | ~12k tokens (critically low RAM) |
@@ -251,6 +257,75 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 | **Context headroom (32GB)** | ~20 GB |
 
 **Verdict:** Not tested. Known tool calling issues in Qwen2.5-7B. Focus has shifted to Qwen3.x and newer architectures.
+
+---
+
+### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 🔬 testing
+
+| | |
+|---|---|
+| **Architecture** | Dense |
+| **Active parameters** | 27B |
+| **VRAM footprint** | ~14 GB (measured peak ~15.6 GB on M4 Pro 64GB) |
+| **Native context** | 262k tokens (Qwen3.5-27B base) |
+| **Practical context (32GB Mac)** | ~32k tokens (only 6GB KV headroom after model + activation) |
+| **Context headroom (32GB)** | ~11 GB |
+
+**Traits:**
+- Community fine-tune: Qwen3.5-27B base distilled on Claude 4.6 Opus reasoning traces
+- Deep chain-of-thought reasoning with internal `<think>` steps; optimised for technical planning and agentic coding
+- Measured: ~15.7 t/s on M4 Pro 64GB — expect slower on 32GB M1 Max
+- Tightest context budget of the tested models: dense 27B leaves only 6GB for KV cache → ~32–40k practical tokens
+- Apache 2.0
+
+**Verdict:** Untested locally. High reasoning quality claim. Context-limited on 32GB Mac — best for focused, shorter sessions where depth matters more than breadth.
+
+---
+
+### `mlx-community/gemma-4-26b-a4b-it-4bit` 🔬 testing
+
+| | |
+|---|---|
+| **Architecture** | MoE (26B total / ~3.8–4B active per token) |
+| **Active parameters** | ~4B per token |
+| **VRAM footprint** | ~14 GB |
+| **Native context** | 256k tokens |
+| **Practical context (32GB Mac)** | ~64k declared; shared KV cache may extend effective capacity |
+| **Context headroom (32GB)** | ~11 GB |
+| **Multimodal** | Text, images, video |
+
+**Traits:**
+- Google Gemma 4 26B MoE (2026), Apache 2.0
+- **Shared KV Cache:** final attention layers reuse KV from earlier layers — physically less RAM per token than standard models. Context budget stretches further than comparable 14GB dense models
+- **Dual RoPE:** prevents context quality collapse at long range
+- Hybrid local+global attention (always global at final layer)
+- Fast inference despite large total param count — only 4B active per token
+- MMLU Pro: 82.6%, AIME 2026: 88.3%, LiveCodeBench v6: 77.1% — strong benchmarks
+
+**Verdict:** Untested locally. Most technically interesting of the new batch: MoE speed + shared KV cache gives more effective context per GB than any other ~14GB model. High priority for evaluation.
+
+---
+
+### `mlx-community/GLM-4.7-Flash-4bit` 🔬 testing
+
+| | |
+|---|---|
+| **Architecture** | MoE (30B total / ~3–3.6B active per token) |
+| **Active parameters** | ~3B per token |
+| **VRAM footprint** | ~16 GB |
+| **Native context** | 128–200k tokens |
+| **Practical context (32GB Mac)** | ~32k tokens (measured: 32k total=20GB, 65k total=23GB which is risky) |
+| **Context headroom (32GB)** | ~9 GB |
+
+**Traits:**
+- Zhipu/Z.AI GLM-4.7-Flash (2026): updated successor to GLM-4.6V-Flash
+- MoE with 64 experts, 4 routed per token + 1 shared — ~10x throughput vs dense 30B
+- Strong coding, tool use, and agentic workflows; different training paradigm from Qwen MoE
+- Measured VRAM scaling: 4k≈17GB, 32k≈20GB, 65k≈23GB, 131k≈30GB
+- 65k context leaves only 3GB for activations on 26GB cap — unsafe. 32k is the safe ceiling.
+- Tighter context than GLM-4.6V-Flash-9B despite being a "Flash" model — simply because it's ~3× larger
+
+**Verdict:** Untested locally. Alternative to Qwen3-30B-A3B MoE if tool calling proved inconsistent. Worth testing given different training origin.
 
 ---
 
