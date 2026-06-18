@@ -1,0 +1,15 @@
+[meta]
+name               = "Granite-4.1-8B Instruct 4bit"
+status             = "testing"
+notes              = "Extremely lightweight, enterprise Go focus. 128k context with 8B model leaves excellent headroom. Cache reduced from 18GB to 16GB vs original config: at 128k tokens, activation buffer needs ~5.5GB (same lesson as Qwen3.5-9B OOM at 18GB cache). Use 6 sessions only with short conversations."
+model_vram_gb      = 4
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/granite-4.1-8b-instruct-4bit"
+MLX_CACHE_BYTES            = "17179869184"  # 16GB — 26GB cap − 4.5GB model − 5.5GB buffer (adjusted from 18GB)
+MLX_CACHE_SIZE             = "6"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "131072"       # 128k; compaction fires at ~127k
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — 128k context, slow tokens at large context

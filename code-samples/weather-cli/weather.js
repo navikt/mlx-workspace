@@ -1,63 +1,74 @@
-#!/usr/bin/env node
-
-// Simple weather CLI for Bergen, Norway
+// Weather module for fetching and parsing weather data
 const axios = require('axios');
 
-// Using a free weather API that doesn't require registration
-const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const WEATHER_API_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/complete';
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-// Bergen coordinates (latitude: 60.3944, longitude: 5.3227)
-const BERGEN_LAT = 60.3944;
-const BERGEN_LONG = 5.3227;
+async function fetchWeather(lat, lon) {
+  const response = await axios.get(`${WEATHER_API_URL}?lat=${lat}&lon=${lon}`, {
+    headers: {
+      'User-Agent': DEFAULT_USER_AGENT
+    }
+  });
+  
+  return parseWeatherData(response.data);
+}
 
-// Function to get weather data for Bergen
-async function getWeather() {
-  try {
-    const response = await axios.get(API_URL, {
-      params: {
-        lat: BERGEN_LAT,
-        lon: BERGEN_LONG,
-        appid: "03333333333333333333333333333333333", // Placeholder - user needs to set their own key
-        units: 'metric' // Celsius
+function parseWeatherData(rawData) {
+  const timeseries = rawData.properties.timeseries;
+  const currentTime = new Date().toISOString();
+  let currentIdx = -1;
+  let minDiff = Infinity;
+  
+  // Find the closest time in the timeseries
+  for (let i = 0; i < timeseries.length; i++) {
+    const tsTime = new Date(timeseries[i].time);
+    const timeDiff = Math.abs(tsTime.getTime() - new Date(currentTime).getTime());
+    
+    if (timeDiff < minDiff) {
+      minDiff = timeDiff;
+      currentIdx = i;
+    } else if (timeDiff === minDiff) {
+      // If times are equal, prefer the later one
+      const tsTime2 = new Date(timeseries[i + 1]?.time);
+      if (tsTime2 && tsTime2.getTime() > tsTime.getTime()) {
+        currentIdx = i + 1;
+        minDiff = timeDiff;
       }
-    });
-
-    const weather = response.data;
-    const temperature = weather.main.temp;
-    const description = weather.weather[0].description;
-    const humidity = weather.main.humidity;
-    const windSpeed = weather.wind.speed;
-
-    console.log('Weather in Bergen:');
-    console.log('Temperature:', `${temperature}°C`);
-    console.log('Description:', description);
-    console.log('Humidity:', `${humidity}%`);
-    console.log('Wind Speed:', `${windSpeed} m/s`);
-  } catch (error) {
-    console.error('Error fetching weather data:', error.message);
-    console.log('Please set your OpenWeatherMap API key:');
-    console.log('1. Sign up at https://openweathermap.org/api');
-    console.log('2. Get your free API key');
-    console.log('3. Set it as environment variable:');
-    console.log('   export OPENWEATHER_API_KEY=your_api_key_here');
+    }
   }
+  
+  const current = timeseries[currentIdx]?.data?.instant?.details;
+  const temperature = current?.air_temperature;
+  const humidity = current?.relative_humidity;
+  const windSpeed = current?.wind_speed;
+  const pressure = current?.air_pressure_at_sea_level;
+  const cloudFraction = current?.cloud_area_fraction;
+  const uvIndex = current?.ultraviolet_index_clear_sky;
+  
+  const description = cloudFraction !== undefined ? getWeatherDescription(cloudFraction) : 'Clear';
+  
+  return {
+    temperature,
+    humidity,
+    windSpeed,
+    pressure,
+    uvIndex,
+    description
+  };
 }
 
-// Main function
-async function main() {
-  if (!process.env.OPENWEATHER_API_KEY) {
-    console.log('Weather CLI for Bergen, Norway');
-    console.log('This CLI requires an OpenWeatherMap API key');
-    console.log('1. Sign up at https://openweathermap.org/api');
-    console.log('2. Get your free API key');
-    console.log('3. Set it as environment variable:');
-    console.log('   export OPENWEATHER_API_KEY=your_api_key_here');
-    console.log('4. Run the command again');
-    process.exit(1);
+function getWeatherDescription(cloudFraction) {
+  if (cloudFraction > 75) {
+    return 'Overcast';
   }
-
-  await getWeather();
+  if (cloudFraction > 50) {
+    return 'Partly cloudy';
+  }
+  if (cloudFraction > 25) {
+    return 'Mostly clear';
+  }
+  return 'Clear';
 }
 
-// Run the main function
-main();
+module.exports = { fetchWeather, parseWeatherData, getWeatherDescription };

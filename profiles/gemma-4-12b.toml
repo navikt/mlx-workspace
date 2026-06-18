@@ -1,0 +1,15 @@
+[meta]
+name               = "Gemma-4-12B Instruct 4bit"
+status             = "testing"
+notes              = "Reported strong tool schema adherence. 3.5GB activation buffer is lean vs 6GB recommendation but acceptable at 64k context. Monitor for OOM on long sessions; reduce MLX_CACHE_BYTES to 13GB if crashes occur."
+model_vram_gb      = 7
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/gemma-4-12B-it-4bit"
+MLX_CACHE_BYTES            = "16106127360"  # 15GB — 26GB cap − 7.5GB model − 3.5GB buffer (lean)
+MLX_CACHE_SIZE             = "5"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "65536"        # 64k; compaction fires at ~61k
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — 64k context, tokens should be fast

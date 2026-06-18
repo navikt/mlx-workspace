@@ -1,12 +1,14 @@
 {
   "name": "weather-cli",
   "version": "1.0.0",
-  "main": "weather.js",
+  "type": "module",
+  "main": "weather-cli.js",
   "bin": {
-    "weather": "./weather.js"
+    "weather": "./weather-cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +16,8 @@
   "description": "",
   "dependencies": {
     "axios": "^1.18.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
   }
 }

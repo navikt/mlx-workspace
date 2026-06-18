@@ -1,0 +1,15 @@
+[meta]
+name               = "GLM-4.6V-Flash-9B 4bit"
+status             = "testing"
+notes              = "Fast local reasoning and tool use. '4.6V' = vision/multimodal — vision encoder adds extra VRAM overhead beyond the base 5.5GB model weight; treat model_vram_gb as approximate. At 128k context, 4.5GB activation buffer is on the lean side; reduce MLX_CACHE_BYTES to 15GB if OOM occurs."
+model_vram_gb      = 5
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/GLM-4.6V-Flash-9B-4bit"
+MLX_CACHE_BYTES            = "17179869184"  # 16GB — 26GB cap − 5.5GB model − 4.5GB buffer
+MLX_CACHE_SIZE             = "5"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "131072"       # 128k; compaction fires at ~127k
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — 128k context, slow tokens at large context
