@@ -1,7 +1,8 @@
 # Model Evaluation Notes
 
-Observations from running models locally via `mlx_lm` on Apple Silicon.
-Update this as you test more models. Set the active model in `mise.toml`.
+Observations from running models locally via `mlx_lm` on Apple Silicon (32GB Mac).
+Focus going forward is **Qwen3.x** — Qwen2.5 variants are largely superseded.
+Set the active model in `mise.toml`.
 
 > **Note on sizes:** *Disk size* (from `mise run models-list`) and *VRAM footprint* are different.
 > Disk includes tokenizer, configs, and bfloat16 safetensors. VRAM is the actual loaded inference footprint.
@@ -9,7 +10,7 @@ Update this as you test more models. Set the active model in `mise.toml`.
 ## How to switch models
 
 ```bash
-# 1. Edit MLX_MODEL in mise.toml
+# 1. Edit MLX_MODEL (and the matching params) in mise.toml
 # 2. Start the server
 mise run server
 
@@ -21,16 +22,15 @@ mise run models-list
 
 ## Quick comparison
 
-| Model | VRAM | Disk | Context headroom¹ | Speed | Code quality | Tool calling |
+| Model | Gen | VRAM | Headroom¹ | Speed | Tool calling | Status |
 |---|---|---|---|---|---|---|
-| Qwen2.5-Coder-7B-4bit | ~4.5 GB | — | ~20 GB | ⚡⚡⚡⚡ | ★★★ | ⚠️ loops |
-| **Qwen3.5-9B-MLX-4bit** ⭐ | ~6 GB | 11 GB | ~19 GB | ⚡⚡⚡ | ★★★★ | ✅ strong |
-| Qwen2.5-Coder-14B-4bit | ~9 GB | 15 GB | ~16 GB | ⚡⚡ | ★★★★ | ⚠️ inconsistent |
-| Qwen3-Coder-30B-A3B-4bit | ~16 GB | 32 GB | ~9 GB | ⚡⚡ | ★★★★ | ✅ excellent² |
-| Qwen2.5-Coder-32B-4bit | ~19 GB | 34 GB | ~6 GB | ⚡ | ★★★★★ | ✅ excellent |
+| Qwen2.5-Coder-7B-4bit | 2.5 | ~4.5 GB | ~20 GB | ⚡⚡⚡⚡ | ⚠️ loops | ⬛ skipped |
+| **Qwen3.5-9B-MLX-4bit** ⭐ | 3.5 | ~6 GB | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
+| Qwen2.5-Coder-14B-4bit | 2.5 | ~9 GB | ~16 GB | ⚡⚡ | ❌ malformed JSON | ⚠️ not viable for agents |
+| Qwen3-Coder-30B-A3B-4bit | 3 | ~16 GB | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow in practice |
+| Qwen2.5-Coder-32B-4bit | 2.5 | ~19 GB | ~6 GB | ⚡ | — | ❌ OOM crash — inconclusive |
 
-¹ Context headroom = 32GB Mac unified RAM − VRAM footprint − ~7GB OS reserve  
-² Tested as excellent per spec; local testing showed inconsistency — may be version-dependent
+¹ Headroom = 32GB − VRAM − ~7GB OS reserve
 
 ## Recommended server parameters
 
@@ -78,7 +78,7 @@ The values are set **lower than actual** so that compaction fires early (small h
 > **Why not use the real 32k limit?**  
 > At 32k tokens, compaction feeds ~32k tokens back to the model for summarization. On a 9B local model that takes 2–3 minutes. At 16–24k it's ~30 seconds. The tradeoff is more frequent compactions that each complete quickly, vs. infrequent compactions that stall everything.
 
-To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `MODEL_OUTPUT` constants at the top of `.mise/tasks/opencode-init`.
+To update the declared context for a model, edit `MLX_OPENCODE_CONTEXT` in the model's block in `mise.toml`.
 
 ---
 
@@ -104,27 +104,27 @@ To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `M
 
 ---
 
-### `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit`
+### `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` ⚠️ too slow
 
 | | |
 |---|---|
 | **Architecture** | MoE (Mixture of Experts) |
-| **Active parameters** | ~3.3B per token |
+| **Active parameters** | ~3.3B active per token |
 | **VRAM footprint** | ~16 GB |
 | **Context window** | 32k tokens |
 | **Context headroom (32GB)** | ~9 GB |
 
 **Traits:**
-- MoE — activates only ~3.3B params per forward pass, so faster than weight count suggests
-- All weights still loaded into VRAM (hence 16GB footprint despite ~3.3B active)
-- Tool calling rated excellent per benchmarks; local opencode testing showed inconsistency (possibly version/config issue)
-- Tight context headroom — be cautious with large codebases
+- MoE activates ~3.3B params per forward pass, but **all 30B weights stay in VRAM** — hence the 16GB footprint
+- Despite low active params, inference was noticeably slow on this hardware
+- Tool calling inconsistent in local testing despite excellent benchmark ratings
+- Tight context headroom — risky with large codebases
 
-**Verdict:** Worth retesting with latest mlx-lm. Good for aider where context fits; watch for tool calling regressions in opencode.
+**Verdict:** Not practical for daily use on 32GB Mac. Benchmarks suggest it should be good — worth re-evaluating on faster hardware or with a future mlx-lm release.
 
 ---
 
-### `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit`
+### `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit` ⚠️ Qwen2.5 — superseded
 
 | | |
 |---|---|
@@ -135,16 +135,15 @@ To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `M
 | **Context headroom (32GB)** | ~16 GB |
 
 **Traits:**
-- Previous daily driver — stable and well-tested
-- Good instruction following
-- Tool calling inconsistent (prone to malformed JSON)
-- Superseded by Qwen3.5-9B for most tasks
+- Server started fine; adequate instruction following
+- Tool calling produced frequent malformed JSON — not viable for aider/opencode
+- Superseded by Qwen3.5-9B which is smaller, faster, and more reliable
 
-**Verdict:** Reliable fallback. Skip for opencode; fine for aider and chat.
+**Verdict:** Skip. Not recommended for agentic tools. Qwen3.5-9B is strictly better.
 
 ---
 
-### `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit`
+### `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit` ❌ OOM — inconclusive
 
 | | |
 |---|---|
@@ -155,16 +154,15 @@ To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `M
 | **Context headroom (32GB)** | ~6 GB |
 
 **Traits:**
-- Best raw code quality of all tested models
-- Requires VRAM unlock on 32GB Mac: `mise run vram-set 26`
-- Only ~6GB left for context — avoid large files or long sessions
-- Slow first-token latency
+- Crashed with `kIOGPUCommandBufferCallbackErrorOutOfMemory` — insufficient headroom on 32GB Mac
+- Would require aggressive VRAM tuning (`mise run vram-set 28`) and minimal cache settings
+- Results inconclusive — could not evaluate quality or tool calling
 
-**Verdict:** Use for complex one-shot refactors where quality matters more than speed. Always unlock VRAM first.
+**Verdict:** Not viable on 32GB Mac without significant memory tuning. May work on 64GB. Part of Qwen2.5 generation — not a priority to retry.
 
 ---
 
-### `mlx-community/Qwen2.5-Coder-7B-Instruct-4bit` *(not yet tested locally)*
+### `mlx-community/Qwen2.5-Coder-7B-Instruct-4bit` ⬛ skipped
 
 | | |
 |---|---|
@@ -174,12 +172,7 @@ To update `opencode-init` for a different model, edit the `MODEL_CONTEXT` and `M
 | **Context window** | 32k tokens |
 | **Context headroom (32GB)** | ~20 GB |
 
-**Traits:**
-- Smallest footprint — huge context headroom
-- Tool calling prone to looping (known Qwen2.5-7B issue)
-- May suit simple tasks or low-RAM machines
-
-**Verdict:** Not recommended for agentic tools (aider/opencode). May be worth testing for chat/run tasks.
+**Verdict:** Not tested. Known tool calling issues in Qwen2.5-7B. Focus has shifted to Qwen3.x — no plans to evaluate this model.
 
 ---
 
