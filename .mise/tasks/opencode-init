@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Generate opencode.json from MLX_MODEL env var."""
+"""Generate opencode.json from mise env vars."""
 import json
 import os
 
-model = os.environ["MLX_MODEL"]
+model   = os.environ["MLX_MODEL"]
 
-# Declare a 24k context window to opencode.
-# This makes auto-compaction trigger at ~16k tokens (24k - 8k output reserve),
-# keeping the history small enough for fast local summarization (~30s vs ~3min at 50k).
-# The actual model supports 32k but smaller declared context = earlier, cheaper compaction.
-MODEL_CONTEXT = 24_000
-MODEL_OUTPUT   = 8_192
+# MLX_OPENCODE_CONTEXT — context window declared to opencode (set in mise.toml).
+# Controls when auto-compaction fires: threshold = context − output.
+# Intentionally lower than model's real context so each compaction is small and fast.
+context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "24000"))
+
+# MLX_MAX_TOKENS doubles as the output reserve for compaction math.
+# opencode reserves this many tokens for the model's reply before triggering compaction.
+output  = int(os.environ.get("MLX_MAX_TOKENS", "8192"))
 
 config = {
     "$schema": "https://opencode.ai/config.json",
@@ -21,7 +23,7 @@ config = {
             "options": {
                 "baseURL": "http://localhost:8080/v1",
                 "apiKey": "mlx",
-                # Abort if no chunk arrives within 90s — prevents hanging during compaction
+                # Abort if no chunk arrives within 90s — prevents hanging during slow compaction
                 "chunkTimeout": 90000,
                 # Total request timeout: 5 minutes
                 "timeout": 300000,
@@ -29,8 +31,8 @@ config = {
             "models": {
                 model: {
                     "limit": {
-                        "context": MODEL_CONTEXT,
-                        "output": MODEL_OUTPUT,
+                        "context": context,
+                        "output": output,
                     }
                 }
             },
@@ -45,6 +47,8 @@ with open("opencode.json", "w") as f:
     json.dump(config, f, indent=2)
     f.write("\n")
 
+threshold = context - output
 print(f"opencode.json written for model: {model}")
-print(f"  context declared to opencode: {MODEL_CONTEXT:,} tokens (actual: 32k)")
-print(f"  auto-compaction triggers at:  ~{MODEL_CONTEXT - MODEL_OUTPUT:,} tokens")
+print(f"  declared context:  {context:,} tokens  (MLX_OPENCODE_CONTEXT)")
+print(f"  output reserve:    {output:,} tokens  (MLX_MAX_TOKENS)")
+print(f"  compaction fires:  ~{threshold:,} tokens")

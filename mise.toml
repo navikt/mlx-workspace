@@ -6,25 +6,44 @@ pipx = "latest"
 env_shell_expand = true
 
 [env]
-# ── Model ─────────────────────────────────────────────────────────────────────
-# Uncomment the model you want to use. Update server params below to match.
+# ── Active model ───────────────────────────────────────────────────────────────
+# Change this block when switching models. See MODELS.md for all options.
 #
-# MLX_MODEL = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
-# MLX_CACHE_BYTES = "9663676416"   # 9GB  (model ~9GB VRAM, leaves ~8GB headroom)
-# MLX_CACHE_SIZE  = "5"
+# MLX_MODEL            — HuggingFace model ID loaded by the server
+# MLX_CACHE_BYTES      — KV-cache hard cap in bytes (prevents OOM; sum of all open sessions)
+# MLX_CACHE_SIZE       — max concurrent KV caches (one per open conversation)
+# MLX_MAX_TOKENS       — max tokens the server generates per request
+# MLX_OPENCODE_CONTEXT — context window declared to opencode; auto-compaction fires at
+#                        (MLX_OPENCODE_CONTEXT − MLX_MAX_TOKENS). Set lower than the
+#                        model's real context so compaction summarises a small history fast.
 #
-# MLX_MODEL = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
-# MLX_CACHE_BYTES = "4294967296"   # 4GB  (model ~19GB VRAM — run vram-set 26 first!)
-# MLX_CACHE_SIZE  = "3"
+# ── Qwen2.5-Coder-14B — reliable fallback ─────────────────────────────────────
+# MLX_MODEL            = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+# MLX_CACHE_BYTES      = "9663676416"   # 9GB  — model ~9GB VRAM, ~8GB headroom
+# MLX_CACHE_SIZE       = "5"
+# MLX_MAX_TOKENS       = "8192"
+# MLX_OPENCODE_CONTEXT = "24000"        # compaction at ~16k tokens
 #
-# MLX_MODEL = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
-# MLX_CACHE_BYTES = "6442450944"   # 6GB  (model ~16GB VRAM, tight headroom)
-# MLX_CACHE_SIZE  = "4"
+# ── Qwen3-Coder-30B-A3B — tight RAM, watch OOM ────────────────────────────────
+# MLX_MODEL            = "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
+# MLX_CACHE_BYTES      = "6442450944"   # 6GB  — model ~16GB VRAM, tight headroom
+# MLX_CACHE_SIZE       = "4"
+# MLX_MAX_TOKENS       = "4096"
+# MLX_OPENCODE_CONTEXT = "20000"        # compaction at ~16k tokens (low ceiling = safer)
+#
+# ── Qwen2.5-Coder-32B — run `mise run vram-set 26` first ──────────────────────
+# MLX_MODEL            = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
+# MLX_CACHE_BYTES      = "4294967296"   # 4GB  — model ~19GB VRAM, critically low headroom
+# MLX_CACHE_SIZE       = "3"
+# MLX_MAX_TOKENS       = "4096"
+# MLX_OPENCODE_CONTEXT = "16000"        # compaction at ~12k tokens (aggressive = fewer OOM risks)
 
-MLX_MODEL       = "mlx-community/Qwen3.5-9B-MLX-4bit"
-MLX_CACHE_BYTES = "8589934592"   # 8GB  (model ~6GB VRAM, leaves ~10GB headroom)
-MLX_CACHE_SIZE  = "5"
-MLX_MAX_TOKENS  = "8192"
+# ── Qwen3.5-9B — default, best balance ────────────────────────────────────────
+MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
+MLX_CACHE_BYTES      = "8589934592"   # 8GB  — model ~6GB VRAM, ~10GB headroom for cache
+MLX_CACHE_SIZE       = "5"            # 5 open conversations before oldest cache is evicted
+MLX_MAX_TOKENS       = "8192"         # max tokens per generation; also used as opencode output reserve
+MLX_OPENCODE_CONTEXT = "24000"        # compaction at ~16k tokens (24k − 8k); ~30s on local hw
 
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
