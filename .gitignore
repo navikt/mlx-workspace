@@ -4,7 +4,8 @@
 .aider.conf.yml
 .aider.model.metadata.json
 opencode.json
-samples/*/
+samples/**/opencode.json
+samples/**/node_modules/
 mise.local.toml
 node_modules/
 __pycache__/
