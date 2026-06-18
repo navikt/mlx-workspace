@@ -116,6 +116,13 @@ To update the declared context for a model, edit `MLX_OPENCODE_CONTEXT` in the m
 - Solid code generation for common languages
 - Leaves ample RAM headroom for OS, clients, and large context
 
+**Known issue — generation speed degrades at large context:**
+Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a single token was observed taking **3 min 28 s** on a 32GB Mac. This caused opencode to silently stop: the SSE chunk timeout fired mid-generation, the connection dropped, the model returned an empty response, and opencode exited the loop with no error message.
+
+- `MLX_OPENCODE_CHUNK_TIMEOUT` is set to `600000` (10 min) to cover this worst case
+- Practical comfortable operating range is **~50–70k tokens**; sessions approaching 100k will feel slow
+- Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
+
 **Verdict:** Best balance of speed, RAM, and reliability for daily coding. Current default.
 
 ---
