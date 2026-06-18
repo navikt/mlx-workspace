@@ -33,15 +33,11 @@ config = {
                 "baseURL": "http://localhost:8080/v1",
                 "apiKey": "mlx",
                 # Time between SSE chunks before the connection is considered stalled.
-                # Raise from 90s: at large context (20k+ tokens) + thinking mode, a single
-                # token can take >90s when the KV cache is warm and prompts are long.
-                "chunkTimeout": 180000,
-                # Total request timeout. Set to False (no timeout) because:
-                # - At 25-30k tokens, prompt processing alone can take 2-4 minutes
-                # - Thinking mode adds multiple further minutes of generation
-                # - A hard timeout causes BrokenPipeError on the server side and
-                #   "SSE times out" on the opencode side mid-generation
-                # opencode's per-chunk timeout (above) still guards against truly stalled streams.
+                # At 96k+ tokens, a single token can take >3 minutes on this hardware
+                # (observed: chunkTimeout fired at 3min 28s → empty response → loop exit).
+                # Set high enough to survive slowest token at max practical context (~100k).
+                "chunkTimeout": 600000,  # 10 minutes
+                # Total request timeout disabled — see chunkTimeout for the real guard.
                 "timeout": False,
             },
             "models": {
