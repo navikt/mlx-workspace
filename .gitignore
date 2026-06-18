@@ -3,6 +3,7 @@
 .aider.tags.cache.v4
 .aider.conf.yml
 .aider.model.metadata.json
+opencode.json
 samples/*/
 mise.local.toml
 node_modules/
