@@ -39,8 +39,8 @@ Switch model by uncommenting the right block in `mise.toml` `[env]`:
 ```toml
 # Qwen3.5-9B — default, best balance (requires mise run vram-set 26)
 MLX_MODEL            = "mlx-community/Qwen3.5-9B-MLX-4bit"
-MLX_CACHE_BYTES      = "19327352832"  # 18GB — model ~6GB VRAM, 26GB cap → ~20GB headroom
-MLX_CACHE_SIZE       = "10"           # bytes cap is the real guard
+MLX_CACHE_BYTES      = "15032385536"  # 14GB — 26GB cap − 6GB model − 6GB activation buffer
+MLX_CACHE_SIZE       = "5"            # 5 sessions; at ~3GB/session at 87k tokens = 15GB max
 MLX_MAX_TOKENS       = "32768"        # max tokens generated per request
 MLX_OPENCODE_CONTEXT = "131072"       # 128k — native is 262k; KV cache is real limit
 MLX_OPENCODE_OUTPUT  = "4096"         # summary reserve; compaction fires at ~127k tokens
