@@ -1,5 +1,7 @@
 # Weather CLI Specification
 
+> **Note:** This spec is maintained by humans/Copilot CLI. Code in each `samples/*/weather-cli/` directory is owned by the respective model agent and should only be modified by that agent.
+
 ## API Contract
 
 ### Input

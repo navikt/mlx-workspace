@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 const WEATHER_API_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/complete';
-const DEFAULT_USER_AGENT = 'weather-cli/1.0 github.com/navikt/mlx-workspace';
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 async function fetchWeather(lat, lon) {
   const response = await axios.get(`${WEATHER_API_URL}?lat=${lat}&lon=${lon}`, {
