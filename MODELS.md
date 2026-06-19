@@ -67,18 +67,6 @@ mise run server                 # restart server with new model
 ² mlx-vlm models skipped — same architecture as Gemma-4-12B, expected same ~2.5min/turn penalty
 ³ Gated model: accept terms at huggingface.co/ibm-granite/granite-4.1-8b-instruct before downloading
 
-### Successors & newer editions (as of Jun 2026)
-
-| Model in list | Successor / newer edition | MLX 4bit? | Notes |
-|---|---|---|---|
-| Qwen2.5-Coder-14B (Nov 2024) | Qwen3-Coder-30B-A3B (Jul 2025) | ✅ in list | Direct successor line |
-| Qwen2.5-Coder-32B (Nov 2024) | Qwen3-Coder-480B-A35B (Jul 2025) | ❌ server-only | Way too large |
-| GLM-4.6V-Flash-9B (Dec 2025) | GLM-4.7-Flash (Jan 2026) → GLM-5.2 (Jun 2026) | ✅ 4.7 in list; GLM-5.2 no MLX yet | GLM-5 is 744B — not consumer hardware |
-| GLM-4.7-Flash (Jan 2026) | GLM-5.2 (Jun 16, 2026) | ❌ not yet | GLM-5.2 has no MLX 4bit yet; likely very large |
-| Qwen3-Coder-30B-A3B (Jul 2025) | Qwen3-Coder-Next (Feb 2026) | ⚠️ mxfp4 only | Preview model, not standard mlx-lm 4bit |
-| Gemma-4-12B (May 2026) | Gemma-4-26B-A4B is the larger variant (same generation) | ✅ in list | Both use gemma4_unified / mlx-vlm — both expected too slow for agentic use |
-| All others | No direct successor yet as of Jun 2026 | | |
-
 ---
 
 ## Server runtime: mlx-lm vs mlx-vlm
