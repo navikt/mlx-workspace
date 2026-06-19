@@ -44,3 +44,22 @@ Context is limited. Every unnecessary token slows generation.
 - **Verify writes** — after creating a file, confirm it exists with `ls` before proceeding
 - **Check `--help` before inventing flags** — if an option doesn't work, read the docs; do
   not try flag variations or invented options (e.g. `npm init --workdir` does not exist)
+
+## TodoWrite — use it for multi-step tasks
+
+Use the `TodoWrite` tool to plan and track work whenever a task has **3 or more distinct
+steps**. Update status in real time: mark `in_progress` before starting a step, `completed`
+immediately after verifying it on disk.
+
+```
+# ✅ correct flow
+TodoWrite([{content: "Create package.json", status: "in_progress"}, ...])
+→ run: npm init -y
+→ verify: ls package.json
+TodoWrite([{content: "Create package.json", status: "completed"}, ...])
+
+# ❌ wrong — marking complete before verifying, or not using TodoWrite at all
+```
+
+Keep exactly one item `in_progress` at a time. Add follow-up todos if you discover new
+work mid-task.
