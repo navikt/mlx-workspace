@@ -3,32 +3,30 @@ name               = "GLM-4.7-Flash MoE 4bit"
 released           = "2026-01"
 status             = "testing"
 spec_source        = "research"
-notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB headroom OK; 65k tokens≈23GB total → 3GB headroom (risky). Context declared at 64k (risky boundary — drop to 32k if Metal OOM). 128k not reachable: 16GB footprint + 128k KV cache exceeds 26GB wired cap. Strong coding, tool use, and long-context retention.
+notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB headroom OK. 128k not reachable: 16GB footprint + 128k KV cache exceeds 26GB wired cap.
+
+⚠ OOM at 64k context (2026-06-19): Metal crash (kIOGPUCommandBufferCallbackErrorOutOfMemory) during prefill
+  of a ~9k token prompt while session was at ~27k tokens (41% of 65536). Activation spike during prefill
+  exceeded the 26GB wired cap. Reduced to 48k + 6GB KV cache. Drop to 32k if OOM recurs at 48k.
 
 Session observations (2026-06-19):
 - Promising initial results — tool calling worked, read files, made a plan
 - Repetition degeneration loop triggered: model repeated 'node:util: JSON.stringify (9;' infinitely
-- Root cause: mlx_lm.server default temp=0.0 (greedy decoding). With greedy sampling, once a
-  high-probability token loop starts there is no escape. This is a server-wide setting, not model-
-  specific — all models were affected. Fixed by setting MLX_TEMP=0.6 (server default).
-- Note: repetition_penalty is not a CLI flag on mlx_lm.server; temperature is the correct lever.
+  Root cause: mlx_lm.server default temp=0.0 (greedy decoding). Fixed: MLX_TEMP=0.7.
 - Shell builtin confusion: model prefixed 'cd' with 'rtk' (e.g. 'rtk cd /path && rtk npm init').
   rtk wraps commands in a subprocess — 'cd' changes are lost on subprocess exit. npm init ran in
-  the wrong directory. Model then invented a non-existent '--workdir' flag for npm to compensate,
-  spent 3m+ in thought, and abandoned the task. Fixed in AGENTS.md + rtk.ts plugin (rtk-ai/rtk#2508).
-- Thinking mode triggers on trivial decisions: after seeing an empty src/ dir, model spent 3m 35s
-  in <think>...</think> before stopping. GLM-4.7-Flash has dedicated thinking tokens (<think>,
-  </think>, /nothink). Fixed: MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}' suppresses
-  thinking blocks for agentic use via the /nothink token injected by apply_chat_template."""
+  the wrong directory. Model then invented a non-existent '--workdir' flag. Fixed in AGENTS.md + rtk.ts.
+- Thinking mode triggers on trivial decisions: after seeing an empty src/ dir, spent 3m 35s in
+  <think>...</think>. Fixed: MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'."""
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/GLM-4.7-Flash-4bit"
-MLX_CACHE_BYTES            = "7516192768"   # 7GB — 26GB cap − 16GB model − 3GB activation headroom (tight at 64k)
+MLX_CACHE_BYTES            = "6442450944"   # 6GB — reduced from 7GB after 64k OOM; at 48k context this is ~4.5GB KV + 1.5GB headroom
 MLX_CACHE_SIZE             = "3"            # tight — 16GB model leaves little room
 MLX_MAX_TOKENS             = "8192"
-MLX_OPENCODE_CONTEXT       = "65536"        # 64k — measured: 65k≈23GB wired, 3GB headroom (risky; drop to 32k if OOM)
+MLX_OPENCODE_CONTEXT       = "49152"        # 48k — OOM observed at 64k (crash at ~27k tokens during prefill spike; 64k exceeded 26GB wired cap). Drop further to 32k if OOM recurs.
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — large model even with sparse activation
 # Official GLM-4.7-Flash temperature for SWE-Bench/Terminal Bench (agentic coding): temp=0.7, top_p=1.0
