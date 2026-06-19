@@ -171,6 +171,19 @@ GLM-4.7-Flash **does** support turn-level thinking control (re-enable per-reques
 
 A single 32GB M1 Max can only load one large model at a time. However, a **task-routing** approach can combine models without exceeding VRAM:
 
+### Why MoE wins on constrained hardware
+
+The Qwen3.5-27B-Opus-Distilled OOM (2026-06-19) makes this concrete:
+
+| Model | Total params | Active per token | VRAM | Prefill t/s | Result |
+|---|---|---|---|---|---|
+| Qwen3.5-27B-Opus | **27B dense** | 27B | 14 GB | 68–71 t/s | 💥 OOM at 6–17k tokens |
+| Qwen3.6-35B-A3B | 35B MoE | **~3B** | 21 GB | 350–386 t/s | ✅ 96k context, stable |
+
+Dense 27B loads all 27 billion parameters into every forward pass. During prefill, activation tensors for the full input sequence must coexist with model weights — the spike pushes past the 26 GB GPU wired cap even at moderate context lengths. **No config change fixes this.** MoE routes each token through only 8 of 256 experts (~3B active params), keeping activation memory low regardless of model size. Qwen3.6-35B-A3B is simultaneously 3× larger by total params, 5× faster at prefill, and uses less peak VRAM during inference than the 27B dense model.
+
+**Key insight:** On 32 GB Apple Silicon, prefer MoE over dense for any model above ~14B total parameters.
+
 ### The constraint
 
 | Scenario | VRAM used | Feasible? |
@@ -636,7 +649,9 @@ After applying the template patch, the model generates fake YAML listing invente
 - Tightest context budget of the tested models: dense 27B leaves only 6GB for KV cache → ~32–40k practical tokens
 - Apache 2.0
 
-**Verdict:** 💥 **OOM** — crashed with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` during prefill of a 17k-token prompt (2026-06-19). Dense 27B activation spike during prefill exceeds the 26 GB GPU wired cap (14 GB model + peak prefill activations > 26 GB). Also exhibited 3× tool call JSONDecodeError in the first 2 turns — Opus distillation appears to have degraded tool-use reliability. Not viable on 32 GB M1 Max.
+**Verdict:** 💥 **OOM** — crashed twice with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` (2026-06-19). First crash at 17k-token prefill; second crash at 6k/10k-token prefill in the same session (cache fix confirmed working — 5 slots, 4.40 GB — but didn't prevent the crash). Also exhibited 3× tool call JSONDecodeError in first 2 turns — Opus distillation appears to have degraded tool-use reliability. **Measured prefill: ~68–71 t/s** (compared to ~350–386 t/s for Qwen3.6-35B-A3B). Not viable on 32 GB M1 Max.
+
+**Root cause:** Dense 27B means every forward pass activates all 27B parameters. During prefill, activation tensors for the full sequence length must coexist with the model weights: 14 GB model + 4.4 GB KV cache + prefill activation spike > 26 GB GPU wired cap. No configuration tuning can fix this — it is a fundamental architecture constraint.
 
 ---
 
