@@ -95,7 +95,7 @@ For opencode/aider workflows where the tool sends the full conversation with eve
 - **mlx-lm models**: The KV cache stores prior prefill. After the first message, subsequent tool calls only pay for new tokens (the diff from the cache). A 30k-token session costs ~30k prefill the first time, then ~500–2k per tool call.
 - **mlx-vlm models**: Cache is cleared after every response. Every tool call re-prefills the entire conversation. A 30k-token session costs ~30k prefill **on every single tool call** — at 200 t/s that's 150 seconds before generation can start.
 
-**Recommendation:** Use mlx-vlm models for short, focused tasks. For long multi-file agentic sessions, stick to mlx-lm models (Qwen3.5, GLM-4.7, Ministral, etc.).
+**Recommendation:** Use mlx-vlm models for short, focused tasks. For long multi-file agentic sessions, stick to mlx-lm models (Qwen3.5, GLM-4.7, etc.).
 
 ---
 
@@ -241,7 +241,7 @@ Compare to qwen3.5-9b at similar context: **~5–10 seconds/turn** (persistent K
 
 ---
 
-### `mlx-community/Ministral-3-14B-Instruct-4bit` 🔬 testing
+### `mlx-community/Ministral-3-14B-Instruct-2512-4bit` ❌ broken
 
 | | |
 |---|---|
@@ -259,7 +259,27 @@ Compare to qwen3.5-9b at similar context: **~5–10 seconds/turn** (persistent K
 - Reported highly decisive agent — prefers to read logs and edit multiple files directly
 - Dense architecture despite the "Ministral" name (Mistral's edge-optimized line)
 
-**Verdict:** Untested locally. High potential for multi-file agentic editing. Priority for evaluation.
+**KV cache — excellent** (mlx-lm): cold prefill ~150 t/s; subsequent turns only 15–22 tokens (near-instant, 2.83 GB cache after turn 1).
+
+**Fatal issue 1 — Mistral role alternation bug:**
+The model's `chat_template.jinja` raises an exception when conversation roles don't follow strict `user→assistant→user→assistant` alternation. Root cause: the template's parity counter doesn't reset after tool-call rounds, so any `user` message following a tool round fires the exception. mlx-lm returns HTTP 404 for any exception during generation.
+
+- Patched in `chat_templates/ministral-3-14b-patched.jinja` — removes the `raise_exception` call (one line). `ns.index` is provably unused after the check block so this is safe.
+- `--use-default-chat-template` is a no-op for this model (only activates when no template exists).
+
+**Fatal issue 2 — hallucinated garbage output (even with patch):**
+After applying the template patch, the model generates fake YAML listing invented chat template file paths instead of responding to prompts. Likely cause: the template's default system message contains a literal `{today}` string (not a Jinja2 `{{ today }}` expression), which renders unexpanded and confuses the model into meta-level generation. Interaction with AGENTS.md may compound this.
+
+**Verdict:** ❌ Broken for opencode agentic use as of Jun 2026. Both issues are fundamental — not config-tunable. The `chat_templates/` infrastructure created here is reusable for other Mistral-family models.
+
+**Measured benchmarks (M1 Max 32GB, 2026-06-18):**
+
+| Metric | Value |
+|---|---|
+| Prefill — cold (17.3k tokens) | ~150 t/s |
+| Prefill — cached (turn 2) | 15 tokens (~0.3s) |
+| KV cache after turn 1 | 2.83 GB |
+| Turns before failure | 2 |
 
 ---
 
