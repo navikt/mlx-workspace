@@ -6,6 +6,33 @@ Switch models with `mise run model-use` — see `profiles/` for all available co
 > **Note on sizes:** *Disk size* (from `mise run models-list`) and *VRAM footprint* are different.
 > Disk includes tokenizer, configs, and bfloat16 safetensors. VRAM is the actual loaded inference footprint.
 
+## Table of Contents
+
+- [How to switch models](#how-to-switch-models)
+- [Quick comparison](#quick-comparison)
+- [Server runtime: mlx-lm vs mlx-vlm](#server-runtime-mlx-lm-vs-mlx-vlm)
+- [Thinking mode (CoT reasoning tokens)](#thinking-mode-cot-reasoning-tokens)
+- [Multi-model local strategy](#multi-model-local-strategy)
+- [Dynamic model switching (no server restart)](#dynamic-model-switching-no-server-restart)
+- [opencode declared context limits](#opencode-declared-context-limits)
+- [Benchmark guide](#benchmark-guide)
+- [Model evaluations](#benchmark-guide)
+  - [Qwen3.5-9B ⭐ recommended](#mlx-communityqwen35-9b-mlx-4bit--recommended)
+  - [Qwen3.6-35B-A3B ✅ recommended](#mlx-communityqwen36-35b-a3b-4bit--recommended)
+  - [Gemma-4-12B 🐢 slow](#mlx-communitygemma-4-12b-it-4bit--too-slow)
+  - [Ministral-3-14B 🔴 broken](#mlx-communityministral-3-14b-instruct-2512-4bit--broken)
+  - [GLM-4.7-Flash ❌ failed](#mlx-communityglm-47-flash-4bit--not-viable)
+  - [Qwen3-Coder-30B-A3B 🐢 slow](#mlx-communityqwen3-coder-30b-a3b-instruct-4bit--too-slow)
+  - [Qwen2.5-Coder-32B 💥 OOM](#mlx-communityqwen25-coder-32b-instruct-4bit--oom----inconclusive)
+  - [Qwen2.5-Coder-14B ⬛ superseded](#mlx-communityqwen25-coder-14b-instruct-4bit--superseded)
+  - [Qwen2.5-Coder-7B ⬛ skipped](#mlx-communityqwen25-coder-7b-instruct-4bit--skipped)
+  - [Granite-4.1-8B 🔲 untested](#mlx-communitygranite-41-8b-instruct-4bit--untested)
+  - [GLM-4.6V-Flash-9B 🔲 untested](#mlx-communityglm-46v-flash-9b-4bit--untested)
+  - [Qwen3.5-27B-Opus-Distilled 🔲 untested](#mlx-communityqwen35-27b-claude-46-opus-distilled-mlx-4bit--untested)
+  - [Gemma-4-26B-A4B 🔲 untested](#mlx-communitygemma-4-26b-a4b-it-4bit--untested)
+- [Testing checklist](#testing-checklist)
+
+
 ## How to switch models
 
 ```bash
