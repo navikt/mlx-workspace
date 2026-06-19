@@ -17,7 +17,13 @@ cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
 cache_size    = os.environ.get("MLX_CACHE_SIZE", "")
 server_type   = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
 chat_template = os.environ.get("MLX_CHAT_TEMPLATE", "").strip()
-# temp=0.0 (greedy) causes repetition degeneration loops; 0.6 is the standard remedy
+# Sampling temperature. mlx_lm.server defaults to 0.0 (greedy), which causes
+# infinite repetition loops — once a high-probability token pattern starts, greedy
+# decoding reinforces it and the model cannot escape. 0.6 is the standard coding
+# trade-off: low enough to keep outputs deterministic and structured, high enough
+# to break degenerate loops. Observed symptom at temp=0.0: 'node:util: JSON.stringify
+# (9;' repeated endlessly during GLM-4.7-Flash evaluation (2026-06-19).
+# Override per-model via MLX_TEMP in [params] if a model needs different behaviour.
 temp          = os.environ.get("MLX_TEMP", "0.6").strip()
 
 # Resolve chat_template relative to workspace root if it's a relative path
