@@ -14,6 +14,10 @@ Shell builtins (`cd`, `export`, `source`, `alias`, etc.) **must not** be prefixe
 `rtk`. They run in the current shell process; wrapping them in a subprocess (what `rtk`
 does) means the state change (e.g. directory change) is lost when the subprocess exits.
 
+The opencode plugin (rtk.ts) automatically strips an erroneous `rtk` prefix from builtins
+as a workaround for [rtk-ai/rtk#2508](https://github.com/rtk-ai/rtk/issues/2508), but it
+is still best to write builtins without the prefix:
+
 ```bash
 # ✅ correct — cd stays in the same shell
 cd /path/to/project && npm init -y
