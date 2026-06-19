@@ -287,19 +287,20 @@ The server will unload/load automatically when opencode switches models. Switch 
 
 The values are set **lower than native** so that compaction fires before the session grows unmanageable. All values live in `profiles/<key>.toml` as `MLX_OPENCODE_CONTEXT`.
 
-| Profile | Native context | Declared (MLX_OPENCODE_CONTEXT) | Auto-compact threshold |
-|---|---|---|---|
-| qwen3.5-9b | **262k** | 128k | ~127k tokens |
-| granite-4.1-8b | 128k | 128k | ~127k tokens |
-| glm-4.6v-flash-9b | 128k | 128k | ~127k tokens |
-| gemma-4-12b | **256k** | 64k¹ | ~60k tokens |
-| ministral-3-14b | **256k** | 64k¹ | ~60k tokens |
-| gemma-4-26b-a4b | **256k** | 64k | ~60k tokens (shared KV cache may allow more) |
-| qwen3.5-27b-opus-distilled | **262k** | 32k | ~28k tokens (tight 6GB KV budget) |
-| glm-4.7-flash | 128–200k | 48k⁴ | ~40k tokens (OOM at 64k during prefill spike — see footnote ⁴) |
-| qwen2.5-14b | 32k | 64k² | ~60k tokens |
-| qwen3-30b-a3b | **256k** | 64k | ~60k tokens (tight RAM) |
-| qwen2.5-32b | 32k | 16k | ~12k tokens (critically low RAM) |
+| Profile | Native context | Declared (MLX_OPENCODE_CONTEXT) | Auto-compact threshold | KV/token (8-bit) |
+|---|---|---|---|---|
+| qwen3.5-9b | **262k** | 128k | ~127k tokens | 64 KB |
+| granite-4.1-8b | 128k | 128k | ~127k tokens | — |
+| glm-4.6v-flash-9b | 128k | 128k | ~127k tokens | — |
+| gemma-4-12b | **256k** | 64k¹ | ~60k tokens | 180 KB (hybrid window) |
+| ministral-3-14b | **256k** | 64k¹ | ~60k tokens | 100 KB |
+| gemma-4-26b-a4b | **256k** | 64k | ~60k tokens (shared KV cache may allow more) | — |
+| qwen3.5-27b-opus-distilled | **262k** | 32k | ~28k tokens (tight 6GB KV budget) | — |
+| glm-4.7-flash | 128–200k | 48k⁴ | ~40k tokens (OOM at 64k during prefill spike — see footnote ⁴) | 187 KB (no GQA!) |
+| qwen2.5-14b | 32k | 64k² | ~60k tokens | 96 KB |
+| qwen3-30b-a3b | **256k** | 64k | ~60k tokens (tight RAM) | 24 KB |
+| qwen2.5-32b | 32k | 16k | ~12k tokens (critically low RAM) | 128 KB |
+| qwen3.6-35b-a3b | **262k** | 96k | ~90k tokens | **20 KB** (measured 18.3 KB) |
 
 ¹ Declared below native: 14B+ models have larger KV footprint per token; 64k is safe for the cache budget.
 ² Declared context can exceed native — the KV cache bytes cap is the real safety guard.
@@ -400,6 +401,7 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Encoder-free multimodal: vision/audio fed directly into LLM backbone — lower latency than encoder-based models
 - Reported strong function-calling / JSON schema adherence
 - **Requires `mlx-vlm` server** (`model_type: gemma4_unified`) — handled automatically by `mise run server`
+- **Hybrid attention: `sliding_window=1024`** — most layers use local attention (1024-token window), only some layers use full global attention. Effectively limits attended context per layer despite 256k native ctx. Also means KV per token is high (~360 KB/token f16 / 180 KB 8-bit) — at 64k tokens that's ~11 GB KV alone.
 
 **⚠️ mlx-vlm caching — measured impact:**
 
@@ -648,7 +650,8 @@ After applying the template patch, the model generates fake YAML listing invente
 | **Context headroom (32GB)** | ~9 GB (6GB KV cache at 48k) |
 
 **Traits:**
-- Zhipu/Z.AI GLM-4.7-Flash (2026): MoE with 64 experts, 4 routed per token + 1 shared
+- Zhipu/Z.AI GLM-4.7-Flash (2026): MoE with 64 routed experts + 1 shared, 4 active per token
+- **Full MHA: 20 KV heads = 20 attention heads (no GQA)** — KV ≈ 374 KB/token f16 (187 KB 8-bit). At 48k context that's ~8.5 GB KV alone — leaves almost nothing for activations, explains OOM inevitability
 - Supports thinking mode (`<think>`/`</think>`/`/nothink`) — must be disabled for agentic use
 - τ²-Bench: 79.5% agentic score (but with structured scaffolding + greedy decoding — not representative of opencode use)
 
