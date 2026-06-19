@@ -340,7 +340,7 @@ mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
 
 ---
 
-### `mlx-community/Qwen3.5-9B-MLX-4bit` ⭐ current
+### `mlx-community/Qwen3.5-9B-MLX-4bit` ⭐ recommended
 
 | | |
 |---|---|
@@ -380,7 +380,7 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Decode t/s at 8k / 32k / 64k context (comfortable range)
 - Time to first token (TTFT) for typical opencode requests
 - Tool call JSON accuracy rate (% valid first attempt)
-- Max stable context before OOM (currently estimated ~100k)
+- Max stable context before OOM (estimated ~100k based on KV measurements)
 
 ---
 
@@ -471,7 +471,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/granite-4.1-8b-instruct-4bit` 🔬 testing
+### `mlx-community/granite-4.1-8b-instruct-4bit` 🔲 untested
 
 | | |
 |---|---|
@@ -494,7 +494,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/GLM-4.6V-Flash-9B-4bit` 🔬 testing
+### `mlx-community/GLM-4.6V-Flash-9B-4bit` 🔲 untested
 
 | | |
 |---|---|
@@ -592,7 +592,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 🔬 testing
+### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 🔲 untested
 
 | | |
 |---|---|
@@ -614,7 +614,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/gemma-4-26b-a4b-it-4bit` 🔬 testing
+### `mlx-community/gemma-4-26b-a4b-it-4bit` 🔲 untested
 
 | | |
 |---|---|
@@ -666,31 +666,6 @@ After applying the template patch, the model generates fake YAML listing invente
 | Generated code with typos | `location3`, `lon3` in 411-line output | ❌ Model quality issue |
 
 **Verdict:** Not viable as daily driver for agentic coding. Multiple infrastructure failures overcome, but fundamental tool call loop and code quality issues cannot be fixed via config. The τ²-Bench score does not translate to reliable opencode use.
-
----
-
-### `mlx-community/Qwen3.6-35B-A3B-4bit` 🔲 untested
-
-| | |
-|---|---|
-| **Architecture** | MoE (30B total / ~3–3.6B active per token) |
-| **Active parameters** | ~3B per token |
-| **VRAM footprint** | ~16 GB |
-| **Native context** | 128–200k tokens |
-| **Practical context (32GB Mac)** | ~32k tokens (measured: 32k total=20GB, 65k total=23GB which is risky) |
-| **Context headroom (32GB)** | ~9 GB |
-
-**Traits:**
-- Zhipu/Z.AI GLM-4.7-Flash (2026): updated successor to GLM-4.6V-Flash
-- MoE with 64 experts, 4 routed per token + 1 shared — ~10x throughput vs dense 30B
-- Strong coding, tool use, and agentic workflows; different training paradigm from Qwen MoE
-- Measured VRAM scaling: 4k≈17GB, 32k≈20GB, 65k≈23GB, 131k≈30GB
-- 65k context leaves only 3GB for activations on 26GB cap — unsafe. 32k is the safe ceiling.
-- Tighter context than GLM-4.6V-Flash-9B despite being a "Flash" model — simply because it's ~3× larger
-
-**Verdict:** Untested locally. Alternative to Qwen3-30B-A3B MoE if tool calling proved inconsistent. Worth testing given different training origin.
-
-> ⚠️ **Note:** this profile section is the pre-evaluation stub. See `mlx-community/GLM-4.7-Flash-4bit ❌ not viable` section above for actual evaluation results.
 
 ---
 
