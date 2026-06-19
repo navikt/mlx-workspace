@@ -8,6 +8,10 @@ notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.
 ⚠ OOM at 64k context (2026-06-19): Metal crash (kIOGPUCommandBufferCallbackErrorOutOfMemory) during prefill
   of a ~9k token prompt while session was at ~27k tokens (41% of 65536). Activation spike during prefill
   exceeded the 26GB wired cap. Reduced to 48k + 6GB KV cache. Drop to 32k if OOM recurs at 48k.
+⚠ Tool call loop (2026-06-19): model stuck repeatedly calling rtk ls on the same directory without
+  advancing. Produced 411-line index.js (with variable name typos: `location3`, `lon3`) then entered
+  a `ls` loop with no forward progress. This is a fundamental agentic reliability issue — not fixable
+  via sampling/template config. Overall evaluation: multiple failure modes in one session.
 
 Session observations (2026-06-19):
 - Promising initial results — tool calling worked, read files, made a plan
