@@ -3,7 +3,7 @@ name               = "GLM-4.7-Flash MoE 4bit"
 released           = "2026-01"
 status             = "testing"
 spec_source        = "research"
-notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB activation headroom OK; 65k tokens≈23GB total → only 3GB activation, risky. Context declared at 32k (safe). Strong coding, tool use, and long-context retention. Different training paradigm from Qwen MoE — may handle OpenCode tool calling better if Qwen MoE caused issues.
+notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB headroom OK; 65k tokens≈23GB total → 3GB headroom (risky). Context declared at 64k (risky boundary — drop to 32k if Metal OOM). 128k not reachable: 16GB footprint + 128k KV cache exceeds 26GB wired cap. Strong coding, tool use, and long-context retention.
 
 Session observations (2026-06-19):
 - Promising initial results — tool calling worked, read files, made a plan
@@ -25,10 +25,10 @@ gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/GLM-4.7-Flash-4bit"
-MLX_CACHE_BYTES            = "6442450944"   # 6GB — 26GB cap − 16GB model − 4GB activation (3B active)
+MLX_CACHE_BYTES            = "7516192768"   # 7GB — 26GB cap − 16GB model − 3GB activation headroom (tight at 64k)
 MLX_CACHE_SIZE             = "3"            # tight — 16GB model leaves little room
 MLX_MAX_TOKENS             = "8192"
-MLX_OPENCODE_CONTEXT       = "32768"        # 32k — measured: 32k uses 20GB total, leaving 6GB for activation (safe)
+MLX_OPENCODE_CONTEXT       = "65536"        # 64k — measured: 65k≈23GB wired, 3GB headroom (risky; drop to 32k if OOM)
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — large model even with sparse activation
 # Disable thinking mode: GLM-4.7-Flash has <think>/</think>/nothink special tokens.

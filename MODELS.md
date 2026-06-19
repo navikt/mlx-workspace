@@ -296,13 +296,14 @@ The values are set **lower than native** so that compaction fires before the ses
 | ministral-3-14b | **256k** | 64k¹ | ~60k tokens |
 | gemma-4-26b-a4b | **256k** | 64k | ~60k tokens (shared KV cache may allow more) |
 | qwen3.5-27b-opus-distilled | **262k** | 32k | ~28k tokens (tight 6GB KV budget) |
-| glm-4.7-flash | 128–200k | 32k | ~28k tokens (measured: 32k=20GB total, safe) |
+| glm-4.7-flash | 128–200k | 64k⁴ | ~60k tokens (measured: 65k≈23GB wired, 3GB headroom — risky) |
 | qwen2.5-14b | 32k | 64k² | ~60k tokens |
 | qwen3-30b-a3b | **256k** | 64k | ~60k tokens (tight RAM) |
 | qwen2.5-32b | 32k | 16k | ~12k tokens (critically low RAM) |
 
 ¹ Declared below native: 14B+ models have larger KV footprint per token; 64k is safe for the cache budget.
 ² Declared context can exceed native — the KV cache bytes cap is the real safety guard.
+⁴ GLM-4.7-Flash 64k is at the measured VRAM boundary (65k≈23GB wired, 3GB below 26GB cap). Drop to 32k if Metal OOM occurs. 128k is not reachable — the 16GB model footprint leaves insufficient room.
 
 > **GPU memory budget formula:**
 > ```
