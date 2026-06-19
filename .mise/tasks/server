@@ -23,6 +23,7 @@ OPTIONAL_DEFAULTS = {
     "MLX_SERVER_TYPE":       "mlx-lm",
     "MLX_CHAT_TEMPLATE":     "",
     "MLX_TEMP":              "0.6",
+    "MLX_TOP_P":             "1.0",
     "MLX_CHAT_TEMPLATE_ARGS": "",
 }
 
@@ -63,7 +64,9 @@ chat_template_args = os.environ.get("MLX_CHAT_TEMPLATE_ARGS", "").strip()
 # to break degenerate loops. Observed symptom at temp=0.0: 'node:util: JSON.stringify
 # (9;' repeated endlessly during GLM-4.7-Flash evaluation (2026-06-19).
 # Override per-model via MLX_TEMP in [params] if a model needs different behaviour.
-temp          = os.environ.get("MLX_TEMP", "0.6").strip()
+temp  = os.environ.get("MLX_TEMP", "0.6").strip()
+# Nucleus sampling top-p. Override via MLX_TOP_P in [params] (default 1.0 = full distribution).
+top_p = os.environ.get("MLX_TOP_P", "1.0").strip()
 
 # Resolve chat_template relative to workspace root if it's a relative path
 if chat_template and not os.path.isabs(chat_template):
@@ -87,6 +90,7 @@ else:
     print(f"  model:       {model}")
     print(f"  max-tokens:  {max_tokens}")
     print(f"  temp:        {temp}")
+    print(f"  top-p:       {top_p}")
     print(f"  cache-bytes: {cache_bytes}")
     print(f"  cache-size:  {cache_size}")
     if chat_template:
@@ -100,6 +104,7 @@ else:
         "--port", "8080",
         "--max-tokens", max_tokens,
         "--temp", temp,
+        "--top-p", top_p,
     ]
     if cache_size:
         cmd += ["--prompt-cache-size", cache_size]

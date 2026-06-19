@@ -93,7 +93,7 @@ def main():
         subprocess.run(["mise", "set", "-E", "local", f"{var}={val}"], check=True)
     # Always explicitly write optional vars with defaults so switching away from a profile
     # that set them (e.g. gemma → qwen) resets them correctly.
-    OPTIONAL_DEFAULTS = {"MLX_SERVER_TYPE": "mlx-lm", "MLX_CHAT_TEMPLATE": "", "MLX_TEMP": "0.6", "MLX_CHAT_TEMPLATE_ARGS": ""}
+    OPTIONAL_DEFAULTS = {"MLX_SERVER_TYPE": "mlx-lm", "MLX_CHAT_TEMPLATE": "", "MLX_TEMP": "0.6", "MLX_TOP_P": "1.0", "MLX_CHAT_TEMPLATE_ARGS": ""}
     for var, default in OPTIONAL_DEFAULTS.items():
         if var not in params:
             subprocess.run(["mise", "set", "-E", "local", f"{var}={default}"], check=True)

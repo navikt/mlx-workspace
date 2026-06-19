@@ -1,35 +1,46 @@
 # Agent Instructions
 
-## Terminal commands — rtk is active
+## rtk — command output compression
 
-**`rtk` rewrites your shell commands automatically** via the opencode plugin at
-`~/.config/opencode/plugins/rtk.ts`. You do not need to manually prefix commands — the
-plugin intercepts every bash tool call and runs `rtk rewrite` before execution.
+The opencode plugin at `~/.config/opencode/plugins/rtk.ts` runs `rtk rewrite`
+automatically on every bash call, compressing output by 60–90%. No manual prefix needed.
 
-This compresses command output by 60–90% before it enters your context window.
+### IMPORTANT: shell builtins — never prefix with rtk
 
-### Shell builtins — never prefix with rtk
-
-Shell builtins (`cd`, `export`, `source`, `alias`, etc.) **must not** be prefixed with
-`rtk`. They run in the current shell process; wrapping them in a subprocess (what `rtk`
-does) means the state change (e.g. directory change) is lost when the subprocess exits.
-
-The opencode plugin (rtk.ts) automatically strips an erroneous `rtk` prefix from builtins
-as a workaround for [rtk-ai/rtk#2508](https://github.com/rtk-ai/rtk/issues/2508), but it
-is still best to write builtins without the prefix:
+`cd`, `export`, `source`, `alias`, `pushd`, `popd`, `unset` are shell builtins. They must
+run in the current shell process. If wrapped in a subprocess (`rtk` does this), the state
+change is lost when the subprocess exits. The plugin strips an erroneous `rtk` prefix as a
+workaround ([rtk-ai/rtk#2508](https://github.com/rtk-ai/rtk/issues/2508)), but always
+write builtins without the prefix:
 
 ```bash
 # ✅ correct — cd stays in the same shell
-cd /path/to/project && npm init -y
+cd /path && npm init -y
 
-# ❌ wrong — rtk launches a subprocess; cd change is lost
-rtk cd /path/to/project && npm init -y
+# ❌ wrong — cd change is lost, next command runs in wrong directory
+rtk cd /path && npm init -y
 ```
 
-### Meta commands — run these directly
+### rtk meta commands
 
 ```bash
 rtk gain            # token savings dashboard
 rtk gain --history  # per-command savings history
-rtk discover        # find any missed rewrite opportunities
+rtk discover        # find missed rewrite opportunities
 ```
+
+## Context economy — keep it tight
+
+Context is limited. Every unnecessary token slows generation.
+
+- **grep/glob before read** — narrow to relevant lines first, then open the file
+- **Line ranges** — read `path:start_line-end_line`, not whole files, when you know the area
+- **Sample large files** — `head -40 file` before deciding whether to read fully
+- **Never repeat file contents** in your response — the tool result is already in context
+
+## Task discipline
+
+- **One phase at a time** — verify artifacts on disk before starting the next phase
+- **Verify writes** — after creating a file, confirm it exists with `ls` before proceeding
+- **Check `--help` before inventing flags** — if an option doesn't work, read the docs; do
+  not try flag variations or invented options (e.g. `npm init --workdir` does not exist)

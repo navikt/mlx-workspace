@@ -31,6 +31,10 @@ MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k — measured: 65k≈23GB wired, 3GB headroom (risky; drop to 32k if OOM)
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — large model even with sparse activation
+# Official GLM-4.7-Flash temperature for SWE-Bench/Terminal Bench (agentic coding): temp=0.7, top_p=1.0
+# (source: zai-org/GLM-4.7-Flash model card). Server default is 0.6; GLM needs 0.7 for best results.
+MLX_TEMP                   = "0.7"
+MLX_TOP_P                  = "1.0"
 # Disable thinking mode: GLM-4.7-Flash has <think>/</think>/nothink special tokens.
 # With thinking enabled, the model generates multi-minute reasoning traces for trivial
 # decisions (e.g. "src/ is empty, what do I do?"). For agentic coding, direct responses
