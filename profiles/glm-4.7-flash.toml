@@ -11,7 +11,12 @@ Session observations (2026-06-19):
 - Root cause: mlx_lm.server default temp=0.0 (greedy decoding). With greedy sampling, once a
   high-probability token loop starts there is no escape. This is a server-wide setting, not model-
   specific — all models were affected. Fixed by setting MLX_TEMP=0.6 (server default).
-- Note: repetition_penalty is not a CLI flag on mlx_lm.server; temperature is the correct lever."""
+- Note: repetition_penalty is not a CLI flag on mlx_lm.server; temperature is the correct lever.
+- Shell builtin confusion: model prefixed 'cd' with 'rtk' (e.g. 'rtk cd /path && rtk npm init').
+  rtk wraps commands in a subprocess — 'cd' changes are lost on subprocess exit. npm init ran in
+  the wrong directory. Model then invented a non-existent '--workdir' flag for npm to compensate,
+  spent 3m+ in thought, and abandoned the task. Fixed in AGENTS.md: explicit warning not to prefix
+  shell builtins with rtk."""
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26
 

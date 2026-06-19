@@ -8,6 +8,20 @@ plugin intercepts every bash tool call and runs `rtk rewrite` before execution.
 
 This compresses command output by 60–90% before it enters your context window.
 
+### Shell builtins — never prefix with rtk
+
+Shell builtins (`cd`, `export`, `source`, `alias`, etc.) **must not** be prefixed with
+`rtk`. They run in the current shell process; wrapping them in a subprocess (what `rtk`
+does) means the state change (e.g. directory change) is lost when the subprocess exits.
+
+```bash
+# ✅ correct — cd stays in the same shell
+cd /path/to/project && npm init -y
+
+# ❌ wrong — rtk launches a subprocess; cd change is lost
+rtk cd /path/to/project && npm init -y
+```
+
 ### Meta commands — run these directly
 
 ```bash
