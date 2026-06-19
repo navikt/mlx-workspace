@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+import { parseArgs } from '../src/parser.js';
+import { geocode } from '../src/geocode.js';
+import { fetchWeather } from '../src/weather.js';
+import { formatWeather } from '../src/formatter.js';
+
+async function main() {
+  // Parse command-line arguments
+  const args = process.argv.slice(2);
+  const parsed = parseArgs(args);
+
+  let lat, lon, locationName;
+
+  if (parsed.type === 'error') {
+    console.error(`Error: ${parsed.error}`);
+    process.exit(1);
+  } else if (parsed.type === 'coordinates') {
+    lat = parsed.lat;
+    lon = parsed.lon;
+    locationName = `${lat}, ${lon}`;
+  } else if (parsed.type === 'place') {
+    // Geocode the place name
+    const geoResult = await geocode(parsed.name);
+    
+    if (!geoResult.success) {
+      console.error(`Error: ${geoResult.error}`);
+      process.exit(1);
+    }
+    
+    lat = geoResult.lat;
+    lon = geoResult.lon;
+    locationName = geoResult.name;
+  }
+
+  // Fetch weather data
+  const weatherResult = await fetchWeather(lat, lon);
+  
+  if (!weatherResult.success) {
+    console.error(`Error: ${weatherResult.error}`);
+    process.exit(1);
+  }
+
+  // Format and display output
+  const output = formatWeather({
+    temperature: weatherResult.temperature,
+    humidity: weatherResult.humidity,
+    windSpeed: weatherResult.windSpeed,
+    pressure: weatherResult.pressure,
+    uvIndex: weatherResult.uvIndex,
+    cloudAreaFraction: weatherResult.cloudAreaFraction
+  }, locationName);
+
+  console.log(output);
+  process.exit(0);
+}
+
+main().catch((error) => {
+  console.error(`Unexpected error: ${error.message}`);
+  process.exit(1);
+});

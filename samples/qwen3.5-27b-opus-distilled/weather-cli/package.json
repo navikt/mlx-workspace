@@ -1,0 +1,24 @@
+{
+  "name": "weather-cli",
+  "version": "1.0.0",
+  "description": "Norwegian weather CLI using Met.no and Geonorge APIs",
+  "type": "module",
+  "bin": {
+    "weather": "./bin/weather"
+  },
+  "scripts": {
+    "test": "mocha",
+    "weather": "node bin/weather"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "mocha": "^10.0.0",
+    "nock": "^13.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
