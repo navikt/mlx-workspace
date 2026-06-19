@@ -100,7 +100,106 @@ For opencode/aider workflows where the tool sends the full conversation with eve
 
 ---
 
-## opencode declared context limits
+## Thinking mode (CoT reasoning tokens)
+
+Several models in this workspace have built-in chain-of-thought ("thinking") mode — they generate `<think>…</think>` blocks before answering. This is controlled via `MLX_CHAT_TEMPLATE_ARGS` in the profile.
+
+### Models with thinking tokens
+
+| Model | Thinking tokens | Disable mechanism | Profile setting |
+|---|---|---|---|
+| GLM-4.7-Flash | `<think>`, `</think>`, `/nothink` | `</think>` pre-fill (hard switch) | `MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'` |
+| Qwen3 series | `<think>`, `</think>` | `enable_thinking=false` or `/no_think` text token | Same pattern |
+| GLM-4.5 | `/nothink` text token | `enable_thinking=false` → appends `/nothink` to user messages | Same |
+
+> **GLM-4.7-Flash technical detail:** `enable_thinking=false` injects a `</think>` token as the opening of the assistant turn, immediately closing the thinking block. The model never generates thinking content — cost is 1 token. This is distinct from GLM-4.5 which appended `/nothink` to user messages.
+
+### Thinking vs. non-thinking: when to use each
+
+Research summary (sources: arxiv 2412.21187, GLM-4 repo benchmarks, Qwen3 technical report):
+
+| Task type | Thinking helps? | Evidence |
+|---|---|---|
+| Competition math (AIME, MATH-500) | ✅ Strongly | DeepSeek-R1: 79.8% vs. V3: 39.2% on AIME 2024 |
+| Competitive programming (Codeforces) | ✅ Strongly | R1 rating 2029 vs V3 1134 |
+| PhD science (GPQA Diamond) | ✅ Moderately | R1: 71.5% vs V3: 59.1% |
+| **Multi-turn tool calling (BFCL)** | ❌ Harmful | R1: **12.4%** vs V3: **35.8%** — thinking is 3× worse |
+| **Agentic simulation (TAU-Bench)** | ❌ Harmful | R1: 33.0% vs V3: 60.7% — thinking model half as effective |
+| **Agentic coding (opencode/Claude Code)** | ❌ Harmful | Overthinking on trivial decisions; same collapse as BFCL |
+| Instruction following / format | ❌ Slightly worse | Thinking models score ~3pp below on IF-Eval |
+| Simple boilerplate / CRUD | ❌ Not needed | Overhead only — no quality difference |
+
+**Key finding (arxiv 2412.21187 — "Do NOT Think That Much for 2+3=?"):** Thinking models generate exhaustive reasoning for trivial decisions because they have no calibration for task difficulty. In an agentic session, a prompt like *"src/ is empty, what do I do?"* triggers the same extended reasoning loop as a hard math problem — observed as 3m 35s `<think>` block in GLM-4.7-Flash evaluation (2026-06-19).
+
+### Current configuration
+
+All profiles default to `enable_thinking=false` via `OPTIONAL_DEFAULTS` in the `model-use` task. Profiles that need thinking enabled should set `MLX_CHAT_TEMPLATE_ARGS` explicitly.
+
+GLM-4.7-Flash **does** support turn-level thinking control (re-enable per-request via `chat_template_kwargs`), so a future enhancement could selectively enable thinking for heavy architecture turns only.
+
+---
+
+## Multi-model local strategy
+
+A single 32GB M1 Max can only load one large model at a time. However, a **task-routing** approach can combine models without exceeding VRAM:
+
+### The constraint
+
+| Scenario | VRAM used | Feasible? |
+|---|---|---|
+| One large model (16 GB) | ~23–26 GB total | ✅ |
+| Two large models simultaneously | ~32–40 GB | ❌ OOM |
+| One large + one small simultaneously | ~22–28 GB | ⚠️ Tight (depends on sizes) |
+| Sequential switching | Any | ✅ (30–60s reload cost) |
+
+### Practical approaches
+
+#### Option 1: Session-based routing (recommended now)
+Use different model profiles for different *session types*. Switch with `mise run model-use <profile> && mise run server`.
+
+| Session type | Recommended model | Reason |
+|---|---|---|
+| Agentic coding (opencode) | GLM-4.7-Flash or Qwen3.5-9B | Fast MoE + good tool calling |
+| Architecture / design planning | Qwen3.5-27B-Opus-Distilled | Dense 27B — better at deep reasoning |
+| Quick Q&A / chat | Qwen3.5-9B | Fastest, lowest VRAM |
+| Enterprise/IBM stack code | Granite-4.1-8B (gated) | IBM-tuned for enterprise patterns |
+
+Cost: ~30–60s server reload between session types. Acceptable if you work in sessions rather than task-by-task.
+
+#### Option 2: opencode small_model + main_model split
+opencode already has a `small_model` config field — used for title generation and lightweight background tasks. If a small model (e.g. Qwen3.5-9B at ~6 GB) and a large model (GLM-4.7-Flash at ~16 GB) fit together (~22 GB + ~7 GB OS = 29 GB), you can run both simultaneously:
+
+```json
+{
+  "model": "mlx/mlx-community/GLM-4.7-Flash-4bit",
+  "small_model": "mlx/mlx-community/Qwen3.5-9B-4bit"
+}
+```
+
+> ⚠️ **Not yet implemented** — the workspace currently runs a single server on port 8080. Serving two models simultaneously would require a second server instance on a different port and a second opencode provider entry. VRAM headroom would need measurement.
+
+#### Option 3: Turn-level model routing (future)
+GLM-4.7-Flash supports turn-level thinking control already. A step further would be routing individual turns to different models (e.g. a planning step to the 27B model, tool-dispatch steps to the 9B). This requires a proxy layer not currently in the workspace.
+
+#### Option 4: Thinking as the "reasoning mode" toggle
+Rather than switching physical models, use `enable_thinking` as a proxy for "hard vs. easy" tasks within a single model:
+
+- `enable_thinking=false` (default) → fast, direct answers, tool dispatch
+- `enable_thinking=true` → deep reasoning for architecture questions
+
+This is the lowest-friction multi-mode approach and works today with GLM-4.7-Flash.
+
+### Recommended next step
+
+Before investing in multi-model infrastructure, complete the current model evaluation:
+
+1. Finish GLM-4.7-Flash evaluation (thinking disabled)
+2. Test Qwen3.5-27B-Opus-Distilled — if it's significantly better at planning/architecture, session-based routing becomes compelling
+3. Measure whether Qwen3.5-9B + GLM-4.7-Flash fit together in 32 GB (estimated ~29 GB — very tight)
+
+---
+
+
 
 `opencode-init` writes a `limit.context` for each model into `opencode.json`. This is what opencode uses to decide when to compact — without it the model is "unknown" and compaction never auto-triggers.
 
