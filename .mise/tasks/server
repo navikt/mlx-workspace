@@ -17,6 +17,9 @@ cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
 cache_size    = os.environ.get("MLX_CACHE_SIZE", "")
 server_type   = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
 chat_template = os.environ.get("MLX_CHAT_TEMPLATE", "").strip()
+# Extra args forwarded to tokenizer's apply_chat_template as JSON, e.g.:
+#   '{"enable_thinking": false}'  — disables <think> blocks in GLM/Qwen3 thinking models
+chat_template_args = os.environ.get("MLX_CHAT_TEMPLATE_ARGS", "").strip()
 # Sampling temperature. mlx_lm.server defaults to 0.0 (greedy), which causes
 # infinite repetition loops — once a high-probability token pattern starts, greedy
 # decoding reinforces it and the model cannot escape. 0.6 is the standard coding
@@ -52,6 +55,8 @@ else:
     print(f"  cache-size:  {cache_size}")
     if chat_template:
         print(f"  chat-template: {chat_template}")
+    if chat_template_args:
+        print(f"  chat-template-args: {chat_template_args}")
     print()
     cmd = [
         "mlx_lm.server",
@@ -66,5 +71,7 @@ else:
         cmd += ["--prompt-cache-bytes", cache_bytes]
     if chat_template:
         cmd += ["--chat-template", chat_template]
+    if chat_template_args:
+        cmd += ["--chat-template-args", chat_template_args]
 
 os.execvp(cmd[0], cmd)

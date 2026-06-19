@@ -15,8 +15,11 @@ Session observations (2026-06-19):
 - Shell builtin confusion: model prefixed 'cd' with 'rtk' (e.g. 'rtk cd /path && rtk npm init').
   rtk wraps commands in a subprocess — 'cd' changes are lost on subprocess exit. npm init ran in
   the wrong directory. Model then invented a non-existent '--workdir' flag for npm to compensate,
-  spent 3m+ in thought, and abandoned the task. Fixed in AGENTS.md: explicit warning not to prefix
-  shell builtins with rtk."""
+  spent 3m+ in thought, and abandoned the task. Fixed in AGENTS.md + rtk.ts plugin (rtk-ai/rtk#2508).
+- Thinking mode triggers on trivial decisions: after seeing an empty src/ dir, model spent 3m 35s
+  in <think>...</think> before stopping. GLM-4.7-Flash has dedicated thinking tokens (<think>,
+  </think>, /nothink). Fixed: MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}' suppresses
+  thinking blocks for agentic use via the /nothink token injected by apply_chat_template."""
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26
 
@@ -28,3 +31,9 @@ MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "32768"        # 32k — measured: 32k uses 20GB total, leaving 6GB for activation (safe)
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — large model even with sparse activation
+# Disable thinking mode: GLM-4.7-Flash has <think>/</think>/nothink special tokens.
+# With thinking enabled, the model generates multi-minute reasoning traces for trivial
+# decisions (e.g. "src/ is empty, what do I do?"). For agentic coding, direct responses
+# are far more useful than extended internal monologues. enable_thinking=false is passed
+# to apply_chat_template and injects the /nothink token which suppresses <think> blocks.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
