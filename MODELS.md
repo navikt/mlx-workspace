@@ -29,15 +29,15 @@ mise run server                 # restart server with new model
 | GLM-4.6V-Flash-9B | Dec 2025 | **mlx-vlm** ⚠️ | MoE hybrid | ~5.5 GB | 128k | ~19 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | ⚡⚡ cache | ❌ role + halluc. | ❌ broken |
 | **GLM-4.7-Flash** | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | — | ❌ loops + OOM | ❌ not viable |
-| **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~3.3 GB | ⚡⚡ | ✅ early | 🔬 testing |
-| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
+| **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ reccomended |
 | Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
+| **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~3.3 GB | ⚡⚡ | ✅ strong | ✅ recommended |
 | Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | ⚠️ 136s/turn | ❌ re-prefill | ⚠️ too slow |
 | Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested³ |
 
-¹ Headroom = 32GB − VRAM − ~7GB OS reserve  
-² mlx-vlm models skipped — same architecture as Gemma-4-12B, expected same ~2.5min/turn penalty  
+¹ Headroom = 32GB − VRAM − ~7GB OS reserve
+² mlx-vlm models skipped — same architecture as Gemma-4-12B, expected same ~2.5min/turn penalty
 ³ Gated model: accept terms at huggingface.co/ibm-granite/granite-4.1-8b-instruct before downloading
 
 ### Successors & newer editions (as of Jun 2026)
@@ -160,7 +160,7 @@ Use different model profiles for different *session types*. Switch with `mise ru
 
 | Session type | Recommended model | Reason |
 |---|---|---|
-| Agentic coding (opencode) | **Qwen3.5-9B** (daily driver) or Qwen3.6-35B-A3B (untested) | Proven tool calling; 3.6 may have better capacity |
+| Agentic coding (opencode) | **Qwen3.5-9B** or **Qwen3.6-35B-A3B** | Both proven; 3.6 has faster prefill + larger context |
 | Architecture / design planning | Qwen3.5-27B-Opus-Distilled | Dense 27B — better at deep reasoning |
 | Quick Q&A / chat | Qwen3.5-9B | Fastest, lowest VRAM |
 | Enterprise/IBM stack code | Granite-4.1-8B (gated) | IBM-tuned for enterprise patterns |
@@ -192,12 +192,10 @@ This is the lowest-friction multi-mode approach and works today with GLM-4.7-Fla
 
 ### Recommended next step
 
-GLM-4.7-Flash evaluation is **complete and failed** — tool call loops, OOM, and generated code with
-variable name typos. Not a viable daily driver. Next candidates in order:
+Qwen3.6-35B-A3B evaluation **complete and passed** — 35/35 tests, no loops or stalls, 1.5–1.7× faster prefill than Qwen3.5-9B. Next candidates in order:
 
-1. **Qwen3.6-35B-A3B** (untested) — `mise run model-use qwen3.6-35b-a3b && mise run server`
-2. **Qwen3.5-27B-Opus-Distilled** — if Qwen3.6 doesn't hold up, test the dense 27B for planning tasks
-3. Measure whether Qwen3.5-9B + Qwen3.6-35B-A3B fit together in 32 GB (estimated ~27 GB — feasible)
+1. **Qwen3.5-27B-Opus-Distilled** — dense 27B for planning/architecture tasks
+2. Measure whether Qwen3.5-9B + Qwen3.6-35B-A3B fit together in 32 GB (estimated ~27 GB — feasible)
 
 ---
 
@@ -693,6 +691,8 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
+### `mlx-community/Qwen3.6-35B-A3B-4bit` ✅ recommended
+
 | | |
 |---|---|
 | **Architecture** | MoE (35B total / ~3B active per token, MQA) |
@@ -709,11 +709,19 @@ After applying the template patch, the model generates fake YAML listing invente
 - At 128k: KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom — feasible)
 - Prefill: **~386 t/s avg at 26k tokens** — 1.5–1.7× faster than Qwen3.5-9B (245 t/s peak)
 - Generation speed: ~3B active params per forward pass (same as Qwen3.5-9B in practice)
-- TodoWrite, tool calling, and task planning working correctly from first session
+- TodoWrite, tool calling, and task planning working correctly
 - Same Qwen3 thinking token mechanism; disabled in profile (`enable_thinking=false`)
 - Qwen3.6-27B-4bit was NOT profiled: 0.22 MB/token KV limits to ~32k safely, 4× slower decode
+- cache slots must be ≥5: with 3 slots system(2)+user(1) fills all capacity → no assistant caching
 
-**Verdict:** Recommended. Faster prefill than Qwen3.5-9B, larger capacity (35B total params), and comfortable 96k context. Early session results promising — no loops or stalls observed. Evaluation in progress (weather-cli task, 2026-06-19).
+**weather-cli benchmark (2026-06-19):**
+- 35/35 tests passing (5 files: parser, geocode, weather, output, integration)
+- 1,076 lines of code produced (ES module, vitest, nock for HTTP mocking)
+- 8 LLM turns to complete; no tool call loops, no stalls, no OOM
+- Used `fast-xml-parser` — interesting dependency choice (XML fallback for Met.no?)
+- Session context stayed well within 96k window throughout
+
+**Verdict:** Recommended. Performs on par with or better than Qwen3.5-9B. Faster prefill (1.5–1.7×), larger context (96k vs practical ~64k for 9B at same memory), equal tool calling reliability. Preferred choice when context depth matters.
 
 ---
 

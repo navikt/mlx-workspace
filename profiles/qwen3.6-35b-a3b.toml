@@ -1,7 +1,7 @@
 [meta]
 name               = "Qwen3.6-35B-A3B 4bit"
 released           = "2026-04"
-status             = "testing"
+status             = "recommended"
 spec_source        = "research"
 notes              = """Qwen/Alibaba Qwen3.6-35B-A3B (Apr 2026). MoE: 35B total, ~3B active per token.
 Agentic coding was a stated design focus in the release. 262k native context.
