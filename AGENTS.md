@@ -4,6 +4,7 @@
 
 Context is limited. Every unnecessary token slows generation.
 
+- **Prefix all shell commands with `rtk`** — `rtk git status`, `rtk grep …`, `rtk npm test`; rtk compresses output and saves context
 - **grep/glob before read** — narrow to relevant lines first, then open the file
 - **Line ranges** — read `path:start_line-end_line`, not whole files, when you know the area
 - **Sample large files** — `head -40 file` before deciding whether to read fully
