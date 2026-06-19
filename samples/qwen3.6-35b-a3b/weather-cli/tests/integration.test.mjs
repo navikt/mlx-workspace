@@ -4,27 +4,39 @@ import { geocode, fetchWeather } from "../src/weather.mjs";
 import { formatWeather } from "../src/output.mjs";
 import nock from "nock";
 
-// Sample Geonorge GeoJSON response
-const GEONORGE_GEOJSON = {
-  type: "FeatureCollection",
-  features: [
+// Sample Geonorge response (new format with "navn" array)
+const GEONORGE_RESPONSE = {
+  metadata: {
+    side: 1,
+    totaltAntallTreff: 1,
+  },
+  navn: [
     {
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [10.7461, 59.9127], // [lon, lat]
+      geojson: {
+        geometry: {
+          type: "Point",
+          coordinates: [10.7461, 59.9127], // [lon, lat]
+        },
       },
-      properties: {
-        navn: "Oslo",
-        type: "By",
-      },
+      stedsnavn: [
+        {
+          navnestatus: "hovednavn",
+          skrivemåte: "Oslo",
+          språk: "Norsk",
+        },
+      ],
     },
   ],
 };
 
-// Sample Met.no timeseries response
+// Sample Met.no response (new format with "properties" at top level)
 const METNO_TIMESERIES = {
-  product: {
+  type: "Feature",
+  geometry: {
+    type: "Point",
+    coordinates: [10.75, 59.91, 1],
+  },
+  properties: {
     timeseries: [
       {
         time: new Date(Date.now() + 3600000).toISOString(), // +1 hour
@@ -57,9 +69,9 @@ describe("integration", () => {
         sok: "Oslo",
         fuzzy: "true",
         treffPerSide: "1",
-        utkoordsys: "4258",
+        utkoordsys: "4326",
       })
-      .reply(200, GEONORGE_GEOJSON);
+      .reply(200, GEONORGE_RESPONSE);
 
     nock("https://api.met.no")
       .get("/weatherapi/locationforecast/2.0/complete")
@@ -130,7 +142,9 @@ describe("integration", () => {
 
   it("handles partial weather data (some fields missing)", async () => {
     const partialResponse = {
-      product: {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [0, 0, 1] },
+      properties: {
         timeseries: [
           {
             time: new Date(Date.now() + 3600000).toISOString(),
@@ -150,7 +164,7 @@ describe("integration", () => {
     nock("https://ws.geonorge.no")
       .get("/stedsnavn/v1/sted")
       .query(true)
-      .reply(200, GEONORGE_GEOJSON);
+      .reply(200, GEONORGE_RESPONSE);
 
     nock("https://api.met.no")
       .get("/weatherapi/locationforecast/2.0/complete")
@@ -179,7 +193,9 @@ describe("integration", () => {
 
     for (const tc of testCases) {
       const response = {
-        product: {
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [0, 0, 1] },
+        properties: {
           timeseries: [
             {
               time: new Date(Date.now() + 3600000).toISOString(),
@@ -203,7 +219,7 @@ describe("integration", () => {
       nock("https://ws.geonorge.no")
         .get("/stedsnavn/v1/sted")
         .query(true)
-        .reply(200, GEONORGE_GEOJSON);
+        .reply(200, GEONORGE_RESPONSE);
 
       nock("https://api.met.no")
         .get("/weatherapi/locationforecast/2.0/complete")

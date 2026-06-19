@@ -2,21 +2,29 @@ import { describe, it, expect, afterEach } from "vitest";
 import { geocode } from "../src/weather.mjs";
 import nock from "nock";
 
-// Sample Geonorge GeoJSON response
-const GEONORGE_GEOJSON = {
-  type: "FeatureCollection",
-  features: [
+// Sample Geonorge response (new format with "navn" array)
+const GEONORGE_RESPONSE = {
+  metadata: {
+    side: 1,
+    totaltAntallTreff: 1,
+    viserFra: 1,
+    viserTil: 1,
+  },
+  navn: [
     {
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [10.7461, 59.9127], // [lon, lat] — GeoJSON order
+      geojson: {
+        geometry: {
+          type: "Point",
+          coordinates: [10.7461, 59.9127], // [lon, lat]
+        },
       },
-      properties: {
-        navn: "Oslo",
-        type: "By",
-        kommunenummer: "0301",
-      },
+      stedsnavn: [
+        {
+          navnestatus: "hovednavn",
+          skrivemåte: "Oslo",
+          språk: "Norsk",
+        },
+      ],
     },
   ],
 };
@@ -33,9 +41,9 @@ describe("geocode", () => {
         sok: "Oslo",
         fuzzy: "true",
         treffPerSide: "1",
-        utkoordsys: "4258",
+        utkoordsys: "4326",
       })
-      .reply(200, GEONORGE_GEOJSON);
+      .reply(200, GEONORGE_RESPONSE);
 
     const result = await geocode("Oslo");
     expect(result).toEqual({
@@ -47,14 +55,13 @@ describe("geocode", () => {
 
   it("sends correct query params and headers", async () => {
     let receivedQuery = {};
-    let receivedHeaders = {};
 
     nock("https://ws.geonorge.no")
       .get("/stedsnavn/v1/sted")
       .query(true)
       .reply(200, function (_uri) {
         receivedQuery = this.req.headers;
-        return GEONORGE_GEOJSON;
+        return GEONORGE_RESPONSE;
       });
 
     await geocode("Bergen");
@@ -63,13 +70,13 @@ describe("geocode", () => {
     expect(receivedQuery["user-agent"]).toBe("weather-cli/1.0 github.com/navikt");
   });
 
-  it("throws when no features returned", async () => {
-    const emptyGeoJSON = { type: "FeatureCollection", features: [] };
+  it("throws when no results returned", async () => {
+    const emptyResponse = { metadata: {}, navn: [] };
 
     nock("https://ws.geonorge.no")
       .get("/stedsnavn/v1/sted")
       .query(true)
-      .reply(200, emptyGeoJSON);
+      .reply(200, emptyResponse);
 
     await expect(geocode("NowhereCity")).rejects.toThrow(
       'No results found for "NowhereCity"'
@@ -88,13 +95,14 @@ describe("geocode", () => {
   });
 
   it("handles missing name property, falls back to input name", async () => {
-    const geoJSONNoName = {
-      type: "FeatureCollection",
-      features: [
+    const responseNoName = {
+      metadata: {},
+      navn: [
         {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [5.3221, 60.3913] },
-          properties: {}, // no navn
+          geojson: {
+            geometry: { type: "Point", coordinates: [5.3221, 60.3913] },
+          },
+          stedsnavn: [], // no skrivemåte
         },
       ],
     };
@@ -102,7 +110,7 @@ describe("geocode", () => {
     nock("https://ws.geonorge.no")
       .get("/stedsnavn/v1/sted")
       .query(true)
-      .reply(200, geoJSONNoName);
+      .reply(200, responseNoName);
 
     const result = await geocode("Bergen");
     expect(result).toEqual({

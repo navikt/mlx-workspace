@@ -2,9 +2,20 @@ import { describe, it, expect, afterEach } from "vitest";
 import { fetchWeather } from "../src/weather.mjs";
 import nock from "nock";
 
-// Sample Met.no timeseries response (JSON format)
+// Sample Met.no response (new format with "properties" at top level)
 const METNO_TIMESERIES = {
-  product: {
+  type: "Feature",
+  geometry: {
+    type: "Point",
+    coordinates: [10.75, 59.91, 1],
+  },
+  properties: {
+    meta: {
+      updated_at: "2024-01-01T00:00:00Z",
+      units: {
+        air_temperature: "celsius",
+      },
+    },
     timeseries: [
       {
         time: "2024-01-01T00:00:00Z",
@@ -57,7 +68,9 @@ const METNO_TIMESERIES = {
 
 // Response with missing fields
 const METNO_PARTIAL = {
-  product: {
+  type: "Feature",
+  geometry: { type: "Point", coordinates: [0, 0, 1] },
+  properties: {
     timeseries: [
       {
         time: "2024-01-01T00:00:00Z",
@@ -76,7 +89,9 @@ const METNO_PARTIAL = {
 
 // Response with missing instant details
 const METNO_NO_DETAILS = {
-  product: {
+  type: "Feature",
+  geometry: { type: "Point", coordinates: [0, 0, 1] },
+  properties: {
     timeseries: [
       {
         time: "2024-01-01T00:00:00Z",
@@ -88,7 +103,9 @@ const METNO_NO_DETAILS = {
 
 // Empty timeseries
 const METNO_EMPTY = {
-  product: {
+  type: "Feature",
+  geometry: { type: "Point", coordinates: [0, 0, 1] },
+  properties: {
     timeseries: [],
   },
 };
@@ -101,7 +118,9 @@ describe("fetchWeather", () => {
   it("returns structured weather data from timeseries", async () => {
     const futureDate = new Date(Date.now() + 3600000).toISOString();
     const futureResponse = {
-      product: {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [59.91, 10.75, 1] },
+      properties: {
         timeseries: [
           {
             time: futureDate,
@@ -140,12 +159,13 @@ describe("fetchWeather", () => {
   });
 
   it("selects the timeseries entry closest to current time", async () => {
-    // Create a response where the second entry is closest to "now"
     const futureDate = new Date(Date.now() + 3600000); // +1 hour
     const nearFutureDate = new Date(Date.now() + 1800000); // +30 min
 
     const response = {
-      product: {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [0, 0, 1] },
+      properties: {
         timeseries: [
           {
             time: futureDate.toISOString(),
@@ -207,7 +227,9 @@ describe("fetchWeather", () => {
 
     for (const tc of testCases) {
       const response = {
-        product: {
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [0, 0, 1] },
+        properties: {
           timeseries: [
             {
               time: new Date(Date.now() + 3600000).toISOString(),

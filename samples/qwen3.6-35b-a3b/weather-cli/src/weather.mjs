@@ -14,7 +14,7 @@ export async function geocode(name) {
   url.searchParams.set("sok", name);
   url.searchParams.set("fuzzy", "true");
   url.searchParams.set("treffPerSide", "1");
-  url.searchParams.set("utkoordsys", "4258");
+  url.searchParams.set("utkoordsys", "4326");
 
   const response = await fetch(url.toString(), {
     headers: { "User-Agent": UA, "Accept": "application/json" },
@@ -28,14 +28,14 @@ export async function geocode(name) {
 
   const json = await response.json();
 
-  // Geonorge GeoJSON: { type: "FeatureCollection", features: [{ geometry: { coordinates: [lon, lat] }, properties: { navn } }] }
-  const features = json?.features;
-  if (!features || features.length === 0) {
+  // Geonorge API returns { metadata, navn: [{ geojson: { geometry: { coordinates: [lon, lat] } }, stedsnavn: [{ skrivemåte }] }] }
+  const navneobjekter = json?.navn;
+  if (!navneobjekter || navneobjekter.length === 0) {
     throw new Error(`No results found for "${name}"`);
   }
 
-  const feat = features[0];
-  const coords = feat?.geometry?.coordinates; // [lon, lat]
+  const obj = navneobjekter[0];
+  const coords = obj?.geojson?.geometry?.coordinates; // [lon, lat]
   if (!coords || coords.length < 2) {
     throw new Error(`No coordinates found for "${name}"`);
   }
@@ -44,8 +44,18 @@ export async function geocode(name) {
   const lon = coords[0];
   const lat = coords[1];
 
+  // Get the place name from the first stedsnavn entry's skrivemåte
+  const navnestaver = obj?.stedsnavn || [];
+  let placeName = name;
+  for (const sn of navnestaver) {
+    if (sn.skrivemåte) {
+      placeName = sn.skrivemåte;
+      break;
+    }
+  }
+
   return {
-    name: feat.properties?.navn || name,
+    name: placeName,
     lat,
     lon,
   };
@@ -59,8 +69,8 @@ export async function geocode(name) {
  */
 export async function fetchWeather(lat, lon) {
   const url = new URL(WEATHER_BASE);
-  url.searchParams.set("latitude", String(lat));
-  url.searchParams.set("longitude", String(lon));
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lon));
 
   const response = await fetch(url.toString(), {
     headers: { "User-Agent": UA },
@@ -84,7 +94,7 @@ export async function fetchWeather(lat, lon) {
  * @returns {object} Structured weather data
  */
 function parseWeatherData(data) {
-  const timeseries = data?.product?.timeseries;
+  const timeseries = data?.properties?.timeseries;
   if (!timeseries || timeseries.length === 0) {
     throw new Error("No timeseries data found in API response");
   }
