@@ -1,0 +1,36 @@
+[meta]
+name               = "Qwen3.6-35B-A3B 4bit"
+released           = "2026-04"
+status             = "untested"
+spec_source        = "research"
+notes              = """Qwen/Alibaba Qwen3.6-35B-A3B (Apr 2026). MoE: 35B total, ~3B active per token.
+Agentic coding was a stated design focus in the release. 262k native context.
+
+Hardware fit on M1 Max 32GB (26GB wired cap):
+- Model footprint: ~21GB wired (20.4GB disk at 4bit)
+- KV architecture: MQA — only 2 KV heads, 40 layers → 0.04 MB/token (extremely low)
+- At 64k context: KV ≈ 2.6GB → total wired ≈ 23.6GB (2.4GB headroom, comfortable)
+- At 128k context: KV ≈ 5.2GB → total wired ≈ 26.2GB (borderline — test only after 64k is stable)
+- Qwen3.6-27B-4bit was skipped: dense 27B with 0.22 MB/token KV limits context to ~32k safely,
+  and generation is ~4x slower per token vs this MoE. Not worth testing given the MoE exists.
+
+Generation speed expected: similar to Qwen3.5-9B (~3B active params per forward pass).
+
+Thinking mode: supports enable_thinking (same Qwen3 mechanism as Qwen3.5).
+Disabled here for agentic use — thinking benchmarks show 3x worse tool-call accuracy
+(BFCL multi-turn: 12.4% thinking vs 35.8% non-thinking). Enable per-request if needed."""
+model_vram_gb      = 21
+gpu_wired_limit_gb = 26
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-4bit"
+MLX_CACHE_BYTES            = "3221225472"   # 3GB — at 0.04 MB/token, covers ~75k tokens; wired total ≈ 24GB (2GB headroom)
+MLX_CACHE_SIZE             = "3"            # limited slots — 21GB model leaves little room
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"        # 64k — KV ≈ 2.6GB, wired ≈ 23.6GB (comfortable)
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — ~3B active params should be fast; extend if needed
+# Disable thinking mode for agentic use (enable_thinking=false injects /nothink token).
+# Research: BFCL multi-turn benchmark 12.4% (thinking) vs 35.8% (non-thinking) — 3x worse.
+# For architecture/design tasks where deep reasoning helps, test with enable_thinking=true.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
