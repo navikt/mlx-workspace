@@ -29,7 +29,7 @@ mise run server                 # restart server with new model
 | GLM-4.6V-Flash-9B | Dec 2025 | **mlx-vlm** ⚠️ | MoE hybrid | ~5.5 GB | 128k | ~19 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | ⚡⚡ cache | ❌ role + halluc. | ❌ broken |
 | **GLM-4.7-Flash** | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | — | ❌ loops + OOM | ❌ not viable |
-| **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~5 GB | ⚡⚡ | — | 🔲 untested |
+| **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~3.3 GB | ⚡⚡ | ✅ early | 🔬 testing |
 | **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
 | Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
@@ -365,7 +365,7 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Practical comfortable operating range is **~50–70k tokens**; sessions approaching 100k will feel slow
 - Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
 
-**Verdict:** Best balance of speed, RAM, and reliability for daily agentic coding. Confirmed as most reliable model in head-to-head evaluation (Jun 2026): GLM-4.7-Flash had tool call loops, OOM crashes, and code quality issues across a single session; Qwen3.5-9B had none of these. Current default.
+**Verdict:** Recommended daily driver. Best balance of speed, RAM, and reliability in head-to-head evaluation (Jun 2026): no tool call loops, no OOM, clean code output. Qwen3.6-35B-A3B is a strong candidate to supersede it if evaluation continues well.
 
 **Measured benchmarks (M1 Max 32GB, vram-set 26, 2026-06-18):**
 
@@ -699,20 +699,21 @@ After applying the template patch, the model generates fake YAML listing invente
 | **Active parameters** | ~3B per token |
 | **VRAM footprint** | ~21 GB |
 | **Native context** | 262k tokens |
-| **Practical context (32GB Mac)** | 64k (KV: 0.04 MB/token × 64k = 2.6GB → 23.6GB wired) |
-| **Context headroom (32GB)** | ~5 GB |
+| **Practical context (32GB Mac)** | 96k declared (measured: 8-bit KV = 18.3 KB/token → 1.7 GB at 96k, 22.7 GB wired) |
+| **Context headroom (32GB)** | ~3.3 GB at 96k |
 
 **Traits:**
-- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA — only 2 KV heads, 40 layers
-- Extremely KV-efficient: 0.04 MB/token vs 0.094 MB/token for GLM-4.7-Flash
-- At 64k context: only 2.6GB KV cache, total ~23.6GB wired (comfortable 2.4GB headroom)
-- At 128k: KV ≈ 5.2GB → total ~26.2GB (borderline — test after 64k is stable)
-- Generation speed: ~3B active params per forward pass → similar to Qwen3.5-9B
-- Agentic coding was a stated design focus in the release
+- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA — 2 KV heads, 40 layers
+- mlx-lm uses 8-bit KV cache compression: **18.3 KB/token measured** (vs 40 KB/token float16 theoretical)
+- At 96k: KV ≈ 1.7 GB, wired ≈ 22.7 GB (3.3 GB headroom — comfortable)
+- At 128k: KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom — feasible)
+- Prefill: **~386 t/s avg at 26k tokens** — 1.5–1.7× faster than Qwen3.5-9B (245 t/s peak)
+- Generation speed: ~3B active params per forward pass (same as Qwen3.5-9B in practice)
+- TodoWrite, tool calling, and task planning working correctly from first session
 - Same Qwen3 thinking token mechanism; disabled in profile (`enable_thinking=false`)
-- Qwen3.6-27B-4bit (dense) was NOT profiled: 0.22 MB/token KV limits it to ~32k context safely on this hardware, and 27B dense is ~4× slower per token — inferior in every way to this MoE
+- Qwen3.6-27B-4bit was NOT profiled: 0.22 MB/token KV limits to ~32k safely, 4× slower decode
 
-**Verdict:** Untested locally. Strong candidate: same generation speed as Qwen3.5-9B but more total capacity (35B vs 9B params), larger context budget per GB than any other tested model. Next evaluation target after GLM-4.7-Flash was retired.
+**Verdict:** Recommended. Faster prefill than Qwen3.5-9B, larger capacity (35B total params), and comfortable 96k context. Early session results promising — no loops or stalls observed. Evaluation in progress (weather-cli task, 2026-06-19).
 
 ---
 

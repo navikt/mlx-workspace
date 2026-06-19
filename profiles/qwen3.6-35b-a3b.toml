@@ -1,36 +1,46 @@
 [meta]
 name               = "Qwen3.6-35B-A3B 4bit"
 released           = "2026-04"
-status             = "untested"
+status             = "testing"
 spec_source        = "research"
 notes              = """Qwen/Alibaba Qwen3.6-35B-A3B (Apr 2026). MoE: 35B total, ~3B active per token.
 Agentic coding was a stated design focus in the release. 262k native context.
 
 Hardware fit on M1 Max 32GB (26GB wired cap):
 - Model footprint: ~21GB wired (20.4GB disk at 4bit)
-- KV architecture: MQA — only 2 KV heads, 40 layers → 0.04 MB/token (extremely low)
-- At 64k context: KV ≈ 2.6GB → total wired ≈ 23.6GB (2.4GB headroom, comfortable)
-- At 128k context: KV ≈ 5.2GB → total wired ≈ 26.2GB (borderline — test only after 64k is stable)
-- Qwen3.6-27B-4bit was skipped: dense 27B with 0.22 MB/token KV limits context to ~32k safely,
-  and generation is ~4x slower per token vs this MoE. Not worth testing given the MoE exists.
+- KV architecture: MQA — 2 KV heads, 40 layers
+- mlx-lm uses 8-bit KV cache compression → 18.3 KB/token actual (vs 40 KB/token float16)
+- Measured (2026-06-19, 27k token session): 0.97 GB total KV cache, wired ≈ 22 GB, 85% RAM
+- At 64k: KV ≈ 1.1 GB, wired ≈ 22.1 GB (3.9 GB headroom — very comfortable)
+- At 96k: KV ≈ 1.7 GB, wired ≈ 22.7 GB (3.3 GB headroom)
+- At 128k: KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom — feasible, test carefully)
+- Qwen3.6-27B-4bit was skipped: dense 27B limited to ~32k safely and 4x slower per token.
 
-Generation speed expected: similar to Qwen3.5-9B (~3B active params per forward pass).
+Measured prefill performance (2026-06-19, 26,881 token prompt):
+- Peak prefill: ~410 t/s (early chunks, fresh KV cache)
+- Avg prefill at 26k: ~386 t/s (from first log) / 355 t/s (from POST request)
+- Degrades with context: 400 t/s at 4k → 315 t/s at 26k (KV cache pressure)
+- Compare: Qwen3.5-9B peak 245 t/s, avg 44k = 205 t/s → Qwen3.6 is ~1.5-1.7x faster at prefill
+- GPU: 99% during generation (expected). System RAM: ~85% (22GB wired / 32GB)
+
+Session observations (2026-06-19):
+- Started using TodoWrite for planning immediately (AGENTS.md instruction working)
+- Active generation observed, tasks progressing through todo list
+- No tool call loops or stalls observed so far
 
 Thinking mode: supports enable_thinking (same Qwen3 mechanism as Qwen3.5).
-Disabled here for agentic use — thinking benchmarks show 3x worse tool-call accuracy
-(BFCL multi-turn: 12.4% thinking vs 35.8% non-thinking). Enable per-request if needed."""
+Disabled for agentic use — BFCL: 12.4% thinking vs 35.8% non-thinking (3x worse)."""
 model_vram_gb      = 21
 gpu_wired_limit_gb = 26
 
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-4bit"
-MLX_CACHE_BYTES            = "3221225472"   # 3GB — at 0.04 MB/token, covers ~75k tokens; wired total ≈ 24GB (2GB headroom)
+MLX_CACHE_BYTES            = "2147483648"   # 2GB — measured: 8-bit KV cache = 18.3 KB/token; 2GB covers ~112k tokens, well above 96k declared
 MLX_CACHE_SIZE             = "3"            # limited slots — 21GB model leaves little room
 MLX_MAX_TOKENS             = "32768"
-MLX_OPENCODE_CONTEXT       = "65536"        # 64k — KV ≈ 2.6GB, wired ≈ 23.6GB (comfortable)
+MLX_OPENCODE_CONTEXT       = "98304"        # 96k — measured: wired ≈ 22.7 GB at 96k (3.3 GB headroom, comfortable)
 MLX_OPENCODE_OUTPUT        = "4096"
-MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — ~3B active params should be fast; extend if needed
+MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — fast MoE; extend if 96k context slows decode
 # Disable thinking mode for agentic use (enable_thinking=false injects /nothink token).
 # Research: BFCL multi-turn benchmark 12.4% (thinking) vs 35.8% (non-thinking) — 3x worse.
-# For architecture/design tasks where deep reasoning helps, test with enable_thinking=true.
 MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
