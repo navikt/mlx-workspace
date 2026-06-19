@@ -28,7 +28,7 @@ Switch models with `mise run model-use` — see `profiles/` for all available co
   - [Qwen2.5-Coder-7B ⬛ skipped](#mlx-communityqwen25-coder-7b-instruct-4bit--skipped)
   - [Granite-4.1-8B 🔲 untested](#mlx-communitygranite-41-8b-instruct-4bit--untested)
   - [GLM-4.6V-Flash-9B 🔲 untested](#mlx-communityglm-46v-flash-9b-4bit--untested)
-  - [Qwen3.5-27B-Opus-Distilled 🔲 untested](#mlx-communityqwen35-27b-claude-46-opus-distilled-mlx-4bit--untested)
+  - [Qwen3.5-27B-Opus-Distilled 💥 OOM](#mlx-communityqwen35-27b-claude-46-opus-distilled-mlx-4bit--oom)
   - [Gemma-4-26B-A4B 🔲 untested](#mlx-communitygemma-4-26b-a4b-it-4bit--untested)
 - [Testing checklist](#testing-checklist)
 
@@ -58,7 +58,7 @@ mise run server                 # restart server with new model
 | **GLM-4.7-Flash** | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | — | ❌ loops + OOM | ❌ not viable |
 | **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ reccomended |
 | Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
-| Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
+| Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | ❌ tool failures | 💥 OOM |
 | **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~3.3 GB | ⚡⚡ | ✅ strong | ✅ recommended |
 | Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | ⚠️ 136s/turn | ❌ re-prefill | ⚠️ too slow |
 | Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested³ |
@@ -188,7 +188,6 @@ Use different model profiles for different *session types*. Switch with `mise ru
 | Session type | Recommended model | Reason |
 |---|---|---|
 | Agentic coding (opencode) | **Qwen3.5-9B** or **Qwen3.6-35B-A3B** | Both proven; 3.6 has faster prefill + larger context |
-| Architecture / design planning | Qwen3.5-27B-Opus-Distilled | Dense 27B — better at deep reasoning |
 | Quick Q&A / chat | Qwen3.5-9B | Fastest, lowest VRAM |
 | Enterprise/IBM stack code | Granite-4.1-8B (gated) | IBM-tuned for enterprise patterns |
 
@@ -219,9 +218,9 @@ This is the lowest-friction multi-mode approach and works today with GLM-4.7-Fla
 
 ### Recommended next step
 
-Qwen3.6-35B-A3B evaluation **complete and passed** — 35/35 tests, no loops or stalls, 1.5–1.7× faster prefill than Qwen3.5-9B. Next candidates in order:
+Qwen3.6-35B-A3B evaluation **complete and passed** — 35/35 tests, no loops or stalls, 1.5–1.7× faster prefill than Qwen3.5-9B. Qwen3.5-27B-Opus-Distilled OOM'd on first real session. Next candidates:
 
-1. **Qwen3.5-27B-Opus-Distilled** — dense 27B for planning/architecture tasks
+1. **Granite-4.1-8B** — if accessible (gated model)
 2. Measure whether Qwen3.5-9B + Qwen3.6-35B-A3B fit together in 32 GB (estimated ~27 GB — feasible)
 
 ---
@@ -619,7 +618,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 🔲 untested
+### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 💥 OOM
 
 | | |
 |---|---|
@@ -637,7 +636,7 @@ After applying the template patch, the model generates fake YAML listing invente
 - Tightest context budget of the tested models: dense 27B leaves only 6GB for KV cache → ~32–40k practical tokens
 - Apache 2.0
 
-**Verdict:** Untested locally. High reasoning quality claim. Context-limited on 32GB Mac — best for focused, shorter sessions where depth matters more than breadth.
+**Verdict:** 💥 **OOM** — crashed with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` during prefill of a 17k-token prompt (2026-06-19). Dense 27B activation spike during prefill exceeds the 26 GB GPU wired cap (14 GB model + peak prefill activations > 26 GB). Also exhibited 3× tool call JSONDecodeError in the first 2 turns — Opus distillation appears to have degraded tool-use reliability. Not viable on 32 GB M1 Max.
 
 ---
 
