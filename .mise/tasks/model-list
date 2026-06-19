@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import _profiles as P
 
 STATUS_ICON = {
-    "daily-driver": "⭐",
+    "recommended":  "⭐",
     "untested":     "🔲",
     "testing":      "🔬",
     "slow":         "🐢",
