@@ -695,7 +695,7 @@ After applying the template patch, the model generates fake YAML listing invente
 
 | | |
 |---|---|
-| **Architecture** | MoE (35B total / ~3B active per token, MQA) |
+| **Architecture** | MoE (35B total / ~3B active per token — 256 experts, 8 active, MQA) |
 | **Active parameters** | ~3B per token |
 | **VRAM footprint** | ~21 GB |
 | **Native context** | 262k tokens |
@@ -703,7 +703,7 @@ After applying the template patch, the model generates fake YAML listing invente
 | **Context headroom (32GB)** | ~3.3 GB at 96k |
 
 **Traits:**
-- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA — 2 KV heads, 40 layers
+- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA — 256 experts, 8 active per token, 2 KV heads, 40 layers
 - mlx-lm uses 8-bit KV cache compression: **18.3 KB/token measured** (vs 40 KB/token float16 theoretical)
 - At 96k: KV ≈ 1.7 GB, wired ≈ 22.7 GB (3.3 GB headroom — comfortable)
 - At 128k: KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom — feasible)
