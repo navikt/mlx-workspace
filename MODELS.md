@@ -199,7 +199,89 @@ Before investing in multi-model infrastructure, complete the current model evalu
 
 ---
 
+## Dynamic model switching (no server restart)
 
+`mlx_lm.server` supports **per-request model switching** natively. No restart is needed — the server process stays alive and handles the swap itself.
+
+### How it works (source: `mlx_lm/server.py`)
+
+Every incoming request includes a `"model"` field. The server's `ModelProvider.load()` compares the requested model path against the currently loaded model's key:
+
+```python
+# ModelProvider.load() — called on every request
+model_key = (model_path, adapter_path, draft_model_path)
+if self.model_key != model_key:
+    self._load(*model_key)   # unload old, load new
+```
+
+`_load()` explicitly frees the old model before loading the new one:
+
+```python
+def _load(self, model_path, ...):
+    self.model_key = None
+    self.model = None        # → Python GC releases Metal buffers → VRAM freed
+    self.tokenizer = None
+    # ... then load new model weights
+```
+
+This means a single server on port 8080 can serve multiple models sequentially — the client just specifies different model IDs in each request.
+
+### Caching behaviour across model switches
+
+The **KV prompt cache (`LRUPromptCache`) is owned by `ResponseGenerator`, not `ModelProvider`** — it is never cleared on model switch. Cache entries are keyed by `(model_key, token_sequence)`, so:
+
+| Event | Model weights | KV prompt cache |
+|---|---|---|
+| Request with same model | In VRAM ✅ | Hit if tokens match ✅ |
+| Switch to model B | Old freed, B loaded | Old entries **stay in LRU** (different key, ignored) |
+| Switch back to model A | A reloaded | Old A entries **still in LRU** — warm restart if not evicted ✅ |
+| LRU eviction | — | Oldest entries dropped when cache hits `prompt_cache_size` limit |
+
+**Key insight**: switching between two models and back is a **warm restart** for the original model, as long as the LRU hasn't evicted the old entries. The `MLX_CACHE_SIZE = "3"` in GLM's profile means only 3 cached sequences — switching to another model and back will likely evict them (the new model's sequences fill the LRU slots). Increase `MLX_CACHE_SIZE` if you plan to switch models frequently.
+
+### VRAM peak during a switch
+
+`_load()` does NOT clear the prompt cache before loading the new model. During the switch there is a brief window where:
+
+```
+VRAM peak = old_model_KV_cache (still held by LRU) + new_model_weights
+```
+
+For GLM-4.7-Flash → another 16 GB model:
+```
+6 GB (KV cache) + 16 GB (new model) + 7 GB (OS) = 29 GB  ← tight but within 32 GB
+```
+
+If `MLX_CACHE_BYTES` is set, the trim happens *during generation* (not during the switch itself), so the peak is real. Reduce `MLX_CACHE_BYTES` if you see OOM errors when hot-switching between large models.
+
+### Thinking mode and the KV cache
+
+Switching `enable_thinking` on the **same model** (`GLM-4.7-Flash`) does **not** change the `model_key` — the key is `(model_path, adapter_path, draft_model_path)` only. However, thinking mode changes the system prompt structure (`<think>` vs `</think>` prefix on the assistant turn), so **token sequences won't match** the old cache entries anyway. In practice, switching thinking on/off on the same server restart is a cold cache.
+
+### Using dynamic switching today
+
+To switch models without restarting, register multiple model IDs in `opencode.json` all pointing to `http://localhost:8080/v1`:
+
+```json
+{
+  "provider": {
+    "mlx": {
+      "models": {
+        "mlx-community/GLM-4.7-Flash-4bit": { "limit": { "context": 32768, "output": 4096 } },
+        "mlx-community/Qwen3.5-9B-4bit":    { "limit": { "context": 131072, "output": 8192 } }
+      }
+    }
+  }
+}
+```
+
+The server will unload/load automatically when opencode switches models. Switch cost: ~30–60s reload time (same as server restart). Advantage: no tmux wrangling, KV cache for the previous model survives in LRU for fast switchback.
+
+> **Not yet implemented in this workspace** — `opencode-init` currently writes a single model entry. Multi-model registration is a planned enhancement.
+
+---
+
+## opencode declared context limits
 
 `opencode-init` writes a `limit.context` for each model into `opencode.json`. This is what opencode uses to decide when to compact — without it the model is "unknown" and compaction never auto-triggers.
 
