@@ -36,7 +36,7 @@ gpu_wired_limit_gb = 26
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-4bit"
 MLX_CACHE_BYTES            = "2147483648"   # 2GB — measured: 8-bit KV cache = 18.3 KB/token; 2GB covers ~112k tokens, well above 96k declared
-MLX_CACHE_SIZE             = "3"            # limited slots — 21GB model leaves little room
+MLX_CACHE_SIZE             = "5"            # 5 slots — system(2) + user(1) + assistant(2); 0.92 GB observed at 3 slots, well within 2GB budget
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "98304"        # 96k — measured: wired ≈ 22.7 GB at 96k (3.3 GB headroom, comfortable)
 MLX_OPENCODE_OUTPUT        = "4096"
