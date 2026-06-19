@@ -27,6 +27,8 @@ Session observations (2026-06-19):
 - Started using TodoWrite for planning immediately (AGENTS.md instruction working)
 - Active generation observed, tasks progressing through todo list
 - No tool call loops or stalls observed so far
+- Cache slots initially set to 3 → system(2)+user(1) filled all slots, assistant never cached.
+  Cache was static at 0.92 GB across turns (no KV reuse). Fixed to 5 slots to match Qwen3.5-9B.
 
 Thinking mode: supports enable_thinking (same Qwen3 mechanism as Qwen3.5).
 Disabled for agentic use — BFCL: 12.4% thinking vs 35.8% non-thinking (3x worse)."""
