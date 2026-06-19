@@ -649,7 +649,7 @@ After applying the template patch, the model generates fake YAML listing invente
 - Tightest context budget of the tested models: dense 27B leaves only 6GB for KV cache → ~32–40k practical tokens
 - Apache 2.0
 
-**Verdict:** 💥 **OOM** — crashed twice with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` (2026-06-19). First crash at 17k-token prefill; second crash at 6k/10k-token prefill in the same session (cache fix confirmed working — 5 slots, 4.40 GB — but didn't prevent the crash). Also exhibited 3× tool call JSONDecodeError in first 2 turns — Opus distillation appears to have degraded tool-use reliability. **Measured prefill: ~68–71 t/s** (compared to ~350–386 t/s for Qwen3.6-35B-A3B). Not viable on 32 GB M1 Max.
+**Verdict:** 💥 **OOM + broken tool loop** — crashed 3× with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` (always at ~6144 tokens into prefill). Also exhibited 3× tool call JSONDecodeError in first 2 turns, and an **infinite tool loop**: model repeatedly called the same wrong path (`mlx-workscope` typo), detected "path is wrong" in `<think>` each iteration, but re-issued the identical broken call 8+ times — Opus distillation preserves error *detection* but not error *correction*. **Measured prefill: ~68–71 t/s** (vs ~350–386 t/s for Qwen3.6-35B-A3B). Not viable on 32 GB M1 Max.
 
 **Root cause:** Dense 27B means every forward pass activates all 27B parameters. During prefill, activation tensors for the full sequence length must coexist with the model weights: 14 GB model + 4.4 GB KV cache + prefill activation spike > 26 GB GPU wired cap. No configuration tuning can fix this — it is a fundamental architecture constraint.
 
