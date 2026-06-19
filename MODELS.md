@@ -28,7 +28,8 @@ mise run server                 # restart server with new model
 | Qwen3-Coder-30B-A3B | Jul 2025 | mlx-lm | MoE | ~16 GB | **256k** | ~9 GB | ⚡ | ⚠️ inconsistent | ⚠️ too slow |
 | GLM-4.6V-Flash-9B | Dec 2025 | **mlx-vlm** ⚠️ | MoE hybrid | ~5.5 GB | 128k | ~19 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Ministral-3-14B | Dec 2025 | mlx-lm | Dense | ~8.5 GB | 256k | ~16 GB | ⚡⚡ cache | ❌ role + halluc. | ❌ broken |
-| **GLM-4.7-Flash** | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | — | — | 🔬 testing |
+| **GLM-4.7-Flash** | Jan 2026 | mlx-lm | MoE | ~16 GB | 128–200k | ~9 GB | — | ❌ loops + OOM | ❌ not viable |
+| **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~5 GB | ⚡⚡ | — | 🔲 untested |
 | **Qwen3.5-9B-MLX** ⭐ | Feb 2026 | mlx-lm | Dense | ~6 GB | 262k | ~19 GB | ⚡⚡⚡ | ✅ strong | ✅ daily driver |
 | Gemma-4-26B-A4B | Mar 2026 | **mlx-vlm** ⚠️ | MoE | ~14 GB | 256k | ~11 GB | ⚠️ (mlx-vlm) | — | ⏭️ skipping² |
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | — | 🔲 untested |
@@ -159,7 +160,7 @@ Use different model profiles for different *session types*. Switch with `mise ru
 
 | Session type | Recommended model | Reason |
 |---|---|---|
-| Agentic coding (opencode) | GLM-4.7-Flash or Qwen3.5-9B | Fast MoE + good tool calling |
+| Agentic coding (opencode) | **Qwen3.5-9B** (daily driver) or Qwen3.6-35B-A3B (untested) | Proven tool calling; 3.6 may have better capacity |
 | Architecture / design planning | Qwen3.5-27B-Opus-Distilled | Dense 27B — better at deep reasoning |
 | Quick Q&A / chat | Qwen3.5-9B | Fastest, lowest VRAM |
 | Enterprise/IBM stack code | Granite-4.1-8B (gated) | IBM-tuned for enterprise patterns |
@@ -191,11 +192,12 @@ This is the lowest-friction multi-mode approach and works today with GLM-4.7-Fla
 
 ### Recommended next step
 
-Before investing in multi-model infrastructure, complete the current model evaluation:
+GLM-4.7-Flash evaluation is **complete and failed** — tool call loops, OOM, and generated code with
+variable name typos. Not a viable daily driver. Next candidates in order:
 
-1. Finish GLM-4.7-Flash evaluation (thinking disabled)
-2. Test Qwen3.5-27B-Opus-Distilled — if it's significantly better at planning/architecture, session-based routing becomes compelling
-3. Measure whether Qwen3.5-9B + GLM-4.7-Flash fit together in 32 GB (estimated ~29 GB — very tight)
+1. **Qwen3.6-35B-A3B** (untested) — `mise run model-use qwen3.6-35b-a3b && mise run server`
+2. **Qwen3.5-27B-Opus-Distilled** — if Qwen3.6 doesn't hold up, test the dense 27B for planning tasks
+3. Measure whether Qwen3.5-9B + Qwen3.6-35B-A3B fit together in 32 GB (estimated ~27 GB — feasible)
 
 ---
 
@@ -636,7 +638,37 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ---
 
-### `mlx-community/GLM-4.7-Flash-4bit` 🔬 testing
+### `mlx-community/GLM-4.7-Flash-4bit` ❌ not viable
+
+| | |
+|---|---|
+| **Architecture** | MoE (30B total / ~3–3.6B active per token) |
+| **Active parameters** | ~3B per token |
+| **VRAM footprint** | ~16 GB |
+| **Native context** | 128–200k tokens |
+| **Practical context (32GB Mac)** | 48k (OOM at 64k — prefill spike exceeds 26GB cap) |
+| **Context headroom (32GB)** | ~9 GB (6GB KV cache at 48k) |
+
+**Traits:**
+- Zhipu/Z.AI GLM-4.7-Flash (2026): MoE with 64 experts, 4 routed per token + 1 shared
+- Supports thinking mode (`<think>`/`</think>`/`/nothink`) — must be disabled for agentic use
+- τ²-Bench: 79.5% agentic score (but with structured scaffolding + greedy decoding — not representative of opencode use)
+
+**Evaluation results (2026-06-19, weather-cli task):**
+
+| Failure mode | Root cause | Status |
+|---|---|---|
+| Repetition degeneration loop | `temp=0.0` default (greedy) | ✅ Fixed: `MLX_TEMP=0.7` |
+| Thinking stalls (3m35s on trivial decisions) | Thinking mode enabled | ✅ Fixed: `enable_thinking=false` |
+| Metal OOM at 64k context | Prefill activation spike at 27k tokens (41%) | ✅ Mitigated: reduced to 48k |
+| Tool call loop | Repeatedly called `ls` same dir without progress | ❌ Unfixable |
+| Generated code with typos | `location3`, `lon3` in 411-line output | ❌ Model quality issue |
+
+**Verdict:** Not viable as daily driver for agentic coding. Multiple infrastructure failures overcome, but fundamental tool call loop and code quality issues cannot be fixed via config. The τ²-Bench score does not translate to reliable opencode use.
+
+---
+
+### `mlx-community/Qwen3.6-35B-A3B-4bit` 🔲 untested
 
 | | |
 |---|---|
@@ -656,6 +688,31 @@ After applying the template patch, the model generates fake YAML listing invente
 - Tighter context than GLM-4.6V-Flash-9B despite being a "Flash" model — simply because it's ~3× larger
 
 **Verdict:** Untested locally. Alternative to Qwen3-30B-A3B MoE if tool calling proved inconsistent. Worth testing given different training origin.
+
+> ⚠️ **Note:** this profile section is the pre-evaluation stub. See `mlx-community/GLM-4.7-Flash-4bit ❌ not viable` section above for actual evaluation results.
+
+---
+
+| | |
+|---|---|
+| **Architecture** | MoE (35B total / ~3B active per token, MQA) |
+| **Active parameters** | ~3B per token |
+| **VRAM footprint** | ~21 GB |
+| **Native context** | 262k tokens |
+| **Practical context (32GB Mac)** | 64k (KV: 0.04 MB/token × 64k = 2.6GB → 23.6GB wired) |
+| **Context headroom (32GB)** | ~5 GB |
+
+**Traits:**
+- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA — only 2 KV heads, 40 layers
+- Extremely KV-efficient: 0.04 MB/token vs 0.094 MB/token for GLM-4.7-Flash
+- At 64k context: only 2.6GB KV cache, total ~23.6GB wired (comfortable 2.4GB headroom)
+- At 128k: KV ≈ 5.2GB → total ~26.2GB (borderline — test after 64k is stable)
+- Generation speed: ~3B active params per forward pass → similar to Qwen3.5-9B
+- Agentic coding was a stated design focus in the release
+- Same Qwen3 thinking token mechanism; disabled in profile (`enable_thinking=false`)
+- Qwen3.6-27B-4bit (dense) was NOT profiled: 0.22 MB/token KV limits it to ~32k context safely on this hardware, and 27B dense is ~4× slower per token — inferior in every way to this MoE
+
+**Verdict:** Untested locally. Strong candidate: same generation speed as Qwen3.5-9B but more total capacity (35B vs 9B params), larger context budget per GB than any other tested model. Next evaluation target after GLM-4.7-Flash was retired.
 
 ---
 
