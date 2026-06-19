@@ -14,6 +14,8 @@ STATUS_ICON = {
     "slow":         "🐢",
     "oom":          "💥",
     "skipped":      "⬛",
+    "broken":       "🔴",
+    "failed":       "❌",
 }
 
 SPEC_ICON = {

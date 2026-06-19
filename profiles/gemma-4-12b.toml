@@ -1,7 +1,7 @@
 [meta]
 name               = "Gemma-4-12B Instruct 4bit"
 released           = "2026-05"
-status             = "inconclusive"
+status             = "slow"
 spec_source        = "measured"
 notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone — no separate heavy encoders. Strong function-calling adherence reported. REQUIRES mlx-vlm (model_type: gemma4_unified) — server auto-dispatches via MLX_SERVER_TYPE. WARNING: mlx-vlm clears KV cache after every request ('Stream finished, cleared cache') — no cross-request prompt caching. Every opencode tool call re-prefills the full conversation from scratch. This makes agentic sessions impractically slow: 10 turns took 24 minutes, average 2m16s/turn, yet the session produced almost no output (files created empty, no implementation written). Verdict: unusable for agentic coding as of Jun 2026 due to mlx-vlm's per-request cache-clear. May be viable for short single-turn queries."
 model_vram_gb      = 7

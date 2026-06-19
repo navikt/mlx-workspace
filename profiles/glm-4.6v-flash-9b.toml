@@ -10,6 +10,8 @@ gpu_wired_limit_gb = 26
 [params]
 MLX_MODEL                  = "mlx-community/GLM-4.6V-Flash-4bit"
 MLX_SERVER_TYPE            = "mlx-vlm"
+MLX_CACHE_BYTES            = "16106127360"  # 15GB — mlx-vlm; reduce if OOM at 128k
+MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "131072"       # 128k; compaction fires at ~127k
 MLX_OPENCODE_OUTPUT        = "4096"

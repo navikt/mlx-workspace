@@ -19,7 +19,7 @@ REQUIRED_PARAMS = [
     "MLX_OPENCODE_CHUNK_TIMEOUT",
 ]
 
-VALID_STATUS = {"recommended", "untested", "testing", "slow", "oom", "skipped"}
+VALID_STATUS = {"recommended", "untested", "testing", "slow", "oom", "skipped", "broken", "failed"}
 
 
 def list_keys() -> list[str]:

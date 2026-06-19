@@ -1,7 +1,7 @@
 [meta]
 name               = "GLM-4.7-Flash MoE 4bit"
 released           = "2026-01"
-status             = "testing"
+status             = "failed"
 spec_source        = "research"
 notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB headroom OK. 128k not reachable: 16GB footprint + 128k KV cache exceeds 26GB wired cap.
 
