@@ -365,7 +365,7 @@ Token generation slows significantly beyond ~80k tokens. At ~96k tokens, a singl
 - Practical comfortable operating range is **~50–70k tokens**; sessions approaching 100k will feel slow
 - Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
 
-**Verdict:** Best balance of speed, RAM, and reliability for daily coding. Current default.
+**Verdict:** Best balance of speed, RAM, and reliability for daily agentic coding. Confirmed as most reliable model in head-to-head evaluation (Jun 2026): GLM-4.7-Flash had tool call loops, OOM crashes, and code quality issues across a single session; Qwen3.5-9B had none of these. Current default.
 
 **Measured benchmarks (M1 Max 32GB, vram-set 26, 2026-06-18):**
 
