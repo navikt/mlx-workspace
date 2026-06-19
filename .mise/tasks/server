@@ -17,6 +17,8 @@ cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
 cache_size    = os.environ.get("MLX_CACHE_SIZE", "")
 server_type   = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
 chat_template = os.environ.get("MLX_CHAT_TEMPLATE", "").strip()
+# temp=0.0 (greedy) causes repetition degeneration loops; 0.6 is the standard remedy
+temp          = os.environ.get("MLX_TEMP", "0.6").strip()
 
 # Resolve chat_template relative to workspace root if it's a relative path
 if chat_template and not os.path.isabs(chat_template):
@@ -39,6 +41,7 @@ else:
     print(f"→ Starting mlx_lm.server")
     print(f"  model:       {model}")
     print(f"  max-tokens:  {max_tokens}")
+    print(f"  temp:        {temp}")
     print(f"  cache-bytes: {cache_bytes}")
     print(f"  cache-size:  {cache_size}")
     if chat_template:
@@ -49,6 +52,7 @@ else:
         "--model", model,
         "--port", "8080",
         "--max-tokens", max_tokens,
+        "--temp", temp,
     ]
     if cache_size:
         cmd += ["--prompt-cache-size", cache_size]

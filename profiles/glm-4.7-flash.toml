@@ -1,9 +1,17 @@
 [meta]
 name               = "GLM-4.7-Flash MoE 4bit"
 released           = "2026-01"
-status             = "untested"
+status             = "testing"
 spec_source        = "research"
-notes              = "Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB activation headroom OK; 65k tokens≈23GB total → only 3GB activation, risky. Context declared at 32k (safe). Strong coding, tool use, and long-context retention. Different training paradigm from Qwen MoE — may handle OpenCode tool calling better if Qwen MoE caused issues."
+notes              = """Zhipu/Z.AI GLM-4.7-Flash (2026). MoE: 30B total, ~3–3.6B active per token. 128–200k native context. Measured VRAM: 4k tokens≈17GB total → model footprint ~16GB; 32k tokens≈20GB total → 6GB activation headroom OK; 65k tokens≈23GB total → only 3GB activation, risky. Context declared at 32k (safe). Strong coding, tool use, and long-context retention. Different training paradigm from Qwen MoE — may handle OpenCode tool calling better if Qwen MoE caused issues.
+
+Session observations (2026-06-19):
+- Promising initial results — tool calling worked, read files, made a plan
+- Repetition degeneration loop triggered: model repeated 'node:util: JSON.stringify (9;' infinitely
+- Root cause: mlx_lm.server default temp=0.0 (greedy decoding). With greedy sampling, once a
+  high-probability token loop starts there is no escape. This is a server-wide setting, not model-
+  specific — all models were affected. Fixed by setting MLX_TEMP=0.6 (server default).
+- Note: repetition_penalty is not a CLI flag on mlx_lm.server; temperature is the correct lever."""
 model_vram_gb      = 16
 gpu_wired_limit_gb = 26
 
