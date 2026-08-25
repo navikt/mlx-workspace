@@ -36,3 +36,11 @@ TodoWrite([{content: "Create package.json", status: "completed"}, ...])
 
 Keep exactly one item `in_progress` at a time. Add follow-up todos if you discover new
 work mid-task.
+
+## Mise Tasks Requirement
+
+This workspace uses `mise` (mise-en-place) as its primary task runner and environment manager.
+
+- **Use mise tasks** — always prefer running `mise run <task>` over executing underlying python scripts or commands directly.
+- **Check available tasks** — read `mise.toml` to see the available tasks (e.g., `setup`, `model-use`, `server`, `vram-set`).
+- **Dependencies** — do not manually install dependencies with `pip`; rely on the `mise run setup` task to manage the virtual environment and installations.

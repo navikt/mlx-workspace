@@ -1,0 +1,17 @@
+[meta]
+name               = "Qwen2.5-72B Instruct 8bit"
+released           = "2026-08"
+status             = "recommended"
+spec_source        = "local"
+notes              = "The sweet spot for 128GB Mac. Leaves ~40GB for massive 128K context window."
+model_vram_gb      = 72
+gpu_wired_limit_gb = 115
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen2.5-72B-Instruct-8bit"
+MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
