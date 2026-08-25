@@ -35,6 +35,10 @@ MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
 MLX_SERVER_TYPE            = "mlx-lm"  # override to "mlx-vlm" in profiles that need it
 
+# ── HuggingFace Fixes ─────────────────────────────────────────────────────────
+HF_HUB_DISABLE_XET         = "1"
+HF_HUB_ENABLE_HF_TRANSFER  = "0"
+
 VIRTUAL_ENV = "{{config_root}}/.venv"
 _.path = ["{{config_root}}/.venv/bin"]
 
