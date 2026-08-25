@@ -50,13 +50,9 @@ def main():
     print(f"\n→ Downloading {meta['name']} ({model_id})")
     print("  This may take a while depending on the model size and your connection...\n")
     
-    # We explicitly run in the venv to use its huggingface-cli
-    workspace = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    cli_path = os.path.join(workspace, ".venv", "bin", "huggingface-cli")
-    
     # Run the download command
     # Inherit env so HF_HUB_DISABLE_XET applies if they have it set in their terminal
-    cmd = [cli_path, "download", model_id]
+    cmd = ["huggingface-cli", "download", model_id]
     
     try:
         subprocess.run(cmd, check=True)
