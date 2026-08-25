@@ -1,0 +1,17 @@
+[meta]
+name               = "DeepSeek V2.5 236B MoE 4bit"
+released           = "2024-09"
+status             = "testing"
+spec_source        = "local"
+notes              = "Extreme Max-out model. Massive 236B MoE. May require VRAM tweak. Watch out for memory swapping."
+model_vram_gb      = 115
+gpu_wired_limit_gb = 115
+
+[params]
+MLX_MODEL                  = "mlx-community/DeepSeek-V2.5-4bit"
+MLX_CACHE_BYTES            = "8589934592"   # 8GB cache (tight)
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "4096"
+MLX_OPENCODE_CONTEXT       = "16384"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

@@ -1,0 +1,17 @@
+[meta]
+name               = "Mixtral 8x22B Instruct 4bit"
+released           = "2024-04"
+status             = "testing"
+spec_source        = "local"
+notes              = "Fast MoE with 141B total parameters but 39B active. Efficient inference."
+model_vram_gb      = 71
+gpu_wired_limit_gb = 96
+
+[params]
+MLX_MODEL                  = "mlx-community/Mixtral-8x22B-Instruct-v0.1-4bit"
+MLX_CACHE_BYTES            = "17179869184"  # 16GB cache
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "4096"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

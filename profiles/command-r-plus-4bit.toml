@@ -1,0 +1,17 @@
+[meta]
+name               = "Command R+ 104B 4bit"
+released           = "2024-08"
+status             = "testing"
+spec_source        = "local"
+notes              = "The RAG specialist. Kept at 4-bit to ensure enough room for huge context window."
+model_vram_gb      = 60
+gpu_wired_limit_gb = 96
+
+[params]
+MLX_MODEL                  = "mlx-community/Command-R-plus-08-2024-4bit"
+MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "4096"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
