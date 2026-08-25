@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+# mise description="Download a model's weights to cache without activating it. Usage: mise run model-download [<key>]"
+"""Download a model to the Hugging Face cache using huggingface-cli."""
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+import _profiles as P
+
+def pick_interactive() -> str:
+    """Prompt user to choose a profile (fzf if available, else numbered list)."""
+    keys = P.list_keys()
+    if not keys:
+        raise SystemExit("No profiles found in profiles/. Add a .toml file first.")
+    active = P.active_key()
+    rows = []
+    for k in keys:
+        meta, params = P.load(k)
+        dl = "✓" if P.is_downloaded(params["MLX_MODEL"]) else "–"
+        marker = "●" if k == active else " "
+        rows.append((k, f"{marker} {k:<22} {meta['name']:<40} [{meta['status']}]  DL:{dl}"))
+
+    # simple fallback list for this script
+    print("\nAvailable model profiles:\n")
+    for i, (k, line) in enumerate(rows, 1):
+        print(f"  {i}) {line}")
+    print()
+    try:
+        sel = input("Choose number (or q to quit): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        raise SystemExit("\nCancelled.")
+    if sel.lower() == "q":
+        raise SystemExit("Cancelled.")
+    try:
+        idx = int(sel) - 1
+        return rows[idx][0]
+    except (ValueError, IndexError):
+        raise SystemExit(f"Invalid selection: {sel}")
+
+def main():
+    key = sys.argv[1] if len(sys.argv) > 1 else pick_interactive()
+    meta, params = P.load(key)
+    model_id = params["MLX_MODEL"]
+
+    if P.is_downloaded(model_id):
+        print(f"✓ {model_id} is already downloaded in your cache.")
+        return
+
+    print(f"\n→ Downloading {meta['name']} ({model_id})")
+    print("  This may take a while depending on the model size and your connection...\n")
+    
+    # We explicitly run in the venv to use its huggingface-cli
+    workspace = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cli_path = os.path.join(workspace, ".venv", "bin", "huggingface-cli")
+    
+    # Run the download command
+    # Inherit env so HF_HUB_DISABLE_XET applies if they have it set in their terminal
+    cmd = [cli_path, "download", model_id]
+    
+    try:
+        subprocess.run(cmd, check=True)
+        print(f"\n✓ Successfully downloaded {model_id} to cache.")
+        print(f"  You can activate it later with: mise run model-use {key}")
+    except subprocess.CalledProcessError as e:
+        print(f"\n⚠ Download failed (exit code {e.returncode})", file=sys.stderr)
+        sys.exit(e.returncode)
+    except KeyboardInterrupt:
+        print("\n⚠ Download interrupted.", file=sys.stderr)
+
+if __name__ == "__main__":
+    main()

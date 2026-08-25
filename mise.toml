@@ -106,6 +106,10 @@ env = { COPILOT_PROVIDER_BASE_URL = "http://localhost:8080/v1", COPILOT_PROVIDER
 description = "Switch active model profile. Usage: mise run model-use [<key>]"
 run = ".mise/tasks/model-use"
 
+[tasks.model-download]
+description = "Download a model to cache without activating it. Usage: mise run model-download [<key>]"
+run = ".mise/tasks/model-download"
+
 [tasks.model-list]
 description = "List model profiles (active, status, download state)"
 run = ".mise/tasks/model-list"
