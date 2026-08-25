@@ -1,0 +1,17 @@
+[meta]
+name               = "DeepSeek V4 Flash (284B MoE) 3bit"
+released           = "2026-05"
+status             = "testing"
+spec_source        = "local"
+notes              = "2026's crown jewel for coding. 284B total parameters but only 13B active. Fits perfectly on 128GB Mac with 3-bit mixed precision."
+model_vram_gb      = 105
+gpu_wired_limit_gb = 115
+
+[params]
+MLX_MODEL                  = "mlx-community/DeepSeek-V4-Flash-3bit-mixed"
+MLX_CACHE_BYTES            = "17179869184"  # 16GB cache
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

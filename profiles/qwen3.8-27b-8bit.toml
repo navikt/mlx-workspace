@@ -1,0 +1,17 @@
+[meta]
+name               = "Qwen 3.8 27B Instruct 8bit"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "local"
+notes              = "Incredibly efficient late-2026 model. Punches way above its weight. Leaves 90GB of RAM completely free for massive context."
+model_vram_gb      = 27
+gpu_wired_limit_gb = 96
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-Instruct-8bit"
+MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
+MLX_CACHE_SIZE             = "5"
+MLX_MAX_TOKENS             = "8192"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

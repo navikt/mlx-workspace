@@ -1,0 +1,17 @@
+[meta]
+name               = "Gemma 4 (31B) 8bit"
+released           = "2026-06"
+status             = "testing"
+spec_source        = "local"
+notes              = "Google's 2026 edge-optimized flagship. Great for high-precision local chat."
+model_vram_gb      = 31
+gpu_wired_limit_gb = 96
+
+[params]
+MLX_MODEL                  = "mlx-community/Gemma-4-31B-It-8bit"
+MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
+MLX_CACHE_SIZE             = "5"
+MLX_MAX_TOKENS             = "4096"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
