@@ -3,7 +3,7 @@ name               = "Qwen2.5-72B Instruct 8bit"
 released           = "2026-08"
 status             = "recommended"
 spec_source        = "local"
-notes              = "The sweet spot for 128GB Mac. Leaves ~40GB for massive 128K context window."
+notes              = "The sweet spot for 128GB Mac. Leaves ~40GB for massive context. WARNING: Requires strict JSON prompting ('Make sure your tool call uses strict valid JSON with double quotes') to avoid infinite parsing loops in aider/opencode."
 model_vram_gb      = 72
 gpu_wired_limit_gb = 115
 
