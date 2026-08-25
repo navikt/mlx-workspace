@@ -8,7 +8,7 @@ model_vram_gb      = 105
 gpu_wired_limit_gb = 115
 
 [params]
-MLX_MODEL                  = "mlx-community/DeepSeek-V4-Flash-3bit-mixed"
+MLX_MODEL                  = "mlx-community/DeepSeek-V4-Flash-0731-2.4bit-mixed"
 MLX_CACHE_BYTES            = "17179869184"  # 16GB cache
 MLX_CACHE_SIZE             = "3"
 MLX_MAX_TOKENS             = "8192"
