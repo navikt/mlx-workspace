@@ -50,9 +50,9 @@ def main():
     print(f"\n→ Downloading {meta['name']} ({model_id})")
     print("  This may take a while depending on the model size and your connection...\n")
     
-    # Run the download command
+    # Run the download command using the new 'hf' CLI
     # Inherit env so HF_HUB_DISABLE_XET applies if they have it set in their terminal
-    cmd = ["huggingface-cli", "download", model_id]
+    cmd = ["hf", "download", model_id]
     
     try:
         subprocess.run(cmd, check=True)
