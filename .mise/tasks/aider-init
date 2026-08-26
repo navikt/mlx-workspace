@@ -4,6 +4,10 @@ import json
 import os
 
 model = os.environ["MLX_MODEL"]
+server_type = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
+
+if server_type == "omlx":
+    model = model.replace("/", "--")
 max_tokens = int(os.environ.get("MLX_MAX_TOKENS", "8192"))
 context = int(os.environ.get("MLX_OPENCODE_CONTEXT", "32768"))
 

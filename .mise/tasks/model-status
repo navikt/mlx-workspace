@@ -65,11 +65,16 @@ else:
 if server_running():
     srv = server_model()
     if srv:
-        if srv == hf_id:
+        # oMLX uses -- instead of / for HF cache directory aliases
+        expected_hf = hf_id
+        if params.get("MLX_SERVER_TYPE") == "omlx":
+            expected_hf = hf_id.replace("/", "--")
+            
+        if srv == expected_hf:
             print(f"  Server :8080: ✓ running with correct model")
         else:
             print(f"  Server :8080: ⚠ running but loaded '{srv}'")
-            print(f"               Expected '{hf_id}' — restart with: mise run server")
+            print(f"               Expected '{expected_hf}' — restart with: mise run server")
     else:
         print("  Server :8080: ✓ running (model not queryable)")
 else:
