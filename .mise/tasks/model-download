@@ -13,9 +13,10 @@ def main():
     meta, params = P.load(key)
     model_id = params["MLX_MODEL"]
 
-    if P.is_downloaded(model_id):
-        print(f"✓ {model_id} is already downloaded in your cache.")
-        return
+    # Let hf-cli handle idempotency/resuming natively
+    # if P.is_downloaded(model_id):
+    #     print(f"✓ {model_id} is already downloaded in your cache.")
+    #     return
 
     print(f"\n→ Downloading {meta['name']} ({model_id})")
     print("  This may take a while depending on the model size and your connection...\n")
