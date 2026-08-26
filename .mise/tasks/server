@@ -79,6 +79,7 @@ if server_type == "omlx":
     print(f"  Note: oMLX auto-discovers from Hugging Face cache.")
     cmd = [
         "omlx", "serve",
+        "--port", "8080"
     ]
 elif server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
