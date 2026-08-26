@@ -21,6 +21,11 @@ else:
 agents_md = str(Path.cwd() / "AGENTS.md")
 
 model   = os.environ["MLX_MODEL"]
+server_type = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
+
+# oMLX uses HF cache directory names as aliases natively
+if server_type == "omlx":
+    model = model.replace("/", "--")
 
 # MLX_OPENCODE_CONTEXT — context window declared to opencode (set in mise.toml).
 # Controls when auto-compaction fires: threshold = context − output.
