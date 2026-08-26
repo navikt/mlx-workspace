@@ -21,8 +21,11 @@ def main():
     print("  This may take a while depending on the model size and your connection...\n")
     
     # Run the download command using the new 'hf' CLI
-    # Inherit env so HF_HUB_DISABLE_XET applies if they have it set in their terminal
-    cmd = ["hf", "download", model_id]
+    import shutil
+    if shutil.which("fnox"):
+        cmd = ["fnox", "exec", "--", "hf", "download", model_id]
+    else:
+        cmd = ["hf", "download", model_id]
     
     try:
         subprocess.run(cmd, check=True)
