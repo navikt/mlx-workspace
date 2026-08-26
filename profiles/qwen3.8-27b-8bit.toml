@@ -12,6 +12,7 @@ MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
 MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
 MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "8192"
+MLX_CHAT_TEMPLATE          = "{{config_root}}/qwen_template.jinja"
 MLX_OPENCODE_CONTEXT       = "131072"
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
