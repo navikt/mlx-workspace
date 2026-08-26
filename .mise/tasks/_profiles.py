@@ -69,3 +69,51 @@ def active_key() -> str | None:
         data = tomllib.loads(LOCAL_TOML.read_text())
         return data.get("env", {}).get("MLX_ACTIVE_PROFILE")
     return None
+
+def pick_interactive() -> str:
+    """Prompt user to choose a profile (fzf if available, else numbered list)."""
+    import shutil
+    import subprocess
+    keys = list_keys()
+    if not keys:
+        raise SystemExit("No profiles found in profiles/. Add a .toml file first.")
+    active = active_key()
+    rows = []
+    for k in keys:
+        meta, params = load(k)
+        dl = "✓" if is_downloaded(params["MLX_MODEL"]) else "–"
+        marker = "●" if k == active else " "
+        rows.append((k, f"{marker} {k:<22} {meta['name']:<40} [{meta['status']}]  DL:{dl}"))
+
+    if shutil.which("fzf"):
+        fzf_input = "\n".join(r[1] for r in rows)
+        result = subprocess.run(
+            ["fzf", "--ansi", "--prompt=model> ", "--height=40%", "--reverse"],
+            input=fzf_input,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            raise SystemExit("Cancelled.")
+        chosen_line = result.stdout.strip()
+        # Match back to key by position
+        for i, (k, line) in enumerate(rows):
+            if line == chosen_line:
+                return k
+        raise SystemExit("Could not match fzf selection.")
+
+    print("\nAvailable model profiles:\n")
+    for i, (k, line) in enumerate(rows, 1):
+        print(f"  {i}) {line}")
+    print()
+    try:
+        sel = input("Choose number (or q to quit): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        raise SystemExit("\nCancelled.")
+    if sel.lower() == "q":
+        raise SystemExit("Cancelled.")
+    try:
+        idx = int(sel) - 1
+        return rows[idx][0]
+    except (ValueError, IndexError):
+        raise SystemExit(f"Invalid selection: {sel}")
