@@ -19,6 +19,15 @@ workspace = Path(__file__).resolve().parents[2]  # repo root
 samples_dir = workspace / "samples" / key
 samples_dir.mkdir(parents=True, exist_ok=True)
 
+# Provision the weather-cli challenge spec into the sample workspace
+weather_cli_dir = samples_dir / "weather-cli"
+weather_cli_dir.mkdir(exist_ok=True)
+spec_source = workspace / "WEATHER_CLI_SPEC.md"
+spec_dest = weather_cli_dir / "WEATHER_CLI_SPEC.md"
+if spec_source.exists() and not spec_dest.exists():
+    import shutil
+    shutil.copy2(spec_source, spec_dest)
+
 print(f"→ Starting opencode in {samples_dir.relative_to(workspace)}/")
 
 # Write fresh opencode.json into the samples dir (AGENTS.md path is absolute)
