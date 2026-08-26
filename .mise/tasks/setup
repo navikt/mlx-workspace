@@ -18,10 +18,14 @@ root = Path(__file__).resolve().parents[2]
 # Always: ensure venv and deps are up to date
 subprocess.run([sys.executable, "-m", "venv", ".venv"], cwd=root, check=True)
 pip = root / ".venv" / "bin" / "pip"
-subprocess.run([pip, "install", "--upgrade", "pip", "mlx", "mlx-lm", "mlx-vlm"], cwd=root, check=True)
-# DeepSeek V4 and some new architectures require oMLX since mlx-lm lags behind
+subprocess.run([pip, "install", "--upgrade", "pip"], cwd=root, check=True)
+# Install everything together so pip can resolve oMLX's strict mlx/transformers requirements
 subprocess.run(
-    [sys.executable, "-m", "pip", "install", "git+https://github.com/jundot/omlx.git"],
+    [
+        sys.executable, "-m", "pip", "install", 
+        "mlx-vlm", 
+        "git+https://github.com/jundot/omlx.git"
+    ],
     cwd=root,
     check=True,
     env={**os.environ, "OMLX_WITH_CUSTOM_KERNEL": "1"}
