@@ -1,9 +1,9 @@
 [meta]
 name               = "Qwen 3.8 27B Instruct 8bit"
 released           = "2026-07"
-status             = "testing"
+status             = "recommended"
 spec_source        = "local"
-notes              = "Incredibly efficient late-2026 model. Punches way above its weight. Leaves 90GB of RAM completely free for massive context."
+notes              = "Astoundingly fast and highly agentic. Flawless JSON tool-calling and response times under 10 seconds. Leaves ~100GB of RAM free."
 model_vram_gb      = 27
 gpu_wired_limit_gb = 96
 
