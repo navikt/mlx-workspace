@@ -139,7 +139,14 @@ if chat_template and not os.path.isabs(chat_template):
     workspace = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     chat_template = os.path.join(workspace, chat_template)
 
-if server_type == "mlx-vlm":
+if server_type == "omlx":
+    print(f"→ Starting omlx server (model requires oMLX)")
+    print(f"  model:      {model}")
+    print(f"  Note: oMLX auto-discovers from Hugging Face cache.")
+    cmd = [
+        "omlx", "serve",
+    ]
+elif server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
     print(f"  model:      {model}")
     print(f"  max-tokens: {max_tokens}")

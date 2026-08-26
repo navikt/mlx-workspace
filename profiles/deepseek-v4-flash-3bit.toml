@@ -12,6 +12,7 @@ MLX_MODEL                  = "mlx-community/DeepSeek-V4-Flash-0731-2.4bit-mixed"
 MLX_CACHE_BYTES            = "17179869184"  # 16GB cache
 MLX_CACHE_SIZE             = "3"
 MLX_MAX_TOKENS             = "8192"
+MLX_SERVER_TYPE            = "omlx"
 MLX_CHAT_TEMPLATE          = "{{config_root}}/deepseek_template.jinja"
 MLX_OPENCODE_CONTEXT       = "16384"
 MLX_OPENCODE_OUTPUT        = "4096"
