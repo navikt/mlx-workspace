@@ -12,6 +12,6 @@ MLX_MODEL                  = "mlx-community/DeepSeek-V2.5-4bit"
 MLX_CACHE_BYTES            = "8589934592"   # 8GB cache (tight)
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "4096"
-MLX_OPENCODE_CONTEXT       = "16384"
+MLX_OPENCODE_CONTEXT       = "131072"
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
