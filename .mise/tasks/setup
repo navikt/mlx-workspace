@@ -8,6 +8,7 @@ After first setup, switching models with 'mise run model-use' is permanent
 and setup will never override it.
 """
 import os
+import shutil
 import subprocess
 import sys
 import tomllib
@@ -15,21 +16,90 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
 
+# oMLX is installed from git and builds custom Metal kernels, which is slow.
+# Cache the clone outside the repo and reinstall only when upstream has actually
+# moved — 'pip install git+...' re-clones and rebuilds on every single run.
+OMLX_REPO = "https://github.com/jundot/omlx.git"
+CACHE_DIR = Path.home() / ".cache" / "mlx-workspace"
+OMLX_SRC = CACHE_DIR / "omlx"
+OMLX_STAMP = CACHE_DIR / "omlx.installed"
+FORCE = "--force" in sys.argv
+
+
+def git(*args, **kw):
+    return subprocess.run(["git", *args], check=True, capture_output=True, text=True, **kw)
+
+
+def metal_compiler_available() -> bool:
+    """oMLX's custom kernels need `xcrun metal`, which ships with full Xcode.
+    Command Line Tools alone do not provide it and the build fails with
+    'unable to find utility "metal"'. Detect rather than assume."""
+    return subprocess.run(["xcrun", "-f", "metal"], capture_output=True).returncode == 0
+
+
+def cached_clone_is_usable() -> bool:
+    """A clone interrupted mid-transfer leaves a .git that every later fetch fails on."""
+    if not (OMLX_SRC / ".git").is_dir():
+        return False
+    try:
+        git("rev-parse", "HEAD", cwd=OMLX_SRC)
+        return True
+    except subprocess.CalledProcessError:
+        print("⚠  Cached oMLX clone is incomplete — re-cloning")
+        shutil.rmtree(OMLX_SRC, ignore_errors=True)
+        return False
+
+
+def sync_omlx_source() -> str:
+    """Clone once, fetch thereafter. Returns the checked-out commit sha."""
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    if cached_clone_is_usable():
+        print(f"→ Updating cached oMLX clone ({OMLX_SRC})")
+        git("fetch", "--depth", "1", "origin", "HEAD", cwd=OMLX_SRC)
+        git("reset", "--hard", "FETCH_HEAD", cwd=OMLX_SRC)
+    else:
+        print(f"→ Cloning oMLX into {OMLX_SRC} (once — cached for later runs)")
+        git("clone", "--depth", "1", OMLX_REPO, str(OMLX_SRC))
+    return git("rev-parse", "HEAD", cwd=OMLX_SRC).stdout.strip()
+
 # Always: ensure venv and deps are up to date
 subprocess.run([sys.executable, "-m", "venv", ".venv"], cwd=root, check=True)
 pip = root / ".venv" / "bin" / "pip"
+# Everything below installs through the venv's own interpreter. sys.executable is
+# mise's python on a fresh clone (the venv bin dir does not exist yet when mise
+# resolves PATH), so using it would land the heavy deps outside the venv.
+venv_python = str(root / ".venv" / "bin" / "python")
 subprocess.run([pip, "install", "--upgrade", "pip"], cwd=root, check=True)
 # Install everything together so pip can resolve oMLX's strict mlx/transformers requirements
-subprocess.run(
-    [
-        sys.executable, "-m", "pip", "install", 
-        "mlx-vlm", 
-        "git+https://github.com/jundot/omlx.git"
-    ],
-    cwd=root,
-    check=True,
-    env={**os.environ, "OMLX_WITH_CUSTOM_KERNEL": "1"}
-)
+omlx_sha = sync_omlx_source()
+installed_sha = OMLX_STAMP.read_text().strip() if OMLX_STAMP.exists() else ""
+if omlx_sha == installed_sha and not FORCE:
+    print(f"✓ oMLX already installed at {omlx_sha[:12]} — skipping rebuild (--force to reinstall)")
+    subprocess.run([venv_python, "-m", "pip", "install", "mlx-vlm"], cwd=root, check=True)
+else:
+    # A previous failed build leaves CMake state in the cached source tree that
+    # breaks the next attempt — pip's own git+ install never hit this because it
+    # cloned to a fresh temp dir every time.
+    for stale in (OMLX_SRC / "build", OMLX_SRC / "omlx.egg-info"):
+        shutil.rmtree(stale, ignore_errors=True)
+
+    env = {**os.environ}
+    if metal_compiler_available():
+        env["OMLX_WITH_CUSTOM_KERNEL"] = "1"
+        print(f"→ Installing oMLX {omlx_sha[:12]} with custom Metal kernels (takes a few minutes)")
+    else:
+        env.pop("OMLX_WITH_CUSTOM_KERNEL", None)
+        print(f"→ Installing oMLX {omlx_sha[:12]} WITHOUT custom Metal kernels")
+        print("   'xcrun metal' not found — that compiler ships with full Xcode, not")
+        print("   Command Line Tools. Install Xcode and re-run 'mise run setup --force'")
+        print("   to build the DeepSeek sparse-attention kernels.")
+    subprocess.run(
+        [venv_python, "-m", "pip", "install", "mlx-vlm", str(OMLX_SRC)],
+        cwd=root,
+        check=True,
+        env=env,
+    )
+    OMLX_STAMP.write_text(omlx_sha)
 subprocess.run(
     ["pipx", "install", "aider-chat", "--python", "python3.12"],
     cwd=root,

@@ -1,5 +1,5 @@
 [meta]
-name               = "Qwen 3.8 27B Instruct 8bit"
+name               = "Qwen 3.8 27B abliterated MTPLX Q8"
 released           = "2026-07"
 status             = "recommended"
 spec_source        = "local"
@@ -12,8 +12,8 @@ MLX_MODEL                  = "mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8"
 MLX_SERVER_TYPE            = "omlx"
 MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
 MLX_CACHE_SIZE             = "5"
-MLX_MAX_TOKENS             = "8192"
-MLX_CHAT_TEMPLATE          = "{{config_root}}/qwen_template.jinja"
+MLX_MAX_TOKENS             = "32768"
+MLX_CHAT_TEMPLATE          = "qwen_template.jinja"
 MLX_OPENCODE_CONTEXT       = "131072"
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"  # thinking model: 4096 truncated mid-<think> (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

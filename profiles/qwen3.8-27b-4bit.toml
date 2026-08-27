@@ -1,0 +1,22 @@
+[meta]
+name               = "Qwen 3.8 27B 4bit"
+released           = "2026-07"
+status             = "untested"
+spec_source        = "externally verified"
+notes              = "Target-hardware build for a 48 GB Pro Mac. 16 GB weights at 4-bit, halving the per-token memory traffic of the 8-bit — which binds before capacity does on Pro-class bandwidth. No speculative decoding: the MTP head is oMLX-only, so expect the 11-14 tok/s non-MTP baseline, not the 8-bit MTPLX 18-38."
+model_vram_gb      = 16
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-4bit"
+# NO draft model: the MTP head is model_type `qwen3_5_mtp`, which mlx-lm cannot load
+# ("Model type qwen3_5_mtp not supported"). MTP is an oMLX feature — the 8-bit MTPLX build
+# runs it because oMLX absorbs mtp.safetensors into its own index. A drafter for mlx-lm would
+# have to be an ordinary small qwen3_5 model, not this head.
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "12884901888"  # 12GB cache — fits the 36GB wired ceiling on 48GB
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

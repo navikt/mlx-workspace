@@ -1,14 +1,32 @@
 #!/usr/bin/env python3
 # mise description="Generate opencode.json. Usage: mise run opencode-init [<output-dir>]"
-"""Generate opencode.json from mise env vars.
+"""Generate opencode.json for the active model profile.
 
 Optional first argument: directory to write opencode.json into (default: CWD).
-Used by 'mise run opencode' to write into samples/<model-key>/.
+Used by 'mise run opencode' to write into workspaces/<model-key>/.
+
+Values are read from profiles/<active-key>.toml directly, NOT from mise.local.toml:
+mise.local.toml is only refreshed by 'model-use', so editing a profile and relaunching
+opencode would otherwise silently keep serving the previous values.
 """
 import json
 import os
 import sys
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _profiles as P
+
+_key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+_params = P.load(_key)[1] if _key else {}
+
+
+def param(name):
+    """Profile value wins over the (possibly stale) mise env, then the shared default."""
+    val = _params.get(name, os.environ.get(name, P.OPTIONAL_DEFAULTS.get(name)))
+    if val is None:
+        raise SystemExit(f"✗ {name} not set — run: mise run model-use")
+    return str(val)
 
 # Resolve output directory (default: CWD)
 if len(sys.argv) > 1:
@@ -17,11 +35,16 @@ if len(sys.argv) > 1:
 else:
     out_dir = Path.cwd()
 
-# AGENTS.md path: absolute so it resolves correctly from any output dir
-agents_md = str(Path.cwd() / "AGENTS.md")
+# AGENTS.md lives next to the config, in the dir opencode actually runs from
+# (workspaces/<model-key>/ — copied there by the 'opencode' task). Fall back to the
+# repo root copy when generating a config for the root workspace itself.
+agents_md = out_dir / "AGENTS.md"
+if not agents_md.exists():
+    agents_md = Path.cwd() / "AGENTS.md"
+agents_md = str(agents_md)
 
-model   = os.environ["MLX_MODEL"]
-server_type = os.environ.get("MLX_SERVER_TYPE", "mlx-lm").strip()
+model   = param("MLX_MODEL")
+server_type = param("MLX_SERVER_TYPE").strip()
 
 # oMLX uses HF cache directory names as aliases natively
 if server_type == "omlx":
@@ -30,24 +53,24 @@ if server_type == "omlx":
 # MLX_OPENCODE_CONTEXT — context window declared to opencode (set in mise.toml).
 # Controls when auto-compaction fires: threshold = context − output.
 # Intentionally lower than model's real context so each compaction is small and fast.
-context       = int(os.environ.get("MLX_OPENCODE_CONTEXT", "131072"))
+context       = int(param("MLX_OPENCODE_CONTEXT"))
 
 # MLX_OPENCODE_OUTPUT — output token reserve for compaction math (set in mise.toml).
 # Separate from MLX_MAX_TOKENS: compaction summaries need ~2-4k tokens, not the full
 # generation budget. Smaller reserve = higher effective threshold before compaction fires.
-output        = int(os.environ.get("MLX_OPENCODE_OUTPUT", "4096"))
+output        = int(param("MLX_OPENCODE_OUTPUT"))
 
 # MLX_OPENCODE_CHUNK_TIMEOUT — ms between SSE tokens before opencode drops the connection.
 # At large context (80k+ tokens) a single token can take minutes on local hardware.
 # If this fires mid-generation the model returns an empty response and opencode exits
 # the loop silently (observed at 96k tokens: one token took 3min 28s).
-chunk_timeout = int(os.environ.get("MLX_OPENCODE_CHUNK_TIMEOUT", "600000"))
+chunk_timeout = int(param("MLX_OPENCODE_CHUNK_TIMEOUT"))
 
 config = {
     "$schema": "https://opencode.ai/config.json",
     # Instruction files opencode loads into every session's system context.
     # AGENTS.md contains project-level rules (e.g. always use rtk for shell commands).
-    # Absolute path so it resolves correctly whether opencode runs from root or samples/<key>/.
+    # Absolute path so it resolves correctly whether opencode runs from root or workspaces/<key>/.
     "instructions": [agents_md],
     # RTK plugin: intercepts tool.execute.before and rewrites bash commands
     # to use rtk for token-compressed output. Installed globally via:

@@ -1,0 +1,2 @@
+[secrets]
+HF_TOKEN= { provider = "keychain", value = "HF_TOKEN" }

@@ -23,5 +23,5 @@ MLX_CACHE_BYTES            = "15032385536"  # 14GB — 26GB cap − 6GB model �
 MLX_CACHE_SIZE             = "5"            # 5 sessions; 6×~3GB = 18GB caused OOM crash
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"       # 128k declared; compaction fires at ~127k
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"       # matches every other benchmarked profile; 4096 truncated runs mid-file
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — observed >3min/token at 96k context

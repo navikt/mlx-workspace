@@ -44,7 +44,7 @@ Run LLMs locally on Apple Silicon with [MLX](https://github.com/ml-explore/mlx),
 
 ## Prerequisites
 
-- Apple Silicon Mac (M1/M2/M3/M4)
+- Apple Silicon Mac (M1–M5). Tested on a 32 GB M1 Max and a 128 GB M5 Max — see `MODELS.md`
 - [mise](https://mise.jdx.dev) (`brew install mise`)
 - [rtk](https://github.com/rtk-ai/rtk) (`brew install rtk-ai/tap/rtk`) — token-compressing output proxy
 - Python 3.12 for aider (`brew install python@3.12`)
@@ -170,6 +170,8 @@ mise run vram-set 28        # set a custom GB value
 mise run vram-reset         # restore macOS default
 ```
 
+Profiles carry their own ceiling as `gpu_wired_limit_gb`; `mise run model-use` applies it.
+
 **Quick reference for 32GB Macs:**
 
 | GPU allocation | OS headroom | Command |
@@ -177,6 +179,13 @@ mise run vram-reset         # restore macOS default
 | 24 GB | 8 GB (safe default) | `mise run vram-set 24` |
 | 26 GB | 6 GB (recommended) | `mise run vram-set 26` |
 | 28 GB | 4 GB (risky) | `mise run vram-set 28` |
+
+**Quick reference for 128GB Macs:**
+
+| GPU allocation | OS headroom | Used by |
+|---|---|---|
+| 96 GB | 32 GB | `qwen3.8-27b-8bit` (~28 GB model, room to spare) |
+| 115 GB | 13 GB | `deepseek-v4-flash-3bit` (~84 GB wired) |
 
 > ⚠️ **Risks:** Allocating too much causes hard lockups, beachballs, or forced reboots. Always leave at least 4–6 GB for macOS. The setting resets on reboot.
 

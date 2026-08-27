@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-# mise description="Start opencode in samples/<model-key>/ for per-model output isolation"
-"""Launch opencode from samples/<active-profile-key>/.
+# mise description="Start opencode in workspaces/<model-key>/ for per-model output isolation"
+"""Launch opencode from workspaces/<active-profile-key>/.
 
 Each model's sessions, generated files, and outputs stay in their own directory,
 making it easy to compare results across models later.
 """
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -16,29 +17,30 @@ if not key:
     sys.exit(1)
 
 workspace = Path(__file__).resolve().parents[2]  # repo root
-samples_dir = workspace / "samples" / key
-samples_dir.mkdir(parents=True, exist_ok=True)
+workspace_dir = workspace / "workspaces" / key
+workspace_dir.mkdir(parents=True, exist_ok=True)
 
-# Provision the weather-cli challenge spec into the sample workspace
-weather_cli_dir = samples_dir / "weather-cli"
+# Provision the weather-cli challenge spec into the model workspace
+weather_cli_dir = workspace_dir / "weather-cli"
 weather_cli_dir.mkdir(exist_ok=True)
-spec_source = workspace / "WEATHER_CLI_SPEC.md"
-spec_dest = weather_cli_dir / "WEATHER_CLI_SPEC.md"
-if spec_source.exists() and not spec_dest.exists():
-    import shutil
-    shutil.copy2(spec_source, spec_dest)
+shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
 
-print(f"→ Starting opencode in {samples_dir.relative_to(workspace)}/")
+# opencode reads AGENTS.md from its working directory, which is workspaces/<key>/,
+# not the repo root. Copy the current rules in on every launch so rule edits
+# at the root always reach the model being tested.
+shutil.copy2(workspace / "AGENTS.md", workspace_dir / "AGENTS.md")
 
-# Write fresh opencode.json into the samples dir (AGENTS.md path is absolute)
+print(f"→ Starting opencode in {workspace_dir.relative_to(workspace)}/")
+
+# Write fresh opencode.json into the workspace dir (points at the local AGENTS.md)
 result = subprocess.run(
-    ["mise", "run", "opencode-init", str(samples_dir)],
+    ["mise", "run", "opencode-init", str(workspace_dir)],
     cwd=str(workspace),
 )
 if result.returncode != 0:
     print("✗ opencode-init failed", file=sys.stderr)
     sys.exit(result.returncode)
 
-# Launch opencode with samples/<key> as working directory
-os.chdir(samples_dir)
+# Launch opencode with workspaces/<key> as working directory
+os.chdir(workspace_dir)
 os.execvp("opencode", ["opencode"] + sys.argv[1:])

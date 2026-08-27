@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# mise description="Delete the active model's workspace. Usage: mise run workspace-clear [-y]"
+"""Reset workspaces/<active-profile-key>/ so the next opencode run starts clean.
+
+'mise run opencode' re-provisions the spec, AGENTS.md and opencode.json on launch,
+so clearing throws away only a previous run's output — as long as that output has
+not been committed or staged. Two guards enforce that: the workspace must not be
+any running process's working directory, and it must contain no git-tracked files.
+"""
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+if not key:
+    sys.exit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+
+workspace_dir = Path(__file__).resolve().parents[2] / "workspaces" / key
+if not workspace_dir.is_dir():
+    print(f"✓ Nothing to clear — {workspace_dir.name}/ does not exist")
+    sys.exit(0)
+
+# Deleting a directory that a running process has as its cwd leaves that process with a
+# dangling inode: every path it touches fails with NotFound until it is restarted.
+# +D walks the whole tree: opencode's shell often sits in weather-cli/, a
+# subdirectory, which the plain path form does not match.
+in_use = subprocess.run(
+    ["lsof", "-a", "-d", "cwd", "+D", str(workspace_dir)],
+    capture_output=True, text=True,
+).stdout.strip()
+if in_use:
+    procs = {l.split()[0] for l in in_use.splitlines()[1:]}
+    sys.exit(
+        f"✗ In use as the working directory of: {', '.join(sorted(procs))}\n"
+        f"  Quit it first — clearing now would break it until restart."
+    )
+
+# Tracked or staged files are history, not scratch output — rmtree would destroy
+# work git is holding on to. Refuse rather than guess which files matter.
+tracked = subprocess.run(
+    ["git", "status", "--porcelain", "--", str(workspace_dir)],
+    capture_output=True, text=True, cwd=workspace_dir.parents[1],
+).stdout
+tracked = [l for l in tracked.splitlines() if not l.startswith("??")]
+if tracked:
+    sys.exit(
+        f"✗ {len(tracked)} git-tracked or staged file(s) under workspaces/{key}/\n"
+        f"  Commit or unstage them first — clearing now would delete them."
+    )
+
+files = [p for p in workspace_dir.rglob("*") if p.is_file()]
+print(f"→ {workspace_dir}")
+print(f"  {len(files)} files")
+
+if "-y" not in sys.argv and "--yes" not in sys.argv:
+    if input("  Delete? [y/N] ").strip().lower() not in ("y", "yes"):
+        sys.exit("✗ Aborted")
+
+shutil.rmtree(workspace_dir)
+print(f"✓ Cleared workspaces/{key}/")

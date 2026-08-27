@@ -31,7 +31,7 @@ MLX_CACHE_BYTES            = "15032385536"
 MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"  # 4096 truncated runs mid-file (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
 MLX_SERVER_TYPE            = "mlx-lm"  # override to "mlx-vlm" in profiles that need it
 
@@ -91,9 +91,13 @@ description = "Generate opencode.json from current MLX_MODEL (run automatically 
 run = ".mise/tasks/opencode-init"
 
 [tasks.opencode]
-description = "Start opencode pointed at the local MLX server"
-depends = ["opencode-init"]
-run = "opencode"
+# Implementation lives in .mise/tasks/opencode — it provisions workspaces/<key>/ and
+# calls opencode-init with that directory. No 'depends' here: it would run opencode-init
+# a second time against the repo root and leave a stale opencode.json behind.
+description = "Start opencode in workspaces/<model-key>/ against the local MLX server"
+
+[tasks.workspace-clear]
+description = "Delete the active model's workspace so the next run starts clean"
 
 [tasks.copilot]
 description = "Start GitHub Copilot CLI pointed at the local MLX server"

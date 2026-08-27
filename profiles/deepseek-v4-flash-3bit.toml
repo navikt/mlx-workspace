@@ -1,9 +1,9 @@
 [meta]
 name               = "DeepSeek V4 Flash (284B MoE) 3bit"
 released           = "2026-05"
-status             = "testing"
+status             = "recommended"
 spec_source        = "local"
-notes              = "2026's crown jewel for coding. 284B total parameters but only 13B active. Fits perfectly on 128GB Mac with 3-bit mixed precision."
+notes              = "284B MoE, ~13B active. 10m 09s / 17-17 on weather-cli at 19.1 tok/s. Acts rather than deliberates: 30 small turns, plans to a file, delegates to sub-agents. Costs 79 GB resident for the same wall clock as qwen3.8-27b."
 model_vram_gb      = 105
 gpu_wired_limit_gb = 115
 
@@ -13,7 +13,7 @@ MLX_CACHE_BYTES            = "17179869184"  # 16GB cache
 MLX_CACHE_SIZE             = "3"
 MLX_MAX_TOKENS             = "32768"
 MLX_SERVER_TYPE            = "omlx"
-MLX_CHAT_TEMPLATE          = "{{config_root}}/deepseek_template.jinja"
+MLX_CHAT_TEMPLATE          = "deepseek_template.jinja"
 MLX_OPENCODE_CONTEXT       = "131072"
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"  # parity with qwen3.8 run
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

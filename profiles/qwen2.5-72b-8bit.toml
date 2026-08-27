@@ -1,6 +1,6 @@
 [meta]
 name               = "Qwen2.5-72B Instruct 8bit"
-released           = "2026-08"
+released           = "2024-09"
 status             = "broken"
 spec_source        = "local"
 notes              = "BROKEN: Even with strict JSON prompting, this model fails to properly execute tool calls in aider/opencode (it just writes to the chat instead of writing to files). Do not use for autonomous coding."

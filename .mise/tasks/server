@@ -13,38 +13,27 @@ changes to a profile take effect without needing to re-run model-use.
 """
 import os
 import sys
-import tomllib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _profiles as P
 
 # ---------------------------------------------------------------------------
-# Sync env from the active profile so the server always reflects the current
-# profile state, not stale mise.local.toml values from a previous run.
+# Read the active profile from disk so the server always reflects current
+# profile state, not stale mise.local.toml values. Defaults come from
+# _profiles.OPTIONAL_DEFAULTS — never redeclared here.
 # ---------------------------------------------------------------------------
-OPTIONAL_DEFAULTS = {
-    "MLX_SERVER_TYPE":       "mlx-lm",
-    "MLX_CHAT_TEMPLATE":     "",
-    "MLX_TEMP":              "0.6",
-    "MLX_TOP_P":             "1.0",
-    "MLX_CHAT_TEMPLATE_ARGS": "",
-}
-
 active_profile = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
 if active_profile:
-    workspace = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    profile_path = os.path.join(workspace, "profiles", f"{active_profile}.toml")
-    if os.path.exists(profile_path):
-        with open(profile_path, "rb") as f:
-            profile = tomllib.load(f)
-        params = profile.get("params", {})
-        # Apply profile params (override stale mise.local.toml values)
-        for key, val in params.items():
-            os.environ[key] = str(val)
-        # Reset optional vars not set by this profile to their defaults
-        for key, default in OPTIONAL_DEFAULTS.items():
-            if key not in params:
-                os.environ[key] = default
-        print(f"✓ Synced params from profiles/{active_profile}.toml")
-    else:
-        print(f"⚠  Profile not found: profiles/{active_profile}.toml — using env as-is", file=sys.stderr)
+    cfg = P.params_for(active_profile)
+    os.environ.update(cfg)
+    print(f"✓ Synced params from profiles/{active_profile}.toml")
+    ignored = P.warn_ignored(active_profile, cfg)
+    if ignored:
+        print(f"⚠  {cfg['MLX_SERVER_TYPE']} cannot apply these profile params — they have NO effect:")
+        for name in ignored:
+            print(f"     {name} = {cfg[name]}")
+        if cfg["MLX_SERVER_TYPE"] == "omlx":
+            print("   oMLX reads its own ~/.omlx/settings.json for context/temperature.")
 else:
     print("⚠  MLX_ACTIVE_PROFILE not set — using env as-is (run 'mise run model-use' to select a profile)", file=sys.stderr)
 
@@ -67,6 +56,18 @@ chat_template_args = os.environ.get("MLX_CHAT_TEMPLATE_ARGS", "").strip()
 temp  = os.environ.get("MLX_TEMP", "0.6").strip()
 # Nucleus sampling top-p. Override via MLX_TOP_P in [params] (default 1.0 = full distribution).
 top_p = os.environ.get("MLX_TOP_P", "1.0").strip()
+# Additional sampling knobs — several model cards publish recommended values
+# (e.g. Qwen: top_k 20, min_p 0). 0 / 0.0 disables each.
+top_k = os.environ.get("MLX_TOP_K", "0").strip()
+min_p = os.environ.get("MLX_MIN_P", "0.0").strip()
+# Speculative decoding for mlx-lm: a small model drafts tokens the big one verifies.
+# This is the mlx-lm equivalent of the MTP drafter oMLX uses (2-3x on Qwen3.8).
+draft_model  = os.environ.get("MLX_DRAFT_MODEL", "").strip()
+num_draft    = os.environ.get("MLX_NUM_DRAFT_TOKENS", "").strip()
+# Prefill batch size. Lower values shrink the activation spike during prompt
+# processing — the spike that OOM'd GLM-4.7-Flash and Qwen3.5-27B on rig A.
+prefill_step = os.environ.get("MLX_PREFILL_STEP_SIZE", "").strip()
+trust_remote = os.environ.get("MLX_TRUST_REMOTE_CODE", "").strip()
 
 # Resolve chat_template relative to workspace root if it's a relative path
 if chat_template and not os.path.isabs(chat_template):
@@ -77,10 +78,17 @@ if server_type == "omlx":
     print(f"→ Starting omlx server (model requires oMLX)")
     print(f"  model:      {model}")
     print(f"  Note: oMLX auto-discovers from Hugging Face cache.")
-    cmd = [
-        "omlx", "serve",
-        "--port", "8080"
-    ]
+    cmd = ["omlx", "serve", "--port", "8080"]
+    for flag, var in (
+        ("--memory-guard",            "MLX_OMLX_MEMORY_GUARD"),
+        ("--memory-guard-gb",         "MLX_OMLX_MEMORY_GUARD_GB"),
+        ("--hot-cache-max-size",      "MLX_OMLX_HOT_CACHE_MAX_SIZE"),
+        ("--paged-ssd-cache-max-size", "MLX_OMLX_SSD_CACHE_MAX_SIZE"),
+    ):
+        val = os.environ.get(var, "").strip()
+        if val:
+            cmd += [flag, val]
+            print(f"  {flag}: {val}")
 elif server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
     print(f"  model:      {model}")
@@ -99,6 +107,14 @@ else:
     print(f"  max-tokens:  {max_tokens}")
     print(f"  temp:        {temp}")
     print(f"  top-p:       {top_p}")
+    if top_k != "0":
+        print(f"  top-k:       {top_k}")
+    if min_p != "0.0":
+        print(f"  min-p:       {min_p}")
+    if draft_model:
+        print(f"  draft-model: {draft_model}  (speculative decoding)")
+    if prefill_step:
+        print(f"  prefill-step-size: {prefill_step}")
     print(f"  cache-bytes: {cache_bytes}")
     print(f"  cache-size:  {cache_size}")
     if chat_template:
@@ -122,5 +138,17 @@ else:
         cmd += ["--chat-template", chat_template]
     if chat_template_args:
         cmd += ["--chat-template-args", chat_template_args]
+    if top_k != "0":
+        cmd += ["--top-k", top_k]
+    if min_p != "0.0":
+        cmd += ["--min-p", min_p]
+    if draft_model:
+        cmd += ["--draft-model", draft_model]
+        if num_draft:
+            cmd += ["--num-draft-tokens", num_draft]
+    if prefill_step:
+        cmd += ["--prefill-step-size", prefill_step]
+    if trust_remote:
+        cmd += ["--trust-remote-code"]
 
 os.execvp(cmd[0], cmd)

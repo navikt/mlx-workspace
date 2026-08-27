@@ -21,6 +21,63 @@ REQUIRED_PARAMS = [
 
 VALID_STATUS = {"recommended", "untested", "testing", "slow", "oom", "skipped", "broken", "failed"}
 
+# Single source of truth for every optional param and its default.
+# Any task that needs a profile value reads it through params_for() / OPTIONAL_DEFAULTS —
+# never re-declares a default of its own, so the three copies of these values that used to
+# live in model-use, server and opencode-init cannot drift apart again.
+OPTIONAL_DEFAULTS = {
+    # backend + prompt formatting
+    "MLX_SERVER_TYPE":            "mlx-lm",
+    "MLX_CHAT_TEMPLATE":          "",
+    "MLX_CHAT_TEMPLATE_ARGS":     "",
+    "MLX_TRUST_REMOTE_CODE":      "",       # non-empty enables --trust-remote-code
+    # sampling
+    "MLX_TEMP":                   "0.6",    # 0.0 (mlx-lm default) causes repetition loops
+    "MLX_TOP_P":                  "1.0",
+    "MLX_TOP_K":                  "0",      # 0 = disabled
+    "MLX_MIN_P":                  "0.0",
+    # throughput
+    "MLX_DRAFT_MODEL":            "",       # speculative decoding for mlx-lm (oMLX uses MTP instead)
+    "MLX_NUM_DRAFT_TOKENS":       "",
+    "MLX_PREFILL_STEP_SIZE":      "",       # lower = smaller prefill activation spike (OOM control)
+    # oMLX-only
+    "MLX_OMLX_MEMORY_GUARD":      "",       # off | safe | balanced | aggressive
+    "MLX_OMLX_MEMORY_GUARD_GB":   "",
+    "MLX_OMLX_HOT_CACHE_MAX_SIZE": "",
+    "MLX_OMLX_SSD_CACHE_MAX_SIZE": "",
+    # opencode client limits
+    "MLX_OPENCODE_CONTEXT":       "131072",
+    "MLX_OPENCODE_OUTPUT":        "16384",
+    "MLX_OPENCODE_CHUNK_TIMEOUT": "600000",
+}
+
+# Params the server ignores for a given backend — warned about rather than applied,
+# so a profile can never quietly claim a setting that has no effect.
+IGNORED_BY_BACKEND = {
+    "omlx": [
+        "MLX_MAX_TOKENS", "MLX_TEMP", "MLX_TOP_P", "MLX_TOP_K", "MLX_MIN_P",
+        "MLX_CHAT_TEMPLATE", "MLX_CHAT_TEMPLATE_ARGS", "MLX_CACHE_BYTES", "MLX_CACHE_SIZE",
+        "MLX_DRAFT_MODEL", "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE",
+    ],
+    "mlx-vlm": [
+        "MLX_TEMP", "MLX_TOP_P", "MLX_TOP_K", "MLX_MIN_P", "MLX_CACHE_BYTES", "MLX_CACHE_SIZE",
+        "MLX_CHAT_TEMPLATE", "MLX_CHAT_TEMPLATE_ARGS", "MLX_DRAFT_MODEL",
+        "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE",
+    ],
+}
+
+
+def params_for(key: str) -> dict:
+    """Profile params merged over OPTIONAL_DEFAULTS. Profile always wins."""
+    params = {k: str(v) for k, v in load(key)[1].items()}
+    return {**OPTIONAL_DEFAULTS, **params}
+
+
+def warn_ignored(key: str, params: dict) -> list[str]:
+    """Return profile params that the selected backend cannot apply."""
+    declared = set(load(key)[1])
+    return [p for p in IGNORED_BY_BACKEND.get(params["MLX_SERVER_TYPE"], []) if p in declared]
+
 
 def list_keys() -> list[str]:
     return sorted(p.stem for p in PROFILES_DIR.glob("*.toml"))
@@ -38,6 +95,13 @@ def load(key: str) -> tuple[dict, dict]:
     missing = [k for k in REQUIRED_PARAMS if k not in params]
     if missing:
         raise SystemExit(f"Profile '{key}' missing required params: {', '.join(missing)}")
+    unknown = sorted(set(params) - set(REQUIRED_PARAMS) - set(OPTIONAL_DEFAULTS))
+    if unknown:
+        raise SystemExit(
+            f"Profile '{key}' declares unknown param(s): {', '.join(unknown)}. "
+            f"A misspelled param is silently ignored by every backend — fix the name "
+            f"or add it to OPTIONAL_DEFAULTS in _profiles.py."
+        )
     if meta.get("status") not in VALID_STATUS:
         raise SystemExit(
             f"Profile '{key}' has invalid status '{meta.get('status')}'. "
@@ -52,7 +116,10 @@ def hf_cache_dir(hf_id: str) -> Path:
 
 def is_downloaded(hf_id: str) -> bool:
     snaps = hf_cache_dir(hf_id) / "snapshots"
-    return snaps.is_dir() and any(snaps.iterdir())
+    if not snaps.is_dir():
+        return False
+    # A complete download must have at least one large model weight file
+    return any(snaps.rglob("*.safetensors"))
 
 
 def cache_size_gib(hf_id: str) -> float:
