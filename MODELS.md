@@ -23,6 +23,7 @@ Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
 - [Dynamic model switching (no server restart)](#dynamic-model-switching-no-server-restart)
 - [opencode declared context limits](#opencode-declared-context-limits)
 - [Benchmark guide](#benchmark-guide)
+- [opencode drops output from some models](#opencode-drops-output-from-some-models)
 - [Cheap-operations results](#cheap-operations-results)
 - [weather-cli challenge results](#weather-cli-challenge-results)
 - [Model evaluations: rig B (M5 Max 128 GB)](#model-evaluations-rig-b-m5-max-128-gb)
@@ -489,6 +490,59 @@ mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
 
 ---
 
+## opencode drops output from some models
+
+The single most important finding from the cheap-operations round, and it is about the harness
+rather than any model.
+
+**Three models, three different outcomes through the same opencode setup:**
+
+| Model | `model_type` | Through opencode | Direct API |
+|---|---|---|---|
+| Qwen3.6-35B-A3B | `qwen3_5_moe` | works, 1 to 20 tool calls per task | works |
+| Qwen3-Coder-30B-A3B | `qwen3_moe` | **nothing surfaces** | works |
+| Granite 4.1 8B | `granite` | **nothing surfaces** | works |
+
+For the two that fail, opencode reports zero tool calls and no reply text, while the token counter
+shows the model generated output. Asked "What is 7+5", Qwen3-Coder produced three output tokens
+and opencode displayed nothing at all. This is not a tool-calling failure. Everything the model
+returns is discarded.
+
+**The models are fine.** Both were tested directly against the same running server and both return
+correct tool calls on the first attempt, with proper `finish_reason: tool_calls` and well-formed
+arguments.
+
+**Every server-side explanation was tested and eliminated** against Qwen3-Coder:
+
+| Condition | Result |
+|---|---|
+| 1, 3, 5, 8, 12, 15 tools | tool calls correct at every count |
+| 26,551-token system prompt | correct |
+| Two system messages | correct |
+| Streaming (`stream: true`) | correct, `tool_calls` present in the delta |
+
+The tool-count threshold reported elsewhere for Qwen3-Coder, roughly five tools before it starts
+emitting tool syntax as text, **did not reproduce here**. That was the change ranked first in our
+research review, and it is not our problem.
+
+The remaining candidate is a chat template or response-parser mismatch on the opencode side,
+which matches the general pattern in the literature that tool-calls-as-text problems are template
+mismatches rather than prompt problems. An attempt to capture opencode's exact request through a
+logging proxy did not complete, because opencode would not talk to a non-default local port under
+the sandbox. That capture is the obvious next step.
+
+**What this costs us.** Any benchmark result from this harness partly measures opencode
+compatibility rather than model capability. A model can look unusable here and be perfectly good.
+Granite was written up as "never calls tools" on exactly this evidence, and that entry has been
+corrected. Results for a model that produces zero tool calls should be treated as a harness
+result until the model has been checked directly.
+
+**It also raises the priority of the Copilot CLI comparison.** nav-pilot must support both clients
+at GA. If a model's usability depends this strongly on which client drives it, then the client is
+part of the recommendation and has to be measured, not assumed.
+
+---
+
 ## Cheap-operations results
 
 The weather-cli benchmark measures building a whole application, which is the hardest task shape
@@ -502,7 +556,7 @@ dependencies. Every task is pinned to a symbol verified to exist in that reposit
 hard-resets the checkout between tasks and verifies results itself, never trusting the model's
 claim.
 
-### `mlx-community/granite-4.1-8b-4bit` ❌ never calls tools
+### `mlx-community/granite-4.1-8b-4bit` ⚠️ incompatible with opencode, not incapable
 
 | Task | Time | Turns | Tool calls | Files changed | Result |
 |---|---|---|---|---|---|
@@ -534,11 +588,22 @@ rename passed the symbol grep.
 window in which the server received no requests at all. The model was not working; the client was
 stalled. Granite's real per-task time is around 10 seconds.
 
-**Verdict:** ❌ unusable for agentic work in this harness, regardless of speed or footprint. At
-5.12 GB and Apache 2.0 it was the most attractive candidate on paper, which is exactly why it
-needed measuring. Worth one retry with a tool-calling-focused prompt before writing off the model
-rather than the pairing, since its card publishes no sampling recommendation and we ran it on
-defaults.
+**Correction: this was recorded as "never calls tools" and that was wrong.** Tested directly
+against the same server, with the same model, Granite returns a correct tool call on the first
+attempt:
+
+```
+finish_reason: tool_calls
+tool_calls: [{"function": {"name": "read_file", "arguments": "{\"path\": \"build.gradle.kts\"}"}}]
+```
+
+The model is capable. The pairing with opencode is not. Every number in the table above measures
+that pairing, not the model, and none of it should be read as a verdict on Granite.
+
+**Verdict:** ⚠️ untested. At 5.12 GB and Apache 2.0 it remains the most attractive candidate on
+paper, and we still do not know how it performs on real work. Re-run once the opencode
+incompatibility is understood, or measure it through Copilot CLI instead. See
+[opencode drops output from some models](#opencode-drops-output-from-some-models).
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit`
 
