@@ -49,7 +49,8 @@ UV Index: {uvIndex}
 | `User-Agent` | Met.no (**required by ToS**), Geonorge (recommended) | `<appname>/<version> <contact>` e.g. `weather-cli/1.0 github.com/yourname` |
 | `Accept` | Geonorge (recommended) | `application/json` |
 
-> ⚠️ Met.no **will throttle or block** requests with a missing or fake browser User-Agent. The UA must identify the application with contact info.
+> ⚠️ Met.no requires a User-Agent that identifies the app with a real contact. Missing, browser-faked,
+> or placeholder contacts (`example.com`) are rejected with **403**. Throttling is **429**.
 
 ## Error Handling
 

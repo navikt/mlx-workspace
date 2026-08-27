@@ -25,3 +25,9 @@ MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"       # 128k declared; compaction fires at ~127k
 MLX_OPENCODE_OUTPUT        = "16384"       # matches every other benchmarked profile; 4096 truncated runs mid-file
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — observed >3min/token at 96k context
+# Qwen model card sampling. Added after a run collapsed into a degenerate repetition loop
+# ("DIDIDIDI..." emitted by a sub-agent) at the default temp 0.6 with top_k disabled.
+# top_k truncates the sampling pool to the 20 most likely tokens, which stops the
+# distribution's tail from settling into a fixed cycle. temp 0.6 alone was not enough.
+MLX_TOP_K                  = "20"
+MLX_MIN_P                  = "0.0"
