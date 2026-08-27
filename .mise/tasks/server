@@ -37,6 +37,10 @@ if active_profile:
 else:
     print("⚠  MLX_ACTIVE_PROFILE not set — using env as-is (run 'mise run model-use' to select a profile)", file=sys.stderr)
 
+# Port is configurable so a logging proxy can sit on the default port while the
+# real server moves behind it. opencode would not talk to a non-default port under
+# the sandbox, so capturing its traffic means moving the server, not the client.
+port          = os.environ.get("MLX_SERVER_PORT", "8080")
 model         = os.environ["MLX_MODEL"]
 max_tokens    = os.environ.get("MLX_MAX_TOKENS", "32768")
 cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
@@ -78,7 +82,7 @@ if server_type == "omlx":
     print(f"→ Starting omlx server (model requires oMLX)")
     print(f"  model:      {model}")
     print(f"  Note: oMLX auto-discovers from Hugging Face cache.")
-    cmd = ["omlx", "serve", "--port", "8080"]
+    cmd = ["omlx", "serve", "--port", port]
     for flag, var in (
         ("--memory-guard",            "MLX_OMLX_MEMORY_GUARD"),
         ("--memory-guard-gb",         "MLX_OMLX_MEMORY_GUARD_GB"),
@@ -98,7 +102,7 @@ elif server_type == "mlx-vlm":
     cmd = [
         "python", "-m", "mlx_vlm.server",
         "--model", model,
-        "--port", "8080",
+        "--port", port,
         "--max-tokens", max_tokens,
     ]
 else:
@@ -125,7 +129,7 @@ else:
     cmd = [
         "mlx_lm.server",
         "--model", model,
-        "--port", "8080",
+        "--port", port,
         "--max-tokens", max_tokens,
         "--temp", temp,
         "--top-p", top_p,

@@ -101,9 +101,18 @@ def verify(task):
 def run_task(task):
     reset_repo()
     started = time.time()
-    r = sh(["mise", "run", "opencode-headless", task["prompt"]], cwd=ROOT, timeout=2400)
+    # Per-task cap. E3 looped 77 identical tool calls twice and consumed a whole
+    # 90-minute budget both times, starving three later tasks. A cap turns a loop
+    # into a recorded failure instead of a lost run.
+    cap = int(os.environ.get("BENCH_TASK_TIMEOUT", "420"))
+    timed_out = False
+    try:
+        r = sh(["mise", "run", "opencode-headless", task["prompt"]], cwd=ROOT, timeout=cap)
+        out = r.stdout + r.stderr
+    except subprocess.TimeoutExpired as e:
+        timed_out = True
+        out = (e.stdout or b"").decode("utf8", "replace") + (e.stderr or b"").decode("utf8", "replace")
     elapsed = time.time() - started
-    out = r.stdout + r.stderr
 
     def grab(pat, cast=str, default=None):
         m = re.search(pat, out)
@@ -117,7 +126,13 @@ def run_task(task):
         "tokens_out": grab(r"out ([\d,]+) ·", int, 0),
         "truncated": "TRUNCATED" in out,
         "exit": grab(r"exit (\d+)", int, -1),
+        "timed_out": timed_out,
     }
+    if timed_out:
+        rec["files_changed"] = len(changed_files())
+        rec["verified"] = False
+        rec["note"] = f"timed out after {cap}s"
+        return rec
     rec["files_changed"] = len(changed_files())
     ok, note = verify(task)
     rec["verified"] = ok
