@@ -23,6 +23,7 @@ Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
 - [Dynamic model switching (no server restart)](#dynamic-model-switching-no-server-restart)
 - [opencode declared context limits](#opencode-declared-context-limits)
 - [Benchmark guide](#benchmark-guide)
+- [Cheap-operations results](#cheap-operations-results)
 - [weather-cli challenge results](#weather-cli-challenge-results)
 - [Model evaluations: rig B (M5 Max 128 GB)](#model-evaluations-rig-b-m5-max-128-gb)
 - [Model evaluations: rig A (M1 Max 32 GB)](#model-evaluations-rig-a-m1-max-32-gb)
@@ -485,6 +486,59 @@ mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
   --prompt "Write a detailed explanation of Rust's borrow checker" \
   --max-tokens 512 --verbose
 ```
+
+---
+
+## Cheap-operations results
+
+The weather-cli benchmark measures building a whole application, which is the hardest task shape
+and the one we would never route to a local model. This one measures the opposite: the short,
+routine operations that consume a Copilot premium request each. Spec in `CHEAP_OPS_SPEC.md`,
+tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
+
+Target is `navikt/isoppfolgingstilfelle`, a real Nav Kotlin service. Ktor, Kafka, Postgres,
+5,661 lines of main Kotlin, 151 tests that pass on a clean machine with no Nav-internal
+dependencies. Every task is pinned to a symbol verified to exist in that repository. The runner
+hard-resets the checkout between tasks and verifies results itself, never trusting the model's
+claim.
+
+### `mlx-community/Qwen3.6-35B-A3B-4bit`
+
+| Task | | Time | Turns | Tools | Input tokens | Result |
+|---|---|---|---|---|---|---|
+| R2 | find where a config value is read | **10.4s** | 2 | 1 | 15,890 | correct file and line |
+| R1 | explain a domain function | **11.6s** | 4 | 3 | 17,979 | needs review |
+| R3 | list call sites of a function | **18.5s** | 2 | 1 | 16,355 | needs review |
+| E1 | add a KDoc block | **21.1s** | 4 | 3 | 16,241 | compiles |
+| E3 | add a log line with context | **29.1s** | 8 | 7 | 20,845 | compiles |
+| M1 | rename across call sites | **32.1s** | 5 | 6 | 18,474 | old symbol gone, compiles |
+| M2 | add a field to a DTO and map it | **49.5s** | 13 | 16 | 25,302 | **151-test suite passes** |
+| G2 | write a test file for an untested util | **138.6s** | 16 | 20 | 41,127 | **suite passes** |
+
+**Median 25.1s, mean 38.9s. Five of five objectively verified tasks passed. No truncation.**
+The bar set in advance was a median under 30 seconds with most checks passing, so this clears it.
+
+**This is a different machine to the weather-cli numbers.** The same model took 6m 45s to build a
+whole CLI. On routine operations against an existing codebase it is a different tool: most tasks
+finish in under half a minute, and the two that do not are the two that write substantial new
+code.
+
+**It changes the economics.** The nav-pilot analysis assumed roughly six minutes of extra waiting
+per task, taken from the build-an-application benchmark, and put break-even near ten tasks a
+month. Against Copilot on this workload the delta is tens of seconds, not minutes. Break-even
+moves out by more than an order of magnitude. `reports/nav-pilot-path.md` still carries the old
+figure and needs revising.
+
+**The overhead floor is 15.6k tokens.** Every turn carries roughly 15,600 input tokens of system
+prompt and tool schemas before the request itself. Measured with the trivial prompt "Create a file
+called probe.txt containing exactly the word: verified", which cost 15,628 input tokens. Task
+input rises with conversation length, from 15.9k on the shortest task to 41.1k on the longest.
+Published work on another harness measured tool schemas at 81% of a comparable payload, so a
+reduced tool set is the obvious lever and is untested here.
+
+**Verified, not reported.** M2 added a field to a REST DTO, mapped it at the construction site,
+and the existing suite still passed. M1's rename was checked by grepping for the old symbol before
+compiling, because a rename that misses a call site still compiles if the caller was deleted.
 
 ---
 
