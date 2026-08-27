@@ -111,18 +111,41 @@ mise run opencode               # launch opencode in workspaces/<key>/
 
 ## Quick comparison: rig B (128 GB)
 
-| Model | Released | Server | Arch | VRAM | Declared ctx | Decode speed | Tool calling | Status |
-|---|---|---|---|---|---|---|---|---|
-| Qwen2.5-72B-Instruct-8bit | Sep 2024 | mlx-lm | Dense 72B | ~72 GB | 128k | — | ❌ never calls tools | ❌ broken |
-| **DeepSeek-V4-Flash-0731** (2.4-bit mixed) | May 2026 | **oMLX** | MoE 284B / ~13B active | ~84 GB wired | 128k | 25–31 t/s | ✅ strong | ✅ recommended |
-| **Qwen3.8-27B-Instruct-8bit** (MTPLX Q8) | Jul 2026 | **oMLX** | Dense 27B + MTP head | ~27–28 GB | 128k | 11–14 t/s plain, 25–38 t/s with MTP | ✅ strong ⚠️ see quirks | ✅ recommended |
-| Mistral-Large-2-4bit | Jul 2024 | mlx-lm | Dense 123B | ~69 GB | — | — | — | 🔲 downloaded, untested |
-| Mistral Medium 3.5 (6-bit) | 2026 | mlx-lm | Dense 128B | ~96 GB | — | — | — | 🔲 candidate |
-| Gemma-4-31B-8bit | 2026 | mlx-vlm | Dense 31B | ~33 GB | — | — | — | 🔲 candidate |
+Two benchmarks now exist and they disagree, so both are shown. **weather-cli** builds a whole
+application from scratch. **Cheap ops** does eight routine operations on an existing Kotlin
+service. A model can be good at one and poor at the other, and most are.
 
-At 128 GB the binding constraint flips. Weights are no longer the problem, **tool-calling
-reliability is**. The 72B dense model is the fastest way to burn 72 GB on a model that
-cannot drive `opencode`.
+| Model | Released | Server | Arch | VRAM | weather-cli | Cheap ops | Status |
+|---|---|---|---|---|---|---|---|
+| **Qwen3.6-35B-A3B-4bit** | Apr 2026 | mlx-lm | **MoE 35B, 256 experts, 8 active** | 18.6 GB | 6m 45s, code 6.8/10 | **25.1s median, 5/5 verified** | ✅ **best for routine work** |
+| **Qwen3.8-27B-8bit** (MTPLX Q8) | Jul 2026 | **oMLX** | Dense 27B + MTP head | 28.9 GB | 10m 10s, 16/16 | not tested | ✅ best all-round, too big for 48 GB |
+| **Qwen3.8-27B-4bit** | Jul 2026 | mlx-lm | Dense 27B, no drafter | 14.6 GB | 32m 21s, **code 8.5/10** | 61.2s median no-think, 138.6s with | ⚠️ best code, slow on routine work |
+| DeepSeek-V4-Flash-0731 (2.4-bit) | May 2026 | **oMLX** | MoE 284B, 256 experts, 6 active | 79 GB | 10m 09s, 17/17¹ | not tested | ✅ rig B only |
+| Gemma-4-31B-8bit | 2026 | mlx-lm | Dense 31B, hybrid attention | 30.9 GB | 20m 23s, 16/16 | not tested | ⚠️ 865 KB/token KV rules out 48 GB |
+| Qwen3-Coder-30B-A3B-4bit | 2025 | mlx-lm | MoE 30B, 128 experts, 8 active | 16.3 GB | not tested | ❌ opencode discards output | ⚠️ blocked, model verified working |
+| Granite-4.1-8B-4bit | 2026 | mlx-lm | Dense 8B | 5.1 GB | not tested | ❌ opencode discards output | ⚠️ blocked, model verified working |
+| Qwen2.5-Coder-14B-4bit | Sep 2024 | mlx-lm | Dense 14B | 7.8 GB | not tested | not tested | 🔲 downloaded |
+| Qwen2.5-72B-Instruct-8bit | Sep 2024 | mlx-lm | Dense 72B | 72 GB | ❌ never wrote a file | not tested | ❌ broken |
+| Mistral-Large-2-4bit | Jul 2024 | mlx-lm | Dense 123B | ~69 GB | not tested | not tested | 🔲 downloaded |
+
+¹ Self-reported; the workspace was deleted before it could be checked.
+
+**Sparse beats dense on this hardware, twice over.** Qwen3.6-35B-A3B activates about 3B parameters
+per token and is roughly 4x faster than the dense 27B on identical work, measured on both
+benchmarks independently. Decode is bandwidth-bound, so what matters is bytes streamed per token,
+not parameter count on disk.
+
+**The 3.8 line has no small MoE.** Qwen ships `Qwen3.8-27B` dense and `Qwen3.8-2.4T-A95B`, a
+frontier-scale MoE with 95B active. Nothing sits where `Qwen3.6-35B-A3B` does. Qwen3.6 shipped
+both a dense 27B and a small MoE; 3.8 did not, and there is no Qwen3.7 at all. That is why our
+fastest model is a generation old: for local hardware, whether the family shipped a small MoE
+matters more than the version number.
+
+**Two models are blocked by the harness, not by capability.** opencode discards everything
+Qwen3-Coder-30B and Granite return, text and tool calls alike, while both produce correct tool
+calls against the API directly. See
+[opencode drops output from some models](#opencode-drops-output-from-some-models). Their cheap-ops
+rows measure the pairing, not the model.
 
 ## Server backends: mlx-lm vs mlx-vlm vs oMLX
 
