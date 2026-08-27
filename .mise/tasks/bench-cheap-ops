@@ -98,7 +98,29 @@ def verify(task):
     return None, "needs a human"
 
 
+def restart_server():
+    """Restart the inference server before every task.
+
+    The server degrades across a long session: after some number of tasks the
+    model stops calling tools entirely and every later task fails with no edits.
+    Restarting between tasks turns that from a silent confound into a known cost.
+    Demonstrated directly: a task that produced 0 turns and 0 tool calls passed
+    with 6 turns and 9 tool calls after nothing changed but a server restart.
+    """
+    subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT),
+                   capture_output=True, text=True)
+    subprocess.Popen(["mise", "run", "server"], cwd=str(ROOT),
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+    r = subprocess.run(["mise", "run", "server-wait"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=1800)
+    if r.returncode != 0:
+        raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
+
+
 def run_task(task):
+    if os.environ.get("BENCH_RESTART_SERVER", "1") == "1":
+        restart_server()
     reset_repo()
     started = time.time()
     # Per-task cap. E3 looped 77 identical tool calls twice and consumed a whole
