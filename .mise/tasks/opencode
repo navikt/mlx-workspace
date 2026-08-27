@@ -41,6 +41,28 @@ if result.returncode != 0:
     print("✗ opencode-init failed", file=sys.stderr)
     sys.exit(result.returncode)
 
-# Launch opencode with workspaces/<key> as working directory
+# Launch opencode with workspaces/<key> as working directory.
+#
+# Run it under cplt, a kernel-level sandbox (Seatbelt on macOS). Two things went
+# wrong without it: a model walked out of its own workspace with an absolute path
+# and listed every other model's finished solution, and another tried to
+# `npm install -g` and `brew tap` a package it had hallucinated, mutating the
+# host. --project-dir confines reads and writes to this model's workspace, which
+# closes both. Localhost is blocked by default to prevent SSRF, so the MLX server
+# port has to be allowed explicitly.
+server_port = os.environ.get("MLX_SERVER_PORT", "8080")
 os.chdir(workspace_dir)
+
+if shutil.which("cplt"):
+    os.execvp("cplt", [
+        "cplt",
+        "--agent", "opencode",
+        "--project-dir", str(workspace_dir),
+        "--allow-localhost", server_port,
+        "--", *sys.argv[1:],
+    ])
+
+print("⚠  cplt not found — launching opencode unsandboxed.", file=sys.stderr)
+print("   The model can read sibling workspaces and modify this machine.", file=sys.stderr)
+print("   Install it with: brew install cplt", file=sys.stderr)
 os.execvp("opencode", ["opencode"] + sys.argv[1:])
