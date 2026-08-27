@@ -604,11 +604,38 @@ is **6.7x slower than the MoE** and got the explain task wrong where the MoE got
 in a fifteenth of the time. Twenty minutes to add one log line is not a trade, it is a
 disqualification.
 
-**Thinking is the obvious suspect.** This is the only model in this round with reasoning enabled,
-verified from the response carrying a `reasoning` field. Published work on Qwen3 1.7B-32B found
-thinking helps planning constraints and hurts precision ones, which is most of this task set. The
-scheduled re-test with thinking disabled is now the highest-value experiment for this model, and
-until it runs these numbers measure a configuration rather than the model.
+**E3 is a tool-call loop, not slow generation.** Re-run with thinking disabled, E3 hit the
+2400-second timeout. Its event stream shows 77 steps, every one ending `reason: tool-calls`, and
+from step 14 onward **every step emits exactly 97 output tokens**. The model calls a tool, reads
+the result, and calls it again unchanged, until something kills it. That is why the same task took
+1196s with thinking and never finished without it, and why the MoE completed it in 29.1s.
+
+The fix is known and measured elsewhere: an explicit instruction never to repeat a failing tool
+call, backed by a harness-side debounce that blocks identical consecutive calls so it holds even
+when the model ignores the rule. Neither is in place here. Adding the rule changes `AGENTS.md`,
+which is a benchmark input, so it requires re-running the Qwen3.6 baseline for comparability.
+
+**Thinking costs about 2.3x, architecture about 4.1x.** Measured by re-running with thinking disabled:
+
+| Task | No-think | Thinking | Gain | Qwen3.6 MoE |
+|---|---|---|---|---|
+| R1 explain | 85.8s | 174.4s | 2.0x | 11.6s |
+| R2 find config | 30.9s | 92.3s | 3.0x | 10.4s |
+| R3 call sites | 55.9s | 109.8s | 2.0x | 18.5s |
+| E1 add KDoc | 66.5s | 167.4s | 2.5x | 21.1s |
+| **Median** | **61.2s** | **138.6s** | **2.3x** | **15.1s** |
+
+Output tokens fell about 3x with thinking off, so it was generating three times the tokens for
+the same work. But the model is still **4.1x slower than the MoE with thinking off on both**,
+which is the dense-versus-sparse decode gap: 4.7 against 22.4 tokens per second. Multiplying the
+two factors gives about 9.4x, matching the 8.8x measured across the full task set.
+
+So thinking was a real cost, and an earlier note here dismissing it as the smaller factor was
+wrong. Architecture is still the larger one. Disabling thinking makes this model meaningfully
+more usable without making it competitive on turnaround.
+
+Note the tokens fell 3x while time fell only 2.3x. The remainder is per-turn overhead that
+thinking does not explain, most likely the ~15.6k-token prefill carried on every request.
 
 ### `mlx-community/granite-4.1-8b-4bit` ⚠️ incompatible with opencode, not incapable
 
