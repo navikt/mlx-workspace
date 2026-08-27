@@ -54,11 +54,23 @@ server_port = os.environ.get("MLX_SERVER_PORT", "8080")
 os.chdir(workspace_dir)
 
 if shutil.which("cplt"):
+    home = Path.home()
     os.execvp("cplt", [
         "cplt",
         "--agent", "opencode",
         "--project-dir", str(workspace_dir),
         "--allow-localhost", server_port,
+        # opencode keeps its session database, logs and snapshots outside the
+        # project. Without write access to these it dies at startup with
+        # "Unexpected server error".
+        "--allow-write", str(home / ".local/share/opencode"),
+        "--allow-write", str(home / ".cache/opencode"),
+        "--allow-read", str(home / ".config/opencode"),
+        # opencode walks up the directory tree looking for config and reads the
+        # repo-root opencode.json, one level above the sandbox boundary. A denial
+        # there is fatal, not "no config here". Grant that one file rather than
+        # the repo root, so sibling workspaces stay unreadable.
+        "--allow-read", str(workspace / "opencode.json"),
         "--", *sys.argv[1:],
     ])
 
