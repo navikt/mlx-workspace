@@ -502,6 +502,44 @@ dependencies. Every task is pinned to a symbol verified to exist in that reposit
 hard-resets the checkout between tasks and verifies results itself, never trusting the model's
 claim.
 
+### `mlx-community/granite-4.1-8b-4bit` ❌ never calls tools
+
+| Task | Time | Turns | Tool calls | Files changed | Result |
+|---|---|---|---|---|---|
+| R1 explain a function | 13.6s | 1 | **0** | 0 | answered without reading the file, 2 of 4 key terms |
+| R2 find a config value | 547.9s | 1 | **0** | 0 | 0 of 2 terms |
+| R3 list call sites | 2743.9s | 1 | **0** | 0 | 0 of 1 terms |
+| E1 add a KDoc block | 9.8s | 1 | **0** | 0 | no edit |
+| E3 add a log line | 9.0s | 1 | **0** | 0 | no edit |
+| M1 rename across call sites | 9.2s | 1 | **0** | 0 | no edit |
+| M2 add a DTO field | 9.6s | 1 | **0** | 0 | no edit |
+| G2 write a test file | 11.3s | 1 | **0** | 0 | no edit |
+
+**Zero tool calls across every task.** One turn each, no file ever opened, no file ever written.
+This is the same failure class as Qwen2.5-72B in the weather-cli benchmark: the model answers in
+chat instead of using the tools it was given.
+
+On R1 it explained a Kotlin function it had not read, matching only the two most common digits in
+the expected answer while missing both distinctive thresholds. A fast, fluent, fabricated answer.
+
+**It exposed a bug in our harness, which is the more useful outcome.** The compile and test checks
+certify that the repository is healthy, not that the model did the work. An untouched checkout
+compiles and its suite passes, so Granite scored four false passes. Only the rename task caught it,
+because that check greps for the old symbol rather than trusting the build. Every edit task now
+requires a non-empty `git status` before its check counts, and files-changed is recorded per task.
+Qwen3.6's results predate the fix but are unaffected: it made 1 to 20 tool calls per task and its
+rename passed the symbol grep.
+
+**The two slow tasks were not slow generation.** R2 at 548s and R3 at 2744s bracket a 46-minute
+window in which the server received no requests at all. The model was not working; the client was
+stalled. Granite's real per-task time is around 10 seconds.
+
+**Verdict:** ❌ unusable for agentic work in this harness, regardless of speed or footprint. At
+5.12 GB and Apache 2.0 it was the most attractive candidate on paper, which is exactly why it
+needed measuring. Worth one retry with a tool-calling-focused prompt before writing off the model
+rather than the pairing, since its card publishes no sampling recommendation and we ran it on
+defaults.
+
 ### `mlx-community/Qwen3.6-35B-A3B-4bit`
 
 | Task | | Time | Turns | Tools | Input tokens | Result |
