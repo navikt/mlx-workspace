@@ -686,7 +686,40 @@ paper, and we still do not know how it performs on real work. Re-run once the op
 incompatibility is understood, or measure it through Copilot CLI instead. See
 [opencode drops output from some models](#opencode-drops-output-from-some-models).
 
-### `mlx-community/Qwen3.6-35B-A3B-4bit`
+### `mlx-community/Qwen3.6-35B-A3B-4bit` — 11-task run
+
+Second run, on the updated harness: eleven tasks including three data-parsing tasks, `AGENTS.md`
+rule 8 forbidding a repeated failing tool call, and a 420-second per-task cap.
+
+| Task | | Time | Turns | Tools | Files | Result |
+|---|---|---|---|---|---|---|
+| R2 | find where a config value is read | 7.6s | 2 | 1 | 0 | 2 of 2 terms |
+| E1 | add a KDoc block | 12.5s | 4 | 3 | 1 | compiles |
+| M1 | rename across call sites | 18.3s | 5 | 6 | 2 | old symbol gone, compiles |
+| R1 | explain a domain function | 20.0s | 4 | 3 | 0 | 2 of 4 terms |
+| D1 | explain PDL ident selection | 25.3s | 4 | 3 | 0 | 2 of 2 terms |
+| R3 | list call sites | 30.8s | 2 | 1 | 0 | 1 of 1 terms |
+| G2 | write a test for an untested util | 48.1s | 10 | 13 | 1 | suite passes |
+| E3 | add a log line with context | 57.9s | 10 | 9 | 1 | compiles |
+| M2 | add a field to a DTO and map it | 57.9s | 8 | 10 | 2 | suite passes |
+| D3 | write a Kafka DTO deserialization test | 153.5s | 11 | 17 | 1 | suite passes |
+| D2 | thread a field through a row mapper | **420.0s** | — | — | 6 | ❌ **timed out** |
+
+**Median 30.8s, mean 77.4s, 6 of 7 verified.**
+
+**The data tasks are harder, and they found the first failure.** D2 asks for a new field on a
+database row class threaded through its mapper and every construction site. The model touched
+**six files** and still ran out of time. That is the most realistic task in the set, a schema
+change rippling through a real codebase, and none of the structural tasks reached it. D3 passed
+but was the slowest passing task at 153.5s. Adding data-parsing tasks changed the median from
+25.1s to 30.8s and turned a clean sweep into 6 of 7.
+
+**Run-to-run variance is large.** Against the earlier eight-task run on the same model and tasks:
+R1 20.0s against 11.6s, R3 30.8s against 18.5s, but E1 12.5s against 21.1s and R2 7.6s against
+10.4s. Individual tasks swing up to 1.7x in both directions. Single runs cannot separate models
+within about 1.5x of each other. They can separate 30s from 167s, which is the comparison that
+matters for the alpha decision.
+
 
 | Task | | Time | Turns | Tools | Input tokens | Result |
 |---|---|---|---|---|---|---|
