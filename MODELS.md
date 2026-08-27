@@ -556,6 +556,37 @@ dependencies. Every task is pinned to a symbol verified to exist in that reposit
 hard-resets the checkout between tasks and verifies results itself, never trusting the model's
 claim.
 
+### `mlx-community/Qwen3.8-27B-4bit` — slow on routine work
+
+Partial run: five of eight tasks completed before the harness timeout. E3 alone took twenty
+minutes, which consumed the budget. The three multi-file tasks were not reached.
+
+| Task | 27B 4-bit | Qwen3.6 MoE | Result |
+|---|---|---|---|
+| R1 explain a function | 174.4s | 11.6s | **0 of 4 key terms** |
+| R2 find a config value | 92.3s | 10.4s | 2 of 2 terms |
+| R3 list call sites | 109.8s | 18.5s | 1 of 1 terms |
+| E1 add a KDoc block | 167.4s | 21.1s | compiles |
+| E3 add a log line | **1196.3s** | 29.1s | compiles |
+| **Median** | **167.4s** | **25.1s** | |
+
+**It works through opencode**: 38 tool calls, both verifiable tasks passed. That matters for
+[the harness bug](#opencode-drops-output-from-some-models), because this is `qwen3_5`, the same
+family as the working MoE, while the two models opencode discards are `qwen3_moe` and `granite`.
+Family looks like the discriminator.
+
+**The weather-cli trade does not survive this workload.** Building a whole CLI, this model wrote
+the best code measured, 8.5/10, and its 4.8x slowness bought something. On routine operations it
+is **6.7x slower than the MoE** and got the explain task wrong where the MoE got it partly right
+in a fifteenth of the time. Twenty minutes to add one log line is not a trade, it is a
+disqualification.
+
+**Thinking is the obvious suspect.** This is the only model in this round with reasoning enabled,
+verified from the response carrying a `reasoning` field. Published work on Qwen3 1.7B-32B found
+thinking helps planning constraints and hurts precision ones, which is most of this task set. The
+scheduled re-test with thinking disabled is now the highest-value experiment for this model, and
+until it runs these numbers measure a configuration rather than the model.
+
 ### `mlx-community/granite-4.1-8b-4bit` ⚠️ incompatible with opencode, not incapable
 
 | Task | Time | Turns | Tool calls | Files changed | Result |
