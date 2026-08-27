@@ -6,7 +6,7 @@ in [`../MODELS.md`](../MODELS.md) and summarised in [`48gb-question.md`](48gb-qu
 
 Short version: hold the bundling. The cost case has a much better shape than expected, but it
 points at a different intervention than local models, and one number needs explaining before
-anything is built.
+we build anything.
 
 ## The number that needs explaining
 
@@ -14,7 +14,7 @@ anything is built.
 
 GitHub Copilot Business lists at $19. Enterprise lists at $39. Nav is paying roughly 1.8x
 Enterprise list. That difference is $30-50 per seat per month, which is $234,000 to $390,000 a
-year, and nobody should build anything until it is explained.
+year, and nobody should build anything until we can explain it.
 
 Three candidates, and they lead to opposite strategies:
 
@@ -37,18 +37,18 @@ The benchmark measured one task at 6m 45s locally against well under a minute on
 it six minutes of extra waiting per task. So the seat pays for itself at roughly **10 tasks per
 month**.
 
-That cuts cleanly in both directions, and the segmentation is the useful part:
+That cuts both ways, and the segmentation is the useful part:
 
 - A developer running **more than ~10 assisted tasks a month** is cheaper on a Copilot seat.
   Local inference costs Nav money for these people, and the heavier the user the worse it gets.
 - A developer running **fewer than ~10** is cheaper served locally, and below about two or three
   a month it is not close.
 
-The earlier version of this analysis assumed a $19 seat and concluded the cost case was hopeless.
-At $69 it is not hopeless, it is a segmentation problem. That is a real change and it came
-entirely from using the actual invoice instead of list price.
+An earlier pass assumed a $19 seat and concluded the cost case was hopeless. At $69 it is not
+hopeless, it is a segmentation problem. That change came from using the invoice instead of list
+price.
 
-## Where the money actually is
+## Where the money is
 
 Reclaiming unused seats beats local inference by an order of magnitude, and needs no engineering:
 
@@ -58,14 +58,13 @@ Reclaiming unused seats beats local inference by an order of magnitude, and need
 | 30% | $162,000 |
 | 40% | $216,000 |
 
-Org-wide rollouts commonly leave a large tail of near-zero users. If Nav's usage data shows that
+Org-wide rollouts tend to leave a long tail of near-zero users. If Nav's usage data shows that
 tail, pulling those seats saves six figures this quarter, with no download, no sudo, and no
 support burden.
 
 Local models then have a narrow and defensible role: **serving the people who were reclaimed**.
-Those are by definition light users, which is exactly the segment where the break-even favours
-local, and their comparison is not Copilot but nothing at all. Six minutes is an easy sell
-against nothing.
+Those are light users by definition, the segment where the break-even favours local, and their
+comparison is not Copilot but nothing at all. Six minutes is an easy sell against nothing.
 
 That reframes the pitch from "cheaper than Copilot" to "covers the tail we stopped paying for".
 Same budget outcome, and the benchmark data supports it.
@@ -97,8 +96,8 @@ and a different context problem, since a real service does not fit in a 131k-tok
 model that writes a clean weather CLI may be useless at adding a consumer to an existing topic.
 
 The six-minute figure that all the arithmetic above rests on comes from the JavaScript task. It
-could be materially worse on Nav's real code, which would move the break-even against local
-inference. Treat every number here as provisional until a Nav-shaped task is measured.
+could be much worse on Nav's real code, which moves the break-even against local inference. Every
+number here holds only until a Nav-shaped task is measured.
 
 ## Product shape, if it ships
 
@@ -118,16 +117,16 @@ absorb all of it. The download and the sudo step cannot be hidden, only explaine
 
 ## Recommended sequence
 
-1. **Get the invoice breakdown.** Explain $69 against a $39 list price. An afternoon of work
-   that could redirect the entire project, and may surface a saving with no engineering at all.
-2. **Pull seat usage data.** If there is an idle tail, reclaiming it saves six figures a year
-   immediately. This is the intervention the numbers actually support.
+1. **Get the invoice breakdown.** Explain $69 against a $39 list price. An afternoon of work that
+   could redirect the whole project, and may surface a saving needing no engineering.
+2. **Pull seat usage data.** An idle tail reclaimed is six figures a year, available now. This is
+   the intervention the numbers support.
 3. **Add a Kotlin and Ktor task to the benchmark.** Modify an existing service rather than
    create one. Highest-value technical work available, and it decides whether local models are
    viable for Nav work at all.
-4. **Three Qwen3.6 runs with corrected sampling.** Thirty minutes. Converts the fastest recorded
-   result from a single sample into a measurement with a spread, and fixes sampling that both
-   headline runs got wrong.
+4. **Three Qwen3.6 runs with corrected sampling.** Thirty minutes. Turns the fastest recorded
+   result from a single sample into a measurement with a spread, and fixes sampling both headline
+   runs got wrong.
 5. **Hold the bundling** until 1 and 3 report. Bundling is cheap to do later and expensive to
    withdraw once developers have installed it.
 
