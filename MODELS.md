@@ -28,6 +28,7 @@ Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
 - [Model evaluations — rig A (M1 Max 32 GB)](#model-evaluations--rig-a-m1-max-32-gb)
 - [Testing checklist](#testing-checklist)
 - [Standard benchmark prompts](#standard-benchmark-prompts)
+- [Code review rubric](#code-review-rubric)
 
 ---
 
@@ -497,6 +498,7 @@ prompts in [Standard benchmark prompts](#standard-benchmark-prompts).
 | Gemma-4-31B 8-bit | B | 6m 7s | abandoned | — | — | Served by mlx-vlm by mistake — cache cleared per request; 43s median turn, 197s worst |
 | DeepSeek-V4-Flash 2.4-bit | B | 4m 43s | 5m 26s | **10m 09s** | 17/17¹ | ✅ Rerun at parity; planned properly this time, dispatched a sub-agent, wrote its plan to a file |
 | Qwen3.8-27B MTPLX Q8 | B | **1m 23s** | 8m 47s | **10m 10s** | 16/16 | ✅ Best run. Rule 7 + corrected spec UA warning |
+| Qwen3.8-27B 4-bit | B (36 GB cap) | 5m 16s | 27m 5s | **32m 21s** | 25/25² | Code **8.5/10**. Same artifact as the Q8 at 3.2× the wall clock — no MTP. Ignored rule 7, drafted files inside `<think>` |
 | Qwen3.8-27B MTPLX Q8 | B | 7m 58s | abandoned | — | — | Rule 7, old spec wording; plan phase lost ~5 min to a self-inflicted `example.com` 403 read as rate limiting |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 43s | 11m 22s | **14m 05s** | 17/17 | ✅ Complete. First run with `request_max_tokens=16384` in effect; no truncation |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 40s | aborted 3m 22s | — | — | Same `finish_reason=length` — the raised output cap had not reached `opencode.json` (see trap below) |
@@ -522,6 +524,12 @@ fact and confirmed; DeepSeek's workspace was deleted before that check, so its c
 model's own claim. **Verify test counts before clearing a workspace** — the number is the result,
 and the artifacts are the only proof of it.
 
+² Independently verified: 25 tests, 24 pass hermetic + 1 live test gated behind `WEATHER_LIVE=1`
+(25/25 with it set). Test counts are not comparable across models — each chooses how finely to
+split its suite — so read the count as "did it verify its own work", not as a score. Qwen3.8-4bit
+is the first model whose self-report matched a hand check in every particular, including its two
+disclosed spec deviations.
+
 The single biggest lever was the prompt, not the model: adding *"Check the external apis do not
 assume the data model"* to the plan prompt moved DeepSeek-class debugging loops into a 3-minute
 research phase and cut Qwen 3.8's total time by ~4×.
@@ -529,6 +537,58 @@ research phase and cut Qwen 3.8's total time by ~4×.
 ---
 
 ## Model evaluations — rig B (M5 Max 128 GB)
+
+### `mlx-community/Qwen3.8-27B-4bit` — the 48 GB target candidate
+
+First model measured under the **36 GB wired cap** that simulates a 48 GB Pro machine
+(`mise run vram-set 36`). Everything else — spec, prompts, AGENTS.md, harness — identical to the
+Q8 run above it in the results table, so the two differ only in quantization.
+
+| | |
+|---|---|
+| **Architecture** | Dense 27B, `model_type: qwen3_5` |
+| **Backend** | mlx-lm (no MTP — the drafter head is `qwen3_5_mtp`, oMLX-only) |
+| **Peak RSS** | **14.57 GB** (Q8: 28.9 GB) |
+| **KV cache** | 3.28 GB at end of run, 3 sequences |
+| **Wall clock** | plan 5m 16s + implement 27m 5s = **32m 21s** |
+| **Turns** | 22 |
+| **Tests** | 25/25 verified by hand |
+| **Code quality** | **8.5/10** |
+
+**Capacity: comfortable. Speed: not.** RSS never moved off 14.5 GB and never approached the 36 GB
+ceiling — memory was never the binding constraint. The problem is the clock: **3.2× the Q8's
+10m 10s on identical work**. Halving the weights did not halve the time because the Q8 run had MTP
+speculative decoding and this build has none. On this rig the drafter is worth more than the
+bandwidth saved by the smaller weights.
+
+**Quantization degraded instruction-following, not output quality.** Two process failures the Q8
+did not exhibit under the same rules:
+
+- It **ignored AGENTS.md rule 7** and drafted entire file contents inside `<think>`, then rewrote
+  them through tool calls. The workspace copy of AGENTS.md was verified byte-identical to the root.
+  The Q8 obeyed the rule — its thinking became visibly more compact once rule 7 was added.
+- It stalled ~4 minutes on the User-Agent question, from the *corrected* spec that gives a working
+  example. The Q8 read the same line and moved on.
+
+Both burn output tokens without improving the artifact. This is the cost of 4-bit here — it shows
+up as wasted process, not as worse code.
+
+**The code is good.** Reviewed against the [Code review rubric](#code-review-rubric): no severe
+bugs, and it avoided every trap on the checklist — UTC-safe closest-entry selection with no
+sorted-input assumption, cloud thresholds matching the spec's strict `>` exactly at 75/76, correct
+GeoJSON `[lon, lat]` swap with `representasjonspunkt` preferred, `encodeURIComponent` on place
+names. Three minor risks, all one family: `?? {}` and `?? 0` on missing Met.no fields print
+`undefined°C` or fabricate "Clear" with exit 0, where the empty-timeseries path correctly throws.
+
+**Honest self-report.** The first model whose claims survived a hand check unchanged, including
+both disclosed deviations — `Oslo` resolving to "Oslo fylke" (faithful application of the
+first-hit rule) and the spec's `temperature`/`humidity` field names not existing in Met.no v2
+(correctly mapped to `air_temperature`/`relative_humidity`).
+
+**Verdict:** thorough but slow. It fits the target machine with room to spare and writes the best
+code measured so far, but takes half an hour to do what the Q8 does in ten minutes. Recommend it
+for the 48 GB target **only** where the Q8 will not fit — and re-test the moment a 4-bit build
+with a loadable drafter appears, because that is the entire gap.
 
 ### `mlx-community/Qwen2.5-72B-Instruct-8bit` ❌ broken
 
@@ -1182,3 +1242,50 @@ The "check the external apis do not assume the data model" clause was added afte
 observing models invent the Met.no / Geonorge response shapes and then spend the
 majority of the run repairing that guess. It moves the cost into the plan phase
 (~3m 12s for Qwen3.8-27B MTPLX) and makes implementation more direct.
+
+---
+
+## Code review rubric
+
+Wall-clock and a passing test count say nothing about what the model actually wrote.
+A model can pass every test with code that silently prints `undefined°C` on a partial
+API payload. This rubric exists so every submission is judged against the same
+questions, by the same scale, and the resulting grades are comparable.
+
+**Process.** Functional verification comes first and is done by hand, not by the
+model's self-report: run `npm test`, run the live suite, check the output line count,
+check every exit code without a pipe (`$?` after a pipeline is the last command's
+status, not the program's). Only then hand the workspace to a read-only review agent
+along with this rubric. The reviewer never runs the tests — it judges what tests cannot.
+
+**Dimensions.** Each scored 1–10, then averaged with these weights:
+
+| Dimension | Weight | The question |
+|---|---|---|
+| Correctness risks | 30% | What breaks that the tests do not cover? Every finding must name the input that triggers it |
+| Error handling | 20% | Are network errors, non-2xx, malformed payloads and empty data explicit and actionable, or do they reach a stack trace — or worse, exit 0 with garbage? |
+| Structure | 20% | Is the module split meaningful or cosmetic? Is the entry point thin? Is anything abstracted with one caller? |
+| Test quality | 20% | Real assertions at a sensible mock boundary, or trivia that cannot fail? Are the spec's exact boundary values pinned? |
+| Idiom and readability | 10% | Naming, dead code, copy-paste; do comments explain *why* or restate the code? |
+
+**Fixed trap checklist.** Every reviewer checks these same items, because they are
+where one-shot code actually fails on this spec. Report each as avoided or hit:
+
+1. Timezone — Met.no timestamps carry `Z`; is "closest to now" compared in UTC?
+2. Sorted-input assumption — is the timeseries scanned, or is `series[0]` trusted?
+3. Cloud-cover thresholds — the spec uses strict `>`. Check the exact boundary values (25 / 50 / 75), not values near them
+4. Coordinate order — Geonorge GeoJSON is `[lon, lat]`; `representasjonspunkt` is `nord`/`øst`
+5. Missing fields — does `?? 0` / `?? {}` fabricate a confident answer from an incomplete payload?
+6. Injection — is user input validated before URL interpolation, and are place names encoded?
+7. Float comparison and latitude/longitude range validation at the exact bounds (±90 / ±180)
+
+**Grading discipline.** Judge the submission as a one-shot from a local quantized
+model, not against a production codebase. Separate "real bug" from "stylistic
+preference" explicitly, and state plainly where the code is genuinely good — a review
+that only lists complaints is not usable evidence. If there are no real bugs, say so
+rather than inventing some.
+
+**Dependencies are spec-mandated.** `axios` is required by `WEATHER_CLI_SPEC.md`; its
+presence is compliance and must not be counted against a model. Anything *beyond* the
+spec's dependency list (e.g. jest, where the spec names test files but no framework)
+is a genuine finding.
