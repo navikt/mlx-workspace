@@ -26,6 +26,8 @@ Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
 - [weather-cli challenge results](#weather-cli-challenge-results)
 - [Model evaluations — rig B (M5 Max 128 GB)](#model-evaluations--rig-b-m5-max-128-gb)
 - [Model evaluations — rig A (M1 Max 32 GB)](#model-evaluations--rig-a-m1-max-32-gb)
+- [Recommendations](#recommendations)
+- [Scheduled re-tests](#scheduled-re-tests)
 - [Testing checklist](#testing-checklist)
 - [Standard benchmark prompts](#standard-benchmark-prompts)
 - [Code review rubric](#code-review-rubric)
@@ -1286,6 +1288,64 @@ After applying the template patch, the model generates fake YAML listing invente
 - Session context stayed well within 96k window throughout
 
 **Verdict:** Recommended. Performs on par with or better than Qwen3.5-9B. Faster prefill (1.5–1.7×), larger context (96k vs practical ~64k for 9B at same memory), equal tool calling reliability. Preferred choice when context depth matters.
+
+---
+
+## Recommendations
+
+What the benchmark supports today. Every number comes from rig A or rig B; the 48 GB Pro target
+is reasoned about, not measured, so capacity claims transfer and speed claims do not.
+
+### Which model
+
+| If you… | Run | Why |
+|---|---|---|
+| have 96 GB+ and want the best speed/quality balance | **Qwen3.8-27B MTPLX Q8** (oMLX) | 10m 10s with 16/16, the reference run. MTP speculative decoding is what makes it fast, and only oMLX can load the drafter |
+| are targeting **48 GB** and value correctness | **Qwen3.8-27B 4-bit** (mlx-lm) | 14.6 GB resident, best code measured (**8.5/10**), fits with a 12 GB cache. But **32m 21s** — no drafter exists for this build |
+| are targeting **48 GB** and value turnaround | **Qwen3.6-35B-A3B 4-bit** (mlx-lm) | **6m 45s**, 18.6 GB resident. Ships two silent-wrong-answer paths (**6.8/10**) — review its output, do not trust it |
+| have 128 GB and want a second opinion | DeepSeek-V4-Flash 2.4-bit (oMLX) | 10m 09s, dispatches sub-agents, plans to a file. 79 GB resident — a rig B luxury |
+| want Gemma | reconsider | Correct but **20m 23s**, and an **865 KB/token** KV cache rules it out of 48 GB regardless of quantization |
+| want a 6 GB model | nothing yet | Qwen3.5-9B failed four times. The rung is unmeasured, not disproven |
+
+**There is no single answer for 48 GB.** The fast model writes worse code and the careful model
+takes five times longer. Both fit. Pick against what you are doing, and if you take the fast one,
+budget the review time you saved on inference.
+
+### Which levers actually matter
+
+Ranked by measured effect, largest first. The first three all beat changing model.
+
+1. **Spec precision.** Naming the Met.no 403/429 distinction cut the plan phase from 7m 58s to
+   **1m 23s**. Two sentences, ~6× on that phase.
+2. **Output cap.** `MLX_OPENCODE_OUTPUT` at 4096 truncated runs mid-file with
+   `finish_reason=length`. 16384 fixed it. A profile that still carries 4096 is a run waiting to die.
+3. **Backend choice.** Gemma served by mlx-vlm cleared its cache every request: 43s median turn.
+   On mlx-lm: 27s. Check `model_type` in `config.json` against an existing backend module —
+   exactly, never by prefix.
+4. **Sampling.** `top_k = 20` turned a repetition loop into a 23.4s plan on Qwen3.5-9B. Both
+   Qwen profiles shipped with it disabled. Follow the model card.
+5. **Thinking on/off.** Disabling it cut a one-word answer from 159 output tokens to 2. It also
+   deleted reasoning the model needed — the same run then reused a placeholder contact it had
+   previously diagnosed as causing a 403.
+6. **`AGENTS.md` rule 7.** Cut the median turn ~28% on the models that obey it. Qwen3.8-27B
+   **4-bit ignores it**; the Q8 of the same model does not.
+7. **Model choice.** Real, but smaller than the above and rarely the first thing to change.
+
+### Standing rules
+
+- **Verify the model's claims before clearing anything.** Run `npm test` yourself. Check exit
+  codes without a pipe — `$?` after a pipeline is the last command's status, not the program's.
+- **A passing test count is only as good as its weakest test.** One submission wrapped eight
+  assertions in a `try`/`catch` meant for network errors; Node's `assert` throws, so the catch
+  swallowed them. 20/20 was really 19 that could fail and one that could not.
+- **Check the workspace is empty before a run.** Two of three workspaces used today held a
+  previous run's implementation. A model that finds working code in place is not being measured.
+- **Sandbox the run.** Models escape: one listed every sibling workspace's solution, another
+  tried to `npm install -g` and `brew tap` a package it had invented. `mise run opencode` now
+  launches under `cplt`.
+- **Grade code against the [rubric](#code-review-rubric), not impressions.** Speed and quality
+  came apart in both directions today — the slowest model wrote the best code, the fastest wrote
+  the worst.
 
 ---
 
