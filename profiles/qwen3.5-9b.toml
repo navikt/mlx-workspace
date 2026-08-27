@@ -31,3 +31,11 @@ MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — observed >3min/token at 
 # distribution's tail from settling into a fixed cycle. temp 0.6 alone was not enough.
 MLX_TOP_K                  = "20"
 MLX_MIN_P                  = "0.0"
+MLX_TOP_P                  = "0.95"   # the model card specifies these four as a set; top_p was left at 1.0
+# Thinking disabled for agentic use. Three attempts with it enabled produced three
+# different failures — a repetition loop, a hallucinated CLI it tried to install, and
+# a 9m 51s turn that never delivered a plan. All three were long-generation failures,
+# and the reasoning phase is what runs long. Qwen3.6-35B-A3B runs this way and was the
+# fastest, most stable run measured. Same rationale the Qwen3.6 profile documents:
+# BFCL multi-turn 12.4% thinking vs 35.8% non-thinking.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'

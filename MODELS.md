@@ -500,6 +500,7 @@ prompts in [Standard benchmark prompts](#standard-benchmark-prompts).
 | Qwen3.8-27B MTPLX Q8 | B | **1m 23s** | 8m 47s | **10m 10s** | 16/16 | ✅ Best run. Rule 7 + corrected spec UA warning |
 | Qwen3.8-27B 4-bit | B (36 GB cap) | 5m 16s | 27m 5s | **32m 21s** | 25/25² | Code **8.5/10**. Same artifact as the Q8 at 3.2× the wall clock — no MTP. Ignored rule 7, drafted files inside `<think>` |
 | Qwen3.6-35B-A3B 4-bit | B (36 GB cap) | **34.9s** | **6m 10s** | **6m 45s** | 20/20³ | ⚡ Fastest run. Code **6.8/10**. MoE ~3B active, **thinking disabled** — not a like-for-like process comparison |
+| Qwen3.5-9B 4-bit | B (36 GB cap) | — | — | ❌ **4 attempts, no plan delivered** | — | Four distinct failures across four configs. Oldest model tested (Feb 2026); Qwen3.6 and 3.8 both work |
 | Qwen3.8-27B MTPLX Q8 | B | 7m 58s | abandoned | — | — | Rule 7, old spec wording; plan phase lost ~5 min to a self-inflicted `example.com` 403 read as rate limiting |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 43s | 11m 22s | **14m 05s** | 17/17 | ✅ Complete. First run with `request_max_tokens=16384` in effect; no truncation |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 40s | aborted 3m 22s | — | — | Same `finish_reason=length` — the raised output cap had not reached `opencode.json` (see trap below) |
@@ -543,6 +544,45 @@ research phase and cut Qwen 3.8's total time by ~4×.
 ---
 
 ## Model evaluations — rig B (M5 Max 128 GB)
+
+### `mlx-community/Qwen3.5-9B-MLX-4bit` ❌ does not complete the benchmark
+
+The 6 GB floor of the ladder. Four attempts under the 36 GB cap, each with the
+previous attempt's failure fixed. It never delivered a plan.
+
+| Attempt | Config change | Failure |
+|---|---|---|
+| 1 | profile defaults (`top_k` disabled) | `webfetch` returned a **truncated** Met.no payload; it groped at the fragment with `Grep "\{"` and `Grep "property"`, then produced a single **8m 18s** thought block and collapsed into `DIDIDIDI…` — a degenerate repetition loop |
+| 2 | `MLX_TOP_K = 20` | Plan in **23.4s** — the fastest in the benchmark. Then wrote `index.js` to shell out to a `geonorge` CLI that does not exist, and tried to conjure it: `npm install -g`, four `brew install` variants, a `brew tap` that cloned into `/opt/homebrew` |
+| 3 | + cplt sandbox | Diagnosed the Met.no 403 **correctly and immediately** — better than Qwen3.8-27B Q8, which read the same 403 as rate limiting. Then a **9m 51s** turn that never completed |
+| 4 | + `top_p = 0.95`, thinking **disabled** | POSTed multipart form fields (`lat`, `lon`, `User-Agent`, `Content-Type`, an invented `apikey=demo`) to a **GET** endpoint → `405 Not Allowed`. **8m 35s**, no plan |
+
+**The levers worked; they just moved the failure.** Each fix did what it was
+supposed to. `top_k=20` ended the repetition loop and produced a 23.4s plan. The
+sandbox stopped the install flailing. Disabling thinking cut the response to
+"reply with exactly: ok" from **159 output tokens to 2** — attempt 1 was spending
+roughly 80× the necessary output on a one-word answer, which is what a stall looks
+like before it becomes one. None of it produced a finished plan.
+
+**Attempt 4 is the one that settles it.** Sending headers as form fields to a GET
+endpoint is not a sampling artifact or a context problem — it is a broken model of
+HTTP. And it reused `hans@example.com` after attempt 3 had correctly identified that
+exact placeholder as the cause of a 403: with thinking off, the reasoning that
+reached that conclusion was gone. The levers traded one failure mode for another.
+
+**What it was good at.** Two things no larger model did better. It diagnosed the
+403 by *saving the response body and reading it* (`/tmp/metno.json`) rather than
+inferring from a status code — the best debugging method observed in the benchmark.
+And with rule 7 in force and thinking enabled it obeyed cleanly: ~400ms of thought,
+then a tool call, where Qwen3.8-27B 4-bit drafted whole files inside `<think>`.
+
+**Verdict:** ❌ for agentic coding on this harness. This is the oldest model tested
+(Feb 2026) and Qwen3.6 and Qwen3.8 both work, so read this as a verdict on this
+build rather than on 9B-class models. The capability that fails is multi-step tool
+use against real APIs, not code generation — it never got far enough to write much.
+
+**The 6 GB rung is unmeasured.** No conclusion about the floor of the ladder follows
+from this; a working small model has yet to be tested there.
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit` ⚡ fastest run
 
@@ -1262,6 +1302,7 @@ the recorded numbers do **not** include:
 | `qwen3.8-27b-8bit`, `deepseek-v4-flash-3bit` | oMLX `--memory-guard`, `--hot-cache-max-size` | Cache/OOM behaviour; both ran entirely on defaults | low |
 | `qwen3.8-27b-4bit` | `MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'` | Its rule 7 violation and 4-minute User-Agent stall are both thinking-phase costs. Qwen3.6 with thinking off ran 5× faster | **high** — cheapest experiment with the largest predicted payoff |
 | `qwen3.6-35b-a3b` | thinking **enabled** (drop the profile's `enable_thinking: false`) | The only way to separate "MoE is fast" from "no reasoning tokens is fast". Also tests whether its two silent-wrong-answer paths survive deliberation | **high** — today's headline result rests on this being config, not model |
+| harness | expose `repetition_penalty` / `frequency_penalty` per profile | The installed `mlx_lm.server` accepts these **per request** but has no CLI flag, so a profile cannot reach them. This is the textbook remedy for the degenerate loop that killed Qwen3.5-9B attempt 1, and we had no lever for it | **high** — a known gap the benchmark already hit |
 | `qwen3.6-35b-a3b`, `qwen3.5-9b` | raise `MLX_CACHE_BYTES` above 3 GB | Both are rig-A tuned for a 26 GB cap. Qwen3.6 overshot to 4.70 GB at 36 GB with no visible thrash — there is headroom the profiles never knew about | medium |
 
 Nothing here invalidates a recorded result — every number stands for the config it was measured
