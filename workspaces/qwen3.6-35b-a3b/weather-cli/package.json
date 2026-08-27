@@ -1,18 +1,19 @@
 {
   "name": "weather-cli",
   "version": "1.0.0",
-  "description": "Weather CLI using Met.no API",
+  "description": "Weather CLI using Geonorge and Met.no APIs",
   "type": "module",
+  "main": "index.js",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "weather": "node weather.mjs"
+    "test": "node --test --test-concurrency=1 test/*.test.js"
   },
   "dependencies": {
-    "fast-xml-parser": "^4.4.1"
+    "axios": "^1.7.0"
   },
   "devDependencies": {
-    "vitest": "^1.6.0",
     "nock": "^14.0.0"
+  },
+  "devDependencies": {
+    "nock": "^14.0.17"
   }
 }

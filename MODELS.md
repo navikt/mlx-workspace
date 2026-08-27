@@ -499,6 +499,7 @@ prompts in [Standard benchmark prompts](#standard-benchmark-prompts).
 | DeepSeek-V4-Flash 2.4-bit | B | 4m 43s | 5m 26s | **10m 09s** | 17/17¹ | ✅ Rerun at parity; planned properly this time, dispatched a sub-agent, wrote its plan to a file |
 | Qwen3.8-27B MTPLX Q8 | B | **1m 23s** | 8m 47s | **10m 10s** | 16/16 | ✅ Best run. Rule 7 + corrected spec UA warning |
 | Qwen3.8-27B 4-bit | B (36 GB cap) | 5m 16s | 27m 5s | **32m 21s** | 25/25² | Code **8.5/10**. Same artifact as the Q8 at 3.2× the wall clock — no MTP. Ignored rule 7, drafted files inside `<think>` |
+| Qwen3.6-35B-A3B 4-bit | B (36 GB cap) | **34.9s** | **6m 10s** | **6m 45s** | 20/20³ | ⚡ Fastest run. Code **6.8/10**. MoE ~3B active, **thinking disabled** — not a like-for-like process comparison |
 | Qwen3.8-27B MTPLX Q8 | B | 7m 58s | abandoned | — | — | Rule 7, old spec wording; plan phase lost ~5 min to a self-inflicted `example.com` 403 read as rate limiting |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 43s | 11m 22s | **14m 05s** | 17/17 | ✅ Complete. First run with `request_max_tokens=16384` in effect; no truncation |
 | Qwen3.8-27B MTPLX Q8 | B | 2m 40s | aborted 3m 22s | — | — | Same `finish_reason=length` — the raised output cap had not reached `opencode.json` (see trap below) |
@@ -530,6 +531,11 @@ split its suite — so read the count as "did it verify its own work", not as a 
 is the first model whose self-report matched a hand check in every particular, including its two
 disclosed spec deviations.
 
+³ 19 tests that can fail, plus one that cannot: `test/integration.test.js:37-50` wraps all eight of
+its assertions in a `try`/`catch` intended to tolerate a network outage. Node's `assert` throws
+`AssertionError`, which that same bare `catch` swallows. A passing count is only as good as the
+weakest test in it — check for swallowed assertions before recording the number.
+
 The single biggest lever was the prompt, not the model: adding *"Check the external apis do not
 assume the data model"* to the plan prompt moved DeepSeek-class debugging loops into a 3-minute
 research phase and cut Qwen 3.8's total time by ~4×.
@@ -537,6 +543,64 @@ research phase and cut Qwen 3.8's total time by ~4×.
 ---
 
 ## Model evaluations — rig B (M5 Max 128 GB)
+
+### `mlx-community/Qwen3.6-35B-A3B-4bit` ⚡ fastest run
+
+MoE: 35B total, **~3B active per token**. Measured under the same 36 GB wired cap as the Qwen3.8
+4-bit, same spec, same prompts, same harness.
+
+| | |
+|---|---|
+| **Architecture** | MoE 35B total / ~3B active, `model_type: qwen3_5_moe` |
+| **Backend** | mlx-lm |
+| **Thinking** | **disabled** (`enable_thinking: false` in the profile) |
+| **Peak RSS** | 18.64 GB |
+| **KV cache** | 4.70 GB (MQA + 8-bit KV compression) |
+| **Wall clock** | plan **34.9s** + implement **6m 10s** = **6m 45s** |
+| **Turns** | 27 |
+| **Tests** | 20/20 verified, but see the caveat below |
+| **Code quality** | **6.8/10** |
+
+**Speed comes from cheap turns, not fewer of them.** It took *more* turns than the Qwen3.8 4-bit
+(27 vs 22) — it backtracked to fix bugs and fill gaps — and still finished in a fifth of the time.
+Two effects compound and should not both be credited to the architecture: ~3B active parameters
+instead of 27B dense, and no reasoning tokens at all. The cache figure isolates the architectural
+half cleanly: **0.30 GB across 4 sequences after warm-up**, against the dense 4-bit's 1.10 GB, and
+against Gemma-4-31B's 865 KB/token.
+
+**The thinking caveat is load-bearing.** Both Qwen3.8 runs had thinking on; this profile disables
+it on cited BFCL evidence (12.4% thinking vs 35.8% non-thinking on multi-turn agentic use). That
+makes this a fair comparison of *deployed configurations* and an unfair one of *models*. In
+particular it cannot be credited with obeying AGENTS.md rule 7 — with no `<think>` block, drafting
+code inside one is not a thing it can do. What the contrast does establish is that the 4-bit's
+rule 7 violation is **fixable by configuration**, which is now a scheduled re-test.
+
+**Faster, but the code is worse.** Six of seven traps avoided: UTC-safe selection, full timeseries
+scan rather than trusting `series[0]`, strict `>` thresholds correct at exactly 75/50/25,
+`new URL` + `searchParams` on every URL (injection-proof, and rare in one-shot output), inclusive
+±90/±180 bounds. It hit the missing-fields trap harder than the dense 4-bit did: no per-field
+checks at all, so a Met.no entry lacking `ultraviolet_index_clear_sky` — which happens at night —
+prints `UV Index: undefined` and exits **0**, and a missing `cloud_area_fraction` fabricates a
+confident "Clear".
+
+**Two defects worth naming:**
+
+- `index.js:6` calls `parseArgs` *outside* the `try` that starts at line 14, so validation errors
+  escape the catch at 32-34 and surface as a raw Node stack trace. `node index.js 999 10`
+  demonstrates it. A geocode miss, going through the try, prints cleanly — same program, two
+  different error experiences depending on which side of line 14 the throw happens.
+- `package.json` declares `devDependencies` **twice**. Last-wins under `JSON.parse` so npm works,
+  but any strict tool or human merge will trip on it.
+
+**It knowingly broke the dependency spec.** `test/geocode.test.js:7-9`: *"spec says only axios.
+However, tests need mocking. We'll add nock as dev dependency."* Deliberate and disclosed, unlike
+Gemma's silent jest — but still a deviation, and the other models covered the same ground with
+plain injection.
+
+**Verdict:** the throughput result of the benchmark and the strongest argument yet that active
+parameter count, not total size, is what matters on bandwidth-bound hardware. But it ships two
+silent-wrong-answer paths and a test that cannot fail, so it is fast, not finished. Re-test with
+thinking enabled before concluding anything about the model rather than the config.
 
 ### `mlx-community/Qwen3.8-27B-4bit` — the 48 GB target candidate
 
@@ -1196,6 +1260,9 @@ the recorded numbers do **not** include:
 | `qwen3.5-9b`, `qwen3.6-35b-a3b` (rig A) | `MLX_TOP_K = 20`, `MLX_MIN_P` per Qwen model card | Output quality/stability, not speed | medium |
 | `glm-4.7-flash`, `qwen3.5-27b-opus-distilled` | `MLX_PREFILL_STEP_SIZE` (lower) | Both were failed as **OOM during prefill** — a smaller prefill batch shrinks exactly that spike and may make them viable | **high** — could overturn two ❌ verdicts |
 | `qwen3.8-27b-8bit`, `deepseek-v4-flash-3bit` | oMLX `--memory-guard`, `--hot-cache-max-size` | Cache/OOM behaviour; both ran entirely on defaults | low |
+| `qwen3.8-27b-4bit` | `MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'` | Its rule 7 violation and 4-minute User-Agent stall are both thinking-phase costs. Qwen3.6 with thinking off ran 5× faster | **high** — cheapest experiment with the largest predicted payoff |
+| `qwen3.6-35b-a3b` | thinking **enabled** (drop the profile's `enable_thinking: false`) | The only way to separate "MoE is fast" from "no reasoning tokens is fast". Also tests whether its two silent-wrong-answer paths survive deliberation | **high** — today's headline result rests on this being config, not model |
+| `qwen3.6-35b-a3b`, `qwen3.5-9b` | raise `MLX_CACHE_BYTES` above 3 GB | Both are rig-A tuned for a 26 GB cap. Qwen3.6 overshot to 4.70 GB at 36 GB with no visible thrash — there is headroom the profiles never knew about | medium |
 
 Nothing here invalidates a recorded result — every number stands for the config it was measured
 with. These are upside tests, not corrections.
