@@ -686,6 +686,31 @@ paper, and we still do not know how it performs on real work. Re-run once the op
 incompatibility is understood, or measure it through Copilot CLI instead. See
 [opencode drops output from some models](#opencode-drops-output-from-some-models).
 
+### `mlx-community/Qwen3.6-35B-A3B-4bit-DWQ` ❌ worse than the plain build
+
+Controlled A/B against the plain build: same model, same eleven tasks, same sampling, same 18.9 GB
+resident, fresh server before every task. Quantization method was the only variable.
+
+| | DWQ | Plain 4-bit |
+|---|---|---|
+| Median | 23.8s | 32.4s |
+| Mean | 62.4s | **52.9s** |
+| **Verified** | **2 of 7** | **5 of 7** |
+| Failures | compile error, 2x no edits, timeout, broken suite | 1x no edits, broken suite |
+
+**The lower median is an artifact of failing faster.** G2 took 18.1s and made no edits where the
+plain build spent 96.8s and passed. Its mean is worse because the failures include a 420-second
+timeout. A model that gives up quickly has a flattering median and produces nothing.
+
+**The published claim does not reproduce.** Testing elsewhere reports flat 4-bit losing tool-call
+formatting over a long context while 4-bit DWQ stays clean. Here the DWQ build failed five of
+seven verifiable tasks against the plain build's two, on identical hardware and prompts.
+
+That is the third recommendation from our research review to fail against our own measurements,
+after the five-tool threshold for Qwen3-Coder and the framing that thinking hurts across the
+board. The published material on small local models is thin and does not transfer reliably to
+this stack. Worth reading for hypotheses, not for settings.
+
 ### `mlx-community/Qwen3.6-35B-A3B-4bit` — clean baseline
 
 Eleven tasks, fresh server before each one. This is the first run in this project where every
