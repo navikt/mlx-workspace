@@ -1,0 +1,725 @@
+<title>The 48 GB Question</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #F4F5F2;
+    --surface: #FFFFFF;
+    --surface-sunk: #ECEEE9;
+    --ink: #191B1F;
+    --ink-soft: #4A5150;
+    --ink-faint: #7C8481;
+    --rule: #D8DCD5;
+    --rule-strong: #BCC2BA;
+    --accent: #186A63;
+    --accent-soft: #DCEAE6;
+    --pass: #3F7D3F;
+    --fail: #A8372C;
+    --caution: #B4791A;
+    --measure: 66ch;
+    --step-0: 1rem;
+    --step-1: 1.15rem;
+    --step-2: 1.45rem;
+    --step-3: 1.95rem;
+    --step-4: 2.7rem;
+    --step-5: 3.6rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101312;
+      --surface: #171B1A;
+      --surface-sunk: #1E2322;
+      --ink: #E8EBE7;
+      --ink-soft: #A7B0AC;
+      --ink-faint: #77817D;
+      --rule: #2A302E;
+      --rule-strong: #3B4340;
+      --accent: #5FBDAF;
+      --accent-soft: #1B2E2B;
+      --pass: #74B96E;
+      --fail: #E0796B;
+      --caution: #DDA85B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101312;
+    --surface: #171B1A;
+    --surface-sunk: #1E2322;
+    --ink: #E8EBE7;
+    --ink-soft: #A7B0AC;
+    --ink-faint: #77817D;
+    --rule: #2A302E;
+    --rule-strong: #3B4340;
+    --accent: #5FBDAF;
+    --accent-soft: #1B2E2B;
+    --pass: #74B96E;
+    --fail: #E0796B;
+    --caution: #DDA85B;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: var(--step-1);
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 1.5rem 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 78rem; margin: 0 auto; }
+  .col { max-width: var(--measure); }
+
+  h1, h2, h3, .label, th, .stat-value, .bar-name {
+    font-family: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
+  }
+  h1, h2, h3 { text-wrap: balance; line-height: 1.1; margin: 0; }
+
+  .label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ---------- masthead ---------- */
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 5rem 0 3rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  h1 {
+    font-size: var(--step-5);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .standfirst {
+    max-width: var(--measure);
+    font-size: var(--step-2);
+    font-weight: 300;
+    color: var(--ink-soft);
+  }
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 3.5rem 0 0; }
+  .sec-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+  h2 { font-size: var(--step-4); font-weight: 600; letter-spacing: -0.02em; }
+  h3 {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-top: 2.25rem;
+    margin-bottom: 0.6rem;
+  }
+  p { margin: 0 0 1.1rem; max-width: var(--measure); }
+  .lede { font-size: var(--step-2); font-weight: 300; color: var(--ink-soft); }
+  strong { font-weight: 600; }
+  em.term { font-style: normal; font-family: "IBM Plex Mono", monospace; font-size: 0.86em; }
+  code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.84em;
+    background: var(--surface-sunk);
+    padding: 0.12em 0.4em;
+    border-radius: 3px;
+  }
+
+  /* ---------- tables ---------- */
+  .scroller { overflow-x: auto; margin: 0 0 1.5rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 42rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.83rem;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 1rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.72rem 1rem 0.72rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; padding-right: 1.6rem; }
+  .win { color: var(--accent); font-weight: 600; }
+  .model { font-weight: 500; color: var(--ink); white-space: nowrap; }
+
+  .pill {
+    display: inline-block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 0.18em 0.6em;
+    border-radius: 2px;
+    white-space: nowrap;
+    border: 1px solid currentColor;
+  }
+  .pill.ok { color: var(--pass); }
+  .pill.no { color: var(--fail); }
+  .pill.warn { color: var(--caution); }
+  .pill.pending { color: var(--ink-faint); }
+
+  /* ---------- memory chart ---------- */
+  .chart {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 2rem 1.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .bar-row { display: grid; grid-template-columns: 13rem 1fr; gap: 1rem; align-items: center; }
+  @media (max-width: 40rem) { .bar-row { grid-template-columns: 1fr; gap: 0.35rem; } }
+  .bar-name { font-size: 0.85rem; font-weight: 600; }
+  .bar-name span {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+  .track { position: relative; height: 2.1rem; background: var(--surface-sunk); }
+  .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: flex;
+    align-items: center;
+    padding-left: 0.6rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--surface);
+    background: var(--accent);
+  }
+  .fill.over { background: var(--fail); }
+  .fill.weights { background: var(--accent); }
+  .fill-kv {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--accent);
+    opacity: 0.42;
+  }
+  .ceiling {
+    position: absolute;
+    top: -0.5rem;
+    bottom: -0.5rem;
+    width: 2px;
+    background: var(--ink);
+  }
+  .ceiling::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -1.15rem;
+    left: 0.3rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .chart-note {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    padding-top: 0.9rem;
+    margin: 0.4rem 0 0;
+    max-width: none;
+  }
+
+  /* ---------- levers ---------- */
+  .levers { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.5rem; }
+  .lever {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr 9rem;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .lever:first-child { border-top: 1px solid var(--rule-strong); }
+  @media (max-width: 46rem) {
+    .lever { grid-template-columns: 2.5rem 1fr; }
+    .lever-delta { grid-column: 2; }
+  }
+  .lever-rank {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+  .lever-body p { margin: 0.3rem 0 0; font-size: var(--step-0); color: var(--ink-soft); }
+  .lever-name { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: var(--step-1); }
+  .lever-delta {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: right;
+  }
+  @media (max-width: 46rem) { .lever-delta { text-align: left; margin-top: 0.4rem; } }
+
+  /* ---------- traps ---------- */
+  .traps { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-bottom: 1.5rem; }
+  .trap { background: var(--surface); padding: 1.4rem 1.3rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .trap h4 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: var(--step-0);
+    font-weight: 600;
+  }
+  .trap p { margin: 0; font-size: 0.92rem; color: var(--ink-soft); max-width: none; }
+  .trap .cost {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    color: var(--fail);
+    letter-spacing: 0.03em;
+  }
+
+  /* ---------- protocol ---------- */
+  ol.protocol { counter-reset: step; list-style: none; padding: 0; margin: 0 0 1.5rem; max-width: var(--measure); }
+  ol.protocol li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 2.2rem 1fr;
+    gap: 0.9rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  ol.protocol li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    padding-top: 0.2rem;
+  }
+  ol.protocol strong { display: block; font-family: "Bricolage Grotesque", sans-serif; }
+  ol.protocol span { font-size: 0.95rem; color: var(--ink-soft); }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 1.2rem 1.4rem;
+    margin: 0 0 1.5rem;
+    max-width: var(--measure);
+  }
+  .callout p { margin: 0; }
+  .callout p + p { margin-top: 0.7rem; }
+
+  footer {
+    margin-top: 4.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+  }
+
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="label">Local model evaluation · 26–27 Aug 2026</div>
+    <h1>The 48 GB Question</h1>
+    <p class="standfirst">Seven models ran the same coding task. Two of them fit a 48 GB Pro — and they disagree so completely about how to spend the machine that there is no single answer to recommend.</p>
+    <div class="byline">
+      <span>weather-cli benchmark</span>
+      <span>opencode + mlx-lm / oMLX</span>
+      <span>36 GB wired cap · 16k output · sandboxed</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Results</div>
+      <h2>What seven models did</h2>
+    </div>
+    <p class="lede">Every model built the same Node.js weather CLI against live Met.no and Geonorge APIs, from the same two prompts. The last three ran under a 36 GB wired cap, which is what a 48 GB Pro actually allows.</p>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th><th>Arch</th><th class="num">Plan</th><th class="num">Implement</th>
+            <th class="num">Total</th><th class="num">Tests</th><th class="num">Code</th><th class="num">RSS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model">Qwen3.6-35B-A3B <span class="pill ok">fits 48 GB</span></td><td>MoE 35B / ~3B active</td>
+            <td class="num win">34.9s</td><td class="num">6m 10s</td><td class="num win">6m 45s</td>
+            <td class="num">20/20<sup>‡</sup></td><td class="num">6.8/10</td><td class="num">18.6 GB</td>
+          </tr>
+          <tr>
+            <td class="model">DeepSeek-V4-Flash</td><td>MoE 284B / 13B active</td>
+            <td class="num">4m 43s</td><td class="num">5m 26s</td><td class="num">10m 09s</td>
+            <td class="num">17/17<sup>†</sup></td><td class="num">—</td><td class="num">79 GB</td>
+          </tr>
+          <tr>
+            <td class="model">Qwen3.8-27B MTPLX</td><td>Dense 27B + MTP</td>
+            <td class="num">1m 23s</td><td class="num">8m 47s</td><td class="num">10m 10s</td>
+            <td class="num">16/16 ✓</td><td class="num">—</td><td class="num">28.9 GB</td>
+          </tr>
+          <tr>
+            <td class="model">Gemma-4-31B</td><td>Dense 31B, hybrid attn</td>
+            <td class="num">4m 02s</td><td class="num">16m 21s</td><td class="num">20m 23s</td>
+            <td class="num">16/16 ✓</td><td class="num">—</td><td class="num">30.9 GB</td>
+          </tr>
+          <tr>
+            <td class="model">Qwen3.8-27B 4-bit <span class="pill ok">fits 48 GB</span></td><td>Dense 27B, no drafter</td>
+            <td class="num">5m 16s</td><td class="num">27m 05s</td><td class="num">32m 21s</td>
+            <td class="num">25/25 ✓</td><td class="num win">8.5/10</td><td class="num win">14.6 GB</td>
+          </tr>
+          <tr>
+            <td class="model">Qwen3.5-9B</td><td>Dense 9B, MLA</td>
+            <td class="num">—</td><td class="num">—</td><td class="num">—</td>
+            <td class="num"><span class="pill no">4 attempts, no plan</span></td><td class="num">—</td><td class="num">5.1 GB</td>
+          </tr>
+          <tr>
+            <td class="model">Qwen2.5-72B</td><td>Dense 72B</td>
+            <td class="num">—</td><td class="num">—</td><td class="num">—</td>
+            <td class="num"><span class="pill no">never wrote a file</span></td><td class="num">—</td><td class="num">72 GB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="chart-note">† Self-reported; the workspace was deleted before it could be checked. ‡ 19 tests that can fail, plus one that cannot — see below. Code scores are the weighted rubric; only the two capped runs have been reviewed so far.</p>
+
+    <p><strong>Speed and quality came apart in both directions.</strong> The slowest finisher wrote the best code. The fastest wrote the worst. Both fit the target machine, and nothing in a stopwatch would have told you which to trust.</p>
+    <p>Qwen3.8-27B at 4-bit takes <strong>4.8× longer</strong> than the MoE and scores <strong>8.5/10</strong>: it avoided every trap on the checklist — UTC-safe time selection, strict cloud thresholds correct at exactly 75, injection-proof URL building. Qwen3.6-35B-A3B finishes in under seven minutes and scores <strong>6.8</strong>: it ships two paths that print a confident wrong answer rather than failing, and one test that structurally cannot fail.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Fit</div>
+      <h2>Two models fit. They are opposites.</h2>
+    </div>
+    <p class="lede">Measured under <code>vram-set 36</code>, the ceiling a 48 GB Pro allows. Yesterday nothing fit; today the question is which trade to take.</p>
+
+    <div class="chart">
+      <div class="bar-row">
+        <div class="bar-name">DeepSeek-V4-Flash<span>2.4-bit mixed</span></div>
+        <div class="track">
+          <div class="fill over" style="width:100%">79 GB — exceeds 48 GB outright</div>
+          <div class="ceiling" data-label="36 GB wired" style="left:45.6%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-name">Gemma-4-31B<span>8-bit · 865 KB/token KV</span></div>
+        <div class="track">
+          <div class="fill-kv" style="width:72.2%"></div>
+          <div class="fill" style="width:39.2%">31 GB + ~26 GB KV at 30k</div>
+          <div class="ceiling" data-label="36 GB wired" style="left:45.6%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-name">Qwen3.8-27B<span>8-bit + MTP</span></div>
+        <div class="track">
+          <div class="fill" style="width:44.3%">~35 GB with cache + activation</div>
+          <div class="ceiling" data-label="36 GB wired" style="left:45.6%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-name">Qwen3.6-35B-A3B <span>4-bit MoE — measured</span></div>
+        <div class="track">
+          <div class="fill" style="width:29.6%">18.6 GB resident + 4.7 GB KV</div>
+          <div class="ceiling" data-label="36 GB wired" style="left:45.6%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-name">Qwen3.8-27B <span>4-bit dense — measured</span></div>
+        <div class="track">
+          <div class="fill" style="width:23.2%">14.6 GB resident + 3.3 GB KV</div>
+          <div class="ceiling" data-label="36 GB wired" style="left:45.6%"></div>
+        </div>
+      </div>
+      <p class="chart-note">Bars scaled to a 79 GB span. The bottom two are measured peak RSS under the cap, not estimates — neither came close to the ceiling across a full run.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>Capacity was never the binding constraint.</strong> Both fitting models sat at half the ceiling all run. What separates them is decode speed and code quality — and those point in opposite directions.</p>
+    </div>
+
+    <p>The dense 4-bit costs <em>time</em>. It has no drafter: the MTP head is published as <em class="term">qwen3_5_mtp</em>, which only oMLX can load, and oMLX cannot serve this build. Against the 8-bit's 10m 10s on identical work, the same model at half the weights took <strong>32m 21s</strong> — halving the bytes per token did not halve the clock, because the 8-bit run had speculative decoding and this one has none.</p>
+    <p>The MoE costs <em>trust</em>. Roughly 3B active parameters make each turn cheap — it took <em>more</em> turns than the dense build, backtracked to fix its own bugs, and still finished five times sooner. But it omits per-field checks, so a Met.no entry missing its UV index prints <code>UV Index: undefined</code> and exits 0, and a missing cloud fraction reports a confident "Clear".</p>
+    <p>Attention architecture, not parameter count, decides the cache: Qwen3.6's MQA holds 0.30 GB where the dense 4-bit holds 1.10 GB and Gemma needs 865 KB <em>per token</em>. That last figure is what rules Gemma out, and no quantization recovers it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Findings</div>
+      <h2>What actually moved the numbers</h2>
+    </div>
+    <p class="lede">Ranked by measured effect. The top three all beat changing model, which lands seventh.</p>
+
+    <div class="levers">
+      <div class="lever">
+        <div class="lever-rank">01</div>
+        <div class="lever-body">
+          <div class="lever-name">Two sentences of spec precision</div>
+          <p>Naming 403 as a hard block and 429 as throttling stopped the model reasoning its way there. Plan phase fell from 7m 58s to 1m 23s.</p>
+        </div>
+        <div class="lever-delta">−82% plan</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">02</div>
+        <div class="lever-body">
+          <div class="lever-name">An output cap that fits the thinking</div>
+          <p>At <code>max_tokens 4096</code> runs died mid-file with <code>finish_reason=length</code>. Two profiles were still carrying 4096 into today's runs — a failure waiting to happen, found by reading configs rather than by hitting it again.</p>
+        </div>
+        <div class="lever-delta">2 runs lost</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">03</div>
+        <div class="lever-body">
+          <div class="lever-name">Choosing the right backend</div>
+          <p>Gemma was served by mlx-vlm, which clears the KV cache after every request. Its <code>model_type</code> is <code>gemma4</code>, which mlx-lm supports; only <code>gemma4_unified</code> needs mlx-vlm.</p>
+        </div>
+        <div class="lever-delta">43s → 27s / turn</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">04</div>
+        <div class="lever-body">
+          <div class="lever-name">Sampling from the model card</div>
+          <p>Qwen3.5-9B collapsed into <code>DIDIDIDI…</code> forever at the default settings. Setting <code>top_k = 20</code> turned that same run into a 23.4s plan — the fastest measured. Both Qwen profiles had shipped with it disabled.</p>
+        </div>
+        <div class="lever-delta">loop → 23.4s</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">05</div>
+        <div class="lever-body">
+          <div class="lever-name">Which tool the model reaches for</div>
+          <p>Asked to check the APIs, one model used <code>webfetch</code> — which pulls pages through context and <em>truncates</em>. It then reasoned for 8m 18s about a payload it never fully received. Models that used <code>curl</code> had the same data in a second.</p>
+        </div>
+        <div class="lever-delta">8m 18s stall</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">06</div>
+        <div class="lever-body">
+          <div class="lever-name">Speculative decoding</div>
+          <p>Qwen3.8's MTP drafter emits 2.8–3.5 tokens per forward cycle at 80–95% acceptance — the difference between 11–14 tok/s and 18–38 tok/s on identical weights. Its absence is the whole 4-bit gap.</p>
+        </div>
+        <div class="lever-delta">2–3× decode</div>
+      </div>
+      <div class="lever">
+        <div class="lever-rank">07</div>
+        <div class="lever-body">
+          <div class="lever-name">Changing the model</div>
+          <p>Real, but smaller than any of the above, and rarely the first thing worth changing.</p>
+        </div>
+        <div class="lever-delta">last resort</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>Quantization degrades instruction-following before it degrades code.</strong> Qwen3.8-27B at 8-bit obeys the rule against drafting files inside <code>&lt;think&gt;</code>. The identical model at 4-bit ignores it — drafting whole files in reasoning, then rewriting them as tool calls — and stalls for minutes on a spec line the 8-bit reads once. Its <em>code</em> still scored 8.5/10. What broke was the following of instructions, not the writing of software.</p>
+      <p>A sampling parameter changed the plan of attack, not just the prose. With <code>top_k</code> disabled, Qwen3.5-9B chose <code>webfetch</code> and dispatched a sub-agent to read an entire API documentation set. With <code>top_k = 20</code> and nothing else changed, it used <code>curl</code>, dispatched nothing, and planned in 23.4s.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Failure modes</div>
+      <h2>What the benchmark was quietly not measuring</h2>
+    </div>
+    <p class="lede">Every one of these presented as a slow or capable <em>model</em>. None of them was.</p>
+
+    <div class="traps">
+      <div class="trap">
+        <h4>A test that cannot fail</h4>
+        <p>One submission wrapped eight assertions in a <code>try</code>/<code>catch</code> meant to tolerate a network outage. Node's <code>assert</code> throws, so the catch swallowed the assertions too. "20/20 passing" was 19 that could fail and one that could not.</p>
+        <p class="cost">cost: a headline number, nearly believed</p>
+      </div>
+      <div class="trap">
+        <h4>A workspace that wasn't empty</h4>
+        <p>Two of the three directories used today still held a previous run's finished implementation. A model that finds working code already in place is not being measured at all.</p>
+        <p class="cost">cost: caught before the runs, not after</p>
+      </div>
+      <div class="trap">
+        <h4>A model reading its competitors</h4>
+        <p>Nothing confined the agent to its own directory. One walked out with an absolute path and listed every other model's finished solution — one <code>cat</code> from a free answer. The submissions were structurally unalike, so nothing was copied. That was luck.</p>
+        <p class="cost">cost: none yet, by chance</p>
+      </div>
+      <div class="trap">
+        <h4>A model editing the host</h4>
+        <p>Another hallucinated a <code>geonorge</code> CLI, wrote code that shelled out to it, then tried to make it exist: <code>npm install -g</code>, four <code>brew install</code> variants, and a <code>brew tap</code> that cloned into <code>/opt/homebrew</code> before failing on auth.</p>
+        <p class="cost">cost: a Homebrew metadata refresh</p>
+      </div>
+      <div class="trap">
+        <h4>A placeholder the models cannot resist</h4>
+        <p>Met.no rejects a User-Agent containing <code>example.com</code> with a bare 403. Three of four models put it there anyway — the spec names it as rejected and gives a working example on the line above. One read the 403 as rate limiting and built backoff against a wall that never opens.</p>
+        <p class="cost">cost: ~5 min per occurrence</p>
+      </div>
+      <div class="trap">
+        <h4>A knob with no handle</h4>
+        <p>The repetition loop that killed a run has a textbook remedy: <code>repetition_penalty</code>. The server accepts it per request but exposes no CLI flag, so no profile can reach it. The one setting that addresses the failure directly was unreachable.</p>
+        <p class="cost">cost: one run, and a gap still open</p>
+      </div>
+    </div>
+    <p>Runs now launch under <em class="term">cplt</em>, a kernel-level sandbox: reads and writes are confined to the model's own workspace, with the inference port allowed back in explicitly. Verified after the change — the model reaches Met.no and the local server, while listing a sibling workspace or touching <code>/opt/homebrew</code> both fail with <em class="term">Operation not permitted</em>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Method</div>
+      <h2>How we evaluate the next model</h2>
+    </div>
+    <p class="lede">The protocol as it now stands, in the order it has to happen.</p>
+
+    <ol class="protocol">
+      <li><strong>Check <code>model_type</code> exactly</strong><span>Read it from the model's own <code>config.json</code> and confirm a matching backend module exists. Never match on a family prefix.</span></li>
+      <li><strong>Apply the model card's sampling</strong><span>Not just temperature. A disabled <code>top_k</code> cost one model four attempts and produced a repetition loop that looked like a hung server.</span></li>
+      <li><strong>Confirm the workspace is empty</strong><span>Not that the task says it clears it — look. Two of three held a previous run's code.</span></li>
+      <li><strong>Launch sandboxed</strong><span>Confine the agent to its own directory. Models read their neighbours and write to the host, and neither shows up in the result.</span></li>
+      <li><strong>Run both prompts verbatim</strong><span>The wording is itself the strongest lever, so changing it invalidates the comparison.</span></li>
+      <li><strong>Verify the tests yourself</strong><span>Run them before anything is cleared, and read the test bodies — a passing count is only as good as its weakest test. Check exit codes without a pipe: <code>$?</code> after a pipeline is the last command's status, not the program's.</span></li>
+      <li><strong>Review the code against a fixed rubric</strong><span>Same dimensions, same weights, same trap checklist for every model. Speed and quality came apart in both directions; only a rubric catches that.</span></li>
+      <li><strong>Sample memory against context</strong><span>Peak RSS and KV growth decide the 48 GB question. Attention architecture, not parameter count, drives the cache.</span></li>
+    </ol>
+
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Confidence</div>
+      <h2>What this does and does not establish</h2>
+    </div>
+    <p class="lede">The hardware answer is solid. The model ranking is not, and it would be easy to read this page as though it were.</p>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Claim</th><th>Confidence</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Both 4-bit builds fit a 48 GB Pro</td>
+            <td><span class="pill ok">high</span></td>
+            <td>Measured peak RSS across full runs under the cap, at roughly half the ceiling. Capacity arithmetic transfers between machines.</td>
+          </tr>
+          <tr>
+            <td>Attention architecture, not size, drives KV cost</td>
+            <td><span class="pill ok">high</span></td>
+            <td>Consistent across four architectures spanning 9B to 284B, with a mechanistic explanation.</td>
+          </tr>
+          <tr>
+            <td>Harness levers beat model choice</td>
+            <td><span class="pill ok">high</span></td>
+            <td>Five independent levers produced large effects; three of four failures this session were harness-permitted.</td>
+          </tr>
+          <tr>
+            <td>The MoE is ~5× faster</td>
+            <td><span class="pill warn">medium</span></td>
+            <td>One run each. The gap is far too large to be noise, but the magnitude is a single sample and the two runs are not like-for-like.</td>
+          </tr>
+          <tr>
+            <td>The dense 4-bit writes better code</td>
+            <td><span class="pill no">low</span></td>
+            <td>8.5 against 6.8, one run each, one ungaudited reviewer. That margin sits inside plausible run-to-run spread.</td>
+          </tr>
+          <tr>
+            <td>Anything about a real 48 GB Pro's speed</td>
+            <td><span class="pill no">untested</span></td>
+            <td>Capping wired memory reproduces the ceiling, not the halved bandwidth. Expect roughly half these speeds.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>Every run here is n = 1.</strong> These are single samples of a stochastic process at temperature 0.6, with no repeats and therefore no variance estimate. Wall-clock gaps of 5× survive that; an 8.5-versus-6.8 code score does not.</p>
+      <p><strong>And both headline runs used sampling we now believe is wrong.</strong> Each ran with <code>top_k</code> disabled and <code>top_p</code> at 1.0, against the model card's <code>top_k 20</code> / <code>top_p 0.95</code> — the exact setting whose absence turned a third model's run into a repetition loop.</p>
+    </div>
+
+    <p>Three further limits worth stating plainly. The 6 GB rung is <em>unmeasured</em>, not disproven — Qwen3.5-9B failed four times, but it is the oldest model tested and both its successors work. Only two of seven models have been graded at all; four finished submissions sit in git, ungraded. And this is <em>one task</em> — a CLI against two HTTP APIs. Nothing here licenses a claim about refactoring, debugging, or anything stateful.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="label">Recommendation</div>
+      <h2>Pick the trade, not the model</h2>
+    </div>
+    <p class="lede">There is no single answer for 48 GB. Both candidates fit; they fail in opposite directions.</p>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>If you…</th><th>Run</th><th>And accept</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>value correctness over turnaround</td>
+            <td class="model">Qwen3.8-27B 4-bit</td>
+            <td>32m 21s per task. Best code measured, smallest footprint, no drafter exists for this build.</td>
+          </tr>
+          <tr>
+            <td>value turnaround over correctness</td>
+            <td class="model">Qwen3.6-35B-A3B</td>
+            <td>6m 45s, and a review you actually have to do. Budget the time you saved on inference.</td>
+          </tr>
+          <tr>
+            <td>have 96 GB or more</td>
+            <td class="model">Qwen3.8-27B MTPLX Q8</td>
+            <td>10m 10s with the drafter that makes it fast. Needs oMLX, and does not fit a Pro.</td>
+          </tr>
+          <tr>
+            <td>want Gemma</td>
+            <td class="model">reconsider</td>
+            <td>Correct, and priced out: 865 KB/token of cache no quantization recovers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>Fix the harness before you change the model.</strong> Six of the seven levers that moved these numbers were configuration, prompt wording, or tooling. A model swap was the smallest of them — and three of today's four failures were things the harness allowed rather than things a model got wrong.</p>
+    </div>
+
+    <p>Next: enable thinking on the MoE, to separate "sparse is fast" from "no reasoning tokens is fast"; disable it on the dense 4-bit, whose two costly stalls were both reasoning-phase; grade the four finished submissions still sitting ungraded in git; and give profiles a way to reach <code>repetition_penalty</code>.</p>
+  </section>
+
+  <footer>
+    <span>Working notes: MODELS.md</span>
+    <span>Benchmark: WEATHER_CLI_SPEC.md</span>
+    <span>Rig A — M1 Max 32 GB · Rig B — M5 Max 128 GB · target — 48 GB Pro</span>
+  </footer>
+
+</div>
+

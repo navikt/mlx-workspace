@@ -1293,6 +1293,10 @@ After applying the template patch, the model generates fake YAML listing invente
 
 ## Recommendations
 
+> 📄 Published summary: [`reports/48gb-question.html`](reports/48gb-question.html) —
+> the readable version of this section, with per-claim confidence levels.
+> Live at <https://claude.ai/code/artifact/6807ccc4-e846-4371-a77c-dfb5b9a066c1>.
+
 What the benchmark supports today. Every number comes from rig A or rig B; the 48 GB Pro target
 is reasoned about, not measured, so capacity claims transfer and speed claims do not.
 
@@ -1330,6 +1334,29 @@ Ranked by measured effect, largest first. The first three all beat changing mode
 6. **`AGENTS.md` rule 7.** Cut the median turn ~28% on the models that obey it. Qwen3.8-27B
    **4-bit ignores it**; the Q8 of the same model does not.
 7. **Model choice.** Real, but smaller than the above and rarely the first thing to change.
+
+### How far these results can be trusted
+
+| Claim | Confidence | Why |
+|---|---|---|
+| Both 4-bit builds fit a 48 GB Pro | **high** | Measured peak RSS across full runs under the cap, at ~half the ceiling. Capacity transfers between machines |
+| Attention architecture, not size, drives KV cost | **high** | Consistent across four architectures from 9B to 284B, with a mechanistic explanation |
+| Harness levers beat model choice | **high** | Five independent levers, large effects; three of four failures this session were harness-permitted |
+| Qwen3.6-35B-A3B is ~5× faster | medium | One run each, and the two are not like-for-like (thinking on vs off). The gap is too large to be noise; the magnitude is one sample |
+| Qwen3.8-27B 4-bit writes better code | **low** | 8.5 vs 6.8, one run each, one unaudited reviewer. That margin sits inside plausible run-to-run spread |
+| Anything about a real 48 GB Pro's speed | **untested** | The wired cap reproduces the ceiling, not the halved bandwidth. Expect roughly half these speeds |
+
+**Every run is n = 1.** Single samples of a stochastic process at temperature 0.6, no repeats,
+no variance estimate. Wall-clock gaps of 5× survive that; a 1.7-point code-score gap does not.
+
+**Both headline runs used sampling we now believe is wrong.** Each ran with `MLX_TOP_K = 0` and
+`MLX_TOP_P = 1.0`, against the model card's `top_k 20` / `top_p 0.95` — the exact setting whose
+absence turned Qwen3.5-9B's run into a repetition loop. Re-running Qwen3.6 three times with
+corrected sampling closes the n=1 gap and the sampling gap together, in about half an hour, and
+is the highest value per minute in the backlog.
+
+**One task.** A CLI against two HTTP APIs. Nothing here licenses a claim about refactoring,
+debugging, or anything stateful.
 
 ### Standing rules
 
