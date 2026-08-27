@@ -686,7 +686,44 @@ paper, and we still do not know how it performs on real work. Re-run once the op
 incompatibility is understood, or measure it through Copilot CLI instead. See
 [opencode drops output from some models](#opencode-drops-output-from-some-models).
 
-### `mlx-community/Qwen3.6-35B-A3B-4bit` — 11-task run
+### `mlx-community/Qwen3.6-35B-A3B-4bit` — clean baseline
+
+Eleven tasks, fresh server before each one. This is the first run in this project where every
+task starts from a known server state, so it supersedes the earlier figures. Those runs are kept
+as `.CONFOUNDED.json` because they are evidence for
+[the server degradation bug](#the-server-degrades-over-a-session), not because they are
+comparable.
+
+| Task | | Time | Turns | Tools | Result |
+|---|---|---|---|---|---|
+| R2 | find where a config value is read | 10.1s | 2 | 1 | 2 of 2 terms |
+| R1 | explain a domain function | 19.2s | 4 | 3 | 3 of 4 terms |
+| D1 | explain PDL ident selection | 20.7s | 4 | 3 | 2 of 2 terms |
+| M2 | add a field to a DTO and map it | 21.5s | 2 | 4 | ❌ made no edits |
+| E1 | add a KDoc block | 22.3s | 5 | 4 | compiles |
+| R3 | list call sites | 32.4s | 2 | 1 | 1 of 1 terms |
+| M1 | rename across call sites | 35.1s | 5 | 6 | old symbol gone, compiles |
+| E3 | add a log line with context | 46.2s | 8 | 7 | compiles |
+| D3 | write a Kafka DTO deserialization test | 57.0s | 5 | 9 | suite passes |
+| G2 | write a test for an untested util | 96.8s | 10 | 18 | suite passes |
+| D2 | thread a field through a row mapper | 220.8s | 19 | 29 | ❌ broke the suite |
+
+**Median 32.4s, mean 52.9s, 5 of 7 verified, zero tasks with no tool calls.**
+
+**The restart fixed the categorical failures.** Against the confounded run, mean fell from 77.4s
+to 52.9s and zero-tool tasks went from one to none. The median barely moved, because the
+degradation hit the tail rather than the typical case.
+
+**D2 is genuinely hard for this model.** It no longer times out. It runs 19 turns and 29 tool
+calls over 220.8s and then breaks the test suite. Threading a new field through a database row
+class, its mapper and every construction site is real work this model attempts and gets wrong.
+That is the most realistic task in the set and the clearest limit found so far.
+
+**M2 flipped.** It passed in the confounded run and failed here with two turns and no edits, on a
+task the same model has completed before. Single runs cannot separate close calls, which is worth
+remembering before reading any one-run comparison as a ranking.
+
+
 
 Second run, on the updated harness: eleven tasks including three data-parsing tasks, `AGENTS.md`
 rule 8 forbidding a repeated failing tool call, and a 420-second per-task cap.
