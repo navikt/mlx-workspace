@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+# mise description="Block until the MLX server answers, then verify it generates"
+"""Wait for the server to bind AND produce a token.
+
+Binding the port is not the same as being able to answer. mlx-lm loads weights
+lazily, so the first request can be minutes after the socket opens. A benchmark
+that starts on bind alone measures model loading as if it were thinking time.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+
+port = os.environ.get("MLX_SERVER_PORT", "8080")
+model = os.environ.get("MLX_MODEL", "")
+deadline = time.time() + float(os.environ.get("MLX_SERVER_WAIT_SECONDS", "900"))
+
+def listening() -> bool:
+    return bool(subprocess.run(["lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
+                               capture_output=True, text=True).stdout.strip())
+
+print(f"→ Waiting for port {port} ...", flush=True)
+while not listening():
+    if time.time() > deadline:
+        sys.exit(f"✗ Nothing listening on port {port} before the deadline")
+    time.sleep(2)
+print(f"✓ Port {port} open", flush=True)
+
+body = json.dumps({
+    "model": model,
+    "messages": [{"role": "user", "content": "Reply with exactly: ok"}],
+    "max_tokens": 400,
+}).encode()
+req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
+                             data=body, headers={"Content-Type": "application/json"})
+print("→ Warming the model (first request loads weights) ...", flush=True)
+started = time.time()
+try:
+    with urllib.request.urlopen(req, timeout=max(30, deadline - time.time())) as r:
+        data = json.load(r)
+except (urllib.error.URLError, TimeoutError) as e:
+    sys.exit(f"✗ Server did not answer: {e}")
+
+choice = data.get("choices", [{}])[0]
+took = time.time() - started
+print(f"✓ Answered in {took:.1f}s · finish={choice.get('finish_reason')} "
+      f"· thinking={'yes' if 'reasoning' in choice.get('message', {}) else 'no'}")

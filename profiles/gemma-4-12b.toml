@@ -1,9 +1,9 @@
 [meta]
 name               = "Gemma-4-12B Instruct 4bit"
 released           = "2026-05"
-status             = "slow"
+status             = "untested"
 spec_source        = "measured"
-notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone — no separate heavy encoders. Strong function-calling adherence reported. REQUIRES mlx-vlm (model_type: gemma4_unified) — server auto-dispatches via MLX_SERVER_TYPE. WARNING: mlx-vlm clears KV cache after every request ('Stream finished, cleared cache') — no cross-request prompt caching. Every opencode tool call re-prefills the full conversation from scratch. This makes agentic sessions impractically slow: 10 turns took 24 minutes, average 2m16s/turn, yet the session produced almost no output (files created empty, no implementation written). Verdict: unusable for agentic coding as of Jun 2026 due to mlx-vlm's per-request cache-clear. May be viable for short single-turn queries."
+notes              = "Google Gemma 4 12B (Jun 2026). Native context: 256k tokens. Dense encoder-free architecture: vision (35M embedder), audio, and video fed directly into the LLM backbone, no separate heavy encoders. Strong function-calling adherence reported. REQUIRES mlx-vlm (model_type: gemma4_unified), server auto-dispatches via MLX_SERVER_TYPE. WARNING: mlx-vlm clears KV cache after every request ('Stream finished, cleared cache'), no cross-request prompt caching, so every opencode tool call re-prefills the full conversation from scratch. Earlier verdict was slow: a full application-building session of 10 turns took 24 minutes, average 2m16s/turn, and produced almost no output (files created empty, no implementation written). That verdict was measured on a full application-building workload, not what the upcoming benchmark tests, and with MLX_OPENCODE_OUTPUT 4096, so status is reset to untested. The measurements are kept in [benchmarks] below. Sampling: the model card generation_config recommends temperature 1.0, top_k 64, top_p 0.95 (checked 2026-08-27), but the mlx-vlm backend ignores sampling params (see IGNORED_BY_BACKEND in _profiles.py), so they are deliberately not declared here."
 model_vram_gb      = 7
 gpu_wired_limit_gb = 26
 
@@ -14,7 +14,7 @@ MLX_CACHE_BYTES            = "16106127360"  # 15GB — 26GB cap − 7.5GB model 
 MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k; compaction fires at ~61k
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"        # 4096 truncated runs mid-file (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — mlx-vlm no KV cache; full re-prefill every turn
 
 [benchmarks]

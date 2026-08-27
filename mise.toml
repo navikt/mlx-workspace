@@ -96,6 +96,15 @@ run = ".mise/tasks/opencode-init"
 # a second time against the repo root and leave a stale opencode.json behind.
 description = "Start opencode in workspaces/<model-key>/ against the local MLX server"
 
+[tasks.opencode-headless]
+description = "Run one opencode prompt non-interactively, sandboxed. Usage: mise run opencode-headless \"<prompt>\""
+
+[tasks.server-stop]
+description = "Stop the running MLX server on the inference port"
+
+[tasks.server-wait]
+description = "Block until the MLX server answers, then verify it generates"
+
 [tasks.workspace-clear]
 description = "Delete the active model's workspace so the next run starts clean"
 

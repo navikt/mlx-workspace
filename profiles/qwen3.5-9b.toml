@@ -37,5 +37,5 @@ MLX_TOP_P                  = "0.95"   # the model card specifies these four as a
 # a 9m 51s turn that never delivered a plan. All three were long-generation failures,
 # and the reasoning phase is what runs long. Qwen3.6-35B-A3B runs this way and was the
 # fastest, most stable run measured. Same rationale the Qwen3.6 profile documents:
-# BFCL multi-turn 12.4% thinking vs 35.8% non-thinking.
+# The 12.4/35.8 figures once cited here were DeepSeek R1 vs V3 numbers, not Qwen. See MODELS.md.
 MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'

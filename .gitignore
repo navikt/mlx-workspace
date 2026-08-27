@@ -10,3 +10,5 @@ mise.local.toml
 node_modules/
 __pycache__/
 .venv/
+
+.bench-logs/

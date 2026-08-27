@@ -1,17 +1,17 @@
 [meta]
-name               = "Granite-4.1-8B Instruct 4bit"
+name               = "Granite-4.1-8B 4bit"
 released           = "2026-05"
 status             = "untested"
 spec_source        = "research"
-notes              = "IBM Granite 4.1 8B. Native context: 131,072 tokens (128k) — confirmed via OpenRouter and IBM docs. Dense architecture. Enterprise-reinforced for strict tool calling: Go, Java, C++, Rust, and language-server adherence. 128k context with 8B model leaves excellent headroom. Cache reduced from 18GB to 16GB vs original config: at 128k tokens, activation buffer needs ~5.5GB (same lesson as Qwen3.5-9B OOM). GATED MODEL: requires accepting license terms before download. Steps: (1) huggingface-cli login, (2) accept terms at https://huggingface.co/ibm-granite/granite-4.1-8b-instruct and https://huggingface.co/mlx-community/granite-4.1-8b-instruct-4bit, (3) mise run server will then download normally."
+notes              = "IBM Granite 4.1 8B. Native context: 131,072 tokens (128k), confirmed via OpenRouter and IBM docs. Dense architecture. Enterprise-reinforced for strict tool calling: Go, Java, C++, Rust, and language-server adherence. 128k context with 8B model leaves excellent headroom. Cache reduced from 18GB to 16GB vs original config: at 128k tokens, activation buffer needs ~5.5GB (same lesson as Qwen3.5-9B OOM). MODEL ID FIX 2026-08-27: the old ID mlx-community/granite-4.1-8b-instruct-4bit does not exist on HF, do not restore it. Correct repo is mlx-community/granite-4.1-8b-4bit (base: ibm-granite/granite-4.1-8b). That repo is not gated, config downloads without a token, so the earlier gated-model login instructions no longer apply. Sampling: neither the IBM model card nor generation_config.json recommends temperature/top_p/top_k values (checked 2026-08-27), so the profile keeps the workspace defaults."
 model_vram_gb      = 4
 gpu_wired_limit_gb = 26
 
 [params]
-MLX_MODEL                  = "mlx-community/granite-4.1-8b-instruct-4bit"
+MLX_MODEL                  = "mlx-community/granite-4.1-8b-4bit"
 MLX_CACHE_BYTES            = "17179869184"  # 16GB — 26GB cap − 4.5GB model − 5.5GB buffer (adjusted from 18GB)
 MLX_CACHE_SIZE             = "6"
 MLX_MAX_TOKENS             = "8192"
 MLX_OPENCODE_CONTEXT       = "131072"       # 128k; compaction fires at ~127k
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"        # 4096 truncated runs mid-file (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — 128k context, slow tokens at large context

@@ -31,7 +31,13 @@ Session observations (2026-06-19):
   Cache was static at 0.92 GB across turns (no KV reuse). Fixed to 5 slots to match Qwen3.5-9B.
 
 Thinking mode: supports enable_thinking (same Qwen3 mechanism as Qwen3.5).
-Disabled for agentic use — BFCL: 12.4% thinking vs 35.8% non-thinking (3x worse)."""
+Disabled for agentic use. NOTE: this profile previously cited "BFCL 12.4% vs 35.8%" as the
+reason. Those are DeepSeek R1 vs V3 numbers that were copied here by mistake, not Qwen numbers.
+The direction still holds from other sources: thinking degrades Qwen3-class models on multi-turn
+tool use, largely by spending the output budget inside the thinking block. See arXiv 2606.09662,
+which tested Qwen3 1.7B-32B and found thinking helps planning constraints and hurts precision
+constraints, with a negative aggregate. Qwen themselves split Instruct and Thinking into separate
+models rather than keep hybrid mode."""
 model_vram_gb      = 21
 gpu_wired_limit_gb = 26
 
@@ -43,6 +49,12 @@ MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "98304"        # 96k — measured: wired ≈ 22.7 GB at 96k (3.3 GB headroom, comfortable)
 MLX_OPENCODE_OUTPUT        = "16384"       # matches every other benchmarked profile; 4096 truncated runs mid-file
 MLX_OPENCODE_CHUNK_TIMEOUT = "300000"       # 5min — fast MoE; extend if 96k context slows decode
+# Qwen model card sampling. Both weather-cli runs were measured with top_k disabled and
+# top_p at 1.0, which is not what the card specifies. Running with top_k off produced a
+# degenerate repetition loop on Qwen3.5-9B, so this is a correction, not a preference.
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
 # Disable thinking mode for agentic use (enable_thinking=false injects /nothink token).
-# Research: BFCL multi-turn benchmark 12.4% (thinking) vs 35.8% (non-thinking) — 3x worse.
+# See the note above: the old 12.4/35.8 citation was DeepSeek data misapplied to Qwen.
 MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'

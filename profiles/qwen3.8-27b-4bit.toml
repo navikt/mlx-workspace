@@ -20,3 +20,9 @@ MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"
 MLX_OPENCODE_OUTPUT        = "16384"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+# Qwen model card sampling. Both weather-cli runs were measured with top_k disabled and
+# top_p at 1.0, which is not what the card specifies. Running with top_k off produced a
+# degenerate repetition loop on Qwen3.5-9B, so this is a correction, not a preference.
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"

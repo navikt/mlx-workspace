@@ -611,7 +611,10 @@ half cleanly: **0.30 GB across 4 sequences after warm-up**, against the dense 4-
 against Gemma-4-31B's 865 KB/token.
 
 **The thinking caveat is load-bearing.** Both Qwen3.8 runs had thinking on; this profile disables
-it on cited BFCL evidence (12.4% thinking vs 35.8% non-thinking on multi-turn agentic use). That
+it because thinking degrades Qwen3-class models on multi-turn tool use, mainly by spending the
+output budget inside the thinking block (arXiv 2606.09662, tested on Qwen3 1.7B-32B). An earlier
+version of this note cited "BFCL 12.4% vs 35.8%" here. Those are the DeepSeek R1 vs V3 numbers
+from the thinking-mode table above, copied across model families by mistake. That
 makes this a fair comparison of *deployed configurations* and an unfair one of *models*. In
 particular it cannot be credited with obeying AGENTS.md rule 7. With no `<think>` block, drafting
 code inside one is not a thing it can do. What the contrast does establish is that the 4-bit's

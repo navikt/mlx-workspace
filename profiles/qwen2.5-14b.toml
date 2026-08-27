@@ -1,9 +1,9 @@
 [meta]
 name               = "Qwen2.5-Coder-14B Instruct 4bit"
 released           = "2024-11"
-status             = "skipped"
+status             = "untested"
 spec_source        = "local"
-notes              = "Tool calling produced frequent malformed JSON — not viable for aider/opencode. Superseded by Qwen3.5-9B which is smaller, faster, and more reliable. Part of Qwen2.5 generation."
+notes              = "Earlier verdict was skipped: tool calling produced frequent malformed JSON, not viable for aider/opencode, and it was superseded by Qwen3.5-9B which is smaller, faster, and more reliable. That verdict was measured under different conditions than the upcoming benchmark: top_k was disabled and MLX_OPENCODE_OUTPUT was 4096, both known failure sources. Re-testing with card sampling (top_k 20, top_p 0.95, min_p 0.0) and 16384 output. Part of Qwen2.5 generation."
 model_vram_gb      = 9
 gpu_wired_limit_gb = 26
 
@@ -12,6 +12,9 @@ MLX_MODEL                  = "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
 MLX_CACHE_BYTES            = "10737418240"  # 10GB — model ~9GB VRAM, ~10GB headroom
 MLX_CACHE_SIZE             = "6"
 MLX_MAX_TOKENS             = "12288"
+MLX_TOP_K                  = "20"           # per Qwen card; disabled top_k caused repetition loops
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
 MLX_OPENCODE_CONTEXT       = "65536"        # 64k practical; compaction at ~61k
-MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_OUTPUT        = "16384"        # 4096 truncated runs mid-file (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"       # 10min — conservative; no downside to generous timeout

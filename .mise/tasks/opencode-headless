@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# mise description="Run one opencode prompt non-interactively, sandboxed. Usage: mise run opencode-headless \"<prompt>\""
+"""Drive opencode without a terminal, for scripted benchmark runs.
+
+Same workspace provisioning and same sandbox as `mise run opencode`, but it sends
+one prompt, captures structured events, and exits. Emits a one-line summary plus
+a JSON log so a benchmark harness gets numbers instead of screen scrapings.
+
+  mise run opencode-headless "Explain what dagerMellomDatoer does"
+  mise run opencode-headless --continue "now rename it to daysBetweenDates"
+
+Everything after the task name goes to `opencode run`, so --continue, --session,
+--model and --agent all work.
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _sandbox as S
+
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+if not key:
+    sys.exit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+
+args = sys.argv[1:]
+if not args:
+    sys.exit('✗ Nothing to send. Usage: mise run opencode-headless "<prompt>"')
+
+workspace = Path(__file__).resolve().parents[2]
+workspace_dir = workspace / "workspaces" / key
+workspace_dir.mkdir(parents=True, exist_ok=True)
+
+# Provision exactly like the interactive task, so a headless run and a hand-driven
+# run see the same spec and the same rules.
+weather_cli_dir = workspace_dir / "weather-cli"
+weather_cli_dir.mkdir(exist_ok=True)
+shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
+shutil.copy2(workspace / "AGENTS.md", workspace_dir / "AGENTS.md")
+
+if subprocess.run(["mise", "run", "opencode-init", str(workspace_dir)],
+                  cwd=str(workspace)).returncode != 0:
+    sys.exit("✗ opencode-init failed")
+
+log_dir = workspace / ".bench-logs"
+log_dir.mkdir(exist_ok=True)
+stamp = time.strftime("%Y%m%d-%H%M%S")
+log_path = log_dir / f"{key}-{stamp}.jsonl"
+
+server_port = os.environ.get("MLX_SERVER_PORT", "8080")
+# --yes skips the confirmation prompt, which has no terminal to answer it here.
+# --quiet drops the sandbox banner so it does not pollute the event stream.
+prefix = S.cplt_argv(workspace_dir, workspace, server_port, extra=["--yes", "--quiet"])
+if prefix is None:
+    S.warn_unsandboxed(sys.stderr)
+    prefix = []
+    cmd = ["opencode", "run", "--format", "json", *args]
+else:
+    cmd = prefix + ["--", "run", "--format", "json", *args]
+
+print(f"→ {key} · {workspace_dir.relative_to(workspace)}/")
+started = time.time()
+with open(log_path, "w") as log:
+    rc = subprocess.run(cmd, cwd=str(workspace_dir), stdout=log,
+                        stderr=subprocess.STDOUT).returncode
+elapsed = time.time() - started
+
+# Pull telemetry out of the event stream. cplt and opencode both write human text
+# to the same stream, so parse leniently and report what actually parsed.
+steps, tools, text = [], [], []
+tok = {"input": 0, "output": 0, "reasoning": 0}
+reasons, tool_names = [], []
+for line in log_path.read_text().splitlines():
+    line = line.strip()
+    if not line.startswith("{"):
+        continue
+    try:
+        ev = json.loads(line)
+    except json.JSONDecodeError:
+        continue
+    kind, part = ev.get("type", ""), ev.get("part", {}) or {}
+    if kind == "step_start":
+        steps.append(ev.get("timestamp", 0))
+    elif kind == "step_finish":
+        reasons.append(part.get("reason", "?"))
+        t = part.get("tokens") or {}
+        for k in tok:
+            tok[k] += int(t.get(k) or 0)
+    elif kind == "tool_use":
+        tool_names.append(part.get("tool", "?"))
+        tools.append(ev)
+    elif kind == "text" and isinstance(part.get("text"), str):
+        text.append(part["text"])
+
+mins, secs = divmod(int(elapsed), 60)
+turns = len(reasons)
+print(f"✓ exit {rc} · {mins}m {secs:02d}s · {turns} turns · {len(tools)} tool calls")
+if turns:
+    # input tokens per turn is the fixed harness overhead plus conversation so far.
+    # It is the floor under every task and worth watching per run.
+    print(f"  tokens: in {tok['input']:,} · out {tok['output']:,} · "
+          f"reasoning {tok['reasoning']:,} · first turn in {tok['input'] // turns:,} avg")
+if tool_names:
+    counts = {n: tool_names.count(n) for n in dict.fromkeys(tool_names)}
+    print("  tools: " + ", ".join(f"{n}x{c}" for n, c in counts.items()))
+# "length" means the model was cut off mid-output. It killed two earlier runs and
+# is invisible unless you look for it.
+if "length" in reasons:
+    print(f"  ⚠  TRUNCATED — a turn ended with reason=length "
+          f"(raise MLX_OPENCODE_OUTPUT, currently {os.environ.get('MLX_OPENCODE_OUTPUT', '?')})")
+print(f"  log: {log_path.relative_to(workspace)}")
+if text:
+    joined = " ".join(text).strip().replace("\n", " ")
+    print(f"  reply: {joined[:300]}{'…' if len(joined) > 300 else ''}")
+sys.exit(rc)
