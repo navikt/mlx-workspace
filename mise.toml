@@ -96,6 +96,9 @@ run = ".mise/tasks/opencode-init"
 # a second time against the repo root and leave a stale opencode.json behind.
 description = "Start opencode in workspaces/<model-key>/ against the local MLX server"
 
+[tasks.bench-cheap-ops]
+description = "Run the cheap-operations benchmark for the active model"
+
 [tasks.opencode-headless]
 description = "Run one opencode prompt non-interactively, sandboxed. Usage: mise run opencode-headless \"<prompt>\""
 

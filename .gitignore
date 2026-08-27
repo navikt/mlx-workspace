@@ -12,3 +12,5 @@ __pycache__/
 .venv/
 
 .bench-logs/
+workspaces/*/kotlin/
+bench/results-*.json

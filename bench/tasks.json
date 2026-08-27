@@ -1,0 +1,27 @@
+{
+  "repo": "https://github.com/navikt/isoppfolgingstilfelle.git",
+  "ref": "master",
+  "jdk": "~/.local/share/mise/installs/java/temurin-21",
+  "tasks": [
+    {"id": "R1", "kind": "read", "verify": "manual",
+     "prompt": "Explain what the function hasGjentakendeSykefravar in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt does. Answer in a few sentences. Do not change any files.",
+     "expect_terms": ["5", "100", "2", "300"]},
+    {"id": "R2", "kind": "read", "verify": "grep_answer",
+     "prompt": "Which file and line reads the PDL_URL environment variable? Answer with the path and line number only. Do not change any files.",
+     "expect_terms": ["ApplicationEnvironment.kt", "59"]},
+    {"id": "R3", "kind": "read", "verify": "manual",
+     "prompt": "List every call site of the extension function calculateCurrentVarighetUker. Report the file paths. Do not change any files.",
+     "expect_terms": ["OppfolgingstilfellePerson.kt"]},
+    {"id": "E1", "kind": "edit", "verify": "compile",
+     "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else."},
+    {"id": "E3", "kind": "edit", "verify": "compile",
+     "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line at the start of the first public function recording the values of its parameters. Use the existing logging style in this codebase. Change nothing else."},
+    {"id": "M1", "kind": "edit", "verify": "rename",
+     "prompt": "Rename the function dagerMellomDatoer to daysBetweenDates everywhere in the codebase, including its definition, imports and all call sites. Change nothing else.",
+     "old_symbol": "dagerMellomDatoer", "new_symbol": "daysBetweenDates"},
+    {"id": "M2", "kind": "edit", "verify": "test",
+     "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else."},
+    {"id": "G2", "kind": "edit", "verify": "test",
+     "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day."}
+  ]
+}

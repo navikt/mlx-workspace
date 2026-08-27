@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# mise description="Run the cheap-operations benchmark for the active model. Usage: mise run bench-cheap-ops [taskid ...]"
+"""Run CHEAP_OPS_SPEC.md tasks against a real Kotlin service, unattended.
+
+Each task starts from a clean checkout, so no task inherits another's edits. That
+matters: two of three workspaces used in an earlier round turned out to hold a
+previous run's code, which would have invalidated every number.
+
+Verification is done here, not by the model. A model's claim that its tests pass
+is not a result; one earlier submission reported "20/20 passing" where eight of
+the assertions sat inside a catch block that swallowed them.
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+CFG = json.loads((ROOT / "bench" / "tasks.json").read_text())
+JDK = Path(os.path.expanduser(CFG["jdk"]))
+
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+if not key:
+    sys.exit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+
+wanted = [a for a in sys.argv[1:] if not a.startswith("-")]
+tasks = [t for t in CFG["tasks"] if not wanted or t["id"] in wanted]
+if not tasks:
+    sys.exit(f"✗ No tasks matched {wanted}")
+
+ws = ROOT / "workspaces" / key
+repo = ws / "kotlin"
+results_path = ROOT / "bench" / f"results-{key}.json"
+results = json.loads(results_path.read_text()) if results_path.exists() else {}
+
+
+def sh(cmd, cwd=None, timeout=1800, env=None):
+    e = {**os.environ, **(env or {})}
+    return subprocess.run(cmd, cwd=cwd and str(cwd), capture_output=True,
+                          text=True, timeout=timeout, env=e)
+
+
+def ensure_clone():
+    if (repo / ".git").is_dir():
+        return
+    ws.mkdir(parents=True, exist_ok=True)
+    print(f"→ Cloning {CFG['repo']}")
+    sh(["git", "clone", "--depth", "1", "-b", CFG["ref"], CFG["repo"], str(repo)], timeout=600)
+
+
+def reset_repo():
+    """Hard reset plus clean, so a task never sees the previous task's edits."""
+    sh(["git", "reset", "--hard", "-q"], cwd=repo)
+    sh(["git", "clean", "-qfd", "-e", "build", "-e", ".gradle"], cwd=repo)
+
+
+def gradle(target):
+    """Gradle needs JAVA_HOME pointed at JDK 21; the machine default is newer and
+    the project pins jvmToolchain(21), which Gradle will not auto-provision."""
+    return sh(["./gradlew", target, "--console=plain", "-q", "--offline"],
+              cwd=repo, timeout=1800,
+              env={"JAVA_HOME": str(JDK),
+                   "PATH": f"{JDK}/bin:" + os.environ.get("PATH", "")})
+
+
+def verify(task):
+    kind = task["verify"]
+    if kind == "compile":
+        r = gradle("compileKotlin")
+        return r.returncode == 0, "compiles" if r.returncode == 0 else "compile failed"
+    if kind == "test":
+        r = gradle("test")
+        return r.returncode == 0, "suite passes" if r.returncode == 0 else "suite failed"
+    if kind == "rename":
+        old, new = task["old_symbol"], task["new_symbol"]
+        hits = sh(["grep", "-rn", old, "src"], cwd=repo).stdout.strip()
+        if hits:
+            return False, f"old symbol still present ({len(hits.splitlines())} refs)"
+        r = gradle("compileKotlin")
+        return r.returncode == 0, "renamed and compiles" if r.returncode == 0 else "renamed but broken"
+    return None, "needs a human"
+
+
+def run_task(task):
+    reset_repo()
+    started = time.time()
+    r = sh(["mise", "run", "opencode-headless", task["prompt"]], cwd=ROOT, timeout=2400)
+    elapsed = time.time() - started
+    out = r.stdout + r.stderr
+
+    def grab(pat, cast=str, default=None):
+        m = re.search(pat, out)
+        return cast(m.group(1).replace(",", "")) if m else default
+
+    rec = {
+        "task": task["id"], "kind": task["kind"], "seconds": round(elapsed, 1),
+        "turns": grab(r"· (\d+) turns", int, 0),
+        "tool_calls": grab(r"· (\d+) tool calls", int, 0),
+        "tokens_in": grab(r"in ([\d,]+) ·", int, 0),
+        "tokens_out": grab(r"out ([\d,]+) ·", int, 0),
+        "truncated": "TRUNCATED" in out,
+        "exit": grab(r"exit (\d+)", int, -1),
+    }
+    ok, note = verify(task)
+    rec["verified"] = ok
+    rec["note"] = note
+    if task.get("expect_terms"):
+        reply = out.split("reply:", 1)[1] if "reply:" in out else out
+        rec["terms_found"] = [t for t in task["expect_terms"] if t in reply]
+        rec["terms_expected"] = task["expect_terms"]
+    return rec
+
+
+ensure_clone()
+print(f"→ {key} · {len(tasks)} task(s) · repo {repo.relative_to(ROOT)}")
+for task in tasks:
+    print(f"\n── {task['id']} ({task['kind']}, verify={task['verify']})")
+    rec = run_task(task)
+    results[task["id"]] = rec
+    results_path.write_text(json.dumps(results, indent=2))  # write as we go
+    flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
+    print(f"   {flag} {rec['seconds']}s · {rec['turns']} turns · "
+          f"{rec['tool_calls']} tools · in {rec['tokens_in']:,} · {rec['note']}"
+          + ("  ⚠ TRUNCATED" if rec["truncated"] else ""))
+    if "terms_found" in rec:
+        print(f"     terms: {len(rec['terms_found'])}/{len(rec['terms_expected'])} "
+              f"{rec['terms_found']}")
+
+reset_repo()
+print(f"\n✓ Results → {results_path.relative_to(ROOT)}")
