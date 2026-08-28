@@ -1,62 +1,85 @@
-import axios from 'axios';
+const axios = require('axios');
 
 const MET_NO_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/complete';
 const USER_AGENT = 'weather-cli/1.0 github.com/weather-cli';
 
-export async function fetchWeather(lat, lon) {
-  const url = new URL(MET_NO_URL);
-  url.searchParams.set('lat', lat);
-  url.searchParams.set('lon', lon);
-
-  const res = await axios.get(url.toString(), {
+/**
+ * Fetches weather data from Met.no API.
+ * Returns the closest timeseries entry's data.
+ * Throws on API errors.
+ */
+async function fetchWeather(lat, lon) {
+  const response = await axios.get(MET_NO_URL, {
+    params: { lat, lon },
     headers: {
       'User-Agent': USER_AGENT,
     },
     timeout: 15000,
   });
 
-  const timeseries = res.data?.properties?.timeseries;
-  if (!timeseries || timeseries.length === 0) {
-    throw new Error('No weather data available');
+  if (response.status !== 200) {
+    throw new Error(`Met.no API returned status ${response.status}`);
   }
 
-  // Find the timeseries entry closest to the current time
+  const data = response.data;
+  const timeseries = data?.properties?.timeseries;
+
+  if (!timeseries || timeseries.length === 0) {
+    throw new Error('No weather data available for the given location.');
+  }
+
+  // Find the closest timeseries entry to current time
   const now = new Date();
   let closest = timeseries[0];
-  let closestDiff = Math.abs(new Date(timeseries[0].time).getTime() - now.getTime());
+  let closestDiff = Infinity;
 
-  for (let i = 1; i < timeseries.length; i++) {
-    const diff = Math.abs(new Date(timeseries[i].time).getTime() - now.getTime());
+  for (const entry of timeseries) {
+    const entryTime = new Date(entry.startTime);
+    const diff = Math.abs(entryTime - now);
     if (diff < closestDiff) {
       closestDiff = diff;
-      closest = timeseries[i];
+      closest = entry;
     }
   }
 
   const instant = closest.data?.instant;
-  if (!instant?.details) {
-    throw new Error('No instant details in weather data');
+  if (!instant) {
+    throw new Error('No instant data available in weather response.');
   }
 
-  const details = instant.details;
-
-  // Derive description from cloud_area_fraction
-  const cloud = details.cloud_area_fraction;
-  let description = 'Clear';
-  if (cloud > 75) {
-    description = 'Overcast';
-  } else if (cloud > 50) {
-    description = 'Partly cloudy';
-  } else if (cloud > 25) {
-    description = 'Mostly clear';
-  }
+  const details = instant.details || {};
 
   return {
-    temperature: details.air_temperature,
-    description,
+    temperature: details.air_pressure_at_sea_level ?? details.temperature,
+    temperature: details.temperature,
     humidity: details.relative_humidity,
     windSpeed: details.wind_speed,
     pressure: details.air_pressure_at_sea_level,
-    uvIndex: details.ultraviolet_index_clear_sky,
+    uvIndex: details.ultraviolet_index_total,
+    cloudAreaFraction: details.cloud_area_fraction,
   };
 }
+
+/**
+ * Derives weather description from cloud_area_fraction.
+ * @param {number} cloudAreaFraction - Cloud coverage percentage (0-100)
+ * @returns {string} Weather description
+ */
+function getDescription(cloudAreaFraction) {
+  if (!cloudAreaFraction && cloudAreaFraction !== 0) {
+    return 'Clear';
+  }
+
+  if (cloudAreaFraction > 75) {
+    return 'Overcast';
+  }
+  if (cloudAreaFraction > 50) {
+    return 'Partly cloudy';
+  }
+  if (cloudAreaFraction > 25) {
+    return 'Mostly clear';
+  }
+  return 'Clear';
+}
+
+module.exports = { fetchWeather, getDescription };

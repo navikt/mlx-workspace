@@ -1,19 +1,22 @@
 {
   "name": "weather-cli",
   "version": "1.0.0",
-  "description": "Weather CLI using Geonorge and Met.no APIs",
-  "type": "module",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test --test-concurrency=1 test/*.test.js"
+    "test": "mocha --recursive"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
-    "axios": "^1.7.0"
+    "axios": "^1.20.0"
   },
   "devDependencies": {
-    "nock": "^14.0.0"
-  },
-  "devDependencies": {
+    "chai": "^6.2.2",
+    "chai-as-promised": "^8.0.2",
+    "mocha": "^11.8.0",
     "nock": "^14.0.17"
   }
 }

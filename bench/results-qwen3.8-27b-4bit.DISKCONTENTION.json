@@ -162,5 +162,35 @@
     "files_changed": 0,
     "verified": null,
     "note": "needs a human"
+  },
+  "D2": {
+    "task": "D2",
+    "kind": "edit",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "D3": {
+    "task": "D3",
+    "kind": "edit",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 420s"
   }
 }

@@ -1,0 +1,111 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "terms_found": [
+      "5",
+      "2"
+    ],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ],
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "terms_found": [],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "terms_found": [],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 420.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 0,
+    "verified": false,
+    "note": "timed out after 420s"
+  }
+}
