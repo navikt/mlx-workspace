@@ -97,7 +97,7 @@ mise run opencode               # launch opencode in workspaces/<key>/
 | Qwen3.5-27B-Opus-Distilled | Mar 2026 | mlx-lm | Dense | ~14 GB | 262k | ~11 GB | ⚡ | ❌ tool failures | 💥 OOM |
 | **Qwen3.6-35B-A3B** | Apr 2026 | mlx-lm | MoE | ~21 GB | 262k | ~3.3 GB | ⚡⚡ | ✅ strong | ✅ recommended |
 | Gemma-4-12B | May 2026 | **mlx-vlm** ⚠️ | Dense | ~7 GB | 256k | ~18 GB | ⚠️ 136s/turn | ❌ re-prefill | ⚠️ too slow |
-| Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | 🔲 untested³ |
+| Granite-4.1-8B | May 2026 | mlx-lm | Dense | ~4.5 GB | 128k | ~20 GB | — | ✅ enterprise | ❌ reads, never writes³ |
 
 ¹ Headroom = 32 GB − VRAM − ~7 GB OS reserve
 ² mlx-vlm models skipped. Same architecture as Gemma-4-12B, expected same ~2.5 min/turn penalty
@@ -119,7 +119,7 @@ service. A model can be good at one and poor at the other, and most are.
 | DeepSeek-V4-Flash-0731 (2.4-bit) | May 2026 | **oMLX** | MoE 284B, 256 experts, 6 active | 79 GB | 10m 09s, 17/17¹ | not tested | ✅ rig B only |
 | Gemma-4-31B-8bit | 2026 | mlx-lm | Dense 31B, hybrid attention | 30.9 GB | 20m 23s, 16/16 | not tested | ⚠️ 865 KB/token KV rules out 48 GB |
 | Qwen3-Coder-30B-A3B-4bit | 2025 | mlx-lm | MoE 30B, 128 experts, 8 active | 16.3 GB | not tested | ❌ opencode discards output | ⚠️ blocked, model verified working |
-| Granite-4.1-8B-4bit | 2026 | mlx-lm | Dense 8B | 5.1 GB | not tested | ❌ opencode discards output | ⚠️ blocked, model verified working |
+| Granite-4.1-8B-4bit | 2026 | mlx-lm | Dense 8B | 5.1 GB | not tested | 11.4s median, 1 of 8 verified, 0 files written | ❌ reads, never writes |
 | Qwen2.5-Coder-14B-4bit | Sep 2024 | mlx-lm | Dense 14B | 7.8 GB | not tested | not tested | 🔲 downloaded |
 | Qwen2.5-72B-Instruct-8bit | Sep 2024 | mlx-lm | Dense 72B | 72 GB | ❌ never wrote a file | not tested | ❌ broken |
 | Mistral-Large-2-4bit | Jul 2024 | mlx-lm | Dense 123B | ~69 GB | not tested | not tested | 🔲 downloaded |
@@ -535,7 +535,7 @@ than any model or any client.
 |---|---|---|---|
 | Qwen3.6-35B-A3B | `qwen3_5_moe` | works, 1 to 20 tool calls per task | works |
 | Qwen3-Coder-30B-A3B | `qwen3_moe` | **nothing surfaces** | works |
-| Granite 4.1 8B | `granite` | **nothing surfaces** | works |
+| Granite 4.1 8B | `granite` | nothing surfaced before the fix, works after | works |
 
 For the two that fail, opencode reported zero tool calls and no reply text while the token counter
 showed the model generating output. Asked "What is 7+5", Qwen3-Coder produced three output tokens
@@ -651,51 +651,46 @@ architecture is still the larger one. Tokens fell 3x while time fell only 2.3x, 
 is per-turn overhead thinking does not explain, most likely the ~15.6k-token prefill carried on
 every request.
 
-### `mlx-community/granite-4.1-8b-4bit` ⚠️ incompatible with opencode, not incapable
+### `mlx-community/granite-4.1-8b-4bit` ❌ reads, never writes
+
+Re-run on 28 August 2026 after the prompt fix in `9a2b324`, which is the first run of this model
+that measures the model rather than our own broken prompt. Eleven tasks, fresh server before each.
 
 | Task | Time | Turns | Tool calls | Files changed | Result |
 |---|---|---|---|---|---|
-| R1 explain a function | 13.6s | 1 | **0** | 0 | answered without reading the file, 2 of 4 key terms |
-| R2 find a config value | 547.9s | 1 | **0** | 0 | 0 of 2 terms |
-| R3 list call sites | 2743.9s | 1 | **0** | 0 | 0 of 1 terms |
-| E1 add a KDoc block | 9.8s | 1 | **0** | 0 | no edit |
-| E3 add a log line | 9.0s | 1 | **0** | 0 | no edit |
-| M1 rename across call sites | 9.2s | 1 | **0** | 0 | no edit |
-| M2 add a DTO field | 9.6s | 1 | **0** | 0 | no edit |
-| G2 write a test file | 11.3s | 1 | **0** | 0 | no edit |
+| R1 explain a function | 6.1s | 1 | 1 | 0 | needs a human |
+| R2 find a config value | 6.2s | 2 | 1 | 0 | 2 of 2 expected terms in the answer |
+| R3 list call sites | 9.7s | 2 | 1 | 0 | needs a human |
+| E1 add a KDoc block | 6.5s | 1 | 1 | 0 | no changes made (model did not edit anything) |
+| E3 add a log line | 6.8s | 1 | 1 | 0 | no changes made (model did not edit anything) |
+| M1 rename across call sites | 420.0s | 0 | 0 | 0 | timed out after 420s |
+| M2 add a DTO field | 120.8s | 24 | 24 | 0 | no changes made (model did not edit anything) |
+| G2 write a test file | 60.5s | 6 | 5 | 0 | no changes made (model did not edit anything) |
+| D1 explain PDL ident selection | 11.4s | 1 | 1 | 0 | needs a human |
+| D2 parse a new field | 65.0s | 3 | 2 | 0 | no changes made (model did not edit anything) |
+| D3 map a response field | 420.0s | 0 | 0 | 0 | timed out after 420s |
 
-**Zero tool calls across every task**, one turn each, no file ever opened or written. Same failure
-class as Qwen2.5-72B in weather-cli: the model answers in chat instead of using its tools. On R1 it
-explained a Kotlin function it had not read, matching only the two most common digits in the
-expected answer and missing both distinctive thresholds. The two slow tasks were not slow
-generation: R2 at 548s and R3 at 2744s bracket a 46-minute window in which the server received no
-requests at all, so the client was stalled, not the model. Granite's real per-task time is around
-10 seconds.
+Median 11.4s, 1 of 8 checkable tasks verified, and **not one file written in the entire run**.
 
-**It exposed a bug in our harness, which is the more useful outcome.** The compile and test checks
-certify that the repository is healthy, not that the model did the work. An untouched checkout
-compiles and its suite passes, so Granite scored four false passes. Only the rename task caught it,
-because that check greps for the old symbol rather than trusting the build. Every edit task now
-requires a non-empty `git status` before its check counts, and files-changed is recorded per task.
-Qwen3.6's results predate the fix but are unaffected: it made 1 to 20 tool calls per task and its
-rename passed the symbol grep.
+**The output bug is fixed and the verdict got worse, not better.** Before the fix Granite recorded
+zero tool calls on every task because opencode discarded everything it produced. It now calls tools
+on nine of eleven tasks, reads files, and answers read-only questions correctly and quickly: R2
+returned both expected terms in 6.2 seconds. It never edits. M2 is the clearest case, 24 turns and
+24 tool calls exploring the codebase before stopping without writing anything.
 
-**Correction: this was recorded as "never calls tools" and that was wrong.** Tested directly
-against the same server, with the same model, Granite returns a correct tool call on the first
-attempt:
+That is the same shape Copilot CLI showed when it had no instructions file: it locates the work,
+announces it, and does not do it. Whether an instruction change would fix it is untested. On this
+evidence a 5 GB install does not do routine Kotlin work.
 
-```
-finish_reason: tool_calls
-tool_calls: [{"function": {"name": "read_file", "arguments": "{\"path\": \"build.gradle.kts\"}"}}]
-```
+**Read the two timeouts carefully.** M1 and D3 are recorded with 0 turns and 0 tool calls. That is a
+harness artifact, not a measurement: a task killed at the cap never prints the summary line the
+parser reads, so the fields default to zero. The D3 log shows a session in progress when the cap
+fired. Do not read those zeros as evidence of anything.
 
-The model is capable, the pairing with opencode is not. Every number above measures that pairing.
-
-**Verdict:** ⚠️ untested, re-run in progress. At 5.12 GB and Apache 2.0 it remains the most
-attractive candidate on paper, and we still do not know how it performs on real work. The
-incompatibility is understood and fixed in `9a2b324`, so the only thing left was to run it again,
-which is happening now. See
-[opencode drops output from some models](#opencode-drops-output-from-some-models).
+**What the earlier run bought us.** It exposed the false-pass bug in the harness. Compile and test
+checks certify that the repository is healthy, not that the model did the work, so an untouched
+checkout passes both. Granite scored four false passes that way before every edit task was made to
+require a non-empty `git status` first.
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit-DWQ` ❌ worse than the plain build
 
@@ -1401,9 +1396,8 @@ models.
 IBM Granite 4.1 (2025), Apache 2.0. Dense 8B, ~4.5 GB VRAM, 131,072 native context (confirmed via
 OpenRouter + IBM docs), ~128k practical, ~20 GB headroom. Enterprise-reinforced tool calling (Go,
 Java, C++, Rust, language-server adherence), claimed to beat much larger MoE models on enterprise
-benchmarks. Smallest footprint tested, so the best VRAM profile for long-context experiments, and a
-priority for evaluation. Rig B tested it through opencode, see
-[the harness bug](#opencode-drops-output-from-some-models).
+benchmarks. Smallest footprint tested. Re-run on rig B after the prompt fix: it reads and answers, and it
+never edits. See [the cheap-operations result](#mlx-communitygranite-41-8b-4bit--reads-never-writes).
 
 > **⚠️ HF path note:** The mlx-community model may be `mlx-community/granite-4.1-8b-4bit` (without
 > `-instruct`). Verify before downloading.

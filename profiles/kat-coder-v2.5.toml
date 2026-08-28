@@ -1,0 +1,23 @@
+[meta]
+name               = "KAT-Coder V2.5 Dev OptiQ 4bit"
+released           = "2026"
+status             = "untested"
+spec_source        = "config.json"
+notes              = "Coder-tuned MoE on the same qwen3_5_moe architecture as Qwen3.6-35B-A3B, which is the model the alpha decision picked. Same backend module, so the harness will drive it. The open question is whether code-specific training beats a general model of the same shape on routine operations inside an existing codebase, which is the one thing our benchmark measures well."
+model_vram_gb      = 22
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/KAT-Coder-V2.5-Dev-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+# Qwen model card sampling, since this is a Qwen3.5-family MoE. Revisit against
+# the model's own card once a run shows how it behaves.
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
