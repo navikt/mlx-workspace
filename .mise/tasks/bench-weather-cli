@@ -114,17 +114,28 @@ def run_tests():
     except subprocess.TimeoutExpired:
         return {"ran": True, "passed": False, "note": "test run timed out"}
     out = t.stdout + t.stderr
-    # Both node:test and jest are in play across submissions, so read whichever
-    # counter is present rather than assuming a runner.
-    def num(pat):
-        m = re.search(pat, out)
-        return int(m.group(1)) if m else None
+    # node:test, jest and mocha are all in play across submissions, so read
+    # whichever counter is present rather than assuming a runner. The first four
+    # runs reported null counts because only the first two were handled.
+    def num(*pats):
+        for pat in pats:
+            m = re.search(pat, out)
+            if m:
+                return int(m.group(1))
+        return None
     return {
         "ran": True,
         "passed": t.returncode == 0,
         "exit": t.returncode,
-        "pass_count": num(r"# pass (\d+)") or num(r"Tests:\s+(?:\d+ failed, )?(\d+) passed"),
-        "fail_count": num(r"# fail (\d+)") or num(r"Tests:\s+(\d+) failed"),
+        "runner": ("node:test" if re.search(r"[#ℹ] pass \d+", out) else
+                   "jest" if "Tests:" in out else
+                   "mocha" if "passing" in out else "unknown"),
+        "pass_count": num(r"[#ℹ] pass (\d+)",
+                          r"Tests:\s+(?:\d+ failed, )?(\d+) passed",
+                          r"(\d+) passing"),
+        "fail_count": num(r"[#ℹ] fail (\d+)",
+                          r"Tests:\s+(\d+) failed",
+                          r"(\d+) failing"),
         "tail": out[-1500:],
     }
 

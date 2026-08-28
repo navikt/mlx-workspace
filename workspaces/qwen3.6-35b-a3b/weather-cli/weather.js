@@ -50,7 +50,6 @@ async function fetchWeather(lat, lon) {
   const details = instant.details || {};
 
   return {
-    temperature: details.air_pressure_at_sea_level ?? details.temperature,
     temperature: details.temperature,
     humidity: details.relative_humidity,
     windSpeed: details.wind_speed,

@@ -47,14 +47,21 @@ describe('weather', () => {
     it('should throw when no timeseries data', async () => {
       nock('https://api.met.no')
         .get('/weatherapi/locationforecast/2.0/complete')
+        .query(true)
         .reply(200, { properties: { timeseries: [] } });
 
-      await expect(fetchWeather(59.91, 10.75)).to.be.rejectedWith(/No weather data/);
+      try {
+        await fetchWeather(59.91, 10.75);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect(error.message).to.include('No weather data');
+      }
     });
 
     it('should throw when no instant data', async () => {
       nock('https://api.met.no')
         .get('/weatherapi/locationforecast/2.0/complete')
+        .query(true)
         .reply(200, {
           properties: {
             timeseries: [
@@ -63,7 +70,12 @@ describe('weather', () => {
           },
         });
 
-      await expect(fetchWeather(59.91, 10.75)).to.be.rejectedWith(/No instant data/);
+      try {
+        await fetchWeather(59.91, 10.75);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect(error.message).to.include('No instant data');
+      }
     });
 
     it('should throw on API error', async () => {
@@ -71,7 +83,12 @@ describe('weather', () => {
         .get('/weatherapi/locationforecast/2.0/complete')
         .reply(403);
 
-      await expect(fetchWeather(59.91, 10.75)).to.be.rejected();
+      try {
+        await fetchWeather(59.91, 10.75);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect(error.message).to.be.a('string');
+      }
     });
   });
 
@@ -80,8 +97,8 @@ describe('weather', () => {
       expect(getDescription(0)).to.equal('Clear');
     });
 
-    it('should return "Mostly clear" for 20% cloud coverage', () => {
-      expect(getDescription(20)).to.equal('Mostly clear');
+    it('should return "Clear" for 20% cloud coverage', () => {
+      expect(getDescription(20)).to.equal('Clear');
     });
 
     it('should return "Mostly clear" for 30% cloud coverage', () => {

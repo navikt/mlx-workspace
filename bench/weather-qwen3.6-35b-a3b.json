@@ -1,0 +1,51 @@
+{
+  "model_key": "qwen3.6-35b-a3b",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 67.5,
+      "turns": 13,
+      "tool_calls": 13,
+      "tokens_in": 11173,
+      "tokens_out": 1867,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 371.3,
+      "turns": 58,
+      "tool_calls": 57,
+      "tokens_in": 23473,
+      "tokens_out": 18349,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 438.8,
+  "tests": {
+    "ran": true,
+    "passed": false,
+    "exit": 1,
+    "pass_count": null,
+    "fail_count": null,
+    "tail": "\n> weather-cli@1.0.0 test\n> mocha --recursive\n\nError: No test files found: \"test\"\n",
+    "runner": "mocha",
+    "counts_backfilled": true
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "geocode.js",
+    "geocode.test.js",
+    "index.js",
+    "integration.test.js",
+    "output.js",
+    "output.test.js",
+    "package-lock.json",
+    "package.json",
+    "parser.js",
+    "parser.test.js",
+    "weather.js",
+    "weather.test.js"
+  ]
+}

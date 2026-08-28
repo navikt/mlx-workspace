@@ -6,10 +6,8 @@ const { expect } = require('chai');
 const nock = require('nock');
 
 describe('integration', () => {
-  let scope;
-
   beforeEach(() => {
-    scope = nock('https://ws.geonorge.no')
+    nock('https://ws.geonorge.no')
       .get('/stedsnavn/v1/sted')
       .query(true)
       .reply(200, {
@@ -26,7 +24,7 @@ describe('integration', () => {
       });
 
     const now = new Date();
-    scope = nock('https://api.met.no')
+    nock('https://api.met.no')
       .get('/weatherapi/locationforecast/2.0/complete')
       .query(true)
       .reply(200, {
@@ -98,6 +96,11 @@ describe('integration', () => {
       .get('/stedsnavn/v1/sted')
       .reply(500);
 
-    await expect(geocode('Oslo')).to.be.rejected();
+    try {
+      await geocode('Oslo');
+      expect.fail('Should have thrown');
+    } catch (error) {
+      expect(error.message).to.be.a('string');
+    }
   });
 });

@@ -1,0 +1,33 @@
+{
+  "model_key": "granite-4.1-8b",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 25.1,
+      "turns": 2,
+      "tool_calls": 1,
+      "tokens_in": 8832,
+      "tokens_out": 697,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 49.4,
+      "turns": 5,
+      "tool_calls": 4,
+      "tokens_in": 8572,
+      "tokens_out": 1213,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 74.5,
+  "tests": {
+    "ran": false,
+    "note": "no package.json, nothing to test"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md"
+  ]
+}

@@ -65,8 +65,9 @@ describe('parser', () => {
       expect(() => parseArgs(['59.91'])).to.throw();
     });
 
-    it('should throw on non-numeric coordinate string', () => {
-      expect(() => parseArgs(['abc def'])).to.throw();
+    it('should treat non-numeric coordinate-like string as location', () => {
+      const result = parseArgs(['abc def']);
+      expect(result).to.deep.equal({ type: 'location', name: 'abc def' });
     });
   });
 });

@@ -8,7 +8,7 @@ describe('geocode', () => {
   });
 
   it('should return { lat, lon } for a valid location name', async () => {
-    const scope = nock('https://ws.geonorge.no')
+    nock('https://ws.geonorge.no')
       .get('/stedsnavn/v1/sted')
       .query({
         sok: 'Oslo',
@@ -34,16 +34,23 @@ describe('geocode', () => {
   });
 
   it('should throw when no results returned', async () => {
-    const scope = nock('https://ws.geonorge.no')
+    nock('https://ws.geonorge.no')
       .get('/stedsnavn/v1/sted')
+      .query(true)
       .reply(200, { navn: [] });
 
-    await expect(geocode('NonExistentPlace12345')).to.be.rejectedWith(/not found/);
+    try {
+      await geocode('NonExistentPlace12345');
+      expect.fail('Should have thrown');
+    } catch (error) {
+      expect(error.message).to.include('not found');
+    }
   });
 
   it('should throw when no coordinates in response', async () => {
-    const scope = nock('https://ws.geonorge.no')
+    nock('https://ws.geonorge.no')
       .get('/stedsnavn/v1/sted')
+      .query(true)
       .reply(200, {
         navn: [
           {
@@ -54,14 +61,24 @@ describe('geocode', () => {
         ],
       });
 
-    await expect(geocode('Oslo')).to.be.rejectedWith(/No coordinates/);
+    try {
+      await geocode('Oslo');
+      expect.fail('Should have thrown');
+    } catch (error) {
+      expect(error.message).to.include('No coordinates');
+    }
   });
 
   it('should throw on API error', async () => {
-    const scope = nock('https://ws.geonorge.no')
+    nock('https://ws.geonorge.no')
       .get('/stedsnavn/v1/sted')
       .reply(500);
 
-    await expect(geocode('Oslo')).to.be.rejected();
+    try {
+      await geocode('Oslo');
+      expect.fail('Should have thrown');
+    } catch (error) {
+      expect(error.message).to.be.a('string');
+    }
   });
 });

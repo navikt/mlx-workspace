@@ -1,0 +1,51 @@
+{
+  "model_key": "qwen3.8-27b-6bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 247.7,
+      "turns": 5,
+      "tool_calls": 6,
+      "tokens_in": 17809,
+      "tokens_out": 1601,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 2352.0,
+      "turns": 20,
+      "tool_calls": 28,
+      "tokens_in": 268694,
+      "tokens_out": 16846,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 2599.7,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "pass_count": 26,
+    "fail_count": 0,
+    "tail": "dsnavn form (0.120708ms)\n\u2714 toPlace falls back to representasjonspunkt when geojson is absent (0.095375ms)\n\u2714 toPlace throws when there are no hits (0.293791ms)\n\u2714 toPlace throws when a hit has no coordinates (0.091917ms)\n\u2714 geocode sends the stedsnavn query params and identifying headers (0.689709ms)\n\u2714 geocode propagates HTTP errors (0.187959ms)\n\u2714 weather Oslo (real Geonorge + Met.no APIs) (372.779834ms)\n\u2714 weather by coordinates (real Met.no API) (204.891875ms)\n\u2714 unknown location exits 1 (201.608542ms)\n\u2714 invalid coordinates exit 1 (101.352167ms)\n\u2714 missing location exits 1 (101.469541ms)\n\u2714 formats the exact output block from the spec (0.828042ms)\n\u2714 formats coordinate locations in the header (0.32775ms)\n\u2714 parses a place name (1.32325ms)\n\u2714 parses a multi-word place name (0.192333ms)\n\u2714 parses valid coordinates in lat lon order (0.105125ms)\n\u2714 rejects out-of-range coordinates (0.992416ms)\n\u2714 treats non-numeric two-word input as a place name (0.1ms)\n\u2714 rejects missing location (0.080417ms)\n\u2714 toWeather picks the timeseries entry closest to now (0.895459ms)\n\u2714 toWeather extracts all output fields from instant.details (0.890833ms)\n\u2714 toWeather throws on empty or missing timeseries (0.321042ms)\n\u2714 toWeather throws when the closest entry has no instant details (0.278833ms)\n\u2714 describeClouds applies the spec thresholds (0.264625ms)\n\u2714 fetchWeather sends lat/lon params and a User-Agent (1.570875ms)\n\u2139 tests 26\n\u2139 suites 0\n\u2139 pass 26\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1077.700042\n",
+    "runner": "node:test",
+    "counts_backfilled": true
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "package-lock.json",
+    "package.json",
+    "src/geocode.js",
+    "src/index.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ]
+}
