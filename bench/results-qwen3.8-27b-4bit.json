@@ -64,5 +64,20 @@
     "files_changed": 0,
     "verified": null,
     "note": "needs a human"
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 1800.1,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 1800s"
   }
 }

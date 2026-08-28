@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+# mise description="Generate manifest/models.json from profiles/, for nav-pilot to fetch"
+"""Publish the model configurations nav-pilot serves to alpha users.
+
+nav-pilot fetches this file at `alpha local init` and on demand, so a new model
+or a corrected sampling parameter reaches users without shipping a new binary.
+That only works if the manifest is boring: a fixed schema, no fields a client is
+required to understand, and nothing in it that can execute.
+
+Profiles are the source of truth. This task derives the manifest from them so a
+model cannot be offered to users without also being runnable here.
+"""
+import json
+import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(__file__))
+import _profiles as P
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "manifest" / "models.json"
+
+# Bump when the shape changes. A client refuses a manifest whose major version
+# it does not know, which is what keeps a pushed config from breaking an old
+# install: the whole point of pushing configs is lost if a push can brick one.
+SCHEMA_VERSION = 1
+
+# Only these orgs. The manifest names weights that a user's machine downloads
+# and loads, so the set of publishers stays a decision made here, in review,
+# rather than one made by whoever can edit a file we serve.
+ALLOWED_ORGS = {"mlx-community", "lmstudio-community"}
+
+# Models we are willing to put in front of an alpha user, and what to say about
+# each. A profile is not an offer: the repo carries profiles for models we have
+# rejected, and those must never reach the manifest.
+OFFERED = {
+    "qwen3.6-35b-a3b": {
+        "default": True,
+        "role": "Quick edits and questions",
+        "expect": "Answers routine work in seconds. Gets it right about half the time, so read what it changes.",
+    },
+    "qwen3.8-27b-4bit": {
+        "default": False,
+        "role": "Leave it running on a task",
+        "expect": "Writes better code and takes minutes, not seconds. Suits work you can walk away from.",
+    },
+}
+
+
+def entry(key: str) -> dict:
+    meta, params = P.load(key)
+    hf_id = params["MLX_MODEL"]
+    org = hf_id.split("/")[0]
+    if org not in ALLOWED_ORGS:
+        raise SystemExit(f"✗ {key} publishes {hf_id}, and {org} is not an allowed org")
+    offer = OFFERED[key]
+    return {
+        "key": key,
+        "name": meta["name"],
+        "model": hf_id,
+        "backend": params.get("MLX_SERVER_TYPE", "mlx-lm"),
+        "default": offer["default"],
+        "role": offer["role"],
+        "expect": offer["expect"],
+        "weights_gb": meta.get("model_vram_gb"),
+        "min_ram_gb": 48,
+        "wired_limit_gb": meta.get("gpu_wired_limit_gb"),
+        # Everything the server and the clients need, already validated here.
+        "params": {k: v for k, v in params.items() if k.startswith("MLX_")},
+    }
+
+
+manifest = {
+    "schema_version": SCHEMA_VERSION,
+    "channel": "alpha",
+    "note": "Generated from profiles/ by 'mise run model-manifest'. Do not edit by hand.",
+    "models": [entry(k) for k in OFFERED],
+}
+
+missing = [k for k in OFFERED if k not in P.list_keys()]
+if missing:
+    raise SystemExit(f"✗ offered but no profile exists: {missing}")
+if sum(1 for m in manifest["models"] if m["default"]) != 1:
+    raise SystemExit("✗ exactly one model must be the default")
+
+OUT.parent.mkdir(exist_ok=True)
+OUT.write_text(json.dumps(manifest, indent=2) + "\n")
+print(f"✓ {OUT.relative_to(ROOT)}  schema {SCHEMA_VERSION}, {len(manifest['models'])} models")
+for m in manifest["models"]:
+    print(f"   {'*' if m['default'] else ' '} {m['key']:20s} {m['model']}")
