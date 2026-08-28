@@ -92,6 +92,12 @@ but a restart. `restart_server()` runs `server-stop`, relaunches `server` detach
 `server-wait`, which sends a real completion request rather than checking the socket: mlx-lm loads
 weights lazily, so a benchmark that starts on bind alone charges model loading to thinking time.
 
+**Nothing else touches disk or network during a run.** Every task restarts the server, which
+re-reads the model weights, so a concurrent model download competes for the same disk. Qwen3.8-27B
+timed out on four of eight tasks during a run that overlapped a 22 GB download, while its input
+tokens per task had halved. Less work taking twice as long is a machine result, not a model result.
+Download models before the run, not during it.
+
 **Every task is capped.** Task E3 once looped 77 identical tool calls twice and consumed a whole
 90-minute budget both times, starving three later tasks. `BENCH_TASK_TIMEOUT` turns a loop into a
 recorded failure instead of a lost run.
