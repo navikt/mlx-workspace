@@ -8,7 +8,7 @@ in `bench/tasks.json`.
 
 ## Why this one
 
-**It does the work we intend to route local.** Eleven routine operations against an existing
+**It does the work we want to route locally.** Eleven routine operations against an existing
 codebase, each on a fresh server, verified by compiling and running the test suite rather than by
 believing the model:
 
@@ -26,8 +26,8 @@ in the codebase's own style, and locates config values correctly.
 No per-machine tuning required.
 
 **It works through both clients.** Verified separately under opencode and GitHub Copilot CLI, the
-two nav-pilot must support at GA. Under Copilot CLI it completed a rename across three call sites
-in 22s and the result compiled.
+two clients nav-pilot must support at GA. Under Copilot CLI it completed a rename across three
+call sites in 22s and the result compiled.
 
 **Architecture is why.** 256 experts with 8 active means roughly 3B parameters stream per token
 against 27B for a dense model of similar quality. On bandwidth-bound Apple Silicon that is worth
@@ -50,11 +50,11 @@ about 4x, measured consistently across two different benchmarks.
 
 Three findings that are shipping requirements, not benchmark details.
 
-**The server degrades over a long session.** After some number of sessions the model stops calling
-tools entirely and every later task fails silently. Demonstrated directly: a task producing 0 turns
-and 0 tool calls passed with 6 turns and 9 tool calls after nothing changed but a server restart.
-A developer using this all day is exactly the case that triggers it. `nav-pilot local` needs to
-restart or reset the server periodically. Issue #11.
+**The server degrades over a long session.** After enough sessions against one server process the
+model stops calling tools at all, and every later task fails silently. Demonstrated directly: a
+task producing 0 turns and 0 tool calls passed with 6 turns and 9 tool calls after nothing changed
+but a server restart. A developer using this all day is exactly the case that triggers it.
+`nav-pilot local` needs to restart or reset the server periodically. Issue #11.
 
 **Agent instructions are per-client.** opencode reads `AGENTS.md`; Copilot CLI reads
 `.github/copilot-instructions.md`. Without the file, Copilot CLI found the three call sites it
@@ -89,5 +89,5 @@ preserving tool-call formatting, and thinking hurting across the board rather th
 1. Fix the server degradation, or give nav-pilot a restart strategy. It affects every model.
 2. Generate instructions for both clients from one source.
 3. Run the benchmark three times on the chosen model to replace single samples with a range.
-4. Revisit Granite and Qwen3-Coder once issue #10 is understood. Granite at 5.1 GB would change
-   the install substantially if it works.
+4. Revisit Granite and Qwen3-Coder once issue #10 is understood. Granite at 5.1 GB against
+   18.6 GB would cut what we ask users to download by about three quarters.
