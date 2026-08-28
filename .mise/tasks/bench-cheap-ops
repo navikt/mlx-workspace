@@ -138,6 +138,45 @@ def restart_server():
     raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
 
 
+def loop_check(out):
+    """Count the longest run of identical consecutive tool calls in a task.
+
+    Qwen3.8-27B-4bit ran the same `rg` command 113 times after a successful edit,
+    burning a 1800s cap. Without this, a loop and a genuinely slow model produce
+    the same record, and the difference is the whole verdict on a model.
+    """
+    m = re.search(r"log: (\S+\.jsonl)", out)
+    if not m:
+        return {}
+    path = ROOT / m.group(1)
+    if not path.exists():
+        return {}
+    calls = []
+    for line in path.read_text(errors="replace").splitlines():
+        if '"type": "tool_use"' not in line and '"type":"tool_use"' not in line:
+            continue
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        p = d.get("part", {})
+        name = p.get("tool") or p.get("name") or "?"
+        args = json.dumps(p.get("state", {}).get("input", p.get("input", {})), sort_keys=True)
+        calls.append((name, args))
+    best = run = 1
+    which = None
+    for i in range(1, len(calls)):
+        if calls[i] == calls[i - 1]:
+            run += 1
+            if run > best:
+                best, which = run, calls[i][0]
+        else:
+            run = 1
+    return {"tool_calls_logged": len(calls),
+            "longest_identical_run": best if calls else 0,
+            "looped_on": which if best >= 5 else None}
+
+
 def run_task(task):
     if os.environ.get("BENCH_RESTART_SERVER", "1") == "1":
         restart_server()
@@ -181,6 +220,7 @@ def run_task(task):
         reply = out.split("reply:", 1)[1] if "reply:" in out else out
         rec["terms_found"] = [t for t in task["expect_terms"] if t in reply]
         rec["terms_expected"] = task["expect_terms"]
+    rec.update(loop_check(out))
     rec["files_changed"] = len(changed_files())
     if timed_out:
         rec["verified"] = False
@@ -213,6 +253,9 @@ for task in tasks:
     results[task["id"]] = rec
     results_path.write_text(json.dumps(results, indent=2))  # write as we go
     flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
+    if rec.get("looped_on"):
+        print(f"   ⚠  LOOP: {rec['longest_identical_run']} identical "
+              f"{rec['looped_on']} calls in a row")
     print(f"   {flag} {rec['seconds']}s · {rec['turns']} turns · "
           f"{rec['tool_calls']} tools · {rec['files_changed']} files · "
           f"in {rec['tokens_in']:,} · {rec['note']}"

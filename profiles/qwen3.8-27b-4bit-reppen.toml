@@ -1,0 +1,38 @@
+[meta]
+name               = "Qwen 3.8 27B 4bit + repetition penalty"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "externally verified"
+notes              = "The 4-bit build with repetition_penalty on. Its failures are loops, not slowness: on the KDoc task it ran the same rg command 113 times after a successful edit and burned a 1800s cap, while completing a rename across call sites in seven minutes. AGENTS.md rule 8 tells it not to repeat a failing call and this build ignores it, so this profile tries the sampling lever instead. 1.05 is the value Qwen publishes for this family."
+model_vram_gb      = 16
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-4bit"
+# NO draft model: the MTP head is model_type `qwen3_5_mtp`, which mlx-lm cannot load
+# ("Model type qwen3_5_mtp not supported"). MTP is an oMLX feature — the 8-bit MTPLX build
+# runs it because oMLX absorbs mtp.safetensors into its own index. A drafter for mlx-lm would
+# have to be an ordinary small qwen3_5 model, not this head.
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "12884901888"  # 12GB cache — fits the 36GB wired ceiling on 48GB
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+# Qwen model card sampling. Both weather-cli runs were measured with top_k disabled and
+# top_p at 1.0, which is not what the card specifies. Running with top_k off produced a
+# degenerate repetition loop on Qwen3.5-9B, so this is a correction, not a preference.
+# Thinking disabled for routine operations. With it enabled this model ran 6.7x slower than
+# the Qwen3.6 MoE on the cheap-operations benchmark and produced 1.87x the output tokens for
+# the same work. Analysis attributes most of the gap to dense-vs-sparse decode throughput
+# (4.7 vs 22.4 tok/s) rather than to thinking, so this is expected to recover part of the gap,
+# not all of it. Published work on Qwen3 1.7B-32B finds thinking helps planning constraints and
+# hurts precision ones, which is most of that task set.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+# Qwen publishes repetition_penalty 1.05 for this family. mlx_lm has no CLI flag for
+# it, so it reaches the model in the request body through the generated opencode.json.
+MLX_REPETITION_PENALTY     = "1.05"
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
