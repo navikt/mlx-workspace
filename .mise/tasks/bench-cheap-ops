@@ -146,9 +146,16 @@ def loop_check(out):
     the same record, and the difference is the whole verdict on a model.
     """
     m = re.search(r"log: (\S+\.jsonl)", out)
-    if not m:
-        return {}
-    path = ROOT / m.group(1)
+    if m:
+        path = ROOT / m.group(1)
+    else:
+        # A killed task never prints its log path, and a killed task is exactly
+        # the one that looped, so fall back to the newest log for this profile.
+        logs = sorted((ROOT / ".bench-logs").glob(f"{key}-*.jsonl"),
+                      key=lambda p: p.stat().st_mtime)
+        if not logs:
+            return {}
+        path = logs[-1]
     if not path.exists():
         return {}
     calls = []

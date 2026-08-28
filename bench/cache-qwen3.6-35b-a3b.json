@@ -1,0 +1,27 @@
+{
+  "model": "mlx-community/Qwen3.6-35B-A3B-4bit",
+  "turns": [
+    {
+      "turn": 0,
+      "seconds": 1.66,
+      "prompt_tokens": 4428,
+      "cached_tokens": 0,
+      "cache_hit_pct": 0.0
+    },
+    {
+      "turn": 1,
+      "seconds": 0.25,
+      "prompt_tokens": 4450,
+      "cached_tokens": 4424,
+      "cache_hit_pct": 99.4
+    },
+    {
+      "turn": 2,
+      "seconds": 0.24,
+      "prompt_tokens": 4472,
+      "cached_tokens": 4446,
+      "cache_hit_pct": 99.4
+    }
+  ],
+  "verdict": "reuses the cache"
+}
