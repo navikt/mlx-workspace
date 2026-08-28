@@ -14,3 +14,17 @@ Provider, model and context limits come from the generated `opencode.json` in
 each workspace, so nothing here is needed for the client to reach the server.
 
 See issue #12.
+
+## Setup on a fresh clone
+
+opencode resolves its provider packages from `node_modules` next to this file, and
+installing them needs network access the sandbox does not grant, so a run against an
+empty config home hangs at startup. Link the personal install instead:
+
+```bash
+ln -sfn ~/.config/opencode/node_modules bench/opencode-home/opencode/node_modules
+cp ~/.config/opencode/package.json bench/opencode-home/opencode/package.json
+```
+
+Neither file is tracked. `opencode.json` here is tracked deliberately, with `git add -f`,
+because the repo's `.gitignore` excludes that filename everywhere else.
