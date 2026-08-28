@@ -154,6 +154,11 @@ def run_task(task):
     except subprocess.TimeoutExpired as e:
         timed_out = True
         out = (e.stdout or b"").decode("utf8", "replace") + (e.stderr or b"").decode("utf8", "replace")
+        # subprocess kills `mise run`, not the client it launched. Six orphaned
+        # opencode processes accumulated over one day of killed runs, each
+        # holding its session state, and the machine ended up in swap.
+        subprocess.run(["pkill", "-f", "opencode --pure"], capture_output=True)
+        subprocess.run(["pkill", "-f", "cplt --agent opencode"], capture_output=True)
     elapsed = time.time() - started
 
     def grab(pat, cast=str, default=None):
