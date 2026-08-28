@@ -107,15 +107,25 @@ def restart_server():
     Demonstrated directly: a task that produced 0 turns and 0 tool calls passed
     with 6 turns and 9 tool calls after nothing changed but a server restart.
     """
-    subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT),
-                   capture_output=True, text=True)
-    subprocess.Popen(["mise", "run", "server"], cwd=str(ROOT),
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                     start_new_session=True)
-    r = subprocess.run(["mise", "run", "server-wait"], cwd=str(ROOT),
-                       capture_output=True, text=True, timeout=1800)
-    if r.returncode != 0:
-        raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
+    # Retry the start. A server launched while the previous one is still
+    # releasing port 8080 exits on the bind, and server-wait then blocks for its
+    # full timeout against a process that is already gone. Seen once between two
+    # models in the same queue.
+    log = ROOT / ".bench-logs" / "server-restart.log"
+    for attempt in range(3):
+        subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT),
+                       capture_output=True, text=True)
+        time.sleep(2)
+        with log.open("a") as fh:
+            subprocess.Popen(["mise", "run", "server"], cwd=str(ROOT),
+                             stdout=fh, stderr=subprocess.STDOUT,
+                             start_new_session=True)
+        r = subprocess.run(["mise", "run", "server-wait"], cwd=str(ROOT),
+                           capture_output=True, text=True, timeout=1800)
+        if r.returncode == 0:
+            return
+        print(f"   ⚠ server did not come back (attempt {attempt + 1} of 3)")
+    raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
 
 
 def run_task(task):

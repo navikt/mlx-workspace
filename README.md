@@ -146,13 +146,14 @@ Profiles carry their own ceiling as `gpu_wired_limit_gb`; `mise run model-use` a
 > macOS. The setting resets on reboot.
 
 > If the server crashes during inference with `Insufficient Memory` or
-> `kIOGPUCommandBufferCallbackErrorOutOfMemory`: the KV cache (`MLX_CACHE_BYTES`) is not the only
-> GPU memory consumer. At 50k+ token contexts the forward pass itself needs 4–6 GB for intermediate
-> activations and Metal command buffers, on top of the cached KV state. Budget
-> `GPU cap = model weights + KV cache cap + ~6GB activation buffer`, so `26 GB = ~6 GB + 14 GB + 6 GB`.
-> Lower `MLX_CACHE_BYTES`, not just `vram-set`, and reduce `MLX_CACHE_SIZE` to limit how many
-> sessions accumulate. Each cached session at ~80k tokens holds ~3 GB, so 6 sessions × 3 GB = 18 GB
-> can exceed a "safe" cap with no warning.
+> `kIOGPUCommandBufferCallbackErrorOutOfMemory`: the KV cache is not the only GPU memory consumer.
+> At 50k+ token contexts the forward pass itself needs 4–6 GB for intermediate activations and Metal
+> command buffers, on top of the cached KV state. Budget
+> `GPU cap = model weights + KV cache held + ~6GB activation buffer`, so `26 GB = ~6 GB + 14 GB + 6 GB`.
+> Reduce `MLX_CACHE_SIZE` to limit how many sessions accumulate, and lower `vram-set` if that is not
+> enough. Each cached session at ~80k tokens holds ~3 GB, so 6 sessions × 3 GB = 18 GB can exceed a
+> "safe" cap with no warning. `MLX_CACHE_BYTES` will not help: mlx-lm builds its prompt cache
+> without a byte limit, so the setting is a no-op and slots are the only bound.
 
 > On macOS Ventura and older, the sysctl key is `debug.iogpu.wired_limit` and takes bytes instead of
 > MB. The mise tasks use the Sonoma+ key (`iogpu.wired_limit_mb`).

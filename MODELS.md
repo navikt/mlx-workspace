@@ -23,6 +23,7 @@ its own scratch workspace under `workspaces/<profile-key>/`.
 - [Dynamic model switching (no server restart)](#dynamic-model-switching-no-server-restart)
 - [opencode declared context limits](#opencode-declared-context-limits)
 - [Benchmark guide](#benchmark-guide)
+- [Benchmark prompt pollution](#benchmark-prompt-pollution)
 - [opencode drops output from some models](#opencode-drops-output-from-some-models)
 - [Cheap-operations results](#cheap-operations-results)
 - [weather-cli challenge results](#weather-cli-challenge-results)
@@ -144,8 +145,8 @@ rows measure the pairing, not the model.
 
 | Feature | mlx-lm | mlx-vlm |
 |---|---|---|
-| **KV cache** | Persistent across requests, shared cache up to `MLX_CACHE_BYTES` | **Cleared after every request** (`Stream finished, cleared cache`) |
-| **Prompt caching** | `--prompt-cache-bytes` / `--prompt-cache-size` | Not supported, no equivalent flags |
+| **KV cache** | Persistent across requests, bounded in slots by `MLX_CACHE_SIZE` | **Cleared after every request** (`Stream finished, cleared cache`) |
+| **Prompt caching** | `--prompt-cache-size` (slots); `--prompt-cache-bytes` is parsed and never applied | Not supported, no equivalent flags |
 | **Per-turn cost** | Re-uses prior context; only new tokens prefilled | **Full conversation re-prefilled every tool call** |
 | **Agentic impact** | Fast at steady state; grows slowly | Grows linearly, each tool call costs O(session_length) prefill |
 | **Server logs** | Detailed `Prompt processing progress` lines | Minimal; no per-chunk progress |
@@ -389,8 +390,12 @@ model:
 6 GB (KV cache) + 16 GB (new model) + 7 GB (OS) = 29 GB  ← tight but within 32 GB
 ```
 
-`MLX_CACHE_BYTES` trims *during generation*, not during the switch, so that peak is real. Reduce
-it if hot-switching between large models OOMs.
+`MLX_CACHE_BYTES` does not trim at all. mlx-lm constructs `LRUPromptCache` without `max_bytes`
+(`server.py:1743`), so it stays at `1 << 63` and the byte eviction at `cache.py:1733` never fires.
+The only byte enforcement left is an opportunistic trim in the batch-add path, which wipes the
+whole cache when a single in-flight batch exceeds the limit. The switch peak is real and the only
+lever on it is `MLX_CACHE_SIZE`, in slots. See
+[issue #11](https://github.com/navikt/mlx-workspace/issues/11).
 
 **Thinking mode is always a cold cache.** Toggling `enable_thinking` does not change the
 `model_key`, which is `(model_path, adapter_path, draft_model_path)` only, but it changes the
@@ -466,7 +471,8 @@ Rig B profiles (128 GB, where context is no longer the scarce resource):
 > definitions eat several thousand tokens before your first message.
 
 ¹ Declared below native: 14B+ models have larger KV footprint per token; 64k is safe for the cache budget.
-² Declared context can exceed native. The KV cache bytes cap is the real safety guard.
+² Declared context can exceed native. The KV cache is the real constraint, and `MLX_CACHE_SIZE`
+  is the only setting that bounds it.
 ⁴ GLM-4.7-Flash OOM confirmed at 64k (2026-06-19): Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` crash
   during prefill of a ~9k token prompt at ~27k session context (41% of 65k). Activation spike during
   prefill pushes peak VRAM above the 26GB wired cap. Reduced to 48k + 6GB KV cache. Drop to 32k if
@@ -474,11 +480,13 @@ Rig B profiles (128 GB, where context is no longer the scarce resource):
 
 > **GPU memory budget formula:**
 > ```
-> GPU cap  =  model weights  +  MLX_CACHE_BYTES  +  ~5–6GB activation buffer
->  26 GB   =     ~6 GB       +       14 GB        +       6 GB   (Qwen3.5-9B)
+> GPU cap  =  model weights  +  KV cache held  +  ~5–6GB activation buffer
+>  26 GB   =     ~6 GB       +     14 GB       +       6 GB   (Qwen3.5-9B)
 > ```
-> The forward pass needs 4–6 GB beyond the declared KV cache. `MLX_CACHE_BYTES` does NOT cover
-> this. Leave headroom or the server OOMs.
+> The budget still holds, but nothing in it is enforced by `MLX_CACHE_BYTES`, which is a no-op
+> ([issue #11](https://github.com/navikt/mlx-workspace/issues/11)). The KV term is what the cached
+> sessions actually hold, so the only lever is `MLX_CACHE_SIZE`, in slots. The forward pass needs
+> 4–6 GB on top of it. Leave headroom or the server OOMs.
 
 ---
 
@@ -504,10 +512,24 @@ mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
 
 ---
 
+## Benchmark prompt pollution
+
+The benchmark was sending 37,807 characters of system prompt, most of it a nav-pilot exported
+`AGENTS.md` and 38 global skills from the personal opencode config, none of it chosen by the
+benchmark. Runs now use `opencode --pure` and `XDG_CONFIG_HOME=bench/opencode-home`, which cuts the
+system prompt to 11,191 characters and the input from 14,224 tokens to 5,687 on the same task.
+Tracked as [issue #12](https://github.com/navikt/mlx-workspace/issues/12).
+
+Every result recorded before commit `9a2b324` was measured through the polluted prompt, and those
+files are quarantined with a `.POLLUTED` suffix. The first clean measurement moves Qwen3.6-35B-A3B
+from a 32.4s median to 13.4s, with 4 of 7 verified against 5 of 7.
+
+---
+
 ## opencode drops output from some models
 
-The single most important finding from the cheap-operations round, and it is about the harness
-rather than any model.
+The single most important finding from the cheap-operations round, and the cause was ours rather
+than any model or any client.
 
 | Model | `model_type` | Through opencode | Direct API |
 |---|---|---|---|
@@ -515,39 +537,59 @@ rather than any model.
 | Qwen3-Coder-30B-A3B | `qwen3_moe` | **nothing surfaces** | works |
 | Granite 4.1 8B | `granite` | **nothing surfaces** | works |
 
-For the two that fail, opencode reports zero tool calls and no reply text while the token counter
-shows the model generated output. Asked "What is 7+5", Qwen3-Coder produced three output tokens and
-opencode displayed nothing. Everything the model returns is discarded, which is not a tool-calling
-failure. Both were tested directly against the same running server and both return correct tool
-calls on the first attempt, with proper `finish_reason: tool_calls` and well-formed arguments.
+For the two that fail, opencode reported zero tool calls and no reply text while the token counter
+showed the model generating output. Asked "What is 7+5", Qwen3-Coder produced three output tokens
+and opencode displayed nothing. Both were tested directly against the same running server and both
+return correct tool calls on the first attempt, with proper `finish_reason: tool_calls` and
+well-formed arguments.
 
-**Every server-side explanation was tested and eliminated** against Qwen3-Coder:
+**The cause was our own `AGENTS.md`.** It contained the literal think tags in rules 6 and 7, and the
+last opening tag came after the last closing one. `mlx_lm/server.py:568-574` sets the initial
+generation state by scanning the rendered prompt: if the last think-start is after the last
+think-end, generation starts in reasoning state. Everything the model then emits goes to
+`delta.reasoning` instead of `delta.content`, and opencode renders nothing. The model generates
+correctly throughout, which is why the token counter moved while the screen stayed empty.
 
-| Condition | Result |
+Evidence was captured with a byte-level TCP tee between opencode and the server, then replayed with
+curl. Same model, same prompt:
+
+| Request body | Model output lands in |
 |---|---|
-| 1, 3, 5, 8, 12, 15 tools | tool calls correct at every count |
-| 26,551-token system prompt | correct |
-| Two system messages | correct |
-| Streaming (`stream: true`) | correct, `tool_calls` present in the delta |
+| opencode's exact body | `{"reasoning": "12\n"}` |
+| the same body with a one-sentence system prompt | `{"content": "12\n"}` |
+| the same body with 1 tool instead of 10 | `reasoning` |
+| the same body with no tools at all | `reasoning` |
 
-The tool-count threshold reported elsewhere for Qwen3-Coder, roughly five tools before it emits
-tool syntax as text, **did not reproduce here**. That was the change ranked first in our research
-review, and it is not our problem. The remaining candidate is a chat template or response-parser
-mismatch on the opencode side, matching the general pattern that tool-calls-as-text problems are
-template mismatches rather than prompt problems. An attempt to capture opencode's exact request
-through a logging proxy did not complete, because opencode would not talk to a non-default local
-port under the sandbox. That capture is the obvious next step.
+Tool count is irrelevant. The system prompt is the trigger. The tool-count threshold reported
+elsewhere for Qwen3-Coder, roughly five tools before it emits tool syntax as text, was ranked first
+in our research review and is not what we were looking at.
 
-**What this costs us.** Any result from this harness partly measures opencode compatibility rather
-than model capability, so a model can look unusable here and be perfectly good. Granite was written
-up as "never calls tools" on exactly this evidence, and that entry has been corrected. Treat a
-zero-tool-call result as a harness result until the model has been checked directly.
+**Why only some models were hit**, verified directly against each tokenizer with an unclosed think
+tag in the system prompt:
 
-**It also raises the priority of the Copilot CLI comparison.** nav-pilot must support both clients
-at GA. If a model's usability depends this strongly on which client drives it, the client is part
-of the recommendation and has to be measured, not assumed.
+| Model | Template default | With `enable_thinking: false` |
+|---|---|---|
+| Qwen3.6-35B-A3B | reasoning | normal, the Qwen3 template emits an empty think pair whose closing tag lands after our stray opening one |
+| Qwen3-Coder-30B | reasoning | reasoning, it is not a thinking model and its template emits no closing tag |
+| Granite 4.1 8B | reasoning | reasoning, same position as Qwen3-Coder |
+
+Every model behind the alpha decision has `enable_thinking: false` in its profile, so those results
+were protected by accident.
+
+Fixed in commit `9a2b324`. Verified end to end against Qwen3-Coder-30B through opencode under the
+sandbox: no reply before, correct reply and a working tool call after.
+
+**What this costs us.** Any result from this harness partly measures the harness rather than model
+capability, so a model can look unusable here and be perfectly good. Granite was written up as
+"never calls tools" on exactly this evidence, and that entry has been corrected. Treat a
+zero-tool-call result as a harness result until the model has been checked directly. That rule is
+more true now, not less: the fault was in a file we wrote ourselves, and it silenced every model
+that did not happen to have thinking disabled.
 
 ## Cheap-operations results
+
+> Every number in this section was measured through the polluted prompt and is being re-measured.
+> See [Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 weather-cli measures building a whole application, the hardest task shape and the one we would
 never route to a local model. This one measures the opposite: short routine operations that each
@@ -649,9 +691,10 @@ tool_calls: [{"function": {"name": "read_file", "arguments": "{\"path\": \"build
 
 The model is capable, the pairing with opencode is not. Every number above measures that pairing.
 
-**Verdict:** ⚠️ untested. At 5.12 GB and Apache 2.0 it remains the most attractive candidate on
-paper, and we still do not know how it performs on real work. Re-run once the opencode
-incompatibility is understood, or measure it through Copilot CLI instead. See
+**Verdict:** ⚠️ untested, re-run in progress. At 5.12 GB and Apache 2.0 it remains the most
+attractive candidate on paper, and we still do not know how it performs on real work. The
+incompatibility is understood and fixed in `9a2b324`, so the only thing left was to run it again,
+which is happening now. See
 [opencode drops output from some models](#opencode-drops-output-from-some-models).
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit-DWQ` ❌ worse than the plain build
@@ -677,11 +720,14 @@ threshold for Qwen3-Coder and the framing that thinking hurts across the board. 
 material on small local models is thin and does not transfer to this stack. Read it for
 hypotheses, not for settings.
 
-### `mlx-community/Qwen3.6-35B-A3B-4bit`: clean baseline
+### `mlx-community/Qwen3.6-35B-A3B-4bit`: no server crash, still a polluted prompt
 
-Eleven tasks, fresh server before each one, so every task starts from a known server state. This
-supersedes the earlier figures, kept as `.CONFOUNDED.json` because they are evidence for
-[the server degradation bug](https://github.com/navikt/mlx-workspace/issues/11), not because they are comparable.
+Eleven tasks from `bench/results-qwen3.6-35b-a3b.POLLUTED.json`, fresh server before each one, so
+every task starts from a known server state. This supersedes the earlier figures, kept as
+`.CONFOUNDED.json` because they are evidence for
+[the server crash](https://github.com/navikt/mlx-workspace/issues/11), not because they are
+comparable. Both runs predate the prompt fix in `9a2b324`, so read them against
+[Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 | Task | | Time | Turns | Tools | Result |
 |---|---|---|---|---|---|
@@ -699,7 +745,7 @@ supersedes the earlier figures, kept as `.CONFOUNDED.json` because they are evid
 
 **Median 32.4s, mean 52.9s, 5 of 7 verified, zero tasks with no tool calls.** Against the confounded
 run the restart cut the mean from 77.4s to 52.9s and zero-tool tasks from one to none. The median
-barely moved, because the degradation hit the tail rather than the typical case.
+barely moved, because the crash hit the tail of the run rather than the typical task.
 
 **D2 is genuinely hard for this model.** It no longer times out. It runs 19 turns and 29 tool calls
 over 220.8s and then breaks the test suite. Threading a new field through a database row class, its
@@ -709,7 +755,34 @@ most realistic task in the set and the clearest limit found so far.
 **M2 flipped**, passing in the confounded run and failing here with two turns and no edits, on a
 task this model has completed before. Single runs cannot separate close calls.
 
-Earlier eleven-task run (confounded by server degradation), on the updated harness with three
+**The server does not degrade, it crashes.** Crash report
+`~/Library/Logs/DiagnosticReports/python3.11-2026-08-28-003856.ips` is timestamped inside the minute
+the DWQ run went dead: `EXC_BAD_ACCESS` (SIGBUS), `KERN_PROTECTION_FAILURE` on a stack guard page
+immediately below a 16 MB thread stack, with `compile_dfs` frames from MLX's recursive graph walk,
+on the generation thread. The logs say the same thing. The first failing benchmark log ends with
+`error APIError "Cannot connect to API: Unable to connect"`, the four logs after it are 909 bytes
+each and contain only that error, and the log after the restart is 40 KB with 9 tool calls.
+Connection refused, not bad output.
+
+The likely mechanism, at medium confidence, is recursion depth in the prompt cache. Cache entries
+are stored unevaluated (`cache.py:1080-1086`, `server.py:869-877`), and the one place the graph is
+collapsed (`mx.eval` in `generate.py:1161-1170`) is skipped when a cache hit leaves a single token
+to process, so depth grows with the number of high-hit requests. Confidence is high that this is a
+crash rather than degradation, medium that the prompt cache is the specific accumulator, because
+the crash backtrace is truncated.
+
+Two related findings from the same read of the server:
+
+- `--prompt-cache-bytes` is parsed and never applied. `LRUPromptCache` is constructed without
+  `max_bytes` at `server.py:1743`, so our `MLX_CACHE_BYTES` setting does nothing and the real bound
+  is `MLX_CACHE_SIZE`.
+- An exact prompt cache hit indexes an empty list in `insert_segments`
+  (`generate.py:1645-1646`), killing the generation thread, so the server keeps accepting
+  connections and never answers.
+
+Tracked as [issue #11](https://github.com/navikt/mlx-workspace/issues/11).
+
+Earlier eleven-task run (confounded by the server crash), on the updated harness with three
 data-parsing tasks, `AGENTS.md` rule 8 forbidding a repeated failing tool call, and a 420-second
 per-task cap:
 
@@ -764,14 +837,21 @@ an order of magnitude. `reports/nav-pilot-path.md` still carries the old figure 
 prompt and tool schemas before the request itself, measured with the trivial prompt "Create a file
 called probe.txt containing exactly the word: verified" at 15,628 input tokens. Task input rises
 with conversation length, 15.9k on the shortest task to 41.1k on the longest. Published work on
-another harness measured tool schemas at 81% of a comparable payload, so a reduced tool set is the
-obvious lever and is untested here.
+another harness measured tool schemas at 81% of a comparable payload, so a reduced tool set looked
+like the obvious lever.
+
+**Most of that floor was ours.** After the prompt fix in `9a2b324` one task's input fell from
+14,224 to 5,687 tokens with the tool set unchanged, so the floor was config rather than schemas.
+See [Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 **Verified, not reported.** M2 added a field to a REST DTO, mapped it at the construction site, and
 the existing suite still passed. M1's rename was checked by grepping for the old symbol before
 compiling, because a rename that misses a call site still compiles if the caller was deleted.
 
 ## weather-cli challenge results
+
+> Every number in this section predates commit `9a2b324` and was measured through the polluted
+> prompt. See [Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 Every model builds the same Node.js CLI from `WEATHER_CLI_SPEC.md` (live Met.no + Geonorge APIs,
 spec-named test files) in its own `workspaces/<key>/weather-cli/`, driven by the two prompts in
@@ -821,6 +901,10 @@ The single biggest lever was the prompt, not the model: adding *"Check the exter
 assume the data model"* to the plan prompt moved DeepSeek-class debugging loops into a 3-minute
 research phase and cut Qwen 3.8's total time by ~4×.
 ## Model evaluations: rig B (M5 Max 128 GB)
+
+> Every number in this section predates commit `9a2b324` and was measured through the polluted
+> prompt. Re-measurement is under way. See
+> [Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 ### `mlx-community/Qwen3.5-9B-MLX-4bit` ❌ does not complete the benchmark
 
@@ -1215,6 +1299,9 @@ with a draft model before drawing a final conclusion.
 
 ## Model evaluations: rig A (M1 Max 32 GB)
 
+> Every number in this section predates commit `9a2b324` and was measured through the polluted
+> prompt. See [Benchmark prompt pollution](#benchmark-prompt-pollution).
+
 ### `mlx-community/Qwen3.5-9B-MLX-4bit` ⭐ recommended
 
 Dense 9B, ~6 GB VRAM, 262k native context (`max_position_embeddings: 262144`), practically ~128k on a
@@ -1330,15 +1417,18 @@ clears the KV cache after every request, so every opencode tool call re-prefills
 (see [Server backends](#server-backends-mlx-lm-vs-mlx-vlm-vs-omlx)). Untested locally: the unique
 proposition is vision-native tool calling, and the cache limitation confines it to short sessions.
 
-### `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` ⚠️ too slow
+### `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` ⬛ dropped, 2025 model
 
 MoE, 128 experts with 8 active, 30.5B total / ~3.3B active per token, ~16 GB VRAM (all 30B weights
 stay resident), 256k native context (YaRN-extendable to 1M), ~9 GB headroom. Pretrained on 7.5T
 tokens, 70% code. Despite the low active count, inference was noticeably slow on rig A and tool
 calling was inconsistent, despite strong published benchmarks. Context headroom is tight for large
-codebases. Not practical on a 32 GB Mac; worth re-evaluating on faster hardware or newer mlx-lm.
-On rig B it is blocked by [the opencode output bug](#opencode-drops-output-from-some-models), not by
-speed.
+codebases. Not practical on a 32 GB Mac.
+
+**Verdict:** ⬛ dropped, not blocked. The empty output on rig B was
+[our own prompt](#opencode-drops-output-from-some-models) and is fixed, so it would run today. It
+is a July 2025 model, and we are not carrying 2025 models forward into further testing: the field
+moves faster than a run costs, so the runs go to current weights.
 
 ### `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit` ⬛ superseded
 
@@ -1559,6 +1649,12 @@ Ranked by measured effect, largest first. The first three all beat changing mode
 | Qwen3.6-35B-A3B is ~5× faster | medium | One run each, and the two are not like-for-like (thinking on vs off). The gap is too large to be noise; the magnitude is one sample |
 | Qwen3.8-27B 4-bit writes better code | **low** | 8.5 vs 6.8, one run each, one unaudited reviewer. That margin sits inside plausible run-to-run spread |
 | Anything about a real 48 GB Pro's speed | **untested** | The wired cap reproduces the ceiling, not the halved bandwidth. Expect roughly half these speeds |
+| Any published timing here | **superseded** | Every one was measured with 8.5k tokens of instructions the benchmark did not choose. The first clean re-measurement moved a median from 32.4s to 13.4s |
+
+**The prompt pollution is the largest caveat in this file.** No published number here was measured
+on the prompt the benchmark intended to send, and the one task set re-run since more than halved.
+Ranking between models may survive it, because every model carried the same overhead, but no
+absolute number does. See [Benchmark prompt pollution](#benchmark-prompt-pollution).
 
 **Every run is n = 1.** Single samples of a stochastic process at temperature 0.6, no repeats,
 no variance estimate. Wall-clock gaps of 5× survive that; a 1.7-point code-score gap does not.
@@ -1604,7 +1700,7 @@ the recorded numbers do **not** include:
 | `qwen3.8-27b-4bit` | `MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'` | Its rule 7 violation and 4-minute User-Agent stall are both thinking-phase costs. Qwen3.6 with thinking off ran 5× faster | **high**, cheapest experiment with the largest predicted payoff |
 | `qwen3.6-35b-a3b` | thinking **enabled** (drop the profile's `enable_thinking: false`) | The only way to separate "MoE is fast" from "no reasoning tokens is fast". Also tests whether its two silent-wrong-answer paths survive deliberation | **high**, today's headline result rests on this being config, not model |
 | harness | expose `repetition_penalty` / `frequency_penalty` per profile | The installed `mlx_lm.server` accepts these **per request** but has no CLI flag, so a profile cannot reach them. This is the textbook remedy for the degenerate loop that killed Qwen3.5-9B attempt 1, and we had no lever for it | **high**, a known gap the benchmark already hit |
-| `qwen3.6-35b-a3b`, `qwen3.5-9b` | raise `MLX_CACHE_BYTES` above 3 GB | Both are rig-A tuned for a 26 GB cap. Qwen3.6 overshot to 4.70 GB at 36 GB with no visible thrash. There is headroom the profiles never knew about | medium |
+| `qwen3.6-35b-a3b`, `qwen3.5-9b` | raise `MLX_CACHE_SIZE` above the rig-A slot count | Both are rig-A tuned for a 26 GB cap and Qwen3.6 overshot to 4.70 GB at 36 GB with no visible thrash, so there is headroom the profiles never knew about. This was written as raising `MLX_CACHE_BYTES`, which cannot do anything, so slots are the only knob that reaches the headroom | medium |
 
 Nothing here invalidates a recorded result. Every number stands for the config it was measured
 with. These are upside tests, not corrections.
