@@ -37,7 +37,7 @@ about 4x, measured consistently across two different benchmarks.
 
 | Model | Reason |
 |---|---|
-| **Qwen3.8-27B-4bit** | Writes the best code measured, 8.5/10 on a from-scratch build, but 61.2s median on routine work even with thinking disabled, against 32.4s. Also looped 77 identical tool calls on one task. Right model for the wrong workload |
+| **Qwen3.8-27B-4bit** | Writes the best code measured, 8.5/10 on a from-scratch build, but too slow on routine work even with thinking disabled. Measured on 4 of the 11 tasks before the run was abandoned: 61.2s median against 20.8s for the chosen model on those same four, a 2.9x gap. Also looped 77 identical tool calls on one task. Right model for the wrong workload |
 | **Qwen3.6-35B-A3B-4bit-DWQ** | Clean A/B against the plain build, quantization the only variable: 2 of 7 verified against 5 of 7. Its lower median is an artifact of failing faster |
 | **Qwen3-Coder-30B-A3B** | opencode discards its output entirely. The model calls tools correctly against the API, so this is a pairing failure, but a model that cannot drive a shipping client cannot ship. See issue #10 |
 | **Granite 4.1 8B** | Same. Attractive on paper at 5.1 GB and Apache 2.0, and worth revisiting when #10 is understood |
@@ -68,9 +68,11 @@ not. Worth telling alpha users plainly.
 
 ## How far this can be trusted
 
-**One run per model.** Task times vary up to 1.7x between runs of the same model on the same task,
-and one task flipped from pass to fail between two runs. Single runs separate 32s from 61s
-reliably. They do not separate models within about 1.5x of each other.
+**One run per model, and not all on the same tasks.** Task times vary up to 1.7x between runs of
+the same model on the same task, and one task flipped from pass to fail between two runs. Only the
+chosen model and the DWQ build completed all 11 tasks. Qwen3.8-27B was abandoned after 4, so its
+comparison is like-for-like on those 4 and nothing more. Single runs separate a 3x gap reliably.
+They do not separate models within about 1.5x of each other.
 
 **One client for most numbers.** Everything except the two Copilot CLI checks was measured through
 opencode, and opencode is demonstrably not neutral: it discards output from two model families

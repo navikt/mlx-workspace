@@ -150,19 +150,27 @@ def run_task(task):
         "exit": grab(r"exit (\d+)", int, -1),
         "timed_out": timed_out,
     }
-    if timed_out:
-        rec["files_changed"] = len(changed_files())
-        rec["verified"] = False
-        rec["note"] = f"timed out after {cap}s"
-        return rec
-    rec["files_changed"] = len(changed_files())
-    ok, note = verify(task)
-    rec["verified"] = ok
-    rec["note"] = note
+    # Record term hits before any early return, so a timed-out task is still
+    # comparable field-for-field with a completed one.
     if task.get("expect_terms"):
         reply = out.split("reply:", 1)[1] if "reply:" in out else out
         rec["terms_found"] = [t for t in task["expect_terms"] if t in reply]
         rec["terms_expected"] = task["expect_terms"]
+    rec["files_changed"] = len(changed_files())
+    if timed_out:
+        rec["verified"] = False
+        rec["note"] = f"timed out after {cap}s"
+        return rec
+    ok, note = verify(task)
+    rec["verified"] = ok
+    rec["note"] = note
+    # A read task with expect_terms is checkable without a human: the answer
+    # either contains every term or it does not. verify() cannot do this because
+    # it never sees the model's reply.
+    if task["verify"] == "grep_answer" and "terms_found" in rec:
+        found, want = len(rec["terms_found"]), len(rec["terms_expected"])
+        rec["verified"] = found == want
+        rec["note"] = f"{found} of {want} expected terms in the answer"
     return rec
 
 

@@ -1,11 +1,11 @@
 # Model Evaluation Notes
 
-Observations from running models locally on Apple Silicon and driving them from
-`opencode` / `aider`. Every measurement is tagged with the rig it was taken on.
-Numbers do not transfer between rigs.
+Observations from running models locally on Apple Silicon and driving them from `opencode` /
+`aider`. Every measurement is tagged with the rig it was taken on. Numbers do not transfer
+between rigs.
 
-Switch models with `mise run model-use`. See `profiles/` for all configurations.
-Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
+Switch models with `mise run model-use`. See `profiles/` for all configurations. Each model gets
+its own scratch workspace under `workspaces/<profile-key>/`.
 
 > **Note on sizes:** *Disk size* (from `mise run models-list`) and *VRAM footprint* are different.
 > Disk includes tokenizer, configs, and safetensors. VRAM is the actual loaded inference footprint.
@@ -44,8 +44,7 @@ Each model gets its own scratch workspace under `workspaces/<profile-key>/`.
 | **B** | M5 Max | 128 GB | 96–115 GB (per profile `gpu_wired_limit_gb`) | mlx-lm, mlx-vlm, **oMLX** | 27B–284B, 8-bit / 3-bit mixed (Aug 2026) |
 
 **Target hardware: 48 GB, Pro-class chip.** That is what most developers here run, and neither rig
-represents it. Rig A is too small, and rig B is both larger and much faster in memory bandwidth.
-Recommendations must be qualified against it:
+represents it. Rig A is too small, rig B is both larger and much faster in memory bandwidth.
 
 | Constraint | 48 GB Pro | Rig B (128 GB Max) |
 |---|---|---|
@@ -54,20 +53,16 @@ Recommendations must be qualified against it:
 | Qwen3.8 8-bit (~27 GB weights) | ~35 GB needed, does not leave working room | comfortable |
 | Qwen3.8 4-bit (~14 GB weights) | fits with room for a 12 GB KV cache | trivial |
 
-A dense model streams all its weights per token, so decode speed ≈ bandwidth ÷ weight size. On
-Pro-class silicon the 8-bit build is bandwidth-starved *before* it is memory-starved. Halving the
-weights with a 4-bit quant roughly doubles the achievable tokens/sec, on top of freeing 13 GB.
-`profiles/qwen3.8-27b-4bit.toml` (`mlx-community/Qwen3.8-27B-4bit`) exists for this reason. It runs
-**without MTP**: the drafter head is published as `model_type: qwen3_5_mtp`, which only oMLX can
-load, and oMLX cannot serve this 4-bit build. Expect the plain mlx-lm decode rate, not the 8-bit
-MTPLX numbers.
+On Pro-class silicon the 8-bit build is bandwidth-starved before it is memory-starved (see
+[Dense vs MoE](#dense-vs-moe)). `profiles/qwen3.8-27b-4bit.toml`
+(`mlx-community/Qwen3.8-27B-4bit`) exists for this reason. It runs **without MTP**: the drafter
+head is published as `model_type: qwen3_5_mtp`, which only oMLX can load, and oMLX cannot serve
+this 4-bit build. Expect the plain mlx-lm decode rate, not the 8-bit MTPLX numbers.
 
-**Untested on the target.** Every number in this document comes from rig A or rig B. Capacity
-arithmetic transfers; bandwidth-bound throughput does not. Treat 48 GB Pro guidance as predicted
-until someone measures it.
-
-Nothing from rig A was re-measured on rig B. Rig A numbers stay as the reference for
-what fits in 32 GB; rig B numbers are the current daily-driver data.
+**Untested on the target.** Every number here comes from rig A or rig B. Capacity arithmetic
+transfers; bandwidth-bound throughput does not. Treat 48 GB Pro guidance as predicted until
+someone measures it. Nothing from rig A was re-measured on rig B: rig A numbers are the reference
+for what fits in 32 GB, rig B numbers are the current daily-driver data.
 
 ---
 
@@ -111,7 +106,7 @@ mise run opencode               # launch opencode in workspaces/<key>/
 
 ## Quick comparison: rig B (128 GB)
 
-Two benchmarks now exist and they disagree, so both are shown. **weather-cli** builds a whole
+Two benchmarks exist and they disagree, so both are shown. **weather-cli** builds a whole
 application from scratch. **Cheap ops** does eight routine operations on an existing Kotlin
 service. A model can be good at one and poor at the other, and most are.
 
@@ -130,16 +125,9 @@ service. A model can be good at one and poor at the other, and most are.
 
 ¹ Self-reported; the workspace was deleted before it could be checked.
 
-**Sparse beats dense on this hardware, twice over.** Qwen3.6-35B-A3B activates about 3B parameters
-per token and is roughly 4x faster than the dense 27B on identical work, measured on both
-benchmarks independently. Decode is bandwidth-bound, so what matters is bytes streamed per token,
-not parameter count on disk.
-
-**The 3.8 line has no small MoE.** Qwen ships `Qwen3.8-27B` dense and `Qwen3.8-2.4T-A95B`, a
-frontier-scale MoE with 95B active. Nothing sits where `Qwen3.6-35B-A3B` does. Qwen3.6 shipped
-both a dense 27B and a small MoE; 3.8 did not, and there is no Qwen3.7 at all. That is why our
-fastest model is a generation old: for local hardware, whether the family shipped a small MoE
-matters more than the version number.
+Qwen3.6-35B-A3B activates about 3B parameters per token and is roughly 4x faster than the dense
+27B on identical work, measured on both benchmarks independently. Why that happens, and why our
+fastest model is a generation old, is in [Dense vs MoE](#dense-vs-moe).
 
 **Two models are blocked by the harness, not by capability.** opencode discards everything
 Qwen3-Coder-30B and Granite return, text and tool calls alike, while both produce correct tool
@@ -165,7 +153,7 @@ rows measure the pairing, not the model.
 
 ### Why some models always need mlx-vlm
 
-The MLX ecosystem splits model support across two packages. A model requires mlx-vlm when its `model_type` is **only implemented in mlx-vlm**, not in mlx-lm:
+A model requires mlx-vlm when its `model_type` is **only implemented in mlx-vlm**, not in mlx-lm:
 
 | model_type | Affected models | Notes |
 |---|---|---|
@@ -188,16 +176,20 @@ The MLX ecosystem splits model support across two packages. A model requires mlx
 > benchmark run: `gemma-4-31b-8bit` was served by mlx-vlm, which clears the KV cache after every
 > request, and its turn times climbed to a 43s median / 197s worst against ~12s for oMLX models.
 
-> **Note:** Models with dual support (e.g., `qwen3_vl` exists in both packages) run via mlx-lm in text-only mode. No image input, but full KV cache persistence.
+> **Note:** Models with dual support (e.g. `qwen3_vl` exists in both packages) run via mlx-lm in
+> text-only mode. No image input, but full KV cache persistence.
 
 ### Impact on agentic coding sessions
 
-For opencode/aider workflows where the tool sends the full conversation with every tool call:
+opencode and aider send the full conversation with every tool call:
 
-- **mlx-lm models**: The KV cache stores prior prefill. After the first message, subsequent tool calls only pay for new tokens (the diff from the cache). A 30k-token session costs ~30k prefill the first time, then ~500–2k per tool call.
-- **mlx-vlm models**: Cache is cleared after every response. Every tool call re-prefills the entire conversation. A 30k-token session costs ~30k prefill **on every single tool call**. At 200 t/s that's 150 seconds before generation can start.
+- **mlx-lm**: after the first message, subsequent tool calls only pay for new tokens. A
+  30k-token session costs ~30k prefill once, then ~500–2k per tool call.
+- **mlx-vlm**: cache cleared after every response, so a 30k-token session costs ~30k prefill **on
+  every tool call**. At 200 t/s that is 150 seconds before generation starts.
 
-**Recommendation:** Use mlx-vlm models for short, focused tasks. For long multi-file agentic sessions, stick to mlx-lm models (Qwen3.5, GLM-4.7, etc.).
+Use mlx-vlm models for short, focused tasks. For long multi-file agentic sessions use mlx-lm
+models (Qwen3.5, GLM-4.7, etc.).
 
 ### oMLX (rig B)
 
@@ -232,7 +224,8 @@ Gotchas found on rig B:
 
 ## Thinking mode (CoT reasoning tokens)
 
-Several models in this workspace have built-in chain-of-thought ("thinking") mode. They generate `<think>…</think>` blocks before answering. This is controlled via `MLX_CHAT_TEMPLATE_ARGS` in the profile.
+Several models here generate `<think>…</think>` blocks before answering, controlled via
+`MLX_CHAT_TEMPLATE_ARGS` in the profile.
 
 ### Models with thinking tokens
 
@@ -242,9 +235,11 @@ Several models in this workspace have built-in chain-of-thought ("thinking") mod
 | Qwen3 series | `<think>`, `</think>` | `enable_thinking=false` or `/no_think` text token | Same pattern |
 | GLM-4.5 | `/nothink` text token | `enable_thinking=false` → appends `/nothink` to user messages | Same |
 
-> **GLM-4.7-Flash technical detail:** `enable_thinking=false` injects a `</think>` token as the opening of the assistant turn, immediately closing the thinking block. The model never generates thinking content, so the cost is 1 token. This is distinct from GLM-4.5 which appended `/nothink` to user messages.
+> **GLM-4.7-Flash detail:** `enable_thinking=false` injects a `</think>` token as the opening of
+> the assistant turn, immediately closing the block. The model never generates thinking content,
+> so the cost is 1 token. GLM-4.5 instead appended `/nothink` to user messages.
 
-### Thinking vs. non-thinking: when to use each
+### Thinking vs non-thinking: when to use each
 
 Research summary (sources: arxiv 2412.21187, GLM-4 repo benchmarks, Qwen3 technical report):
 
@@ -259,7 +254,11 @@ Research summary (sources: arxiv 2412.21187, GLM-4 repo benchmarks, Qwen3 techni
 | Instruction following / format | ❌ Slightly worse | Thinking models score ~3pp below on IF-Eval |
 | Simple boilerplate / CRUD | ❌ Not needed | Overhead only, no quality difference |
 
-**Key finding (arxiv 2412.21187, "Do NOT Think That Much for 2+3=?"):** Thinking models generate exhaustive reasoning for trivial decisions because they have no calibration for task difficulty. In an agentic session, a prompt like *"src/ is empty, what do I do?"* triggers the same extended reasoning loop as a hard math problem. Observed as a 3m 35s `<think>` block in the GLM-4.7-Flash evaluation (2026-06-19).
+**Key finding (arxiv 2412.21187, "Do NOT Think That Much for 2+3=?"):** thinking models generate
+exhaustive reasoning for trivial decisions because they have no calibration for task difficulty.
+In an agentic session, *"src/ is empty, what do I do?"* triggers the same extended reasoning loop
+as a hard math problem. Observed as a 3m 35s `<think>` block in the GLM-4.7-Flash evaluation
+(2026-06-19).
 
 ### Current configuration
 
@@ -272,13 +271,12 @@ regardless of configuration. Measured cost on rig B (2026-08-26): a 2,488-token 
 raised the next turn's prompt from 19,897 to 22,417 tokens. The whole block is fed back, so each
 reasoning token is paid once at decode (~27 t/s) and again as prefill on every later turn.
 
-Front-loading reasoning into the *plan* phase is worth it (one block, paid once, and it is what
-cut the weather-cli run from ~34 min to 7m 33s). Reasoning inside the *implement* phase is not:
-it recurs per tool call and matches the BFCL/TAU-Bench collapse above. `AGENTS.md` rule 7 asks for
+Front-loading reasoning into the *plan* phase is worth it: one block, paid once, and it is what
+cut the weather-cli run from ~34 min to 7m 33s. Reasoning inside the *implement* phase is not, it
+recurs per tool call and matches the BFCL/TAU-Bench collapse above. `AGENTS.md` rule 7 asks for
 short thinking during implementation; a template-level toggle is the stronger fix if that is not
-enough.
-
-GLM-4.7-Flash **does** support turn-level thinking control (re-enable per-request via `chat_template_kwargs`), so a later change could enable thinking for heavy architecture turns only.
+enough. GLM-4.7-Flash does support turn-level thinking control via `chat_template_kwargs`, so a
+later change could enable thinking for heavy architecture turns only.
 
 ---
 
@@ -296,34 +294,33 @@ Measured on rig B (`mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8`, oMLX):
 | Tokens per forward cycle | 1.0 | 2.8–3.5 |
 | Draft acceptance rate | — | 80–95% (depth 1–3) |
 
-Speed varies with what is being generated: short tool-call turns land at the top of the range,
-long `<think>` blocks at 21k+ context drop back to ~11–18 t/s. The drafter is worth roughly a
-2–3× speedup on the same weights, which is what makes a dense 27B competitive with a 284B MoE.
+Short tool-call turns land at the top of the range; long `<think>` blocks at 21k+ context drop
+back to ~11–18 t/s. The drafter is worth roughly 2–3× on the same weights, which is what makes a
+dense 27B competitive with a 284B MoE.
 
 ---
 
 ## Dense vs MoE
 
-The Qwen3.5-27B-Opus-Distilled OOM on rig A (2026-06-19) makes the tradeoff concrete:
+Decode is bandwidth-bound: what matters is bytes streamed per token, not parameter count on disk.
+Dense models load every parameter into every forward pass, and during prefill the activation
+tensors for the whole input must coexist with the weights. That spike is what breaches the
+wired-memory cap. MoE routes each token through a few experts only, so activation memory stays low
+regardless of total size.
+
+The Qwen3.5-27B-Opus-Distilled OOM on rig A (2026-06-19) makes it concrete:
 
 | Model | Total params | Active per token | VRAM | Prefill t/s | Result |
 |---|---|---|---|---|---|
 | Qwen3.5-27B-Opus | **27B dense** | 27B | 14 GB | 68–71 t/s | 💥 OOM at 6–17k tokens |
 | Qwen3.6-35B-A3B | 35B MoE | **~3B** | 21 GB | 350–386 t/s | ✅ 96k context, stable |
 
-Dense models load every parameter into every forward pass; during prefill the activation
-tensors for the whole input must coexist with the weights, and that spike is what breaches
-the wired-memory cap. MoE routes each token through a few experts only, so activation memory
-stays low regardless of total size. Qwen3.6-35B-A3B is 3× larger by total params, 5× faster
-at prefill, and peaks lower than the 27B dense model.
-
-**On 32 GB (rig A):** prefer MoE for anything above ~14B total params.
+Qwen3.6-35B-A3B is 3× larger by total params, 5× faster at prefill, and peaks lower than the 27B
+dense model. **On 32 GB (rig A): prefer MoE above ~14B total params.**
 
 ### Why an older version can be the better choice
 
-Expect the question "why test Qwen3.6 when 3.8 exists?". The answer is architecture, not recency:
-decode speed on Apple Silicon tracks **active** parameters, because every active weight is read
-from memory for every token. Total parameter count sets capacity; active count sets speed.
+Total parameter count sets capacity; active count sets speed.
 
 | | Qwen3.8-27B (dense, 4-bit) | Qwen3.6-35B-A3B (MoE, 4-bit) |
 |---|---|---|
@@ -335,29 +332,29 @@ from memory for every token. Total parameter count sets capacity; active count s
 
 On a 128 GB Max there is bandwidth to spare and the dense 3.8 wins outright. On a 48 GB Pro, where
 bandwidth is roughly halved, the dense model reads ~16 GB per token and is throughput-bound long
-before it is capacity-bound. The MoE reads about an eighth of that and carries a KV cache
-three to four times cheaper.
+before it is capacity-bound. The MoE reads about an eighth of that and carries a KV cache three to
+four times cheaper.
 
-There is no MoE in the 3.8 line to sidestep the trade with: MLX has only `Qwen3.8-27B-4bit` and its
-drafter, and the one MoE build (`Qwen3.8-Whittle-MoE-27B-A17.8B`) is an unofficial merge with 17.8B
-active, nearly dense in bandwidth terms. Wanting MoE economics means going back a version.
+**The 3.8 line has no small MoE to sidestep the trade with.** Qwen ships `Qwen3.8-27B` dense and
+`Qwen3.8-2.4T-A95B`, a frontier-scale MoE with 95B active. MLX has only `Qwen3.8-27B-4bit` and its
+drafter; the one MoE build, `Qwen3.8-Whittle-MoE-27B-A17.8B`, is an unofficial merge with 17.8B
+active, nearly dense in bandwidth terms. Qwen3.6 shipped both a dense 27B and a small MoE, 3.8 did
+not, and there is no Qwen3.7 at all. Wanting MoE economics means going back a version: for local
+hardware, whether the family shipped a small MoE matters more than the version number.
 
 **So: 3.8 is the better model, 3.6-A3B may be the better fit.** A newer version buys capability per
 token; on halved bandwidth you may not be able to afford those tokens. Test the dense build first as
-the quality anchor, and keep the MoE as the fallback that was designed for this constraint.
+the quality anchor, keep the MoE as the fallback designed for this constraint.
 
-**On 128 GB (rig B):** the rule softens. A dense 27B at 8-bit fits with ~100 GB to spare, and
-with MTP it outruns the 284B MoE on wall-clock task time. The 284B MoE still wins on raw
-capability per token; the dense 27B wins on responsiveness and leaves the machine usable.
-
+**On 128 GB (rig B):** the rule softens. A dense 27B at 8-bit fits with ~100 GB to spare, and with MTP
+it outruns the 284B MoE on wall-clock task time. The 284B MoE still wins on raw capability per token;
+the dense 27B wins on responsiveness and leaves the machine usable.
 
 ## Dynamic model switching (no server restart)
 
-`mlx_lm.server` supports **per-request model switching** natively. No restart is needed. The server process stays alive and handles the swap itself.
-
-### How it works (source: `mlx_lm/server.py`)
-
-Every incoming request includes a `"model"` field. The server's `ModelProvider.load()` compares the requested model path against the currently loaded model's key:
+`mlx_lm.server` supports per-request model switching natively. Every request carries a `"model"`
+field, and `ModelProvider.load()` compares it against the currently loaded model's key
+(source: `mlx_lm/server.py`):
 
 ```python
 # ModelProvider.load() — called on every request
@@ -366,21 +363,12 @@ if self.model_key != model_key:
     self._load(*model_key)   # unload old, load new
 ```
 
-`_load()` explicitly frees the old model before loading the new one:
+`_load()` clears `model_key`, `model` and `tokenizer` first, so Python's GC releases the Metal
+buffers before the new weights load. One server on port 8080 can serve models sequentially.
 
-```python
-def _load(self, model_path, ...):
-    self.model_key = None
-    self.model = None        # → Python GC releases Metal buffers → VRAM freed
-    self.tokenizer = None
-    # ... then load new model weights
-```
-
-This means a single server on port 8080 can serve multiple models sequentially. The client just specifies different model IDs in each request.
-
-### Caching behaviour across model switches
-
-The **KV prompt cache (`LRUPromptCache`) is owned by `ResponseGenerator`, not `ModelProvider`**. It is never cleared on model switch. Cache entries are keyed by `(model_key, token_sequence)`, so:
+**Caching across switches.** The KV prompt cache (`LRUPromptCache`) is owned by
+`ResponseGenerator`, not `ModelProvider`, and is never cleared on switch. Entries are keyed by
+`(model_key, token_sequence)`:
 
 | Event | Model weights | KV prompt cache |
 |---|---|---|
@@ -389,30 +377,28 @@ The **KV prompt cache (`LRUPromptCache`) is owned by `ResponseGenerator`, not `M
 | Switch back to model A | A reloaded | Old A entries **still in LRU**, warm restart if not evicted ✅ |
 | LRU eviction | — | Oldest entries dropped when cache hits `prompt_cache_size` limit |
 
-Switching between two models and back is a **warm restart** for the original model, as long as the LRU hasn't evicted the old entries. The `MLX_CACHE_SIZE = "3"` in GLM's profile means only 3 cached sequences, so switching to another model and back will likely evict them (the new model's sequences fill the LRU slots). Increase `MLX_CACHE_SIZE` if you plan to switch models frequently.
+A round trip is a warm restart if the LRU has not evicted the old entries. `MLX_CACHE_SIZE = "3"`
+in GLM's profile means only 3 cached sequences, so a round trip will likely evict them. Raise it
+if you switch often.
 
-### VRAM peak during a switch
+**VRAM peak during a switch.** `_load()` does not clear the prompt cache first, so the peak is
+`old_model_KV_cache (still held by LRU) + new_model_weights`. For GLM-4.7-Flash → another 16 GB
+model:
 
-`_load()` does NOT clear the prompt cache before loading the new model. During the switch there is a brief window where:
-
-```
-VRAM peak = old_model_KV_cache (still held by LRU) + new_model_weights
-```
-
-For GLM-4.7-Flash → another 16 GB model:
 ```
 6 GB (KV cache) + 16 GB (new model) + 7 GB (OS) = 29 GB  ← tight but within 32 GB
 ```
 
-If `MLX_CACHE_BYTES` is set, the trim happens *during generation* (not during the switch itself), so the peak is real. Reduce `MLX_CACHE_BYTES` if you see OOM errors when hot-switching between large models.
+`MLX_CACHE_BYTES` trims *during generation*, not during the switch, so that peak is real. Reduce
+it if hot-switching between large models OOMs.
 
-### Thinking mode and the KV cache
+**Thinking mode is always a cold cache.** Toggling `enable_thinking` does not change the
+`model_key`, which is `(model_path, adapter_path, draft_model_path)` only, but it changes the
+prompt structure (`<think>` vs `</think>` prefix on the assistant turn), so token sequences never
+match the old entries.
 
-Switching `enable_thinking` on the **same model** (`GLM-4.7-Flash`) does **not** change the `model_key`. The key is `(model_path, adapter_path, draft_model_path)` only. However, thinking mode changes the system prompt structure (`<think>` vs `</think>` prefix on the assistant turn), so **token sequences won't match** the old cache entries anyway. In practice, switching thinking on/off on the same server restart is a cold cache.
-
-### Using dynamic switching today
-
-To switch models without restarting, register multiple model IDs in `opencode.json` all pointing to `http://localhost:8080/v1`:
+**Using it today.** Register multiple model IDs in `opencode.json`, all pointing at
+`http://localhost:8080/v1`:
 
 ```json
 {
@@ -427,17 +413,21 @@ To switch models without restarting, register multiple model IDs in `opencode.js
 }
 ```
 
-The server will unload/load automatically when opencode switches models. Switch cost: ~30–60s reload time (same as server restart). Advantage: no tmux wrangling, KV cache for the previous model survives in LRU for fast switchback.
+Switch cost is ~30–60s reload, the same as a server restart. The gain is no tmux wrangling, and
+the previous model's KV cache survives in the LRU for a fast switchback.
 
-> **Not yet implemented in this workspace.** `opencode-init` currently writes a single model entry. Multi-model registration is planned.
+> **Not yet implemented in this workspace.** `opencode-init` currently writes a single model
+> entry. Multi-model registration is planned.
+
 
 ---
 
 ## opencode declared context limits
 
-`opencode-init` writes a `limit.context` for each model into `opencode.json`. This is what opencode uses to decide when to compact. Without it the model is "unknown" and compaction never auto-triggers.
-
-The values are set **lower than native** so that compaction fires before the session grows unmanageable. All values live in `profiles/<key>.toml` as `MLX_OPENCODE_CONTEXT`.
+`opencode-init` writes a `limit.context` per model into `opencode.json`. Without it the model is
+"unknown" and compaction never auto-triggers. Values are set **lower than native** so compaction
+fires before the session grows unmanageable, and live in `profiles/<key>.toml` as
+`MLX_OPENCODE_CONTEXT`.
 
 | Profile | Native context | Declared (MLX_OPENCODE_CONTEXT) | Auto-compact threshold | KV/token (8-bit) |
 |---|---|---|---|---|
@@ -487,7 +477,8 @@ Rig B profiles (128 GB, where context is no longer the scarce resource):
 > GPU cap  =  model weights  +  MLX_CACHE_BYTES  +  ~5–6GB activation buffer
 >  26 GB   =     ~6 GB       +       14 GB        +       6 GB   (Qwen3.5-9B)
 > ```
-> The inference forward pass needs 4–6 GB beyond the declared KV cache. `MLX_CACHE_BYTES` does NOT cover this. Leave enough headroom or the server OOMs.
+> The forward pass needs 4–6 GB beyond the declared KV cache. `MLX_CACHE_BYTES` does NOT cover
+> this. Leave headroom or the server OOMs.
 
 ---
 
@@ -518,22 +509,17 @@ mlx_lm.generate --model mlx-community/Qwen3.5-9B-MLX-4bit \
 The single most important finding from the cheap-operations round, and it is about the harness
 rather than any model.
 
-**Three models, three different outcomes through the same opencode setup:**
-
 | Model | `model_type` | Through opencode | Direct API |
 |---|---|---|---|
 | Qwen3.6-35B-A3B | `qwen3_5_moe` | works, 1 to 20 tool calls per task | works |
 | Qwen3-Coder-30B-A3B | `qwen3_moe` | **nothing surfaces** | works |
 | Granite 4.1 8B | `granite` | **nothing surfaces** | works |
 
-For the two that fail, opencode reports zero tool calls and no reply text, while the token counter
-shows the model generated output. Asked "What is 7+5", Qwen3-Coder produced three output tokens
-and opencode displayed nothing at all. This is not a tool-calling failure. Everything the model
-returns is discarded.
-
-**The models are fine.** Both were tested directly against the same running server and both return
-correct tool calls on the first attempt, with proper `finish_reason: tool_calls` and well-formed
-arguments.
+For the two that fail, opencode reports zero tool calls and no reply text while the token counter
+shows the model generated output. Asked "What is 7+5", Qwen3-Coder produced three output tokens and
+opencode displayed nothing. Everything the model returns is discarded, which is not a tool-calling
+failure. Both were tested directly against the same running server and both return correct tool
+calls on the first attempt, with proper `finish_reason: tool_calls` and well-formed arguments.
 
 **Every server-side explanation was tested and eliminated** against Qwen3-Coder:
 
@@ -544,45 +530,39 @@ arguments.
 | Two system messages | correct |
 | Streaming (`stream: true`) | correct, `tool_calls` present in the delta |
 
-The tool-count threshold reported elsewhere for Qwen3-Coder, roughly five tools before it starts
-emitting tool syntax as text, **did not reproduce here**. That was the change ranked first in our
-research review, and it is not our problem.
+The tool-count threshold reported elsewhere for Qwen3-Coder, roughly five tools before it emits
+tool syntax as text, **did not reproduce here**. That was the change ranked first in our research
+review, and it is not our problem. The remaining candidate is a chat template or response-parser
+mismatch on the opencode side, matching the general pattern that tool-calls-as-text problems are
+template mismatches rather than prompt problems. An attempt to capture opencode's exact request
+through a logging proxy did not complete, because opencode would not talk to a non-default local
+port under the sandbox. That capture is the obvious next step.
 
-The remaining candidate is a chat template or response-parser mismatch on the opencode side,
-which matches the general pattern in the literature that tool-calls-as-text problems are template
-mismatches rather than prompt problems. An attempt to capture opencode's exact request through a
-logging proxy did not complete, because opencode would not talk to a non-default local port under
-the sandbox. That capture is the obvious next step.
-
-**What this costs us.** Any benchmark result from this harness partly measures opencode
-compatibility rather than model capability. A model can look unusable here and be perfectly good.
-Granite was written up as "never calls tools" on exactly this evidence, and that entry has been
-corrected. Results for a model that produces zero tool calls should be treated as a harness
-result until the model has been checked directly.
+**What this costs us.** Any result from this harness partly measures opencode compatibility rather
+than model capability, so a model can look unusable here and be perfectly good. Granite was written
+up as "never calls tools" on exactly this evidence, and that entry has been corrected. Treat a
+zero-tool-call result as a harness result until the model has been checked directly.
 
 **It also raises the priority of the Copilot CLI comparison.** nav-pilot must support both clients
-at GA. If a model's usability depends this strongly on which client drives it, then the client is
-part of the recommendation and has to be measured, not assumed.
-
----
+at GA. If a model's usability depends this strongly on which client drives it, the client is part
+of the recommendation and has to be measured, not assumed.
 
 ## Cheap-operations results
 
-The weather-cli benchmark measures building a whole application, which is the hardest task shape
-and the one we would never route to a local model. This one measures the opposite: the short,
-routine operations that consume a Copilot premium request each. Spec in `CHEAP_OPS_SPEC.md`,
-tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
+weather-cli measures building a whole application, the hardest task shape and the one we would
+never route to a local model. This one measures the opposite: short routine operations that each
+consume a Copilot premium request. Spec in `CHEAP_OPS_SPEC.md`, tasks in `bench/tasks.json`, run
+with `mise run bench-cheap-ops`.
 
-Target is `navikt/isoppfolgingstilfelle`, a real Nav Kotlin service. Ktor, Kafka, Postgres,
-5,661 lines of main Kotlin, 151 tests that pass on a clean machine with no Nav-internal
-dependencies. Every task is pinned to a symbol verified to exist in that repository. The runner
-hard-resets the checkout between tasks and verifies results itself, never trusting the model's
-claim.
+Target is `navikt/isoppfolgingstilfelle`, a real Nav Kotlin service. Ktor, Kafka, Postgres, 5,661
+lines of main Kotlin, 151 tests that pass on a clean machine with no Nav-internal dependencies.
+Every task is pinned to a symbol verified to exist in that repository. The runner hard-resets the
+checkout between tasks and verifies results itself, never trusting the model's claim.
 
-### `mlx-community/Qwen3.8-27B-4bit` — slow on routine work
+### `mlx-community/Qwen3.8-27B-4bit`: slow on routine work
 
 Partial run: five of eight tasks completed before the harness timeout. E3 alone took twenty
-minutes, which consumed the budget. The three multi-file tasks were not reached.
+minutes and consumed the budget; the three multi-file tasks were never reached.
 
 | Task | 27B 4-bit | Qwen3.6 MoE | Result |
 |---|---|---|---|
@@ -594,28 +574,24 @@ minutes, which consumed the budget. The three multi-file tasks were not reached.
 | **Median** | **167.4s** | **25.1s** | |
 
 **It works through opencode**: 38 tool calls, both verifiable tasks passed. That matters for
-[the harness bug](#opencode-drops-output-from-some-models), because this is `qwen3_5`, the same
-family as the working MoE, while the two models opencode discards are `qwen3_moe` and `granite`.
-Family looks like the discriminator.
+[the harness bug](#opencode-drops-output-from-some-models): this is `qwen3_5`, the same family as
+the working MoE, while the two models opencode discards are `qwen3_moe` and `granite`. Family
+looks like the discriminator.
 
-**The weather-cli trade does not survive this workload.** Building a whole CLI, this model wrote
-the best code measured, 8.5/10, and its 4.8x slowness bought something. On routine operations it
-is **6.7x slower than the MoE** and got the explain task wrong where the MoE got it partly right
-in a fifteenth of the time. Twenty minutes to add one log line is not a trade, it is a
-disqualification.
+**The weather-cli trade does not survive this workload.** Building a whole CLI it wrote the best
+code measured, 8.5/10, and its 4.8x slowness bought something. On routine operations it is **6.7x
+slower than the MoE** and got the explain task wrong where the MoE got it partly right in a
+fifteenth of the time. Twenty minutes to add one log line is a disqualification.
 
-**E3 is a tool-call loop, not slow generation.** Re-run with thinking disabled, E3 hit the
-2400-second timeout. Its event stream shows 77 steps, every one ending `reason: tool-calls`, and
-from step 14 onward **every step emits exactly 97 output tokens**. The model calls a tool, reads
-the result, and calls it again unchanged, until something kills it. That is why the same task took
-1196s with thinking and never finished without it, and why the MoE completed it in 29.1s.
+**E3 is a tool-call loop, not slow generation.** Re-run with thinking disabled it hit the
+2400-second timeout: 77 steps, every one ending `reason: tool-calls`, and from step 14 onward
+**every step emits exactly 97 output tokens**. It calls a tool, reads the result, and calls it
+again unchanged. The MoE finished the same task in 29.1s. The fix is known and measured elsewhere:
+an instruction never to repeat a failing tool call, plus a harness-side debounce blocking identical
+consecutive calls. Neither is in place. Adding the rule changes `AGENTS.md`, a benchmark input, so
+it requires re-running the Qwen3.6 baseline for comparability.
 
-The fix is known and measured elsewhere: an explicit instruction never to repeat a failing tool
-call, backed by a harness-side debounce that blocks identical consecutive calls so it holds even
-when the model ignores the rule. Neither is in place here. Adding the rule changes `AGENTS.md`,
-which is a benchmark input, so it requires re-running the Qwen3.6 baseline for comparability.
-
-**Thinking costs about 2.3x, architecture about 4.1x.** Measured by re-running with thinking disabled:
+**Thinking costs about 2.3x, architecture about 4.1x**, measured by re-running with thinking off:
 
 | Task | No-think | Thinking | Gain | Qwen3.6 MoE |
 |---|---|---|---|---|
@@ -625,17 +601,13 @@ which is a benchmark input, so it requires re-running the Qwen3.6 baseline for c
 | E1 add KDoc | 66.5s | 167.4s | 2.5x | 21.1s |
 | **Median** | **61.2s** | **138.6s** | **2.3x** | **15.1s** |
 
-Output tokens fell about 3x with thinking off, so it was generating three times the tokens for
-the same work. But the model is still **4.1x slower than the MoE with thinking off on both**,
-which is the dense-versus-sparse decode gap: 4.7 against 22.4 tokens per second. Multiplying the
-two factors gives about 9.4x, matching the 8.8x measured across the full task set.
-
-So thinking was a real cost, and an earlier note here dismissing it as the smaller factor was
-wrong. Architecture is still the larger one. Disabling thinking makes this model meaningfully
-more usable without making it competitive on turnaround.
-
-Note the tokens fell 3x while time fell only 2.3x. The remainder is per-turn overhead that
-thinking does not explain, most likely the ~15.6k-token prefill carried on every request.
+Output tokens fell about 3x with thinking off. The model is still **4.1x slower than the MoE with
+thinking off on both**, which is the dense-versus-sparse decode gap: 4.7 against 22.4 tokens per
+second. The two factors multiply to about 9.4x, matching the 8.8x measured across the full task
+set. An earlier note here dismissed thinking as the smaller factor; that was wrong, though
+architecture is still the larger one. Tokens fell 3x while time fell only 2.3x, and the remainder
+is per-turn overhead thinking does not explain, most likely the ~15.6k-token prefill carried on
+every request.
 
 ### `mlx-community/granite-4.1-8b-4bit` ⚠️ incompatible with opencode, not incapable
 
@@ -650,12 +622,13 @@ thinking does not explain, most likely the ~15.6k-token prefill carried on every
 | M2 add a DTO field | 9.6s | 1 | **0** | 0 | no edit |
 | G2 write a test file | 11.3s | 1 | **0** | 0 | no edit |
 
-**Zero tool calls across every task.** One turn each, no file ever opened, no file ever written.
-This is the same failure class as Qwen2.5-72B in the weather-cli benchmark: the model answers in
-chat instead of using the tools it was given.
-
-On R1 it explained a Kotlin function it had not read, matching only the two most common digits in
-the expected answer while missing both distinctive thresholds. A fast, fluent, fabricated answer.
+**Zero tool calls across every task**, one turn each, no file ever opened or written. Same failure
+class as Qwen2.5-72B in weather-cli: the model answers in chat instead of using its tools. On R1 it
+explained a Kotlin function it had not read, matching only the two most common digits in the
+expected answer and missing both distinctive thresholds. The two slow tasks were not slow
+generation: R2 at 548s and R3 at 2744s bracket a 46-minute window in which the server received no
+requests at all, so the client was stalled, not the model. Granite's real per-task time is around
+10 seconds.
 
 **It exposed a bug in our harness, which is the more useful outcome.** The compile and test checks
 certify that the repository is healthy, not that the model did the work. An untouched checkout
@@ -664,10 +637,6 @@ because that check greps for the old symbol rather than trusting the build. Ever
 requires a non-empty `git status` before its check counts, and files-changed is recorded per task.
 Qwen3.6's results predate the fix but are unaffected: it made 1 to 20 tool calls per task and its
 rename passed the symbol grep.
-
-**The two slow tasks were not slow generation.** R2 at 548s and R3 at 2744s bracket a 46-minute
-window in which the server received no requests at all. The model was not working; the client was
-stalled. Granite's real per-task time is around 10 seconds.
 
 **Correction: this was recorded as "never calls tools" and that was wrong.** Tested directly
 against the same server, with the same model, Granite returns a correct tool call on the first
@@ -678,8 +647,7 @@ finish_reason: tool_calls
 tool_calls: [{"function": {"name": "read_file", "arguments": "{\"path\": \"build.gradle.kts\"}"}}]
 ```
 
-The model is capable. The pairing with opencode is not. Every number in the table above measures
-that pairing, not the model, and none of it should be read as a verdict on Granite.
+The model is capable, the pairing with opencode is not. Every number above measures that pairing.
 
 **Verdict:** ⚠️ untested. At 5.12 GB and Apache 2.0 it remains the most attractive candidate on
 paper, and we still do not know how it performs on real work. Re-run once the opencode
@@ -688,8 +656,8 @@ incompatibility is understood, or measure it through Copilot CLI instead. See
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit-DWQ` ❌ worse than the plain build
 
-Controlled A/B against the plain build: same model, same eleven tasks, same sampling, same 18.9 GB
-resident, fresh server before every task. Quantization method was the only variable.
+Controlled A/B against the plain build: same eleven tasks, same sampling, same 18.9 GB resident,
+fresh server before every task, quantization method the only variable.
 
 | | DWQ | Plain 4-bit |
 |---|---|---|
@@ -698,26 +666,22 @@ resident, fresh server before every task. Quantization method was the only varia
 | **Verified** | **2 of 7** | **5 of 7** |
 | Failures | compile error, 2x no edits, timeout, broken suite | 1x no edits, broken suite |
 
-**The lower median is an artifact of failing faster.** G2 took 18.1s and made no edits where the
-plain build spent 96.8s and passed. Its mean is worse because the failures include a 420-second
-timeout. A model that gives up quickly has a flattering median and produces nothing.
+The lower median is an artifact of failing faster: G2 took 18.1s and made no edits where the plain
+build spent 96.8s and passed. Its mean is worse because the failures include a 420-second timeout.
 
 **The published claim does not reproduce.** Testing elsewhere reports flat 4-bit losing tool-call
-formatting over a long context while 4-bit DWQ stays clean. Here the DWQ build failed five of
-seven verifiable tasks against the plain build's two, on identical hardware and prompts.
+formatting over a long context while DWQ stays clean. Here DWQ failed five of seven verifiable
+tasks against the plain build's two, on identical hardware and prompts. That is the third
+recommendation from our research review to fail against our own measurements, after the five-tool
+threshold for Qwen3-Coder and the framing that thinking hurts across the board. The published
+material on small local models is thin and does not transfer to this stack. Read it for
+hypotheses, not for settings.
 
-That is the third recommendation from our research review to fail against our own measurements,
-after the five-tool threshold for Qwen3-Coder and the framing that thinking hurts across the
-board. The published material on small local models is thin and does not transfer reliably to
-this stack. Worth reading for hypotheses, not for settings.
+### `mlx-community/Qwen3.6-35B-A3B-4bit`: clean baseline
 
-### `mlx-community/Qwen3.6-35B-A3B-4bit` — clean baseline
-
-Eleven tasks, fresh server before each one. This is the first run in this project where every
-task starts from a known server state, so it supersedes the earlier figures. Those runs are kept
-as `.CONFOUNDED.json` because they are evidence for
-[the server degradation bug](#the-server-degrades-over-a-session), not because they are
-comparable.
+Eleven tasks, fresh server before each one, so every task starts from a known server state. This
+supersedes the earlier figures, kept as `.CONFOUNDED.json` because they are evidence for
+[the server degradation bug](https://github.com/navikt/mlx-workspace/issues/11), not because they are comparable.
 
 | Task | | Time | Turns | Tools | Result |
 |---|---|---|---|---|---|
@@ -733,25 +697,21 @@ comparable.
 | G2 | write a test for an untested util | 96.8s | 10 | 18 | suite passes |
 | D2 | thread a field through a row mapper | 220.8s | 19 | 29 | ❌ broke the suite |
 
-**Median 32.4s, mean 52.9s, 5 of 7 verified, zero tasks with no tool calls.**
+**Median 32.4s, mean 52.9s, 5 of 7 verified, zero tasks with no tool calls.** Against the confounded
+run the restart cut the mean from 77.4s to 52.9s and zero-tool tasks from one to none. The median
+barely moved, because the degradation hit the tail rather than the typical case.
 
-**The restart fixed the categorical failures.** Against the confounded run, mean fell from 77.4s
-to 52.9s and zero-tool tasks went from one to none. The median barely moved, because the
-degradation hit the tail rather than the typical case.
+**D2 is genuinely hard for this model.** It no longer times out. It runs 19 turns and 29 tool calls
+over 220.8s and then breaks the test suite. Threading a new field through a database row class, its
+mapper and every construction site is real work this model attempts and gets wrong. That is the
+most realistic task in the set and the clearest limit found so far.
 
-**D2 is genuinely hard for this model.** It no longer times out. It runs 19 turns and 29 tool
-calls over 220.8s and then breaks the test suite. Threading a new field through a database row
-class, its mapper and every construction site is real work this model attempts and gets wrong.
-That is the most realistic task in the set and the clearest limit found so far.
+**M2 flipped**, passing in the confounded run and failing here with two turns and no edits, on a
+task this model has completed before. Single runs cannot separate close calls.
 
-**M2 flipped.** It passed in the confounded run and failed here with two turns and no edits, on a
-task the same model has completed before. Single runs cannot separate close calls, which is worth
-remembering before reading any one-run comparison as a ranking.
-
-
-
-Second run, on the updated harness: eleven tasks including three data-parsing tasks, `AGENTS.md`
-rule 8 forbidding a repeated failing tool call, and a 420-second per-task cap.
+Earlier eleven-task run (confounded by server degradation), on the updated harness with three
+data-parsing tasks, `AGENTS.md` rule 8 forbidding a repeated failing tool call, and a 420-second
+per-task cap:
 
 | Task | | Time | Turns | Tools | Files | Result |
 |---|---|---|---|---|---|---|
@@ -767,21 +727,17 @@ rule 8 forbidding a repeated failing tool call, and a 420-second per-task cap.
 | D3 | write a Kafka DTO deserialization test | 153.5s | 11 | 17 | 1 | suite passes |
 | D2 | thread a field through a row mapper | **420.0s** | — | — | 6 | ❌ **timed out** |
 
-**Median 30.8s, mean 77.4s, 6 of 7 verified.**
+**Median 30.8s, mean 77.4s, 6 of 7 verified.** The data tasks found the first failure: D2 touched
+six files and still ran out of time. D3 passed but was the slowest passing task at 153.5s. Adding
+them moved the median from 25.1s to 30.8s and turned a clean sweep into 6 of 7.
 
-**The data tasks are harder, and they found the first failure.** D2 asks for a new field on a
-database row class threaded through its mapper and every construction site. The model touched
-**six files** and still ran out of time. That is the most realistic task in the set, a schema
-change rippling through a real codebase, and none of the structural tasks reached it. D3 passed
-but was the slowest passing task at 153.5s. Adding data-parsing tasks changed the median from
-25.1s to 30.8s and turned a clean sweep into 6 of 7.
-
-**Run-to-run variance is large.** Against the earlier eight-task run on the same model and tasks:
+**Run-to-run variance is large.** Against the eight-task run below on the same model and tasks:
 R1 20.0s against 11.6s, R3 30.8s against 18.5s, but E1 12.5s against 21.1s and R2 7.6s against
 10.4s. Individual tasks swing up to 1.7x in both directions. Single runs cannot separate models
 within about 1.5x of each other. They can separate 30s from 167s, which is the comparison that
 matters for the alpha decision.
 
+First eight-task run:
 
 | Task | | Time | Turns | Tools | Input tokens | Result |
 |---|---|---|---|---|---|---|
@@ -794,38 +750,32 @@ matters for the alpha decision.
 | M2 | add a field to a DTO and map it | **49.5s** | 13 | 16 | 25,302 | **151-test suite passes** |
 | G2 | write a test file for an untested util | **138.6s** | 16 | 20 | 41,127 | **suite passes** |
 
-**Median 25.1s, mean 38.9s. Five of five objectively verified tasks passed. No truncation.**
-The bar set in advance was a median under 30 seconds with most checks passing, so this clears it.
+**Median 25.1s, mean 38.9s. Five of five objectively verified tasks passed. No truncation.** The bar
+set in advance was a median under 30 seconds with most checks passing. The same model took 6m 45s to
+build a whole CLI; on routine operations most tasks finish in under half a minute, and the two that
+do not are the two that write substantial new code.
 
-**This is a different machine to the weather-cli numbers.** The same model took 6m 45s to build a
-whole CLI. On routine operations against an existing codebase it is a different tool: most tasks
-finish in under half a minute, and the two that do not are the two that write substantial new
-code.
-
-**It changes the economics.** The nav-pilot analysis assumed roughly six minutes of extra waiting
-per task, taken from the build-an-application benchmark, and put break-even near ten tasks a
-month. Against Copilot on this workload the delta is tens of seconds, not minutes. Break-even
-moves out by more than an order of magnitude. `reports/nav-pilot-path.md` still carries the old
-figure and needs revising.
+**It changes the economics.** The nav-pilot analysis assumed roughly six minutes of extra waiting per
+task, taken from the build-an-application benchmark, and put break-even near ten tasks a month.
+Against Copilot on this workload the delta is tens of seconds, so break-even moves out by more than
+an order of magnitude. `reports/nav-pilot-path.md` still carries the old figure and needs revising.
 
 **The overhead floor is 15.6k tokens.** Every turn carries roughly 15,600 input tokens of system
-prompt and tool schemas before the request itself. Measured with the trivial prompt "Create a file
-called probe.txt containing exactly the word: verified", which cost 15,628 input tokens. Task
-input rises with conversation length, from 15.9k on the shortest task to 41.1k on the longest.
-Published work on another harness measured tool schemas at 81% of a comparable payload, so a
-reduced tool set is the obvious lever and is untested here.
+prompt and tool schemas before the request itself, measured with the trivial prompt "Create a file
+called probe.txt containing exactly the word: verified" at 15,628 input tokens. Task input rises
+with conversation length, 15.9k on the shortest task to 41.1k on the longest. Published work on
+another harness measured tool schemas at 81% of a comparable payload, so a reduced tool set is the
+obvious lever and is untested here.
 
-**Verified, not reported.** M2 added a field to a REST DTO, mapped it at the construction site,
-and the existing suite still passed. M1's rename was checked by grepping for the old symbol before
+**Verified, not reported.** M2 added a field to a REST DTO, mapped it at the construction site, and
+the existing suite still passed. M1's rename was checked by grepping for the old symbol before
 compiling, because a rename that misses a call site still compiles if the caller was deleted.
-
----
 
 ## weather-cli challenge results
 
-Every model builds the same Node.js CLI from `WEATHER_CLI_SPEC.md` (live Met.no + Geonorge
-APIs, spec-named test files) in its own `workspaces/<key>/weather-cli/`, driven by the two
-prompts in [Standard benchmark prompts](#standard-benchmark-prompts).
+Every model builds the same Node.js CLI from `WEATHER_CLI_SPEC.md` (live Met.no + Geonorge APIs,
+spec-named test files) in its own `workspaces/<key>/weather-cli/`, driven by the two prompts in
+[Standard benchmark prompts](#standard-benchmark-prompts).
 
 | Model | Rig | Plan | Implement | Total | Tests | Behaviour |
 |---|---|---|---|---|---|---|
@@ -845,16 +795,11 @@ prompts in [Standard benchmark prompts](#standard-benchmark-prompts).
 | Qwen3.8-27B 8-bit (pre-MTP) | B | — | — | ~34 min | 18/18 | Ran unattended; found and fixed 3 errors in the spec by probing the live APIs |
 | Qwen2.5-72B 8-bit | B | — | — | — | — | Never wrote a file, printed code into chat instead of calling tools |
 
-Naming the 403/429 distinction in the spec halved the plan phase: **1m 23s**, against a
-happy-path band of **2m 52s / 2m 40s / 2m 43s** and a 7m 58s worst case when the model had to
-work the ambiguity out itself. Two sentences of precision in the spec bought more than any
-model or backend change measured so far.
-
-Plan-phase time was otherwise repeatable while the model stayed on the happy path, **2m 52s /
-2m 40s / 2m 43s** across three runs, but a run that actually hits the spec's Met.no 403
-User-Agent trap during planning cost **7m 58s**, roughly 3× the others. Plan time therefore
-measures *what the model ran into*, not just how it reasons; compare implement time and test
-count across runs, and treat a long plan phase as a signal to check what it was wrestling with.
+Naming the 403/429 distinction in the spec halved the plan phase: **1m 23s**, against a happy-path
+band of **2m 52s / 2m 40s / 2m 43s** and a 7m 58s worst case when the model had to work the ambiguity
+out itself. Plan time measures *what the model ran into*, not just how it reasons, so compare
+implement time and test count across runs and treat a long plan phase as a signal to check what the
+model was wrestling with.
 
 ¹ Self-reported. Qwen3.8 (16/16) and Gemma-4-31B (16/16) were re-run with `npm test` after the
 fact and confirmed; DeepSeek's workspace was deleted before that check, so its count rests on the
@@ -875,15 +820,12 @@ weakest test in it. Check for swallowed assertions before recording the number.
 The single biggest lever was the prompt, not the model: adding *"Check the external apis do not
 assume the data model"* to the plan prompt moved DeepSeek-class debugging loops into a 3-minute
 research phase and cut Qwen 3.8's total time by ~4×.
-
----
-
 ## Model evaluations: rig B (M5 Max 128 GB)
 
 ### `mlx-community/Qwen3.5-9B-MLX-4bit` ❌ does not complete the benchmark
 
-The 6 GB floor of the ladder. Four attempts under the 36 GB cap, each with the
-previous attempt's failure fixed. It never delivered a plan.
+The 6 GB floor of the ladder. Four attempts under the 36 GB cap, each fixing the previous attempt's
+failure. It never delivered a plan.
 
 | Attempt | Config change | Failure |
 |---|---|---|
@@ -892,37 +834,29 @@ previous attempt's failure fixed. It never delivered a plan.
 | 3 | + cplt sandbox | Diagnosed the Met.no 403 **correctly and immediately**, better than Qwen3.8-27B Q8, which read the same 403 as rate limiting. Then a **9m 51s** turn that never completed |
 | 4 | + `top_p = 0.95`, thinking **disabled** | POSTed multipart form fields (`lat`, `lon`, `User-Agent`, `Content-Type`, an invented `apikey=demo`) to a **GET** endpoint → `405 Not Allowed`. **8m 35s**, no plan |
 
-**The levers worked; they just moved the failure.** Each fix did what it was
-supposed to. `top_k=20` ended the repetition loop and produced a 23.4s plan. The
-sandbox stopped the install flailing. Disabling thinking cut the response to
-"reply with exactly: ok" from **159 output tokens to 2**. Attempt 1 was spending
-roughly 80× the necessary output on a one-word answer, which is what a stall looks
-like before it becomes one. None of it produced a finished plan.
+**The levers worked; they just moved the failure.** `top_k=20` ended the repetition loop and produced
+a 23.4s plan. The sandbox stopped the install flailing. Disabling thinking cut the response to "reply
+with exactly: ok" from **159 output tokens to 2**, so attempt 1 was spending roughly 80× the
+necessary output on a one-word answer. None of it produced a finished plan.
 
-**Attempt 4 is the one that settles it.** Sending headers as form fields to a GET
-endpoint is not a sampling artifact or a context problem. It is a broken model of
-HTTP. And it reused `hans@example.com` after attempt 3 had correctly identified that
-exact placeholder as the cause of a 403. With thinking off, the reasoning that
-reached that conclusion was gone. The levers traded one failure mode for another.
+**Attempt 4 settles it.** Sending headers as form fields to a GET endpoint is a broken model of HTTP,
+not a sampling artifact. And it reused `hans@example.com` after attempt 3 had correctly identified
+that exact placeholder as the cause of a 403: with thinking off, the reasoning that reached that
+conclusion was gone.
 
-**What it was good at.** Two things no larger model did better. It diagnosed the
-403 by *saving the response body and reading it* (`/tmp/metno.json`) rather than
-inferring from a status code, the best debugging method observed in the benchmark.
-And with rule 7 in force and thinking enabled it obeyed cleanly: ~400ms of thought,
-then a tool call, where Qwen3.8-27B 4-bit drafted whole files inside `<think>`.
+**What it was good at.** It diagnosed the 403 by saving the response body and reading it
+(`/tmp/metno.json`) rather than inferring from a status code, the best debugging method observed in
+the benchmark. With rule 7 in force and thinking enabled it obeyed cleanly, ~400ms of thought then a
+tool call, where Qwen3.8-27B 4-bit drafted whole files inside `<think>`.
 
-**Verdict:** ❌ for agentic coding on this harness. This is the oldest model tested
-(Feb 2026) and Qwen3.6 and Qwen3.8 both work, so read this as a verdict on this
-build rather than on 9B-class models. The capability that fails is multi-step tool
-use against real APIs, not code generation. It never got far enough to write much.
-
-**The 6 GB rung is unmeasured.** No conclusion about the floor of the ladder follows
-from this; a working small model has yet to be tested there.
+**Verdict:** ❌ for agentic coding on this harness. This is the oldest model tested (Feb 2026) and
+Qwen3.6 and Qwen3.8 both work, so read it as a verdict on this build rather than on 9B-class models.
+The capability that fails is multi-step tool use against real APIs, not code generation. **The 6 GB
+rung stays unmeasured:** a working small model has yet to be tested there.
 
 ### `mlx-community/Qwen3.6-35B-A3B-4bit` ⚡ fastest run
 
-MoE: 35B total, **~3B active per token**. Measured under the same 36 GB wired cap as the Qwen3.8
-4-bit, same spec, same prompts, same harness.
+Measured under the same 36 GB wired cap as the Qwen3.8 4-bit, same spec, prompts, and harness.
 
 | | |
 |---|---|
@@ -937,54 +871,51 @@ MoE: 35B total, **~3B active per token**. Measured under the same 36 GB wired ca
 | **Code quality** | **6.8/10** |
 
 **Speed comes from cheap turns, not fewer of them.** It took *more* turns than the Qwen3.8 4-bit
-(27 vs 22), backtracking to fix bugs and fill gaps, and still finished in a fifth of the time.
-Two effects compound and should not both be credited to the architecture: ~3B active parameters
-instead of 27B dense, and no reasoning tokens at all. The cache figure isolates the architectural
-half cleanly: **0.30 GB across 4 sequences after warm-up**, against the dense 4-bit's 1.10 GB, and
-against Gemma-4-31B's 865 KB/token.
+(27 vs 22), backtracking to fix bugs and fill gaps, and still finished in a fifth of the time. Two
+effects compound and should not both be credited to the architecture: ~3B active parameters instead
+of 27B dense, and no reasoning tokens at all. The cache figure isolates the architectural half:
+**0.30 GB across 4 sequences after warm-up**, against the dense 4-bit's 1.10 GB and Gemma-4-31B's
+865 KB/token.
 
-**The thinking caveat is load-bearing.** Both Qwen3.8 runs had thinking on; this profile disables
-it because thinking degrades Qwen3-class models on multi-turn tool use, mainly by spending the
-output budget inside the thinking block (arXiv 2606.09662, tested on Qwen3 1.7B-32B). An earlier
-version of this note cited "BFCL 12.4% vs 35.8%" here. Those are the DeepSeek R1 vs V3 numbers
-from the thinking-mode table above, copied across model families by mistake. That
-makes this a fair comparison of *deployed configurations* and an unfair one of *models*. In
-particular it cannot be credited with obeying AGENTS.md rule 7. With no `<think>` block, drafting
-code inside one is not a thing it can do. What the contrast does establish is that the 4-bit's
-rule 7 violation is **fixable by configuration**, which is now a scheduled re-test.
+**The thinking caveat is load-bearing.** Both Qwen3.8 runs had thinking on; this profile disables it
+because thinking degrades Qwen3-class models on multi-turn tool use, mainly by spending the output
+budget inside the thinking block (arXiv 2606.09662, tested on Qwen3 1.7B-32B). An earlier version of
+this note cited "BFCL 12.4% vs 35.8%" here; those are the DeepSeek R1 vs V3 numbers from the
+thinking-mode table above, copied across model families by mistake. So this is a fair comparison of
+*deployed configurations* and an unfair one of *models*. It cannot be credited with obeying AGENTS.md
+rule 7 either: with no `<think>` block, drafting code inside one is not a thing it can do. What the
+contrast does establish is that the 4-bit's rule 7 violation is **fixable by configuration**, now a
+scheduled re-test.
 
 **Faster, but the code is worse.** Six of seven traps avoided: UTC-safe selection, full timeseries
-scan rather than trusting `series[0]`, strict `>` thresholds correct at exactly 75/50/25,
-`new URL` + `searchParams` on every URL (injection-proof, and rare in one-shot output), inclusive
-±90/±180 bounds. It hit the missing-fields trap harder than the dense 4-bit did: no per-field
-checks at all, so a Met.no entry lacking `ultraviolet_index_clear_sky`, which happens at night,
-prints `UV Index: undefined` and exits **0**, and a missing `cloud_area_fraction` fabricates a
-confident "Clear".
-
-**Two defects worth naming:**
+scan rather than trusting `series[0]`, strict `>` thresholds correct at exactly 75/50/25, `new URL`
++ `searchParams` on every URL (injection-proof, and rare in one-shot output), inclusive ±90/±180
+bounds. It hit the missing-fields trap harder than the dense 4-bit did, with no per-field checks at
+all: a Met.no entry lacking `ultraviolet_index_clear_sky`, which happens at night, prints
+`UV Index: undefined` and exits **0**, and a missing `cloud_area_fraction` fabricates a confident
+"Clear". Two more defects:
 
 - `index.js:6` calls `parseArgs` *outside* the `try` that starts at line 14, so validation errors
   escape the catch at 32-34 and surface as a raw Node stack trace. `node index.js 999 10`
-  demonstrates it. A geocode miss, going through the try, prints cleanly. Same program, two
-  different error experiences depending on which side of line 14 the throw happens.
+  demonstrates it; a geocode miss, going through the try, prints cleanly.
 - `package.json` declares `devDependencies` **twice**. Last-wins under `JSON.parse` so npm works,
   but any strict tool or human merge will trip on it.
 
 **It knowingly broke the dependency spec.** `test/geocode.test.js:7-9`: *"spec says only axios.
 However, tests need mocking. We'll add nock as dev dependency."* Deliberate and disclosed, unlike
-Gemma's silent jest. Still a deviation, though, and the other models covered the same ground with
-plain injection.
+Gemma's silent jest, but still a deviation, and the other models covered the same ground with plain
+injection.
 
 **Verdict:** the throughput result of the benchmark and the strongest argument yet that active
-parameter count, not total size, is what matters on bandwidth-bound hardware. But it ships two
+parameter count, not total size, is what matters on bandwidth-bound hardware. It ships two
 silent-wrong-answer paths and a test that cannot fail, so it is fast, not finished. Re-test with
 thinking enabled before concluding anything about the model rather than the config.
 
 ### `mlx-community/Qwen3.8-27B-4bit`: the 48 GB target candidate
 
 First model measured under the **36 GB wired cap** that simulates a 48 GB Pro machine
-(`mise run vram-set 36`). The spec, prompts, AGENTS.md, and harness are identical to the
-Q8 run above it in the results table, so the two differ only in quantization.
+(`mise run vram-set 36`). Spec, prompts, AGENTS.md, and harness are identical to the Q8 run, so the
+two differ only in quantization.
 
 | | |
 |---|---|
@@ -998,13 +929,12 @@ Q8 run above it in the results table, so the two differ only in quantization.
 | **Code quality** | **8.5/10** |
 
 **Capacity: comfortable. Speed: not.** RSS never moved off 14.5 GB and never approached the 36 GB
-ceiling. Memory was never the binding constraint. The problem is the clock: **3.2× the Q8's
-10m 10s on identical work**. Halving the weights did not halve the time because the Q8 run had MTP
-speculative decoding and this build has none. On this rig the drafter is worth more than the
-bandwidth saved by the smaller weights.
+ceiling. The problem is the clock, **3.2× the Q8's 10m 10s on identical work**. Halving the weights
+did not halve the time because the Q8 run had MTP speculative decoding and this build has none. On
+this rig the drafter is worth more than the bandwidth saved by the smaller weights.
 
-**Quantization degraded instruction-following, not output quality.** Two process failures the Q8
-did not exhibit under the same rules:
+**Quantization degraded instruction-following, not output quality.** Two process failures the Q8 did
+not exhibit under the same rules:
 
 - It **ignored AGENTS.md rule 7** and drafted entire file contents inside `<think>`, then rewrote
   them through tool calls. The workspace copy of AGENTS.md was verified byte-identical to the root.
@@ -1012,44 +942,33 @@ did not exhibit under the same rules:
 - It stalled ~4 minutes on the User-Agent question, from the *corrected* spec that gives a working
   example. The Q8 read the same line and moved on.
 
-Both burn output tokens without improving the artifact. This is the cost of 4-bit here. It shows
-up as wasted process, not as worse code.
+Both burn output tokens without improving the artifact. This is the cost of 4-bit here: wasted
+process, not worse code.
 
-**The code is good.** Reviewed against the [Code review rubric](#code-review-rubric): no severe
-bugs, and it avoided every trap on the checklist: UTC-safe closest-entry selection with no
-sorted-input assumption, cloud thresholds matching the spec's strict `>` exactly at 75/76, correct
-GeoJSON `[lon, lat]` swap with `representasjonspunkt` preferred, `encodeURIComponent` on place
-names. Three minor risks, all one family: `?? {}` and `?? 0` on missing Met.no fields print
-`undefined°C` or fabricate "Clear" with exit 0, where the empty-timeseries path correctly throws.
+**The code is good.** Reviewed against the [Code review rubric](#code-review-rubric): no severe bugs
+and every trap on the checklist avoided. UTC-safe closest-entry selection with no sorted-input
+assumption, cloud thresholds matching the spec's strict `>` exactly at 75/76, correct GeoJSON
+`[lon, lat]` swap with `representasjonspunkt` preferred, `encodeURIComponent` on place names. Three
+minor risks, all one family: `?? {}` and `?? 0` on missing Met.no fields print `undefined°C` or
+fabricate "Clear" with exit 0, where the empty-timeseries path correctly throws.
 
-**Honest self-report.** The first model whose claims survived a hand check unchanged, including
-both disclosed deviations: `Oslo` resolving to "Oslo fylke" (faithful application of the
-first-hit rule) and the spec's `temperature`/`humidity` field names not existing in Met.no v2
-(correctly mapped to `air_temperature`/`relative_humidity`).
+**Honest self-report.** The first model whose claims survived a hand check unchanged, including both
+disclosed deviations: `Oslo` resolving to "Oslo fylke" (faithful application of the first-hit rule)
+and the spec's `temperature`/`humidity` field names not existing in Met.no v2 (correctly mapped to
+`air_temperature`/`relative_humidity`).
 
 **Verdict:** thorough but slow. It fits the target machine with room to spare and writes the best
-code measured so far, but takes half an hour to do what the Q8 does in ten minutes. Recommend it
-for the 48 GB target **only** where the Q8 will not fit. Re-test the moment a 4-bit build
-with a loadable drafter appears, because that is the entire gap.
+code measured so far, but takes half an hour to do what the Q8 does in ten minutes. Recommend it for
+the 48 GB target **only** where the Q8 will not fit. Re-test the moment a 4-bit build with a loadable
+drafter appears, because that is the entire gap.
 
 ### `mlx-community/Qwen2.5-72B-Instruct-8bit` ❌ broken
 
-| | |
-|---|---|
-| **Architecture** | Dense 72B |
-| **VRAM footprint** | ~72 GB (`gpu_wired_limit_gb = 115`) |
-| **Backend** | mlx-lm |
-| **Declared context** | 128k |
-
-**Result: fails tool calling.** It answers well in chat, but in `opencode` and `aider` it
-prints markdown code blocks instead of emitting tool calls, so nothing is ever written to disk.
-Strict-JSON prompting ("use strict valid JSON with double quotes") did not fix it. Marked
-`status = "broken"` in `profiles/qwen2.5-72b-8bit.toml`.
-
-**Verdict:** unusable for autonomous coding. 72 GB spent for a chat model.
-
----
-
+Dense 72B, ~72 GB footprint (`gpu_wired_limit_gb = 115`), mlx-lm, 128k declared context. It answers
+well in chat, but in `opencode` and `aider` it prints markdown code blocks instead of emitting tool
+calls, so nothing is ever written to disk. Strict-JSON prompting ("use strict valid JSON with
+double quotes") did not fix it. Marked `status = "broken"` in `profiles/qwen2.5-72b-8bit.toml`.
+72 GB spent for a chat model.
 ### `mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8` ✅ recommended
 
 | | |
@@ -1060,72 +979,54 @@ Strict-JSON prompting ("use strict valid JSON with double quotes") did not fix i
 | **Declared context** | 131,072 (`MLX_OPENCODE_CONTEXT`) |
 | **Chat template** | `qwen_template.jinja` (bound explicitly, see below) |
 
-**Performance:** 11.3–14.3 t/s without MTP, 18–38 t/s with it. Typical tool-call turns land
-25–33 t/s at 20–35k context. Leaves ~100 GB of RAM free; zero swap.
+11.3–14.3 t/s without MTP, 18–38 t/s with it; typical tool-call turns land 25–33 t/s at 20–35k
+context. Leaves ~100 GB of RAM free, zero swap. Fast, autonomous tool use, sequential `bash` + `edit`
+calls without babysitting, responses in ~8s at small context. It is the only model tested that
+reliably follows an instruction to research external APIs *before* writing code, which produced the
+7m 33s weather-cli run. Throughput drops steadily with context (34.8 t/s at 18k prompt, 20.6 t/s at
+34k, 18.0 t/s at 34.9k) while MTP acceptance holds at mostly 80–95%, so that is backbone prefill
+cost, not drafter decay.
 
-**Agentic behaviour:** Fast, autonomous tool use: sequential `bash` + `edit` calls without
-babysitting, responses in ~8s at small context. It is the only model tested that reliably
-follows an instruction to research external APIs *before* writing code, which is what produced
-the 7m 33s weather-cli run.
-
-**Bug fixed: missing chat template.** Out of the box the HF tokenizer had no `chat_template`,
-which produced 4-minute prefills and a 44 GB KV cache spike on trivial prompts. Fixed by binding
-the Qwen Jinja template via `MLX_CHAT_TEMPLATE`.
-
-**Bug fixed: output cap truncated thinking.** `MLX_OPENCODE_OUTPUT` (written into `opencode.json`
-as `limit.output`) is what opencode sends as `max_tokens`; the profile's `MLX_MAX_TOKENS` cannot
-raise it. At the default 4096 the model spent its entire budget inside a `<think>` block reasoning
-about test design, hit `finish_reason=length` after 3m 48s, and returned a truncated message with
-no tool call. opencode then stopped, looking exactly like the abliteration quirk below. Raised to
-`MLX_OPENCODE_OUTPUT = 16384` / `MLX_MAX_TOKENS = 32768`. Any thinking model needs headroom beyond
-its reasoning budget to actually emit the call.
-
-**⚠️ Quirk: abliteration regression.** This abliterated MTPLX build follows instructions worse
-than the base instruct model. It sometimes drafts the entire implementation *inside* a `<think>`
-block and then emits EOS without ever calling a tool. Prompting it to use its tools recovers it;
-rule 6 in `AGENTS.md` ("THINK AND ACT") exists for this.
-
-**⚠️ Quirk: JSON formatting.** Like Qwen 2.5 it occasionally emits single-quoted tool-call JSON.
-Rule 2 in `AGENTS.md` covers it.
+- **Bug fixed: missing chat template.** The HF tokenizer shipped no `chat_template`, which produced
+  4-minute prefills and a 44 GB KV cache spike on trivial prompts. Fixed by binding the Qwen Jinja
+  template via `MLX_CHAT_TEMPLATE`.
+- **Bug fixed: output cap truncated thinking.** `MLX_OPENCODE_OUTPUT` (written into `opencode.json`
+  as `limit.output`) is what opencode sends as `max_tokens`; the profile's `MLX_MAX_TOKENS` cannot
+  raise it. At the default 4096 the model spent its whole budget inside a `<think>` block reasoning
+  about test design, hit `finish_reason=length` after 3m 48s, and returned a truncated message with
+  no tool call, which looked exactly like the abliteration quirk below. Raised to
+  `MLX_OPENCODE_OUTPUT = 16384` / `MLX_MAX_TOKENS = 32768`. Any thinking model needs headroom beyond
+  its reasoning budget to emit the call.
+- **⚠️ Quirk: abliteration regression.** This build follows instructions worse than the base instruct
+  model. It sometimes drafts the entire implementation *inside* a `<think>` block, then emits EOS
+  without calling a tool. Prompting it to use its tools recovers it; `AGENTS.md` rule 6 ("THINK AND
+  ACT") exists for this.
+- **⚠️ Quirk: JSON formatting.** Like Qwen 2.5 it occasionally emits single-quoted tool-call JSON.
+  `AGENTS.md` rule 2 covers it.
 
 **Best run (2026-08-26, 16k output cap, `AGENTS.md` rule 7, corrected spec):**
 
 | Metric | Value | vs previous |
 |---|---|---|
-| Wall clock | 1m 23s plan + 8m 47s implement = **10m 10s** | −28% (was 14m 05s) |
-| Tests | 16/16 passing | 17/17 |
-| Turns | 16: 13 `tool_calls`, 3 `stop`, no truncation | same 16 / 13 / 3 |
-| Generated | 11,996 tokens in 623s → **19.2 tok/s** | −19% tokens, +8% speed |
+| Wall clock | 1m 23s plan + 8m 47s implement = **10m 10s** | −28% (was 2m 43s + 11m 22s = 14m 05s) |
+| Tests | 16/16 passing | 17/17, **self-reported** (workspace deleted before an independent `npm test`) |
+| Turns | 16: 13 `tool_calls`, 3 `stop`, no truncation | same 16 / 13 / 3, zero truncations |
+| Generated | 11,996 tokens in 623s → **19.2 tok/s** | 14,892 tokens in 841s → 17.7 tok/s, 10.8–34.8 per turn |
 | Median turn | **338 tokens** | −28% (was 468) |
-| Largest turn | 3,299 tokens | −18% (was 3,999) |
-| Peak context | 31.7k | 34.9k |
-| MTP | 2.88 tok/cycle, 62–97% acceptance | 2.91, 50–99% |
+| Largest turn | 3,299 tokens | −18% (was 3,999, which the old 4,096 cap would have cut off) |
+| Peak context | 31.7k | 16.4k → 34.9k |
+| MTP | 2.88 tok/cycle, 62–97% acceptance | 2.91 avg (1.75–3.67), 50–99% |
 
-Same 16 turns and same tool-call ratio, but each turn is smaller: the model reached the same
-place having generated 2,900 fewer tokens. It still verified the API shapes before writing,
-which is the behaviour worth keeping, but stopped drafting whole files inside `<think>`.
-
-Two changes landed together here (rule 7 and the spec wording), so the split between them is not
-isolated; the spec fix owns most of the plan-phase gain, rule 7 most of the per-turn shrink.
-
-**Previous complete run (16k output cap, before rule 7, old spec):**
-
-| Metric | Value |
-|---|---|
-| Wall clock | 2m 43s plan + 11m 22s implement = **14m 05s** |
-| Tests | 17/17, **self-reported, not verified** (workspace deleted before an independent `npm test`) |
-| Turns | 16: 13 `tool_calls`, 3 `stop`, zero truncations |
-| Generated | 14,892 tokens in 841s → **17.7 tok/s** average, 10.8–34.8 per turn |
-| Context | 16.4k → 34.9k prompt tokens |
-| Largest turn | 3,999 tokens, which the old 4,096 cap would have cut off |
-| MTP | 2.91 tok/cycle avg (1.75–3.67), acceptance 50–99% |
-
-Files: `src/{parse,geocode,weather,output,index}.js` + 5 spec-named test files.
+Same 16 turns and tool-call ratio, but each turn is smaller: it reached the same place having
+generated 2,900 fewer tokens, still verifying API shapes before writing but no longer drafting whole
+files inside `<think>`. Rule 7 and the spec wording landed together, so the split is not isolated;
+the spec fix owns most of the plan-phase gain, rule 7 most of the per-turn shrink. Both runs produced
+`src/{parse,geocode,weather,output,index}.js` + 5 spec-named test files.
 
 **Not a spec error, a model-invented one.** The run reported that the spec's example User-Agent
-returns 403. It does not: the spec says `weather-cli/1.0 github.com/yourname`, which returns
-**200**. The model substituted `contact@example.com` on its own and then attributed the resulting
-403 to the spec. Verified directly (2026-08-26):
+returns 403. It does not: `weather-cli/1.0 github.com/yourname` returns **200**. The model substituted
+`contact@example.com` on its own, then attributed the resulting 403 to the spec. Verified directly
+(2026-08-26):
 
 | User-Agent | Result |
 |---|---|
@@ -1135,20 +1036,13 @@ returns 403. It does not: the spec says `weather-cli/1.0 github.com/yourname`, w
 | `weather-cli/1.0 (contact@example.com)` | **403**, parentheses are irrelevant |
 
 Met.no blocks the literal placeholder domain `example.com`. The 403 is a 162-byte nginx HTML page
-with no `Retry-After` and no `RateLimit-*` headers; real throttling returns 429. A later run
-misread this 403 as rate limiting and spent minutes on backoff that could never succeed, which is
-what inflated its plan phase to 7m 58s.
+with no `Retry-After` and no `RateLimit-*` headers; real throttling returns 429. A later run misread
+this 403 as rate limiting and spent minutes on backoff that could never succeed, inflating its plan
+phase to 7m 58s. Three failures worth tracking per model: substituting a placeholder into a working
+spec, blaming the spec for it, then diagnosing a hard block as throttling.
 
-**Scored dimension:** substituting a placeholder into a working spec, then blaming the spec, then
-diagnosing a hard block as throttling. Three separate failures, all worth tracking per model.
-
-Throughput drops steadily with context: 34.8 t/s at 18k prompt, 20.6 t/s at 34k, 18.0 t/s at
-34.9k. MTP acceptance holds (mostly 80–95%), so this is backbone prefill cost, not drafter decay.
-
-**Verdict:** the daily driver on rig B. Fast, cheap on memory, strong tool calling, and the only
-model whose planning phase can be steered.
-
----
+**Verdict:** the daily driver on rig B. Fast, cheap on memory, strong tool calling, and the only model
+whose planning phase can be steered.
 
 ### `mlx-community/DeepSeek-V4-Flash-0731-2.4bit-mixed` ✅ recommended
 
@@ -1160,17 +1054,15 @@ model whose planning phase can be steered.
 | **Declared context** | 131,072, `MLX_MAX_TOKENS = 32768` |
 | **Chat template** | `deepseek_template.jinja` |
 
-**Performance:** 25–31 t/s decode, holding 25–26 t/s at 35,230 tokens of context. TTFT on an
-18k-token prompt ~3.3s thanks to oMLX's paged cache. CPU stays around 1.25 cores. The work is
-all on the GPU. MLA keeps the 131k KV cache small enough that context is not the constraint.
+25–31 t/s decode, holding 25–26 t/s at 35,230 tokens of context. TTFT on an 18k-token prompt ~3.3s
+thanks to oMLX's paged cache. CPU stays around 1.25 cores, the work is all on the GPU. MLA keeps the
+131k KV cache small enough that context is not the constraint. Behaviour is "code first, debug later"
+and stubbornly so: even told to probe the APIs first, the earlier run assumed the response shapes,
+wrote the implementation, and used failing tests as its feedback loop, finishing in 11m 58s with
+13/13 tests passing.
 
-**Behaviour:** "code first, debug later", and stubbornly so. Even with an explicit instruction
-to probe the APIs first it assumed the response shapes, wrote the implementation, and used
-failing tests as its feedback loop. Still finished in 11m 58s with 13/13 tests passing.
-
-**Parity rerun (2026-08-26, 16k output cap, rule 7, corrected spec):** **10m 09s** total
-(4m 43s plan + 5m 26s implement), 17/17 tests, down from 11m 58s, and a dead heat with
-Qwen3.8's 10m 10s.
+**Parity rerun (2026-08-26, 16k output cap, rule 7, corrected spec):** **10m 09s** total (4m 43s plan
++ 5m 26s implement), 17/17 tests, down from 11m 58s, and a dead heat with Qwen3.8's 10m 10s.
 
 | Metric | DeepSeek V4 Flash | Qwen3.8 MTPLX |
 |---|---|---|
@@ -1185,49 +1077,36 @@ Qwen3.8's 10m 10s.
 | Peak context | 29.4k | 31.7k |
 | RSS | 79 GB | 28.9 GB |
 
-Two opposite routes to the same wall-clock: DeepSeek runs **twice as many turns at half the size**,
+Two opposite routes to the same wall clock: DeepSeek runs **twice as many turns at half the size**,
 front-loading a written plan and delegating to a sub-agent; Qwen3.8 takes fewer, larger turns and
-plans in-context. Median turn 166 tokens is the lowest measured on either rig. This model acts
-rather than deliberates, which is exactly the profile the BFCL/TAU-Bench numbers predict.
+plans in-context. Median turn 166 tokens is the lowest measured on either rig. This model acts rather
+than deliberates, exactly the profile the BFCL/TAU-Bench numbers predict.
 
-**Behaviour change: the "code first, debug later" trait is promptable after all.** The earlier run
-ignored an explicit instruction to probe the APIs first; under the corrected spec plus `AGENTS.md`
-rule 7 it planned for 4m 43s, wrote `IMPLEMENTATION_PLAN.md` to disk, and dispatched a sub-agent
-(visible in the log as the parent context dropping from 18.6k to 11.0k). Persisting the plan as a
-file is the smarter pattern: it survives compaction and costs one cheap re-read instead of riding
-in every later prompt. Qwen3.8 never delegated across four runs.
-
-**Cost note:** it buys that at 79 GB resident vs 28.9 GB. Same speed, same wall clock, 2.7× the
-memory. On this hardware the 27B is the better default and the 284B is what you reach for when
-the task actually needs it.
-
-**Bugs fixed getting here:** oMLX alias translation (`/` → `--`) in `opencode-init`/`aider-init`;
-`~/.omlx/settings.json` `max_context_window` raised from 32,768 to 131,072; temperature locked to
-0.6 to stop repeating tool calls.
-
-**Correction: the ~20% second-run speedup was not custom kernels.** It was originally recorded as
-such, but the kernels never compiled on this machine (no `xcrun metal`, see the oMLX section). The
-gain came from the context and sampling changes made in the same session: raising
-`MLX_OPENCODE_CONTEXT` from 16k to 131k stopped the compaction loop, and locking temperature to 0.6
-stopped repeated tool calls. Kernel acceleration remains untested.
+- **The "code first" trait is promptable after all.** Under the corrected spec plus rule 7 it planned
+  for 4m 43s, wrote `IMPLEMENTATION_PLAN.md` to disk, and dispatched a sub-agent (visible in the log
+  as the parent context dropping from 18.6k to 11.0k). Persisting the plan as a file survives
+  compaction and costs one cheap re-read instead of riding in every later prompt. Qwen3.8 never
+  delegated across four runs.
+- **Cost:** 79 GB resident vs 28.9 GB. Same speed, same wall clock, 2.7× the memory. On this hardware
+  the 27B is the better default and the 284B is what you reach for when the task needs it.
+- **Bugs fixed getting here:** oMLX alias translation (`/` → `--`) in `opencode-init`/`aider-init`;
+  `~/.omlx/settings.json` `max_context_window` raised from 32,768 to 131,072; temperature locked to
+  0.6 to stop repeating tool calls.
+- **Correction: the ~20% second-run speedup was not custom kernels.** The kernels never compiled on
+  this machine (no `xcrun metal`, see the oMLX section). The gain came from the same session's
+  context and sampling changes: `MLX_OPENCODE_CONTEXT` from 16k to 131k stopped the compaction loop,
+  and temperature 0.6 stopped repeated tool calls. Kernel acceleration remains untested.
 
 **Verdict:** the capability ceiling on this machine, and it fits with ~38 GB to spare. Slower in
 wall-clock terms than Qwen 3.8 on agentic tasks purely because of how it approaches problems.
 
----
-
 ### `mlx-community/gemma-4-31b-it-8bit` ⚠️ slow but correct
 
-| | |
-|---|---|
-| **Architecture** | Dense 31B, hybrid sliding-window attention, MoE block |
-| **VRAM footprint** | ~31 GB weights, 30.9 GB RSS |
-| **Backend** | **mlx-lm**, `model_type: gemma4` (only `gemma4_unified` needs mlx-vlm) |
-| **Declared context** | 131,072 |
-
-**Result: correct, and slow.** 20m 23s total (4m 2s plan + 16m 21s implement), 16/16 tests
-passing, verified independently with `npm test`, not taken on the model's word. Roughly **2× the wall
-clock** of Qwen3.8 (10m 10s) and DeepSeek (10m 09s) for the same task and the same test outcome.
+Dense 31B with hybrid sliding-window attention and an MoE block, ~31 GB weights / 30.9 GB RSS, served
+by **mlx-lm** (`model_type: gemma4`, only `gemma4_unified` needs mlx-vlm), 131,072 declared context.
+20m 23s total (4m 2s plan + 16m 21s implement), 16/16 tests passing, verified independently with
+`npm test` rather than taken on the model's word. Roughly **2× the wall clock** of Qwen3.8 (10m 10s)
+and DeepSeek (10m 09s) for the same task and outcome.
 
 | Metric | Gemma-4-31B | Qwen3.8 MTPLX | DeepSeek V4 |
 |---|---|---|---|
@@ -1237,56 +1116,43 @@ clock** of Qwen3.8 (10m 10s) and DeepSeek (10m 09s) for the same task and the sa
 | Worst turn | 121s | 88s | — |
 | Prefill | ~328 t/s | — | — |
 
-The turn count matches DeepSeek's 30 almost exactly; every turn simply costs ~4× as long. There is
-no drafter for Gemma. See [Scheduled re-tests](#scheduled-re-tests), where pairing it with
+The turn count matches DeepSeek's 30 almost exactly; every turn simply costs ~4× as long. There is no
+drafter for Gemma. See [Scheduled re-tests](#scheduled-re-tests), where pairing it with
 `MLX_DRAFT_MODEL` is the highest-value experiment outstanding.
 
-**⚠️ KV cache is expensive.** Measured 1.65 GB for 1,907 tokens ≈ **865 KB/token**, against 64 KB
-for Qwen3.5-9B and 20 KB for Qwen3.6-35B-A3B. At 30k context that is ~26 GB of cache on top of
-31 GB of weights. It fits rig B's 96 GB ceiling with room; it **cannot fit the 48 GB Pro target**,
-and quantizing the weights does not help because the cache does not shrink with them. This build
-of mlx-lm has no `--kv-bits`, so there is no lever for it today.
+**⚠️ KV cache is expensive.** Measured 1.65 GB for 1,907 tokens ≈ **865 KB/token**, against 64 KB for
+Qwen3.5-9B and 20 KB for Qwen3.6-35B-A3B. At 30k context that is ~26 GB of cache on top of 31 GB of
+weights. It fits rig B's 96 GB ceiling with room; it **cannot fit the 48 GB Pro target**, and
+quantizing the weights does not help because the cache does not shrink with them. This build of
+mlx-lm has no `--kv-bits`, so there is no lever for it today.
 
-**Behavioural notes:** it kept an explicit todo list and worked through it. DeepSeek did the same,
-so this is a two-of-four trait, not a Gemma distinctive. It also added **jest** as a dependency rather than using the built-in `node:test` the
-other models chose, heavier, and the spec does not ask for it. Its coordinate output reads
-`Weather in 59.91, 10.75` (comma inserted) where other models emit the input verbatim; the spec
-does not pin the form, so this is a divergence rather than a failure.
+**Behaviour:** it kept an explicit todo list and worked through it, as DeepSeek did, so that is a
+two-of-four trait rather than a Gemma distinctive. It added **jest** rather than the built-in
+`node:test` the other models chose, heavier and not asked for by the spec. Its coordinate output
+reads `Weather in 59.91, 10.75` (comma inserted) where other models emit the input verbatim; the spec
+does not pin the form, so that is a divergence rather than a failure.
 
-**Verdict:** correct and well-organised, but priced out on this hardware. Twice the time for the
-same result, and a KV footprint that rules out the target machine. Re-test with a draft model
-before drawing a final conclusion.
-
----
+**Verdict:** correct and well-organised, but priced out on this hardware. Twice the time for the same
+result, and a KV footprint that rules out the target machine. Re-test with a draft model before
+drawing a final conclusion.
 
 ## Model evaluations: rig A (M1 Max 32 GB)
 
-
 ### `mlx-community/Qwen3.5-9B-MLX-4bit` ⭐ recommended
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 9B |
-| **VRAM footprint** | ~6 GB |
-| **Native context** | 262k tokens (`max_position_embeddings: 262144`) |
-| **Practical context (32GB Mac)** | ~128k tokens (KV cache budget) |
-| **Context headroom (32GB)** | ~19 GB |
+Dense 9B, ~6 GB VRAM, 262k native context (`max_position_embeddings: 262144`), practically ~128k on a
+32 GB Mac with ~19 GB headroom. MLA gives a 64 KB/token KV cache. Fastest tokens/sec of the models
+tested here, strong tool calling with the updated Qwen3.5 parsers, solid code generation.
 
-**Traits:**
-- Fast inference, best tokens/sec of tested models
-- Strong tool calling with updated parsers in Qwen3.5
-- Solid code generation for common languages
-- MLA (Multi-head Latent Attention) = 64KB/token KV cache, very efficient
-
-**Known issue: generation speed degrades at large context.**
-Token generation slows beyond ~80k tokens. At ~96k tokens, a single token was observed taking **3 min 28 s** on a 32GB Mac. This caused opencode to silently stop: the SSE chunk timeout fired mid-generation, the connection dropped, the model returned an empty response, and opencode exited the loop with no error message.
+**Known issue: generation speed degrades at large context.** Beyond ~80k tokens generation slows; at
+~96k tokens a single token was observed taking **3 min 28 s**. That made opencode stop silently: the
+SSE chunk timeout fired mid-generation, the connection dropped, the model returned an empty response,
+and opencode exited the loop with no error message.
 
 - `MLX_OPENCODE_CHUNK_TIMEOUT` is set to `600000` (10 min) to cover this worst case
-- Practical comfortable operating range is **~50–70k tokens**; sessions approaching 100k will feel slow
-- Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
-
-**Verdict:** Recommended daily driver. Best balance of speed, RAM, and reliability in head-to-head evaluation (Jun 2026): no tool call loops, no OOM, clean code output. Qwen3.6-35B-A3B is a strong candidate to supersede it if evaluation continues well.
+- Comfortable operating range is **~50–70k tokens**; sessions approaching 100k will feel slow
+- Diagnose silent stops: check `~/.local/share/opencode/log/opencode.log` for `"exiting loop"` and
+  query `~/.local/share/opencode/opencode.db` for messages with `parts: 0`
 
 **Measured benchmarks (M1 Max 32GB, vram-set 26, 2026-06-18):**
 
@@ -1298,36 +1164,21 @@ Token generation slows beyond ~80k tokens. At ~96k tokens, a single token was ob
 | Prefill degradation | 258→181 t/s | 4k tokens → 44k tokens in same run |
 | Decode, extreme context | ~0.005 t/s (208 s/tok) | ~96k tokens, severe degrade, near unusable |
 
-**Missing benchmarks to measure** (none collected yet):
-- Decode t/s at 8k / 32k / 64k context (comfortable range)
-- Time to first token (TTFT) for typical opencode requests
-- Tool call JSON accuracy rate (% valid first attempt)
-- Max stable context before OOM (estimated ~100k based on KV measurements)
+**Still unmeasured:** decode t/s at 8k / 32k / 64k context, TTFT for typical opencode requests, tool
+call JSON accuracy rate, and max stable context before OOM (estimated ~100k from the KV measurements).
 
----
+**Verdict:** recommended daily driver on this rig. Best balance of speed, RAM, and reliability in
+head-to-head evaluation (Jun 2026): no tool call loops, no OOM, clean code output. Qwen3.6-35B-A3B is
+a strong candidate to supersede it.
 
 ### `mlx-community/gemma-4-12B-it-4bit` ⚠️ too slow
 
-| | |
-|---|---|
-| **Architecture** | Dense, encoder-free |
-| **Active parameters** | 12B |
-| **VRAM footprint** | ~7 GB |
-| **Native context** | 256k tokens |
-| **Practical context (32GB Mac)** | ~64k tokens declared (15GB KV budget; 128k = ~8GB KV/session) |
-| **Context headroom (32GB)** | ~18 GB |
-| **Multimodal** | Text, images, audio, video (35M vision embedder + direct audio projection, no separate heavy encoders) |
-
-**Traits:**
-- Google Gemma 4 (Jun 2026), Apache 2.0
-- Encoder-free multimodal: vision/audio fed directly into LLM backbone, lower latency than encoder-based models
-- Reported strong function-calling / JSON schema adherence
-- **Requires `mlx-vlm` server** (`model_type: gemma4_unified`), handled automatically by `mise run server`
-- **Hybrid attention: `sliding_window=1024`.** Most layers use local attention (1024-token window), only some layers use full global attention. Effectively limits attended context per layer despite 256k native ctx. Also means KV per token is high (~360 KB/token f16 / 180 KB 8-bit). At 64k tokens that's ~11 GB KV alone.
-
-**⚠️ mlx-vlm caching, measured impact:**
-
-Every tool call re-prefills the full conversation from scratch. What this looks like in practice (measured 2026-06-18, weather-cli opencode task):
+Dense 12B, encoder-free multimodal (text, images, audio, video), ~7 GB VRAM, 256k native context
+declared down to ~64k, ~18 GB headroom. Apache 2.0, Jun 2026. Requires **mlx-vlm**
+(`model_type: gemma4_unified`), which `mise run server` handles. Hybrid attention with
+`sliding_window=1024` makes KV expensive: ~360 KB/token f16, 180 KB at 8-bit, so ~11 GB of cache at
+64k. mlx-vlm re-prefills the whole conversation every tool call, measured 2026-06-18 on the
+weather-cli opencode task:
 
 | Turn | Input tokens | Output tokens | Duration |
 |---|---|---|---|
@@ -1343,241 +1194,122 @@ Every tool call re-prefills the full conversation from scratch. What this looks 
 | 10 | 19,125 | 162 | 165s |
 | **Avg** | | **141 tokens out** | **~136s (2m16s)** |
 
-**Result: 10 turns × 2m16s = 24 minutes → 0 files implemented** (only empty stubs created). Session aborted.
+**10 turns × 2m16s = 24 minutes → 0 files implemented** (only empty stubs). Session aborted. At
+similar context qwen3.5-9b takes ~5–10 seconds per turn.
 
-Compare to qwen3.5-9b at similar context: **~5–10 seconds/turn** (persistent KV cache, only new tokens prefilled).
-
-**Verdict:** ⚠️ Inconclusive / impractical for agentic coding as of Jun 2026. The mlx-vlm per-request cache-clear makes multi-turn agentic sessions prohibitively slow on this hardware. May be usable for short single-turn queries. Re-evaluate if mlx-vlm adds persistent KV caching in a future version.
-
----
+**Verdict:** ⚠️ inconclusive and impractical for agentic coding as of Jun 2026. The mlx-vlm
+per-request cache clear makes multi-turn sessions prohibitively slow on this hardware. May be usable
+for short single-turn queries. Re-evaluate if mlx-vlm adds persistent KV caching.
 
 ### `mlx-community/Ministral-3-14B-Instruct-2512-4bit` ❌ broken
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 14B (13.5B language + 0.4B vision encoder) |
-| **VRAM footprint** | ~8.5 GB |
-| **Native context** | 256k tokens |
-| **Practical context (32GB Mac)** | ~64k tokens declared (14GB KV budget; 14B models ~160KB/token KV overhead) |
-| **Context headroom (32GB)** | ~16 GB |
-| **Multimodal** | Text + images + PDFs (410M ViT encoder) |
+Dense 14B (13.5B language + 0.4B vision encoder), ~8.5 GB VRAM, 256k native context declared down to
+~64k, ~16 GB headroom. Mistral AI, Dec 2025, Apache 2.0, HF
+`mistralai/Ministral-3-14B-Instruct-2512`. KV behaviour under mlx-lm is excellent: cold prefill
+~150 t/s, subsequent turns only 15–22 tokens, 2.83 GB cache after turn 1. It failed after 2 turns.
 
-**Traits:**
-- Mistral AI Ministral 3 14B (Dec 2025, Apache 2.0); HF: `mistralai/Ministral-3-14B-Instruct-2512`
-- 256k native context with multimodal capability (vision via separate ViT encoder)
-- Reported highly decisive agent, prefers to read logs and edit multiple files directly
-- Dense architecture despite the "Ministral" name (Mistral's edge-optimized line)
+**Fatal issue 1: Mistral role alternation bug.** The model's `chat_template.jinja` raises an
+exception when roles do not follow strict `user→assistant→user→assistant` alternation, because the
+template's parity counter does not reset after tool-call rounds. Any `user` message following a tool
+round fires it, and mlx-lm returns HTTP 404 for any exception during generation. Patched in
+`chat_templates/ministral-3-14b-patched.jinja`, which removes the one-line `raise_exception`;
+`ns.index` is provably unused after the check block, so this is safe. `--use-default-chat-template`
+is a no-op here, it only activates when no template exists.
 
-**KV cache is excellent** (mlx-lm): cold prefill ~150 t/s; subsequent turns only 15–22 tokens (near-instant, 2.83 GB cache after turn 1).
+**Fatal issue 2: hallucinated output, even with the patch.** After patching, the model generates fake
+YAML listing invented chat template file paths instead of responding. Likely cause: the template's
+default system message contains a literal `{today}` string rather than a Jinja2 `{{ today }}`
+expression, which renders unexpanded and pushes the model into meta-level generation. Interaction
+with AGENTS.md may compound it.
 
-**Fatal issue 1: Mistral role alternation bug.**
-The model's `chat_template.jinja` raises an exception when conversation roles don't follow strict `user→assistant→user→assistant` alternation. Root cause: the template's parity counter doesn't reset after tool-call rounds, so any `user` message following a tool round fires the exception. mlx-lm returns HTTP 404 for any exception during generation.
-
-- Patched in `chat_templates/ministral-3-14b-patched.jinja`, which removes the `raise_exception` call (one line). `ns.index` is provably unused after the check block so this is safe.
-- `--use-default-chat-template` is a no-op for this model (only activates when no template exists).
-
-**Fatal issue 2: hallucinated garbage output (even with patch).**
-After applying the template patch, the model generates fake YAML listing invented chat template file paths instead of responding to prompts. Likely cause: the template's default system message contains a literal `{today}` string (not a Jinja2 `{{ today }}` expression), which renders unexpanded and confuses the model into meta-level generation. Interaction with AGENTS.md may compound this.
-
-**Verdict:** ❌ Broken for opencode agentic use as of Jun 2026. Both issues are fundamental, not config-tunable. The `chat_templates/` infrastructure created here is reusable for other Mistral-family models.
-
-**Measured benchmarks (M1 Max 32GB, 2026-06-18):**
-
-| Metric | Value |
-|---|---|
-| Prefill, cold (17.3k tokens) | ~150 t/s |
-| Prefill, cached (turn 2) | 15 tokens (~0.3s) |
-| KV cache after turn 1 | 2.83 GB |
-| Turns before failure | 2 |
-
----
+**Verdict:** ❌ broken for opencode agentic use as of Jun 2026. Both issues are fundamental, not
+config-tunable. The `chat_templates/` infrastructure built here is reusable for other Mistral-family
+models.
 
 ### `mlx-community/granite-4.1-8b-instruct-4bit` 🔲 untested
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 8B |
-| **VRAM footprint** | ~4.5 GB |
-| **Native context** | 131,072 tokens (128k), confirmed via OpenRouter + IBM docs |
-| **Practical context (32GB Mac)** | ~128k tokens (small model, generous headroom) |
-| **Context headroom (32GB)** | ~20 GB |
+IBM Granite 4.1 (2025), Apache 2.0. Dense 8B, ~4.5 GB VRAM, 131,072 native context (confirmed via
+OpenRouter + IBM docs), ~128k practical, ~20 GB headroom. Enterprise-reinforced tool calling (Go,
+Java, C++, Rust, language-server adherence), claimed to beat much larger MoE models on enterprise
+benchmarks. Smallest footprint tested, so the best VRAM profile for long-context experiments, and a
+priority for evaluation. Rig B tested it through opencode, see
+[the harness bug](#opencode-drops-output-from-some-models).
 
-**Traits:**
-- IBM Granite 4.1 (2025), Apache 2.0
-- Enterprise-reinforced tool calling: Go, Java, C++, Rust, language-server adherence
-- Dense model, claimed to outperform much larger MoE models on enterprise benchmarks
-- Smallest footprint of tested models, leaves the most headroom for KV cache
-
-> **⚠️ HF path note:** The mlx-community model may be `mlx-community/granite-4.1-8b-4bit` (without `-instruct`). Verify before downloading.
-
-**Verdict:** Untested locally. Best VRAM profile for long-context experiments. Priority for evaluation.
-
----
+> **⚠️ HF path note:** The mlx-community model may be `mlx-community/granite-4.1-8b-4bit` (without
+> `-instruct`). Verify before downloading.
 
 ### `mlx-community/GLM-4.6V-Flash-9B-4bit` 🔲 untested
 
-| | |
-|---|---|
-| **Architecture** | MoE hybrid (not pure Dense despite small size) |
-| **Active parameters** | 9B |
-| **VRAM footprint** | ~5.5 GB+ (vision encoder adds overhead) |
-| **Native context** | 128k tokens |
-| **Practical context (32GB Mac)** | ~128k tokens (16GB KV budget; vision overhead may reduce practical limit) |
-| **Context headroom (32GB)** | ~19 GB |
-| **Multimodal** | Text, images (up to 4K), video frames, documents, PDFs, with native vision tool use |
-
-**Traits:**
-- Z.AI GLM-4.6V-Flash, open source
-- Vision-language model with native multimodal tool use (no conversion to text required)
-- Optimized for low-latency local deployment
-- MoE hybrid architecture, active params lower than total suggests; inference characteristics may differ from pure dense models
-- **Requires `mlx-vlm` server** (`model_type: glm4v`), handled automatically by `mise run server`
-
-**⚠️ mlx-vlm caching limitation:**
-`mlx-vlm` clears the KV cache after every completed request. Every opencode tool call re-prefills the full conversation from scratch. See the [Server backends section](#server-backends-mlx-lm-vs-mlx-vlm-vs-omlx) for details.
-
-**Verdict:** Untested locally. Unique proposition: vision-native tool calling for image/document analysis tasks. Best suited for short focused sessions due to cache limitation.
-
----
+Z.AI GLM-4.6V-Flash, open source. MoE hybrid, 9B active, ~5.5 GB VRAM plus vision encoder overhead,
+128k native context, ~19 GB headroom. Multimodal (images up to 4K, video frames, documents, PDFs)
+with native vision tool use, no conversion to text. Requires **mlx-vlm** (`model_type: glm4v`), which
+clears the KV cache after every request, so every opencode tool call re-prefills the conversation
+(see [Server backends](#server-backends-mlx-lm-vs-mlx-vlm-vs-omlx)). Untested locally: the unique
+proposition is vision-native tool calling, and the cache limitation confines it to short sessions.
 
 ### `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` ⚠️ too slow
 
-| | |
-|---|---|
-| **Architecture** | MoE (Mixture of Experts), 128 experts, 8 active per token |
-| **Total / active parameters** | 30.5B total / ~3.3B active per token |
-| **VRAM footprint** | ~16 GB |
-| **Native context** | **256k tokens** (YaRN-extendable to 1M) |
-| **Context headroom (32GB)** | ~9 GB |
-
-**Traits:**
-- MoE activates ~3.3B params per forward pass, but **all 30B weights stay in VRAM**, hence the 16GB footprint
-- Despite low active params, inference was noticeably slow on this hardware
-- Tool calling inconsistent in local testing despite excellent benchmark ratings
-- Pretrained on 7.5T tokens (70% code), excellent code generation quality
-- Tight context headroom, risky with large codebases
-
-**Verdict:** Not practical for daily use on 32GB Mac. Worth re-evaluating on faster hardware or future mlx-lm releases.
-
----
+MoE, 128 experts with 8 active, 30.5B total / ~3.3B active per token, ~16 GB VRAM (all 30B weights
+stay resident), 256k native context (YaRN-extendable to 1M), ~9 GB headroom. Pretrained on 7.5T
+tokens, 70% code. Despite the low active count, inference was noticeably slow on rig A and tool
+calling was inconsistent, despite strong published benchmarks. Context headroom is tight for large
+codebases. Not practical on a 32 GB Mac; worth re-evaluating on faster hardware or newer mlx-lm.
+On rig B it is blocked by [the opencode output bug](#opencode-drops-output-from-some-models), not by
+speed.
 
 ### `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit` ⬛ superseded
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 14B |
-| **VRAM footprint** | ~9 GB |
-| **Native context** | 32k tokens |
-| **Context headroom (32GB)** | ~16 GB |
-
-**Traits:**
-- Tool calling produced frequent malformed JSON, not viable for aider/opencode
-- Superseded by Qwen3.5-9B which is smaller, faster, and more reliable
-
-**Verdict:** Skip. Qwen3.5-9B is strictly better in every dimension.
-
----
-
+Dense 14B, ~9 GB VRAM, 32k native context, ~16 GB headroom. Tool calling produced frequent
+malformed JSON, not viable for aider or opencode. Qwen3.5-9B is smaller, faster, and more reliable
+in every dimension. Skip.
 ### `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit` ❌ OOM, inconclusive
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 32B |
-| **VRAM footprint** | ~19 GB |
-| **Native context** | 32k tokens |
-| **Context headroom (32GB)** | ~6 GB |
-
-**Traits:**
-- Crashed with `kIOGPUCommandBufferCallbackErrorOutOfMemory`, insufficient headroom on 32GB Mac
-- Critical: only ~3GB left for activation buffer after model + 4GB KV cache
-- Results inconclusive, could not evaluate quality or tool calling
-
-**Verdict:** Not viable on 32GB Mac. May work on 64GB. Part of the Qwen2.5 generation, not a priority to retry.
-
----
-
+Dense 32B, ~19 GB VRAM, 32k native context, ~6 GB headroom. Crashed with
+`kIOGPUCommandBufferCallbackErrorOutOfMemory`: after model + 4 GB KV cache only ~3 GB was left for
+the activation buffer. Quality and tool calling were never evaluated, so the result is
+inconclusive. May work on 64 GB. Qwen2.5 generation, not a priority to retry.
 ### `mlx-community/Qwen2.5-Coder-7B-Instruct-4bit` ⬛ skipped
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 7B |
-| **VRAM footprint** | ~4.5 GB |
-| **Native context** | 32k tokens |
-| **Context headroom (32GB)** | ~20 GB |
-
-**Verdict:** Not tested. Known tool calling issues in Qwen2.5-7B. Focus has shifted to Qwen3.x and newer architectures.
-
----
-
+Dense 7B, ~4.5 GB VRAM, 32k native context, ~20 GB headroom. Never tested: Qwen2.5-7B has known
+tool calling issues and focus moved to Qwen3.x.
 ### `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` 💥 OOM
 
-| | |
-|---|---|
-| **Architecture** | Dense |
-| **Active parameters** | 27B |
-| **VRAM footprint** | ~14 GB (measured peak ~15.6 GB on M4 Pro 64GB) |
-| **Native context** | 262k tokens (Qwen3.5-27B base) |
-| **Practical context (32GB Mac)** | ~32k tokens (only 6GB KV headroom after model + activation) |
-| **Context headroom (32GB)** | ~11 GB |
+Community fine-tune of Qwen3.5-27B base on Claude 4.6 Opus reasoning traces, Apache 2.0. Dense 27B,
+~14 GB VRAM (measured peak ~15.6 GB on an M4 Pro 64GB), 262k native context but only ~32k practical
+on 32 GB, ~11 GB headroom, ~15.7 t/s on the M4 Pro and slower on the M1 Max.
 
-**Traits:**
-- Community fine-tune: Qwen3.5-27B base distilled on Claude 4.6 Opus reasoning traces
-- Deep chain-of-thought reasoning with internal `<think>` steps; optimised for technical planning and agentic coding
-- Measured: ~15.7 t/s on M4 Pro 64GB, expect slower on 32GB M1 Max
-- Tightest context budget of the tested models: dense 27B leaves only 6GB for KV cache → ~32–40k practical tokens
-- Apache 2.0
+Crashed 3× with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory`, always at ~6144 tokens into
+prefill. It also produced 3 tool call JSONDecodeErrors in the first 2 turns and an **infinite tool
+loop**: it repeatedly called the same wrong path (a `mlx-workscope` typo), detected "path is wrong"
+in `<think>` on each iteration, and re-issued the identical broken call 8+ times. Opus distillation
+preserves error *detection* but not error *correction*. Measured prefill **~68–71 t/s**, against
+~350–386 t/s for Qwen3.6-35B-A3B.
 
-**Verdict:** 💥 **OOM + broken tool loop.** Crashed 3× with Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` (always at ~6144 tokens into prefill). Also exhibited 3× tool call JSONDecodeError in first 2 turns, and an **infinite tool loop**: the model repeatedly called the same wrong path (`mlx-workscope` typo), detected "path is wrong" in `<think>` each iteration, but re-issued the identical broken call 8+ times. Opus distillation preserves error *detection* but not error *correction*. **Measured prefill: ~68–71 t/s** (vs ~350–386 t/s for Qwen3.6-35B-A3B). Not viable on 32 GB M1 Max.
-
-**Root cause:** Dense 27B means every forward pass activates all 27B parameters. During prefill, activation tensors for the full sequence length must coexist with the model weights: 14 GB model + 4.4 GB KV cache + prefill activation spike > 26 GB GPU wired cap. No configuration tuning can fix this. It is an architecture constraint.
-
----
+**Root cause:** dense 27B activates every parameter per forward pass, so during prefill the
+activation tensors for the full sequence must coexist with the weights: 14 GB model + 4.4 GB KV cache
++ prefill spike > 26 GB wired cap. No configuration fixes this, it is an architecture constraint.
+See [Dense vs MoE](#dense-vs-moe).
 
 ### `mlx-community/gemma-4-26b-a4b-it-4bit` 🔲 untested
 
-| | |
-|---|---|
-| **Architecture** | MoE (26B total / ~3.8–4B active per token) |
-| **Active parameters** | ~4B per token |
-| **VRAM footprint** | ~14 GB |
-| **Native context** | 256k tokens |
-| **Practical context (32GB Mac)** | ~64k declared; shared KV cache may extend effective capacity |
-| **Context headroom (32GB)** | ~11 GB |
-| **Multimodal** | Text, images, video |
-
-**Traits:**
-- Google Gemma 4 26B MoE (2026), Apache 2.0
-- **Shared KV Cache:** final attention layers reuse KV from earlier layers, physically less RAM per token than standard models. Context budget stretches further than comparable 14GB dense models
-- **Dual RoPE:** prevents context quality collapse at long range
-- Hybrid local+global attention (always global at final layer)
-- Fast inference despite large total param count, only 4B active per token
-- MMLU Pro: 82.6%, AIME 2026: 88.3%, LiveCodeBench v6: 77.1%, strong benchmarks
-
-**Verdict:** Untested locally. Most technically interesting of the new batch: MoE speed + shared KV cache gives more effective context per GB than any other ~14GB model. High priority for evaluation.
-
----
+Google Gemma 4 26B MoE (2026), Apache 2.0. 26B total / ~3.8–4B active per token, ~14 GB VRAM, 256k
+native context declared to ~64k, ~11 GB headroom, multimodal (text, images, video). Two features make
+it interesting: a **shared KV cache** where the final attention layers reuse KV from earlier layers,
+so it needs physically less RAM per token than comparable models, and **dual RoPE** against context
+quality collapse at long range. Hybrid local+global attention, always global at the final layer.
+Published benchmarks: MMLU Pro 82.6%, AIME 2026 88.3%, LiveCodeBench v6 77.1%. Untested locally, and
+the highest priority of the untested batch: MoE speed plus a shared KV cache gives more effective
+context per GB than any other ~14 GB model.
 
 ### `mlx-community/GLM-4.7-Flash-4bit` ❌ not viable
 
-| | |
-|---|---|
-| **Architecture** | MoE (30B total / ~3–3.6B active per token) |
-| **Active parameters** | ~3B per token |
-| **VRAM footprint** | ~16 GB |
-| **Native context** | 128–200k tokens |
-| **Practical context (32GB Mac)** | 48k (OOM at 64k, prefill spike exceeds 26GB cap) |
-| **Context headroom (32GB)** | ~9 GB (6GB KV cache at 48k) |
-
-**Traits:**
-- Zhipu/Z.AI GLM-4.7-Flash (2026): MoE with 64 routed experts + 1 shared, 4 active per token
-- **Full MHA: 20 KV heads = 20 attention heads (no GQA).** KV ≈ 374 KB/token f16 (187 KB 8-bit). At 48k context that's ~8.5 GB KV alone, which leaves almost nothing for activations and explains why OOM was inevitable
-- Supports thinking mode (`<think>`/`</think>`/`/nothink`), must be disabled for agentic use
-- τ²-Bench: 79.5% agentic score (but with structured scaffolding + greedy decoding, not representative of opencode use)
+Zhipu/Z.AI GLM-4.7-Flash (2026). MoE with 64 routed experts + 1 shared, 4 active per token, 30B
+total / ~3–3.6B active, ~16 GB VRAM, 128–200k native context but 48k practical (OOM at 64k), ~9 GB
+headroom with a 6 GB KV cache at 48k. **Full MHA, 20 KV heads for 20 attention heads, no GQA**:
+KV ≈ 374 KB/token f16 (187 KB at 8-bit), so ~8.5 GB of cache at 48k, which leaves almost nothing
+for activations and made the OOM inevitable. Supports thinking mode, which must be disabled for
+agentic use. Published τ²-Bench agentic score 79.5%, measured with structured scaffolding and
+greedy decoding, not representative of opencode use.
 
 **Evaluation results (2026-06-19, weather-cli task):**
 
@@ -1589,48 +1321,44 @@ After applying the template patch, the model generates fake YAML listing invente
 | Tool call loop | Repeatedly called `ls` same dir without progress | ❌ Unfixable |
 | Generated code with typos | `location3`, `lon3` in 411-line output | ❌ Model quality issue |
 
-**Verdict:** Not viable as daily driver for agentic coding. Multiple infrastructure failures overcome, but fundamental tool call loop and code quality issues cannot be fixed via config. The τ²-Bench score does not translate to reliable opencode use.
-
----
-
+**Verdict:** not viable as a daily driver. The infrastructure failures were all fixable; the tool
+call loop and the code quality are not. The τ²-Bench score does not translate to reliable opencode
+use.
 ### `mlx-community/Qwen3.6-35B-A3B-4bit` ✅ recommended
 
-| | |
-|---|---|
-| **Architecture** | MoE (35B total / ~3B active per token, 256 experts, 8 active, MQA) |
-| **Active parameters** | ~3B per token |
-| **VRAM footprint** | ~21 GB |
-| **Native context** | 262k tokens |
-| **Practical context (32GB Mac)** | 96k declared (measured: 8-bit KV = 18.3 KB/token → 1.7 GB at 96k, 22.7 GB wired) |
-| **Context headroom (32GB)** | ~3.3 GB at 96k |
+Qwen/Alibaba, April 2026. MoE with MQA: 35B total / ~3B active per token, 256 experts with 8 active,
+2 KV heads, 40 layers. ~21 GB VRAM, 262k native context, 96k declared, ~3.3 GB headroom at 96k.
 
-**Traits:**
-- Qwen/Alibaba Qwen3.6-35B-A3B (April 2026). MoE with MQA: 256 experts, 8 active per token, 2 KV heads, 40 layers
-- mlx-lm uses 8-bit KV cache compression: **18.3 KB/token measured** (vs 40 KB/token float16 theoretical)
-- At 96k: KV ≈ 1.7 GB, wired ≈ 22.7 GB (3.3 GB headroom, comfortable)
-- At 128k: KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom, feasible)
-- Prefill: **~386 t/s avg at 26k tokens**, 1.5–1.7× faster than Qwen3.5-9B (245 t/s peak)
-- Generation speed: ~3B active params per forward pass (same as Qwen3.5-9B in practice)
-- TodoWrite, tool calling, and task planning working correctly
-- Same Qwen3 thinking token mechanism; disabled in profile (`enable_thinking=false`)
-- Qwen3.6-27B-4bit was NOT profiled: 0.22 MB/token KV limits to ~32k safely, 4× slower decode
-- cache slots must be ≥5: with 3 slots system(2)+user(1) fills all capacity → no assistant caching
+- mlx-lm uses 8-bit KV cache compression: **18.3 KB/token measured**, against 40 KB/token float16
+  theoretical. At 96k: KV ≈ 1.7 GB, wired ≈ 22.7 GB (3.3 GB headroom, comfortable). At 128k:
+  KV ≈ 2.3 GB, wired ≈ 23.3 GB (2.7 GB headroom, feasible)
+- Prefill **~386 t/s avg at 26k tokens**, 1.5–1.7× faster than Qwen3.5-9B (245 t/s peak). Generation
+  speed matches Qwen3.5-9B in practice, ~3B active params per forward pass
+- TodoWrite, tool calling, and task planning all work. Same Qwen3 thinking mechanism, disabled in the
+  profile (`enable_thinking=false`)
+- Qwen3.6-27B-4bit was NOT profiled: 0.22 MB/token KV limits it to ~32k safely, 4× slower decode
+- Cache slots must be ≥5: with 3 slots, system(2) + user(1) fills capacity and nothing is cached for
+  the assistant
 
-**weather-cli benchmark (2026-06-19):**
-- 35/35 tests passing (5 files: parser, geocode, weather, output, integration)
-- 1,076 lines of code produced (ES module, vitest, nock for HTTP mocking)
-- 8 LLM turns to complete; no tool call loops, no stalls, no OOM
-- Used `fast-xml-parser`, an interesting dependency choice (XML fallback for Met.no?)
-- Session context stayed well within 96k window throughout
+**weather-cli benchmark (2026-06-19):** 35/35 tests passing across 5 files (parser, geocode, weather,
+output, integration), 1,076 lines of code (ES module, vitest, nock for HTTP mocking), 8 LLM turns, no
+tool call loops, stalls, or OOM. It chose `fast-xml-parser`, presumably an XML fallback for Met.no.
+Session context stayed well within the 96k window.
 
-**Verdict:** Recommended. Performs on par with or better than Qwen3.5-9B. Faster prefill (1.5–1.7×), larger context (96k vs practical ~64k for 9B at same memory), equal tool calling reliability. Preferred choice when context depth matters.
-
----
+**Verdict:** recommended. On par with or better than Qwen3.5-9B, with faster prefill (1.5–1.7×) and a
+larger usable context (96k vs ~64k for the 9B at the same memory) at equal tool calling reliability.
+Preferred when context depth matters.
 
 ## Recommendations
 
 > Published summary: [`reports/48gb-question.md`](reports/48gb-question.md),
 > the readable version of this section, with per-claim confidence levels.
+
+**Where the testing ended.** `mlx-community/Qwen3.6-35B-A3B-4bit` is the model for the nav-pilot
+alpha, decided on the cheap-operations data rather than on weather-cli. Full reasoning and the
+rejected alternatives in [`reports/alpha-model-decision.md`](reports/alpha-model-decision.md).
+The section below is the weather-cli view, which answers a different question: which model builds
+an application best. That is not the workload we intend to route local, so it did not decide this.
 
 What the benchmark supports today. Every number comes from rig A or rig B; the 48 GB Pro target
 is reasoned about, not measured, so capacity claims transfer and speed claims do not.
@@ -1751,7 +1479,6 @@ then `mise run server`):
 - [ ] Tool calling stability: completes tool calls without looping or malformed JSON?
 - [ ] OOM check: monitor server logs for Metal OOM errors at larger context lengths
 
-
 ---
 
 ## Standard benchmark prompts
@@ -1777,16 +1504,15 @@ majority of the run repairing that guess. It moves the cost into the plan phase
 
 ## Code review rubric
 
-Wall-clock and a passing test count say nothing about what the model actually wrote.
-A model can pass every test with code that silently prints `undefined°C` on a partial
-API payload. This rubric exists so every submission is judged against the same
-questions, by the same scale, and the resulting grades are comparable.
+Wall-clock and a passing test count say nothing about what the model wrote. A model can pass every
+test with code that silently prints `undefined°C` on a partial API payload. This rubric exists so
+every submission is judged against the same questions, by the same scale.
 
-**Process.** Functional verification comes first and is done by hand, not by the
-model's self-report: run `npm test`, run the live suite, check the output line count,
-check every exit code without a pipe (`$?` after a pipeline is the last command's
-status, not the program's). Only then hand the workspace to a read-only review agent
-along with this rubric. The reviewer never runs the tests. It judges what tests cannot.
+**Process.** Functional verification comes first and is done by hand, not by the model's self-report:
+run `npm test`, run the live suite, check the output line count, check every exit code without a pipe
+(`$?` after a pipeline is the last command's status, not the program's). Only then hand the workspace
+to a read-only review agent along with this rubric. The reviewer never runs the tests. It judges what
+tests cannot.
 
 **Dimensions.** Each scored 1–10, then averaged with these weights:
 
@@ -1798,8 +1524,8 @@ along with this rubric. The reviewer never runs the tests. It judges what tests 
 | Test quality | 20% | Real assertions at a sensible mock boundary, or trivia that cannot fail? Are the spec's exact boundary values pinned? |
 | Idiom and readability | 10% | Naming, dead code, copy-paste; do comments explain *why* or restate the code? |
 
-**Fixed trap checklist.** Every reviewer checks these same items, because they are
-where one-shot code actually fails on this spec. Report each as avoided or hit:
+**Fixed trap checklist.** Every reviewer checks these, because they are where one-shot code actually
+fails on this spec. Report each as avoided or hit:
 
 1. Timezone: Met.no timestamps carry `Z`; is "closest to now" compared in UTC?
 2. Sorted-input assumption: is the timeseries scanned, or is `series[0]` trusted?
@@ -1809,13 +1535,10 @@ where one-shot code actually fails on this spec. Report each as avoided or hit:
 6. Injection: is user input validated before URL interpolation, and are place names encoded?
 7. Float comparison and latitude/longitude range validation at the exact bounds (±90 / ±180)
 
-**Grading discipline.** Judge the submission as a one-shot from a local quantized
-model, not against a production codebase. Separate "real bug" from "stylistic
-preference" explicitly, and state plainly where the code is genuinely good. A review
-that only lists complaints is not usable evidence. If there are no real bugs, say so
-rather than inventing some.
-
-**Dependencies are spec-mandated.** `axios` is required by `WEATHER_CLI_SPEC.md`; its
-presence is compliance and must not be counted against a model. Anything *beyond* the
-spec's dependency list (e.g. jest, where the spec names test files but no framework)
-is a genuine finding.
+**Grading discipline.** Judge the submission as a one-shot from a local quantized model, not against
+a production codebase. Separate "real bug" from "stylistic preference" explicitly, and state plainly
+where the code is genuinely good. A review that only lists complaints is not usable evidence. If
+there are no real bugs, say so rather than inventing some. `axios` is required by
+`WEATHER_CLI_SPEC.md`, so its presence is compliance and must not be counted against a model;
+anything *beyond* the spec's dependency list (e.g. jest, where the spec names test files but no
+framework) is a genuine finding.
