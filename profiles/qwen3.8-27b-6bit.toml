@@ -1,0 +1,27 @@
+[meta]
+name               = "Qwen 3.8 27B 6bit"
+released           = "2026-07"
+status             = "untested"
+spec_source        = "externally verified"
+notes              = "Reported working by another Nav team: 6-bit at 65k context (57k input, 8k output) with medium reasoning, run as background work rather than interactively. Slower per task than the 4-bit, better code. This profile reproduces their configuration so the comparison is against what they actually run, not against our defaults."
+model_vram_gb      = 22
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "lmstudio-community/Qwen3.8-27B-MLX-6bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+# 57k input plus 8k output, the split the other team runs. Lower than the 4-bit
+# profile's 131k on purpose: their point is that the context budget is much smaller
+# than the cloud Copilot models, and instructions have to be trimmed to fit.
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# Thinking left ON, unlike the 4-bit profile. The other team runs medium reasoning
+# and accepts the wall clock because the work runs in the background. Our own
+# measurement puts thinking at about 2.3x on routine operations, so expect that.
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"

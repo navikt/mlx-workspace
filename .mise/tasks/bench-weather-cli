@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+# mise description="Run the weather-cli challenge headless for the active model. Usage: mise run bench-weather-cli"
+"""Drive the weather-cli challenge without a human at the keyboard.
+
+The two prompts are the ones in MODELS.md, verbatim, issued as one opencode
+session so the second turn sees the plan the first produced. Changing their
+wording invalidates comparison with every earlier run.
+
+Verification is `npm test` run here, never the model's claim about it. One
+earlier submission reported "20/20 passing" with eight assertions inside a
+catch block that swallowed them.
+
+Previous submissions live in git. This task clears the workspace, so commit
+anything worth keeping before running it.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+PLAN = ("Read the weather-cli/WEATHER_CLI_SPEC.md and make a short and concrete "
+        "implementation plan make sure you have a good understanding about the "
+        "external services and their data strucure for input / output data. "
+        "Check the external apis do not assume the data model")
+IMPLEMENT = ("Lets start implementing, check your work and ensure tests and the "
+             "final cli works according to the supplied specification")
+
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+if not key:
+    sys.exit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+
+ws = ROOT / "workspaces" / key
+cli = ws / "weather-cli"
+results_path = ROOT / "bench" / f"weather-{key}.json"
+cap = int(os.environ.get("BENCH_WEATHER_TIMEOUT", "5400"))
+
+
+def sh(cmd, cwd=None, timeout=1800):
+    return subprocess.run(cmd, cwd=cwd and str(cwd), capture_output=True,
+                          text=True, timeout=timeout)
+
+
+def restart_server():
+    """Start from a fresh server process.
+
+    The server dies rather than degrades: a stack overflow in MLX's recursive
+    graph walk kills the generation thread, the socket goes with it, and every
+    later request gets connection refused. See issue #11. A weather-cli run is
+    long enough to hit it, so at least start from a known-good process.
+    """
+    subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT), capture_output=True)
+    subprocess.Popen(["mise", "run", "server"], cwd=str(ROOT),
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+    r = sh(["mise", "run", "server-wait"], cwd=ROOT, timeout=1800)
+    if r.returncode != 0:
+        raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
+
+
+def turn(label, args):
+    """One opencode turn. Returns the record and the raw output."""
+    started = time.time()
+    timed_out = False
+    try:
+        r = sh(["mise", "run", "opencode-headless", *args], cwd=ROOT, timeout=cap)
+        out = r.stdout + r.stderr
+    except subprocess.TimeoutExpired as e:
+        timed_out = True
+        out = (e.stdout or b"").decode("utf8", "replace") + (e.stderr or b"").decode("utf8", "replace")
+    elapsed = time.time() - started
+
+    def grab(pat, cast=str, default=None):
+        m = re.search(pat, out)
+        return cast(m.group(1).replace(",", "")) if m else default
+
+    rec = {
+        "phase": label,
+        "seconds": round(elapsed, 1),
+        "turns": grab(r"· (\d+) turns", int, 0),
+        "tool_calls": grab(r"· (\d+) tool calls", int, 0),
+        "tokens_in": grab(r"in ([\d,]+) ·", int, 0),
+        "tokens_out": grab(r"out ([\d,]+) ·", int, 0),
+        "truncated": "TRUNCATED" in out,
+        "timed_out": timed_out,
+    }
+    print(f"   {label}: {rec['seconds']}s · {rec['turns']} turns · "
+          f"{rec['tool_calls']} tools · out {rec['tokens_out']:,}"
+          + ("  ⚠ TRUNCATED" if rec["truncated"] else "")
+          + ("  ⚠ TIMED OUT" if timed_out else ""))
+    return rec
+
+
+def run_tests():
+    """npm test in the submission. Counts come from the runner, not the model."""
+    if not cli.is_dir() or not (cli / "package.json").exists():
+        return {"ran": False, "note": "no package.json, nothing to test"}
+    if not (cli / "node_modules").is_dir():
+        inst = sh(["npm", "install", "--no-audit", "--no-fund"], cwd=cli, timeout=900)
+        if inst.returncode != 0:
+            return {"ran": False, "note": "npm install failed", "tail": inst.stderr[-800:]}
+    try:
+        t = sh(["npm", "test"], cwd=cli, timeout=900)
+    except subprocess.TimeoutExpired:
+        return {"ran": True, "passed": False, "note": "test run timed out"}
+    out = t.stdout + t.stderr
+    # Both node:test and jest are in play across submissions, so read whichever
+    # counter is present rather than assuming a runner.
+    def num(pat):
+        m = re.search(pat, out)
+        return int(m.group(1)) if m else None
+    return {
+        "ran": True,
+        "passed": t.returncode == 0,
+        "exit": t.returncode,
+        "pass_count": num(r"# pass (\d+)") or num(r"Tests:\s+(?:\d+ failed, )?(\d+) passed"),
+        "fail_count": num(r"# fail (\d+)") or num(r"Tests:\s+(\d+) failed"),
+        "tail": out[-1500:],
+    }
+
+
+print(f"→ weather-cli · {key}")
+if os.environ.get("BENCH_KEEP_WORKSPACE") != "1":
+    c = sh(["mise", "run", "workspace-clear", "-y"], cwd=ROOT)
+    print(f"   {c.stdout.strip().splitlines()[-1] if c.stdout.strip() else 'workspace-clear: nothing to do'}")
+restart_server()
+
+record = {"model_key": key, "phases": []}
+record["phases"].append(turn("plan", [PLAN]))
+record["phases"].append(turn("implement", ["--continue", IMPLEMENT]))
+record["total_seconds"] = round(sum(p["seconds"] for p in record["phases"]), 1)
+
+print("   running npm test")
+record["tests"] = run_tests()
+record["files"] = sorted(str(p.relative_to(cli)) for p in cli.rglob("*")
+                         if p.is_file() and "node_modules" not in p.parts) if cli.is_dir() else []
+
+results_path.write_text(json.dumps(record, indent=2))
+t = record["tests"]
+verdict = "✓" if t.get("passed") else "✗"
+print(f"\n{verdict} {record['total_seconds']}s total · {len(record['files'])} files · "
+      f"tests {'pass' if t.get('passed') else 'fail'} "
+      f"({t.get('pass_count')} passed, {t.get('fail_count')} failed)")
+print(f"✓ Results → {results_path.relative_to(ROOT)}")
+print("  Grade the code against the rubric in MODELS.md. The test result is not the grade.")
