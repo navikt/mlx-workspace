@@ -1,0 +1,110 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 63.4,
+    "turns": 3,
+    "tool_calls": 2,
+    "tokens_in": 13621,
+    "tokens_out": 266,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ],
+    "tool_calls_logged": 2,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human"
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 28.5,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 8009,
+    "tokens_out": 47,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "tool_calls_logged": 1,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": true,
+    "note": "2 of 2 expected terms in the answer"
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 39.1,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 8452,
+    "tokens_out": 250,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "tool_calls_logged": 1,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human"
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 49.3,
+    "turns": 4,
+    "tool_calls": 3,
+    "tokens_in": 9789,
+    "tokens_out": 395,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "tool_calls_logged": 3,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 1,
+    "verified": true,
+    "note": "compiles"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 900.1,
+    "turns": null,
+    "tool_calls": null,
+    "tokens_in": null,
+    "tokens_out": null,
+    "truncated": false,
+    "exit": null,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 900s"
+  }
+}

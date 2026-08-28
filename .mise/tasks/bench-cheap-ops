@@ -256,9 +256,14 @@ for task in tasks:
     if rec.get("looped_on"):
         print(f"   ⚠  LOOP: {rec['longest_identical_run']} identical "
               f"{rec['looped_on']} calls in a row")
-    print(f"   {flag} {rec['seconds']}s · {rec['turns']} turns · "
-          f"{rec['tool_calls']} tools · {rec['files_changed']} files · "
-          f"in {rec['tokens_in']:,} · {rec['note']}"
+    # Timed-out tasks carry None for the parsed fields, so nothing here may
+    # assume a number. A format string that did crashed a run at its first
+    # timeout and cost six tasks.
+    def show(v, fmt=""):
+        return "?" if v is None else format(v, fmt)
+    print(f"   {flag} {rec['seconds']}s · {show(rec['turns'])} turns · "
+          f"{show(rec['tool_calls'])} tools · {rec['files_changed']} files · "
+          f"in {show(rec['tokens_in'], ',')} · {rec['note']}"
           + ("  ⚠ TRUNCATED" if rec["truncated"] else ""))
     if "terms_found" in rec:
         print(f"     terms: {len(rec['terms_found'])}/{len(rec['terms_expected'])} "

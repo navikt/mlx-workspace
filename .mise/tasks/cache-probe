@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# mise description="Measure prompt cache reuse for the active model. Usage: mise run cache-probe [turns]"
+"""Does the server reuse the prompt cache between turns?
+
+mlx-lm issue #980 reports that its prefix cache silently falls back to full
+recompute for sliding-window, SSM and hybrid models, naming the whole Qwen3.5
+family, and that repeated requests get slower rather than faster. Our chosen
+model is `qwen3_5_moe`, and an agent re-sends 6 to 15k tokens on every tool
+call, so if that holds here it is most of our wall clock.
+
+This sends turns that share a growing prefix, the shape an agent produces, and
+reports what the server says it reused.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+model = os.environ.get("MLX_MODEL", "").strip()
+if not key or not model:
+    sys.exit("✗ MLX_ACTIVE_PROFILE / MLX_MODEL not set — run: mise run model-use")
+
+port = os.environ.get("MLX_SERVER_PORT", "8080")
+turns = int(sys.argv[1]) if len(sys.argv) > 1 else 4
+# A system prompt in the size range opencode actually sends.
+system = ("You are a coding agent working in a Kotlin repository. " * 400)
+
+messages = [{"role": "system", "content": system}]
+rows = []
+for i in range(turns):
+    messages.append({"role": "user", "content": f"Reply with the single word ok. Turn {i}."})
+    body = json.dumps({"model": model, "messages": messages, "max_tokens": 8, "stream": False})
+    t0 = time.time()
+    r = subprocess.run(["curl", "-s", "-m", "900", f"http://127.0.0.1:{port}/v1/chat/completions",
+                        "-H", "Content-Type: application/json", "-d", body],
+                       capture_output=True, text=True)
+    elapsed = time.time() - t0
+    try:
+        d = json.loads(r.stdout)
+        u = d["usage"]
+    except Exception:
+        sys.exit(f"✗ turn {i} failed: {r.stdout[:200]}")
+    cached = u.get("prompt_tokens_details", {}).get("cached_tokens", 0)
+    rows.append({"turn": i, "seconds": round(elapsed, 2), "prompt_tokens": u["prompt_tokens"],
+                 "cached_tokens": cached,
+                 "cache_hit_pct": round(100 * cached / max(u["prompt_tokens"], 1), 1)})
+    messages.append({"role": "assistant", "content": d["choices"][0]["message"].get("content") or "ok"})
+    print(f"  turn {i}: {elapsed:6.2f}s  prompt {u['prompt_tokens']:6d}  "
+          f"cached {cached:6d}  ({rows[-1]['cache_hit_pct']}%)")
+
+first, last = rows[0]["seconds"], rows[-1]["seconds"]
+verdict = ("reuses the cache" if last < first * 0.6 else
+           "no reuse, and it got slower" if last > first * 1.1 else
+           "no useful reuse")
+print(f"\n{key}: turn 0 {first}s, turn {turns - 1} {last}s -> {verdict}")
+out = ROOT / "bench" / f"cache-{key}.json"
+out.write_text(json.dumps({"model": model, "turns": rows, "verdict": verdict}, indent=2) + "\n")
+print(f"✓ {out.relative_to(ROOT)}")

@@ -1,0 +1,77 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 99.5,
+    "turns": 3,
+    "tool_calls": 2,
+    "tokens_in": 10496,
+    "tokens_out": 712,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ],
+    "tool_calls_logged": 2,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human"
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 42.7,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 8068,
+    "tokens_out": 120,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "tool_calls_logged": 1,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": true,
+    "note": "2 of 2 expected terms in the answer"
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 86.8,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 8525,
+    "tokens_out": 656,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "terms_found": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "tool_calls_logged": 1,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human"
+  }
+}
