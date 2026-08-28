@@ -26,6 +26,26 @@ def bench_env(env: dict) -> dict:
     return {**env, "XDG_CONFIG_HOME": str(BENCH_CONFIG_HOME)}
 
 
+# mlx_lm's server decides whether generation starts in reasoning state by scanning
+# the rendered prompt for the last think-start against the last think-end
+# (server.py:568-574). An unclosed think tag anywhere in the prompt, including in
+# AGENTS.md, sends every model's output to the reasoning field, where opencode
+# discards it. That cost us two models and most of a day. See issue #10.
+THINK_OPEN = "<" + "think>"
+THINK_CLOSE = "</" + "think>"
+
+
+def check_prompt(agents_md) -> None:
+    """Refuse to launch when AGENTS.md would poison the reasoning state."""
+    text = agents_md.read_text()
+    if text.rfind(THINK_OPEN) > text.rfind(THINK_CLOSE):
+        raise SystemExit(
+            f"\u2717 {agents_md} ends with an unclosed think tag.\n"
+            f"  Every model's output would go to the reasoning field and be discarded.\n"
+            f"  Describe reasoning blocks in words instead of writing the tags. Issue #10."
+        )
+
+
 def cplt_argv(workspace_dir: Path, repo_root: Path, server_port: str = "8080",
               extra: list[str] | None = None) -> list[str] | None:
     """Return the cplt argv prefix, or None when cplt is not installed.

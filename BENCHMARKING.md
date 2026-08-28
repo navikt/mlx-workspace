@@ -96,6 +96,15 @@ weights lazily, so a benchmark that starts on bind alone charges model loading t
 90-minute budget both times, starving three later tasks. `BENCH_TASK_TIMEOUT` turns a loop into a
 recorded failure instead of a lost run.
 
+**AGENTS.md is checked before every launch.** `check_prompt()` in `.mise/tasks/_sandbox.py`
+refuses to start a run when the last think-start in `AGENTS.md` comes after the last think-end.
+mlx_lm's server picks the initial generation state by scanning the rendered prompt for exactly that
+(`server.py:568-574`), so an unclosed tag sends every model's output to the reasoning field, where
+opencode discards it. Our own rules 6 and 7 did this and cost us two models and most of a day, so
+describe reasoning blocks in words and never write the tags. The warning lives here rather than in
+`AGENTS.md` because that file is a prompt: anything in it, HTML comments included, is sent to the
+model under test.
+
 **Everything runs sandboxed under cplt.** All client launches go through `cplt_argv()` in
 `.mise/tasks/_sandbox.py`, so interactive and headless runs cannot drift to different policies. The
 sandbox confines the model to `workspaces/<key>/`, opens localhost only on the inference port, and

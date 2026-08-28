@@ -40,6 +40,7 @@ workspace_dir.mkdir(parents=True, exist_ok=True)
 weather_cli_dir = workspace_dir / "weather-cli"
 weather_cli_dir.mkdir(exist_ok=True)
 shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
+S.check_prompt(workspace / "AGENTS.md")
 shutil.copy2(workspace / "AGENTS.md", workspace_dir / "AGENTS.md")
 
 if subprocess.run(["mise", "run", "opencode-init", str(workspace_dir)],

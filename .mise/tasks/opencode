@@ -31,6 +31,7 @@ shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_S
 # opencode reads AGENTS.md from its working directory, which is workspaces/<key>/,
 # not the repo root. Copy the current rules in on every launch so rule edits
 # at the root always reach the model being tested.
+S.check_prompt(workspace / "AGENTS.md")
 shutil.copy2(workspace / "AGENTS.md", workspace_dir / "AGENTS.md")
 
 print(f"→ Starting opencode in {workspace_dir.relative_to(workspace)}/")
