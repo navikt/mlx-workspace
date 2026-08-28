@@ -779,10 +779,10 @@ spec-named test files) in its own `workspaces/<key>/weather-cli/`, driven by the
 
 | Model | Rig | Plan | Implement | Total | Tests | Behaviour |
 |---|---|---|---|---|---|---|
-| Gemma-4-31B 8-bit | B | 4m 2s | 16m 21s | **20m 23s** | 16/16 | Correct mlx-lm backend. Twice the wall clock of Qwen3.8/DeepSeek; 31 turns at a 35s median. Pulled in **jest** instead of `node:test` |
+| Gemma-4-31B 8-bit | B | 4m 2s | 16m 21s | **20m 23s** | 16/16 | Code **6.0/10**. Correct mlx-lm backend. Twice the wall clock of Qwen3.8/DeepSeek; 31 turns at a 35s median. Pulled in **jest** instead of `node:test` |
 | Gemma-4-31B 8-bit | B | 6m 7s | abandoned | — | — | Served by mlx-vlm by mistake, cache cleared per request; 43s median turn, 197s worst |
 | DeepSeek-V4-Flash 2.4-bit | B | 4m 43s | 5m 26s | **10m 09s** | 17/17¹ | ✅ Rerun at parity; planned properly this time, dispatched a sub-agent, wrote its plan to a file |
-| Qwen3.8-27B MTPLX Q8 | B | **1m 23s** | 8m 47s | **10m 10s** | 16/16 | ✅ Best run. Rule 7 + corrected spec UA warning |
+| Qwen3.8-27B MTPLX Q8 | B | **1m 23s** | 8m 47s | **10m 10s** | 16/16 | ✅ Best run. Code **8.1/10**. Rule 7 + corrected spec UA warning |
 | Qwen3.8-27B 4-bit | B (36 GB cap) | 5m 16s | 27m 5s | **32m 21s** | 25/25² | Code **8.5/10**. Same artifact as the Q8 at 3.2× the wall clock, no MTP. Ignored rule 7, drafted files inside `<think>` |
 | Qwen3.6-35B-A3B 4-bit | B (36 GB cap) | **34.9s** | **6m 10s** | **6m 45s** | 20/20³ | ⚡ Fastest run. Code **6.8/10**. MoE ~3B active, **thinking disabled**, not a like-for-like process comparison |
 | Qwen3.5-9B 4-bit | B (36 GB cap) | — | — | ❌ **4 attempts, no plan delivered** | — | Four distinct failures across four configs. Oldest model tested (Feb 2026); Qwen3.6 and 3.8 both work |
@@ -966,9 +966,11 @@ drafter appears, because that is the entire gap.
 
 Dense 72B, ~72 GB footprint (`gpu_wired_limit_gb = 115`), mlx-lm, 128k declared context. It answers
 well in chat, but in `opencode` and `aider` it prints markdown code blocks instead of emitting tool
-calls, so nothing is ever written to disk. Strict-JSON prompting ("use strict valid JSON with
-double quotes") did not fix it. Marked `status = "broken"` in `profiles/qwen2.5-72b-8bit.toml`.
-72 GB spent for a chat model.
+calls, so no code is ever written to disk. `workspaces/qwen2.5-72b-8bit/weather-cli/` does contain
+`package.json` and `src/{index,parser,geocode,weather,output}.js`, but all six are **0 bytes**: it
+created the files and then printed their contents into chat. Not gradeable. Strict-JSON prompting
+("use strict valid JSON with double quotes") did not fix it. Marked `status = "broken"` in
+`profiles/qwen2.5-72b-8bit.toml`. 72 GB spent for a chat model.
 ### `mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8` ✅ recommended
 
 | | |
@@ -1021,7 +1023,9 @@ Same 16 turns and tool-call ratio, but each turn is smaller: it reached the same
 generated 2,900 fewer tokens, still verifying API shapes before writing but no longer drafting whole
 files inside `<think>`. Rule 7 and the spec wording landed together, so the split is not isolated;
 the spec fix owns most of the plan-phase gain, rule 7 most of the per-turn shrink. Both runs produced
-`src/{parse,geocode,weather,output,index}.js` + 5 spec-named test files.
+five source modules plus the 5 spec-named test files. The surviving 2026-08-26 workspace keeps them
+flat rather than under `src/`, as `parseArgs.js`, `geocode.js`, `fetchWeather.js`, `format.js` and
+`weather-cli.js`.
 
 **Not a spec error, a model-invented one.** The run reported that the spec's example User-Agent
 returns 403. It does not: `weather-cli/1.0 github.com/yourname` returns **200**. The model substituted
@@ -1040,6 +1044,41 @@ with no `Retry-After` and no `RateLimit-*` headers; real throttling returns 429.
 this 403 as rate limiting and spent minutes on backoff that could never succeed, inflating its plan
 phase to 7m 58s. Three failures worth tracking per model: substituting a placeholder into a working
 spec, blaming the spec for it, then diagnosing a hard block as throttling.
+
+**Code review: 8.1/10.** Scored against the [Code review rubric](#code-review-rubric) on the
+surviving best-run workspace, `workspaces/qwen3.8-27b-8bit/weather-cli/`. It was written against the
+corrected spec, so it is comparable with the Qwen3.8-27B 4-bit and Qwen3.6-35B-A3B grades and not
+with the June runs.
+
+| Dimension | Weight | Score |
+|---|---|---|
+| Correctness risks | 30% | 8 |
+| Error handling | 20% | 7 |
+| Structure | 20% | 9 |
+| Test quality | 20% | 8 |
+| Idiom and readability | 10% | 9 |
+
+**Traps: six avoided, one hit.** `closestEntry` compares `Date.parse(entry.time)` against
+`Date.now()`, both epoch milliseconds, so timezone is a non-issue, and it scans the whole timeseries
+rather than trusting `series[0]`. `format.js:1-6` uses strict `>` at exactly 75/50/25.
+`geocode.js:14` destructures `const [lon, lat]` in the right order. Every URL is built from an axios
+`params` object, so nothing is interpolated and place names are encoded. `parseArgs.js:10-11` bounds
+latitude and longitude inclusively at ±90 and ±180. The miss is missing fields: `format.js` has no
+guards at all, so a Met.no entry without `ultraviolet_index_clear_sky`, which is what a night payload
+looks like, prints `UV Index: undefined` and exits **0**, and a missing `cloud_area_fraction` makes
+`undefined > 75` false three times over and reports a confident "Clear".
+
+**What is genuinely good.** The `http = axios` default parameter on `geocode` and `fetchWeather` is
+the cleanest mock boundary in the batch: the tests inject a fake client, so this is the only
+submission that stays inside the spec's single `axios` dependency instead of reaching for jest, nock
+or mocha. `weather-cli.js:12-13` parses inside the `try`, which is exactly the bug the Qwen3.6 run
+shipped. All 16 tests are real assertions with no swallowed `catch`, and `output.test.js:5-14` pins
+the cloud thresholds at the exact boundary values rather than near them.
+
+**Real findings, both minor.** `geocode.js:14` walks `hit.geojson.geometry.coordinates` unguarded, so
+a Geonorge hit without a `geojson` key exits 1 with `Error: Cannot read properties of undefined`
+instead of a usable message. `integration.test.js` calls the live APIs with no environment gate, so
+`npm test` fails offline and in CI; the 4-bit run gated the equivalent test behind `WEATHER_LIVE=1`.
 
 **Verdict:** the daily driver on rig B. Fast, cheap on memory, strong tool calling, and the only model
 whose planning phase can be steered.
@@ -1132,9 +1171,47 @@ two-of-four trait rather than a Gemma distinctive. It added **jest** rather than
 reads `Weather in 59.91, 10.75` (comma inserted) where other models emit the input verbatim; the spec
 does not pin the form, so that is a divergence rather than a failure.
 
-**Verdict:** correct and well-organised, but priced out on this hardware. Twice the time for the same
-result, and a KV footprint that rules out the target machine. Re-test with a draft model before
-drawing a final conclusion.
+**Code review: 6.0/10.** Scored against the [Code review rubric](#code-review-rubric) on
+`workspaces/gemma-4-31b-8bit/weather-cli/`.
+
+| Dimension | Weight | Score |
+|---|---|---|
+| Correctness risks | 30% | 5 |
+| Error handling | 20% | 6 |
+| Structure | 20% | 8 |
+| Test quality | 20% | 5 |
+| Idiom and readability | 10% | 7 |
+
+**Traps: three avoided, three hit, one not applicable.** Avoided: `geocode.js:21-22` swaps the
+GeoJSON pair correctly and says why in a comment, `encodeURIComponent` wraps the place name at
+`geocode.js:4`, and `output.js:4-6` uses strict `>` at 75/50/25. Hit: `weather.js:19` takes
+`timeseries[0]` outright, under a comment that admits it ("For simplicity in this CLI, we take the
+first one as it's usually the current/closest"); no field is guarded, so a payload without
+`ultraviolet_index_clear_sky` prints `UV Index: undefined` and exits **0**; and there is no latitude
+or longitude range validation anywhere, so `weather "999 999"` reaches Met.no and exits 1 only
+because Met.no rejects it. The timezone trap does not apply, because nothing here compares times.
+
+**The real bug is the argument parser.** `parser.js:2` reads `args[0]` and nothing else, and the
+coordinate regex expects both numbers inside that one string. Unquoted `weather 59.91 10.75`, which
+is how the spec's synopsis reads, leaves `args[0]` as `'59.91'`, fails the regex, and is sent to
+Geonorge as a place name. `weather Bergen sentrum` searches for "Bergen". Only the quoted form
+`weather "59.91 10.75"` works. The spec quotes its own example, so this is defensible rather than a
+spec violation, but it is the sharpest usability failure in the batch.
+
+**Tests are real but pin nothing.** All 16 assertions can fail, there is no swallowed `catch`, and
+both API modules have error-path coverage. What they do not do is pin the spec's boundary values:
+`output.test.js` exercises cloud fractions of 10, 30, 60 and 80, so changing every `>` to `>=` would
+not fail a single test. `integration.test.js:44-48` re-implements `main()`'s flow by hand rather than
+invoking `index.js`, so the entry point, the exit codes and the `args[0]` bug are all untested. Per
+the rubric, the silent addition of **jest** where the spec names only `axios` is a genuine finding.
+
+**What is genuinely good.** Five flat modules, 131 lines of source, one job each, a 40-line entry
+point that only orchestrates, and no abstraction with a single caller. Errors reach one `try`/`catch`
+in `index.js` and exit 1 with a readable message.
+
+**Verdict:** well organised, not quite correct, and priced out on this hardware. Twice the time for
+the same result, a code grade of 6.0, and a KV footprint that rules out the target machine. Re-test
+with a draft model before drawing a final conclusion.
 
 ## Model evaluations: rig A (M1 Max 32 GB)
 
@@ -1196,6 +1273,12 @@ weather-cli opencode task:
 
 **10 turns × 2m16s = 24 minutes → 0 files implemented** (only empty stubs). Session aborted. At
 similar context qwen3.5-9b takes ~5–10 seconds per turn.
+
+**Not gradeable, and not a submission.** GitHub issue #5 lists this run among the ungraded
+weather-cli submissions. It is not one. `workspaces/gemma-4-12b/weather-cli/` holds
+`src/{index,parser,geocoder,weather,formatter}.js` and the five spec-named test files, and all ten
+are **0 bytes**. Only `package.json` has content. No score, because there is nothing to score, which
+matches the "0 files implemented (empty stubs only)" note in the profile.
 
 **Verdict:** ⚠️ inconclusive and impractical for agentic coding as of Jun 2026. The mlx-vlm
 per-request cache clear makes multi-turn sessions prohibitively slow on this hardware. May be usable
@@ -1290,6 +1373,68 @@ activation tensors for the full sequence must coexist with the weights: 14 GB mo
 + prefill spike > 26 GB wired cap. No configuration fixes this, it is an architecture constraint.
 See [Dense vs MoE](#dense-vs-moe).
 
+**It did produce an artifact, and the notes above miss it.** The OOM record reads as if the session
+never got anywhere. `workspaces/qwen3.5-27b-opus-distilled/weather-cli/` holds a complete submission
+timestamped 2026-06-19, the same day as the crash runs: four source modules, a `bin/weather` entry
+point, four of the five spec-named test files, 749 lines in total. Written against the June spec, so
+its score is not directly comparable with the August runs.
+
+**Code review: 4.6/10.** Scored against the [Code review rubric](#code-review-rubric).
+
+| Dimension | Weight | Score |
+|---|---|---|
+| Correctness risks | 30% | 2 |
+| Error handling | 20% | 6 |
+| Structure | 20% | 8 |
+| Test quality | 20% | 3 |
+| Idiom and readability | 10% | 6 |
+
+**Traps: six avoided, one hit.** The closest-entry loop at `weather.js:27-38` scans the whole series
+and compares epoch milliseconds, so timezone and sorted-input are both clear; `formatter.js:6-16`
+uses strict `>` at 75/50/25; `geocode.js:34-35` takes `coordinates[0]` as longitude; `geocode.js:10`
+encodes the place name and the coordinate regex at `parser.js:14` keeps anything but digits out of
+the URL; `parser.js:21-33` bounds ±90 and ±180 inclusively. Missing fields is the hit, in its worst
+form here: `weather.js:63` falls back to `uvIndex: 0`, so a payload without a UV index reports a
+confident **0** rather than a visibly wrong `undefined`, and the four-deep ternary at `weather.js:64`
+ends in `?? 0`, so a missing cloud fraction becomes "Clear".
+
+**It cannot succeed once against the live APIs.** Four invented response shapes, any one of them
+fatal on its own:
+
+| Location | Reads | Actual |
+|---|---|---|
+| `geocode.js:23` | `data.features` | `/stedsnavn/v1/sted` returns `{ navn: [...] }` |
+| `weather.js:27` | `data.timeseries` | `data.properties.timeseries` |
+| `weather.js:48` | `closestEntry.instant` | `entry.data.instant` |
+| `weather.js:62` | `instant.pressure` | `instant.air_pressure_at_sea_level` |
+
+So `weather Oslo` always prints `Error: No location found for "Oslo"` and `weather "59.91 10.75"`
+always prints `Error: No weather data available`. Both exit 1, which is the spec's error code, so the
+exit status is right for entirely the wrong reason. No path through this program prints a
+temperature.
+
+**32 green tests, and they are the reason.** Every assertion is real, none is swallowed, the
+thresholds are pinned at exactly 25/50/75 in `output.test.js:31-49`, the ±90/±180 bounds are covered,
+and the mocks sit at the HTTP layer via `nock`, the strictest mock boundary any submission here
+chose. All of it is spent confirming the model's own guesses: `geocode.test.js:19-31` replies with a
+`FeatureCollection`, `weather.test.js:15` puts `timeseries` at the top level, and every fixture
+carries `instant` on the entry and a `pressure` field. This is the clearest case in the benchmark of
+a suite that locks in an assumption instead of checking an API, and it is why the count says nothing.
+`integration.test.js`, which the spec names, is absent, and chai, mocha and nock are all beyond the
+spec's single `axios`, added without disclosure.
+
+**What is genuinely good.** The structure is the best organised of the batch: `bin/` plus `src/`,
+four modules with one job each, a 61-line entry that only orchestrates, JSDoc on every export, and a
+`{ success, error }` result convention applied consistently across both API modules rather than as a
+one-off. `bin/weather:58-60` keeps a `main().catch` backstop and both requests set timeouts. Against
+that, `weather.js:29-31` builds a `Date`, formats it to ISO and parses it back for no reason, and
+`weather.js:64` is a 240-character four-level ternary that also prefers `cloud_area_low_fraction`
+over the `cloud_area_fraction` the spec names.
+
+**Verdict on the code:** the most professional-looking submission in the benchmark and the only one
+that never works. It is the strongest evidence yet for the plan-prompt rule about checking external
+APIs instead of assuming the data model.
+
 ### `mlx-community/gemma-4-26b-a4b-it-4bit` 🔲 untested
 
 Google Gemma 4 26B MoE (2026), Apache 2.0. 26B total / ~3.8–4B active per token, ~14 GB VRAM, 256k
@@ -1320,6 +1465,12 @@ greedy decoding, not representative of opencode use.
 | Metal OOM at 64k context | Prefill activation spike at 27k tokens (41%) | ✅ Mitigated: reduced to 48k |
 | Tool call loop | Repeatedly called `ls` same dir without progress | ❌ Unfixable |
 | Generated code with typos | `location3`, `lon3` in 411-line output | ❌ Model quality issue |
+
+**Not gradeable.** `workspaces/glm-4.7-flash/weather-cli/index.js` does not parse: the 411 lines are
+one `try` block repeated dozens of times, `const { lat, lon }` is redeclared repeatedly in the same
+scope, and line 14 reads `const { lat, lon3 } = parseLocation(location3)` against two names that do
+not exist. `parser.js` reads `values._[0]`, which `node:util`'s `parseArgs` does not return, and no
+test file was written. Nothing here can be scored.
 
 **Verdict:** not viable as a daily driver. The infrastructure failures were all fixable; the tool
 call loop and the code quality are not. The τ²-Bench score does not translate to reliable opencode

@@ -13,6 +13,19 @@ import shutil
 from pathlib import Path
 
 
+# opencode reads the personal config at ~/.config/opencode, which carries a
+# nav-pilot exported AGENTS.md and 38 global skills. All of it lands in the
+# system prompt: 32,754 characters measured on the wire, none of it chosen by
+# the benchmark. Point XDG_CONFIG_HOME at this directory instead so a run sees
+# the workspace AGENTS.md and nothing else. See issue #12.
+BENCH_CONFIG_HOME = Path(__file__).resolve().parents[2] / "bench" / "opencode-home"
+
+
+def bench_env(env: dict) -> dict:
+    """Return env with opencode's config home pointed at the benchmark copy."""
+    return {**env, "XDG_CONFIG_HOME": str(BENCH_CONFIG_HOME)}
+
+
 def cplt_argv(workspace_dir: Path, repo_root: Path, server_port: str = "8080",
               extra: list[str] | None = None) -> list[str] | None:
     """Return the cplt argv prefix, or None when cplt is not installed.
@@ -40,6 +53,10 @@ def cplt_argv(workspace_dir: Path, repo_root: Path, server_port: str = "8080",
         # fatal, not "no config here". Grant that one file rather than the repo
         # root, so sibling workspaces stay unreadable.
         "--allow-read", str(repo_root / "opencode.json"),
+        # opencode writes into its config home at startup (a .gitignore, and
+        # auth state), so read access alone makes it exit with
+        # "Unexpected error: FileSystem.writeFile".
+        "--allow-write", str(BENCH_CONFIG_HOME),
     ]
     argv += extra or []
     return argv

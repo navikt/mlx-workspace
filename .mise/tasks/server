@@ -155,4 +155,12 @@ else:
     if trust_remote:
         cmd += ["--trust-remote-code"]
 
+# Repetition control is per request, not per server. mlx_lm 0.31.3 reads repetition_penalty,
+# repetition_context_size, presence_penalty and frequency_penalty from the request body
+# (server.py:1180-1184) and has no CLI flag for any of them; mlx-vlm and oMLX are the same.
+# opencode-init puts them in opencode.json so opencode sends them on every request. Echoed
+# here so a profile's value is visible next to the rest of the sampling config.
+for key, val in P.penalties(os.environ).items():
+    print(f"  {key}: {val}  (sent by the client per request, not a server flag)")
+
 os.execvp(cmd[0], cmd)

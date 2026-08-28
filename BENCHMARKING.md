@@ -161,6 +161,17 @@ disabled. Running with `top_k` off produced a degenerate repetition loop on Qwen
 `MLX_TEMP=0.0`, the mlx-lm default, causes repetition loops too. Confirm the flags reached the
 process with `ps`, not just the profile loader.
 
+Repetition control is per request, not per server. `MLX_REPETITION_PENALTY` (0.0 = off,
+sign-aware multiplicative, above 1.0 penalises repeats), `MLX_REPETITION_CONTEXT_SIZE` (20
+tokens of history), `MLX_PRESENCE_PENALTY` and `MLX_FREQUENCY_PENALTY` (both 0.0 = off) default
+to the values mlx-lm already uses, so a profile that leaves them out sends nothing and behaves
+as before. mlx-lm, mlx-vlm and oMLX all read these four from the request body and none of them
+has a command-line flag for any of them, so `opencode-init` writes the non-default ones into
+`opencode.json` as model options and opencode sends them with every request. `mise run server`
+echoes them, but it is the client that carries them, so confirm them in a request body rather
+than in `ps`. These are the knobs for a model stuck in a repetition loop, the failure that
+ended a Qwen3.5-9B run in an endless `DIDIDIDI`.
+
 `profiles/qwen3.6-35b-a3b.toml` is the worked example: measured VRAM and KV cache numbers in the
 notes, a comment on every param explaining the measurement behind the value, and
 `MLX_CHAT_TEMPLATE_ARGS = '{"enable_thinking": false}'` with the reasoning for disabling thinking.

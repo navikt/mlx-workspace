@@ -58,15 +58,16 @@ prefix = S.cplt_argv(workspace_dir, workspace, server_port, extra=["--yes", "--q
 if prefix is None:
     S.warn_unsandboxed(sys.stderr)
     prefix = []
-    cmd = ["opencode", "run", "--format", "json", *args]
+    cmd = ["opencode", "--pure", "run", "--format", "json", *args]
 else:
-    cmd = prefix + ["--", "run", "--format", "json", *args]
+    cmd = prefix + ["--", "--pure", "run", "--format", "json", *args]
 
 print(f"→ {key} · {workspace_dir.relative_to(workspace)}/")
 started = time.time()
 with open(log_path, "w") as log:
     rc = subprocess.run(cmd, cwd=str(workspace_dir), stdout=log,
-                        stderr=subprocess.STDOUT).returncode
+                        stderr=subprocess.STDOUT,
+                        env=S.bench_env(os.environ)).returncode
 elapsed = time.time() - started
 
 # Pull telemetry out of the event stream. cplt and opencode both write human text

@@ -36,6 +36,18 @@ OPTIONAL_DEFAULTS = {
     "MLX_TOP_P":                  "1.0",
     "MLX_TOP_K":                  "0",      # 0 = disabled
     "MLX_MIN_P":                  "0.0",
+    # Repetition control. These four are per request, not per server: mlx_lm 0.31.3 reads
+    # them from the request body (server.py:1180-1184) and publishes no CLI flag for any of
+    # them, and the same is true of mlx_vlm.server and oMLX. opencode-init writes them into
+    # opencode.json instead — see PENALTY_PARAMS below. Defaults are mlx-lm's own request
+    # defaults, so a profile that does not set them sends nothing and changes nothing.
+    # Reach for these when a model collapses into a repetition loop: Qwen3.5-9B failed a
+    # benchmark run by emitting 'DIDIDIDI...' without end (issue #4).
+    "MLX_REPETITION_PENALTY":     "0.0",    # 0 = off. Sign-aware multiplicative penalty
+                                            # (arXiv:1909.05858); >1.0 penalises repeats.
+    "MLX_REPETITION_CONTEXT_SIZE": "20",    # tokens of history the penalty looks back over
+    "MLX_PRESENCE_PENALTY":       "0.0",    # 0 = off. Additive, flat per repeated token.
+    "MLX_FREQUENCY_PENALTY":      "0.0",    # 0 = off. Additive, scales with token count.
     # throughput
     "MLX_DRAFT_MODEL":            "",       # speculative decoding for mlx-lm (oMLX uses MTP instead)
     "MLX_NUM_DRAFT_TOKENS":       "",
@@ -65,6 +77,32 @@ IGNORED_BY_BACKEND = {
         "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE",
     ],
 }
+# The MLX_*_PENALTY params are deliberately absent from both lists: all three backends read
+# them from the request body, so all three apply them — mlx_lm/server.py:1180-1184,
+# mlx_vlm/server/schemas.py:318-326, omlx/request.py:63-69.
+
+# Repetition-control params, as (request body key, profile param, type). No backend takes
+# these on the command line, so they travel in the request body that opencode sends.
+PENALTY_PARAMS = [
+    ("repetition_penalty",      "MLX_REPETITION_PENALTY",      float),
+    ("repetition_context_size", "MLX_REPETITION_CONTEXT_SIZE", int),
+    ("presence_penalty",        "MLX_PRESENCE_PENALTY",        float),
+    ("frequency_penalty",       "MLX_FREQUENCY_PENALTY",       float),
+]
+
+
+def penalties(params: dict) -> dict:
+    """Penalty body params whose value differs from the default. Empty dict = send nothing.
+
+    Only differences are returned, so a profile that does not opt in leaves the request
+    body exactly as it was before these params existed.
+    """
+    out = {}
+    for body_key, var, cast in PENALTY_PARAMS:
+        val = str(params.get(var) or OPTIONAL_DEFAULTS[var]).strip()
+        if cast(val) != cast(OPTIONAL_DEFAULTS[var]):
+            out[body_key] = cast(val)
+    return out
 
 
 def params_for(key: str) -> dict:
@@ -184,3 +222,15 @@ def pick_interactive() -> str:
         return rows[idx][0]
     except (ValueError, IndexError):
         raise SystemExit(f"Invalid selection: {sel}")
+
+
+if __name__ == "__main__":
+    # Self-check for the one rule penalties() has to keep: a profile that does not opt in
+    # must add nothing to the request body. Run with: python3 .mise/tasks/_profiles.py
+    assert penalties({}) == {}, "unset params must send nothing"
+    assert penalties({v: OPTIONAL_DEFAULTS[v] for _, v, _ in PENALTY_PARAMS}) == {}
+    assert penalties({"MLX_REPETITION_PENALTY": "0"}) == {}, "0 and 0.0 are the same value"
+    assert penalties({"MLX_REPETITION_PENALTY": "1.05"}) == {"repetition_penalty": 1.05}
+    for k in list_keys():
+        load(k)
+    print(f"✓ penalties() self-check passed, {len(list_keys())} profiles validate")
