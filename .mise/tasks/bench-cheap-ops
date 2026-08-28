@@ -36,6 +36,16 @@ ws = ROOT / "workspaces" / key
 repo = ws / "kotlin"
 results_path = ROOT / "bench" / f"results-{key}.json"
 results = json.loads(results_path.read_text()) if results_path.exists() else {}
+if results:
+    # Results are keyed by the active profile, so a failed `model-use` leaves the
+    # previous model active and this run merges into its file. That happened: a
+    # profile with an invalid status field refused to activate, the run went to
+    # the wrong model, and three tasks of a finished run were overwritten before
+    # anyone noticed. Keep a copy of what was there.
+    backup = ROOT / "bench" / ".previous" / f"results-{key}-{int(results_path.stat().st_mtime)}.json"
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    backup.write_text(results_path.read_text())
+    print(f"→ existing results backed up to {backup.relative_to(ROOT)}")
 
 
 def sh(cmd, cwd=None, timeout=1800, env=None):
@@ -170,6 +180,12 @@ def run_task(task):
     if timed_out:
         rec["verified"] = False
         rec["note"] = f"timed out after {cap}s"
+        # opencode-headless prints its summary line at the end, so a killed task
+        # leaves nothing to parse and these fields default to zero. Zero turns
+        # reads as "the model did nothing", which is a different claim from "we
+        # do not know", and it has been misread twice.
+        for f in ("turns", "tool_calls", "tokens_in", "tokens_out", "exit"):
+            rec[f] = None
         return rec
     ok, note = verify(task)
     rec["verified"] = ok

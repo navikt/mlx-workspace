@@ -92,6 +92,13 @@ but a restart. `restart_server()` runs `server-stop`, relaunches `server` detach
 `server-wait`, which sends a real completion request rather than checking the socket: mlx-lm loads
 weights lazily, so a benchmark that starts on bind alone charges model loading to thinking time.
 
+**Check that the model actually switched.** `mise run model-use <key>` exits non-zero when a
+profile is invalid, and the benchmark keys its results file by whatever profile is active, so a
+queue script that ignores that exit code runs the wrong model and merges into the wrong file. That
+happened once: three tasks of a finished run were overwritten before anyone noticed. Scripts must
+use `model-use <key> || exit 1`, and the runner now backs up any existing results file to
+`bench/.previous/` before its first write.
+
 **Nothing else touches disk or network during a run.** Every task restarts the server, which
 re-reads the model weights, so a concurrent model download competes for the same disk. Qwen3.8-27B
 timed out on four of eight tasks during a run that overlapped a 22 GB download, while its input
@@ -136,6 +143,7 @@ One JSON object per file, keyed by task id, written after each task. Fields:
 | `timed_out` | True when the task hit `BENCH_TASK_TIMEOUT` |
 | `files_changed` | Lines of `git status --porcelain` after the run |
 | `verified` | `true`, `false`, or `null` when the task needs a human |
+| _timed-out tasks_ | `turns`, `tool_calls`, `tokens_in`, `tokens_out` and `exit` are `null`, not zero. A killed task never prints the summary line the parser reads, so zero would mean "unknown", not "nothing happened" |
 | `note` | Why it passed or failed, for example `no changes made`, `compile failed`, `needs a human` |
 | `terms_found`, `terms_expected` | Present only for tasks with `expect_terms`, matched against the reply text |
 

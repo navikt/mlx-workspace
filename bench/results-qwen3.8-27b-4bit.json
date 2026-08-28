@@ -6,20 +6,14 @@
     "turns": 4,
     "tool_calls": 3,
     "tokens_in": 9752,
-    "tokens_out": 400,
-    "truncated": false,
-    "exit": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
     "timed_out": false,
-    "terms_found": [],
-    "terms_expected": [
-      "5",
-      "100",
-      "2",
-      "300"
-    ],
     "files_changed": 0,
     "verified": null,
-    "note": "needs a human"
+    "note": "needs a human",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
   },
   "R2": {
     "task": "R2",
@@ -28,21 +22,14 @@
     "turns": 2,
     "tool_calls": 1,
     "tokens_in": 7998,
-    "tokens_out": 47,
-    "truncated": false,
-    "exit": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
     "timed_out": false,
-    "terms_found": [
-      "ApplicationEnvironment.kt",
-      "59"
-    ],
-    "terms_expected": [
-      "ApplicationEnvironment.kt",
-      "59"
-    ],
     "files_changed": 0,
     "verified": true,
-    "note": "2 of 2 expected terms in the answer"
+    "note": "2 of 2 expected terms in the answer",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
   },
   "R3": {
     "task": "R3",
@@ -51,19 +38,14 @@
     "turns": 2,
     "tool_calls": 1,
     "tokens_in": 8439,
-    "tokens_out": 562,
-    "truncated": false,
-    "exit": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
     "timed_out": false,
-    "terms_found": [
-      "OppfolgingstilfellePerson.kt"
-    ],
-    "terms_expected": [
-      "OppfolgingstilfellePerson.kt"
-    ],
     "files_changed": 0,
     "verified": null,
-    "note": "needs a human"
+    "note": "needs a human",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
   },
   "E1": {
     "task": "E1",
@@ -72,12 +54,125 @@
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
-    "tokens_out": 0,
-    "truncated": false,
-    "exit": -1,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
     "timed_out": true,
     "files_changed": 1,
     "verified": false,
-    "note": "timed out after 1800s"
+    "note": "timed out after 1800s",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 1800.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 1800s",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 455.7,
+    "turns": 4,
+    "tool_calls": 5,
+    "tokens_in": 9269,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": false,
+    "files_changed": 2,
+    "verified": true,
+    "note": "renamed and compiles",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "M2": {
+    "task": "M2",
+    "kind": "edit",
+    "seconds": 906.3,
+    "turns": 13,
+    "tool_calls": 13,
+    "tokens_in": 33874,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": false,
+    "files_changed": 2,
+    "verified": false,
+    "note": "suite failed",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "G2": {
+    "task": "G2",
+    "kind": "edit",
+    "seconds": 1800.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 1800s",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "D1": {
+    "task": "D1",
+    "kind": "read",
+    "seconds": 314.6,
+    "turns": 3,
+    "tool_calls": 2,
+    "tokens_in": 8586,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "D2": {
+    "task": "D2",
+    "kind": "edit",
+    "seconds": 1800.0,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": true,
+    "files_changed": 1,
+    "verified": false,
+    "note": "timed out after 1800s",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
+  },
+  "D3": {
+    "task": "D3",
+    "kind": "edit",
+    "seconds": 1278.5,
+    "turns": 21,
+    "tool_calls": 26,
+    "tokens_in": 39554,
+    "tokens_out": null,
+    "truncated": null,
+    "exit": null,
+    "timed_out": false,
+    "files_changed": 1,
+    "verified": false,
+    "note": "suite failed",
+    "recovered_from": "run log after the results file was reverted by mistake; tokens_out, truncated and exit were not printed and are unknown"
   }
 }

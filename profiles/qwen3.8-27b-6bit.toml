@@ -1,7 +1,7 @@
 [meta]
 name               = "Qwen 3.8 27B 6bit"
 released           = "2026-07"
-status             = "not a stand-in for the llama.cpp build"
+status             = "broken"
 spec_source        = "externally verified"
 notes              = "Written to reproduce another Nav team's configuration, and it does not. They run llama.cpp with an Unsloth GGUF Q6_K_XL on an M4 Pro 48 GB at about 10 tok/s. This is mlx-lm with an MLX 6-bit conversion on an M5 Max, and it is pathologically slow: R2, which the 4-bit build of the same weights answers in 30 seconds and Qwen3.6-35B-A3B in 4.6 seconds, took 1546.8 seconds here, and R1 timed out at a 1800 second cap. Prefill measured normal at about 285 tok/s on a fresh server, so the cause is unexplained. Keep this profile as the record of an MLX 6-bit result, do not read it as a result about Q6 quantization or about the other team's setup."
 model_vram_gb      = 22
