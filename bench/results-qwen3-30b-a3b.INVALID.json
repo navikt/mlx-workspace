@@ -1,0 +1,133 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 9.8,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 15471,
+    "tokens_out": 41,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "5",
+      "2"
+    ],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ]
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 418.2,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8432,
+    "tokens_out": 16384,
+    "truncated": true,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ]
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 11.8,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8634,
+    "tokens_out": 28,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ]
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 12.8,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8499,
+    "tokens_out": 87,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 11.4,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8051,
+    "tokens_out": 90,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 12.1,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8616,
+    "tokens_out": 76,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "M2": {
+    "task": "M2",
+    "kind": "edit",
+    "seconds": 12.3,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8540,
+    "tokens_out": 81,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "G2": {
+    "task": "G2",
+    "kind": "edit",
+    "seconds": 12.8,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8544,
+    "tokens_out": 76,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  }
+}

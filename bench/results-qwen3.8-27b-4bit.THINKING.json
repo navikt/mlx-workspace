@@ -1,0 +1,93 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 174.4,
+    "turns": 6,
+    "tool_calls": 5,
+    "tokens_in": 29906,
+    "tokens_out": 988,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ]
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 92.3,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 16005,
+    "tokens_out": 141,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ]
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 109.8,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 16491,
+    "tokens_out": 566,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ]
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 167.4,
+    "turns": 6,
+    "tool_calls": 6,
+    "tokens_in": 20623,
+    "tokens_out": 879,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 1,
+    "verified": true,
+    "note": "compiles"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 1196.3,
+    "turns": 25,
+    "tool_calls": 25,
+    "tokens_in": 237132,
+    "tokens_out": 5846,
+    "truncated": false,
+    "exit": 0,
+    "files_changed": 1,
+    "verified": true,
+    "note": "compiles"
+  }
+}

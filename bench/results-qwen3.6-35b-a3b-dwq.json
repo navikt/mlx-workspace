@@ -1,0 +1,198 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 23.8,
+    "turns": 4,
+    "tool_calls": 3,
+    "tokens_in": 18055,
+    "tokens_out": 336,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "5"
+    ],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ]
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 10.3,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 16025,
+    "tokens_out": 49,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ]
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 27.1,
+    "turns": 2,
+    "tool_calls": 1,
+    "tokens_in": 16407,
+    "tokens_out": 669,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "OppfolgingstilfellePerson.kt"
+    ],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ]
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 22.9,
+    "turns": 5,
+    "tool_calls": 4,
+    "tokens_in": 16324,
+    "tokens_out": 463,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 1,
+    "verified": true,
+    "note": "compiles"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 35.6,
+    "turns": 8,
+    "tool_calls": 7,
+    "tokens_in": 20807,
+    "tokens_out": 753,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 1,
+    "verified": false,
+    "note": "compile failed"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 31.1,
+    "turns": 4,
+    "tool_calls": 6,
+    "tokens_in": 18623,
+    "tokens_out": 654,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 2,
+    "verified": true,
+    "note": "renamed and compiles"
+  },
+  "M2": {
+    "task": "M2",
+    "kind": "edit",
+    "seconds": 23.3,
+    "turns": 3,
+    "tool_calls": 7,
+    "tokens_in": 18574,
+    "tokens_out": 329,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "G2": {
+    "task": "G2",
+    "kind": "edit",
+    "seconds": 18.1,
+    "turns": 3,
+    "tool_calls": 4,
+    "tokens_in": 15919,
+    "tokens_out": 193,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
+  },
+  "D1": {
+    "task": "D1",
+    "kind": "read",
+    "seconds": 22.0,
+    "turns": 4,
+    "tool_calls": 3,
+    "tokens_in": 16492,
+    "tokens_out": 270,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "first",
+      "find"
+    ],
+    "terms_expected": [
+      "first",
+      "find"
+    ]
+  },
+  "D2": {
+    "task": "D2",
+    "kind": "edit",
+    "seconds": 420.1,
+    "turns": 0,
+    "tool_calls": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "truncated": false,
+    "exit": -1,
+    "timed_out": true,
+    "files_changed": 3,
+    "verified": false,
+    "note": "timed out after 420s"
+  },
+  "D3": {
+    "task": "D3",
+    "kind": "edit",
+    "seconds": 52.1,
+    "turns": 9,
+    "tool_calls": 12,
+    "tokens_in": 23707,
+    "tokens_out": 1295,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "files_changed": 1,
+    "verified": false,
+    "note": "suite failed"
+  }
+}

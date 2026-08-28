@@ -1,0 +1,125 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 13.6,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 16586,
+    "tokens_out": 60,
+    "truncated": false,
+    "exit": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [
+      "5",
+      "2"
+    ],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ]
+  },
+  "R2": {
+    "task": "R2",
+    "kind": "read",
+    "seconds": 547.9,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 9078,
+    "tokens_out": 16384,
+    "truncated": true,
+    "exit": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [],
+    "terms_expected": [
+      "ApplicationEnvironment.kt",
+      "59"
+    ]
+  },
+  "R3": {
+    "task": "R3",
+    "kind": "read",
+    "seconds": 2743.9,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8916,
+    "tokens_out": 16384,
+    "truncated": true,
+    "exit": 0,
+    "verified": null,
+    "note": "needs a human",
+    "terms_found": [],
+    "terms_expected": [
+      "OppfolgingstilfellePerson.kt"
+    ]
+  },
+  "E1": {
+    "task": "E1",
+    "kind": "edit",
+    "seconds": 9.8,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8639,
+    "tokens_out": 64,
+    "truncated": false,
+    "exit": 0,
+    "verified": true,
+    "note": "compiles"
+  },
+  "E3": {
+    "task": "E3",
+    "kind": "edit",
+    "seconds": 9.0,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 9143,
+    "tokens_out": 41,
+    "truncated": false,
+    "exit": 0,
+    "verified": true,
+    "note": "compiles"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 9.2,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8568,
+    "tokens_out": 58,
+    "truncated": false,
+    "exit": 0,
+    "verified": false,
+    "note": "old symbol still present (3 refs)"
+  },
+  "M2": {
+    "task": "M2",
+    "kind": "edit",
+    "seconds": 9.6,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8918,
+    "tokens_out": 49,
+    "truncated": false,
+    "exit": 0,
+    "verified": true,
+    "note": "suite passes"
+  },
+  "G2": {
+    "task": "G2",
+    "kind": "edit",
+    "seconds": 11.3,
+    "turns": 1,
+    "tool_calls": 0,
+    "tokens_in": 8957,
+    "tokens_out": 135,
+    "truncated": false,
+    "exit": 0,
+    "verified": true,
+    "note": "suite passes"
+  }
+}
