@@ -41,7 +41,31 @@ Per task, per arm, record:
 `cloud_turns` is the cost number. `local_calls` is free. The comparison is
 `cloud_turns(hybrid)` against `cloud_turns(cloud only)` for the same verified outcome.
 
-## First measurement, rung 2
+## Results, rungs 1 and 2
+
+Claude Sonnet 4.6, three samples per arm. The control has dispatch disabled through
+`alpha local off`, not merely an instruction that omits the task tool: with the fragment
+installed, the cloud model dispatches on its own initiative even for a plain request, so an
+arm that only omits the instruction is not a control. That mistake cost a step per run and
+overstated the first version of this table.
+
+| Rung | Arm | Steps | Cloud tokens | Lines |
+|---|---|---|---|---|
+| 1, answer a question | hybrid | 2, 2, 2 | ~32,500 | 0 |
+| 1 | control | 3, 3, 3 | ~48,500 | 0 |
+| 2, add a docstring | hybrid | 2, 3, 2 | 32.5k, 49k, 32.5k | 4 to 5 |
+| 2 | control | 4, 4, 5 | 64k, 64k, 81k | 12 |
+
+Hybrid costs about half the cloud steps and about half the tokens at both rungs, with tighter
+variance than anything else we have measured.
+
+Two things this does not yet establish. The outputs differ: the control writes twelve lines
+where hybrid writes four or five, so some of the saving is the local model being terser rather
+than cheaper, and the arms need scoring against one rubric before the token gap means what it
+appears to mean. And these are the two easiest rungs; the interesting question is where the
+lines cross.
+
+## Superseded first measurement, rung 2
 
 Claude Sonnet 4.6, add a docstring explaining the zero case, one sample per arm.
 
