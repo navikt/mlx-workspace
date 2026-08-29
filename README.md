@@ -9,7 +9,7 @@ Copilot premium request each.
 
 ## The decision
 
-Ship one model: **`mlx-community/Qwen3.6-35B-A3B-4bit`** under mlx-lm, thinking disabled. It does
+Ship one model: **`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`** under mlx-lm, thinking disabled. It does
 eleven routine operations inside a real Nav Kotlin service at a 12.7s median, verifying 4 of the 8
 checkable ones, with no loops and no timeouts.
 

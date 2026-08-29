@@ -1,6 +1,9 @@
 # Which model the nav-pilot alpha ships
 
-Decision: ship **one** model, `mlx-community/Qwen3.6-35B-A3B-4bit`. No opt-in second slot.
+Decision: ship **one** model, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`. No opt-in second slot.
+
+Measured at a 36 GB wired limit, which is what a 48 GB Mac gives a model. Every earlier number in
+this repository was taken at 115 GB on rig B, and the cap changes behaviour, not just speed.
 
 Measured 28-29 August 2026 on rig B (M5 Max 128 GB): one clean pass, nine configurations, eleven
 tasks each, a 900s cap, a fresh server per task, and machine state recorded before and after every
@@ -55,7 +58,7 @@ better model, not merely a slower one.
 
 | Candidate | Verdict |
 |---|---|
-| **OptiQ quantization of the chosen model** | Tie. 12.8s and 4 of 8 against 12.7s and 4 of 8. No reason to carry a second build |
+| **Plain 4-bit of the chosen model** | Equally fast at the cap, and it produced a runaway tool loop of 220 and 203 identical calls in two of two full passes. OptiQ produced none in either. That is why the alpha ships OptiQ |
 | **KAT-Coder-V2.5, coder-tuned, same architecture** | 17.5s against 12.7s at the identical 4 of 8. Coder tuning bought nothing and cost speed |
 | **Qwen3.6-27B dense, same family** | 112.8s median. Nine times slower than its own MoE sibling for 4 of 8, the same score |
 | **Granite 4.1 8B** | Fastest at 11.4s and it never writes. 1 of 8 verified, zero files changed across eleven tasks, 2 timeouts. Attractive at 5.1 GB and Apache 2.0, and it does not edit |
@@ -96,7 +99,7 @@ at 15 of 16 GB swap with six orphaned clients made three tasks twelve times slow
 state log reads as a model result. Every number here comes from the clean pass after all of it.
 
 **One run per model.** Task times vary up to 1.7x between runs of the same model on the same task.
-That separates a 3x gap reliably and does not separate models within about 1.5x, so OptiQ is a tie
+That separates a 3x gap reliably and does not separate models within about 1.5x, so the two builds are a tie on speed
 and KAT-Coder is a loss only on speed.
 
 **One client, one codebase, one machine.** Everything ran through opencode, which is demonstrably

@@ -1,6 +1,6 @@
 # Plan forward, 29 August 2026
 
-The model question is closed. `mlx-community/Qwen3.6-35B-A3B-4bit` runs the alpha, and Qwen3.8-27B
+The model question is closed. `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit` runs the alpha, and Qwen3.8-27B
 is held back because it loops on tool calls. The evidence is in
 [`alpha-model-decision.md`](alpha-model-decision.md). Everything left is engineering.
 
