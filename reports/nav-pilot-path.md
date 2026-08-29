@@ -46,9 +46,8 @@ Reclaiming unused seats beats local inference by an order of magnitude, and need
 
 Org-wide rollouts leave a long tail of near-zero users. If Nav's usage data shows that tail, pulling
 those seats saves six figures this quarter, with no download, no sudo, and no support burden. Local
-models then have one defensible role, serving the people reclaimed. They are light users by
+models then have one defensible role: serving the people reclaimed. They are light users by
 definition, where break-even favours local, and their comparison is not Copilot but nothing at all.
-The pitch stops being "cheaper than Copilot" and becomes "covers the tail we stopped paying for".
 
 ## Fleet fit
 
@@ -60,41 +59,45 @@ designed around. Both models that fit a 48 GB Pro are smaller than that ceiling:
 | Qwen3.8-27B 4-bit | 14.6 + 3.3 = 17.9 GB | fits with headroom | comfortable |
 | Qwen3.6-35B-A3B | 18.6 + 4.7 = 23.3 GB | marginal, needs `vram-set 26` | comfortable |
 
-The dense 4-bit runs across the whole 32-48 GB fleet with no special tuning. It also scored 8.5/10
-and took 32m 21s. The model that fits every machine is the slow one. MLX is Apple Silicon only, so
-Windows and Linux developers are excluded until a second backend exists.
+Both run across the 32-48 GB fleet, the MoE needing `vram-set 26` on a 32 GB machine. MLX is Apple
+Silicon only, so Windows and Linux developers are excluded until a second backend exists.
 
 ## What the benchmark does not tell you
 
 It measures writing a greenfield JavaScript CLI against two public HTTP APIs. Nav developers modify
 existing Kotlin and Ktor services with Kafka, Postgres and Nais manifests. Nothing measured predicts
 that work: different language, different task shape, and a real service does not fit a 131k-token
-window. The six-minute figure all the arithmetic rests on could be much worse on Nav's real code,
-which moves the break-even against local inference. Every number here holds only until a Nav-shaped
-task is measured.
+window. Eleven Kotlin operations have since been measured against `navikt/isoppfolgingstilfelle` at
+a 12.7s median, which is a different task shape from a from-scratch build and does not replace the
+six-minute figure the arithmetic above rests on. The break-even has not been recomputed on it.
 
 ## Product shape, if it ships
 
-nav-pilot prepares repositories, writing agents, skills and instructions into a codebase and handing
-off to Copilot. Local inference runs a server on a laptop, so `nav-pilot local` would be the first
-command that does not touch the repo. The support burden differs too: a bad repo config produces a
-confusing prompt, a bad local setup a stalled 20 GB download, a beachballing machine, and a sudo
-command to re-run every reboot. Setup today is mise, a Python venv, oMLX built from source, a
-14-20 GB model download, a sudo VRAM adjustment, and a sandbox. Roughly a day per developer, which
-at $67/hour is $470, about seven months of the seat it would replace. `nav-pilot local install` has
-to absorb all of it, and the download and the sudo step cannot be hidden, only explained.
+**The model layer is what we contribute, and it is the only part missing.** `navikt/grillmester`
+already ships the agent payloads through a Tier 2 agentpakke contract wired to nav-pilot, and
+deliberately does not own model selection: `defaultModel: "inherit"`, no catalog. `mise run
+model-manifest` generates `manifest/models.json` from `profiles/`, which fills exactly that gap, and
+composing with `grillmester local setup|doctor|launch` beats rebuilding it. Issue #14.
+
+The support burden is the risk. A bad repo config produces a confusing prompt. A bad local setup
+produces a stalled 20 GB download, a beachballing machine, and a sudo command to re-run every
+reboot. Setup today is mise, a Python venv, oMLX built from source, a 14-20 GB model download, a
+sudo VRAM adjustment, and a sandbox: roughly a day per developer, which at $67/hour is $470, about
+seven months of the seat it would replace. Whatever ships has to absorb all of it, and the download
+and the sudo step cannot be hidden, only explained.
 
 ## Recommended sequence
 
 1. Get the invoice breakdown. Explain $69 against a $39 list price. An afternoon of work.
 2. Pull seat usage data. An idle tail reclaimed is six figures a year, available now.
-3. Add a Kotlin and Ktor task that modifies an existing service. It decides viability for Nav work.
-4. Three Qwen3.6 runs with corrected sampling. Thirty minutes, and n = 1 becomes a spread.
+3. Recompute break-even on the Kotlin numbers. The task shape developers actually hit is the one
+   the arithmetic should use.
+4. Three repeat runs of the chosen model. Thirty minutes, and n = 1 becomes a spread.
 5. Hold the bundling until 1 and 3 report. Cheap later, expensive to withdraw after install.
 
 ## What would kill this
 
 - The $69 gap turns out to be contract structure rather than usage. Local models save nothing.
-- The Kotlin task performs much worse than the JavaScript one. The break-even moves out of reach.
+- Recomputed on Kotlin work, the break-even moves out of reach.
 - Usage data shows few idle seats. The population local inference would serve does not exist.
 - A material share of the fleet is not Apple Silicon. The alpha cannot reach the org.

@@ -1,73 +1,72 @@
-# Plan forward, 28 August 2026
+# Plan forward, 29 August 2026
 
-The model question is closed. `mlx-community/Qwen3.6-35B-A3B-4bit` runs the alpha, decided on
-[cheap-operations data](alpha-model-decision.md) against a real Nav Kotlin service. Everything
-left is engineering and measurement, not model selection.
+The model question is closed. `mlx-community/Qwen3.6-35B-A3B-4bit` runs the alpha, and Qwen3.8-27B
+is held back because it loops on tool calls. The evidence is in
+[`alpha-model-decision.md`](alpha-model-decision.md). Everything left is engineering.
 
 ## Stop testing models
 
-Seven models were measured across two benchmarks. The ranking of what moves the numbers is
-recorded in [`../MODELS.md`](../MODELS.md) and model choice sits seventh. Spec precision, output
-caps, backend choice and sampling each beat it. Another bake-off buys less than fixing the harness
-bugs we already found, so the remaining model work is one cheap repeat run and nothing else.
+Nine configurations were measured in one clean pass, and the ranking of what moves the numbers is
+recorded in [`../MODELS.md`](../MODELS.md), with model choice near the bottom. Spec precision,
+output caps, backend choice and sampling each beat it. The remaining model work is one repeat run of
+the chosen model, for a range instead of a single sample.
 
-The exception is issue #10. If opencode's dropped output turns out to be fixable, Granite 4.1 8B
-at 5.1 GB replaces an 18.6 GB download, which changes what we can ask a developer to install. That
-is worth a day, and it is not on the critical path.
+## Four gates before a user touches this
 
-## Three gates before a user touches this
+**The tool-call loop.** Qwen3.8-27B ran the same `rg` command 113 times after a successful edit, and
+`repetition_penalty` at 1.05 turned a 15-call loop into a 40-call one while improving the median.
+Until the cause is known, the better code writer cannot ship, and we do not know that the chosen
+model is immune outside these eleven tasks. Detection is cheap: identical consecutive tool calls are
+already counted per task, so the client can cut a session off instead of hanging.
 
-**The server has to survive a working day.** Issue #11. It degrades until the model stops calling
-tools and every later task fails silently, producing no error a user would recognise. The
-benchmark works around it by restarting between tasks. A developer will not. Either find the cause
-or ship a supervisor that restarts on a health check, and detect the condition rather than trusting
-an uptime timer.
+**The server has to survive a working day.** Issue #11. It crashes rather than degrades:
+`EXC_BAD_ACCESS` on a stack guard page inside MLX's recursive graph walk, on the generation thread.
+The socket dies with it and every later request gets connection refused. The benchmark restarts
+between tasks. A developer will not. Either find the cause or ship a supervisor that restarts on a
+health check.
 
-**One command has to install and configure everything.** Issues #7 and #8. Model download, wired
-memory limit, server lifecycle, and both client configs. Copilot CLI is the sharp case: without
-`.github/copilot-instructions.md` it found the call sites it needed to change, announced it would
-edit them, and changed nothing. The same model with the file finished in 22 seconds. The two
-clients read different instruction files, so nav-pilot generates both from one source or the alpha
-fails for half its users.
+**KV growth needs a bound the alpha can set.** `mlx_lm.server` does not expose `--kv-bits`,
+`--quantized-kv-start` or `--max-kv-size`, though the library supports all three and
+`stream_generate` takes them as keyword arguments. `--prompt-cache-bytes` is parsed and never
+applied, because `LRUPromptCache` is constructed without `max_bytes` at `server.py:1743`. Three
+upstream issues, open since November, no PR. It is a contained patch and it is ours to write.
 
-**We have to be able to tell whether it worked.** Nothing measures this in the field today. Issue
-#2 gets the premium request distribution, which tells us whether overage is concentrated in a few
-heavy users or spread thin. That answer decides who the alpha is for and what a win looks like.
-Define the success metric from that data before anyone installs anything, because a metric chosen
-afterwards is a metric chosen to pass.
+**Instructions are per-client.** opencode reads `AGENTS.md`, Copilot CLI reads
+`.github/copilot-instructions.md`. Without the file, Copilot CLI found the call sites it needed to
+change, announced it would edit them, and changed nothing. Issue #8. Getting this wrong also
+corrupts measurement: our own `AGENTS.md` carried an unclosed think tag that made two models look
+broken for a day, and opencode was adding 37,807 characters of unrelated config until `--pure` and a
+benchmark-only `XDG_CONFIG_HOME` cut it to 11,191.
+
+## Compose with grillmester, do not rebuild it
+
+`navikt/grillmester` already ships the agent payloads through a Tier 2 agentpakke contract wired to
+nav-pilot, and deliberately does not own model selection: `defaultModel: "inherit"`, no catalog.
+`mise run model-manifest` generates `manifest/models.json` from `profiles/`, which fills exactly that
+gap. We contribute the model layer and leave `grillmester local setup|doctor|launch` alone. Issue
+#14.
 
 ## Sequence
 
 | Phase | Work | Done when |
 |---|---|---|
-| 1 | Issue #11, and three repeat runs of the chosen model (#3) | The server survives a day of use, and the headline numbers have a range instead of a single sample |
-| 2 | `nav-pilot local install` and per-client config generation (#7, #8) | A developer with no context runs one command and gets a working setup |
-| 3 | Premium request distribution (#2), success metric agreed | We know who to invite and what we are counting |
-| 4 | Five volunteers from the capped users (#9), time-boxed | Measured against the metric from phase 3, with a stated kill date |
+| 1 | The loop (root cause or client-side cutoff), issue #11, three repeat runs of the chosen model | The server survives a day, no session hangs, and the headline numbers have a range |
+| 2 | The KV flags patch, and per-client config generation (#8) | Context growth is bounded and both clients get instructions from one source |
+| 3 | `manifest/models.json` into the agentpakke contract (#14) | A developer runs grillmester's existing setup and gets a model |
+| 4 | Premium request distribution (#2), success metric agreed, then five volunteers (#9) | We know who to invite, what we are counting, and by when we stop |
 
-Phase 1 is a day. Phase 2 is the real work. Phases 3 and 4 need people outside this repo, so start
-the conversation for #2 now rather than at the end of phase 2.
-
-## Deferred on purpose
-
-Issue #5, grading the four ungraded weather-cli submissions, and #6, the thinking flip on the
-chosen model, both refine numbers that already point the same way. Issue #4, exposing
-`repetition_penalty`, matters only if we see repetition loops in the field. None of them gate the
-alpha.
+Phases 3 and 4 need people outside this repo, so start the conversation for #2 now.
 
 ## What would kill this
 
-- **The degradation has no clean fix.** A local assistant that silently stops working is worse
-  than no local assistant, because the developer keeps prompting into a dead session.
-- **The waiting is unacceptable in practice.** 32 seconds median is fine on paper. Nobody has
-  measured what it feels like across a working day, and the benchmark cannot tell us.
-- **Support cost exceeds the saving.** Five volunteers producing a steady trickle of setup
-  questions costs more than the overage it absorbs. Phase 2 exists to make this small.
-- **The overage is not concentrated.** If heavy users are not a distinct group, routing their
-  cheap operations locally does not move the invoice, and #2 is what tells us.
+- **The loop is not specific to Qwen3.8-27B.** If the chosen model hangs the same way on a
+  repository larger than the benchmark's, the alpha has no model.
+- **The crash has no clean fix.** A local assistant that silently stops working is worse than none,
+  because the developer keeps prompting into a dead session.
+- **The waiting is unacceptable in practice.** A 12.7s median is fine on paper. Nobody has measured
+  what it feels like across a working day, and the benchmark cannot tell us.
+- **The overage is not concentrated.** If heavy users are not a distinct group, routing their cheap
+  operations locally does not move the invoice. Issue #2 is what tells us.
 
-## What this does not cover
-
-Nothing here addresses the seat price. Nav pays roughly 1.8x Enterprise list, and local models do
-not touch that. It is a procurement question and it is worth more than this project is, so it
-should run in parallel and not behind it.
+Nothing here addresses the seat price. Nav pays roughly 1.8x Enterprise list, local models do not
+touch that, and it is worth more than this project is. Run it in parallel, not behind it.

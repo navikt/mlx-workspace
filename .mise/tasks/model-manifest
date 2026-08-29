@@ -38,13 +38,13 @@ OFFERED = {
     "qwen3.6-35b-a3b": {
         "default": True,
         "role": "Quick edits and questions",
-        "expect": "Answers routine work in seconds. Gets it right about half the time, so read what it changes.",
+        "expect": "Answers routine work in about 13 seconds. Gets it right about half the time, so read what it changes.",
     },
-    "qwen3.8-27b-4bit": {
-        "default": False,
-        "role": "Leave it running on a task",
-        "expect": "Writes better code and takes minutes, not seconds. Suits work you can walk away from.",
-    },
+    # Qwen3.8-27B is deliberately absent. It writes better code, and across three
+    # configurations it timed out on 3 to 4 of 11 tasks and looped on tool calls,
+    # once running the same command 113 times after a successful edit. Offering a
+    # model that hangs after editing a file would define the alpha for whoever
+    # hits it. Add it back when the loop is understood.
 }
 
 
