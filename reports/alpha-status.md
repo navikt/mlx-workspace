@@ -17,9 +17,19 @@ Update it rather than remembering.
 | Port ownership | Refuses a port it does not own, at `start` and per request behind a 3s cache |
 | `stop` identity | Refuses to signal a pid whose recorded start time does not match |
 
-## Outstanding, blocking the alpha
+## Blocking the alpha: nothing
 
-1. **Final QA sign-off** after the model-binding commit `cc9e7d71`. The previous pass said do not ship, on a finding that commit addresses.
+Reviewed four times. The final verdict is ship, for five users on opencode. The last blocker,
+the worker agent leaking into two generated catalogs where it would have run on the premium
+cloud model while claiming to be free, is closed by `593fae43`: excluded through a flag all
+three generators already honour, verified in every catalog, with a regression test, and
+nav-pilot's own materialisation proven not to route through it.
+
+## Follow-ups, outside the alpha's blast radius
+
+0. **A crash window in `RemoveOpenCodeLocalPolicy`**: the policy file is removed before the
+   instructions entry, so a crash between them leaves opencode's config pointing at a deleted
+   file. Same class as the one fixed a level up, harmless in practice, worth closing.
 
 ## Outstanding, not blocking
 
