@@ -25,6 +25,18 @@ cloud model while claiming to be free, is closed by `593fae43`: excluded through
 three generators already honour, verified in every catalog, with a regression test, and
 nav-pilot's own materialisation proven not to route through it.
 
+## Found after the ship call, fixed
+
+**Local setup was gated on the session model, not on dispatch being enabled.** A cloud main
+agent with a local worker, which is the entire point, got no binding, no dispatch fragment and
+no loop guard. Hand testing missed it because an earlier local-model session had written those
+markers and they persisted; the automated harness caught it on its first run by asserting what
+appeared after a launch from a clean state. Fixed in `6abd51b0` and re-verified end to end.
+
+**Still open, from the same review:** `LaunchOpenCodeStaged` does no local dispatch setup at
+all, and `LaunchCopilotStaged` never hits the refusal the legacy Copilot path has, so a staged
+launch with a local model id sends it to GitHub.
+
 ## Follow-ups, outside the alpha's blast radius
 
 0. **A crash window in `RemoveOpenCodeLocalPolicy`**: the policy file is removed before the

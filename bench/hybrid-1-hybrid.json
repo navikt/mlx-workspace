@@ -1,0 +1,89 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 1,
+      "task": "R2",
+      "preflight": 0,
+      "started": "2026-08-29T19:14:36+0200",
+      "seconds": 145.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8045.88,
+          "swap_free_mb": 1170.12,
+          "free_mb": 35583
+        },
+        "after": {
+          "swap_used_mb": 8045.88,
+          "swap_free_mb": 1170.12,
+          "free_mb": 36050
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-1-hybrid-0-20260829-191435.jsonl",
+      "verified": false,
+      "note": "0 of 2 expected terms in the answer",
+      "valid": false,
+      "invalid_reason": "hybrid arm but worker_model, dispatch_fragment, mlx_provider absent after the launch"
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-29T19:14:34+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": true,
+      "cloud_model": "claude-sonnet-4.6",
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 23262,
+        "port": "8080",
+        "started": "2026-08-29T17:37:10.313213+02:00",
+        "probe_seconds": 0.37
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 8045.88,
+        "swap_free_mb": 1170.12,
+        "free_mb": 35638
+      }
+    }
+  ],
+  "rung": 1,
+  "arm": "hybrid",
+  "task": "R2",
+  "kind": "read",
+  "verify": "grep_answer",
+  "prompt": "Which file and line reads the PDL_URL environment variable? Answer with the path and line number only. Do not change any files."
+}
