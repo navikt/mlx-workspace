@@ -1,0 +1,702 @@
+#!/usr/bin/env python3
+# mise description="Measure a cloud orchestrator dispatching to the local model against a dispatch-disabled control. Usage: mise run bench-hybrid --rung N [--arm hybrid|control] [--samples 3]"
+"""Run the ESCALATION_SPEC.md ladder through nav-pilot, two arms, and refuse to
+record anything we cannot stand behind.
+
+Every invalid measurement this week looked exactly like a valid one, and each was
+caught by eye, late. The list, and what now makes each impossible to record:
+
+  * prompts carrying 8.5k tokens of instructions nobody chose   -> preflight 6
+    asserts the instructions array and writes the inventory, with byte counts,
+    into the results file
+  * a run overlapping a 22 GB model download, six of eleven     -> preflight 3
+    tasks timed out
+  * a "cloud only" arm still dispatching, because disabling     -> preflight 6 runs
+    dispatch needs `alpha local off`, not an omitted            `alpha local off`
+    instruction                                                 and asserts clean
+  * a "hybrid" arm that never reached the local server,         -> the post-launch
+    because the binding lives in ~/.config/opencode and is      assert plus the
+    written at launch by nav-pilot                              local_calls rule
+  * timed-out tasks recording 0 turns, which reads as "the      -> nulls, never
+    model did nothing" rather than "unknown"                    zeros
+  * a results file merging two task sets because results were   -> one file per
+    keyed only by model                                         (rung, arm)
+
+Samples are driven through nav-pilot, never through bare `opencode`:
+
+    nav-pilot --client opencode --model <cloud> -- --pure run --format json "<prompt>"
+
+nav-pilot carries the cplt sandbox a real session has, starts the in-process loop
+guard whose port the provider block points at, and writes the worker binding and
+the dispatch fragment at launch. A bare `opencode` run has none of that: it either
+bypasses the guard or cannot reach the local model at all, depending on whether a
+launch happens to be live. That is how a "hybrid" arm measured the cloud.
+
+So the config lifecycle is part of what we measure, not a precondition. The binding
+and fragment must be ABSENT before a hybrid launch and PRESENT after it; for the
+control they must be absent both times. A sample where that does not hold is not
+recorded as a result.
+
+No-GPU paths: `--help` and `--self-check`.
+"""
+import argparse
+import json
+import os
+import re
+import signal
+import subprocess
+import sys
+import time
+import tomllib
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+HOME = Path.home()
+OPENCODE_CFG = HOME / ".config" / "opencode" / "opencode.json"
+NP_CONFIG = HOME / ".nav-pilot" / "config.toml"
+NP_SERVER_JSON = HOME / ".nav-pilot" / "local" / "server.json"
+NP_SERVER_LOG = HOME / ".nav-pilot" / "local" / "server.log"
+NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
+
+# Seam: the subcommands that own the dispatch lifecycle. They are the whole
+# difference between a control arm and a hybrid arm that happens to be quiet, so
+# they are named once, here, rather than spelled out at three call sites.
+LOCAL_OFF = [NAV_PILOT, "alpha", "local", "off"]
+# There is no `alpha local on`: `off` disables dispatch and `init` re-enables it,
+# which is asymmetric and worth fixing in nav-pilot. Until then this is the verb
+# that works, and `init` is safe to re-run once the weights are on disk.
+LOCAL_ON = [NAV_PILOT, "alpha", "local", "init"]
+
+# The three things nav-pilot writes into ~/.config/opencode/opencode.json at
+# launch. All three, or the arm is not what its name says.
+FRAGMENT_MARK = "lokal-dispatch"
+
+# The ladder from bench/ESCALATION_SPEC.md, easiest first, mapped onto the task
+# set in bench/tasks.json so a rung is verified by the same code that verifies
+# cheap-ops rather than by a second, subtly different notion of "passed".
+RUNGS = {
+    1: "R2",   # answer a question about the code (grep_answer: machine-checkable)
+    2: "E1",   # add a doc comment or a log line
+    3: "M1",   # rename a symbol across call sites
+    4: "G2",   # write a test file for an existing function
+    5: "M2",   # thread a field through a type, its mapper and every construction site
+    6: "D2",   # change a database row class, its mapper and all call sites
+    7: None,   # add a small endpoint with a test — never attempted, no verified prompt
+}
+
+
+def sh(cmd, cwd=None, timeout=1800, env=None):
+    e = {**os.environ, **(env or {})}
+    return subprocess.run(cmd, cwd=cwd and str(cwd), capture_output=True,
+                          text=True, timeout=timeout, env=e)
+
+
+# ── measurement primitives ────────────────────────────────────────────────────
+
+def memory():
+    """Swap used and free memory, in MB.
+
+    Recorded before and after every rung. The 22 GB download run did not fail
+    loudly; it pushed the machine into swap and every later task got slower, which
+    is indistinguishable from a worse model unless the number is in the file.
+    """
+    sw = subprocess.run(["sysctl", "-n", "vm.swapusage"], capture_output=True, text=True).stdout
+    vm = subprocess.run(["vm_stat"], capture_output=True, text=True).stdout
+
+    def grab(pat, text, cast=float, default=None):
+        m = re.search(pat, text)
+        return cast(m.group(1)) if m else default
+
+    page = grab(r"page size of (\d+)", vm, int, 4096)
+    free = grab(r"Pages free:\s+(\d+)", vm, int, 0)
+    spec = grab(r"Pages speculative:\s+(\d+)", vm, int, 0)
+    return {
+        "swap_used_mb": grab(r"used = ([\d.]+)M", sw),
+        "swap_free_mb": grab(r"free = ([\d.]+)M", sw),
+        "free_mb": round((free + spec) * page / 1048576),
+    }
+
+
+def read_cfg(path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def markers(cfg=None):
+    """Which of nav-pilot's three dispatch artefacts are present right now."""
+    cfg = read_cfg(OPENCODE_CFG) if cfg is None else cfg
+    instructions = cfg.get("instructions") or []
+    return {
+        "worker_model": bool((cfg.get("agent") or {}).get("lokal-arbeider", {}).get("model")),
+        "dispatch_fragment": any(FRAGMENT_MARK in str(i) for i in instructions),
+        "mlx_provider": "mlx" in (cfg.get("provider") or {}),
+    }
+
+
+def instruction_inventory(cfg=None):
+    """Every file opencode will paste into the system prompt, with its size.
+
+    One run carried 8.5k tokens of unrelated global instructions nobody chose, and
+    nothing in the result said so. This cannot be a simple size cap: the dispatch
+    fragment is a required instruction in the hybrid arm. So the inventory is
+    asserted to exist and written into the results file, where a reader months
+    later can see exactly what was in the prompt.
+    """
+    cfg = read_cfg(OPENCODE_CFG) if cfg is None else cfg
+    out = []
+    for entry in cfg.get("instructions") or []:
+        p = Path(os.path.expanduser(str(entry)))
+        out.append({"path": str(p), "bytes": p.stat().st_size if p.exists() else None})
+    return out
+
+
+def port_pid(port):
+    out = subprocess.run(["lsof", "-tiTCP:" + str(port), "-sTCP:LISTEN"],
+                         capture_output=True, text=True).stdout.split()
+    return int(out[0]) if out else None
+
+
+def local_completion(port, model, timeout=120):
+    """Ask the local server for a real completion. Binding the port is not the
+    same as being able to answer: mlx-lm loads weights lazily, so a benchmark that
+    starts on bind alone measures model loading as if it were thinking time."""
+    body = json.dumps({"model": model, "max_tokens": 8,
+                       "messages": [{"role": "user", "content": "Reply with exactly: ok"}]}).encode()
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
+                                 data=body, headers={"Content-Type": "application/json"})
+    started = time.time()
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        json.load(r)
+    return round(time.time() - started, 2)
+
+
+def log_offset():
+    return NP_SERVER_LOG.stat().st_size if NP_SERVER_LOG.exists() else 0
+
+
+def local_calls_since(offset):
+    """POST /v1/chat/completions lines the local server logged during this sample.
+
+    Read by byte offset rather than by tailing, so a rotated or truncated log
+    cannot quietly count the previous run's traffic as this one's.
+    """
+    if not NP_SERVER_LOG.exists():
+        return None
+    size = NP_SERVER_LOG.stat().st_size
+    with NP_SERVER_LOG.open("rb") as fh:
+        fh.seek(min(offset, size))
+        chunk = fh.read().decode("utf8", "replace")
+    return chunk.count("POST /v1/chat/completions")
+
+
+def parse_events(text):
+    """Cloud steps, cloud tokens and the model's reply from opencode's JSON stream.
+
+    nav-pilot, cplt and opencode all write to the same stream, so parse leniently
+    and report what actually parsed.
+    """
+    steps, reply = 0, []
+    tok = {"total": 0, "input": 0, "output": 0, "reasoning": 0, "cache_write": 0, "cache_read": 0}
+    reasons = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        kind, part = ev.get("type", ""), ev.get("part") or {}
+        if kind == "step_finish":
+            steps += 1
+            reasons.append(part.get("reason", "?"))
+            t = part.get("tokens") or {}
+            cache = t.get("cache") or {}
+            for k in ("total", "input", "output", "reasoning"):
+                tok[k] += int(t.get(k) or 0)
+            tok["cache_write"] += int(cache.get("write") or 0)
+            tok["cache_read"] += int(cache.get("read") or 0)
+        elif kind == "text" and isinstance(part.get("text"), str):
+            reply.append(part["text"])
+    return {"cloud_steps": steps, "cloud_tokens": tok,
+            "truncated": "length" in reasons,
+            "reply": " ".join(reply).strip()}
+
+
+def numstat_lines(numstat):
+    """Lines added plus deleted, from `git diff --numstat`. Binary files show '-'."""
+    total = 0
+    for line in numstat.splitlines():
+        cols = line.split("\t")
+        if len(cols) >= 2:
+            total += sum(int(c) for c in cols[:2] if c.isdigit())
+    return total
+
+
+# ── target repository ─────────────────────────────────────────────────────────
+
+CFG = json.loads((ROOT / "bench" / "tasks.json").read_text())
+JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
+# A workspace of its own. bench-cheap-ops owns workspaces/<profile>/, and two
+# harnesses resetting the same checkout is the failure that made three earlier
+# workspaces hold a previous run's code.
+WS = ROOT / "workspaces" / "hybrid-bench"
+REPO = WS / "kotlin"
+
+
+def ensure_clone():
+    if (REPO / ".git").is_dir():
+        return
+    WS.mkdir(parents=True, exist_ok=True)
+    print(f"→ Cloning {CFG['repo']} at {CFG['ref']}")
+    r = sh(["git", "clone", "--depth", "1", CFG["repo"], str(REPO)], timeout=900)
+    if r.returncode != 0:
+        raise SystemExit(f"✗ clone failed: {r.stderr[-400:]}")
+    ref = CFG["ref"]
+    if ref not in ("main", "master"):
+        f = sh(["git", "fetch", "-q", "--depth", "1", "origin", ref], cwd=REPO, timeout=600)
+        if f.returncode != 0:
+            raise SystemExit(f"✗ fetch of {ref} failed: {f.stderr[-400:]}")
+        sh(["git", "checkout", "-q", "FETCH_HEAD"], cwd=REPO)
+
+
+def reset_repo():
+    sh(["git", "reset", "--hard", "-q"], cwd=REPO)
+    sh(["git", "clean", "-qfd", "-e", "build", "-e", ".gradle"], cwd=REPO)
+
+
+def build(target):
+    cmd = CFG.get(f"{target}_cmd")
+    if cmd:
+        return sh(["bash", "-lc", cmd], cwd=REPO, timeout=1800)
+    return sh(["./gradlew", "compileKotlin" if target == "compile" else "test",
+               "--console=plain", "-q", "--offline"], cwd=REPO, timeout=1800,
+              env={"JAVA_HOME": str(JDK), "PATH": f"{JDK}/bin:" + os.environ.get("PATH", "")})
+
+
+def changed():
+    """Files touched, and lines changed INCLUDING untracked files.
+
+    `git diff` alone reports zero for a task whose whole output is a new test
+    file, which is rung 4. `add -A -N` stages the intent so the new file shows up
+    in numstat; .gitignore still keeps build output out.
+    """
+    sh(["git", "add", "-A", "-N"], cwd=REPO)
+    files = [l for l in sh(["git", "status", "--porcelain"], cwd=REPO).stdout.splitlines() if l.strip()]
+    return len(files), numstat_lines(sh(["git", "diff", "--numstat"], cwd=REPO).stdout)
+
+
+def verify(task, reply):
+    """Run the target's own checks. Never the model's claim that they passed: one
+    earlier submission reported 20/20 passing with eight assertions inside a catch
+    block that swallowed them."""
+    kind = task["verify"]
+    files, _ = changed()
+    if kind in ("compile", "test", "rename") and not files:
+        return False, "no changes made (model did not edit anything)"
+    if kind == "compile":
+        r = build("compile")
+        return r.returncode == 0, "compiles" if r.returncode == 0 else "compile failed"
+    if kind == "test":
+        r = build("test")
+        return r.returncode == 0, "suite passes" if r.returncode == 0 else "suite failed"
+    if kind == "rename":
+        hits = sh(["grep", "-rn", task["old_symbol"], "src"], cwd=REPO).stdout.strip()
+        if hits:
+            return False, f"old symbol still present ({len(hits.splitlines())} refs)"
+        r = build("compile")
+        return r.returncode == 0, "renamed and compiles" if r.returncode == 0 else "renamed but broken"
+    if kind == "grep_answer":
+        want = task.get("expect_terms", [])
+        found = [t for t in want if t in reply]
+        return len(found) == len(want), f"{len(found)} of {len(want)} expected terms in the answer"
+    return None, "needs a human"
+
+
+# ── preflight ─────────────────────────────────────────────────────────────────
+
+def np(cmd, what):
+    r = sh(cmd, timeout=300)
+    if r.returncode != 0:
+        raise SystemExit(
+            f"✗ {what} failed: {' '.join(cmd)}\n"
+            f"  {(r.stderr or r.stdout).strip()[-300:]}\n"
+            f"  If this says 'unknown command: alpha', this nav-pilot predates the\n"
+            f"  local-dispatch lifecycle. Fix: brew upgrade navikt/tap/nav-pilot")
+    return r
+
+
+def preflight(arm, port, profile_key, meta, params):
+    """Fatal, before any measurement. Each check names the run it would have saved.
+
+    Order is deliberate: cheapest and most-often-wrong first, so a misconfigured
+    machine fails in seconds rather than after a rung of GPU time.
+    """
+    snap = {"checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "arm": arm}
+    print("→ preflight")
+
+    # 1. Active profile. A failed `model-use` leaves the previous model active and
+    #    everything downstream measures the wrong model under the right name.
+    served = params["MLX_MODEL"]
+    snap["local_profile"] = profile_key
+    snap["local_model"] = served
+    print(f"  1 ✓ profile {profile_key} → {served}")
+
+    # 2. nav-pilot itself. An auto-update mid-run swaps the binary that writes the
+    #    config and starts the loop guard, which is the same class of failure as
+    #    changing the model halfway through.
+    ver = sh([NAV_PILOT, "version"], timeout=120).stdout.strip().splitlines()
+    snap["nav_pilot_version"] = ver[-1] if ver else "?"
+    np_cfg = tomllib.loads(NP_CONFIG.read_text()) if NP_CONFIG.exists() else {}
+    snap["nav_pilot_auto_update"] = np_cfg.get("auto_update")
+    snap["cloud_model"] = os.environ.get("BENCH_CLOUD_MODEL") or np_cfg.get("model")
+    if not snap["cloud_model"]:
+        raise SystemExit("✗ no cloud model. Fix: nav-pilot config set model <id>, "
+                         "or set BENCH_CLOUD_MODEL")
+    if np_cfg.get("auto_update"):
+        print("    ⚠ nav-pilot auto_update is on — it can change the harness mid-run.\n"
+              "      Fix: nav-pilot config set auto_update false")
+    print(f"  2 ✓ nav-pilot {snap['nav_pilot_version']} · cloud model {snap['cloud_model']}")
+
+    # 3. Nothing else competing for the GPU or the disk. A run that overlapped a
+    #    22 GB download timed out on six of eleven tasks and looked like a bad model.
+    busy = []
+    for pat, why in [(r"hf(_transfer)? download|huggingface-cli download", "a model download"),
+                     (r"\.mise/tasks/bench-cheap-ops", "bench-cheap-ops"),
+                     (r"\.mise/tasks/bench-weather-cli", "bench-weather-cli")]:
+        hits = subprocess.run(["pgrep", "-fl", pat], capture_output=True, text=True).stdout.strip()
+        if hits:
+            busy.append(f"{why}: {hits.splitlines()[0]}")
+    others = [p for p in subprocess.run(["pgrep", "-f", "bench-hybrid"], capture_output=True,
+                                        text=True).stdout.split() if int(p) != os.getpid()]
+    if others:
+        busy.append(f"another bench-hybrid: pid {' '.join(others)}")
+    if busy:
+        raise SystemExit("✗ the machine is busy — every number would be a measurement of "
+                         "contention:\n  " + "\n  ".join(busy) + "\n  Fix: wait for it, or kill it.")
+    snap["exclusive"] = True
+    print("  3 ✓ no download, no other benchmark")
+
+    # 4. Wired memory limit. The plain 4-bit build produced a 200-call runaway loop
+    #    at the wrong cap; a rung measured under a different limit is not comparable.
+    want_gb = meta.get("gpu_wired_limit_gb")
+    cur_mb = sh(["sysctl", "-n", "iogpu.wired_limit_mb"]).stdout.strip()
+    cur_gb = int(cur_mb) // 1024 if cur_mb.isdigit() and cur_mb != "0" else None
+    snap["wired_limit_gb"] = cur_gb
+    snap["wired_limit_expected_gb"] = want_gb
+    if want_gb and cur_gb != want_gb:
+        raise SystemExit(f"✗ wired limit is {cur_gb or 'macOS default'} GB, profile "
+                         f"{profile_key} expects {want_gb} GB.\n"
+                         f"  Fix: mise run vram-set {want_gb}")
+    print(f"  4 ✓ wired limit {cur_gb} GB matches the profile")
+
+    # 5. The local server answers, and the process holding the port is the one
+    #    nav-pilot thinks it started. A stale pid file next to a foreign listener
+    #    means local_calls counts someone else's traffic.
+    holder = port_pid(port)
+    recorded = read_cfg(NP_SERVER_JSON)
+    if holder is None:
+        raise SystemExit(f"✗ nothing is listening on port {port}.\n"
+                         f"  Fix: {NAV_PILOT} alpha local start")
+    if recorded.get("pid") != holder:
+        raise SystemExit(f"✗ pid {holder} holds port {port} but {NP_SERVER_JSON.name} says "
+                         f"{recorded.get('pid')}.\n  A foreign listener would make local_calls "
+                         f"someone else's traffic.\n  Fix: {NAV_PILOT} alpha local restart")
+    if recorded.get("model") != served:
+        raise SystemExit(f"✗ the running server serves {recorded.get('model')}, the active "
+                         f"profile is {served}.\n  Fix: mise run model-use {profile_key}, "
+                         f"then {NAV_PILOT} alpha local restart")
+    try:
+        latency = local_completion(port, served)
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        raise SystemExit(f"✗ the local server bound the port but did not complete: {e}\n"
+                         f"  Fix: {NAV_PILOT} alpha local restart, and wait for the weights to load")
+    snap["local_server"] = {"pid": holder, "port": port, "started": recorded.get("started"),
+                            "probe_seconds": latency}
+    print(f"  5 ✓ local server pid {holder} answered in {latency}s")
+
+    # 6. The dispatch lifecycle. `off` is the control, not an omitted instruction:
+    #    with the fragment installed the cloud model dispatches on its own
+    #    initiative, so an arm that only omits the instruction is not a control.
+    #    Both arms start from a clean config, because nav-pilot writing the binding
+    #    at launch is part of what we are measuring.
+    np(LOCAL_OFF, "alpha local off")
+    before = markers()
+    if any(before.values()):
+        raise SystemExit(f"✗ `alpha local off` left dispatch artefacts behind: "
+                         f"{ {k: v for k, v in before.items() if v} }\n"
+                         f"  {OPENCODE_CFG} must have no agent.lokal-arbeider.model, no "
+                         f"{FRAGMENT_MARK} in instructions and no mlx provider before a launch.\n"
+                         f"  Fix: remove them by hand, then re-run.")
+    snap["markers_before"] = before
+    snap["instructions_before"] = instruction_inventory()
+    print("  6 ✓ config clean after `alpha local off`")
+
+    # 7. Instruction inventory. Every entry must exist: a missing file is a silent
+    #    change in what the model was told, between one run and the next.
+    missing = [i["path"] for i in snap["instructions_before"] if i["bytes"] is None]
+    if missing:
+        raise SystemExit("✗ instructions reference files that do not exist:\n  "
+                         + "\n  ".join(missing))
+    total = sum(i["bytes"] or 0 for i in snap["instructions_before"])
+    print(f"  7 ✓ {len(snap['instructions_before'])} instruction file(s), {total:,} bytes")
+
+    snap["memory_at_preflight"] = memory()
+    return snap
+
+
+# ── one sample ────────────────────────────────────────────────────────────────
+
+def run_sample(arm, rung, task, n, snap, snap_ix, cap):
+    log_dir = ROOT / ".bench-logs"
+    log_dir.mkdir(exist_ok=True)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    log_path = log_dir / f"hybrid-{rung}-{arm}-{n}-{stamp}.jsonl"
+
+    reset_repo()
+    # Re-establish the clean baseline before every sample, so "absent before,
+    # present after" is a fact about this launch rather than about the last one.
+    # Each sample is also a fresh `opencode run`: the prompt cache favours later
+    # tasks in a session, which would make task order the thing we measured.
+    np(LOCAL_OFF, "alpha local off")
+    if arm == "hybrid":
+        np(LOCAL_ON, "alpha local on")
+
+    mem_before = memory()
+    offset = log_offset()
+    argv = [NAV_PILOT, "--client", "opencode", "--model", snap["cloud_model"],
+            "--", "--pure", "run", "--format", "json", task["prompt"]]
+    started = time.time()
+    timed_out = False
+    # start_new_session so a timeout kills this launch's whole tree by process
+    # group. A pkill on "opencode --pure" would also kill a bench-cheap-ops run
+    # sharing the machine, and subprocess only kills nav-pilot, not the client it
+    # launched: six orphaned clients accumulated over one day of killed runs.
+    with log_path.open("w") as fh:
+        proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
+                                start_new_session=True)
+        try:
+            rc = proc.wait(timeout=cap)
+        except subprocess.TimeoutExpired:
+            timed_out, rc = True, None
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            proc.wait(timeout=60)
+    elapsed = round(time.time() - started, 1)
+
+    ev = parse_events(log_path.read_text(errors="replace"))
+    after = markers()
+    local_calls = local_calls_since(offset)
+    files, lines = changed()
+
+    rec = {
+        "n": n, "arm": arm, "rung": rung, "task": task["id"],
+        # Which preflight snapshot this sample ran under. A resumed file holds
+        # more than one, and a sample taken under a different wired limit or a
+        # different instruction set is not the same measurement.
+        "preflight": snap_ix,
+        "started": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(started)),
+        "seconds": elapsed, "timed_out": timed_out, "exit": rc,
+        # local_calls, lines and files are measured from the server log and the
+        # working tree, so they survive a killed client and stay real numbers.
+        "local_calls": local_calls, "lines_changed": lines, "files_changed": files,
+        "cloud_steps": ev["cloud_steps"], "cloud_tokens": ev["cloud_tokens"],
+        "truncated": ev["truncated"],
+        "markers_after": after,
+        "memory": {"before": mem_before, "after": memory()},
+        "local_server_pid": snap["local_server"]["pid"],
+        "local_server_started": snap["local_server"]["started"],
+        "log": str(log_path.relative_to(ROOT)),
+    }
+
+    # Never record an unknown as a zero. A killed client prints no step_finish, so
+    # cloud_steps and every token count default to zero, and zero turns reads as
+    # "the model did nothing" — a different claim from "we do not know". That has
+    # been misread twice.
+    invalid = None
+    if timed_out:
+        invalid = f"timed out after {cap}s"
+    elif rc != 0:
+        invalid = f"client exited {rc}"
+    if invalid:
+        rec["cloud_steps"] = None
+        rec["cloud_tokens"] = None
+        rec["truncated"] = None
+        rec["verified"] = None
+        rec["note"] = invalid
+        rec["valid"] = False
+        rec["invalid_reason"] = invalid
+        return rec
+
+    # The arm has to be what its name says. Hybrid: nav-pilot must have written all
+    # three artefacts at launch. Control: it must have written none.
+    want = arm == "hybrid"
+    wrong = [k for k, v in after.items() if v != want]
+    if wrong:
+        invalid = (f"{arm} arm but {', '.join(wrong)} "
+                   f"{'absent' if want else 'present'} after the launch")
+    # A hybrid sample with no local calls is the cloud doing the work: the model
+    # ignored the fragment and edited directly. Counting it as cheap hybrid is
+    # exactly backwards, so it is marked invalid rather than averaged in.
+    elif arm == "hybrid" and not local_calls:
+        invalid = "hybrid arm made 0 local calls — the cloud did the work"
+    elif arm == "control" and local_calls:
+        invalid = f"control arm made {local_calls} local calls — dispatch was not disabled"
+
+    ok, note = verify(task, ev["reply"])
+    rec["verified"] = ok
+    rec["note"] = note
+    rec["valid"] = invalid is None
+    rec["invalid_reason"] = invalid
+    return rec
+
+
+# ── self-check ────────────────────────────────────────────────────────────────
+
+def self_check():
+    """One runnable check on the parsing, so a silent schema change is loud.
+    Touches no GPU, no server and no config."""
+    stream = "\n".join([
+        "nav-pilot: launching opencode",
+        json.dumps({"type": "step_finish", "part": {"reason": "tool-calls", "tokens": {
+            "total": 100, "input": 90, "output": 10, "reasoning": 0,
+            "cache": {"write": 5, "read": 80}}}}),
+        json.dumps({"type": "step_finish", "part": {"reason": "length", "tokens": {
+            "total": 20, "input": 15, "output": 5, "reasoning": 0,
+            "cache": {"write": 0, "read": 15}}}}),
+        json.dumps({"type": "text", "part": {"text": "ApplicationEnvironment.kt:59"}}),
+        "{ not json",
+    ])
+    ev = parse_events(stream)
+    assert ev["cloud_steps"] == 2, ev
+    assert ev["cloud_tokens"] == {"total": 120, "input": 105, "output": 15,
+                                 "reasoning": 0, "cache_write": 5, "cache_read": 95}, ev
+    assert ev["truncated"] is True
+    assert "59" in ev["reply"]
+
+    clean = {"instructions": ["/x/AGENTS.md"]}
+    dirty = {"agent": {"lokal-arbeider": {"model": "mlx/m"}},
+             "instructions": ["/x/nav-pilot-lokal-dispatch.md"],
+             "provider": {"mlx": {}}}
+    assert markers(clean) == {"worker_model": False, "dispatch_fragment": False,
+                              "mlx_provider": False}
+    assert all(markers(dirty).values())
+    assert instruction_inventory({"instructions": ["/nope/missing.md"]})[0]["bytes"] is None
+
+    assert numstat_lines("3\t1\ta.kt\n-\t-\tlogo.png\n0\t7\tb.kt\n") == 11
+    m = memory()
+    assert isinstance(m["free_mb"], int) and m["swap_used_mb"] is not None, m
+
+    print("✓ self-check passed")
+
+
+# ── main ──────────────────────────────────────────────────────────────────────
+
+def show(v):
+    """A missing number prints as '?', never as 0. See run_sample."""
+    return "?" if v is None else f"{v:,}"
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog="mise run bench-hybrid",
+        description="Cloud orchestrator dispatching to the local model, against a "
+                    "dispatch-disabled control. See bench/ESCALATION_SPEC.md.")
+    ap.add_argument("--rung", type=int, action="append",
+                    help=f"ladder rung to run, repeatable. {sorted(RUNGS)}")
+    ap.add_argument("--arm", choices=["hybrid", "control", "both"], default="both")
+    ap.add_argument("--samples", type=int, default=3,
+                    help="samples per arm (default 3: our medians move 1.5x between "
+                         "identical runs, so one sample is not a result)")
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TASK_TIMEOUT", "900")),
+                    help="per-sample cap in seconds")
+    ap.add_argument("--self-check", action="store_true", help="parser self-check, no GPU")
+    args = ap.parse_args()
+
+    if args.self_check:
+        return self_check()
+    if not args.rung:
+        ap.error("--rung is required. " + ", ".join(
+            f"{r}={t or 'undefined'}" for r, t in sorted(RUNGS.items())))
+
+    import _profiles as P
+    profile_key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+    if not profile_key:
+        raise SystemExit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+    meta, params = P.load(profile_key)
+    port = os.environ.get("MLX_SERVER_PORT", "8080")
+    by_id = {t["id"]: t for t in CFG["tasks"]}
+
+    arms = ["hybrid", "control"] if args.arm == "both" else [args.arm]
+    was_enabled = tomllib.loads(NP_CONFIG.read_text()).get("local_enabled") if NP_CONFIG.exists() else None
+    ensure_clone()
+    try:
+        for rung in args.rung:
+            if RUNGS.get(rung) is None:
+                raise SystemExit(f"✗ rung {rung} has no verified prompt in bench/tasks.json. "
+                                 f"Rung 7 (add a small endpoint with a test) was never "
+                                 f"attempted locally; write the task first.")
+            task = by_id[RUNGS[rung]]
+            for arm in arms:
+                snap = preflight(arm, port, profile_key, meta, params)
+                # One file per (rung, arm). Results keyed only by model merged two
+                # different task sets once, and ids present in both overwrote
+                # each other silently.
+                out = ROOT / "bench" / f"hybrid-{rung}-{arm}.json"
+                doc = json.loads(out.read_text()) if out.exists() else {}
+                doc.setdefault("samples", [])
+                doc.setdefault("preflight", [])
+                print(f"\n── rung {rung} · {arm} · {task['id']} "
+                      f"({len(doc['samples'])}/{args.samples} already recorded)")
+                if len(doc["samples"]) >= args.samples:
+                    print("   nothing to do")
+                    continue
+                if doc["samples"]:
+                    backup = ROOT / "bench" / ".previous" / f"hybrid-{rung}-{arm}-{int(out.stat().st_mtime)}.json"
+                    backup.parent.mkdir(parents=True, exist_ok=True)
+                    backup.write_text(out.read_text())
+                    print(f"→ existing results backed up to {backup.relative_to(ROOT)}")
+                doc.update({"rung": rung, "arm": arm, "task": task["id"],
+                            "kind": task["kind"], "verify": task["verify"],
+                            "prompt": task["prompt"]})
+                # Snapshots accumulate rather than overwrite: a resumed file must
+                # still say what the machine looked like for the samples already
+                # in it.
+                doc["preflight"].append(snap)
+                snap_ix = len(doc["preflight"]) - 1
+                # Resumable: top up to --samples rather than starting over.
+                while len(doc["samples"]) < args.samples:
+                    n = len(doc["samples"])
+                    rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout)
+                    doc["samples"].append(rec)
+                    out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
+                    flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
+                    tk = rec["cloud_tokens"]
+                    print(f"   {flag} sample {n}: {rec['seconds']}s · "
+                          f"{show(rec['cloud_steps'])} steps · "
+                          f"{show(tk['total'] if tk else None)} tokens "
+                          f"(cache r{show(tk['cache_read'] if tk else None)}) · "
+                          f"{show(rec['local_calls'])} local calls · "
+                          f"{rec['lines_changed']} lines · {rec['note']}")
+                    if not rec["valid"]:
+                        print(f"     ⚠ INVALID, not a result: {rec['invalid_reason']}")
+                print(f"✓ {out.relative_to(ROOT)}")
+    finally:
+        reset_repo()
+        # Leave the machine in the state we found it. The control arm turns
+        # dispatch off, and walking away from that silently changes the alpha for
+        # its user.
+        if was_enabled:
+            sh(LOCAL_ON, timeout=300)
+
+
+if __name__ == "__main__":
+    main()

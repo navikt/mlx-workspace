@@ -99,6 +99,9 @@ description = "Start opencode in workspaces/<model-key>/ against the local MLX s
 [tasks.bench-cheap-ops]
 description = "Run the cheap-operations benchmark for the active model"
 
+[tasks.bench-hybrid]
+description = "Measure a cloud orchestrator dispatching to the local model, against a dispatch-disabled control"
+
 [tasks.opencode-headless]
 description = "Run one opencode prompt non-interactively, sandboxed. Usage: mise run opencode-headless \"<prompt>\""
 
