@@ -41,6 +41,28 @@ Per task, per arm, record:
 `cloud_turns` is the cost number. `local_calls` is free. The comparison is
 `cloud_turns(hybrid)` against `cloud_turns(cloud only)` for the same verified outcome.
 
+## First measurement, rung 2
+
+Claude Sonnet 4.6, add a docstring explaining the zero case, one sample per arm.
+
+| Arm | Steps | Cloud tokens | Output | Cache read | Local calls | Lines |
+|---|---|---|---|---|---|---|
+| Hybrid | 3 | 49,012 | 285 | 47,940 | 3 | 5 |
+| Cloud only | 5 | 82,044 | 418 | 64,837 | 0 | 12 |
+
+Hybrid costs fewer cloud steps and fewer cloud tokens, which contradicts the arithmetic above:
+the cloud-only path is not one request either, because it reads, edits and verifies. The
+dispatch overhead is real and smaller than the work it displaces.
+
+Two reasons not to quote this yet. It is one sample, against measurements that move 1.5x
+between identical runs. And the arms did not produce the same output: cloud-only wrote twelve
+lines where hybrid wrote five, so part of the difference is verbosity rather than efficiency.
+Fix that by scoring both against the same rubric before comparing tokens.
+
+Also note where the tokens actually go: 97.8% of the hybrid total is cache reads. Whether that
+is billed at full rate decides the economics, and it is a fact about Nav's contract rather than
+about our code.
+
 ## The ladder
 
 Rungs from our own measurements, easiest first. Each rung is a task shape we have data for,
