@@ -12,6 +12,7 @@ model cannot be offered to users without also being runnable here.
 """
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -48,6 +49,19 @@ OFFERED = {
 }
 
 
+# nav-pilot refuses a manifest whose params carry a key outside this namespace,
+# and it refuses the whole file rather than the entry. That rule exists because
+# params become the environment of the inference process, where PYTHONPATH would
+# execute code and HF_ENDPOINT would move the download to another host.
+#
+# The check is repeated here because the consumer is fail-closed and lives in
+# another repository: a key added here that nav-pilot rejects would silently
+# strand every installed client on its embedded copy of this file. Failing the
+# generator is a broken build for us. Failing the client is a fleet-wide event
+# nobody notices.
+PARAM_KEY = re.compile(r"^MLX_[A-Z0-9_]+$")
+
+
 def entry(key: str) -> dict:
     meta, params = P.load(key)
     hf_id = params["MLX_MODEL"]
@@ -67,8 +81,15 @@ def entry(key: str) -> dict:
         "min_ram_gb": 48,
         "wired_limit_gb": meta.get("gpu_wired_limit_gb"),
         # Everything the server and the clients need, already validated here.
-        "params": {k: v for k, v in params.items() if k.startswith("MLX_")},
+        "params": check_params({k: v for k, v in params.items() if k.startswith("MLX_")}, key),
     }
+
+
+def check_params(params: dict, key: str) -> dict:
+    bad = sorted(k for k in params if not PARAM_KEY.match(k))
+    if bad:
+        raise SystemExit(f"\u2717 {key} declares params nav-pilot would refuse: {', '.join(bad)}")
+    return params
 
 
 manifest = {
