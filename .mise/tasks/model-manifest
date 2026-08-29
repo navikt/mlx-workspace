@@ -35,10 +35,10 @@ ALLOWED_ORGS = {"mlx-community", "lmstudio-community"}
 # each. A profile is not an offer: the repo carries profiles for models we have
 # rejected, and those must never reach the manifest.
 OFFERED = {
-    "qwen3.6-35b-a3b": {
+    "qwen3.6-35b-a3b-optiq": {
         "default": True,
         "role": "Sub-agent worker for focused tasks",
-        "expect": "Takes a scoped task from the main agent and returns in seconds. Reads, renames, small edits and single-file changes. Not for work that needs many turns: it is unreliable past the point where a task stops being focused.",
+        "expect": "Takes a scoped task from the main agent and returns in seconds. Reads, renames, small edits and single-file changes. Not for work that needs many turns: it is unreliable past the point where a task stops being focused. The OptiQ build is chosen over the plain 4-bit because the plain one produced a roughly 200-call runaway tool loop in both passes at the 36 GB memory cap.",
     },
     # Qwen3.8-27B is deliberately absent. It writes better code, and across three
     # configurations it timed out on 3 to 4 of 11 tasks and looped on tool calls,
