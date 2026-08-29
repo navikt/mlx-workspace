@@ -34,7 +34,11 @@ if not tasks:
 
 ws = ROOT / "workspaces" / key
 repo = ws / "kotlin"
-results_path = ROOT / "bench" / f"results-{key}.json"
+# A target may name its own results file. Without this, running a second stack
+# under the same profile merges into the first stack's results, and ids that
+# exist in both sets silently overwrite each other.
+suffix = CFG.get("results_suffix", "")
+results_path = ROOT / "bench" / f"results-{key}{suffix}.json"
 results = json.loads(results_path.read_text()) if results_path.exists() else {}
 if results:
     # Results are keyed by the active profile, so a failed `model-use` leaves the
@@ -58,8 +62,19 @@ def ensure_clone():
     if (repo / ".git").is_dir():
         return
     ws.mkdir(parents=True, exist_ok=True)
-    print(f"→ Cloning {CFG['repo']}")
-    sh(["git", "clone", "--depth", "1", "-b", CFG["ref"], CFG["repo"], str(repo)], timeout=600)
+    print(f"→ Cloning {CFG['repo']} at {CFG['ref']}")
+    # `git clone -b` takes a branch or tag, not a commit. Targets are pinned to a
+    # SHA so a dependency bump cannot change the benchmark under us, so clone the
+    # default branch and then fetch the exact commit.
+    r = sh(["git", "clone", "--depth", "1", CFG["repo"], str(repo)], timeout=900)
+    if r.returncode != 0:
+        raise SystemExit(f"✗ clone failed: {r.stderr[-400:]}")
+    ref = CFG["ref"]
+    if ref not in ("main", "master"):
+        f = sh(["git", "fetch", "-q", "--depth", "1", "origin", ref], cwd=repo, timeout=600)
+        if f.returncode != 0:
+            raise SystemExit(f"✗ fetch of {ref} failed: {f.stderr[-400:]}")
+        sh(["git", "checkout", "-q", "FETCH_HEAD"], cwd=repo)
 
 
 def reset_repo():

@@ -2,23 +2,20 @@
   "R1": {
     "task": "R1",
     "kind": "read",
-    "seconds": 26.6,
+    "seconds": 9.4,
     "turns": 4,
     "tool_calls": 3,
-    "tokens_in": 9127,
-    "tokens_out": 266,
+    "tokens_in": 10713,
+    "tokens_out": 314,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
-    "terms_found": [
-      "11",
-      "9"
-    ],
+    "terms_found": [],
     "terms_expected": [
-      "11",
-      "kontrollsiffer",
-      "9",
-      "10"
+      "5",
+      "100",
+      "2",
+      "300"
     ],
     "tool_calls_logged": 3,
     "longest_identical_run": 1,
@@ -30,21 +27,21 @@
   "R2": {
     "task": "R2",
     "kind": "read",
-    "seconds": 4.5,
+    "seconds": 4.6,
     "turns": 2,
     "tool_calls": 1,
-    "tokens_in": 7988,
-    "tokens_out": 41,
+    "tokens_in": 8025,
+    "tokens_out": 49,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
     "terms_found": [
-      "src/backend/config.ts",
-      "81"
+      "ApplicationEnvironment.kt",
+      "59"
     ],
     "terms_expected": [
-      "src/backend/config.ts",
-      "81"
+      "ApplicationEnvironment.kt",
+      "59"
     ],
     "tool_calls_logged": 1,
     "longest_identical_run": 1,
@@ -56,26 +53,19 @@
   "R3": {
     "task": "R3",
     "kind": "read",
-    "seconds": 8.0,
+    "seconds": 13.6,
     "turns": 2,
     "tool_calls": 1,
-    "tokens_in": 8712,
-    "tokens_out": 277,
+    "tokens_in": 8467,
+    "tokens_out": 640,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
     "terms_found": [
-      "TogglesContext.tsx",
-      "VergeContainer.tsx"
+      "OppfolgingstilfellePerson.kt"
     ],
     "terms_expected": [
-      "TogglesContext.tsx",
-      "EndreEnhet.tsx",
-      "HenleggModal.tsx",
-      "Revurder.tsx",
-      "SendMeldingContext.tsx",
-      "TotrinnskontrollContext.tsx",
-      "VergeContainer.tsx"
+      "OppfolgingstilfellePerson.kt"
     ],
     "tool_calls_logged": 1,
     "longest_identical_run": 1,
@@ -87,11 +77,11 @@
   "E1": {
     "task": "E1",
     "kind": "edit",
-    "seconds": 12.7,
+    "seconds": 10.4,
     "turns": 5,
     "tool_calls": 4,
-    "tokens_in": 13579,
-    "tokens_out": 466,
+    "tokens_in": 9752,
+    "tokens_out": 381,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
@@ -105,38 +95,38 @@
   "E3": {
     "task": "E3",
     "kind": "edit",
-    "seconds": 18.1,
-    "turns": 7,
+    "seconds": 32.8,
+    "turns": 11,
+    "tool_calls": 10,
+    "tokens_in": 43481,
+    "tokens_out": 1128,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "tool_calls_logged": 10,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 1,
+    "verified": true,
+    "note": "compiles"
+  },
+  "M1": {
+    "task": "M1",
+    "kind": "edit",
+    "seconds": 20.7,
+    "turns": 9,
     "tool_calls": 9,
-    "tokens_in": 16403,
-    "tokens_out": 745,
+    "tokens_in": 15710,
+    "tokens_out": 916,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
     "tool_calls_logged": 9,
     "longest_identical_run": 1,
     "looped_on": null,
-    "files_changed": 1,
+    "files_changed": 2,
     "verified": true,
-    "note": "suite passes"
-  },
-  "M1": {
-    "task": "M1",
-    "kind": "edit",
-    "seconds": 14.6,
-    "turns": 3,
-    "tool_calls": 12,
-    "tokens_in": 9716,
-    "tokens_out": 667,
-    "truncated": false,
-    "exit": 0,
-    "timed_out": false,
-    "tool_calls_logged": 12,
-    "longest_identical_run": 1,
-    "looped_on": null,
-    "files_changed": 0,
-    "verified": false,
-    "note": "no changes made (model did not edit anything)"
+    "note": "renamed and compiles"
   },
   "M2": {
     "task": "M2",
@@ -177,24 +167,21 @@
   "D1": {
     "task": "D1",
     "kind": "read",
-    "seconds": 9.3,
+    "seconds": 8.1,
     "turns": 4,
     "tool_calls": 3,
-    "tokens_in": 9630,
-    "tokens_out": 326,
+    "tokens_in": 9056,
+    "tokens_out": 244,
     "truncated": false,
     "exit": 0,
     "timed_out": false,
     "terms_found": [
-      "KONT",
-      "undefined",
-      "safeParse"
+      "first",
+      "find"
     ],
     "terms_expected": [
-      "KONT",
-      "undefined",
-      "alias",
-      "safeParse"
+      "first",
+      "find"
     ],
     "tool_calls_logged": 3,
     "longest_identical_run": 1,
@@ -238,23 +225,5 @@
     "files_changed": 0,
     "verified": false,
     "note": "no changes made (model did not edit anything)"
-  },
-  "E2": {
-    "task": "E2",
-    "kind": "edit",
-    "seconds": 21.2,
-    "turns": 9,
-    "tool_calls": 8,
-    "tokens_in": 23019,
-    "tokens_out": 818,
-    "truncated": false,
-    "exit": 0,
-    "timed_out": false,
-    "tool_calls_logged": 8,
-    "longest_identical_run": 1,
-    "looped_on": null,
-    "files_changed": 1,
-    "verified": true,
-    "note": "compiles"
   }
 }
