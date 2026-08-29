@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CFG = json.loads((ROOT / "bench" / "tasks.json").read_text())
-JDK = Path(os.path.expanduser(CFG["jdk"]))
+JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
 
 key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
 if not key:
@@ -68,10 +68,19 @@ def reset_repo():
     sh(["git", "clean", "-qfd", "-e", "build", "-e", ".gradle"], cwd=repo)
 
 
-def gradle(target):
-    """Gradle needs JAVA_HOME pointed at JDK 21; the machine default is newer and
-    the project pins jvmToolchain(21), which Gradle will not auto-provision."""
-    return sh(["./gradlew", target, "--console=plain", "-q", "--offline"],
+def build(target):
+    """Run the target's compile or test command.
+
+    A task set may declare `compile_cmd` and `test_cmd`, which is how the
+    TypeScript targets work. Without them we assume Gradle, which needs
+    JAVA_HOME on JDK 21: the machine default is newer and the project pins
+    jvmToolchain(21), which Gradle will not auto-provision.
+    """
+    cmd = CFG.get(f"{target}_cmd")
+    if cmd:
+        return sh(["bash", "-lc", cmd], cwd=repo, timeout=1800)
+    gradle_target = "compileKotlin" if target == "compile" else "test"
+    return sh(["./gradlew", gradle_target, "--console=plain", "-q", "--offline"],
               cwd=repo, timeout=1800,
               env={"JAVA_HOME": str(JDK),
                    "PATH": f"{JDK}/bin:" + os.environ.get("PATH", "")})
@@ -93,17 +102,17 @@ def verify(task):
         if not touched:
             return False, "no changes made (model did not edit anything)"
     if kind == "compile":
-        r = gradle("compileKotlin")
+        r = build("compile")
         return r.returncode == 0, "compiles" if r.returncode == 0 else "compile failed"
     if kind == "test":
-        r = gradle("test")
+        r = build("test")
         return r.returncode == 0, "suite passes" if r.returncode == 0 else "suite failed"
     if kind == "rename":
         old, new = task["old_symbol"], task["new_symbol"]
         hits = sh(["grep", "-rn", old, "src"], cwd=repo).stdout.strip()
         if hits:
             return False, f"old symbol still present ({len(hits.splitlines())} refs)"
-        r = gradle("compileKotlin")
+        r = build("compile")
         return r.returncode == 0, "renamed and compiles" if r.returncode == 0 else "renamed but broken"
     return None, "needs a human"
 
