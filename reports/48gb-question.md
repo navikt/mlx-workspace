@@ -88,6 +88,35 @@ Runs now launch under `cplt`, a kernel-level sandbox confining reads and writes 
 workspace with the inference port allowed back in. Verified: Met.no and the local server reachable,
 a sibling workspace and `/opt/homebrew` refused with `Operation not permitted`.
 
+## Conclusion, measured under a real 36 GB cap on 29 August 2026
+
+Everything before this section was measured at a 115 GB wired limit on rig B. These numbers were
+taken with `iogpu.wired_limit_mb` set to 36864, which is what a 48 GB machine gives a model.
+
+| Model | Weights | Median | Verified | Timeouts | Longest identical call run |
+|---|---|---|---|---|---|
+| **Qwen3.6-35B-A3B-4bit** | 18.6 GB | **21.2s** | 3 of 8 | 0 | 220 on one task |
+| Qwen3.8-27B-8bit | 27.0 GB | 900.1s | 1 of 10 | 8 | 20 |
+| Qwen3.8-27B MTPLX Q8 | 28.9 GB | did not run | | | |
+
+**One model fits and works: `Qwen3.6-35B-A3B-4bit`.** It is the only candidate that completes the
+task set at the cap without a single timeout.
+
+**Fitting was never the constraint.** The 8-bit loads at 27.0 GB with 9 GB to spare and then times
+out on eight of eleven tasks. The MTPLX Q8 never generates a token: oMLX refuses the prompt with
+`prefill_memory_exceeded`, 35.9 GB predicted against a 34.8 GB ceiling, and still refuses after the
+context contract is cut to 65k with a 4 GB cache. Weights are not what exhausts a 36 GB budget,
+prefill working memory is.
+
+**The cap costs more than capacity.** The same model at 115 GB runs a 12.7s median with 4 of 8
+verified and no repeated tool calls. Under the cap it is 21.2s, 3 of 8, and produced 220 identical
+consecutive tool calls on one task. The target hardware is not a smaller version of the test rig,
+and every number in this repository other than these was taken on the rig.
+
+**Open, and it sits directly under the recommendation.** That 220-call loop appeared once. Repeats
+are running. If it reproduces, the alpha needs a client-side loop guard before it needs anything
+else, because the model we are shipping does the thing we held the other model back for.
+
 ## How we evaluate the next model
 
 1. Read `model_type` from the model's own `config.json` and confirm a matching backend module

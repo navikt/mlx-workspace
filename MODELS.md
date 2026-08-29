@@ -14,7 +14,11 @@ Run **`mlx-community/Qwen3.6-35B-A3B-4bit`** under mlx-lm with thinking disabled
 and only model in the nav-pilot alpha. The reasoning and the rejected alternatives are in
 [`reports/alpha-model-decision.md`](reports/alpha-model-decision.md).
 
-- Eleven routine operations against a real Nav Kotlin service at a **12.7s median**, 4 of 8
+- Under a real 36 GB wired limit, the 48 GB target: **21.2s median**, 3 of 8 verified, no timeouts,
+  18.6 GB resident. It is the only model that completes the set at that cap. See
+  [`reports/48gb-question.md`](reports/48gb-question.md).
+- On rig B at a 115 GB limit, which is where every other number in this file was taken: **12.7s
+  median**, 4 of 8
   checkable tasks verified, no timeouts, and no task with a repeated identical tool call. 18.6 GB
   resident.
 - **Qwen3.8-27B is held back because it loops, not because it is slow.** The 4-bit build, the same
