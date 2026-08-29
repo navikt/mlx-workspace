@@ -43,7 +43,7 @@ if not agents_md.exists():
     agents_md = Path.cwd() / "AGENTS.md"
 agents_md = str(agents_md)
 
-model   = param("MLX_MODEL")
+model   = P.served_model_id({v: param(v) for v in ("MLX_MODEL", "MLX_SERVER_TYPE")})
 server_type = param("MLX_SERVER_TYPE").strip()
 
 # oMLX uses HF cache directory names as aliases natively

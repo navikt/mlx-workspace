@@ -105,6 +105,20 @@ def penalties(params: dict) -> dict:
     return out
 
 
+def served_model_id(params: dict) -> str:
+    """The id the running server answers to, which is not always MLX_MODEL.
+
+    oMLX discovers models from the Hugging Face cache and names them by the
+    cache directory, so `mvid/Huihui-...` is served as `mvid--Huihui-...`. A
+    request using the slash form returns HTTP 404, and mlx-lm's 404 for an
+    unknown model looks identical to a server that failed to start.
+    """
+    model = params.get("MLX_MODEL", "")
+    if params.get("MLX_SERVER_TYPE", "mlx-lm").strip() == "omlx":
+        return model.replace("/", "--")
+    return model
+
+
 def params_for(key: str) -> dict:
     """Profile params merged over OPTIONAL_DEFAULTS. Profile always wins."""
     params = {k: str(v) for k, v in load(key)[1].items()}

@@ -15,7 +15,9 @@ import urllib.error
 import urllib.request
 
 port = os.environ.get("MLX_SERVER_PORT", "8080")
-model = os.environ.get("MLX_MODEL", "")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _profiles as P
+model = P.served_model_id(dict(os.environ))
 deadline = time.time() + float(os.environ.get("MLX_SERVER_WAIT_SECONDS", "900"))
 
 def listening() -> bool:
