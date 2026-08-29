@@ -13,6 +13,7 @@ __pycache__/
 
 .bench-logs/
 workspaces/*/kotlin/
+workspaces/_prime-*/
 bench/.previous/
 
 # bench/results-*.json is tracked: it is the raw evidence behind every table in
