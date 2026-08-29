@@ -10,7 +10,9 @@ rigs. How the benchmarks are run, verified and quarantined is in
 
 ## Verdict
 
-Run **`mlx-community/Qwen3.6-35B-A3B-4bit`** under mlx-lm with thinking disabled. It is the default
+Run **`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`** under mlx-lm with thinking disabled. The plain
+4-bit build of the same weights is equally fast and produced a roughly 200-call runaway tool loop in
+both full passes at the 36 GB cap; OptiQ produced none in either. It is the default
 and only model in the nav-pilot alpha. The reasoning and the rejected alternatives are in
 [`reports/alpha-model-decision.md`](reports/alpha-model-decision.md).
 

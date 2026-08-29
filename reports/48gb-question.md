@@ -113,9 +113,30 @@ verified and no repeated tool calls. Under the cap it is 21.2s, 3 of 8, and prod
 consecutive tool calls on one task. The target hardware is not a smaller version of the test rig,
 and every number in this repository other than these was taken on the rig.
 
-**Open, and it sits directly under the recommendation.** That 220-call loop appeared once. Repeats
-are running. If it reproduces, the alpha needs a client-side loop guard before it needs anything
-else, because the model we are shipping does the thing we held the other model back for.
+**Ship the OptiQ build, not the plain 4-bit.** Two full passes each at the cap:
+
+| | Plain 4-bit | OptiQ |
+|---|---|---|
+| Pass 1 | 21.2s, 3 of 8, **220-call loop on D3** | 12.0s, 4 of 8, no loop |
+| Pass 2 | 13.3s, 4 of 8, **203-call loop on G2** | 20.7s, 4 of 8, no loop |
+
+Speed is a wash: the medians cross between passes and the two builds average within a second of
+each other. The difference that matters is the runaway. The plain build produced a roughly 200-call
+identical `bash` loop in both passes, on a different task each time, and never produced one at a
+115 GB limit. OptiQ produced none in either pass at the cap.
+
+Two passes each is thin evidence and the direction is consistent, so the recommendation is OptiQ
+with the caveat stated rather than hidden.
+
+**The loop is a property of the memory cap, not of a task.** Isolating D3 and running it three
+times at the cap produced no loop at all, 24.9 to 35.9 seconds each. That looked like exoneration
+and was not: the next full pass looped on G2 instead. Roughly one runaway per eleven-task run, or
+about 9% per task, which at 650 developers is a daily occurrence with no way for the user to
+distinguish it from a hung machine.
+
+**A client-side loop guard is therefore required, not recommended.** N identical consecutive tool
+calls must end the turn with an honest message. `AGENTS.md` rule 8 already tells the model not to
+repeat a failing call and the model ignores it.
 
 ## How we evaluate the next model
 
