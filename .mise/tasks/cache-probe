@@ -20,7 +20,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
-model = os.environ.get("MLX_MODEL", "").strip()
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _profiles as P
+model = P.served_model_id(dict(os.environ)).strip()
 if not key or not model:
     sys.exit("✗ MLX_ACTIVE_PROFILE / MLX_MODEL not set — run: mise run model-use")
 

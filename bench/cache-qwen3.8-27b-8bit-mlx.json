@@ -3,28 +3,28 @@
   "turns": [
     {
       "turn": 0,
-      "seconds": 5.53,
+      "seconds": 5.48,
       "prompt_tokens": 4428,
       "cached_tokens": 0,
       "cache_hit_pct": 0.0
     },
     {
       "turn": 1,
-      "seconds": 0.54,
+      "seconds": 0.55,
       "prompt_tokens": 4454,
       "cached_tokens": 4424,
       "cache_hit_pct": 99.3
     },
     {
       "turn": 2,
-      "seconds": 0.58,
+      "seconds": 0.59,
       "prompt_tokens": 4480,
       "cached_tokens": 4450,
       "cache_hit_pct": 99.3
     },
     {
       "turn": 3,
-      "seconds": 0.54,
+      "seconds": 0.6,
       "prompt_tokens": 4506,
       "cached_tokens": 4476,
       "cache_hit_pct": 99.3

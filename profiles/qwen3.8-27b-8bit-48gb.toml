@@ -1,0 +1,23 @@
+[meta]
+name               = "Qwen 3.8 27B MTPLX Q8, 48 GB contract"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "local"
+notes              = "Astoundingly fast and highly agentic. Flawless JSON tool-calling and response times under 10 seconds. Leaves ~100GB of RAM free."
+model_vram_gb      = 27
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8"
+MLX_SERVER_TYPE            = "omlx"
+# 4 GB of cache, not 20. The rig B profile asks for a 20 GB cache and a 131k
+# context, which needs 35.9 GB to prefill against a 34.8 GB usable ceiling at a
+# 36 GB wired limit: oMLX refuses with prefill_memory_exceeded before the model
+# generates a token. This is the same context contract the other Nav team runs.
+MLX_CACHE_BYTES            = "4294967296"
+MLX_CACHE_SIZE             = "5"
+MLX_MAX_TOKENS             = "32768"
+MLX_CHAT_TEMPLATE          = "qwen_template.jinja"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"  # thinking model: 4096 truncated mid-<think> (finish_reason=length)
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

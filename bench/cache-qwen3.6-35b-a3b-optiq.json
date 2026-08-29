@@ -3,14 +3,14 @@
   "turns": [
     {
       "turn": 0,
-      "seconds": 1.28,
+      "seconds": 1.95,
       "prompt_tokens": 4428,
       "cached_tokens": 0,
       "cache_hit_pct": 0.0
     },
     {
       "turn": 1,
-      "seconds": 0.23,
+      "seconds": 0.25,
       "prompt_tokens": 4450,
       "cached_tokens": 4424,
       "cache_hit_pct": 99.4
@@ -24,7 +24,7 @@
     },
     {
       "turn": 3,
-      "seconds": 0.26,
+      "seconds": 0.27,
       "prompt_tokens": 4494,
       "cached_tokens": 4468,
       "cache_hit_pct": 99.4
