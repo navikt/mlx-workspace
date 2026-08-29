@@ -1,0 +1,188 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 0,
+      "started": "2026-08-29T19:45:51+0200",
+      "seconds": 0.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51153
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51148
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-0-20260829-194551.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 0,
+      "started": "2026-08-29T19:45:52+0200",
+      "seconds": 0.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51146
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51118
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-1-20260829-194551.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 0,
+      "started": "2026-08-29T19:45:52+0200",
+      "seconds": 0.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51114
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51115
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-2-20260829-194552.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-29T19:45:50+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": true,
+      "cloud_model": "claude-sonnet-4.6",
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 23262,
+        "port": "8080",
+        "started": "2026-08-29T17:37:10.313213+02:00",
+        "probe_seconds": 0.47
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 8021.88,
+        "swap_free_mb": 1194.12,
+        "free_mb": 51169
+      }
+    }
+  ],
+  "rung": 6,
+  "arm": "control",
+  "task": "D2",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Add a nullable field kilde of type String to the data class POppfolgingstilfelleBit in src/main/kotlin/no/nav/syfo/infrastructure/database/bit/POppfolgingstilfelleBit.kt, and thread it through the toOppfolgingstilfelleBit mapper to the domain class it maps to. Update every construction site so the project still compiles and all tests pass. Change nothing else."
+}

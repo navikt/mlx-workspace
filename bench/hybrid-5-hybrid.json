@@ -1,0 +1,188 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-29T19:44:38+0200",
+      "seconds": 0.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51203
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51203
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-0-20260829-194437.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": false,
+      "valid": false,
+      "invalid_reason": "hybrid arm but worker_model, dispatch_fragment, mlx_provider absent after the launch"
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-29T19:44:39+0200",
+      "seconds": 0.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51248
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51265
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-1-20260829-194438.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": false,
+      "valid": false,
+      "invalid_reason": "hybrid arm but worker_model, dispatch_fragment, mlx_provider absent after the launch"
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-29T19:44:40+0200",
+      "seconds": 0.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": 0,
+      "cloud_tokens": {
+        "total": 0,
+        "input": 0,
+        "output": 0,
+        "reasoning": 0,
+        "cache_write": 0,
+        "cache_read": 0
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51261
+        },
+        "after": {
+          "swap_used_mb": 8021.88,
+          "swap_free_mb": 1194.12,
+          "free_mb": 51279
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-2-20260829-194439.jsonl",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "dispatched": false,
+      "valid": false,
+      "invalid_reason": "hybrid arm but worker_model, dispatch_fragment, mlx_provider absent after the launch"
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-29T19:44:36+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": true,
+      "cloud_model": "claude-sonnet-4.6",
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 23262,
+        "port": "8080",
+        "started": "2026-08-29T17:37:10.313213+02:00",
+        "probe_seconds": 0.49
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 8021.88,
+        "swap_free_mb": 1194.12,
+        "free_mb": 51203
+      }
+    }
+  ],
+  "rung": 5,
+  "arm": "hybrid",
+  "task": "M2",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else."
+}

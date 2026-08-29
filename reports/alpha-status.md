@@ -43,6 +43,27 @@ launch with a local model id sends it to GitHub.
    instructions entry, so a crash between them leaves opencode's config pointing at a deleted
    file. Same class as the one fixed a level up, harmless in practice, worth closing.
 
+## Copilot CLI supports a different product shape, not the same one
+
+Verified from the client: `COPILOT_PROVIDER_BASE_URL` replaces GitHub's model routing for the
+whole session, and its own help says so. There is no per-agent endpoint, so **the orchestration
+this work is built around, a cloud main agent dispatching to a local worker, cannot be
+expressed in Copilot CLI**. What it can do is run a local model as the session model, which is
+how another Nav team already works: long background tasks, no premium requests, no cloud
+orchestrator.
+
+Both are worth having and they are not the same feature:
+
+| | opencode | Copilot CLI |
+|---|---|---|
+| Cloud orchestrator, local worker | yes, measured | not possible |
+| Whole session on a local model | yes | yes, wired and unmeasured |
+
+That means "Copilot CLI support at GA" has to be stated as the second row, not the first. The
+wiring is done (`d1ee0e52`): BYOK env vars pointing at the loop guard, the guard verified
+against a real captured Copilot CLI request that loops, refusals kept where they are still
+true, and a hosted session byte-identical to today.
+
 ## Outstanding, not blocking
 
 3. **Copilot CLI support in nav-pilot.** The branch refuses the Copilot launch for a local model, on the belief that its endpoint cannot be overridden. That belief is now disproven. Needs the env wiring, and the loop guard has never been exercised from Copilot CLI.
