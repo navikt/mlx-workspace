@@ -1,0 +1,34 @@
+{
+  "model": "lmstudio-community/Qwen3.8-27B-MLX-6bit",
+  "turns": [
+    {
+      "turn": 0,
+      "seconds": 6.06,
+      "prompt_tokens": 4464,
+      "cached_tokens": 0,
+      "cache_hit_pct": 0.0
+    },
+    {
+      "turn": 1,
+      "seconds": 0.75,
+      "prompt_tokens": 4490,
+      "cached_tokens": 4462,
+      "cache_hit_pct": 99.4
+    },
+    {
+      "turn": 2,
+      "seconds": 0.81,
+      "prompt_tokens": 4516,
+      "cached_tokens": 4488,
+      "cache_hit_pct": 99.4
+    },
+    {
+      "turn": 3,
+      "seconds": 0.82,
+      "prompt_tokens": 4542,
+      "cached_tokens": 4514,
+      "cache_hit_pct": 99.4
+    }
+  ],
+  "verdict": "reuses the cache"
+}

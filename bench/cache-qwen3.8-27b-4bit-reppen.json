@@ -1,0 +1,34 @@
+{
+  "model": "mlx-community/Qwen3.8-27B-4bit",
+  "turns": [
+    {
+      "turn": 0,
+      "seconds": 5.08,
+      "prompt_tokens": 4428,
+      "cached_tokens": 0,
+      "cache_hit_pct": 0.0
+    },
+    {
+      "turn": 1,
+      "seconds": 0.43,
+      "prompt_tokens": 4454,
+      "cached_tokens": 4430,
+      "cache_hit_pct": 99.5
+    },
+    {
+      "turn": 2,
+      "seconds": 0.49,
+      "prompt_tokens": 4480,
+      "cached_tokens": 4456,
+      "cache_hit_pct": 99.5
+    },
+    {
+      "turn": 3,
+      "seconds": 0.48,
+      "prompt_tokens": 4506,
+      "cached_tokens": 4482,
+      "cache_hit_pct": 99.5
+    }
+  ],
+  "verdict": "reuses the cache"
+}

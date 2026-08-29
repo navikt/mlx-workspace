@@ -1,0 +1,34 @@
+{
+  "model": "mlx-community/KAT-Coder-V2.5-Dev-OptiQ-4bit",
+  "turns": [
+    {
+      "turn": 0,
+      "seconds": 1.32,
+      "prompt_tokens": 4426,
+      "cached_tokens": 0,
+      "cache_hit_pct": 0.0
+    },
+    {
+      "turn": 1,
+      "seconds": 0.34,
+      "prompt_tokens": 4448,
+      "cached_tokens": 4424,
+      "cache_hit_pct": 99.5
+    },
+    {
+      "turn": 2,
+      "seconds": 0.36,
+      "prompt_tokens": 4470,
+      "cached_tokens": 4446,
+      "cache_hit_pct": 99.5
+    },
+    {
+      "turn": 3,
+      "seconds": 0.37,
+      "prompt_tokens": 4492,
+      "cached_tokens": 4468,
+      "cache_hit_pct": 99.5
+    }
+  ],
+  "verdict": "reuses the cache"
+}
