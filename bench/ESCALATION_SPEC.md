@@ -105,6 +105,28 @@ Also note where the tokens actually go: 97.8% of the hybrid total is cache reads
 is billed at full rate decides the economics, and it is a fact about Nav's contract rather than
 about our code.
 
+## Rung 3 through the validated harness, both arms
+
+Claude Sonnet 4.6, three samples per arm, driven through nav-pilot so the sandbox, the loop
+guard and the config lifecycle are all in the path. Both arms produced the same six-line rename
+and both compiled.
+
+| | Cloud steps | Cloud tokens | Wall clock | Verified |
+|---|---|---|---|---|
+| Hybrid | 4, 2, 4 | 79k, 39k, 79k | 28.7s | 3 of 3 |
+| Control | 6, 6, 6 | ~116,600 | 20.7s | 3 of 3 |
+
+Hybrid costs a third fewer requests and a third fewer tokens, and takes about 40% longer. That
+is the two-regime split in one measurement: dispatch this overnight, think twice while someone
+is waiting.
+
+## Rung 1: the orchestrator declines
+
+Three samples, correct config every time, zero local calls. Asked a plain question about the
+code, the cloud model answers it directly rather than pay a round trip to the worker. So the
+saving cannot come from trivial reads, and the earlier rung 1 figures in this document measured
+a prompt that ordered a dispatch rather than a model choosing one.
+
 ## The ladder
 
 Rungs from our own measurements, easiest first. Each rung is a task shape we have data for,

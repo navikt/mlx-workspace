@@ -1,0 +1,188 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 0,
+      "started": "2026-08-29T19:34:08+0200",
+      "seconds": 28.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 79368,
+        "input": 6,
+        "output": 592,
+        "reasoning": 0,
+        "cache_write": 20184,
+        "cache_read": 58586
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": true,
+        "dispatch_fragment": true,
+        "mlx_provider": true
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 53155
+        },
+        "after": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 52358
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-3-hybrid-0-20260829-193407.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 0,
+      "started": "2026-08-29T19:34:48+0200",
+      "seconds": 30.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 6,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "cloud_steps": 2,
+      "cloud_tokens": {
+        "total": 39310,
+        "input": 4,
+        "output": 419,
+        "reasoning": 0,
+        "cache_write": 19694,
+        "cache_read": 19193
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": true,
+        "dispatch_fragment": true,
+        "mlx_provider": true
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 50556
+        },
+        "after": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 50271
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-3-hybrid-1-20260829-193447.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 0,
+      "started": "2026-08-29T19:35:20+0200",
+      "seconds": 27.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 79404,
+        "input": 6,
+        "output": 580,
+        "reasoning": 0,
+        "cache_write": 20199,
+        "cache_read": 58619
+      },
+      "truncated": false,
+      "markers_after": {
+        "worker_model": true,
+        "dispatch_fragment": true,
+        "mlx_provider": true
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 50204
+        },
+        "after": {
+          "swap_used_mb": 8029.88,
+          "swap_free_mb": 1186.12,
+          "free_mb": 50738
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-3-hybrid-2-20260829-193519.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-29T19:34:06+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": true,
+      "cloud_model": "claude-sonnet-4.6",
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 23262,
+        "port": "8080",
+        "started": "2026-08-29T17:37:10.313213+02:00",
+        "probe_seconds": 0.45
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 8029.88,
+        "swap_free_mb": 1186.12,
+        "free_mb": 53145
+      }
+    }
+  ],
+  "rung": 3,
+  "arm": "hybrid",
+  "task": "M1",
+  "kind": "edit",
+  "verify": "rename",
+  "prompt": "Rename the function dagerMellomDatoer to daysBetweenDates everywhere in the codebase, including its definition, imports and all call sites. Change nothing else."
+}
