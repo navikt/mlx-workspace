@@ -11,6 +11,7 @@ Update it rather than remembering.
 | Dispatch through nav-pilot to opencode to the local model | Correct edit in 11 to 13 seconds, cplt audit intact |
 | Worker bound to the local model | `opencode debug agent lokal-arbeider` resolves `mlx/mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit` |
 | **Copilot CLI against the local server** | `COPILOT_PROVIDER_BASE_URL=http://localhost:8080/v1` plus `COPILOT_PROVIDER_TYPE`, `COPILOT_PROVIDER_API_KEY`, `COPILOT_MODEL`, `COPILOT_OFFLINE=true`. Edit made in 10s |
+| **Cloud orchestrator dispatching to the local worker** | A cloud model ran as main agent, dispatched through the task tool to `lokal-arbeider`, and the local server served three completions during that run. The edit was correct. This also proves opencode's task tool honours the provider-config binding even though it ignores model frontmatter |
 | Loop guard | Mutation-tested: neutering the gate forwards a prompt to a server nav-pilot cannot vouch for |
 | Server log | Mutation-tested: removing the wiring leaves a crash report with nothing to read |
 | Port ownership | Refuses a port it does not own, at `start` and per request behind a 3s cache |
@@ -18,8 +19,7 @@ Update it rather than remembering.
 
 ## Outstanding, blocking the alpha
 
-1. **Cloud main agent dispatching to a local worker has never been tested.** Every end-to-end run so far set the session model to the local one, so what is proven is local-session dispatch, not the orchestration the design is for.
-2. **Final QA sign-off** after the model-binding commit `cc9e7d71`. The previous pass said do not ship, on a finding that commit addresses.
+1. **Final QA sign-off** after the model-binding commit `cc9e7d71`. The previous pass said do not ship, on a finding that commit addresses.
 
 ## Outstanding, not blocking
 
