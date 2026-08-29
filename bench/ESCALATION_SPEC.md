@@ -3,6 +3,24 @@
 The alpha assumes routine work should go to the local model. This experiment finds the
 point where that stops being true, measured in the unit Nav is actually billed in.
 
+## Two regimes, two answers
+
+There is no single break-even, because there are two ways to spend.
+
+**Interactive.** The developer is waiting. Latency is the binding constraint and cost is
+secondary: a task the cloud finishes in 20 seconds and the local model finishes in two minutes
+is a bad trade even when it is cheaper. The break-even is where local latency stops being
+tolerable.
+
+**Background.** Nobody is waiting, so cost binds and latency is nearly free. Another Nav team
+already runs this way, accepting long waits deliberately. Here the ladder can be climbed much
+further, and the limit becomes the repair rate rather than the clock: work the local model gets
+wrong costs a cloud round trip, and that is what eventually exceeds doing it in the cloud.
+
+Every rung therefore needs both numbers, cloud steps and wall clock, and the runbook needs two
+sentences rather than one: what to dispatch when someone is waiting, and what to dispatch
+overnight.
+
 ## The unit
 
 **Premium requests per completed task.** Not tokens, not seconds. Nav's cap counts requests,
@@ -34,7 +52,7 @@ Per task, per arm, record:
 |---|---|
 | `cloud_turns` | `step_finish` events in the client's JSONL log |
 | `local_calls` | `POST /v1/chat/completions` lines in `~/.nav-pilot/local/server.log` |
-| `seconds` | wall clock |
+| `seconds` | wall clock, the deciding number for interactive work |
 | `verified` | compile or test suite, run by us, never the model's claim |
 | `redone_in_cloud` | did the main agent edit the file itself after the worker failed |
 
