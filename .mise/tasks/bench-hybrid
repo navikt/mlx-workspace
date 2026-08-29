@@ -543,17 +543,19 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     if wrong:
         invalid = (f"{arm} arm but {', '.join(wrong)} "
                    f"{'absent' if want else 'present'} after the launch")
-    # A hybrid sample with no local calls is the cloud doing the work: the model
-    # ignored the fragment and edited directly. Counting it as cheap hybrid is
-    # exactly backwards, so it is marked invalid rather than averaged in.
-    elif arm == "hybrid" and not local_calls:
-        invalid = "hybrid arm made 0 local calls — the cloud did the work"
+    # A hybrid sample with no local calls and a correct config is not a broken
+    # run: it is the orchestrator declining to delegate, which is a result worth
+    # keeping. Sonnet answers a trivial read directly rather than pay a round
+    # trip. Averaging those into a hybrid median would flatter the arm, so they
+    # are recorded as `dispatched: false` and reported separately instead.
     elif arm == "control" and local_calls:
         invalid = f"control arm made {local_calls} local calls — dispatch was not disabled"
 
     ok, note = verify(task, ev["reply"])
     rec["verified"] = ok
     rec["note"] = note
+    # Did the orchestrator actually use the worker? Only meaningful for hybrid.
+    rec["dispatched"] = bool(local_calls) if arm == "hybrid" else None
     rec["valid"] = invalid is None
     rec["invalid_reason"] = invalid
     return rec
