@@ -73,7 +73,12 @@ LOCAL_ON = [NAV_PILOT, "alpha", "local", "init"]
 
 # The three things nav-pilot writes into ~/.config/opencode/opencode.json at
 # launch. All three, or the arm is not what its name says.
-FRAGMENT_MARK = "lokal-dispatch"
+# Both names follow the product. nav-pilot renamed the worker agent to
+# local-worker and its fragment to nav-pilot-local-dispatch.md; while these
+# still said "lokal-", markers() reported every artefact absent and the
+# preflight's "config clean" check passed without looking at anything.
+WORKER_AGENT = "local-worker"
+FRAGMENT_MARK = "local-dispatch"
 
 # The ladder from bench/ESCALATION_SPEC.md, easiest first, mapped onto the task
 # set in bench/tasks.json so a rung is verified by the same code that verifies
@@ -193,7 +198,7 @@ def markers(cfg=None):
     cfg = read_cfg(OPENCODE_CFG) if cfg is None else cfg
     instructions = cfg.get("instructions") or []
     return {
-        "worker_model": bool((cfg.get("agent") or {}).get("lokal-arbeider", {}).get("model")),
+        "worker_model": bool((cfg.get("agent") or {}).get(WORKER_AGENT, {}).get("model")),
         "dispatch_fragment": any(FRAGMENT_MARK in str(i) for i in instructions),
         "mlx_provider": "mlx" in (cfg.get("provider") or {}),
     }
@@ -582,7 +587,7 @@ def preflight(arm, port, profile_key, meta, params):
     if any(before.values()):
         raise SystemExit(f"✗ `alpha local off` left dispatch artefacts behind: "
                          f"{ {k: v for k, v in before.items() if v} }\n"
-                         f"  {OPENCODE_CFG} must have no agent.lokal-arbeider.model, no "
+                         f"  {OPENCODE_CFG} must have no agent.{WORKER_AGENT}.model, no "
                          f"{FRAGMENT_MARK} in instructions and no mlx provider before a launch.\n"
                          f"  Fix: remove them by hand, then re-run.")
     snap["markers_before"] = before
@@ -779,8 +784,8 @@ def self_check():
     assert "59" in ev["reply"]
 
     clean = {"instructions": ["/x/AGENTS.md"]}
-    dirty = {"agent": {"lokal-arbeider": {"model": "mlx/m"}},
-             "instructions": ["/x/nav-pilot-lokal-dispatch.md"],
+    dirty = {"agent": {WORKER_AGENT: {"model": "mlx/m"}},
+             "instructions": [f"/x/nav-pilot-{FRAGMENT_MARK}.md"],
              "provider": {"mlx": {}}}
     assert markers(clean) == {"worker_model": False, "dispatch_fragment": False,
                               "mlx_provider": False}
@@ -790,6 +795,23 @@ def self_check():
     assert numstat_lines("3\t1\ta.kt\n-\t-\tlogo.png\n0\t7\tb.kt\n") == 11
     m = memory()
     assert isinstance(m["free_mb"], int) and m["swap_used_mb"] is not None, m
+
+    # The names above have to be the product's, and a rename in nav-pilot is
+    # invisible here: markers() simply reports every artefact absent and the
+    # preflight passes. That already happened once. Read them from the source
+    # when it is on this machine.
+    src = os.environ.get("NAV_PILOT_SRC", os.path.expanduser(
+        "~/go/src/github.com/navikt/copilot"))
+    local_go = Path(src) / "cli/nav-pilot/internal/local/local.go"
+    if local_go.exists():
+        m = re.search(r'WorkerAgent\s*=\s*"([^"]+)"', local_go.read_text())
+        assert m, f"no WorkerAgent constant in {local_go}"
+        assert m.group(1) == WORKER_AGENT, (
+            f"nav-pilot dispatches to {m.group(1)!r}, this harness checks "
+            f"{WORKER_AGENT!r} — every arm check here is blind until they match")
+        print(f"  ✓ worker agent name matches nav-pilot ({WORKER_AGENT})")
+    else:
+        print(f"  ⚠ nav-pilot source not at {src}; worker agent name unverified")
 
     print("✓ self-check passed")
 

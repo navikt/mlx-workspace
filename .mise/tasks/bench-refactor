@@ -66,7 +66,7 @@ REFACTOR = (
 # its own judgement about what is mechanical enough to hand over.
 DECOMPOSE = (
     "\n\nWork file by file. First list every file that has to change. Then, for each "
-    "file in turn, dispatch the edit to the `lokal-arbeider` agent with a complete "
+    "file in turn, dispatch the edit to the `local-worker` agent with a complete "
     "specification: the file path, what to search for, and what to replace it with. "
     "Do not ask it to decide anything. Verify each file changed before moving to the "
     "next, and make the edit yourself only if the worker did not."
