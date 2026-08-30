@@ -321,6 +321,43 @@ after every restart. The disk figure was three gigabytes short of what `init` it
 whether the tests pass, and two were introduced by fixes made hours earlier. That is the
 argument for reviewing a body of work rather than the diffs it arrived in.
 
+## The security review, and the two things we are shipping with
+
+An independent security pass over the branch before merge. Two findings fixed, three
+accepted and written down here so nobody has to rediscover them.
+
+**Fixed: manifest prose reached the main agent's system prompt.** The `role` and `expect`
+fields flow verbatim into the dispatch policy, which opencode pastes into the system prompt
+of a cloud agent with full tool access, and are printed raw to the terminal. Whoever
+controls the manifest already chooses which weights run, so this was not the last line of
+defence, but it was the difference between that and holding a persistent instruction in
+every session of every developer with local inference on. Control characters are now
+rejected and the length is bounded.
+
+**Fixed: the guard forwarded truncated bodies**, and **the ownership proof did not cover the
+address the guard actually forwards to**. Both are in the code review section above.
+
+**Accepted: the publisher allow-list is a namespace, not a vouch.** Both allowed Hugging
+Face orgs have open membership, so someone who controls the manifest can name a backdoored
+model within an allowed org. The server runs without `--trust-remote-code`, so this is not
+code execution; it is a model whose answers become edits in a developer's repository, which
+is bad enough to say out loud. Pinning repositories or a weights digest would close it and
+is the obvious next hardening step.
+
+**Accepted: transitive Python dependencies are unpinned.** `mlx-lm` and `mlx` are pinned
+exactly; everything they pull resolves fresh on install day with no hashes. A lockfile built
+with `uv pip compile --generate-hashes` and installed with `--require-hashes` closes it, and
+is worth doing before this goes beyond an alpha.
+
+**Accepted: a hard kill leaves a stale provider block.** The removal is deferred, so SIGKILL
+or power loss leaves opencode pointing at a dead ephemeral port. It self-heals on the next
+nav-pilot launch, but a developer running opencode directly in between could reach whatever
+has since bound that port.
+
+The review also flagged something outside this feature: `--yes` is now passed to cplt on
+every non-TTY launch, which removes a confirmation gate fleet-wide and rides in on this
+branch. That deserves its own decision rather than arriving as a local-inference detail.
+
 ## Known ceilings, accepted for the alpha
 
 - The manifest is unsigned. Integrity rests on TLS and write access to the generating repo, with the publisher and parameter allow-lists bounding the blast radius. Recorded in the package doc.
