@@ -1,0 +1,87 @@
+{
+  "rung": 3,
+  "arm": "local",
+  "task": "M1",
+  "client": "copilot",
+  "prompt": "Rename the function dagerMellomDatoer to daysBetweenDates everywhere in the codebase, including its definition, imports and all call sites. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:53:30+0200",
+      "seconds": 51.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 10,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 196000,
+        "cached": 171300,
+        "output": 2200
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-0-20260829-235330.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:54:22+0200",
+      "seconds": 58.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 9,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 166000,
+        "cached": 145100,
+        "output": 2600
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-1-20260829-235422.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:55:21+0200",
+      "seconds": 307.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 45,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 1000000,
+        "cached": 964200,
+        "output": 15200
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-2-20260829-235521.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "rung": 5,
+  "arm": "cloud",
+  "task": "M2",
+  "client": "copilot",
+  "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "cloud",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T01:17:21+0200",
+      "seconds": 31.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 165500,
+        "cached": 147500,
+        "output": 1500
+      },
+      "credits": 13.51,
+      "cost_usd": 0.1351,
+      "log": ".bench-logs/copilot-5-cloud-0-20260830-011721.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "cloud",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T01:17:58+0200",
+      "seconds": 36.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 194000,
+        "cached": 174200,
+        "output": 1700
+      },
+      "credits": 15.22,
+      "cost_usd": 0.1522,
+      "log": ".bench-logs/copilot-5-cloud-1-20260830-011758.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "cloud",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T01:18:40+0200",
+      "seconds": 36.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 202000,
+        "cached": 177400,
+        "output": 1700
+      },
+      "credits": 17.13,
+      "cost_usd": 0.1713,
+      "log": ".bench-logs/copilot-5-cloud-2-20260830-011840.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "rung": 1,
+  "arm": "cloud",
+  "task": "R2",
+  "client": "copilot",
+  "prompt": "Which file and line reads the PDL_URL environment variable? Answer with the path and line number only. Do not change any files.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "cloud",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:28:32+0200",
+      "seconds": 13.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 57900,
+        "cached": 42200,
+        "output": 312
+      },
+      "credits": 7.6,
+      "cost_usd": 0.076,
+      "log": ".bench-logs/copilot-1-cloud-0-20260830-002832.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "cloud",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:29:18+0200",
+      "seconds": 10.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 38400,
+        "cached": 22900,
+        "output": 194
+      },
+      "credits": 6.8,
+      "cost_usd": 0.068,
+      "log": ".bench-logs/copilot-1-cloud-1-20260830-002918.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "cloud",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:29:29+0200",
+      "seconds": 13.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 1,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 57900,
+        "cached": 42200,
+        "output": 313
+      },
+      "credits": 7.6,
+      "cost_usd": 0.076,
+      "log": ".bench-logs/copilot-1-cloud-2-20260830-002929.log",
+      "verified": null,
+      "note": "cloud arm but the local server took 1 calls",
+      "valid": false,
+      "invalid_reason": "cloud arm but the local server took 1 calls"
+    }
+  ]
+}

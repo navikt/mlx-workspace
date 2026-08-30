@@ -3,173 +3,26 @@
     {
       "n": 0,
       "arm": "control",
-      "rung": 3,
-      "task": "M1",
+      "rung": 2,
+      "task": "E1",
       "preflight": 0,
-      "started": "2026-08-29T19:36:05+0200",
-      "seconds": 21.8,
-      "timed_out": false,
-      "exit": 0,
-      "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 6,
-      "cloud_tokens": {
-        "total": 116536,
-        "input": 8,
-        "output": 880,
-        "reasoning": 0,
-        "cache_write": 19797,
-        "cache_read": 95851
-      },
-      "truncated": false,
-      "markers_after": {
-        "worker_model": false,
-        "dispatch_fragment": false,
-        "mlx_provider": false
-      },
-      "memory": {
-        "before": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51269
-        },
-        "after": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51578
-        }
-      },
-      "local_server_pid": 23262,
-      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-3-control-0-20260829-193605.jsonl",
-      "verified": true,
-      "note": "renamed and compiles",
-      "dispatched": null,
-      "valid": true,
-      "invalid_reason": null
-    },
-    {
-      "n": 1,
-      "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 0,
-      "started": "2026-08-29T19:36:28+0200",
+      "started": "2026-08-30T04:18:38+0200",
       "seconds": 19.7,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 6,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
       "cloud_tokens": {
-        "total": 116738,
-        "input": 8,
-        "output": 880,
+        "total": 57940,
+        "input": 5,
+        "output": 504,
         "reasoning": 0,
-        "cache_write": 19850,
-        "cache_read": 96000
+        "cache_write": 19531,
+        "cache_read": 37900
       },
-      "truncated": false,
-      "markers_after": {
-        "worker_model": false,
-        "dispatch_fragment": false,
-        "mlx_provider": false
-      },
-      "memory": {
-        "before": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51503
-        },
-        "after": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51549
-        }
-      },
-      "local_server_pid": 23262,
-      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-3-control-1-20260829-193627.jsonl",
-      "verified": true,
-      "note": "renamed and compiles",
-      "dispatched": null,
-      "valid": true,
-      "invalid_reason": null
-    },
-    {
-      "n": 2,
-      "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 0,
-      "started": "2026-08-29T19:36:48+0200",
-      "seconds": 20.7,
-      "timed_out": false,
-      "exit": 0,
-      "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 6,
-      "cloud_tokens": {
-        "total": 116689,
-        "input": 8,
-        "output": 911,
-        "reasoning": 0,
-        "cache_write": 19836,
-        "cache_read": 95934
-      },
-      "truncated": false,
-      "markers_after": {
-        "worker_model": false,
-        "dispatch_fragment": false,
-        "mlx_provider": false
-      },
-      "memory": {
-        "before": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51490
-        },
-        "after": {
-          "swap_used_mb": 8029.88,
-          "swap_free_mb": 1186.12,
-          "free_mb": 51377
-        }
-      },
-      "local_server_pid": 23262,
-      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-3-control-2-20260829-193648.jsonl",
-      "verified": true,
-      "note": "renamed and compiles",
-      "dispatched": null,
-      "valid": true,
-      "invalid_reason": null
-    },
-    {
-      "n": 3,
-      "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 1,
-      "started": "2026-08-30T04:25:04+0200",
-      "seconds": 28.6,
-      "timed_out": false,
-      "exit": 0,
-      "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 5,
-      "cloud_tokens": {
-        "total": 96098,
-        "input": 7,
-        "output": 668,
-        "reasoning": 0,
-        "cache_write": 19479,
-        "cache_read": 75944
-      },
-      "cloud_cost_usd": 0.1059,
+      "cloud_cost_usd": 0.0922,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -180,19 +33,172 @@
         "before": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 22843
+          "free_mb": 20774
         },
         "after": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23716
+          "free_mb": 20858
         }
       },
       "local_server_pid": 38140,
       "local_server_started": "2026-08-30T00:53:49.3061+02:00",
-      "log": ".bench-logs/hybrid-3-control-3-20260830-042504.jsonl",
+      "log": ".bench-logs/hybrid-2-control-0-20260830-041838.jsonl",
       "verified": true,
-      "note": "renamed and compiles",
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:18:59+0200",
+      "seconds": 14.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 57870,
+        "input": 5,
+        "output": 448,
+        "reasoning": 0,
+        "cache_write": 19527,
+        "cache_read": 37890
+      },
+      "cloud_cost_usd": 0.0913,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20788
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20968
+        }
+      },
+      "local_server_pid": 38140,
+      "local_server_started": "2026-08-30T00:53:49.3061+02:00",
+      "log": ".bench-logs/hybrid-2-control-1-20260830-041859.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:19:14+0200",
+      "seconds": 14.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 57919,
+        "input": 5,
+        "output": 494,
+        "reasoning": 0,
+        "cache_write": 19528,
+        "cache_read": 37892
+      },
+      "cloud_cost_usd": 0.092,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20912
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20980
+        }
+      },
+      "local_server_pid": 38140,
+      "local_server_started": "2026-08-30T00:53:49.3061+02:00",
+      "log": ".bench-logs/hybrid-2-control-2-20260830-041914.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:19:29+0200",
+      "seconds": 13.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 57873,
+        "input": 5,
+        "output": 449,
+        "reasoning": 0,
+        "cache_write": 19527,
+        "cache_read": 37892
+      },
+      "cloud_cost_usd": 0.0913,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20971
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 20842
+        }
+      },
+      "local_server_pid": 38140,
+      "local_server_started": "2026-08-30T00:53:49.3061+02:00",
+      "log": ".bench-logs/hybrid-2-control-3-20260830-041928.jsonl",
+      "verified": true,
+      "note": "compiles",
       "dispatched": null,
       "valid": true,
       "invalid_reason": null,
@@ -201,26 +207,26 @@
     {
       "n": 4,
       "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 1,
-      "started": "2026-08-30T04:25:36+0200",
-      "seconds": 27.7,
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:19:43+0200",
+      "seconds": 14.5,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 5,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
       "cloud_tokens": {
-        "total": 96107,
-        "input": 7,
-        "output": 670,
+        "total": 57981,
+        "input": 5,
+        "output": 554,
         "reasoning": 0,
-        "cache_write": 19482,
-        "cache_read": 75948
+        "cache_write": 19526,
+        "cache_read": 37896
       },
-      "cloud_cost_usd": 0.1059,
+      "cloud_cost_usd": 0.0929,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -231,19 +237,19 @@
         "before": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23645
+          "free_mb": 20703
         },
         "after": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23538
+          "free_mb": 20887
         }
       },
       "local_server_pid": 38140,
       "local_server_started": "2026-08-30T00:53:49.3061+02:00",
-      "log": ".bench-logs/hybrid-3-control-4-20260830-042535.jsonl",
+      "log": ".bench-logs/hybrid-2-control-4-20260830-041943.jsonl",
       "verified": true,
-      "note": "renamed and compiles",
+      "note": "compiles",
       "dispatched": null,
       "valid": true,
       "invalid_reason": null,
@@ -252,26 +258,26 @@
     {
       "n": 5,
       "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 1,
-      "started": "2026-08-30T04:26:06+0200",
-      "seconds": 26.0,
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:19:58+0200",
+      "seconds": 15.5,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 5,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
       "cloud_tokens": {
-        "total": 96092,
-        "input": 7,
-        "output": 667,
+        "total": 57907,
+        "input": 5,
+        "output": 484,
         "reasoning": 0,
-        "cache_write": 19478,
-        "cache_read": 75940
+        "cache_write": 19526,
+        "cache_read": 37892
       },
-      "cloud_cost_usd": 0.1059,
+      "cloud_cost_usd": 0.0919,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -282,19 +288,19 @@
         "before": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23595
+          "free_mb": 20886
         },
         "after": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23846
+          "free_mb": 20917
         }
       },
       "local_server_pid": 38140,
       "local_server_started": "2026-08-30T00:53:49.3061+02:00",
-      "log": ".bench-logs/hybrid-3-control-5-20260830-042606.jsonl",
+      "log": ".bench-logs/hybrid-2-control-5-20260830-041958.jsonl",
       "verified": true,
-      "note": "renamed and compiles",
+      "note": "compiles",
       "dispatched": null,
       "valid": true,
       "invalid_reason": null,
@@ -303,26 +309,26 @@
     {
       "n": 6,
       "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 1,
-      "started": "2026-08-30T04:26:33+0200",
-      "seconds": 16.2,
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:20:14+0200",
+      "seconds": 13.2,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 5,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
       "cloud_tokens": {
-        "total": 96088,
-        "input": 7,
-        "output": 668,
+        "total": 57950,
+        "input": 5,
+        "output": 525,
         "reasoning": 0,
-        "cache_write": 19477,
-        "cache_read": 75936
+        "cache_write": 19526,
+        "cache_read": 37894
       },
-      "cloud_cost_usd": 0.1059,
+      "cloud_cost_usd": 0.0925,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -333,19 +339,19 @@
         "before": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23773
+          "free_mb": 20838
         },
         "after": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23795
+          "free_mb": 20735
         }
       },
       "local_server_pid": 38140,
       "local_server_started": "2026-08-30T00:53:49.3061+02:00",
-      "log": ".bench-logs/hybrid-3-control-6-20260830-042632.jsonl",
+      "log": ".bench-logs/hybrid-2-control-6-20260830-042014.jsonl",
       "verified": true,
-      "note": "renamed and compiles",
+      "note": "compiles",
       "dispatched": null,
       "valid": true,
       "invalid_reason": null,
@@ -354,26 +360,26 @@
     {
       "n": 7,
       "arm": "control",
-      "rung": 3,
-      "task": "M1",
-      "preflight": 1,
-      "started": "2026-08-30T04:26:49+0200",
-      "seconds": 15.0,
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-30T04:20:28+0200",
+      "seconds": 14.6,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 6,
-      "files_changed": 2,
-      "cloud_steps": 5,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
       "cloud_tokens": {
-        "total": 96164,
-        "input": 7,
-        "output": 729,
+        "total": 57902,
+        "input": 5,
+        "output": 472,
         "reasoning": 0,
-        "cache_write": 19480,
-        "cache_read": 75948
+        "cache_write": 19529,
+        "cache_read": 37896
       },
-      "cloud_cost_usd": 0.1068,
+      "cloud_cost_usd": 0.0917,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -384,19 +390,19 @@
         "before": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23749
+          "free_mb": 20747
         },
         "after": {
           "swap_used_mb": 0.0,
           "swap_free_mb": 0.0,
-          "free_mb": 23672
+          "free_mb": 20804
         }
       },
       "local_server_pid": 38140,
       "local_server_started": "2026-08-30T00:53:49.3061+02:00",
-      "log": ".bench-logs/hybrid-3-control-7-20260830-042649.jsonl",
+      "log": ".bench-logs/hybrid-2-control-7-20260830-042028.jsonl",
       "verified": true,
-      "note": "renamed and compiles",
+      "note": "compiles",
       "dispatched": null,
       "valid": true,
       "invalid_reason": null,
@@ -405,43 +411,14 @@
   ],
   "preflight": [
     {
-      "checked_at": "2026-08-29T19:36:03+0200",
-      "arm": "control",
-      "local_profile": "qwen3.6-35b-a3b-optiq",
-      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
-      "nav_pilot_auto_update": true,
-      "cloud_model": "claude-sonnet-4.6",
-      "exclusive": true,
-      "wired_limit_gb": 36,
-      "wired_limit_expected_gb": 36,
-      "local_server": {
-        "pid": 23262,
-        "port": "8080",
-        "started": "2026-08-29T17:37:10.313213+02:00",
-        "probe_seconds": 1.0
-      },
-      "markers_before": {
-        "worker_model": false,
-        "dispatch_fragment": false,
-        "mlx_provider": false
-      },
-      "instructions_before": [],
-      "memory_at_preflight": {
-        "swap_used_mb": 8029.88,
-        "swap_free_mb": 1186.12,
-        "free_mb": 51268
-      }
-    },
-    {
-      "checked_at": "2026-08-30T04:24:58+0200",
+      "checked_at": "2026-08-30T04:18:37+0200",
       "arm": "control",
       "local_profile": "qwen3.6-35b-a3b-optiq",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
       "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
       "nav_pilot_auto_update": false,
       "cloud_model": "claude-sonnet-4.6",
-      "load_average": 5.94,
+      "load_average": 3.5,
       "exclusive": true,
       "wired_limit_gb": 36,
       "wired_limit_expected_gb": 36,
@@ -449,7 +426,7 @@
         "pid": 38140,
         "port": "8080",
         "started": "2026-08-30T00:53:49.3061+02:00",
-        "probe_seconds": 4.29
+        "probe_seconds": 0.32
       },
       "markers_before": {
         "worker_model": false,
@@ -460,14 +437,14 @@
       "memory_at_preflight": {
         "swap_used_mb": 0.0,
         "swap_free_mb": 0.0,
-        "free_mb": 22770
+        "free_mb": 20775
       }
     }
   ],
-  "rung": 3,
+  "rung": 2,
   "arm": "control",
-  "task": "M1",
+  "task": "E1",
   "kind": "edit",
-  "verify": "rename",
-  "prompt": "Rename the function dagerMellomDatoer to daysBetweenDates everywhere in the codebase, including its definition, imports and all call sites. Change nothing else."
+  "verify": "compile",
+  "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else."
 }

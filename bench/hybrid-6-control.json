@@ -6,22 +6,23 @@
       "rung": 6,
       "task": "D2",
       "preflight": 0,
-      "started": "2026-08-29T19:45:51+0200",
-      "seconds": 0.2,
+      "started": "2026-08-29T22:32:35+0200",
+      "seconds": 81.3,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 0,
-      "files_changed": 0,
-      "cloud_steps": 0,
+      "lines_changed": 4,
+      "files_changed": 3,
+      "cloud_steps": 20,
       "cloud_tokens": {
-        "total": 0,
-        "input": 0,
-        "output": 0,
+        "total": 659407,
+        "input": 22,
+        "output": 3945,
         "reasoning": 0,
-        "cache_write": 0,
-        "cache_read": 0
+        "cache_write": 39464,
+        "cache_read": 615976
       },
+      "cloud_cost_usd": 0.392,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -30,24 +31,25 @@
       },
       "memory": {
         "before": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51153
+          "swap_used_mb": 7949.88,
+          "swap_free_mb": 1266.12,
+          "free_mb": 35562
         },
         "after": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51148
+          "swap_used_mb": 7949.88,
+          "swap_free_mb": 1266.12,
+          "free_mb": 35670
         }
       },
       "local_server_pid": 23262,
       "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-6-control-0-20260829-194551.jsonl",
-      "verified": false,
-      "note": "no changes made (model did not edit anything)",
+      "log": ".bench-logs/hybrid-6-control-0-20260829-223235.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
       "dispatched": null,
       "valid": true,
-      "invalid_reason": null
+      "invalid_reason": null,
+      "instructions_after": []
     },
     {
       "n": 1,
@@ -55,22 +57,23 @@
       "rung": 6,
       "task": "D2",
       "preflight": 0,
-      "started": "2026-08-29T19:45:52+0200",
-      "seconds": 0.2,
+      "started": "2026-08-29T22:35:39+0200",
+      "seconds": 411.2,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 0,
-      "files_changed": 0,
-      "cloud_steps": 0,
+      "lines_changed": 7,
+      "files_changed": 5,
+      "cloud_steps": 25,
       "cloud_tokens": {
-        "total": 0,
-        "input": 0,
-        "output": 0,
+        "total": 814822,
+        "input": 27,
+        "output": 5330,
         "reasoning": 0,
-        "cache_write": 0,
-        "cache_read": 0
+        "cache_write": 39815,
+        "cache_read": 769650
       },
+      "cloud_cost_usd": 0.4602,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -79,24 +82,25 @@
       },
       "memory": {
         "before": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51146
+          "swap_used_mb": 7949.88,
+          "swap_free_mb": 1266.12,
+          "free_mb": 35302
         },
         "after": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51118
+          "swap_used_mb": 7941.88,
+          "swap_free_mb": 1274.12,
+          "free_mb": 34489
         }
       },
       "local_server_pid": 23262,
       "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-6-control-1-20260829-194551.jsonl",
-      "verified": false,
-      "note": "no changes made (model did not edit anything)",
+      "log": ".bench-logs/hybrid-6-control-1-20260829-223539.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
       "dispatched": null,
       "valid": true,
-      "invalid_reason": null
+      "invalid_reason": null,
+      "instructions_after": []
     },
     {
       "n": 2,
@@ -104,22 +108,23 @@
       "rung": 6,
       "task": "D2",
       "preflight": 0,
-      "started": "2026-08-29T19:45:52+0200",
-      "seconds": 0.1,
+      "started": "2026-08-29T22:44:13+0200",
+      "seconds": 65.4,
       "timed_out": false,
       "exit": 0,
       "local_calls": 0,
-      "lines_changed": 0,
-      "files_changed": 0,
-      "cloud_steps": 0,
+      "lines_changed": 4,
+      "files_changed": 3,
+      "cloud_steps": 16,
       "cloud_tokens": {
-        "total": 0,
-        "input": 0,
-        "output": 0,
+        "total": 444796,
+        "input": 18,
+        "output": 3274,
         "reasoning": 0,
-        "cache_write": 0,
-        "cache_read": 0
+        "cache_write": 34661,
+        "cache_read": 406843
       },
+      "cloud_cost_usd": 0.3012,
       "truncated": false,
       "markers_after": {
         "worker_model": false,
@@ -128,34 +133,290 @@
       },
       "memory": {
         "before": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51114
+          "swap_used_mb": 7941.88,
+          "swap_free_mb": 1274.12,
+          "free_mb": 34445
         },
         "after": {
-          "swap_used_mb": 8021.88,
-          "swap_free_mb": 1194.12,
-          "free_mb": 51115
+          "swap_used_mb": 7941.88,
+          "swap_free_mb": 1274.12,
+          "free_mb": 34523
         }
       },
       "local_server_pid": 23262,
       "local_server_started": "2026-08-29T17:37:10.313213+02:00",
-      "log": ".bench-logs/hybrid-6-control-2-20260829-194552.jsonl",
-      "verified": false,
-      "note": "no changes made (model did not edit anything)",
+      "log": ".bench-logs/hybrid-6-control-2-20260829-224412.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
       "dispatched": null,
       "valid": true,
-      "invalid_reason": null
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 0,
+      "started": "2026-08-29T22:47:01+0200",
+      "seconds": 79.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 4,
+      "files_changed": 3,
+      "cloud_steps": 16,
+      "cloud_tokens": {
+        "total": 438548,
+        "input": 18,
+        "output": 3602,
+        "reasoning": 0,
+        "cache_write": 31011,
+        "cache_read": 403917
+      },
+      "cloud_cost_usd": 0.2916,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 7941.88,
+          "swap_free_mb": 1274.12,
+          "free_mb": 34274
+        },
+        "after": {
+          "swap_used_mb": 7941.88,
+          "swap_free_mb": 1274.12,
+          "free_mb": 33492
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-3-20260829-224701.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 4,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 1,
+      "started": "2026-08-29T23:11:27+0200",
+      "seconds": 303.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 4,
+      "files_changed": 3,
+      "cloud_steps": 2,
+      "cloud_tokens": {
+        "total": 39202,
+        "input": 4,
+        "output": 837,
+        "reasoning": 0,
+        "cache_write": 19640,
+        "cache_read": 18721
+      },
+      "cloud_cost_usd": 0.0918,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 32248
+        },
+        "after": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33521
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-4-20260829-231127.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 5,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 1,
+      "started": "2026-08-29T23:18:12+0200",
+      "seconds": 107.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 6,
+      "files_changed": 4,
+      "cloud_steps": 23,
+      "cloud_tokens": {
+        "total": 788504,
+        "input": 25,
+        "output": 5220,
+        "reasoning": 0,
+        "cache_write": 39819,
+        "cache_read": 743440
+      },
+      "cloud_cost_usd": 0.4507,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33465
+        },
+        "after": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33261
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-5-20260829-231811.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 6,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 1,
+      "started": "2026-08-29T23:21:42+0200",
+      "seconds": 102.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 5,
+      "files_changed": 3,
+      "cloud_steps": 20,
+      "cloud_tokens": {
+        "total": 539853,
+        "input": 22,
+        "output": 4188,
+        "reasoning": 0,
+        "cache_write": 31829,
+        "cache_read": 503814
+      },
+      "cloud_cost_usd": 0.3334,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33371
+        },
+        "after": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33588
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-6-20260829-232142.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 7,
+      "arm": "control",
+      "rung": 6,
+      "task": "D2",
+      "preflight": 1,
+      "started": "2026-08-29T23:25:06+0200",
+      "seconds": 97.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 3,
+      "files_changed": 2,
+      "cloud_steps": 18,
+      "cloud_tokens": {
+        "total": 516998,
+        "input": 20,
+        "output": 4817,
+        "reasoning": 0,
+        "cache_write": 34537,
+        "cache_read": 477624
+      },
+      "cloud_cost_usd": 0.3451,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 33261
+        },
+        "after": {
+          "swap_used_mb": 7933.88,
+          "swap_free_mb": 1282.12,
+          "free_mb": 32370
+        }
+      },
+      "local_server_pid": 23262,
+      "local_server_started": "2026-08-29T17:37:10.313213+02:00",
+      "log": ".bench-logs/hybrid-6-control-7-20260829-232506.jsonl",
+      "verified": true,
+      "note": "no new failures (15 already red)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
     }
   ],
   "preflight": [
     {
-      "checked_at": "2026-08-29T19:45:50+0200",
+      "checked_at": "2026-08-29T22:32:34+0200",
       "arm": "control",
       "local_profile": "qwen3.6-35b-a3b-optiq",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
       "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
-      "nav_pilot_auto_update": true,
+      "nav_pilot_auto_update": false,
       "cloud_model": "claude-sonnet-4.6",
       "exclusive": true,
       "wired_limit_gb": 36,
@@ -164,7 +425,7 @@
         "pid": 23262,
         "port": "8080",
         "started": "2026-08-29T17:37:10.313213+02:00",
-        "probe_seconds": 0.47
+        "probe_seconds": 0.44
       },
       "markers_before": {
         "worker_model": false,
@@ -173,9 +434,38 @@
       },
       "instructions_before": [],
       "memory_at_preflight": {
-        "swap_used_mb": 8021.88,
-        "swap_free_mb": 1194.12,
-        "free_mb": 51169
+        "swap_used_mb": 7949.88,
+        "swap_free_mb": 1266.12,
+        "free_mb": 35610
+      }
+    },
+    {
+      "checked_at": "2026-08-29T23:11:26+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 23262,
+        "port": "8080",
+        "started": "2026-08-29T17:37:10.313213+02:00",
+        "probe_seconds": 0.48
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 7933.88,
+        "swap_free_mb": 1282.12,
+        "free_mb": 32241
       }
     }
   ],

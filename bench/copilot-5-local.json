@@ -1,0 +1,90 @@
+{
+  "rung": 5,
+  "arm": "local",
+  "task": "M2",
+  "client": "copilot",
+  "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-30T01:15:06+0200",
+      "seconds": 39.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 7,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 159600,
+        "cached": 134300,
+        "output": 1800
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-5-local-0-20260830-011506.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-30T01:15:51+0200",
+      "seconds": 38.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 7,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 159600,
+        "cached": 134300,
+        "output": 1700
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-5-local-1-20260830-011551.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 5,
+      "task": "M2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-30T01:16:36+0200",
+      "seconds": 38.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 7,
+      "lines_changed": 2,
+      "files_changed": 2,
+      "tokens": {
+        "input": 159500,
+        "cached": 134300,
+        "output": 1700
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-5-local-2-20260830-011636.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

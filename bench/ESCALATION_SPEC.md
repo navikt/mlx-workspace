@@ -23,20 +23,30 @@ overnight.
 
 ## The unit
 
-**Premium requests per completed task.** Not tokens, not seconds. Nav's cap counts requests,
-and no published study measures request count: every result we found measures tokens or
-dollars, so their break-evens do not transfer.
+**AI credits per completed task**, which is to say tokens priced per model. GitHub Copilot
+moved off request-based billing on 1 June 2026: premium requests are gone, and a Copilot plan
+now carries a monthly allowance of AI credits at $0.01 each, drawn down by input, output and
+cached tokens at each model's published rate.
 
-A dispatched task costs the orchestrator at least:
+For Claude Sonnet 4.6 that is $3.00 per 1M input, $0.30 per 1M cached input, $3.75 per 1M
+cache write and $15.00 per 1M output. Cached reads therefore cost a tenth of fresh input,
+which matters a great deal here: 91 to 97 percent of the token totals we record are cache
+reads, so a comparison denominated in raw token totals overstates the gap between the arms by
+roughly a third. Record the priced figure. opencode emits a per-step `cost`, and GitHub prices
+the same models at the same per-token rates, so a dollar of opencode cost is 100 AI credits.
 
-1. one request to decide and call the task tool
-2. one to receive the worker's result
-3. one to verify, because our own dispatch fragment tells it to check the file actually changed
+This change moves the break-even in the local model's favour, and it invalidates the argument
+this section used to make. Under request billing a dispatched task cost the orchestrator at
+least three requests — one to decide and call the task tool, one to take the result, one to
+verify the file actually changed, because our own dispatch fragment tells it to — so a task
+the cloud finished in one request could cost four when dispatched, and break-even hung on the
+worker's success rate. Under token billing those extra turns are cheap: they are short, and
+they read a cache prefix that is already warm. What is expensive is generating code, and that
+is precisely the part the local worker does for nothing.
 
-and, when the worker declines or produces a broken edit, however many more it takes to redo
-the work in the cloud. So a task the cloud finishes in one request can cost four when
-dispatched. Break-even is governed by the worker's success rate, not by how hard the task
-looks.
+The worker's success rate still decides the outcome, but through a different mechanism. A
+declined or broken edit now costs a redo in the cloud at full output rates, not a fixed
+request surcharge.
 
 ## Design
 

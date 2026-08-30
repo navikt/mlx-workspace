@@ -97,6 +97,56 @@ def sh(cmd, cwd=None, timeout=1800, env=None):
 
 # ── measurement primitives ────────────────────────────────────────────────────
 
+LOAD_CEILING = float(os.environ.get("BENCH_LOAD_CEILING", "8"))
+
+
+def wait_with_deadline(proc, cap):
+    """Wait for a child, enforcing the cap against the wall clock ourselves.
+
+    `Popen.wait(timeout=...)` was observed sitting thirteen minutes past a 2400s
+    deadline with the child still alive, and only returned when the child was killed
+    by hand. Whatever the cause, a benchmark cannot depend on it: a cap that does not
+    fire turns a hung sample into an unbounded one, and the night's remaining work
+    never runs.
+
+    So the deadline is checked here, against time.monotonic(), and the child is killed
+    by process group. Returns (returncode, timed_out).
+    """
+    deadline = time.monotonic() + cap
+    while True:
+        rc = proc.poll()
+        if rc is not None:
+            return rc, False
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(1)
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except (ProcessLookupError, PermissionError):
+        pass
+    # Reap, but never block forever on a child that will not die: a zombie left
+    # behind is worse than an unreaped one, because the next sample's port and
+    # ownership checks would see it.
+    grace = time.monotonic() + 60
+    while proc.poll() is None and time.monotonic() < grace:
+        time.sleep(1)
+    return proc.poll(), True
+
+
+def load_average():
+    """One-minute load average.
+
+    Checked because a benchmark cannot tell a slow model from a busy machine. After
+    a reboot Spotlight reindexed at load 16-20, and neither harness would have
+    refused to start: every latency recorded in that window would have been a
+    measurement of mdworker.
+    """
+    out = subprocess.run(["/usr/sbin/sysctl", "-n", "vm.loadavg"], capture_output=True,
+                         text=True).stdout
+    m = re.search(r"([\d.]+)", out)
+    return float(m.group(1)) if m else 0.0
+
+
 def memory():
     """Swap used and free memory, in MB.
 
@@ -104,7 +154,7 @@ def memory():
     loudly; it pushed the machine into swap and every later task got slower, which
     is indistinguishable from a worse model unless the number is in the file.
     """
-    sw = subprocess.run(["sysctl", "-n", "vm.swapusage"], capture_output=True, text=True).stdout
+    sw = subprocess.run(["/usr/sbin/sysctl", "-n", "vm.swapusage"], capture_output=True, text=True).stdout
     vm = subprocess.run(["vm_stat"], capture_output=True, text=True).stdout
 
     def grab(pat, text, cast=float, default=None):
@@ -204,6 +254,10 @@ def parse_events(text):
     steps, reply = 0, []
     tok = {"total": 0, "input": 0, "output": 0, "reasoning": 0, "cache_write": 0, "cache_read": 0}
     reasons = []
+    # opencode prices each step itself. Worth more than the token total: 91-97%
+    # of that total is cache reads, billed at a tenth of the input rate, so a
+    # comparison denominated in raw tokens overstates the gap between the arms.
+    cost = 0.0
     for line in text.splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -222,9 +276,11 @@ def parse_events(text):
                 tok[k] += int(t.get(k) or 0)
             tok["cache_write"] += int(cache.get("write") or 0)
             tok["cache_read"] += int(cache.get("read") or 0)
+            cost += float(part.get("cost") or 0)
         elif kind == "text" and isinstance(part.get("text"), str):
             reply.append(part["text"])
     return {"cloud_steps": steps, "cloud_tokens": tok,
+            "cloud_cost_usd": round(cost, 4),
             "truncated": "length" in reasons,
             "reply": " ".join(reply).strip()}
 
@@ -292,6 +348,43 @@ def changed():
     return len(files), numstat_lines(sh(["git", "diff", "--numstat"], cwd=REPO).stdout)
 
 
+def failing_tests():
+    """Test classes that failed in the last `gradle test`, from its JUnit XML."""
+    out = set()
+    for f in (REPO / "build" / "test-results" / "test").glob("*.xml"):
+        text = f.read_text(errors="replace")
+        m = re.search(r'failures="(\d+)"[^>]*errors="(\d+)"', text)
+        if m and (m.group(1) != "0" or m.group(2) != "0"):
+            name = re.search(r'name="([^"]+)"', text)
+            out.add(name.group(1) if name else f.name)
+    return out
+
+
+_BASELINE = {}
+
+
+def baseline_failures():
+    """Which tests already fail on an untouched checkout, cached per commit.
+
+    Measured once per commit rather than assumed, because "the suite is green"
+    is exactly the kind of premise that is true on someone's laptop and false on
+    the machine running the benchmark.
+    """
+    sha = sh(["git", "rev-parse", "HEAD"], cwd=REPO).stdout.strip()[:12]
+    if sha in _BASELINE:
+        return _BASELINE[sha]
+    cache = ROOT / "bench" / f".baseline-{sha}.json"
+    if cache.exists():
+        _BASELINE[sha] = set(json.loads(cache.read_text()))
+        return _BASELINE[sha]
+    reset_repo()
+    build("test")
+    failed = failing_tests()
+    cache.write_text(json.dumps(sorted(failed), indent=2))
+    _BASELINE[sha] = failed
+    return failed
+
+
 def verify(task, reply):
     """Run the target's own checks. Never the model's claim that they passed: one
     earlier submission reported 20/20 passing with eight assertions inside a catch
@@ -304,8 +397,27 @@ def verify(task, reply):
         r = build("compile")
         return r.returncode == 0, "compiles" if r.returncode == 0 else "compile failed"
     if kind == "test":
+        # Clear the previous run's XML first. `git clean` keeps build/ (a cold
+        # Gradle build costs minutes), so a change that fails to COMPILE leaves
+        # the last run's results in place: the test task never executes, the
+        # baseline diff finds nothing new, and a broken build scores as a pass.
+        results = REPO / "build" / "test-results" / "test"
+        for stale in results.glob("*.xml"):
+            stale.unlink()
         r = build("test")
-        return r.returncode == 0, "suite passes" if r.returncode == 0 else "suite failed"
+        if not any(results.glob("*.xml")):
+            return False, "build failed before any test ran (compile error)"
+        if r.returncode == 0:
+            return True, "suite passes"
+        new_failures = failing_tests() - baseline_failures()
+        if not new_failures:
+            # The suite is red before anyone touches it. On this target twenty
+            # classes fail because embedded PostgreSQL will not start on this
+            # machine, and judging a sample against green marked every rung 4-6
+            # result "suite failed" regardless of what the model wrote. A sample
+            # is judged against the repository it was handed, not against green.
+            return True, f"no new failures ({len(baseline_failures())} already red)"
+        return False, f"{len(new_failures)} new failing test(s): {sorted(new_failures)[0]}"
     if kind == "rename":
         hits = sh(["grep", "-rn", task["old_symbol"], "src"], cwd=REPO).stdout.strip()
         if hits:
@@ -360,8 +472,14 @@ def preflight(arm, port, profile_key, meta, params):
         raise SystemExit("✗ no cloud model. Fix: nav-pilot config set model <id>, "
                          "or set BENCH_CLOUD_MODEL")
     if np_cfg.get("auto_update"):
-        print("    ⚠ nav-pilot auto_update is on — it can change the harness mid-run.\n"
-              "      Fix: nav-pilot config set auto_update false")
+        # Fatal, not a warning. As a warning this cost a day: nav-pilot replaced
+        # itself mid-ladder with the released build, which has no launch flags, so
+        # eighteen samples exited in 0.2s having printed the help text. Preflight
+        # had already passed against the dev binary, and every later check passed
+        # too, because none of them re-read the binary.
+        raise SystemExit(
+            "✗ nav-pilot auto_update is on — it can replace the binary mid-run.\n"
+            "  Fix: nav-pilot config set auto_update false")
     print(f"  2 ✓ nav-pilot {snap['nav_pilot_version']} · cloud model {snap['cloud_model']}")
 
     # 3. Nothing else competing for the GPU or the disk. A run that overlapped a
@@ -380,13 +498,19 @@ def preflight(arm, port, profile_key, meta, params):
     if busy:
         raise SystemExit("✗ the machine is busy — every number would be a measurement of "
                          "contention:\n  " + "\n  ".join(busy) + "\n  Fix: wait for it, or kill it.")
+    load = load_average()
+    if load > LOAD_CEILING:
+        raise SystemExit(f"✗ load average is {load:.1f}, ceiling is {LOAD_CEILING}.\n"
+                         f"  A busy machine is indistinguishable from a slow model.\n"
+                         f"  Fix: wait for it to settle.")
+    snap["load_average"] = load
     snap["exclusive"] = True
     print("  3 ✓ no download, no other benchmark")
 
     # 4. Wired memory limit. The plain 4-bit build produced a 200-call runaway loop
     #    at the wrong cap; a rung measured under a different limit is not comparable.
     want_gb = meta.get("gpu_wired_limit_gb")
-    cur_mb = sh(["sysctl", "-n", "iogpu.wired_limit_mb"]).stdout.strip()
+    cur_mb = sh(["/usr/sbin/sysctl", "-n", "iogpu.wired_limit_mb"]).stdout.strip()
     cur_gb = int(cur_mb) // 1024 if cur_mb.isdigit() and cur_mb != "0" else None
     snap["wired_limit_gb"] = cur_gb
     snap["wired_limit_expected_gb"] = want_gb
@@ -479,21 +603,26 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     # sharing the machine, and subprocess only kills nav-pilot, not the client it
     # launched: six orphaned clients accumulated over one day of killed runs.
     with log_path.open("w") as fh:
+        # The launch argv, verbatim, at the top of every log. Six samples once
+        # failed in 0.2s with nav-pilot's help text and no argv on record, which
+        # cost a day of guessing at a question the log could have answered.
+        fh.write(f"# argv: {argv!r}\n# cwd: {REPO}\n")
+        fh.flush()
         proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
                                 start_new_session=True)
-        try:
-            rc = proc.wait(timeout=cap)
-        except subprocess.TimeoutExpired:
-            timed_out, rc = True, None
-            try:
-                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
-                pass
-            proc.wait(timeout=60)
+        rc, timed_out = wait_with_deadline(proc, cap)
+        if timed_out:
+            rc = None
     elapsed = round(time.time() - started, 1)
 
     ev = parse_events(log_path.read_text(errors="replace"))
     after = markers()
+    # What the launch actually put in the system prompt. Taken after, not before:
+    # the hybrid arm's dispatch fragment is written at launch, so a preflight
+    # inventory records an empty list for both arms and the fragment's cost to
+    # the prompt appears nowhere. Rung 4 dispatches nothing, which makes its
+    # hybrid arm the control plus this fragment — the only way to price it.
+    instructions_after = instruction_inventory()
     local_calls = local_calls_since(offset)
     files, lines = changed()
 
@@ -509,6 +638,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         # working tree, so they survive a killed client and stay real numbers.
         "local_calls": local_calls, "lines_changed": lines, "files_changed": files,
         "cloud_steps": ev["cloud_steps"], "cloud_tokens": ev["cloud_tokens"],
+        "cloud_cost_usd": ev["cloud_cost_usd"],
         "truncated": ev["truncated"],
         "markers_after": after,
         "memory": {"before": mem_before, "after": memory()},
@@ -526,9 +656,17 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         invalid = f"timed out after {cap}s"
     elif rc != 0:
         invalid = f"client exited {rc}"
+    elif elapsed < 2 and not ev["cloud_steps"]:
+        # A launch that returns in under two seconds having taken no step never
+        # reached the model. nav-pilot prints its help text and exits 0 when it
+        # does not recognise the launch flags, so this reads as a clean run with
+        # a perfect score of zero. Eighteen samples were recorded that way. The
+        # control arm has no config artefacts to check, so this is its only guard.
+        invalid = f"no session: exited 0 in {elapsed}s with no steps (see {log_path.name})"
     if invalid:
         rec["cloud_steps"] = None
         rec["cloud_tokens"] = None
+        rec["cloud_cost_usd"] = None
         rec["truncated"] = None
         rec["verified"] = None
         rec["note"] = invalid
@@ -558,14 +696,35 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     rec["dispatched"] = bool(local_calls) if arm == "hybrid" else None
     rec["valid"] = invalid is None
     rec["invalid_reason"] = invalid
+    rec["instructions_after"] = instructions_after
     return rec
 
 
 # ── self-check ────────────────────────────────────────────────────────────────
 
+def check_deadline():
+    """The cap must fire, and must kill a child that ignores anything softer.
+
+    Not a hypothetical: `Popen.wait(timeout=2400)` was seen thirteen minutes past its
+    deadline with the child alive, which turns one hung sample into a lost night.
+    """
+    child = subprocess.Popen(
+        [sys.executable, "-c",
+         "import signal,time\nsignal.signal(signal.SIGTERM,signal.SIG_IGN)\ntime.sleep(300)"],
+        start_new_session=True)
+    began = time.monotonic()
+    rc, timed_out = wait_with_deadline(child, 3)
+    elapsed = time.monotonic() - began
+    assert timed_out, "the cap did not fire"
+    assert elapsed < 15, f"the cap fired {elapsed:.0f}s late"
+    assert child.poll() is not None, "the child outlived its cap"
+    assert rc is not None, "the killed child was never reaped"
+
+
 def self_check():
     """One runnable check on the parsing, so a silent schema change is loud.
     Touches no GPU, no server and no config."""
+    check_deadline()
     stream = "\n".join([
         "nav-pilot: launching opencode",
         json.dumps({"type": "step_finish", "part": {"reason": "tool-calls", "tokens": {
@@ -675,7 +834,19 @@ def main():
                 doc["preflight"].append(snap)
                 snap_ix = len(doc["preflight"]) - 1
                 # Resumable: top up to --samples rather than starting over.
-                while len(doc["samples"]) < args.samples:
+                # Count VALID samples toward the target, not attempts. An invalid
+                # sample is the absence of a measurement, and letting three of them
+                # satisfy `--samples 3` leaves a results file that looks complete and
+                # contains nothing. Attempts are capped so a systematically broken
+                # arm stops rather than retrying until morning.
+                attempts, cap_attempts = 0, args.samples * 2 + 2
+                while sum(1 for x in doc["samples"] if x.get("valid")) < args.samples:
+                    if attempts >= cap_attempts:
+                        print(f"   ⚠ giving up: {attempts} attempts produced "
+                              f"{sum(1 for x in doc['samples'] if x.get('valid'))} valid "
+                              f"sample(s). Something is wrong with the arm, not the model.")
+                        break
+                    attempts += 1
                     n = len(doc["samples"])
                     rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout)
                     doc["samples"].append(rec)
@@ -686,6 +857,7 @@ def main():
                           f"{show(rec['cloud_steps'])} steps · "
                           f"{show(tk['total'] if tk else None)} tokens "
                           f"(cache r{show(tk['cache_read'] if tk else None)}) · "
+                          f"${rec['cloud_cost_usd']} · "
                           f"{show(rec['local_calls'])} local calls · "
                           f"{rec['lines_changed']} lines · {rec['note']}")
                     if not rec["valid"]:

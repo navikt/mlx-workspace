@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# mise description="Does the reworded dispatch fragment change how often the orchestrator delegates? Same rungs, same model, two fragments. Usage: mise run bench-wording"
+#
+# OpenCode rungs 4 and 5 dispatched zero times in every sample under the old
+# fragment, which promised the worker cost no premium requests — a unit GitHub
+# retired on 1 June 2026 — and spent four sentences on how the worker fails against
+# one clause on what it saves. The new one leads with the economics, prices the
+# failure modes honestly (seconds, no credits), and tells the orchestrator to specify
+# each change fully before dispatching it.
+#
+# Both arms are measured here rather than one being read off older files. The
+# earlier rung 4 and 5 results were deleted in a purge and the copies in git are from
+# the run that nav-pilot's auto-update corrupted, so there is no trustworthy "before"
+# on disk. Generating both with the same harness on the same night is better anyway:
+# the fragment becomes the only difference.
+#
+# The measured quantity is the dispatch rate. If it does not move, the wording was
+# not what held those rungs at zero, and the honest conclusion is that the
+# orchestrator's judgement about those task shapes was right.
+set -u
+
+cd "$(dirname "$0")/../.." || exit 1
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/sbin:/usr/bin:/bin:/sbin:${PATH:-}"
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-/tmp/nav-pilot-local}"
+export PYTHONPATH=".mise/tasks:${PYTHONPATH:-}"
+LOG=".bench-logs/wording-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p .bench-logs
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+
+SAMPLES="${BENCH_WORDING_SAMPLES:-6}"
+SRC=~/go/src/github.com/navikt/copilot/cli/nav-pilot
+
+# Which fragment a binary carries, checked rather than assumed. Rebuilding from a
+# tree someone else changed, or forgetting to rebuild at all, would otherwise show
+# up as "the wording made no difference".
+fragment_of() {
+  if strings "$BENCH_NAV_PILOT" | grep -q "trekker ingen AI-credits"; then echo new
+  elif strings "$BENCH_NAV_PILOT" | grep -q "koster ingen premium"; then echo old
+  else echo unknown; fi
+}
+
+# Rebuilding the binary underneath a running benchmark is how eighteen samples were
+# once recorded as clean runs scoring zero.
+waited=0
+while pgrep -f "bench-night|bench-copilot|bench-hybrid" >/dev/null; do
+  [ "$waited" -ge 21600 ] && { say "FATAL: main queue still running after 6h"; exit 1; }
+  sleep 60; waited=$((waited + 60))
+done
+say "main queue finished after ${waited}s of waiting"
+
+run_rungs() {
+  for rung in 4 5; do
+    say "→ rung $rung hybrid ($1 fragment)"
+    if .mise/tasks/bench-hybrid --rung "$rung" --arm hybrid --samples "$SAMPLES" >>"$LOG" 2>&1; then
+      say "✓ rung $rung ($1)"
+    else
+      say "✗ rung $rung ($1) — see $LOG"
+    fi
+  done
+}
+
+# ── before ────────────────────────────────────────────────────────────────────
+have=$(fragment_of)
+[ "$have" = "old" ] || { say "FATAL: expected the old fragment on disk, found: $have"; exit 1; }
+say "before arm: binary carries the old fragment"
+rm -f bench/hybrid-4-hybrid.json bench/hybrid-5-hybrid.json
+run_rungs old
+for rung in 4 5; do
+  [ -f "bench/hybrid-${rung}-hybrid.json" ] && mv "bench/hybrid-${rung}-hybrid.json" \
+    "bench/hybrid-${rung}-hybrid-oldfragment.json"
+done
+
+# ── after ─────────────────────────────────────────────────────────────────────
+say "rebuilding nav-pilot with the reworded fragment"
+(cd "$SRC" && go build -o "$BENCH_NAV_PILOT" .) || { say "FATAL: build failed"; exit 1; }
+have=$(fragment_of)
+[ "$have" = "new" ] || { say "FATAL: rebuilt binary does not carry the new fragment: $have"; exit 1; }
+say "after arm: binary carries the reworded fragment"
+rm -f bench/hybrid-4-hybrid.json bench/hybrid-5-hybrid.json
+run_rungs new
+
+say "=== dispatch rate, before and after"
+python3 - <<'PY' | tee -a "$LOG"
+import json, pathlib
+for rung in (4, 5):
+    for label, name in (("before", f"bench/hybrid-{rung}-hybrid-oldfragment.json"),
+                        ("after ", f"bench/hybrid-{rung}-hybrid.json")):
+        p = pathlib.Path(name)
+        if not p.exists():
+            print(f"rung {rung} {label}: no file")
+            continue
+        s = [x for x in json.loads(p.read_text())["samples"] if x.get("valid")]
+        d = sum(1 for x in s if x.get("local_calls"))
+        cost = sorted(x["cloud_cost_usd"] for x in s if x.get("cloud_cost_usd") is not None)
+        med = cost[len(cost) // 2] if cost else None
+        print(f"rung {rung} {label}: dispatched {d}/{len(s)}, median ${med}")
+PY
+say "=== wording experiment done"

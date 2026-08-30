@@ -1,0 +1,90 @@
+{
+  "rung": 2,
+  "arm": "cloud",
+  "task": "E1",
+  "client": "copilot",
+  "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "cloud",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:29:43+0200",
+      "seconds": 20.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 1,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 77700,
+        "cached": 61700,
+        "output": 614
+      },
+      "credits": 8.77,
+      "cost_usd": 0.0877,
+      "log": ".bench-logs/copilot-2-cloud-0-20260830-002943.log",
+      "verified": null,
+      "note": "cloud arm but the local server took 1 calls",
+      "valid": false,
+      "invalid_reason": "cloud arm but the local server took 1 calls"
+    },
+    {
+      "n": 1,
+      "arm": "cloud",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:30:03+0200",
+      "seconds": 19.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 77600,
+        "cached": 61600,
+        "output": 607
+      },
+      "credits": 8.75,
+      "cost_usd": 0.0875,
+      "log": ".bench-logs/copilot-2-cloud-1-20260830-003003.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "cloud",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:30:29+0200",
+      "seconds": 19.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 77700,
+        "cached": 61700,
+        "output": 601
+      },
+      "credits": 8.75,
+      "cost_usd": 0.0875,
+      "log": ".bench-logs/copilot-2-cloud-2-20260830-003029.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

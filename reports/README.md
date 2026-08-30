@@ -5,6 +5,7 @@ run, every failure and every correction. These are the summaries.
 
 | Report | Covers |
 |---|---|
+| [`local-inference-findings.md`](local-inference-findings.md) | **The findings report.** 146 verified samples across two clients, six task shapes and three refactor strategies: what the local model saves, what it cannot do, the four things we got wrong, and the bug that would have hurt users |
 | [`alpha-model-decision.md`](alpha-model-decision.md) | Which model the nav-pilot alpha ships, why Qwen3.8-27B is held back, what was rejected, and how far the numbers can be trusted |
 | [`alpha-status.md`](alpha-status.md) | The tracking file: what is verified on hardware, what is outstanding, what our own documents got wrong, and the known ceilings |
 | [`alpha-runbook.md`](alpha-runbook.md) | What the first alpha users need to know: what the local model does well, how it fails, what it costs, and what to report |

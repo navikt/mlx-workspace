@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+# mise description="How much of a multi-file refactor can run locally: three strategies, same refactor, same commit. See bench/REFACTOR_SPEC.md. Usage: mise run bench-refactor --strategy a|b|c [--samples 2]"
+"""The refactor experiment from bench/REFACTOR_SPEC.md.
+
+A single edit saving two cloud steps is a curiosity. A refactor across ten files is
+where that becomes money, and where the local model's known failure lives.
+
+Three strategies over one rename, 46 references in 10 files:
+
+  C, cloud only     the reference. Dispatch disabled. What the expensive model does.
+  A, monolithic     the whole session on the local model. What a user tries first,
+                    and what the literature expects to fail.
+  B, decomposed     cloud orchestrator told to specify each file's change fully and
+                    dispatch it. What published work on cascaded editing says should
+                    win: the large model decides, the small one applies.
+
+Quality is not "does the suite pass" — the target's suite is red before anyone
+touches it, and a rename that changes behaviour in an untested branch passes
+everything we have. It is agreement with strategy C, file by file, plus the two
+deterministic facts a rename allows: the old symbol is gone, and it compiles.
+See _refactor_quality.py for what that measure does and does not establish.
+
+Not chained into the overnight queue on purpose. Measurement code written at two in
+the morning and trusted the same night is how a silent-pass bug reached three rungs
+of results earlier; this runs with someone awake.
+"""
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import os
+import signal
+import subprocess
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def _load(name, filename):
+    spec = importlib.util.spec_from_loader(
+        name, importlib.machinery.SourceFileLoader(name, str(Path(__file__).with_name(filename))))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+bh = _load("bench_hybrid", "bench-hybrid")
+rq = _load("refactor_quality", "_refactor_quality.py")
+
+NAV_PILOT = bh.NAV_PILOT
+REPO = bh.REPO
+
+OLD_SYMBOL = "hasGjentakendeSykefravar"
+NEW_SYMBOL = "harGjentakendeSykefravaer"
+
+REFACTOR = (
+    f"Rename the function {OLD_SYMBOL} to {NEW_SYMBOL} everywhere it appears in this "
+    f"repository, including its declaration, every call site, and the tests. "
+    f"Change nothing else: no formatting, no reordering, no other renames. "
+    f"The project must still compile when you are done."
+)
+
+# Strategy B says the same thing and then says how. The instruction is deliberately
+# about decomposition rather than about the local model, so the orchestrator applies
+# its own judgement about what is mechanical enough to hand over.
+DECOMPOSE = (
+    "\n\nWork file by file. First list every file that has to change. Then, for each "
+    "file in turn, dispatch the edit to the `lokal-arbeider` agent with a complete "
+    "specification: the file path, what to search for, and what to replace it with. "
+    "Do not ask it to decide anything. Verify each file changed before moving to the "
+    "next, and make the edit yourself only if the worker did not."
+)
+
+STRATEGIES = {
+    "c": {"local": False, "session_model": None, "prompt": REFACTOR},
+    "a": {"local": True, "session_model": "local", "prompt": REFACTOR},
+    "b": {"local": True, "session_model": None, "prompt": REFACTOR + DECOMPOSE},
+}
+
+
+def old_symbol_refs():
+    r = bh.sh(["grep", "-rn", OLD_SYMBOL, "src"], cwd=REPO)
+    return [l for l in r.stdout.splitlines() if l.strip()]
+
+
+def run_one(strategy, n, snap, cap):
+    cfg = STRATEGIES[strategy]
+    log_dir = ROOT / ".bench-logs"
+    log_dir.mkdir(exist_ok=True)
+    log_path = log_dir / f"refactor-{strategy}-{n}-{time.strftime('%Y%m%d-%H%M%S')}.jsonl"
+
+    bh.reset_repo()
+    before_refs = len(old_symbol_refs())
+
+    bh.np(bh.LOCAL_OFF, "alpha local off")
+    if cfg["local"]:
+        bh.np(bh.LOCAL_ON, "alpha local init")
+
+    model = snap["local_model"] if cfg["session_model"] == "local" else snap["cloud_model"]
+    argv = [NAV_PILOT, "--client", "opencode", "--model", model,
+            "--", "--pure", "run", "--format", "json", cfg["prompt"]]
+
+    offset = bh.log_offset()
+    started = time.time()
+    timed_out = False
+    with log_path.open("w") as fh:
+        fh.write(f"# argv: {argv!r}\n# cwd: {REPO}\n")
+        fh.flush()
+        proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
+                                stdin=subprocess.DEVNULL, start_new_session=True)
+        try:
+            rc = proc.wait(timeout=cap)
+        except subprocess.TimeoutExpired:
+            timed_out, rc = True, None
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            proc.wait(timeout=60)
+    elapsed = round(time.time() - started, 1)
+
+    text = log_path.read_text(errors="replace")
+    ev = bh.parse_events(text)
+    files = rq.tracked_files(REPO)
+    rec = {
+        "strategy": strategy, "n": n, "model": model,
+        "seconds": elapsed, "timed_out": timed_out, "exit": rc,
+        "cloud_steps": ev["cloud_steps"], "cloud_tokens": ev["cloud_tokens"],
+        "cloud_cost_usd": ev["cloud_cost_usd"],
+        "local_calls": bh.local_calls_since(offset),
+        "files_changed": sorted(files),
+        "refs_before": before_refs,
+        "refs_after": len(old_symbol_refs()),
+        "repairs": rq.repairs(text, repo_name=REPO.name),
+        # The end state itself, so a later comparison never has to re-run anything.
+        "snapshot": rq.snapshot(REPO, files),
+        "log": str(log_path.relative_to(ROOT)),
+    }
+
+    invalid = None
+    if timed_out:
+        invalid = f"timed out after {cap}s"
+    elif rc != 0:
+        invalid = f"client exited {rc}"
+    elif elapsed < 2 and not ev["cloud_steps"]:
+        invalid = f"no session: exited 0 in {elapsed}s with no steps"
+    if invalid:
+        rec.update(valid=False, invalid_reason=invalid, compiles=None, renamed=None)
+        return rec
+
+    # Two deterministic facts a rename allows, neither of which needs the suite.
+    rec["renamed"] = rec["refs_after"] == 0
+    rec["compiles"] = bh.build("compile").returncode == 0
+    rec.update(valid=True, invalid_reason=None)
+    return rec
+
+
+def report():
+    """Agreement of A and B against C, plus the cost of each."""
+    def load(s):
+        p = ROOT / "bench" / f"refactor-{s}.json"
+        return json.loads(p.read_text())["samples"] if p.exists() else []
+
+    ref = [x for x in load("c") if x.get("valid")]
+    if not ref:
+        print("no valid strategy C samples — nothing to compare against")
+        return
+    reference = ref[0]["snapshot"]
+    print(f"\nreference: strategy C sample 0, {len(ref[0]['files_changed'])} files changed")
+    for s in ("a", "b", "c"):
+        for x in [y for y in load(s) if y.get("valid")]:
+            cmp = rq.compare(reference, x["snapshot"])
+            print(f"  {s}{x['n']}: ${x['cloud_cost_usd']} · {x['cloud_steps']} steps · "
+                  f"{x['local_calls']} local · renamed={x['renamed']} compiles={x['compiles']} · "
+                  f"agree {cmp['agreement_rate']} "
+                  f"(differ {len(cmp['differ'])}, missing {len(cmp['missing'])}, "
+                  f"extra {len(cmp['extra'])}) · "
+                  f"repairs {x['repairs']['repair_rate_upper_bound']}")
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-refactor")
+    ap.add_argument("--strategy", choices=["a", "b", "c"], action="append")
+    ap.add_argument("--samples", type=int, default=2)
+    ap.add_argument("--timeout", type=int, default=2400)
+    ap.add_argument("--report", action="store_true", help="compare what is already recorded")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        rq.self_check()
+        assert set(STRATEGIES) == {"a", "b", "c"}
+        assert DECOMPOSE not in STRATEGIES["c"]["prompt"], "the control must not be told to dispatch"
+        assert STRATEGIES["b"]["session_model"] is None, "B is cloud-orchestrated"
+        print("✓ self-check passed")
+        return
+    if args.report:
+        return report()
+    if not args.strategy:
+        raise SystemExit("✗ --strategy is required (c first: it is the reference)")
+
+    import _profiles as P
+    profile_key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+    if not profile_key:
+        raise SystemExit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+    meta, params = P.load(profile_key)
+    port = os.environ.get("MLX_SERVER_PORT", "8080")
+
+    bh.ensure_clone()
+    if not old_symbol_refs():
+        raise SystemExit(f"✗ {OLD_SYMBOL} is not in the checkout — the refactor is already done, "
+                         f"or the target moved. Nothing to measure.")
+
+    try:
+        for strategy in args.strategy:
+            snap = bh.preflight("hybrid" if STRATEGIES[strategy]["local"] else "control",
+                                port, profile_key, meta, params)
+            out = ROOT / "bench" / f"refactor-{strategy}.json"
+            doc = json.loads(out.read_text()) if out.exists() else {
+                "strategy": strategy, "old_symbol": OLD_SYMBOL, "new_symbol": NEW_SYMBOL,
+                "prompt": STRATEGIES[strategy]["prompt"], "samples": []}
+            print(f"\n── strategy {strategy} "
+                  f"({sum(1 for x in doc['samples'] if x.get('valid'))}/{args.samples} valid)")
+            attempts, cap = 0, args.samples * 2 + 2
+            while sum(1 for x in doc["samples"] if x.get("valid")) < args.samples:
+                if attempts >= cap:
+                    print("   ⚠ giving up: the strategy is failing systematically")
+                    break
+                attempts += 1
+                rec = run_one(strategy, len(doc["samples"]), snap, args.timeout)
+                doc["samples"].append(rec)
+                out.write_text(json.dumps(doc, indent=2) + "\n")
+                flag = "✓" if rec["valid"] else "✗"
+                print(f"   {flag} sample {rec['n']}: {rec['seconds']}s · "
+                      f"${rec['cloud_cost_usd']} · {rec['cloud_steps']} steps · "
+                      f"{rec['local_calls']} local · {len(rec['files_changed'])} files · "
+                      f"refs {rec['refs_before']}→{rec['refs_after']} · "
+                      f"{rec['invalid_reason'] or ('compiles' if rec['compiles'] else 'BROKEN')}")
+            print(f"✓ {out.relative_to(ROOT)}")
+        report()
+    finally:
+        bh.reset_repo()
+
+
+if __name__ == "__main__":
+    main()

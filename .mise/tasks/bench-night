@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# mise description="Run the queued benchmark work unattended, one step at a time, and keep going after a step fails. Usage: mise run bench-night"
+#
+# Every step is a harness invocation with its own preflight, so a step that should
+# not run refuses to run rather than producing a number nobody can trust. This file
+# decides only the order and that one failure does not end the night.
+#
+# Launched detached (see bench-night-start): a Claude Code session exiting takes its
+# background jobs with it, which killed two runs before this existed.
+set -u
+
+cd "$(dirname "$0")/../.." || exit 1
+# A detached process inherits almost no PATH, and the harnesses shell out to lsof,
+# sysctl, git, gh, go and the two CLIs under test. Losing one of them mid-queue reads
+# as a failed step rather than a missing tool, so the PATH is stated here.
+# mise shims first: the harnesses need Python 3.11 for tomllib, and /usr/bin/python3
+# is older. Ordering this list wrong fails every step with a missing stdlib module.
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/sbin:/usr/bin:/bin:/sbin:${PATH:-}"
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-/tmp/nav-pilot-local}"
+export PYTHONPATH=".mise/tasks:${PYTHONPATH:-}"
+LOG="${BENCH_NIGHT_LOG:-.bench-logs/night-$(date +%Y%m%d-%H%M%S).log}"
+mkdir -p .bench-logs
+
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+
+# Fail at the start, not eight steps in. A missing tool reads as a failed step, and
+# a night of failed steps looks exactly like a night of refused preflights.
+for tool in lsof sysctl git gh go copilot; do
+  command -v "$tool" >/dev/null || { say "FATAL: $tool not on PATH"; exit 1; }
+done
+python3 -c 'import tomllib' 2>/dev/null || { say "FATAL: python3 has no tomllib (needs 3.11+)"; exit 1; }
+
+# The nav-pilot the harnesses invoke lives in /tmp, which a reboot clears. Rebuild it
+# rather than discovering it is missing three steps in.
+if [ ! -x "$BENCH_NAV_PILOT" ]; then
+  say "nav-pilot missing at $BENCH_NAV_PILOT, rebuilding"
+  (cd ~/go/src/github.com/navikt/copilot/cli/nav-pilot && go build -o "$BENCH_NAV_PILOT" .) \
+    || { say "FATAL: cannot build nav-pilot"; exit 1; }
+fi
+
+# Wait for the machine to go quiet rather than failing the step. Spotlight after a
+# reboot runs for tens of minutes; there is no reason to lose the night to it.
+wait_for_quiet() {
+  local waited=0
+  while [ "$(/usr/sbin/sysctl -n vm.loadavg | awk '{print ($2 > 8)}')" = "1" ]; do
+    [ "$waited" -ge 3600 ] && { say "still loaded after 60m, going anyway"; return; }
+    sleep 120; waited=$((waited + 120))
+  done
+}
+
+step() {
+  local what="$1"; shift
+  wait_for_quiet
+  say "→ $what"
+  if "$@" >>"$LOG" 2>&1; then
+    say "✓ $what"
+  else
+    # A failed step is usually a preflight refusal, which is the harness working.
+    say "✗ $what — see $LOG, continuing"
+  fi
+}
+
+CP=".mise/tasks/bench-copilot"
+HY=".mise/tasks/bench-hybrid"
+
+say "=== night queue starting"
+
+# 1. Close the Copilot ladder's breadth: the rung the reboot interrupted, then the
+#    two rungs it never reached.
+step "copilot rung 6 local to 3"   $CP --rung 6 --arm local  --samples 3
+step "copilot rung 4 both"         $CP --rung 4 --samples 3
+step "copilot rung 5 both"         $CP --rung 5 --samples 3
+
+# 2. Depth on the rung that carries the headline, to the allocation the OpenCode
+#    ladder already has, so the two clients are comparable rather than merely both
+#    measured.
+step "copilot rung 6 local to 12"  $CP --rung 6 --arm local  --samples 12
+step "copilot rung 6 cloud to 8"   $CP --rung 6 --arm cloud  --samples 8
+
+# 3. The dispatch rate per rung is the number that decides whether any of this saves
+#    money, and at three samples a single coin flip moves it. OpenCode rungs 1-3 are
+#    where dispatch actually happens.
+step "opencode rung 1 to 8"        $HY --rung 1 --samples 8
+step "opencode rung 2 to 8"        $HY --rung 2 --samples 8
+step "opencode rung 3 to 8"        $HY --rung 3 --samples 8
+
+say "=== night queue done"

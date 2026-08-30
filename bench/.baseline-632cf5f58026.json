@@ -1,0 +1,17 @@
+[
+  "Happy path",
+  "Successful liveness and readiness checks",
+  "Unhappy path",
+  "Unhappy paths",
+  "Unsuccessful liveness and readiness checks",
+  "no.nav.syfo.client.arbeidsforhold.ArbeidsforholdClientTest",
+  "no.nav.syfo.client.narmesteleder.NarmesteLederClientTest",
+  "no.nav.syfo.client.tokendings.TokendingsClientTest",
+  "no.nav.syfo.infrastructure.cronjob.ModiaAOOversendingCronjobTest",
+  "no.nav.syfo.infrastructure.cronjob.OppfolgingstilfelleCronjobKandidatTest",
+  "no.nav.syfo.narmesteleder.api.OppfolgingstilfelleNarmesteLederApiTest",
+  "no.nav.syfo.oppfolgingstilfelle.api.OppfolgingstilfelleArbeidstakerApiTest",
+  "no.nav.syfo.oppfolgingstilfelle.bit.kafka.syketilfelle.KafkaSyketilfelleBitConsumerTest",
+  "no.nav.syfo.oppfolgingstilfelle.bit.kafka.sykmeldingstatus.KafkaSykmeldingstatusConsumerTest",
+  "no.nav.syfo.personhendelse.KafkaPersonhendelseConsumerServiceTest"
+]

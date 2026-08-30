@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# mise description="Run the refactor experiment after the wording experiment finishes. Usage: mise run bench-refactor-night"
+#
+# The reason this is a separate driver rather than a step in bench-night: the refactor
+# harness and its quality measure were written tonight, and measurement code trusted
+# the same night it was written is how a silent-pass bug reached three rungs of
+# results earlier. Generating the data is not the risk — believing it is. So this
+# runs while the machine is idle anyway, and the numbers are marked unreviewed until
+# someone has read the disagreements it reports.
+#
+# Strategy C runs first and alone at first, because it is the reference every other
+# strategy is compared against. If C fails there is nothing to compare and the rest
+# is wasted GPU time.
+set -u
+
+cd "$(dirname "$0")/../.." || exit 1
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/sbin:/usr/bin:/bin:/sbin:${PATH:-}"
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-/tmp/nav-pilot-local}"
+export PYTHONPATH=".mise/tasks:${PYTHONPATH:-}"
+LOG=".bench-logs/refactor-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p .bench-logs
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+
+waited=0
+while pgrep -f "bench-night|bench-wording|bench-copilot|bench-hybrid" >/dev/null; do
+  [ "$waited" -ge 21600 ] && { say "FATAL: something else still running after 6h"; exit 1; }
+  sleep 60; waited=$((waited + 60))
+done
+say "machine free after ${waited}s of waiting"
+
+.mise/tasks/bench-refactor --self-check >>"$LOG" 2>&1 \
+  || { say "FATAL: refactor harness self-check failed"; exit 1; }
+
+say "→ strategy C, cloud only — the reference"
+if .mise/tasks/bench-refactor --strategy c --samples 2 >>"$LOG" 2>&1; then
+  say "✓ strategy C"
+else
+  say "✗ strategy C failed — nothing to compare against, stopping"
+  exit 1
+fi
+
+for s in a b; do
+  say "→ strategy $s"
+  if .mise/tasks/bench-refactor --strategy "$s" --samples 2 >>"$LOG" 2>&1; then
+    say "✓ strategy $s"
+  else
+    say "✗ strategy $s — see $LOG"
+  fi
+done
+
+say "=== comparison (UNREVIEWED: the quality measure was written the same night)"
+.mise/tasks/bench-refactor --report 2>&1 | tee -a "$LOG"
+say "=== refactor experiment done"

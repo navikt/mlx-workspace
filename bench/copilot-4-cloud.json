@@ -1,0 +1,90 @@
+{
+  "rung": 4,
+  "arm": "cloud",
+  "task": "G2",
+  "client": "copilot",
+  "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "cloud",
+      "rung": 4,
+      "task": "G2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:49:41+0200",
+      "seconds": 60.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 67,
+      "files_changed": 1,
+      "tokens": {
+        "input": 312500,
+        "cached": 290100,
+        "output": 2900
+      },
+      "credits": 21.42,
+      "cost_usd": 0.2142,
+      "log": ".bench-logs/copilot-4-cloud-0-20260830-004940.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "cloud",
+      "rung": 4,
+      "task": "G2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T01:11:28+0200",
+      "seconds": 85.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 67,
+      "files_changed": 1,
+      "tokens": {
+        "input": 420300,
+        "cached": 392500,
+        "output": 4500
+      },
+      "credits": 28.9,
+      "cost_usd": 0.289,
+      "log": ".bench-logs/copilot-4-cloud-1-20260830-011128.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "cloud",
+      "rung": 4,
+      "task": "G2",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T01:13:01+0200",
+      "seconds": 118.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 67,
+      "files_changed": 1,
+      "tokens": {
+        "input": 631900,
+        "cached": 603800,
+        "output": 6200
+      },
+      "credits": 37.9,
+      "cost_usd": 0.379,
+      "log": ".bench-logs/copilot-4-cloud-2-20260830-011301.log",
+      "verified": true,
+      "note": "suite passes",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

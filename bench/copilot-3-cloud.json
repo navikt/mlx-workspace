@@ -1,0 +1,90 @@
+{
+  "rung": 3,
+  "arm": "cloud",
+  "task": "M1",
+  "client": "copilot",
+  "prompt": "Rename the function dagerMellomDatoer to daysBetweenDates everywhere in the codebase, including its definition, imports and all call sites. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "cloud",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:30:49+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 58700,
+        "cached": 42400,
+        "output": 759
+      },
+      "credits": 8.54,
+      "cost_usd": 0.0854,
+      "log": ".bench-logs/copilot-3-cloud-0-20260830-003049.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "cloud",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:31:07+0200",
+      "seconds": 17.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 58700,
+        "cached": 42400,
+        "output": 757
+      },
+      "credits": 8.54,
+      "cost_usd": 0.0854,
+      "log": ".bench-logs/copilot-3-cloud-1-20260830-003106.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "cloud",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "claude-sonnet-4.6",
+      "started": "2026-08-30T00:31:25+0200",
+      "seconds": 15.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 58700,
+        "cached": 42400,
+        "output": 716
+      },
+      "credits": 8.48,
+      "cost_usd": 0.0848,
+      "log": ".bench-logs/copilot-3-cloud-2-20260830-003125.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

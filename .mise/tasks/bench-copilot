@@ -1,0 +1,356 @@
+#!/usr/bin/env python3
+# mise description="Run the ESCALATION_SPEC.md ladder through nav-pilot's Copilot CLI client, whole-session local against whole-session cloud. Usage: mise run bench-copilot --rung N [--arm local|cloud] [--samples 3]"
+"""The same ladder as bench-hybrid, through the other client.
+
+The Copilot CLI resolves one provider per session, so the hybrid shape bench-hybrid
+measures — a cloud orchestrator dispatching to a local worker — cannot be expressed
+here at all. What can be measured is the whole session on the local model against the
+whole session in the cloud, which is the product shape Copilot CLI actually supports.
+Recording it as a separate task rather than an arm of bench-hybrid keeps that
+difference visible: these numbers do not belong in the same table.
+
+Two things forced a separate file rather than a `--client` flag on bench-hybrid.
+The Copilot CLI prints a human summary instead of opencode's JSON event stream, so
+none of the token parsing transfers. And the local arm has no config artefacts to
+assert on, because nav-pilot points this client at the local server through the
+environment; the check that the arm is what its name says is the local server's own
+request count instead.
+
+Everything else — the tasks, the target checkout, the verification, the baseline
+failure set — is imported from bench-hybrid so the two ladders cannot drift apart.
+"""
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import os
+import re
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+# Import bench-hybrid as a module. It has no extension and a hyphen in its name, so
+# a plain import will not find it; the guard at the bottom of that file keeps this
+# from running its main().
+_spec = importlib.util.spec_from_loader(
+    "bench_hybrid",
+    importlib.machinery.SourceFileLoader("bench_hybrid", str(Path(__file__).with_name("bench-hybrid"))),
+)
+bh = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(bh)
+
+NAV_PILOT = bh.NAV_PILOT
+REPO = bh.REPO
+CFG = bh.CFG
+RUNGS = bh.RUNGS
+
+
+def task_for(rung):
+    tid = RUNGS.get(rung)
+    if not tid:
+        raise SystemExit(f"✗ rung {rung} has no task id. {sorted(k for k, v in RUNGS.items() if v)}")
+    for t in CFG["tasks"]:
+        if t["id"] == tid:
+            return t
+    raise SystemExit(f"✗ rung {rung} names task {tid}, which is not in bench/tasks.json")
+
+
+# ── the client's own accounting ───────────────────────────────────────────────
+
+# The Copilot CLI ends a session with a summary block. Parsed rather than estimated,
+# because it is the client's own count and it distinguishes cached tokens, which is
+# the difference between a defensible cost number and a misleading one:
+#
+#     Changes    +0 -0
+#     Duration   16s
+#     Tokens     ↑ 71.9k (53.2k cached) • ↓ 529
+TOKENS_RE = re.compile(
+    r"Tokens\s+↑\s*([\d.]+)([km]?)"
+    r"\s*(?:\(([\d.]+)([km]?)\s*cached(?:,[^)]*)?\))?"
+    r"\s*•\s*↓\s*([\d.]+)([km]?)",
+    re.IGNORECASE,
+)
+
+# The client also prints what the session drew down, which is the number GitHub
+# bills and beats any pricing table we could keep in sync:
+#
+#     AI Credits 8.93 (16s)
+#
+# Absent on a local session, because a local session draws none.
+CREDITS_RE = re.compile(r"AI Credits\s+([\d.]+)")
+
+
+def _scale(value, suffix):
+    return int(float(value) * {"k": 1_000, "m": 1_000_000, "": 1}[suffix.lower()])
+
+
+def parse_summary(text):
+    """Input, cached and output tokens from the Copilot CLI's end-of-session block.
+
+    Returns None for every field when the block is absent, which is what a killed or
+    crashed session leaves behind. Never zero: a session that died before printing
+    its summary is an unknown, and zero would read as a free run.
+    """
+    m = None
+    for m in TOKENS_RE.finditer(text):
+        pass  # the last one, in case a resumed session prints more than one
+    if not m:
+        return {"input": None, "cached": None, "output": None}
+    return {
+        "input": _scale(m.group(1), m.group(2)),
+        "cached": _scale(m.group(3), m.group(4)) if m.group(3) else 0,
+        "output": _scale(m.group(5), m.group(6)),
+    }
+
+
+def credits(text, arm):
+    """AI credits this session drew down, from the client's own summary.
+
+    Zero for the local arm, and not because the tokens are free to produce: they cost
+    electricity and 21 GB of resident memory. They cost no AI credits, because they
+    never reach GitHub.
+
+    Read rather than computed. An earlier version priced the tokens from a table of
+    per-model rates copied out of the GitHub docs, which is a second place to be
+    wrong every time a rate or a promotional discount changes.
+    """
+    if arm == "local":
+        return 0.0
+    m = CREDITS_RE.search(text)
+    return float(m.group(1)) if m else None
+
+
+# ── preflight ─────────────────────────────────────────────────────────────────
+
+def preflight(arm, port, params):
+    """Fatal, before any measurement. A shorter list than bench-hybrid's: this client
+    writes no config artefacts, so there is nothing to assert clean."""
+    print("→ preflight")
+    snap = {"checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "arm": arm}
+    served = params["MLX_MODEL"]
+    snap["local_model"] = served
+
+    np_cfg = bh.tomllib.loads(bh.NP_CONFIG.read_text()) if bh.NP_CONFIG.exists() else {}
+    snap["cloud_model"] = os.environ.get("BENCH_CLOUD_MODEL") or np_cfg.get("model")
+    if not snap["cloud_model"]:
+        raise SystemExit("✗ no cloud model. Fix: nav-pilot config set model <id>")
+    if np_cfg.get("auto_update"):
+        raise SystemExit(
+            "✗ nav-pilot auto_update is on — it can replace the binary mid-run.\n"
+            "  Fix: nav-pilot config set auto_update false")
+    ver = bh.sh([NAV_PILOT, "version"], timeout=120).stdout.strip().splitlines()
+    snap["nav_pilot_version"] = ver[-1] if ver else "?"
+    print(f"  1 ✓ nav-pilot {snap['nav_pilot_version']} · cloud model {snap['cloud_model']}")
+
+    cli = subprocess.run(["which", "copilot"], capture_output=True, text=True)
+    if cli.returncode != 0:
+        raise SystemExit("✗ the Copilot CLI is not installed.")
+    snap["copilot"] = cli.stdout.strip()
+    print(f"  2 ✓ copilot at {snap['copilot']}")
+
+    busy = [pid for pat in ("bench-hybrid", "bench-copilot")
+            for pid in subprocess.run(["pgrep", "-f", pat], capture_output=True,
+                                      text=True).stdout.split()
+            if int(pid) != os.getpid()]
+    if busy:
+        raise SystemExit(f"✗ the machine is busy — every number would be a measurement "
+                         f"of contention: benchmark pid {busy[0]}")
+    load = bh.load_average()
+    if load > bh.LOAD_CEILING:
+        raise SystemExit(f"✗ load average is {load:.1f}, ceiling is {bh.LOAD_CEILING}.\n"
+                         f"  Spotlight reindexed after a reboot at load 16-20 and nothing "
+                         f"stopped a run from recording that as model latency.\n"
+                         f"  Fix: wait for it to settle.")
+    print(f"  3 ✓ no other benchmark, load {load:.1f}")
+
+    if arm == "local":
+        holder = bh.port_pid(port)
+        recorded = bh.read_cfg(bh.NP_SERVER_JSON)
+        if not holder:
+            raise SystemExit(f"✗ nothing is listening on port {port}.\n"
+                             f"  Fix: {NAV_PILOT} alpha local start")
+        if recorded.get("model") != served:
+            raise SystemExit(f"✗ the running server serves {recorded.get('model')}, the "
+                             f"active profile is {served}.\n"
+                             f"  Fix: {NAV_PILOT} alpha local restart")
+        latency = bh.local_completion(port, served)
+        snap["local_server"] = {"pid": holder, "port": port}
+        print(f"  4 ✓ local server pid {holder} answered in {latency:.2f}s")
+    else:
+        # The Copilot CLI authenticates separately from `gh`, and without a token it
+        # exits 1 in under two seconds. That is caught as invalid rather than
+        # recorded, but a whole arm failing that way wastes a night, so it is a
+        # preflight check. The token is read from the gh CLI at run time and lives
+        # only in the child's environment.
+        tok = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True)
+        if tok.returncode != 0 or not tok.stdout.strip():
+            raise SystemExit("✗ the Copilot CLI has no credentials for the cloud arm.\n"
+                             "  Fix: run `copilot` and `/login`, or `gh auth login`.")
+        snap["_token"] = tok.stdout.strip()
+        print("  4 ✓ cloud arm authenticated")
+    return snap
+
+
+# ── one sample ────────────────────────────────────────────────────────────────
+
+def run_sample(arm, rung, task, n, snap, cap):
+    log_dir = ROOT / ".bench-logs"
+    log_dir.mkdir(exist_ok=True)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    log_path = log_dir / f"copilot-{rung}-{arm}-{n}-{stamp}.log"
+
+    bh.reset_repo()
+    model = snap["local_model"] if arm == "local" else snap["cloud_model"]
+    offset = bh.log_offset()
+
+    argv = [NAV_PILOT, "--client", "copilot", "--model", model,
+            "--", "--allow-all-tools", "-p", task["prompt"]]
+    started = time.time()
+    timed_out = False
+    with log_path.open("w") as fh:
+        fh.write(f"# argv: {argv!r}\n# cwd: {REPO}\n")
+        fh.flush()
+        env = dict(os.environ)
+        if snap.get("_token"):
+            env["COPILOT_GITHUB_TOKEN"] = snap["_token"]
+        proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
+                                stdin=subprocess.DEVNULL, start_new_session=True, env=env)
+        rc, timed_out = bh.wait_with_deadline(proc, cap)
+        if timed_out:
+            rc = None
+    elapsed = round(time.time() - started, 1)
+
+    text = log_path.read_text(errors="replace")
+    tokens = parse_summary(text)
+    drawn = credits(text, arm)
+    local_calls = bh.local_calls_since(offset)
+    files, lines = bh.changed()
+
+    rec = {
+        "n": n, "arm": arm, "rung": rung, "task": task["id"], "client": "copilot",
+        "model": model,
+        "started": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(started)),
+        "seconds": elapsed, "timed_out": timed_out, "exit": rc,
+        "local_calls": local_calls, "lines_changed": lines, "files_changed": files,
+        "tokens": tokens, "credits": drawn,
+        "cost_usd": round(drawn / 100, 4) if drawn is not None else None,
+        "log": str(log_path.relative_to(ROOT)),
+    }
+
+    invalid = None
+    if timed_out:
+        invalid = f"timed out after {cap}s"
+    elif rc != 0:
+        invalid = f"client exited {rc}"
+    elif elapsed < 2:
+        # Same guard as bench-hybrid: nav-pilot prints help and exits 0 when it does
+        # not recognise its flags, which reads as a clean run costing nothing.
+        invalid = f"no session: exited 0 in {elapsed}s (see {log_path.name})"
+    elif tokens["input"] is None:
+        invalid = "no token summary in the output — the session did not finish"
+    elif arm == "cloud" and drawn is None:
+        # The cloud arm's whole point is the credit figure. A session that finished
+        # without printing one is not a cheap run, it is an unmeasured one.
+        invalid = "no AI credits line in the output"
+    # The arm has to be what its name says. There are no config artefacts to check
+    # here, so the local server's own request count is the evidence.
+    elif arm == "local" and not local_calls:
+        invalid = "local arm but the local server was never called"
+    elif arm == "cloud" and local_calls:
+        invalid = f"cloud arm but the local server took {local_calls} calls"
+
+    if invalid:
+        rec.update(verified=None, note=invalid, valid=False, invalid_reason=invalid)
+        return rec
+
+    ok, note = bh.verify(task, text)
+    rec.update(verified=ok, note=note, valid=True, invalid_reason=None)
+    return rec
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog="mise run bench-copilot",
+        description="The ESCALATION_SPEC.md ladder through the Copilot CLI: whole "
+                    "session local against whole session cloud.")
+    ap.add_argument("--rung", type=int, action="append",
+                    help=f"ladder rung to run, repeatable. {sorted(k for k, v in RUNGS.items() if v)}")
+    ap.add_argument("--arm", choices=["local", "cloud", "both"], default="both")
+    ap.add_argument("--samples", type=int, default=3)
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TASK_TIMEOUT", "900")))
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        t = parse_summary("Tokens     ↑ 71.9k (53.2k cached) • ↓ 529\n")
+        assert t == {"input": 71900, "cached": 53200, "output": 529}, t
+        # The cloud arm's line carries two extra fields the local arm's does not.
+        t2 = parse_summary("Tokens ↑ 57.9k (38.4k cached, 19.5k written) • ↓ 312 (26 reasoning)")
+        assert t2 == {"input": 57900, "cached": 38400, "output": 312}, t2
+        assert parse_summary("1.0m")["input"] is None
+        assert parse_summary("Tokens ↑ 1.0m (964.2k cached) • ↓ 15.2k")["input"] == 1_000_000
+        assert credits("AI Credits 8.93 (16s)", "cloud") == 8.93
+        assert credits("no summary", "cloud") is None
+        assert credits("AI Credits 8.93", "local") == 0.0
+        print("✓ self-check passed")
+        return
+
+    if not args.rung:
+        raise SystemExit("✗ --rung is required")
+
+    import _profiles as P
+    profile_key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()
+    if not profile_key:
+        raise SystemExit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
+    _meta, params = P.load(profile_key)
+    port = os.environ.get("MLX_SERVER_PORT", "8080")
+    arms = ["local", "cloud"] if args.arm == "both" else [args.arm]
+    bh.ensure_clone()
+
+    try:
+        for rung in args.rung:
+            task = task_for(rung)
+            for arm in arms:
+                snap = preflight(arm, port, params)
+                out = ROOT / "bench" / f"copilot-{rung}-{arm}.json"
+                doc = json.loads(out.read_text()) if out.exists() else {
+                    "rung": rung, "arm": arm, "task": task["id"], "client": "copilot",
+                    "prompt": task["prompt"], "samples": []}
+                print(f"\n── rung {rung} · {arm} · {task['id']} "
+                      f"({len(doc['samples'])}/{args.samples} already recorded)")
+                # Count VALID samples toward the target, not attempts. An invalid
+                # sample is the absence of a measurement, and letting three of them
+                # satisfy `--samples 3` leaves a results file that looks complete and
+                # contains nothing. Attempts are capped so a systematically broken
+                # arm stops rather than retrying until morning.
+                attempts, cap_attempts = 0, args.samples * 2 + 2
+                while sum(1 for x in doc["samples"] if x.get("valid")) < args.samples:
+                    if attempts >= cap_attempts:
+                        print(f"   ⚠ giving up: {attempts} attempts produced "
+                              f"{sum(1 for x in doc['samples'] if x.get('valid'))} valid "
+                              f"sample(s). Something is wrong with the arm, not the model.")
+                        break
+                    attempts += 1
+                    n = len(doc["samples"])
+                    rec = run_sample(arm, rung, task, n, snap, args.timeout)
+                    assert "_token" not in rec, "the token must not reach a results file"
+                    doc["samples"].append(rec)
+                    out.write_text(json.dumps(doc, indent=2) + "\n")
+                    flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
+                    cost = f"${rec['cost_usd']}" if rec["cost_usd"] is not None else "$?"
+                    print(f"   {flag} sample {n}: {rec['seconds']}s · {cost} · "
+                          f"{rec['local_calls']} local calls · "
+                          f"{rec['lines_changed']} lines · {rec['note']}")
+                    if not rec["valid"]:
+                        print(f"     ⚠ INVALID, not a result: {rec['invalid_reason']}")
+                print(f"✓ {out.relative_to(ROOT)}")
+    finally:
+        bh.reset_repo()
+
+
+if __name__ == "__main__":
+    main()

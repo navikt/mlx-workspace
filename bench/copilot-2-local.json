@@ -1,0 +1,87 @@
+{
+  "rung": 2,
+  "arm": "local",
+  "task": "E1",
+  "client": "copilot",
+  "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:52:06+0200",
+      "seconds": 27.9,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 8,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 146700,
+        "cached": 126500,
+        "output": 1000
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-0-20260829-235206.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:52:35+0200",
+      "seconds": 22.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 5,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 90700,
+        "cached": 71400,
+        "output": 713
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-1-20260829-235235.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:52:58+0200",
+      "seconds": 23.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 6,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 109800,
+        "cached": 90000,
+        "output": 809
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-2-20260829-235258.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}

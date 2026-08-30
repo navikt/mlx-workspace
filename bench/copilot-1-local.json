@@ -1,0 +1,87 @@
+{
+  "rung": 1,
+  "arm": "local",
+  "task": "R2",
+  "client": "copilot",
+  "prompt": "Which file and line reads the PDL_URL environment variable? Answer with the path and line number only. Do not change any files.",
+  "samples": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:51:03+0200",
+      "seconds": 17.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 71900,
+        "cached": 53200,
+        "output": 525
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-0-20260829-235103.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:51:21+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 71900,
+        "cached": 53200,
+        "output": 487
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-1-20260829-235121.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-08-29T23:51:38+0200",
+      "seconds": 20.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 5,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 90400,
+        "cached": 71500,
+        "output": 577
+      },
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-2-20260829-235138.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null
+    }
+  ]
+}
