@@ -630,7 +630,8 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
             rc = None
     elapsed = round(time.time() - started, 1)
 
-    ev = parse_events(log_path.read_text(errors="replace"))
+    log_text = log_path.read_text(errors="replace")
+    ev = parse_events(log_text)
     after = markers()
     # What the launch actually put in the system prompt. Taken after, not before:
     # the hybrid arm's dispatch fragment is written at launch, so a preflight
@@ -689,20 +690,27 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         rec["invalid_reason"] = invalid
         return rec
 
-    # The arm has to be what its name says. Hybrid: nav-pilot must have written all
-    # three artefacts at launch. Control: it must have written none.
-    want = arm == "hybrid"
-    wrong = [k for k, v in after.items() if v != want]
-    if wrong:
-        invalid = (f"{arm} arm but {', '.join(wrong)} "
-                   f"{'absent' if want else 'present'} after the launch")
-    # A hybrid sample with no local calls and a correct config is not a broken
-    # run: it is the orchestrator declining to delegate, which is a result worth
-    # keeping. Sonnet answers a trivial read directly rather than pay a round
-    # trip. Averaging those into a hybrid median would flatter the arm, so they
-    # are recorded as `dispatched: false` and reported separately instead.
+    # The arm has to be what its name says, and the evidence for that changed when
+    # nav-pilot started removing the provider block at session end. Checking the
+    # config after a launch now finds a clean file whether or not the launch was
+    # hybrid, so it proves nothing.
+    #
+    # What survives is the line nav-pilot prints when the guard comes up, and the
+    # local server's own request count. Together they say the worker was there and
+    # whether it was used; the fragment's presence in the config says neither once
+    # the session has tidied up after itself.
+    announced = "Local dispatch: nav-pilot ends a turn" in log_text
+    if arm == "hybrid" and not announced:
+        invalid = ("hybrid arm but nav-pilot never announced local dispatch, so the "
+                   "worker was not set up for this launch")
+    elif arm == "control" and announced:
+        invalid = "control arm but nav-pilot announced local dispatch"
     elif arm == "control" and local_calls:
         invalid = f"control arm made {local_calls} local calls — dispatch was not disabled"
+    # A hybrid sample with no local calls is not a broken run: it is the
+    # orchestrator declining to delegate, which is a result worth keeping. Those
+    # are recorded as `dispatched: false` and reported separately rather than
+    # averaged into the arm.
 
     ok, note = verify(task, ev["reply"])
     rec["verified"] = ok
