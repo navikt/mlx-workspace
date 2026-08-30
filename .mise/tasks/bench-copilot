@@ -88,6 +88,19 @@ def _scale(value, suffix):
     return int(float(value) * {"k": 1_000, "m": 1_000_000, "": 1}[suffix.lower()])
 
 
+# The Copilot CLI interleaves the model's prose with its own tool output and
+# session chrome. Everything before the first tool line is the answer for a
+# question-answering task, which is the only shape whose verification reads prose
+# at all; a shape that edits files is verified by the repository, not by text.
+def reply_text(text):
+    out = []
+    for line in text.splitlines():
+        if line.startswith(("[cplt]", "#", "●", "  └")) or "Tokens " in line or "AI Credits" in line:
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
 def parse_summary(text):
     """Input, cached and output tokens from the Copilot CLI's end-of-session block.
 
@@ -267,7 +280,11 @@ def run_sample(arm, rung, task, n, snap, cap):
         rec.update(verified=None, note=invalid, valid=False, invalid_reason=invalid)
         return rec
 
-    ok, note = bh.verify(task, text)
+    # The model's reply, not the whole session log. Verifying against the log
+    # passes any task whose expected terms appear in a tool's own output: rung 1
+    # greps for a filename and a line number, the grep prints both, and the check
+    # could not have failed whatever the model then answered.
+    ok, note = bh.verify(task, reply_text(text))
     rec.update(verified=ok, note=note, valid=True, invalid_reason=None)
     return rec
 

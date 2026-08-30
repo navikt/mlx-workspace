@@ -1,6 +1,6 @@
 # Delegating coding work to a local model: a measurement study
 
-August 2026. 146 valid samples, two clients, six task shapes, three refactor strategies.
+August 2026. 148 valid samples, two clients, six task shapes, three refactor strategies.
 One Apple M4 Max, 48 GB unified memory, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`, a mixed
 4/8-bit build, served by mlx-lm 0.31.3 on mlx 0.32.0.
 
@@ -23,7 +23,7 @@ distinction is between applying a decision and making one.
 
 An intervention that rewrote the dispatch instruction to encourage delegation increased it
 on one task shape (0/6 to 2/6). One of the two delegated samples failed verification while
-all six non-delegated samples passed, indicating the original refusal was correct.
+the four that did not delegate all passed, indicating the original refusal was correct.
 
 ## 1. Question
 
@@ -65,9 +65,15 @@ otherwise make task order a variable.
 ### 2.3 Measures
 
 **Cost** is read from the client, not computed. opencode reports a per-step cost; the
-Copilot CLI reports AI credits in its session summary. An earlier harness priced tokens
-from a published rate table, which introduces a second source of error whenever a rate or
+Copilot CLI reports AI credits in its session summary. An earlier harness priced tokens from
+a published rate table, which introduces a second source of error whenever a rate or
 promotional discount changes.
+
+One exception, stated because it is an assertion rather than a reading: a whole-session-local
+run draws no credits by construction, and the harness records zero rather than parsing a
+figure the client does not print. In the three earliest Copilot task files that field is null
+instead, from a harness that predates it; Table 2 reports both as zero, which is the one
+place in this report where an unknown and a measured zero are shown alike.
 
 **Quality** is the repository's own checks: compilation, absence of the renamed symbol, and
 no test failing that was not already failing. The model's report of its own success is
@@ -81,9 +87,9 @@ from the transcript.
 **Excluded attempts** are kept in the result files rather than deleted, and two are worth
 naming because both strengthen the findings they sit behind. Task 4 on the Copilot CLI has
 11 invalid attempts behind its 3 valid ones, all recorded as sessions that never finished,
-so that task is worse than 0/3 alone conveys. Strategy B in the refactor has three attempts
-killed after the server hung, preserved in `bench/refactor-b-preserialise.json`; §6 is what
-they were.
+so that task is worse than 0/3 alone conveys. Strategy B in the refactor has three attempts killed
+after the server hung, preserved in `bench/refactor-b-preserialise.json` alongside two that
+completed; §6 is what the kills were, and §3.3 reports the post-fix run instead.
 
 ### 2.4 Validity controls
 
@@ -104,8 +110,8 @@ Table 1. Cloud cost per completed task, median. All arms verified all samples.
 |---|---|---|---|---|---|
 | 1, answer a question | 0/8 | $0.080 | $0.078 | 0.97 | |
 | 2, add a doc comment | 0/8 | $0.094 | $0.092 | 0.98 | |
-| 3, rename across call sites | 8/8 | $0.085 | $0.106 | 1.24 | 0.0045 |
-| 6, thread a field through a mapper | 12/12 | $0.134 | $0.339 | 2.54 | 0.0027 |
+| 3, rename across call sites | 8/8 | $0.085 | $0.106 | 1.24 | 0.004 |
+| 6, thread a field through a mapper | 12/12 | $0.134 | $0.339 | 2.54 | 0.002 |
 
 p values are one-sided Mann-Whitney U on per-sample cost, computed by the exact
 enumeration in `bench/analyse.py`. Task 3's cost comparison is n=5+5, not 8+8: three
@@ -114,7 +120,23 @@ to the delegation count but not to the cost test.
 
 Delegation is bimodal rather than graded. In 16 samples of tasks 1 and 2 it never occurs;
 in 20 samples of tasks 3 and 6 it always does. The orchestrator is not evaluating each
-instance and occasionally accepting. It discriminates by task shape.
+instance and occasionally accepting: the same shape gets the same answer every time.
+
+**The instruction names some of those shapes, and this section cannot separate the two.**
+The dispatch fragment in the system prompt tells the orchestrator to send lookups, comments,
+log lines, a single test file, and mechanical changes following one pattern, adding that a
+rename hits call sites in several files and belongs there anyway; and to keep changes
+needing a judgement per file. So the delegation of tasks 3 and 6 is consistent with the
+model following an instruction that describes them, and §3.4 shows the rate is
+instruction-sensitive. What the instruction does not explain is the refusal: it tells the
+orchestrator to send lookups and comments, and in 16 samples it never did. The honest
+statement is that instruction and model jointly produce this pattern, and that the model
+overrides the instruction in the direction of doing more itself.
+
+A consequence for anyone repeating this: the fragment has since been edited to state the
+conclusion this report draws, so a rerun against the current text measures compliance rather
+than judgement. The text the measured runs saw was 1572 bytes and is recorded per sample in
+the result files.
 
 Cost falls 19% on the rename and 61% on threading a field through a mapper and its
 construction sites. Two points is a direction, not a scaling law, but it is consistent
@@ -150,24 +172,40 @@ cloud arm's latency and at zero credits.
 
 ### 3.3 Refactor: 46 references, 10 files
 
-Table 3. One rename, three strategies, n=2 each. All samples removed all references and
-left the project compiling.
+Three strategies. C is the cloud alone, A is the whole job handed to the local model, B is
+the cloud specifying each file and dispatching it one at a time.
 
-| Strategy | Wall | Credits | Cloud steps | Local calls |
-|---|---|---|---|---|
-| C, cloud only | 28s, 44s | 14, 21 | 9, 13 | 0 |
-| A, local only | 171s, 332s | **0, 0** | 4, 10 | 5, 11 |
-| B, cloud decomposes and dispatches per file | 270s, 891s | 5, 34 | 5, 14 | 3, 18 |
+Table 3. One rename, n=2 each. All six samples removed all 46 references across all 10
+files and left the project compiling, and all six agree with the cloud-only reference file
+for file.
 
-Strategy A was predicted to fail: a monolithic instruction is what a user attempts first,
-and the cascade literature holds that a small model cannot carry it. It succeeded in both
-attempts at zero credits.
+| Strategy | Wall | Credits | Local calls |
+|---|---|---|---|
+| C, cloud only | 28s, 44s | 21, 14 | 0 |
+| A, local only | 171s, 332s | **0, 0** | 11, 5 |
+| B, cloud decomposes and dispatches per file | 87s, 153s | 19, 16 | 21, 46 |
 
-Strategy B underperforms A on every axis measured and shows high variance (5 credits at
-270s, then 34 credits at 891s). Cascaded editing (arXiv:2604.19201) reports the decomposed
-form beating the large model alone, but that result concerns tasks containing a decision to
-be made. A rename contains none, so decomposition adds orchestration cost without removing
-judgement load.
+**Strategy A was predicted to fail.** The spec predicted it would, on the grounds that a
+monolithic instruction is what a user attempts first and the cascade literature holds that a
+small model cannot carry it. It succeeded in both attempts at zero credits, and it is the
+only strategy that costs nothing.
+
+Strategy B does not reproduce the cascade result here. It costs about what the cloud alone
+costs (19 and 16 credits against 21 and 14) while taking two to five times as long, and it
+is the most expensive way to get an outcome the other two also reached. Cascaded editing
+(arXiv:2604.19201) reports the decomposed form beating the large model alone on tasks
+containing a decision to be made. A rename contains none, so decomposition here buys nothing
+and is charged for the orchestration.
+
+What B is not is slower than A: at 87 and 153 seconds it beat A's 171 and 332. An earlier
+draft of this report said B underperformed A on every axis, from a run taken before the
+concurrency fix in §6; that run is kept in `bench/refactor-b-preserialise.json` and the
+claim was wrong. On this task the ordering is C fastest, then B, then A, and the credit
+ordering is the reverse.
+
+The three deterministic checks are the same for all six samples and are the reason this
+table is short: the old symbol is gone, the project compiles, and the resulting files match
+the cloud-only run exactly.
 
 ### 3.4 Prompt intervention
 
@@ -196,8 +234,12 @@ not reluctance, and it outperformed the instruction written to override it.
 Four claims made during this work were later contradicted by measurement.
 
 1. **A ceiling was reported that does not exist.** After task 4 failed we concluded the
-   local model tops out at task 3. Task 5 then verified 3/3. The organising distinction is
-   creating and deciding against applying, not difficulty.
+   local model tops out at task 3. Task 5 then verified 3/3, so the organising distinction is
+   not difficulty. Naming what it is instead takes care: task 4 is fully specified, so
+   nothing about it requires a decision, and calling its failure "makes decisions badly"
+   overreaches. What task 4 asks for that no other task does is a file that does not yet
+   exist. The distinction this report defends is applying against creating-or-deciding, and
+   the create half rests on one task.
 2. **A kernel panic was attributed to our configuration.** Two panics during benchmarking
    named the GPU driver in the panic file, and we recorded the raised wired-memory limit as
    destabilising. Those strings occur in the system-wide thread inventory, both parked in
@@ -230,8 +272,12 @@ producing plausible output while measuring nothing.
 - Invalid samples satisfied the sample quota, so three failures produced a complete-looking
   file containing nothing. Valid samples are counted, with an attempt cap.
 - `Popen.wait(timeout=2400)` was observed 13 minutes past its deadline with the child alive.
-  The cap is now enforced against a monotonic clock and tested against a process that
-  ignores SIGTERM.
+  The cap is now enforced against a monotonic clock and tested against a process that ignores
+  SIGTERM. That fix reached the ladder harness and not the refactor one, which is why two
+  §3.3 runs recorded 3192s and 3846s against a 2400s cap and were killed by hand: their
+  `timed_out` field says false because a human, not the harness, ended them. Both are in
+  `refactor-b-preserialise.json` and neither is reported as a result. The refactor harness
+  now shares the same cap.
 - No load check existed. After a reboot, filesystem indexing at load average 16 would have
   been recorded as model latency.
 
@@ -265,6 +311,21 @@ file (§3.2), a full rename completing locally and unaided (§3.3), and decompos
 cost to a task with no decision in it (§3.3, strategy B).
 
 ## 8. Limitations
+
+The delegation pattern in §3.1 is measured against an instruction that names some of the
+shapes it reports, and §3.1 says so. Anyone rerunning it should read the fragment first.
+
+Table 1's task 6 is n=12 hybrid against n=8 control because the hybrid arm received a later
+top-up batch that the control did not. On the first 8 hybrid samples the ratio is 2.95
+rather than 2.54, so the extra batch weakened the reported effect rather than flattering it,
+but the asymmetry is there and has no methodological justification beyond the order the runs
+happened in.
+
+Two cells of Table 2 hide a wide spread: task 3 local has a 308-second sample against
+siblings at 51 and 58, and task 6 cloud spans 52 to 1601 seconds. The medians are honest;
+the ranges are not visible in the table.
+
+
 
 One model, one machine, one repository, and for most task shapes a single task instance. The
 Kotlin service represents Nav's newer backends and nothing else; TypeScript and React have no

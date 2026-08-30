@@ -109,15 +109,13 @@ def run_one(strategy, n, snap, cap):
         fh.flush()
         proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
                                 stdin=subprocess.DEVNULL, start_new_session=True)
-        try:
-            rc = proc.wait(timeout=cap)
-        except subprocess.TimeoutExpired:
-            timed_out, rc = True, None
-            try:
-                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
-                pass
-            proc.wait(timeout=60)
+        # bh.wait_with_deadline, not proc.wait(timeout=): the latter was seen
+        # thirteen minutes past its deadline with the child alive, and this
+        # harness proved it twice, running 3192s and 3846s against a 2400s cap
+        # and recording timed_out false because the kill came from a human.
+        rc, timed_out = bh.wait_with_deadline(proc, cap)
+        if timed_out:
+            rc = None
     elapsed = round(time.time() - started, 1)
 
     text = log_path.read_text(errors="replace")
