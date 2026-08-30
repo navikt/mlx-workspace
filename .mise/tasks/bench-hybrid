@@ -171,11 +171,21 @@ def memory():
     }
 
 
+# Only what a state file written before ports were recorded is assumed to mean.
+DEFAULT_PORT_FALLBACK = 8080
+
+
 def read_cfg(path):
     try:
         return json.loads(path.read_text())
     except (OSError, ValueError):
         return {}
+
+
+def recorded_server_port():
+    """The port nav-pilot recorded for the running server."""
+    st = read_cfg(NP_SERVER_JSON)
+    return st.get("port") or DEFAULT_PORT_FALLBACK
 
 
 def markers(cfg=None):
@@ -798,7 +808,10 @@ def main():
     if not profile_key:
         raise SystemExit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
     meta, params = P.load(profile_key)
-    port = os.environ.get("MLX_SERVER_PORT", "8080")
+    # The recorded port, not a constant: nav-pilot asks the kernel for a free one
+    # so it cannot collide with the developer's own service, and 8080 is now only
+    # what a state file written before that change is assumed to mean.
+    port = os.environ.get("MLX_SERVER_PORT") or str(recorded_server_port())
     by_id = {t["id"]: t for t in CFG["tasks"]}
 
     arms = ["hybrid", "control"] if args.arm == "both" else [args.arm]

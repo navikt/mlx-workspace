@@ -23,7 +23,7 @@ Five states, not interchangeable.
 
 | State | Means | You do | The developer does |
 |---|---|---|---|
-| `not started` | Nothing running, or never provisioned | `alpha local start`. If they never ran `init`, that first: it downloads 25 GB and sets up Python, once | Start it, or run `init` and wait |
+| `not started` | Nothing running, or never provisioned | `alpha local start`. If they never ran `init`, that first: it does the whole setup in one command | Start it, or run `init` and wait |
 | `starting` | Alive, mapping weights. The port opens before the model loads | Wait. Warm is seconds; cold is two to five minutes. Past ten, treat as stuck and collect | Wait, or carry on in the cloud meanwhile |
 | `ready` | Answered a real completion, not just bound a port | The server is fine. Go to the symptom table | Nothing; the wait is generation |
 | `crashed` | The process is gone | `tail -50 ~/.nav-pilot/local/server.log`. Look for a Python traceback or `ValueError`; the last lines before it stopped are the reason | `alpha local start` |
@@ -83,9 +83,10 @@ re-download the weights.
 and the other two stall.
 *They do:* try off the Nav network. Not fixable from here.
 
-**"`start` refuses and wants sudo."** Correct. macOS will not wire enough memory by default.
-The command is in the refusal and resets at every reboot, so it recurs after every restart.
-*They do:* run it, then `start`.
+**"It asked for my password."** Expected. macOS will not wire enough memory by default, so
+`init` raises the limit with sudo and says so as it does it. The limit resets at reboot and
+`start` raises it again when it finds it low.
+*They do:* enter it, or decline and raise it themselves with the command in the error.
 
 **"My app cannot bind its port."** Should be impossible: the server takes an ephemeral port.
 If it happens, get `status` and `lsof -tiTCP:<port>` and escalate, because it means the port

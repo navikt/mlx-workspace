@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# mise description="Does the local worker follow English instructions better than Norwegian ones? Same rung, same model, the agent file's language as the only variable. Usage: mise run bench-language"
+#
+# The worker agent and the dispatch fragment are written in Norwegian. Qwen3.6 is a
+# multilingual model trained mostly on English and Chinese, and instruction-following
+# is the capability that degrades first in a low-resource language. Our headline
+# failure mode is "declines to edit, explains instead", which is also what a model
+# does when it half-understands what it was asked.
+#
+# So this measures whether we have been reporting a property of the model when we
+# were partly measuring a property of the language we wrote its instructions in.
+# Rung 6, because it is the rung where the orchestrator delegates every time and the
+# worker actually runs.
+set -u
+
+cd "$(dirname "$0")/../.." || exit 1
+export PATH="$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/sbin:/usr/bin:/bin:/sbin:${PATH:-}"
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-/tmp/nav-pilot-local}"
+export PYTHONPATH=".mise/tasks:${PYTHONPATH:-}"
+LOG=".bench-logs/language-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p .bench-logs
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+
+AGENT_SRC="$HOME/go/src/github.com/navikt/copilot/agents/lokal-arbeider.agent.md"
+NO_COPY="bench/agents/lokal-arbeider-no.agent.md"
+EN_COPY="bench/agents/lokal-arbeider-en.agent.md"
+SAMPLES="${BENCH_LANG_SAMPLES:-6}"
+
+[ -f "$EN_COPY" ] || { say "FATAL: $EN_COPY missing"; exit 1; }
+cp "$AGENT_SRC" "$NO_COPY"
+restore() { cp "$NO_COPY" "$AGENT_SRC"; say "restored the Norwegian agent"; }
+trap restore EXIT
+
+run_arm() {
+  local lang="$1" src="$2"
+  cp "$src" "$AGENT_SRC"
+  # The launch materialises the agent from the repo, so the file decides the
+  # language of everything the worker is told.
+  grep -q "^# Local worker" "$AGENT_SRC" && got=en || got=no
+  [ "$got" = "$lang" ] || { say "FATAL: wanted $lang, the agent file says $got"; exit 1; }
+  say "→ rung 6 hybrid, worker instructions in $lang"
+  rm -f bench/hybrid-6-hybrid.json
+  .mise/tasks/bench-hybrid --rung 6 --arm hybrid --samples "$SAMPLES" >>"$LOG" 2>&1 \
+    && say "✓ $lang" || say "✗ $lang, see $LOG"
+  mv bench/hybrid-6-hybrid.json "bench/language-6-$lang.json" 2>/dev/null
+}
+
+run_arm no "$NO_COPY"
+run_arm en "$EN_COPY"
+
+say "=== worker instruction language, rung 6"
+python3 - <<'PY' | tee -a "$LOG"
+import json, pathlib, statistics as st
+for lang in ("no", "en"):
+    p = pathlib.Path(f"bench/language-6-{lang}.json")
+    if not p.exists():
+        print(f"{lang}: no file")
+        continue
+    s = [x for x in json.loads(p.read_text())["samples"] if x.get("valid")]
+    if not s:
+        print(f"{lang}: no valid samples")
+        continue
+    ok = sum(1 for x in s if x["verified"])
+    disp = sum(1 for x in s if x["local_calls"])
+    cost = [x["cloud_cost_usd"] for x in s if x.get("cloud_cost_usd") is not None]
+    print(f"{lang}: verified {ok}/{len(s)}  dispatched {disp}/{len(s)}  "
+          f"median ${st.median(cost):.3f}  local calls {st.median([x['local_calls'] for x in s]):.0f}  "
+          f"{st.median([x['seconds'] for x in s]):.0f}s")
+PY
+say "=== done"
