@@ -9,20 +9,20 @@ someone who was not in the room.
 
 ## Phase 0: push, then verify what we changed last night
 
-**0.0 Push first.** Seven commits exist only on this machine, including the fixes the rest
+**0.0 (done) Push first.** Seven commits exist only on this machine, including the fixes the rest
 of Phase 0 exists to verify. Everything until the push is uninsured against one disk
 failure, and pushing costs nothing.
 
 Three fixes landed against a running system and are not yet proven end to end.
 
-**0.1 Concurrency fix, end to end.** The loop guard now serialises completions. There is a
+**0.1 (done) Concurrency fix, end to end.** The loop guard now serialises completions. There is a
 unit test that fires ten concurrent requests and asserts the server sees one at a time, but
 the bug was found by a real ten-file fan-out and that is what should confirm it. Re-run
 refactor strategy B against the rebuilt binary, two samples.
 *Exit: two samples complete without the server entering `hung`, and `alpha local status`
 reports `ready` afterwards.*
 
-**0.2 Toolchain provisioning, into a throwaway HOME.** The part of `init` that rots is the
+**0.2 (done) Toolchain provisioning, into a throwaway HOME.** The part of `init` that rots is the
 pinned toolchain: uv, the interpreter, mlx-lm and mlx are version strings in source, and mlx
 ships macOS arm64 wheels for a narrow range of interpreters. The `realenv` test provisions
 all of it against a temporary HOME without touching the working setup.
@@ -40,7 +40,7 @@ rather than faked here.
 
 ## Phase 1: close the gaps a user would hit
 
-**1.0 Port 8080 is the first user's own application port.** The local server binds
+**1.0 (done) Port 8080 is the first user's own application port.** The local server binds
 `DefaultPort = 8080` (`internal/local/runtime.go:69`) and the guard takes 8081. Phase 4
 selects a Kotlin or Ktor developer, which is exactly the population whose service under
 development binds 8080 by default. Both directions fail in week one. If their app holds the
@@ -79,50 +79,50 @@ nav-pilot sessions both launch and both reach the same single server process; st
 second server is refused with the running one named; no refusal message proposes killing a
 process nav-pilot did not start.*
 
-**1.0b Ctrl-C during `start` orphans the server.** The child runs in its own process group,
+**1.0b (done) Ctrl-C during `start` orphans the server.** The child runs in its own process group,
 so an interrupt kills nav-pilot and leaves a 21 GB process loading, holding the port, with
 no state file written yet, so `stop` and `status` both report nothing recorded. A cold start
 takes minutes, which makes an impatient interrupt the normal case rather than the unlucky
 one.
 *Exit: interrupting `start` leaves no listener on the port and no orphan process.*
 
-**1.0c No way to remove it.** `off` disables dispatch and leaves roughly 23 GB of weights
+**1.0c (done) No way to remove it.** `off` disables dispatch and leaves roughly 23 GB of weights
 plus the virtual environment on disk, with no documented command to reclaim them. A user
 who leaves the alpha should not have to learn the Hugging Face cache layout.
 *Exit: one command removes everything `init` created, and says how much it freed.*
 
-**1.0d No architecture check.** `init` on an Intel Mac provisions uv and then fails inside
+**1.0d (done) No architecture check.** `init` on an Intel Mac provisions uv and then fails inside
 pip with a wheel resolution error about something else.
 *Exit: `init` on a non-arm64 Mac refuses in its first second, naming the reason.*
 
-**1.0e Port-bound tests.** Three provider tests bind the real loop-guard port and fail
+**1.0e (done) Port-bound tests.** Three provider tests bind the real loop-guard port and fail
 whenever a local session is running. CI has no local server, so this does not block green
 CI; it blocks our own bench workflow.
 *Exit: the full suite passes with a local server running.*
 
-**1.1 `LaunchOpenCodeStaged` does no local dispatch setup.** A staged launch with local
+**1.1 (done) `LaunchOpenCodeStaged` does no local dispatch setup.** A staged launch with local
 enabled silently gets no worker binding, no dispatch fragment and no guard. Either wire it
 or make it refuse.
 *Exit: a staged opencode launch with a local session model exits non-zero naming local
 inference, mirroring the staged copilot refusal; a staged launch with a hosted model writes
 no local artefacts; both pinned by tests.*
 
-**1.2 `nav-pilot sync` installs `lokal-arbeider` ungated.** Launch-time materialisation
+**1.2 (done) `nav-pilot sync` installs `lokal-arbeider` ungated.** Launch-time materialisation
 already filters the worker agent when local is off; only the `sync` path bypasses that gate,
 so the fix is narrower than it first looked. Still wrong in principle, and the same class as
 the catalog leak.
 *Exit: a sync with local disabled leaves no local artefacts.*
 
-**1.3 Crash window in `RemoveOpenCodeLocalPolicy`.** The policy file is removed before the
+**1.3 (done) Crash window in `RemoveOpenCodeLocalPolicy`.** The policy file is removed before the
 instructions entry, so a crash between them leaves opencode pointing at a deleted file.
 *Exit: order reversed, or the removal made atomic.*
 
-**1.4 No `alpha local on`.** `off` does print that `init` brings it back, so this is a
+**1.4 (done) No `alpha local on`.** `off` does print that `init` brings it back, so this is a
 missing verb rather than a dead end. Add it, or rename.
 *Exit: one person who has not used the feature performs off, re-enable and start using only
 `nav-pilot alpha local help`, asking nothing.*
 
-**1.5 `local_autostart`.** Once the server is a discoverable singleton, starting it on
+**1.5 (done) `local_autostart`.** Once the server is a discoverable singleton, starting it on
 demand is small: on launch, if autostart is configured and no server is recorded, start one
 and attach. It belongs here rather than in the deferred list because the singleton work in
 1.0 is what makes it safe, and because a first user who has to remember `start` before every
