@@ -310,6 +310,29 @@ shapes (§3.1), unorchestrated sessions succeeding on specified edits and failin
 file (§3.2), a full rename completing locally and unaided (§3.3), and decomposition adding
 cost to a task with no decision in it (§3.3, strategy B).
 
+## 7.1 Every measurement here was taken through Norwegian instructions
+
+The worker agent and the dispatch fragment were written in Norwegian throughout the
+measurements. They are English now, on the grounds that neither is user-facing, but the
+change matters to how this report should be read.
+
+Qwen3.6 is trained mostly on English and Chinese. Instruction-following is the capability
+that degrades first in a low-resource language, and this report's central failure mode is
+that the model reads a task, explains what should change, and edits nothing. That is also
+what a model does when it half-understands an instruction. So an unknown share of what is
+reported here as the model's behaviour may be the behaviour of the model given instructions
+in a language it handles less well.
+
+Three samples of rung 6 with English instructions dispatch 3 of 3 and verify 3 of 3, with a
+median of 22 local calls against 13 for the Norwegian arm, so nothing broke and the
+orchestrator delegated more of the work. The cost went the other way, $0.157 against $0.134.
+None of that is a finding at n=3, and the fragment's wording changed alongside its language,
+so the comparison is not clean. It is enough to say the switch is safe and not enough to say
+what it is worth.
+
+The honest position: rerunning the ladder with English instructions is the cheapest way to
+find out how much of this study is about a model and how much is about a translation.
+
 ## 8. Limitations
 
 The delegation pattern in §3.1 is measured against an instruction that names some of the
