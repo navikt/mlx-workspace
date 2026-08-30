@@ -361,6 +361,24 @@ The review also flagged something outside this feature: `--yes` is now passed to
 every non-TTY launch, which removes a confirmation gate fleet-wide and rides in on this
 branch. That deserves its own decision rather than arriving as a local-inference detail.
 
+## Spring reverses the headline, and Spring is most of production
+
+Rung 6 against a Spring service, n=4 per arm: hybrid $0.146 against control $0.092, and
+slower. The same task on Ktor was 2.54x cheaper with dispatch. Opposite sign, same harness.
+
+Four samples and one task, so the size is not established, but the direction is enough to
+change what we tell people. The saving is not a property of the model or the architecture;
+it is a property of both together with the codebase. Every figure in the findings report is
+from a Ktor service, and the first alpha user is more likely to be working in Spring.
+
+What this does not change: quality held (4/4 verified in both arms) and the orchestrator
+delegated every time, so nothing here says local inference is broken on Spring. It says the
+economics we measured do not transfer, and we do not yet know why.
+
+Owed before the alpha widens beyond one volunteer: enough Spring samples to size the effect,
+and an answer to why the two stacks differ. If the first user works in Spring, their
+experience is the measurement.
+
 ## Known ceilings, accepted for the alpha
 
 - The manifest is unsigned. Integrity rests on TLS and write access to the generating repo, with the publisher and parameter allow-lists bounding the blast radius. Recorded in the package doc.

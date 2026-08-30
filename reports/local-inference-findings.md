@@ -348,6 +348,33 @@ calls against 13) at slightly higher cost, on three samples. Whether English cha
 gets delegated where delegation already happens is open; whether it changes *whether* it
 happens on these two rungs is answered, and the answer is no.
 
+## 7.2 The saving does not transfer to Spring
+
+Every number above is from a Ktor service. Spring is most of what Nav runs in production, and
+the first alpha user is more likely to work in it. Rung 6, the task that carries the headline,
+run against `navikt/ia-tjenester-metrikker` at a pinned commit, n=4 per arm:
+
+| rung 6 | hybrid | control |
+|---|---|---|
+| median cost | **$0.146** | **$0.092** |
+| median wall | 132s | 106s |
+| delegated | 4/4 | 0/4 |
+| verified | 4/4 | 4/4 |
+
+Dispatch costs 59% more on Spring and takes longer, against 2.54x cheaper on Ktor. Same task
+shape, same model, same orchestrator, same harness, opposite sign.
+
+Four samples per arm is thin and this is one task on one repository, so the size of the
+effect is not established. The direction is what matters: the headline saving is not a
+property of the model or of the architecture, it is a property of the model, the architecture
+*and the codebase*. Anything built on "2.54x" as a general figure is built on one Kotlin
+service.
+
+Why it might differ is unmeasured and worth knowing before this widens. Spring's annotation
+and injection style spreads a change across more files with less local context in each, which
+is the shape that costs an orchestrator round trips whether or not it delegates. That is a
+hypothesis, not a finding.
+
 ## 8. Limitations
 
 The delegation pattern in §3.1 is measured against an instruction that names some of the
