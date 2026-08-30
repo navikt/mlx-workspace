@@ -22,14 +22,18 @@ refactor strategy B against the rebuilt binary, two samples.
 *Exit: two samples complete without the server entering `hung`, and `alpha local status`
 reports `ready` afterwards.*
 
-**0.2 Clean-machine install.** `alpha local init` has never been run from nothing on this
-machine within the current branch. The `realenv` test provisions the toolchain but was
-blocked by the network twice, and it does not download weights or start a server.
-*Exit: on a machine with no `~/.nav-pilot` and no `models--mlx-community--*` in the Hugging
-Face cache, on a Nav-managed network, `init && start && status` reaches `ready`. An empty
-`~/.nav-pilot` alone is not enough: it leaves the weights cached, so the 23 GB download,
-which is the longest step and the one most likely to meet a proxy, never runs. Record the
-elapsed time and every prompt shown.*
+**0.2 Toolchain provisioning, into a throwaway HOME.** The part of `init` that rots is the
+pinned toolchain: uv, the interpreter, mlx-lm and mlx are version strings in source, and mlx
+ships macOS arm64 wheels for a narrow range of interpreters. The `realenv` test provisions
+all of it against a temporary HOME without touching the working setup.
+*Exit: `go test -tags realenv` passes, and the four pinned versions in `runtime.go` are
+recorded in this plan on the day it passed.*
+
+The weights download is deliberately not tested here. Doing it honestly means deleting 23 GB
+from the machine the rest of this work runs on, and the result would be a timing figure from
+a fast home connection rather than the one a developer gets. That test belongs on a machine
+that has never seen this branch, which Phase 2.3 already requires, so it is folded into 2.3
+rather than faked here.
 
 ## Phase 1: close the gaps a user would hit
 
@@ -144,10 +148,12 @@ this that ships on our own sign-off.*
 **2.3 Release.** A tagged build in the Homebrew tap containing `alpha local`. Note that
 auto-update is on for most users, so the release reaches machines without them asking; the
 feature stays off until `init`, which is what makes that acceptable.
-*Exit: `brew upgrade navikt/tap/nav-pilot && nav-pilot alpha local status` on a machine that
-has never seen the branch prints that local inference is not provisioned. Not `--help`: the
-global flag loop intercepts it and prints top-level usage, so it passes on a build without
-the feature.*
+*Exit: on a machine that has never seen this branch, and on a Nav-managed network:
+`brew upgrade navikt/tap/nav-pilot && nav-pilot alpha local status` prints that local
+inference is not provisioned; then `init && start && status` reaches `ready`, with the
+elapsed time and every prompt shown written down, because that is the number we quote to
+users. Not `--help` for the first check: the global flag loop intercepts it and prints
+top-level usage, so it passes on a build without the feature.*
 
 ## Phase 3: documentation and announcement
 
