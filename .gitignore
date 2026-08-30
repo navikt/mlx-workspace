@@ -12,7 +12,10 @@ __pycache__/
 .venv/
 
 .bench-logs/
-workspaces/*/kotlin/
+# Benchmark checkouts, one directory per target. Was `kotlin/` when there was
+# only one; a second target arrived and the old pattern let its clone into the
+# index as an embedded repository.
+workspaces/hybrid-bench/*/
 workspaces/_prime-*/
 bench/.previous/
 
