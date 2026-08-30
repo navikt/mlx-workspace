@@ -312,13 +312,25 @@ def numstat_lines(numstat):
 
 # ── target repository ─────────────────────────────────────────────────────────
 
-CFG = json.loads((ROOT / "bench" / "tasks.json").read_text())
+# The target repository and its tasks. A flag rather than a file to swap, because
+# swapping bench/tasks.json mid-run has twice produced results attributed to the
+# wrong repository, and once committed the half-swapped file.
+TARGET = os.environ.get("BENCH_TARGET", "tasks")
+_target_path = ROOT / "bench" / f"{TARGET}.json"
+if not _target_path.exists():
+    _target_path = ROOT / "bench" / "targets" / f"{TARGET}.json"
+CFG = json.loads(_target_path.read_text())
 JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
 # A workspace of its own. bench-cheap-ops owns workspaces/<profile>/, and two
 # harnesses resetting the same checkout is the failure that made three earlier
 # workspaces hold a previous run's code.
 WS = ROOT / "workspaces" / "hybrid-bench"
-REPO = WS / "kotlin"
+
+# One checkout per target, named after it. A single shared directory meant
+# ensure_clone found a .git, returned early, and ran the next target's tasks
+# against the previous target's repository: grep finds nothing, the model is
+# blamed, and the result is attributed to a codebase it never saw.
+REPO = WS / TARGET
 
 
 def ensure_clone():
@@ -803,8 +815,17 @@ def main():
     ap.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TASK_TIMEOUT", "900")),
                     help="per-sample cap in seconds")
     ap.add_argument("--self-check", action="store_true", help="parser self-check, no GPU")
+    ap.add_argument("--target", default=None,
+                    help="target name under bench/ or bench/targets/ (default: tasks). "
+                         "Set BENCH_TARGET instead when scripting; this flag only reports "
+                         "what is already loaded, because the tasks are read at import.")
     args = ap.parse_args()
 
+    if args.target and args.target != TARGET:
+        raise SystemExit(
+            f"✗ --target {args.target} but the tasks were loaded from {TARGET}.\n"
+            f"  The target is read at import, so it is an environment variable:\n\n"
+            f"    BENCH_TARGET={args.target} {' '.join(sys.argv)}")
     if args.self_check:
         return self_check()
     if not args.rung:
