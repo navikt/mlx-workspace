@@ -193,10 +193,14 @@ means, that a wedged server needs `stop` and `start`, and that queued tasks are 
 *Exit: a teammate who did not build this, handed the runbook cold and a wedged server,
 reaches stop and start and can say what `hung` means. The runbook is then amended with
 whatever they had to ask.*
-**Written 30 August 2026**, as triage rather than user documentation: the five health states
-and what each means, a symptom table from the failures we actually hit, what to collect
-before escalating, and what is known-broken and not worth escalating. The drill with a
-teammate is still owed, and is what the exit criterion actually asks for.
+**Written and drilled 30 August 2026.** Handed cold to someone with no context and five
+reports to triage. They classified all five and could close two: every symptom row ended at
+diagnosis, the report we most want had no destination, and `hung` was described both as not
+worth escalating and as serious. Their verdict was that it was a good classifier being asked
+to serve as a runbook, which was correct. Rewritten with an escalation target, a column for
+what the developer does next, real numbers where it said "minutes", and the `hung`
+contradiction resolved into the one question that decides it. A second drill with a human
+teammate is still worth doing before the first user lands.
 
 **3.3 News post, after Phase 4, not before.** Release plus docs plus news is self-service
 onboarding at curiosity's rate, and nothing technical enforces "one user first". The post
