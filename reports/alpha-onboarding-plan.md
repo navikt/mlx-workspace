@@ -159,11 +159,17 @@ a fresh machine. All fixed, and what they found is recorded in `alpha-status.md`
 
 ## Phase 2: merge and release
 
-**2.1 Push and green CI.** Seven commits are local only, all of them last night's fixes,
+**2.1 (done) Push and green CI.** Was seven commits local only, all of them last night's fixes,
 including the three that make local inference work at all where `/usr/sbin` is not on the
 PATH.
 
-**2.2 Review.** 47 commits on `local-inference`. The review someone else should do is not
+**2.1 note.** CI was red for hours while this plan said 2.1 was done, on three failures the
+work introduced: a platform guard inside a library function the suite exercises on Linux, a
+config template entry written but not committed, and gitleaks matching the model manifest's
+`key` field. Green as of 30 August. "Pushed" and "passing" are not the same exit criterion
+and the plan should not have conflated them.
+
+**2.2 Review.** 57 commits on `local-inference`. The review someone else should do is not
 line-by-line; it is the trust boundary. What does the guard forward, what does `init`
 download and verify, what does a launch write into a developer's own config, and what does
 `off` take back out.
