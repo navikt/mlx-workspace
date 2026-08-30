@@ -364,7 +364,7 @@ branch. That deserves its own decision rather than arriving as a local-inference
 ## Spring reverses the headline, and Spring is most of production
 
 Rung 6 against a Spring service, n=8 per arm: hybrid $0.164 against control $0.092. Dispatch
-costs 1.79x as much (p=0.0079), where the same task on Ktor cost 0.39x. Opposite sign, same
+costs 1.79x as much (p=0.0074), where the same task on Ktor cost 0.39x. Opposite sign, same
 harness, same sample size, comparable significance.
 
 One task on one repository, so it is not the last word on Spring, but it is no longer a

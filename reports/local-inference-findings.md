@@ -1,6 +1,7 @@
 # Delegating coding work to a local model: a measurement study
 
-August 2026. 148 valid samples, two clients, six task shapes, three refactor strategies.
+August 2026. 183 valid samples, two clients, two codebases, six task shapes, three refactor
+strategies.
 One Apple M4 Max, 48 GB unified memory, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`, a mixed
 4/8-bit build, served by mlx-lm 0.31.3 on mlx 0.32.0.
 
@@ -12,9 +13,16 @@ model draws no AI credits, so the question is which work it can take.
 
 With a cloud orchestrator (Claude Sonnet 4.6) and an available local worker, delegation
 is bimodal. It never occurs on 16 samples of question-answering and comment-writing, and
-always occurs on 20 samples of mechanical multi-file edits. Where it occurs, cost falls
-1.24x (n=5+5, p=0.004) and 2.54x (n=12+8, p=0.002) at identical verification outcomes.
-An installed but unused dispatch instruction costs 2%.
+always occurs on 20 samples of mechanical multi-file edits. Where it occurs on a Ktor
+service, cost falls 1.24x (n=5+5, p=0.004) and 2.54x (n=12+8, p=0.002) at identical
+verification outcomes. An installed but unused dispatch instruction costs 2%.
+
+**The saving does not survive a change of codebase.** The same task on a Spring service
+costs 1.79x *more* with delegation than without (n=8+8, p=0.0074), where on Ktor it cost
+0.39x. Same model, orchestrator and harness; opposite sign at comparable significance, with
+quality unaffected in both. Spring is most of what this organisation runs in production, so
+the figures above describe one Kotlin service rather than a general property of the
+approach. Any decision resting on "2.54x" should rest on §7.2 instead.
 
 Run without an orchestrator, the local model completes a 46-reference rename across 10
 files unaided in both attempts, at zero credits, but writes no file at all when asked to
@@ -305,6 +313,12 @@ The results reduce to one distinction. Given a decision already made, this model
 across ten files at no credit cost. Asked to make the decision, it declines or produces a
 defect.
 
+That is a finding about the model, and it held on every codebase tested. What did not hold
+is the economics. On Ktor, delegating the mechanical work costs 0.39x what the cloud costs
+alone; on Spring, 1.79x. The distinction above tells you what the model can do; it does not
+tell you whether doing it is worth paying for, and the answer to that changed sign when the
+repository changed.
+
 Four independent measurements support it: the orchestrator delegating exactly the mechanical
 shapes (§3.1), unorchestrated sessions succeeding on specified edits and failing to create a
 file (§3.2), a full rename completing locally and unaided (§3.3), and decomposition adding
@@ -361,7 +375,7 @@ run against `navikt/ia-tjenester-metrikker` at a pinned commit, n=4 per arm:
 | delegated | 8/8 | 0/8 |
 | verified | 8/8 | 8/8 |
 
-Dispatch costs **1.79x** as much on Spring (one-sided Mann-Whitney p=0.0079), against 0.39x
+Dispatch costs **1.79x** as much on Spring (one-sided Mann-Whitney p=0.0074), against 0.39x
 on Ktor. Same task shape, same model, same orchestrator, same harness, opposite sign at the
 same sample size and a comparable p value.
 

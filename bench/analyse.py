@@ -67,8 +67,42 @@ def main():
         p = fisher_one_sided(da, len(after) - da, db, len(before) - db)
         print(f"  task {rung}: before {db}/{len(before)}  after {da}/{len(after)}  Fisher p={p:.3f}")
 
+    print("\n§7.2 Spring, rung 6")
+    try:
+        h = valid("bench/hybrid-spring-ia-tjenester-metrikker-6-hybrid.json")
+        c = valid("bench/hybrid-spring-ia-tjenester-metrikker-6-control.json")
+        ph, pc = priced(h), priced(c)
+        # One-sided the other way: on Spring the question is whether hybrid costs MORE.
+        u = sum((x > y) + 0.5 * (x == y) for x in ph for y in pc)
+        ge, total = 0, comb(len(ph) + len(pc), len(ph))
+        pooled = ph + pc
+        for pick in itertools.combinations(range(len(pooled)), len(ph)):
+            sset = set(pick)
+            xa = [pooled[i] for i in range(len(pooled)) if i in sset]
+            xb = [pooled[i] for i in range(len(pooled)) if i not in sset]
+            if sum((x > y) + 0.5 * (x == y) for x in xa for y in xb) >= u:
+                ge += 1
+        print(f"  hybrid ${st.median(ph):.3f} (n={len(ph)})  control ${st.median(pc):.3f} (n={len(pc)})"
+              f"  ratio {st.median(ph)/st.median(pc):.2f}x dearer  p={ge/total:.4f}")
+        print(f"  verified {sum(1 for x in h if x['verified'])}/{len(h)} and "
+              f"{sum(1 for x in c if x['verified'])}/{len(c)}")
+    except FileNotFoundError as e:
+        print(f"  missing: {e.filename}")
+
+    print("\n§7.1 worker instruction language, rung 6 and the two that never delegate")
+    for name, path in (("English rung 6", "bench/language-6-en.json"),
+                       ("English rung 4", "bench/language-4-en.json"),
+                       ("English rung 5", "bench/language-5-en.json")):
+        try:
+            s_ = valid(path)
+        except FileNotFoundError:
+            print(f"  {name}: missing {path}")
+            continue
+        print(f"  {name}: n={len(s_)} delegated {sum(1 for x in s_ if x['local_calls'])} "
+              f"verified {sum(1 for x in s_ if x['verified'])}")
+
     v = ver = 0
-    for f in glob.glob("bench/hybrid-*.json") + glob.glob("bench/copilot-*.json") + glob.glob("bench/refactor-*.json"):
+    for f in glob.glob("bench/hybrid-*.json") + glob.glob("bench/copilot-*.json") + glob.glob("bench/refactor-*.json") + glob.glob("bench/language-*.json"):
         d = json.load(open(f))
         if "samples" not in d:
             continue
