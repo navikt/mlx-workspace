@@ -323,7 +323,7 @@ argument for reviewing a body of work rather than the diffs it arrived in.
 
 ## The security review, and the two things we are shipping with
 
-An independent security pass over the branch before merge. Two findings fixed, three
+An independent security pass over the branch before merge. Three findings fixed, two
 accepted and written down here so nobody has to rediscover them.
 
 **Fixed: manifest prose reached the main agent's system prompt.** The `role` and `expect`
@@ -344,10 +344,13 @@ code execution; it is a model whose answers become edits in a developer's reposi
 is bad enough to say out loud. Pinning repositories or a weights digest would close it and
 is the obvious next hardening step.
 
-**Accepted: transitive Python dependencies are unpinned.** `mlx-lm` and `mlx` are pinned
-exactly; everything they pull resolves fresh on install day with no hashes. A lockfile built
-with `uv pip compile --generate-hashes` and installed with `--require-hashes` closes it, and
-is worth doing before this goes beyond an alpha.
+**Fixed: transitive Python dependencies were unpinned.** `mlx-lm` and `mlx` were pinned
+exactly; everything they pulled resolved fresh on install day with no hashes. The
+environment is now an embedded lockfile with hashes for all 548 artefacts, installed with
+`--require-hashes`, so an index serving different bytes fails the install rather than
+provisioning quietly. A test connects the lockfile to the version constants, because the two
+drift silently: one decides what `Installed()` compares against and the other decides what
+is installed. Verified against the real toolchain.
 
 **Accepted: a hard kill leaves a stale provider block.** The removal is deferred, so SIGKILL
 or power loss leaves opencode pointing at a dead ephemeral port. It self-heals on the next
