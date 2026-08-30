@@ -28,6 +28,9 @@ ships macOS arm64 wheels for a narrow range of interpreters. The `realenv` test 
 all of it against a temporary HOME without touching the working setup.
 *Exit: `go test -tags realenv` passes, and the four pinned versions in `runtime.go` are
 recorded in this plan on the day it passed.*
+**Passed 30 August 2026** with uv 0.12.6, Python 3.12, mlx-lm 0.31.3, mlx 0.32.0. It failed
+three times first, on a firewall blocking the compiled test binary while curl to the same
+URL succeeded, which is worth knowing before blaming the pins on someone else's machine.
 
 The weights download is deliberately not tested here. Doing it honestly means deleting 23 GB
 from the machine the rest of this work runs on, and the result would be a timing figure from
