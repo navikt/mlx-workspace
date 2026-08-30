@@ -7,6 +7,39 @@ machine, on their own code.
 Sequence matters more than dates. Each phase has an exit criterion that can be checked by
 someone who was not in the room.
 
+## Two milestones, which this plan first conflated
+
+**Ready** is a property of the artefacts: the code does what it says, the failure modes are
+known and handled, the documents match the behaviour, the numbers survive being recomputed,
+and the risks are named rather than discovered. Everything under Ready is ours to finish,
+and it is finished. Phases 0, 1, 1.9, 2.1 and 3.2, plus an independent security pass, with
+CI green and both repositories pushed.
+
+**Started** is a decision and a set of actions that are not ours: a reviewer signing off a
+trust boundary we cannot sign for ourselves, a release, a deploy, and a developer choosing
+to spend a week on it. Phases 2.2, 2.3, 3.1, 3.3 and 4.
+
+The plan originally read as though the second followed automatically from the first. It does
+not, and writing it that way hid the only genuine gate in the whole sequence: someone other
+than us has to look at what a launch writes into a developer's machine and say it is
+acceptable. That is not a formality to be worked around, and the two milestones are
+separated here so nobody mistakes a finished artefact for a started alpha.
+
+### Readiness, as of 30 August 2026
+
+| | |
+|---|---|
+| Code | 58 commits, CI green, full suite passing, verified end to end on the real server |
+| Failure modes | Server wedging, orphaned processes, port collisions, stale config, duplicate servers: found, fixed, tested |
+| Measurements | 148 valid samples, every figure reproducible with `bench/analyse.py` |
+| Documents | User docs, news post and README corrected against the shipping behaviour |
+| Triage | Runbook written and drilled cold against five reports |
+| Security | Independent pass; three findings fixed, two accepted and recorded |
+| Uninstall | One command, reversible half and destructive half separated |
+
+What is not ready, and cannot be made ready from here: nobody outside this work has read it,
+and nobody has used it for a working day.
+
 ## Phase 0: push, then verify what we changed last night
 
 **0.0 (done) Push first.** Seven commits exist only on this machine, including the fixes the rest
