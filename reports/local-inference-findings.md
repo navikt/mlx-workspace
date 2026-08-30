@@ -330,8 +330,23 @@ None of that is a finding at n=3, and the fragment's wording changed alongside i
 so the comparison is not clean. It is enough to say the switch is safe and not enough to say
 what it is worth.
 
-The honest position: rerunning the ladder with English instructions is the cheapest way to
-find out how much of this study is about a model and how much is about a translation.
+The two rungs where the orchestrator never delegates have now been rerun in English, and
+they answer the sharpest version of the question:
+
+| rung | Norwegian | English |
+|---|---|---|
+| 4, write a new unit test file | 0/6 delegated | 0/6 delegated, 6/6 verified |
+| 5, thread a field through a DTO | 0/6 delegated | 0/6 delegated, 6/6 verified |
+
+Identical. The refusal in §3.1 is not an artefact of instructions the orchestrator half
+understood: it declines these two task shapes just as consistently when told in English, and
+the sessions verify either way. §3.4's finding that overriding the refusal made results worse
+therefore stands on its own rather than on a translation.
+
+What remains unmeasured is the other direction. Rung 6 in English dispatched more (22 local
+calls against 13) at slightly higher cost, on three samples. Whether English changes how much
+gets delegated where delegation already happens is open; whether it changes *whether* it
+happens on these two rungs is answered, and the answer is no.
 
 ## 8. Limitations
 
