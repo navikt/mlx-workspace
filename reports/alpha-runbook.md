@@ -127,6 +127,19 @@ nav-pilot alpha local purge --yes   # actually deletes, about 24 GB
 Run `off` before `purge`. Nothing else persists: the wired-memory limit resets at reboot on
 its own, and there is no launch agent or privilege left behind.
 
+## What we measure
+
+Three instruments, on while this is alpha: dispatches per session (zero included, which is
+the value that tells us the model was there and nothing was handed to it), which model and
+how long it took to start, and the server's end state so `hung` stops being invisible.
+Nothing about the work itself. A developer who has set `DO_NOT_TRACK` sends none of it, and
+`NAV_PILOT_TELEMETRY_ENABLED=false` does the same per tool. `init` says all of this before it
+asks whether to download anything.
+
+If a report says "it never used the local model", the dispatch count is the first thing to
+read: zero confirms it, and a nonzero count means the dispatches happened and the developer
+did not notice them.
+
 ## What we do not know
 
 Nobody has used this for a working day. Everything measured is single tasks in a clean
