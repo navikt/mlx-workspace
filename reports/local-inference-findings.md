@@ -1,7 +1,8 @@
 # Delegating coding work to a local model: a measurement study
 
-August 2026. 146 verified samples, two clients, six task shapes, three refactor strategies.
-One Apple M4 Max, 48 GB unified memory, Qwen3.6-35B-A3B at 4-bit under MLX 0.32.0.
+August 2026. 146 valid samples, two clients, six task shapes, three refactor strategies.
+One Apple M4 Max, 48 GB unified memory, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`, a mixed
+4/8-bit build, served by mlx-lm 0.31.3 on mlx 0.32.0.
 
 ## Abstract
 
@@ -12,17 +13,17 @@ model draws no AI credits, so the question is which work it can take.
 With a cloud orchestrator (Claude Sonnet 4.6) and an available local worker, delegation
 is bimodal. It never occurs on 16 samples of question-answering and comment-writing, and
 always occurs on 20 samples of mechanical multi-file edits. Where it occurs, cost falls
-1.24x (n=8+8, p=0.0045) and 2.54x (n=12+8, p=0.0027) at identical verification outcomes.
+1.24x (n=5+5, p=0.004) and 2.54x (n=12+8, p=0.002) at identical verification outcomes.
 An installed but unused dispatch instruction costs 2%.
 
 Run without an orchestrator, the local model completes a 46-reference rename across 10
 files unaided in both attempts, at zero credits, but writes no file at all when asked to
-create one (0/3). We find no difficulty ceiling. The distinction is between applying a
-decision and making one.
+create one (0/3). Within the six shapes tested we find no difficulty ceiling. The
+distinction is between applying a decision and making one.
 
 An intervention that rewrote the dispatch instruction to encourage delegation increased it
-on one task shape (0/6 to 2/6) and halved the verification rate on the delegated samples,
-indicating the orchestrator's original refusal was correct.
+on one task shape (0/6 to 2/6). One of the two delegated samples failed verification while
+all six non-delegated samples passed, indicating the original refusal was correct.
 
 ## 1. Question
 
@@ -77,6 +78,13 @@ failure set measured once per commit rather than against a green suite.
 **Delegation** is counted from the local server's request log over the sample window, not
 from the transcript.
 
+**Excluded attempts** are kept in the result files rather than deleted, and two are worth
+naming because both strengthen the findings they sit behind. Task 4 on the Copilot CLI has
+11 invalid attempts behind its 3 valid ones, all recorded as sessions that never finished,
+so that task is worse than 0/3 alone conveys. Strategy B in the refactor has three attempts
+killed after the server hung, preserved in `bench/refactor-b-preserialise.json`; §6 is what
+they were.
+
 ### 2.4 Validity controls
 
 The harness refuses rather than reports a doubtful number. Each sample asserts its arm's
@@ -99,14 +107,18 @@ Table 1. Cloud cost per completed task, median. All arms verified all samples.
 | 3, rename across call sites | 8/8 | $0.085 | $0.106 | 1.24 | 0.0045 |
 | 6, thread a field through a mapper | 12/12 | $0.134 | $0.339 | 2.54 | 0.0027 |
 
-p values are one-sided Mann-Whitney U on per-sample cost.
+p values are one-sided Mann-Whitney U on per-sample cost, computed by the exact
+enumeration in `bench/analyse.py`. Task 3's cost comparison is n=5+5, not 8+8: three
+samples per arm were taken before the harness recorded per-step cost, and they contribute
+to the delegation count but not to the cost test.
 
 Delegation is bimodal rather than graded. In 16 samples of tasks 1 and 2 it never occurs;
 in 20 samples of tasks 3 and 6 it always does. The orchestrator is not evaluating each
 instance and occasionally accepting. It discriminates by task shape.
 
-Savings scale with the mechanical fraction of the work: 24% for a rename, 154% for
-threading a field through a mapper and its construction sites. Verification is unaffected.
+Cost falls 19% on the rename and 61% on threading a field through a mapper and its
+construction sites. Two points is a direction, not a scaling law, but it is consistent
+with the saving tracking the mechanical fraction of the work. Verification is unaffected.
 
 Tasks 1 and 2 measure the overhead of the dispatch instruction in isolation, since the
 hybrid arm there is the control plus an unused instruction in the system prompt. The
@@ -273,3 +285,4 @@ the capability to volunteers. It does not support recommending a change in how a
 - Copilot billing model and per-token rates: docs.github.com/copilot/reference/copilot-billing
 - Method and task definitions: `bench/ESCALATION_SPEC.md`, `bench/REFACTOR_SPEC.md`
 - Raw samples: `bench/hybrid-*.json`, `bench/copilot-*.json`, `bench/refactor-*.json`
+- Every median and p value in this report: `python3 bench/analyse.py`
