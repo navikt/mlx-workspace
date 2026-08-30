@@ -134,6 +134,25 @@ the memory it holds.
 *Exit: with autostart on and no server running, a launch starts exactly one server, says
 what it is doing, and a second concurrent launch attaches to that same one.*
 
+## Phase 1.9: adversarial review of everything, before anyone outside sees it
+
+A gate, not a task. When Phase 1 closes, the whole thing gets reviewed as a body of
+work rather than as the diffs it arrived in: the code, this plan, the findings report,
+the raw data behind it, and the three documents a developer will read.
+
+Reviewed adversarially, by someone who did not write it, looking for the thing that is
+wrong rather than the thing that is missing. The bar is what the two reviews already
+found: a statistic quoting a sample size the data did not contain, three documents
+claiming behaviour the measurements contradict, and a port collision that would have
+broken the first user's own application in week one. None of those came from a checklist.
+
+Everything it finds is fixed or written down before Phase 2 starts. A finding that is
+neither is a finding we decided to ship, and that decision needs a name against it.
+
+*Exit: the review has run, every finding is fixed or recorded in `alpha-status.md` with
+the reason it was accepted, and the data has been recomputed from the result files rather
+than quoted from earlier prose.*
+
 ## Phase 2: merge and release
 
 **2.1 Push and green CI.** Seven commits are local only, all of them last night's fixes,
