@@ -187,12 +187,16 @@ top-level usage, so it passes on a build without the feature.*
 once on the live site, on a phone as well, since the capability table is two columns.
 *Exit: `/nav-pilot/docs#lokal-modell` renders, and the table of contents entry works.*
 
-**3.2 Runbook for us, not for them.** `reports/alpha-runbook.md` predates most of the
+**3.2 (done) Runbook for us, not for them.** `reports/alpha-runbook.md` predates most of the
 findings. It should carry the triage sequence: what `status` reports mean, what `hung`
 means, that a wedged server needs `stop` and `start`, and that queued tasks are deliberate.
 *Exit: a teammate who did not build this, handed the runbook cold and a wedged server,
 reaches stop and start and can say what `hung` means. The runbook is then amended with
 whatever they had to ask.*
+**Written 30 August 2026**, as triage rather than user documentation: the five health states
+and what each means, a symptom table from the failures we actually hit, what to collect
+before escalating, and what is known-broken and not worth escalating. The drill with a
+teammate is still owed, and is what the exit criterion actually asks for.
 
 **3.3 News post, after Phase 4, not before.** Release plus docs plus news is self-service
 onboarding at curiosity's rate, and nothing technical enforces "one user first". The post
