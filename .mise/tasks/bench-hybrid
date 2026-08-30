@@ -207,7 +207,12 @@ def instruction_inventory(cfg=None):
 
 
 def port_pid(port):
-    out = subprocess.run(["lsof", "-tiTCP:" + str(port), "-sTCP:LISTEN"],
+    # Absolute path: lsof lives in /usr/sbin, which an interactive shell has on its
+    # PATH and a detached process often does not. Looked up by name it is simply
+    # missing there, and the preflight that depends on it fails for a reason that
+    # has nothing to do with the machine under test. Same bug, same day, as the one
+    # fixed in nav-pilot itself.
+    out = subprocess.run(["/usr/sbin/lsof", "-tiTCP:" + str(port), "-sTCP:LISTEN"],
                          capture_output=True, text=True).stdout.split()
     return int(out[0]) if out else None
 
