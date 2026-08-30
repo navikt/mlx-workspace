@@ -285,6 +285,42 @@ the Copilot CLI, run local sessions for work that is already specified, and clou
 anything that has to create a file or decide where a change goes. That is a sharper rule
 than a rung number, and it survives the rung 5 result that killed the rung-number version.
 
+## The pre-ship review, and what it found
+
+Three adversarial reviews before merge, on the code, the data and the documents. Each found
+something the work would otherwise have shipped with.
+
+**The code review found the autostart building the second server the design exists to
+prevent.** It treated every ownership failure as "nothing is running", and three of those
+failures mean the opposite: a corrupt state file, `lsof` timing out under load, and a
+readiness timeout leaving a live but unrecorded server. Each would take a fresh port that
+the in-use check cannot object to, orphan the running server, and put 42 GB of weights on a
+48 GB machine, with every retry adding another 21. It also caught a regression introduced
+the same day: `Attach` still pinned to 8080, so `status` posted a chat completion at
+whatever the developer had on that port.
+
+**The data review found the study reporting a superseded run beside a claim that run
+disproves.** Table 3's strategy B row came from the file the report describes as holding the
+crashed attempts. That file also holds two completed runs, and those were the row. The
+current file shows B faster than A, so "underperforms A on every axis" was false. Both p
+values were the normal approximation while the abstract quoted the exact test, in a report
+claiming exactness. The sample count was 146 where the script prints 148.
+
+Its most useful finding was an omission rather than an error: the dispatch instruction names
+some of the shapes the study reports as the model's own discrimination, and the study did
+not say so. It does now, along with what the instruction cannot explain, and a warning that
+the fragment has since been edited to state the conclusion, so a rerun measures compliance.
+
+**The documentation review found that the documented first run does not work.** Every
+document presented init then start as the whole path. On a fresh machine `start` refuses
+until a macOS memory limit is raised with sudo, and that limit resets at every reboot. The
+first alpha user would have met a sudo prompt nothing prepared them for, on day one and
+after every restart. The disk figure was three gigabytes short of what `init` itself prints.
+
+**What this says about the process.** None of the three would have been caught by asking
+whether the tests pass, and two were introduced by fixes made hours earlier. That is the
+argument for reviewing a body of work rather than the diffs it arrived in.
+
 ## Known ceilings, accepted for the alpha
 
 - The manifest is unsigned. Integrity rests on TLS and write access to the generating repo, with the publisher and parameter allow-lists bounding the blast radius. Recorded in the package doc.
