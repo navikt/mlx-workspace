@@ -44,9 +44,33 @@ their app fails to bind with an error that never mentions nav-pilot.
 The same constant makes the guard one-per-machine, so a second concurrent opencode session
 fails to launch while local dispatch is on. Two terminal tabs in two repositories is
 ordinary work.
-*Exit: the port is configurable and defaults to something no common framework uses; the
-refusal message never proposes killing a process nav-pilot did not start; two concurrent
-opencode sessions both launch.*
+The fix has three parts, and they have different lifetimes.
+
+**The server is a singleton per machine and must stay one.** It holds 21 GB and a warm
+prompt cache, so a second one is not a fallback, it is a machine with no memory left. It
+binds an ephemeral port instead of 8080 and records the real port in `server.json` beside
+the pid, which every reader already consults to find the pid and so learns the port for
+free. Anything that wants a server looks for the recorded one first and attaches to it;
+starting a second is a refusal, not a race.
+
+**The guard is per session and may be many.** It binds an ephemeral port per launch and
+writes that address into the client configuration for that session, which is written at
+launch anyway. Copilot CLI takes it through `COPILOT_PROVIDER_BASE_URL`, the same mechanism
+cplt uses for its own proxy; opencode takes it in the provider block the launch already
+writes and the exit already removes.
+
+**Concurrent launches must converge on the one server rather than race for it.** Two
+nav-pilot instances starting at the same moment must not both decide to start a server.
+Whatever arbitrates that has to hold across processes, and it has to fail towards attaching
+rather than towards starting.
+
+Concurrency then works out: many guards, one server, and completions already serialise at
+the proxy, so two sessions queue rather than fan out into the mlx-lm batching bug.
+
+*Exit: the server binds a port no common framework claims and records it; two concurrent
+nav-pilot sessions both launch and both reach the same single server process; starting a
+second server is refused with the running one named; no refusal message proposes killing a
+process nav-pilot did not start.*
 
 **1.0b Ctrl-C during `start` orphans the server.** The child runs in its own process group,
 so an interrupt kills nav-pilot and leaves a 21 GB process loading, holding the port, with
@@ -90,6 +114,18 @@ instructions entry, so a crash between them leaves opencode pointing at a delete
 missing verb rather than a dead end. Add it, or rename.
 *Exit: one person who has not used the feature performs off, re-enable and start using only
 `nav-pilot alpha local help`, asking nothing.*
+
+**1.5 `local_autostart`.** Once the server is a discoverable singleton, starting it on
+demand is small: on launch, if autostart is configured and no server is recorded, start one
+and attach. It belongs here rather than in the deferred list because the singleton work in
+1.0 is what makes it safe, and because a first user who has to remember `start` before every
+session will simply stop using it. Three constraints, all from measurements: it must refuse
+rather than fall back to the cloud silently, since a user who asked for local and got billed
+has been wronged; it must say that a cold start takes minutes rather than appearing hung;
+and it must not stop the server on exit, because the warm prompt cache is worth more than
+the memory it holds.
+*Exit: with autostart on and no server running, a launch starts exactly one server, says
+what it is doing, and a second concurrent launch attaches to that same one.*
 
 ## Phase 2: merge and release
 
@@ -192,7 +228,7 @@ capability can sit unused at no cost, since it is off by default.
 
 ## What is deliberately not in this plan
 
-`local_autostart`, dispatch telemetry, Spring and TypeScript measurements, and the
+ dispatch telemetry, Spring and TypeScript measurements, and the
 sketch-then-apply strategy. All are interesting; none of them block one developer from
 trying this on their own machine, and each would be better informed by what the first user
 reports than by more lab work.
