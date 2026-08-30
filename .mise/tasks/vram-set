@@ -7,7 +7,7 @@ import sys
 
 def total_ram_gb():
     try:
-        out = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True).stdout
+        out = subprocess.run(["/usr/sbin/sysctl", "hw.memsize"], capture_output=True, text=True).stdout
         return int(out.strip().split(": ", 1)[-1]) / (1024 ** 3)
     except Exception:
         return None
@@ -31,7 +31,7 @@ if total:
         print("  ⚠️  Warning: less than 4 GB left for macOS — risk of lockup!")
 print()
 
-result = subprocess.run(["sudo", "sysctl", f"iogpu.wired_limit_mb={mb}"])
+result = subprocess.run(["sudo", "/usr/sbin/sysctl", f"iogpu.wired_limit_mb={mb}"])
 if result.returncode == 0:
     print(f"  ✓ VRAM limit set to {gb:.0f} GB. Resets on reboot.\n")
 else:
