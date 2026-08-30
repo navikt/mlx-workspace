@@ -366,7 +366,7 @@ happens on these two rungs is answered, and the answer is no.
 
 Every number above is from a Ktor service. Spring is most of what Nav runs in production, and
 the first alpha user is more likely to work in it. Rung 6, the task that carries the headline,
-run against `navikt/ia-tjenester-metrikker` at a pinned commit, n=4 per arm:
+run against `navikt/ia-tjenester-metrikker` at a pinned commit, n=8 per arm:
 
 | rung 6 | hybrid | control |
 |---|---|---|
