@@ -104,6 +104,10 @@ def sh(cmd, cwd=None, timeout=1800, env=None):
 
 LOAD_CEILING = float(os.environ.get("BENCH_LOAD_CEILING", "8"))
 
+# Seconds to wait after a launch that never started a session. See the sample
+# loop for why this exists.
+LAUNCH_BACKOFF = float(os.environ.get("BENCH_LAUNCH_BACKOFF", "45"))
+
 
 def wait_with_deadline(proc, cap):
     """Wait for a child, enforcing the cap against the wall clock ourselves.
@@ -924,6 +928,16 @@ def main():
                     rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout)
                     doc["samples"].append(rec)
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
+                    # A launch that ends in one second having printed nav-pilot's
+                    # help never reached the model. Every launch re-fetches the
+                    # agentpakke from GitHub, and firing them back to back makes
+                    # that fetch fail: 36 launches in four minutes produced 35
+                    # of these and one real sample. It is a rate limit, not a
+                    # result, so back off rather than burning the attempt budget
+                    # at two seconds a try.
+                    if rec.get("invalid_reason", "").startswith("no session"):
+                        print(f"      … no session; waiting {LAUNCH_BACKOFF}s before retrying")
+                        time.sleep(LAUNCH_BACKOFF)
                     flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
                     tk = rec["cloud_tokens"]
                     print(f"   {flag} sample {n}: {rec['seconds']}s · "
