@@ -48,7 +48,7 @@ launch with a local model id sends it to GitHub.
 ## Follow-ups, outside the alpha's blast radius
 
 0. **Three provider tests bind the real loop-guard port (8081)**, so they fail whenever a
-   local session is actually running — including every time the benchmark harness is mid-run.
+   local session is actually running, including every time the benchmark harness is mid-run.
    `TestCopilotLocalSessionRunsOnTheGuardedLocalServer`,
    `TestCopilotHostedSessionIsUntouchedWithLocalEnabled` and `TestHostedLaunchStartsNoLoopGuard`.
    A test suite that cannot run while the product runs is a suite people stop running. The
@@ -105,12 +105,12 @@ in `TH_WAIT`, and in neither panic do they appear in the backtrace. Grepping the
 not reading the trace.
 
 What the evidence says. The panicking task both times is `tbxd`, running as the developer's
-own uid and hosting `com.apple.Virtualization.VirtualMachine` XPC services — a virtual
+own uid and hosting `com.apple.Virtualization.VirtualMachine` XPC services, a virtual
 machine daemon. The two backtraces are the same code path: 20 of 21 frames identical once
 the KASLR slide is removed, a constant `0x1ceb8000` apart, with only the userspace return
 address differing. The fault is a `Kernel tag check fault`, a memory-tagging trap inside
 the kernel, which is what a kernel memory-safety bug looks like and is not what memory
-pressure looks like — the same report records the compressor at 0% of its limits with OK
+pressure looks like: the same report records the compressor at 0% of its limits with OK
 swap space. The panics stopped when that daemon stopped.
 
 So a VM daemon reached a kernel bug through the virtualization path, twice, in the same
@@ -137,7 +137,7 @@ twelve times the cloud's wall clock.
 
 That is the spec's own hypothesis confirmed from the strongest possible direction. The
 local model fails on multi-file **judgement**, not multi-file **volume**. A rename is
-fully specified by its definition — old name, new name — so there is no judgement left in
+fully specified by its definition, old name and new name, so there is no judgement left in
 it, only 46 mechanical applications, and volume is what this model is good at.
 
 Read together with the rest of the night it gives one rule rather than four findings: hand
@@ -172,7 +172,7 @@ can only detect a large effect). What matters is what the two dispatches did:
 
 | rung 4 sample | dispatched | verified | wall |
 |---|---|---|---|
-| n=1 | yes | **no — introduced a new failing test** | 100s |
+| n=1 | yes | **no, introduced a new failing test** | 100s |
 | n=3 | yes | yes | 123s |
 | the other four | no | yes, all four | ~34s |
 
@@ -181,7 +181,7 @@ finished in a third of the time for the same money. **The orchestrator declining
 dispatch rung 4 was the correct decision, and the rewrite talked it into a mistake.**
 
 Rung 4 is writing a new test file, which is exactly where the Copilot CLI ladder shows
-this model refusing outright — 0 of 3, zero lines written. Sonnet had that judgement right.
+this model refusing outright: 0 of 3, zero lines written. Sonnet had that judgement right.
 
 This reverses how the ladder's bimodal dispatch should be read. Zero dispatch on rungs 1,
 2 and 4 is not a limitation to tune away; it is correct discrimination. The orchestrator
@@ -206,7 +206,7 @@ per-step cost. Every arm verified every sample, so quality is not what separates
 
 Dispatch is bimodal, not gradual. On rungs 1 and 2 the orchestrator never delegates, in
 sixteen samples; on rungs 3 and 6 it always does, in twenty. It is not weighing each case
-and sometimes deciding yes — it recognises a shape. Answering a question and writing one
+and sometimes deciding yes. It recognises a shape. Answering a question and writing one
 comment it does itself; anything that repeats one mechanical edit across call sites it
 hands over, every time.
 
@@ -216,7 +216,7 @@ at p < 0.005 on a one-sided Mann-Whitney.
 
 **The cost of having the fragment installed and unused is 2%.** Rungs 1 and 2 are the
 hybrid arm behaving exactly like the control plus the dispatch fragment in the system
-prompt, and they come out $0.002 dearer — a fifth of one AI credit. That is the number
+prompt, and they come out $0.002 dearer, a fifth of one AI credit. That is the number
 that decides whether this can be on by default, and it is small enough that it can.
 
 An earlier three-sample ladder showed rungs 1 and 2 dispatching two to four times each.
@@ -240,7 +240,7 @@ cell, same commit and same tasks as the OpenCode ladder:
 | 6 | thread a field through a mapper | **1/3**, 3 lines | 2/2, 76.1 credits, 6 lines |
 
 The first reading of this table stopped at rung 4 and called rung 3 the ceiling. Rung 5
-then verified 3 of 3, at 39 seconds against the cloud's 36, for no credits at all — so
+then verified 3 of 3, at 39 seconds against the cloud's 36, for no credits at all, so
 the failures are not ordered by difficulty and there is no ceiling to point at. Rung 5 is
 a two-line edit in a file it was told to change. Rung 4 asks it to create a file that does
 not exist, and rung 6 to work out which construction sites a change reaches.
@@ -248,7 +248,7 @@ not exist, and rung 6 to work out which construction sites a change reaches.
 What fails is creating and deciding. Rung 4's three samples changed zero lines: the model
 read the task and declined, which EDIT-Bench names refusal-to-edit and lists as one of its
 four failure categories. Rung 6 needs the change threaded to sites nobody enumerated.
-Everything the model was handed already-specified, it did — including the rung 3 rename
+Everything the model was handed already-specified, it did, including the rung 3 rename
 across call sites, which is multi-file and mechanical.
 
 ### Rung 6 at depth: the thin sample was wrong by a factor of two
@@ -264,7 +264,7 @@ outcome moves the rate by a third. It did:
 
 At three samples the local arm looked like 1 in 3. At 12 it is 7 in 12, and it is
 *faster* than the cloud arm as well as free. That changes the recommendation: a task
-whose failure is cheap to detect — this one compiles or it does not — can be tried
+whose failure is cheap to detect, since this one compiles or it does not, can be tried
 locally first and escalated, because a failed attempt costs seconds and no credits.
 Retrying until success at a 58% rate averages about 1.7 attempts, which is
 still under the cloud arm's wall clock and still zero credits.
@@ -276,8 +276,8 @@ developers not to bother.
 The rung 6 row is the finding worth arguing about. Whole-session-local verified 7 of 12.
 The **same model on the same machine doing the same task verified 12 of 12** when a cloud
 orchestrator drove and delegated pieces of it. Identical weights either way; what differs
-is who decides what to do. Published work on cascaded editing says exactly this — the
-large model should make the decision and the small one carry it out — and we reproduced it
+is who decides what to do. Published work on cascaded editing says exactly this. The
+large model should make the decision and the small one carries it out, and we reproduced it
 without setting out to.
 
 Recommendation splits by client. On opencode, a cloud orchestrator with a local worker. On

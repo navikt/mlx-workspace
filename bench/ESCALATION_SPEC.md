@@ -37,8 +37,8 @@ the same models at the same per-token rates, so a dollar of opencode cost is 100
 
 This change moves the break-even in the local model's favour, and it invalidates the argument
 this section used to make. Under request billing a dispatched task cost the orchestrator at
-least three requests — one to decide and call the task tool, one to take the result, one to
-verify the file actually changed, because our own dispatch fragment tells it to — so a task
+least three requests: one to decide and call the task tool, one to take the result, one to
+verify the file actually changed, because our own dispatch fragment tells it to, so a task
 the cloud finished in one request could cost four when dispatched, and break-even hung on the
 worker's success rate. Under token billing those extra turns are cheap: they are short, and
 they read a cache prefix that is already warm. What is expensive is generating code, and that

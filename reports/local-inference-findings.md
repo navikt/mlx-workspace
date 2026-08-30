@@ -1,234 +1,275 @@
-# Local models in nav-pilot: what we measured
+# Delegating coding work to a local model: a measurement study
 
-August 2026. 146 verified samples across two clients, six task shapes and three refactor
-strategies, all on one M4 Max with 48 GB of memory running Qwen3.6-35B-A3B at 4-bit
-through MLX.
+August 2026. 146 verified samples, two clients, six task shapes, three refactor strategies.
+One Apple M4 Max, 48 GB unified memory, Qwen3.6-35B-A3B at 4-bit under MLX 0.32.0.
 
-This is the evidence behind the alpha. It is written to be argued with: every number has
-the sample size next to it, the failures we caused ourselves are here alongside the
-results, and the places where the evidence does not reach are marked.
+## Abstract
 
-## The question
+We measure whether a cloud coding agent can offload work to a local model on a developer
+machine at lower cost and equal quality. Under GitHub Copilot's token billing, a local
+model draws no AI credits, so the question is which work it can take.
 
-Can a local model take enough work off a cloud coding agent to be worth the trouble?
+With a cloud orchestrator (Claude Sonnet 4.6) and an available local worker, delegation
+is bimodal. It never occurs on 16 samples of question-answering and comment-writing, and
+always occurs on 20 samples of mechanical multi-file edits. Where it occurs, cost falls
+1.24x (n=8+8, p=0.0045) and 2.54x (n=12+8, p=0.0027) at identical verification outcomes.
+An installed but unused dispatch instruction costs 2%.
 
-Nav pays for GitHub Copilot per token now. Since 1 June 2026 the unit is AI credits at
-$0.01 each, drawn down by input, output and cached tokens at each model's published rate.
-A local model draws none of them. So the question is not whether the local model is as
-good as Claude Sonnet, which it plainly is not, but whether there is work it can take that
-is worth more than it costs in wall-clock time and mistakes.
+Run without an orchestrator, the local model completes a 46-reference rename across 10
+files unaided in both attempts, at zero credits, but writes no file at all when asked to
+create one (0/3). We find no difficulty ceiling. The distinction is between applying a
+decision and making one.
 
-## How we measured
+An intervention that rewrote the dispatch instruction to encourage delegation increased it
+on one task shape (0/6 to 2/6) and halved the verification rate on the delegated samples,
+indicating the orchestrator's original refusal was correct.
 
-Two clients, because they support different shapes:
+## 1. Question
 
-- **opencode** runs a cloud orchestrator with a local worker bound as a sub-agent. The
-  comparison is dispatch enabled against dispatch disabled, same cloud model in both arms.
-- **Copilot CLI** resolves one provider per session, so the hybrid shape cannot be
-  expressed at all. The comparison is the whole session on the local model against the
-  whole session in the cloud.
+Nav pays for GitHub Copilot by token. Since 1 June 2026 the unit is the AI credit, $0.01,
+drawn down by input, output and cached tokens at each model's published rate. A model
+served from the developer's own machine draws none.
 
-Every run goes through `nav-pilot`, the tool developers actually use, rather than through
-the model API. What we measure is the product, not the weights.
+The question is therefore not whether a local 35B model matches Claude Sonnet, which it
+does not, but whether a subset of coding work exists that it can take at acceptable cost
+in latency and error.
 
-Six task shapes on a real Nav Kotlin service, from answering a question about the code to
-threading a new field through a data class, its mapper and every construction site. Each
-sample resets the repository to a fixed commit, so no sample sees another's work.
+## 2. Method
 
-Cost is read from the client rather than computed. opencode prices each step; the Copilot
-CLI prints AI credits in its session summary. An earlier version of the harness priced
-tokens from a table copied out of GitHub's documentation, which is a second place to be
-wrong every time a rate changes.
+### 2.1 Configurations
 
-Quality is the repository's own checks: the project compiles, the old symbol is gone, no
-test fails that was not already failing. Never the model's claim that it worked.
+Two clients support different architectures, and both were measured.
 
-## What the orchestrator does with a local worker
+**opencode** binds a local model as a sub-agent under a cloud orchestrator. Arms are
+dispatch enabled (*hybrid*) against dispatch disabled (*control*), with the same cloud
+model driving both. This isolates delegation as the single variable.
 
-opencode, cloud orchestrator with a local worker available, n=8 per arm or better:
+**Copilot CLI** resolves one provider per session, so the orchestrated architecture cannot
+be expressed. Arms are whole-session-local against whole-session-cloud.
 
-| rung | task | dispatched | hybrid | control | ratio | p |
-|---|---|---|---|---|---|---|
-| 1 | answer a question about the code | 0/8 | $0.080 | $0.078 | 0.97x | |
-| 2 | add a doc comment | 0/8 | $0.094 | $0.092 | 0.98x | |
-| 3 | rename across call sites | 8/8 | $0.085 | $0.106 | 1.24x | 0.0045 |
-| 6 | thread a field through a mapper | 12/12 | $0.134 | $0.339 | 2.54x | 0.0027 |
+All runs are launched through `nav-pilot`, the tool developers use, rather than against the
+model API. The unit under test is the product.
 
-Every arm verified every sample. Quality is not what separates them.
+### 2.2 Tasks
 
-**Dispatch is bimodal.** Sixteen samples on rungs 1 and 2 with no delegation at all;
-twenty on rungs 3 and 6 with delegation every single time. Sonnet is not weighing each
-case and sometimes saying yes. It recognises a shape: a question or a single comment it
-answers itself, anything that repeats one mechanical edit across call sites it hands over.
+Six shapes on a Nav Kotlin service, pinned commit, ordered by an a priori difficulty
+estimate: (1) answer a question about the code, (2) add a doc comment, (3) rename a symbol
+across call sites, (4) write a new unit test file, (5) thread a field through a DTO,
+(6) thread a field through a data class, its mapper and every construction site.
 
-**The saving scales with how much of the work is mechanical.** A quarter more on a rename,
-two and a half times on threading a field through a mapper and its construction sites.
+Each sample resets the working tree to the pinned commit, so no sample observes another's
+output. Each is a fresh client session, because prompt-cache reuse across turns would
+otherwise make task order a variable.
 
-**Having the dispatch instruction installed and unused costs 2%.** Rungs 1 and 2 are the
-control arm plus the dispatch fragment sitting in the system prompt doing nothing, and
-they come out $0.002 dearer. A fifth of one AI credit. That is the number that decides
-whether this can be on by default, and it is small enough that it can.
+### 2.3 Measures
 
-## What the local model can do on its own
+**Cost** is read from the client, not computed. opencode reports a per-step cost; the
+Copilot CLI reports AI credits in its session summary. An earlier harness priced tokens
+from a published rate table, which introduces a second source of error whenever a rate or
+promotional discount changes.
 
-Copilot CLI, whole session local against whole session cloud:
+**Quality** is the repository's own checks: compilation, absence of the renamed symbol, and
+no test failing that was not already failing. The model's report of its own success is
+never used. The target's suite fails on an untouched checkout (15 classes, embedded
+PostgreSQL does not start on this hardware), so samples are compared against a baseline
+failure set measured once per commit rather than against a green suite.
 
-| rung | task | local | cloud |
-|---|---|---|---|
-| 1 | answer a question about the code | 3/3, 0 credits, 18s | 2/2, 7.2 credits, 12s |
-| 2 | add a doc comment | 3/3, 0 credits, 24s | 2/2, 8.8 credits, 19s |
-| 3 | rename across call sites | 3/3, 0 credits, 58s | 3/3, 8.5 credits, 16s |
-| 4 | write a new unit test file | **0/3**, 0 lines written | 3/3, 28.9 credits, 67 lines |
-| 5 | thread a field through a DTO | 3/3, 0 credits, 39s | 3/3, 15.2 credits, 36s |
-| 6 | thread a field through a mapper | 7/12, 0 credits, 146s | 8/8, 67.3 credits, 288s |
+**Delegation** is counted from the local server's request log over the sample window, not
+from the transcript.
 
-The failures are not ordered by difficulty. Rung 5 verified 3 of 3 at the cloud's speed
-for nothing, while rung 4, ranked easier, changed zero lines in three attempts. Rung 4
-asks the model to create a file that does not exist and it declines. EDIT-Bench names this
-refusal-to-edit and lists it as one of four categories, so it is a known property of
-models in this class rather than a fault in our setup.
+### 2.4 Validity controls
 
-Rung 6 deserves its own note because the small sample lied. At n=3 the local arm verified
-1 of 3 and we wrote it up as mostly failing. At n=12 it verifies 7, and it is *faster*
-than the cloud arm as well as free. Since failure here is deterministic to detect, the
-project compiles or it does not, trying locally first and escalating averages about 1.7
-attempts, which is still under the cloud arm's wall clock and still costs nothing.
+The harness refuses rather than reports a doubtful number. Each sample asserts its arm's
+configuration artefacts: a hybrid sample lacking the worker binding, dispatch fragment or
+provider block is invalid, not a result. It will not start when the client binary can change
+mid-run, when another benchmark runs, or above a load-average ceiling. A sample exiting
+successfully in under two seconds with no model step is invalid, as is one whose delegation
+count contradicts its label.
 
-## The refactor: one rename, 46 references, 10 files
+## 3. Results
 
-Three strategies. C is the cloud alone, A is the whole job handed to the local model, B is
-the cloud specifying each file and dispatching it one at a time.
+### 3.1 Orchestrated delegation (opencode)
 
-| strategy | samples | old symbol gone | compiles | wall | credits |
+Table 1. Cloud cost per completed task, median. All arms verified all samples.
+
+| Task | Delegated | Hybrid | Control | Ratio | p |
 |---|---|---|---|---|---|
-| C, cloud only | 2/2 | yes | yes | 28s, 44s | 14, 21 |
-| A, all local | 2/2 | yes | yes | 171s, 332s | **0, 0** |
-| B, decomposed | 2/2 | yes | yes | 270s, 891s | 5, 34 |
+| 1, answer a question | 0/8 | $0.080 | $0.078 | 0.97 | |
+| 2, add a doc comment | 0/8 | $0.094 | $0.092 | 0.98 | |
+| 3, rename across call sites | 8/8 | $0.085 | $0.106 | 1.24 | 0.0045 |
+| 6, thread a field through a mapper | 12/12 | $0.134 | $0.339 | 2.54 | 0.0027 |
 
-**Strategy A was the one we expected to fail.** The spec predicted it would, on the
-grounds that a monolithic instruction is what a user tries first and what the literature
-says a small model cannot carry. It carried it. Both samples took all 46 references to
-zero across all 10 files with the project still compiling, unaided, for no credits at all.
+p values are one-sided Mann-Whitney U on per-sample cost.
 
-That is the hypothesis in `REFACTOR_SPEC.md` confirmed from the strongest direction. The
-local model fails on multi-file **judgement**, not multi-file **volume**. A rename contains
-no judgement, only 46 mechanical applications, and volume is what this model is good at.
+Delegation is bimodal rather than graded. In 16 samples of tasks 1 and 2 it never occurs;
+in 20 samples of tasks 3 and 6 it always does. The orchestrator is not evaluating each
+instance and occasionally accepting. It discriminates by task shape.
 
-Strategy B is the interesting negative. Published work on cascaded editing says the large
-model should decide and the small one apply, and that this beats the large model alone.
-Here it lost to strategy A on every axis: it costs credits, it is slower, and its variance
-is enormous (5 credits and 270 seconds one run, 34 credits and 891 seconds the next). The
-reason is that decomposition earns its keep when there is a decision to make. This task
-has none, so the orchestration is overhead.
+Savings scale with the mechanical fraction of the work: 24% for a rename, 154% for
+threading a field through a mapper and its construction sites. Verification is unaffected.
 
-## Where we were wrong
+Tasks 1 and 2 measure the overhead of the dispatch instruction in isolation, since the
+hybrid arm there is the control plus an unused instruction in the system prompt. The
+difference is $0.002, or 2%.
 
-Four things we believed and measurement contradicted. They are the most useful part of
-this document.
+### 3.2 Unorchestrated local sessions (Copilot CLI)
 
-**We rewrote the dispatch instruction to encourage more delegation, and made the results
-worse.** Rungs 4 and 5 never dispatched under the old text, which spent one clause on the
-saving and four sentences on how the worker fails. The rewrite led with the economics.
-Rung 4 moved from 0/6 dispatches to 2/6, and one of those two delegations introduced a
-failing test, while all four non-delegating samples passed in a third of the wall clock.
-The orchestrator declining rung 4 was correct, and we talked it into a mistake. The
-instruction now backs its judgement instead of pushing against it.
+Table 2. Whole session on each provider, median.
 
-That inverts how the bimodal dispatch pattern should be read. Zero dispatch on rungs 1, 2
-and 4 is not reluctance to be tuned away. It is correct discrimination, and it is better
-than the instruction we were about to write.
+| Task | Local verified | Local credits | Local wall | Cloud verified | Cloud credits | Cloud wall |
+|---|---|---|---|---|---|---|
+| 1, answer a question | 3/3 | 0 | 18s | 2/2 | 7.2 | 12s |
+| 2, add a doc comment | 3/3 | 0 | 24s | 2/2 | 8.8 | 19s |
+| 3, rename across call sites | 3/3 | 0 | 58s | 3/3 | 8.5 | 16s |
+| 4, write a new unit test file | **0/3** | 0 | 55s | 3/3 | 28.9 | 85s |
+| 5, thread a field through a DTO | 3/3 | 0 | 39s | 3/3 | 15.2 | 36s |
+| 6, thread a field through a mapper | 7/12 | 0 | 146s | 8/8 | 67.3 | 288s |
 
-**We reported a ceiling that did not exist.** After rung 4 failed we wrote that the local
-model tops out at rung 3. Rung 5 then verified 3 of 3. There is no ceiling, there is a
-distinction: it fails at creating and at deciding, and succeeds at applying.
+Failures do not follow the difficulty ordering. Task 5 verifies 3/3 at the cloud's latency
+for no credits, while task 4, estimated easier, produces zero lines of output in three
+attempts. Task 4 requires creating a file that does not exist. This matches the
+refusal-to-edit category in EDIT-Bench (arXiv:2511.04486), one of four failure classes
+that benchmark names for instructed code editing.
 
-**We blamed a kernel panic on our own settings.** Two panics arrived during a benchmark
-run and the panic file mentions the GPU driver, so we recorded that raising the wired
-memory limit had destabilised the machine. It had not. Those strings appear in the
-inventory of every thread on the system, both parked in `TH_WAIT`, and in neither panic do
-they appear in the backtrace. The panicking task both times was a virtual machine daemon,
-the two backtraces are the same kernel code path once the address randomisation is removed,
-and the fault is a memory-tagging trap, which is not what memory pressure looks like.
-Grepping a file is not reading a trace.
+Task 6 gave 1/3 at n=3 and 7/12 at n=12, so the small sample understated the rate about
+twofold. At n=12 the local arm is also faster (146s against 288s). Failure here is
+deterministically detectable, so retry-until-success averages 1.7 attempts, still below the
+cloud arm's latency and at zero credits.
 
-**We ran a benchmark that measured nothing and did not notice.** Eighteen samples exited
-cleanly in 0.2 seconds scoring zero, because nav-pilot's auto-update had replaced the
-binary mid-run with a build that has no launch flags, so every launch printed help text and
-exited 0. The harness had warned about auto-update and let the run proceed.
+### 3.3 Refactor: 46 references, 10 files
 
-## What broke in the measurement, and what it cost
+Table 3. One rename, three strategies, n=2 each. All samples removed all references and
+left the project compiling.
 
-The harness is now about as interesting as the results, because most of a night went into
-making it refuse to produce numbers rather than produce wrong ones.
+| Strategy | Wall | Credits | Cloud steps | Local calls |
+|---|---|---|---|---|
+| C, cloud only | 28s, 44s | 14, 21 | 9, 13 | 0 |
+| A, local only | 171s, 332s | **0, 0** | 4, 10 | 5, 11 |
+| B, cloud decomposes and dispatches per file | 270s, 891s | 5, 34 | 5, 14 | 3, 18 |
 
-- **A red baseline.** The target repository's test suite fails on an untouched checkout:
-  15 classes, because embedded PostgreSQL will not start on this machine. Every quality
-  verdict was being taken against an unreachable green. Samples are now judged against the
-  repository's own baseline, measured once per commit.
-- **The fix for that introduced a worse bug.** `git clean` keeps `build/` so Gradle stays
-  warm, which means a change that fails to *compile* leaves the previous run's test results
-  in place, the baseline diff finds nothing new, and a broken build scores as a pass. The
-  results are cleared before each run and a missing result file is now an explicit compile
-  failure.
-- **Invalid samples filled the quota.** `--samples 3` counted attempts, so three failures
-  produced a results file that looked complete and contained nothing. It counts valid
-  samples now, with an attempt cap so a broken arm gives up instead of running until
-  morning.
-- **A timeout that did not fire.** `Popen.wait(timeout=2400)` was observed thirteen minutes
-  past its deadline with the child still alive. The cap is now enforced against the wall
-  clock, with a test that gives a SIGTERM-ignoring child three seconds and asserts it dies.
-- **Contention we could not see.** After a reboot, Spotlight reindexed at load average 16
-  and nothing would have stopped a run from recording that as model latency. Both harnesses
-  now refuse to start above a load ceiling.
+Strategy A was predicted to fail: a monolithic instruction is what a user attempts first,
+and the cascade literature holds that a small model cannot carry it. It succeeded in both
+attempts at zero credits.
 
-The pattern in all of these is one failure shape: a run that produces plausible output
-while measuring nothing. Every guard added is a refusal rather than a warning, because a
-warning did not stop any of them.
+Strategy B underperforms A on every axis measured and shows high variance (5 credits at
+270s, then 34 credits at 891s). Cascaded editing (arXiv:2604.19201) reports the decomposed
+form beating the large model alone, but that result concerns tasks containing a decision to
+be made. A rename contains none, so decomposition adds orchestration cost without removing
+judgement load.
 
-## The bug worth shipping a fix for
+### 3.4 Prompt intervention
 
-The refactor experiment found the one thing that would have hurt real users.
+The dispatch instruction was rewritten to lead with cost rather than failure modes, on the
+hypothesis that tasks 4 and 5 were never delegated because the original text read as a
+warning. Six samples per arm, same commit and model, instruction as the only difference.
 
-Asked to work file by file, the orchestrator listed all ten files and dispatched ten
-sub-agents at once. mlx-lm batched those concurrent requests into shared attention, the
+Table 4. Delegation and verification before and after.
+
+| Task | Before | After |
+|---|---|---|
+| 4, write a new unit test file | 0/6 delegated | 2/6 delegated |
+| 5, thread a field through a DTO | 0/6 | 0/6 |
+
+The change on task 4 is not significant alone (one-sided Fisher exact p = 0.227; six per
+arm detects only large effects). The verification outcome is the informative result: of the
+two delegated samples, one introduced a new failing test, while all four non-delegated
+samples verified in roughly a third of the wall time. The orchestrator's refusal to
+delegate task 4 was correct, and the intervention degraded outcomes. It was reverted.
+
+This inverts the reading of §3.1. Zero delegation on tasks 1, 2 and 4 is discrimination,
+not reluctance, and it outperformed the instruction written to override it.
+
+## 4. Threats to validity, and four we realised
+
+Four claims made during this work were later contradicted by measurement.
+
+1. **A ceiling was reported that does not exist.** After task 4 failed we concluded the
+   local model tops out at task 3. Task 5 then verified 3/3. The organising distinction is
+   creating and deciding against applying, not difficulty.
+2. **A kernel panic was attributed to our configuration.** Two panics during benchmarking
+   named the GPU driver in the panic file, and we recorded the raised wired-memory limit as
+   destabilising. Those strings occur in the system-wide thread inventory, both parked in
+   `TH_WAIT`, and in neither trace. The panicking task was a virtualisation daemon; the two
+   backtraces are one code path once address randomisation is removed; the fault class is a
+   memory-tagging trap, not memory exhaustion.
+3. **Eighteen samples measured nothing and scored zero.** The client's auto-update replaced
+   the binary mid-run with a build lacking launch flags, so each launch printed usage text
+   and exited successfully. The harness had warned about auto-update and proceeded.
+4. **The intervention in §3.4 was expected to improve delegation and degraded it.**
+
+Known remaining threats. Cost is dominated by prompt-cache reads (91 to 97% of tokens),
+which bill at a tenth of fresh input, so any comparison in raw token totals overstates the
+difference; all figures here are priced. Samples within an arm run minutes apart and share
+a server-side cache, which affects per-sample cost but not the arm comparison. The refactor
+agreement measure compares strategies against the cloud-only run, so a misunderstood task
+would mark all agreeing strategies correct; it selects what to inspect, not what is right.
+
+## 5. Instrumentation failures
+
+Five defects in the measurement apparatus were found and fixed. All share one shape: a run
+producing plausible output while measuring nothing.
+
+- The target's suite is red on an untouched checkout, so quality was being judged against an
+  unreachable green. Samples are now compared to a per-commit baseline.
+- The fix for that admitted a worse defect. `git clean` preserves `build/` to keep Gradle
+  warm, so a change that fails to compile leaves the previous run's test results in place,
+  the baseline diff finds nothing new, and a broken build scores as a pass. Results are now
+  cleared before each run and their absence is an explicit compile failure.
+- Invalid samples satisfied the sample quota, so three failures produced a complete-looking
+  file containing nothing. Valid samples are counted, with an attempt cap.
+- `Popen.wait(timeout=2400)` was observed 13 minutes past its deadline with the child alive.
+  The cap is now enforced against a monotonic clock and tested against a process that
+  ignores SIGTERM.
+- No load check existed. After a reboot, filesystem indexing at load average 16 would have
+  been recorded as model latency.
+
+Each guard is a refusal rather than a warning, because in every case a warning existed and
+did not prevent the run.
+
+## 6. An upstream defect with product consequences
+
+Instructed to work file by file, the orchestrator enumerated all 10 files and dispatched 10
+sub-agents concurrently. mlx-lm batched the concurrent requests into shared attention;
 differing prompt lengths raised `[broadcast_shapes] Shapes (1,1,1,12919) and
-(1,16,1,14896)`, and the server was left hung: alive, accepting connections, answering
-nothing, and unrecoverable without a restart. Local inference was down for the whole
-machine. It reproduced on the next sample, which then got no local calls at all because
-the server was already dead.
+(1,16,1,14896)`, leaving the server accepting connections and answering none, unrecoverable
+without restart. It reproduced on the following sample, which recorded no local calls
+because the server was already dead.
 
-This is an upstream bug (ml-explore/mlx-lm #1139 and #1256, the latter against the 0.31.3
-we pin) and not one we can fix. It is also trivially reachable from a feature we ship:
-fanning a refactor out across files is the obvious thing for an orchestrator to do. The
-loop guard already proxies every completion, so it now queues them one at a time.
-Serialising costs nothing real, because one model on one GPU has no capacity for a second
-stream and those requests were already going to queue.
+The defect is upstream (ml-explore/mlx-lm #1139, #1256, the latter against the pinned
+0.31.3) and reachable from normal use, since fanning a refactor across files is an obvious
+orchestration strategy. Mitigation is to serialise completions at the proxy already fronting
+the server. One model on one GPU cannot serve a second concurrent stream, so the requests
+queued regardless; they now queue where they cannot corrupt a cache.
 
-nav-pilot's health check called it correctly on the first look: hung, it will not recover,
-restart it. That is the one part of the system that needed no fixing.
+## 7. Conclusion
 
-## One rule
+The results reduce to one distinction. Given a decision already made, this model applies it
+across ten files at no credit cost. Asked to make the decision, it declines or produces a
+defect.
 
-Hand this model a decision that has already been made and it will carry it a long way,
-across ten files, for nothing. Ask it to make the decision and it declines or breaks
-something.
+Four independent measurements support it: the orchestrator delegating exactly the mechanical
+shapes (§3.1), unorchestrated sessions succeeding on specified edits and failing to create a
+file (§3.2), a full rename completing locally and unaided (§3.3), and decomposition adding
+cost to a task with no decision in it (§3.3, strategy B).
 
-Everything above is that sentence measured from four directions: the orchestrator
-delegating exactly the mechanical shapes and refusing the rest, the whole-session runs
-succeeding on specified edits and failing to create a file, the rename running entirely
-locally, and the decomposition adding cost to a task with no decision left in it.
+## 8. Limitations
 
-## What this does not establish
+One model, one machine, one repository, and for most task shapes a single task instance. The
+Kotlin service represents Nav's newer backends and nothing else; TypeScript and React have no
+sample size worth reporting.
 
-One model, one machine, one repository, and mostly one task per shape. The Kotlin service
-is representative of Nav's newer backends and of nothing else; there are no numbers here
-for TypeScript or React at a sample size worth quoting.
+Sample sizes of 8 to 12 detect the effect sizes reported and would not detect small ones.
+Delegation rates of 0/16 and 20/20 are unambiguous; the intervention in §3.4 is not.
 
-The agreement measure used in the refactor compares each strategy against the cloud-only
-run. If the cloud model misunderstood the task, every strategy that agrees with it is
-wrong in the same way and the measure calls them all correct. It decides what is worth
-reading, not what is right.
+Nothing here measures sustained use. These are single tasks in a clean repository with no
+interruption, no partial work in progress and no concurrent demand. That supports offering
+the capability to volunteers. It does not support recommending a change in how a team works.
 
-Nothing here measures a team over a week. It measures single tasks in a clean repository
-with no interruptions, no half-finished work and no colleague waiting. That is enough to
-justify letting people try it. It is not enough to tell a team to change how they work.
+## References
+
+- EDIT-Bench, instructed code editing failure categories: arXiv:2511.04486
+- Cascaded code editing, large model sketches and small model applies: arXiv:2604.19201
+- mlx-lm concurrent request defects: ml-explore/mlx-lm issues #1139, #1256
+- Copilot billing model and per-token rates: docs.github.com/copilot/reference/copilot-billing
+- Method and task definitions: `bench/ESCALATION_SPEC.md`, `bench/REFACTOR_SPEC.md`
+- Raw samples: `bench/hybrid-*.json`, `bench/copilot-*.json`, `bench/refactor-*.json`
