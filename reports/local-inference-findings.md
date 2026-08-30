@@ -356,19 +356,23 @@ run against `navikt/ia-tjenester-metrikker` at a pinned commit, n=4 per arm:
 
 | rung 6 | hybrid | control |
 |---|---|---|
-| median cost | **$0.146** | **$0.092** |
-| median wall | 132s | 106s |
-| delegated | 4/4 | 0/4 |
-| verified | 4/4 | 4/4 |
+| median cost | **$0.164** | **$0.092** |
+| range | $0.093–$0.256 | $0.090–$0.612 |
+| delegated | 8/8 | 0/8 |
+| verified | 8/8 | 8/8 |
 
-Dispatch costs 59% more on Spring and takes longer, against 2.54x cheaper on Ktor. Same task
-shape, same model, same orchestrator, same harness, opposite sign.
+Dispatch costs **1.79x** as much on Spring (one-sided Mann-Whitney p=0.0079), against 0.39x
+on Ktor. Same task shape, same model, same orchestrator, same harness, opposite sign at the
+same sample size and a comparable p value.
 
-Four samples per arm is thin and this is one task on one repository, so the size of the
-effect is not established. The direction is what matters: the headline saving is not a
-property of the model or of the architecture, it is a property of the model, the architecture
-*and the codebase*. Anything built on "2.54x" as a general figure is built on one Kotlin
-service.
+That is the single most important number in this report for anyone deciding whether to adopt
+this. The headline saving is not a property of the model or of the architecture; it is a
+property of the model, the architecture *and the codebase*. Anything built on "2.54x" as a
+general figure is built on one Ktor service.
+
+One asymmetry worth noting rather than smoothing: the control arm's range runs to $0.612,
+against a median of $0.092. The cloud arm on Spring occasionally does something expensive,
+and the median hides it. The hybrid arm is tighter and dearer.
 
 Why it might differ is unmeasured and worth knowing before this widens. Spring's annotation
 and injection style spreads a change across more files with less local context in each, which

@@ -363,11 +363,12 @@ branch. That deserves its own decision rather than arriving as a local-inference
 
 ## Spring reverses the headline, and Spring is most of production
 
-Rung 6 against a Spring service, n=4 per arm: hybrid $0.146 against control $0.092, and
-slower. The same task on Ktor was 2.54x cheaper with dispatch. Opposite sign, same harness.
+Rung 6 against a Spring service, n=8 per arm: hybrid $0.164 against control $0.092. Dispatch
+costs 1.79x as much (p=0.0079), where the same task on Ktor cost 0.39x. Opposite sign, same
+harness, same sample size, comparable significance.
 
-Four samples and one task, so the size is not established, but the direction is enough to
-change what we tell people. The saving is not a property of the model or the architecture;
+One task on one repository, so it is not the last word on Spring, but it is no longer a
+directional hint either. The saving is not a property of the model or the architecture;
 it is a property of both together with the codebase. Every figure in the findings report is
 from a Ktor service, and the first alpha user is more likely to be working in Spring.
 

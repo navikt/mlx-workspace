@@ -858,7 +858,11 @@ def main():
                 # One file per (rung, arm). Results keyed only by model merged two
                 # different task sets once, and ids present in both overwrote
                 # each other silently.
-                out = ROOT / "bench" / f"hybrid-{rung}-{arm}.json"
+                # Target in the name for anything but the default, so a second
+                # target's samples cannot be appended to the first target's file
+                # and reported as one population.
+                stem = "hybrid" if TARGET == "tasks" else f"hybrid-{TARGET}"
+                out = ROOT / "bench" / f"{stem}-{rung}-{arm}.json"
                 doc = json.loads(out.read_text()) if out.exists() else {}
                 doc.setdefault("samples", [])
                 doc.setdefault("preflight", [])
