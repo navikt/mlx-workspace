@@ -134,7 +134,7 @@ the memory it holds.
 *Exit: with autostart on and no server running, a launch starts exactly one server, says
 what it is doing, and a second concurrent launch attaches to that same one.*
 
-## Phase 1.9: adversarial review of everything, before anyone outside sees it
+## Phase 1.9 (done) adversarial review of everything, before anyone outside sees it
 
 A gate, not a task. When Phase 1 closes, the whole thing gets reviewed as a body of
 work rather than as the diffs it arrived in: the code, this plan, the findings report,
@@ -152,6 +152,10 @@ neither is a finding we decided to ship, and that decision needs a name against 
 *Exit: the review has run, every finding is fixed or recorded in `alpha-status.md` with
 the reason it was accepted, and the data has been recomputed from the result files rather
 than quoted from earlier prose.*
+**Ran 30 August 2026.** Three reviews, on the code, the data and the documents. Each found
+something that would have shipped: an autostart that could build a second 21 GB server, a
+study table sourced from a superseded run, and a documented first run that does not work on
+a fresh machine. All fixed, and what they found is recorded in `alpha-status.md`.
 
 ## Phase 2: merge and release
 
