@@ -6,6 +6,10 @@
 
 Last touched 31 August 2026, the day the alpha shipped.
 
+**Landed since:** the delta-counter fix (#529) and the news figure (#524) are in main;
+the Qwen3.8 correction (#532) is queued; and 30 of the 31 dependabot alerts were closed
+by someone else (#525), so that stops being ours.
+
 ## Where things stand
 
 The release is in brew, the news post is published, the docs carry the local-model section,
@@ -102,8 +106,8 @@ would change a decision:
   hardware first. **Add the template finding to it**: ten of eleven model templates break on
   tool arguments in the OpenAI wire format, and only mlx-lm's normalisation hides it — anyone
   pointing Ollama at these weights hits it directly.
-- [#523](https://github.com/navikt/copilot/issues/523) 31 dependabot alerts, all npm in
-  `apps/my-copilot`, none in the Go CLI.
+- ~~[#523](https://github.com/navikt/copilot/issues/523) dependabot~~ — 30 of 31 closed by
+  #525. None were ever in the Go CLI.
 - Eight review threads from #483: `os.Rename` EXDEV, `startProcess` ignoring its context, a
   `slices.Clip` allocation, Tailwind-versus-Aksel tokens, two docs threads.
 - `chat_templates/deepseek-v4-flash.jinja` breaks on three of four shapes. That model is not a
