@@ -9,8 +9,79 @@ the exact test disagree in the third decimal, and the report quotes three.
 import glob
 import itertools
 import json
+import pathlib
 import statistics as st
 from math import comb
+
+def write_step_count_figure(rows, out="reports/figures/step-count.svg"):
+    """Draw §7.3 as an SVG, from the same rows the table is printed from.
+
+    Hand-written SVG rather than a plotting library: the repo has no matplotlib,
+    a figure that needs a dependency stops being regenerated, and an SVG diffs
+    as text so a changed number shows up in review rather than as an opaque
+    binary blob.
+
+    The x axis is the control arm's median step count and the y axis is the
+    delegation ratio. The line at y=1 is the only part that matters to a
+    decision: below it delegation saves money, above it costs.
+    """
+    if len(rows) < 2:
+        return
+    path = pathlib.Path(out)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    W, H = 640, 360
+    L, R, T, B = 70, 24, 28, 52          # margins
+    pw, ph = W - L - R, H - T - B
+    xmax = max(r[1] for r in rows) * 1.15
+    ymax = max(max(r[2] for r in rows), 1.0) * 1.2
+
+    def px(v):
+        return L + (v / xmax) * pw
+
+    def py(v):
+        return T + ph - (v / ymax) * ph
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
+        f'font-family="system-ui,-apple-system,sans-serif" font-size="12">',
+        f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
+        # break-even: at 1.0 delegation costs exactly what the cloud costs alone
+        f'<line x1="{L}" y1="{py(1.0):.1f}" x2="{L+pw}" y2="{py(1.0):.1f}" '
+        f'stroke="#c2410c" stroke-width="1" stroke-dasharray="5 4"/>',
+        f'<text x="{L+pw:.0f}" y="{py(1.0)-7:.1f}" text-anchor="end" fill="#c2410c">'
+        f'break-even: dispatch costs what the cloud costs alone</text>',
+        # axes
+        f'<line x1="{L}" y1="{T}" x2="{L}" y2="{T+ph}" stroke="#94a3b8"/>',
+        f'<line x1="{L}" y1="{T+ph}" x2="{L+pw}" y2="{T+ph}" stroke="#94a3b8"/>',
+    ]
+    for v in (0.5, 1.0, 1.5, 2.0):
+        if v <= ymax:
+            parts.append(f'<text x="{L-8}" y="{py(v)+4:.1f}" text-anchor="end" fill="#475569">{v:.1f}x</text>')
+    for v in (0, 5, 10, 15, 20):
+        if v <= xmax:
+            parts.append(f'<text x="{px(v):.1f}" y="{T+ph+18}" text-anchor="middle" fill="#475569">{v}</text>')
+
+    ordered = sorted(rows, key=lambda r: r[1])
+    pts = " ".join(f"{px(r[1]):.1f},{py(r[2]):.1f}" for r in ordered)
+    parts.append(f'<polyline points="{pts}" fill="none" stroke="#1d4ed8" stroke-width="1.5" opacity="0.45"/>')
+    for name, steps, ratio, nh, nc in ordered:
+        cx, cy = px(steps), py(ratio)
+        colour = "#15803d" if ratio < 1 else "#b91c1c"
+        parts.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="5" fill="{colour}"/>')
+        anchor_ = "start" if steps < xmax * 0.6 else "end"
+        dx = 10 if anchor_ == "start" else -10
+        parts.append(f'<text x="{cx+dx:.1f}" y="{cy+4:.1f}" text-anchor="{anchor_}" fill="#0f172a">'
+                     f'{name} — {ratio:.2f}x</text>')
+
+    parts.append(f'<text x="{L+pw/2:.0f}" y="{H-12}" text-anchor="middle" fill="#0f172a">'
+                 f'steps the cloud-only arm needed</text>')
+    parts.append(f'<text x="16" y="{T+ph/2:.0f}" text-anchor="middle" fill="#0f172a" '
+                 f'transform="rotate(-90 16 {T+ph/2:.0f})">cost with dispatch ÷ without</text>')
+    parts.append("</svg>")
+    path.write_text("\n".join(parts) + "\n")
+    print(f"  figure written: {out}")
+
 
 
 def valid(path):
@@ -116,6 +187,8 @@ def main():
         ordered = sorted(rows, key=lambda r: -r[1])
         monotone = all(ordered[i][2] <= ordered[i + 1][2] for i in range(len(ordered) - 1))
         print(f"  ordered by step count, ratio is {'monotone' if monotone else 'NOT monotone'}")
+
+    write_step_count_figure(rows)
 
     print("\n§7.1 worker instruction language, rung 6 and the two that never delegate")
     for name, path in (("English rung 6", "bench/language-6-en.json"),

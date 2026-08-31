@@ -78,13 +78,26 @@ def main():
     print(f"→ validating {args.target} against {repo.name}")
     sh(["git", "checkout", "--", "."], cwd=repo)
 
-    ok, tail = suite(repo, test_cmd, args.node)
-    print(f"  baseline: {'green' if ok else 'RED'}")
-    for l in tail:
-        print(f"    {l.strip()}")
-    if not ok:
-        print("\n✗ the baseline is not green. Every later verdict would be measuring the")
-        print("  toolchain, not the model. Fix the checkout or pin the right runtime first.")
+    # Both baselines, not just the suite. A rung verified by `rename` runs
+    # compile_cmd and never touches the tests, so a target whose suite is green
+    # and whose compile is red scores every sample as a failure. That is exactly
+    # what happened: eight Next.js samples were judged against a `tsc --noEmit`
+    # that fails on an untouched tree over a deprecated compiler option, and this
+    # task passed the target as measurable because it only ran the suite.
+    failed_baseline = False
+    for label, cmd in (("test", test_cmd), ("compile", cfg.get("compile_cmd"))):
+        if not cmd:
+            continue
+        ok, tail = suite(repo, cmd, args.node)
+        print(f"  {label} baseline: {'green' if ok else 'RED'}")
+        for l in tail:
+            print(f"    {l.strip()}")
+        if not ok:
+            failed_baseline = True
+    if failed_baseline:
+        print("\n✗ a baseline is not green on an untouched tree. Every later verdict would")
+        print("  measure the toolchain, not the model. Fix the checkout, pin the right")
+        print("  runtime, or correct the command in the target file first.")
         return 1
 
     failures = 0

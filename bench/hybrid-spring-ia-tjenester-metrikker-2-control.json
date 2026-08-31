@@ -1,0 +1,450 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:39:17+0200",
+      "seconds": 18.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62973,
+        "input": 5,
+        "output": 480,
+        "reasoning": 0,
+        "cache_write": 21249,
+        "cache_read": 41239
+      },
+      "cloud_cost_usd": 0.0993,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 4107
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3784
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-0-20260831-093917.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:39:37+0200",
+      "seconds": 18.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 10,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62974,
+        "input": 5,
+        "output": 444,
+        "reasoning": 0,
+        "cache_write": 21286,
+        "cache_read": 41239
+      },
+      "cloud_cost_usd": 0.0989,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3061
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 2767
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-1-20260831-093936.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:39:56+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 10,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 63018,
+        "input": 5,
+        "output": 470,
+        "reasoning": 0,
+        "cache_write": 21296,
+        "cache_read": 41247
+      },
+      "cloud_cost_usd": 0.0993,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3006
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3134
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-2-20260831-093955.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:40:15+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 6,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62912,
+        "input": 5,
+        "output": 422,
+        "reasoning": 0,
+        "cache_write": 21244,
+        "cache_read": 41241
+      },
+      "cloud_cost_usd": 0.0984,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1655
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3510
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-3-20260831-094014.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 4,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:40:33+0200",
+      "seconds": 18.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 11,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 63083,
+        "input": 5,
+        "output": 507,
+        "reasoning": 0,
+        "cache_write": 21330,
+        "cache_read": 41241
+      },
+      "cloud_cost_usd": 0.1,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3284
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 2480
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-4-20260831-094033.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 5,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:40:52+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 10,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62971,
+        "input": 5,
+        "output": 454,
+        "reasoning": 0,
+        "cache_write": 21275,
+        "cache_read": 41237
+      },
+      "cloud_cost_usd": 0.099,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 2611
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3134
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-5-20260831-094052.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 6,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:41:10+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 8,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62942,
+        "input": 5,
+        "output": 425,
+        "reasoning": 0,
+        "cache_write": 21269,
+        "cache_read": 41243
+      },
+      "cloud_cost_usd": 0.0985,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3127
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3997
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-6-20260831-094110.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 7,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-08-31T09:41:27+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 9,
+      "files_changed": 1,
+      "cloud_steps": 3,
+      "cloud_tokens": {
+        "total": 62934,
+        "input": 5,
+        "output": 427,
+        "reasoning": 0,
+        "cache_write": 21267,
+        "cache_read": 41235
+      },
+      "cloud_cost_usd": 0.0985,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3907
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3459
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-2-control-7-20260831-094127.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-31T09:39:16+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 2.7,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 1.05
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 4103
+      }
+    }
+  ],
+  "rung": 2,
+  "arm": "control",
+  "task": "E1",
+  "kind": "edit",
+  "verify": "compile",
+  "prompt": "Add a KDoc comment to the function fraKommunenummer in src/main/kotlin/no/nav/arbeidsgiver/iatjenester/metrikker/domene/Fylke.kt describing what it does, its parameter, and what it returns for an unknown kommunenummer. Change nothing else."
+}

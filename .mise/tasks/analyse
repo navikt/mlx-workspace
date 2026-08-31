@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# mise description="Recompute every figure and table the reports quote, and regenerate reports/figures/. Usage: mise run analyse"
+#
+# The rule this enforces: a number in a report that this cannot produce is a
+# number one of the two got wrong. Run it before quoting anything, and after any
+# run that adds samples.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+exec python3 bench/analyse.py "$@"
