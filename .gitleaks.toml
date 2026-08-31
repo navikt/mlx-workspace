@@ -1,0 +1,23 @@
+[extend]
+useDefault = true
+
+# A model identifier is not a credential.
+#
+# gitleaks' generic-api-key rule fires on any `"key": "<value>"` pair, and this
+# repository is full of them: every manifest entry and every benchmark result
+# names the model build it belongs to. Five findings, all of the same shape:
+#
+#   manifest/models.json          "key": "qwen3.6-35b-a3b-optiq"
+#   bench/weather-*.json          "model_key": "granite-4.1-8b"
+#
+# Allowlisting the field would be the lazy fix and the wrong one: it would hide a
+# real token that happened to land in a field called "key". So the value itself
+# has to look like a model name — lower case, digits, dots and dashes — which no
+# API key does. A hex or base64 secret in one of these fields still fires.
+[[rules]]
+id = "generic-api-key"
+[rules.allowlist]
+regexTarget = "line"
+regexes = [
+  '''"(model_)?key":\s*"[a-z0-9][a-z0-9._-]{2,48}"''',
+]
