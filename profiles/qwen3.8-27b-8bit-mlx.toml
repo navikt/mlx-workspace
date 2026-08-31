@@ -18,7 +18,11 @@ MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "65536"
 MLX_OPENCODE_OUTPUT        = "16384"
 MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
-MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+# reasoning_effort is pinned, not left to the client. Qwen3.8's template
+# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
+# values — none, high and max would make the template refuse the request.
+# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false, "reasoning_effort": "medium"}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"

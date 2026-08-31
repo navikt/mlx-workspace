@@ -29,7 +29,11 @@ MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
 # (4.7 vs 22.4 tok/s) rather than to thinking, so this is expected to recover part of the gap,
 # not all of it. Published work on Qwen3 1.7B-32B finds thinking helps planning constraints and
 # hurts precision ones, which is most of that task set.
-MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+# reasoning_effort is pinned, not left to the client. Qwen3.8's template
+# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
+# values — none, high and max would make the template refuse the request.
+# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false, "reasoning_effort": "medium"}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"

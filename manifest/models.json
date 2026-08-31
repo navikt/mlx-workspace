@@ -49,7 +49,7 @@
         "MLX_OPENCODE_CONTEXT": "131072",
         "MLX_OPENCODE_OUTPUT": "16384",
         "MLX_OPENCODE_CHUNK_TIMEOUT": "600000",
-        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
+        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"
@@ -75,7 +75,7 @@
         "MLX_OPENCODE_CONTEXT": "65536",
         "MLX_OPENCODE_OUTPUT": "16384",
         "MLX_OPENCODE_CHUNK_TIMEOUT": "900000",
-        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
+        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"

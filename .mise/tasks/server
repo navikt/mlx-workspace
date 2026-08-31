@@ -73,10 +73,26 @@ num_draft    = os.environ.get("MLX_NUM_DRAFT_TOKENS", "").strip()
 prefill_step = os.environ.get("MLX_PREFILL_STEP_SIZE", "").strip()
 trust_remote = os.environ.get("MLX_TRUST_REMOTE_CODE", "").strip()
 
-# Resolve chat_template relative to workspace root if it's a relative path
-if chat_template and not os.path.isabs(chat_template):
-    workspace = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    chat_template = os.path.join(workspace, chat_template)
+# MLX_CHAT_TEMPLATE names a file; --chat-template takes the template itself.
+#
+# Passing the path put the path string in as the template, so it rendered to
+# itself and every prompt became the filename. The model then continued the
+# filename — a request for "Reply with exactly: OK" came back as
+# "# Qwen3 Chat Template (Jinja2)". No error anywhere, on either side.
+#
+# Read it here rather than at the call site so the failure is a missing file at
+# startup instead of a server that runs and answers nonsense.
+if chat_template:
+    if not os.path.isabs(chat_template):
+        workspace = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        chat_template = os.path.join(workspace, chat_template)
+    try:
+        chat_template_path = chat_template
+        chat_template = open(chat_template_path).read()
+    except OSError as e:
+        sys.exit(f"\u2717 MLX_CHAT_TEMPLATE names {chat_template_path}, which cannot be read: {e}")
+    if "{%" not in chat_template and "{{" not in chat_template:
+        sys.exit(f"\u2717 {chat_template_path} contains no Jinja tags; that is not a chat template")
 
 if server_type == "omlx":
     print(f"→ Starting omlx server (model requires oMLX)")
@@ -122,7 +138,7 @@ else:
     print(f"  cache-bytes: {cache_bytes}")
     print(f"  cache-size:  {cache_size}")
     if chat_template:
-        print(f"  chat-template: {chat_template}")
+        print(f"  chat-template: {chat_template_path} ({len(chat_template)} bytes)")
     if chat_template_args:
         print(f"  chat-template-args: {chat_template_args}")
     print()

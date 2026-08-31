@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# mise description="Run the cheap-ops suite against several model profiles unattended. Usage: mise run bench-models -- <profile> [<profile> ...]"
+#
+# One command for a night of comparing models, because the alternative is a
+# scratch loop that dies with the terminal and has to be rewritten from memory.
+#
+# Every profile gets the same sequence, and every step can refuse:
+#
+#   switch profile -> start server -> wait for a real completion
+#   -> assert the server serves the model the profile names
+#   -> assert it answers a trivial prompt sanely
+#   -> run the suite under a unique BENCH_RUN_TAG
+#   -> stop the server
+#
+# The sanity check is not decoration. MLX_CHAT_TEMPLATE was passed to
+# mlx_lm.server as a path where the flag takes the template text, so the path
+# became the template, every prompt rendered to a filename, and the model
+# answered "Reply with exactly: OK" with "# Qwen3 Chat Template (Jinja2)". The
+# server was up, the port was open, the model id was right, and every number
+# from that run would have been noise. Nothing caught it for months.
+set -uo pipefail
+cd "$(dirname "$0")/../.."
+
+[ "$#" -gt 0 ] || { echo "usage: mise run bench-models -- <profile> [<profile> ...]"; exit 2; }
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+LOG=".bench-logs/models-$STAMP.log"
+mkdir -p .bench-logs
+
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+
+for p in "$@"; do
+  [ -f "profiles/$p.toml" ] || { say "FATAL: no profile profiles/$p.toml"; exit 1; }
+done
+
+say "=== queue: $* "
+
+for profile in "$@"; do
+  say "--- $profile"
+  mise run server-stop >>"$LOG" 2>&1
+
+  if ! mise run model-use "$profile" >>"$LOG" 2>&1; then
+    say "✗ $profile: could not switch profile, skipping"; continue
+  fi
+
+  nohup mise run server >>"$LOG" 2>&1 &
+  if ! mise run server-wait >>"$LOG" 2>&1; then
+    say "✗ $profile: server never came up, skipping"; mise run server-stop >>"$LOG" 2>&1; continue
+  fi
+
+  # The model the profile names, asked of the server rather than assumed. A run
+  # served the 6-bit build while the profile said 8-bit once, and the only
+  # reason we know is that a scratch script happened to check.
+  want=$(python3 -c "
+import sys; sys.path.insert(0,'.mise/tasks')
+import _profiles as P
+print(P.load('$profile')[1]['MLX_MODEL'])")
+
+  reply=$(curl -s -m 300 http://127.0.0.1:8080/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -d "{\"model\":\"$want\",\"max_tokens\":16,\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}]}" \
+    | python3 -c "
+import json,sys
+try: d=json.load(sys.stdin)
+except Exception: print('NO-JSON'); raise SystemExit
+c=d.get('choices')
+print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:80])")
+
+  case "$reply" in
+    *OK*) say "  sanity ok ($want)" ;;
+    *)    say "✗ $profile: server answered $(printf '%q' "$reply") to a trivial prompt — refusing to measure"
+          mise run server-stop >>"$LOG" 2>&1; continue ;;
+  esac
+
+  # Write-once results. The harness overwrote a canonical filename once and the
+  # table built from it was wrong in two places before anyone noticed.
+  if BENCH_RUN_TAG="$STAMP" python3 -u .mise/tasks/bench-cheap-ops >>"$LOG" 2>&1; then
+    say "✓ $profile complete"
+  else
+    say "✗ $profile: suite failed, see $LOG"
+  fi
+  mise run server-stop >>"$LOG" 2>&1
+done
+
+say "=== queue done. results: bench/results-*-$STAMP.json"
+say "    compare with: mise run bench-results ; mise run bench-loop-analysis"
