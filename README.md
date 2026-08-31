@@ -28,6 +28,7 @@ paragraph is a pointer and should stay one sentence long so the two cannot drift
 | [`bench/`](bench/) | Harnesses, targets, specs and raw result JSON | |
 | [`workspaces/`](workspaces/README.md) | Benchmark checkouts, almost all gitignored | `git status` noise here to be a run, not a break |
 | [`profiles/`](profiles/) | One file per model build | |
+| [`AGENTS.md`](AGENTS.md) | Rules for agents working **on** this repo | Each one to cost a night if ignored |
 | `manifest/` | `models.json`, generated from `profiles/` **for nav-pilot to fetch** | To be an external interface: do not restructure |
 
 Naming: SHOUTING.md only at the root, and only for manuals covering the whole repo. Everything

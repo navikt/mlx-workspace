@@ -75,6 +75,25 @@ and writes `bench/cache-<key>.json`. Its verdict is mechanical: "reuses the cach
 turn takes under 0.6 times the first, "no reuse, and it got slower" when over 1.1 times, otherwise
 "no useful reuse". Read turn 0 against the last turn, not the hit percentages alone.
 
+## The tasks
+
+`mise tasks` lists them all with descriptions. The ones that matter:
+
+| Task | Does |
+|---|---|
+| `bench-cheap-ops` | The capability ladder: eleven tasks against one target, per model |
+| `bench-hybrid` | The cost ladder: a cloud orchestrator dispatching to the local model, against a dispatch-disabled control |
+| `bench-copilot` | The same question for the Copilot CLI, where the whole session runs locally |
+| `bench-refactor` | Three strategies over one rename, with a differential quality measure |
+| `bench-queue` | A day of unattended runs in priority order, writing results as it goes |
+| `bench-validate-target` | Proves a target is measurable **before** GPU time is spent: baseline green, every break unique and every break actually failing |
+| `secrets` | Scans the whole history for committed credentials |
+| `model-use`, `model-status`, `vram-set` | Switch model, check the server, raise the wired-memory limit |
+
+Two of these exist because of specific failures. `bench-validate-target` exists because a
+suite that was red for an unrelated reason scored a model 0 of 8, and `secrets` because this
+repo has committed a credential before.
+
 ## Verification rules
 
 Each rule exists because its absence produced a wrong number.
