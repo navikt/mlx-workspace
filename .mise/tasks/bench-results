@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+# mise description="What every recorded arm actually contains: valid, discarded, verified, cost, steps, dispatch. Usage: mise run bench-results [--filter next] [--why] [--json]"
+"""Read the result files, so nobody writes that one-liner again.
+
+Every question asked of these files during a run is the same handful:
+
+  did this arm finish            valid against the quota
+  is the data any good           how many samples were discarded, and why
+  did the model do the work      verified, and how many calls went local
+  what does it cost              median cloud cost and steps
+
+Those were retyped as an inline json/glob/statistics snippet twenty times in one
+day, each version slightly different, one of them wrong (it counted total
+samples where it meant valid ones and reported an arm as finished when it had
+produced nothing). This is that snippet, once, with the definitions fixed.
+
+Two rules encoded here rather than remembered:
+
+  A discarded sample is not a result. It is counted and shown, never averaged
+  in, and an arm that discarded more than it kept says so loudly, because that
+  is the signature of a broken harness rather than a weak model.
+
+  An arm where BOTH sides verify nothing is a broken task, not a model finding.
+  Sixteen samples were published-adjacent before that was noticed.
+"""
+import argparse
+import json
+import pathlib
+import statistics as st
+import sys
+from collections import Counter
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+
+def load(path):
+    """Samples from one result file, or None when it is not a sample file."""
+    try:
+        doc = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+    samples = doc.get("samples")
+    return samples if isinstance(samples, list) else None
+
+
+def median(values):
+    return st.median(values) if values else 0.0
+
+
+def summarise(path, samples):
+    valid = [s for s in samples if s.get("valid")]
+    invalid = [s for s in samples if not s.get("valid")]
+    verified = sum(1 for s in valid if s.get("verified") is True)
+    judged = sum(1 for s in valid if s.get("verified") is not None)
+    return {
+        "file": path.name,
+        "valid": len(valid),
+        "discarded": len(invalid),
+        "verified": verified,
+        "judged": judged,
+        "dispatched": sum(1 for s in valid if s.get("local_calls")),
+        "cost": median([s.get("cloud_cost_usd") or 0 for s in valid]),
+        "steps": median([s.get("cloud_steps") or 0 for s in valid]),
+        "seconds": median([s.get("seconds") or 0 for s in valid]),
+        "reasons": Counter(str(s.get("invalid_reason"))[:52] for s in invalid),
+    }
+
+
+def warnings_for(row):
+    """The two failure signatures worth interrupting someone about."""
+    out = []
+    if row["discarded"] > row["valid"]:
+        out.append("discarded more than it kept — suspect the harness, not the model")
+    if row["valid"] >= 4 and row["judged"] and row["verified"] == 0:
+        out.append("nothing verified — if the other arm is also 0, the task is broken")
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-results")
+    ap.add_argument("--filter", default="", help="substring of the filename, e.g. spring or next")
+    ap.add_argument("--why", action="store_true", help="show why samples were discarded")
+    ap.add_argument("--json", action="store_true", help="machine-readable, for another script")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        rows = [
+            {"valid": 8, "discarded": 0, "verified": 8, "judged": 8},
+            {"valid": 2, "discarded": 18, "verified": 2, "judged": 2},
+            {"valid": 8, "discarded": 0, "verified": 0, "judged": 8},
+        ]
+        assert warnings_for(rows[0]) == []
+        assert "discarded more" in warnings_for(rows[1])[0]
+        assert "nothing verified" in warnings_for(rows[2])[0]
+        # A sample with no verdict must not count as verified.
+        s = summarise(pathlib.Path("x.json"), [{"valid": True, "verified": None}])
+        assert s["verified"] == 0 and s["judged"] == 0, s
+        print("✓ self-check passed")
+        return 0
+
+    rows = []
+    for path in sorted((ROOT / "bench").glob("*.json")):
+        if args.filter and args.filter not in path.name:
+            continue
+        samples = load(path)
+        if not samples:
+            continue
+        rows.append(summarise(path, samples))
+
+    if args.json:
+        for r in rows:
+            r["reasons"] = dict(r["reasons"])
+        print(json.dumps(rows, indent=2))
+        return 0
+
+    if not rows:
+        print("no result files matched")
+        return 0
+
+    print(f"{'arm':52} {'valid':>5} {'disc':>5} {'ok':>7} {'disp':>5} {'cost$':>7} {'steps':>5}")
+    for r in rows:
+        name = r["file"].replace("hybrid-", "").replace(".json", "")[:52]
+        ok = f"{r['verified']}/{r['judged']}" if r["judged"] else "—"
+        print(f"{name:52} {r['valid']:5} {r['discarded']:5} {ok:>7} {r['dispatched']:5} "
+              f"{r['cost']:7.3f} {r['steps']:5.0f}")
+        for w in warnings_for(r):
+            print(f"{'':52} ⚠ {w}")
+        if args.why and r["reasons"]:
+            for reason, n in r["reasons"].most_common(3):
+                print(f"{'':52}   {n}× {reason}")
+
+    total_valid = sum(r["valid"] for r in rows)
+    total_disc = sum(r["discarded"] for r in rows)
+    share = total_disc / (total_valid + total_disc) if (total_valid + total_disc) else 0
+    print(f"\n{total_valid} valid, {total_disc} discarded ({share:.0%} of everything run)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

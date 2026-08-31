@@ -1,7 +1,7 @@
 # Triage runbook: local inference in nav-pilot
 
 For whoever picks up an alpha report. What the user needs is on the docs site at
-`/nav-pilot/docs#lokal-modell`; this is the other side of that conversation.
+https://ki-utvikling.nav.no/nav-pilot/docs#lokal-modell; this is the other side of that conversation.
 
 Scope: nav-pilot with `alpha local`, `Qwen3.6-35B-A3B-OptiQ-4bit`, 30 August 2026. In an
 alpha this goes stale quickly. If something here does not match what you see, the code is
