@@ -40,8 +40,12 @@ workspace_dir.mkdir(parents=True, exist_ok=True)
 weather_cli_dir = workspace_dir / "weather-cli"
 weather_cli_dir.mkdir(exist_ok=True)
 shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
-S.check_prompt(workspace / "AGENTS.md")
-shutil.copy2(workspace / "AGENTS.md", workspace_dir / "AGENTS.md")
+S.check_prompt(workspace / "bench" / "agents-prompt.md")
+# The benchmark prompt lives in bench/ because it is an experimental
+# variable, not documentation: it is copied verbatim into every workspace
+# and is what the model under test actually reads. The root AGENTS.md is
+# for agents working ON this repo and must never reach a benchmark.
+shutil.copy2(workspace / "bench" / "agents-prompt.md", workspace_dir / "AGENTS.md")
 
 if subprocess.run(["mise", "run", "opencode-init", str(workspace_dir)],
                   cwd=str(workspace)).returncode != 0:
