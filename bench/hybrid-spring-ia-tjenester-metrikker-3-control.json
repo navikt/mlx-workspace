@@ -1,0 +1,123 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 0,
+      "started": "2026-08-31T01:59:03+0200",
+      "seconds": 22.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 20,
+      "files_changed": 3,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 139525,
+        "input": 9,
+        "output": 1255,
+        "reasoning": 0,
+        "cache_write": 20459,
+        "cache_read": 117802
+      },
+      "cloud_cost_usd": 0.1309,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 55962
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 56285
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-0-20260831-015903.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-31T01:59:02+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 1.63,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.19
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 55962
+      }
+    },
+    {
+      "checked_at": "2026-08-31T02:37:58+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 0.71,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.32
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 53838
+      }
+    }
+  ],
+  "rung": 3,
+  "arm": "control",
+  "task": "M1",
+  "kind": "edit",
+  "verify": "rename",
+  "prompt": "Rename the function erOrgnrGyldig to isOrgnrValid everywhere in the codebase, including both overloads, all imports and all call sites in main and test sources. Change nothing else."
+}

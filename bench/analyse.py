@@ -89,6 +89,34 @@ def main():
     except FileNotFoundError as e:
         print(f"  missing: {e.filename}")
 
+    print("\n§7.3 the predictor: ratio against the control arm's step count")
+    # Four paired experiments, each within one codebase. The claim is not that
+    # they measure the same task, it is that the ratio orders by how many steps
+    # the cloud-only arm needed.
+    points = [
+        ("Ktor, rung 6", "bench/hybrid-6-hybrid.json", "bench/hybrid-6-control.json"),
+        ("Frontend, rung 3", "bench/hybrid-frontend-familie-tilbake-3-hybrid.json",
+         "bench/hybrid-frontend-familie-tilbake-3-control.json"),
+        ("Ktor, rung 3", "bench/hybrid-3-hybrid.json", "bench/hybrid-3-control.json"),
+        ("Spring, rung 6", "bench/hybrid-spring-ia-tjenester-metrikker-6-hybrid.json",
+         "bench/hybrid-spring-ia-tjenester-metrikker-6-control.json"),
+    ]
+    rows = []
+    for name, hp, cp in points:
+        try:
+            h, c = valid(hp), valid(cp)
+        except FileNotFoundError as e:
+            print(f"  {name}: missing {e.filename}")
+            continue
+        steps = st.median([x.get("cloud_steps") or 0 for x in c])
+        ratio = st.median(priced(h)) / st.median(priced(c))
+        rows.append((name, steps, ratio, len(h), len(c)))
+        print(f"  {name:18} control steps {steps:5.0f}  ratio {ratio:.2f}  (n={len(h)}+{len(c)})")
+    if len(rows) > 1:
+        ordered = sorted(rows, key=lambda r: -r[1])
+        monotone = all(ordered[i][2] <= ordered[i + 1][2] for i in range(len(ordered) - 1))
+        print(f"  ordered by step count, ratio is {'monotone' if monotone else 'NOT monotone'}")
+
     print("\n§7.1 worker instruction language, rung 6 and the two that never delegate")
     for name, path in (("English rung 6", "bench/language-6-en.json"),
                        ("English rung 4", "bench/language-4-en.json"),

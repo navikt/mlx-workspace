@@ -1,6 +1,6 @@
 # Delegating coding work to a local model: a measurement study
 
-August 2026. 183 valid samples, two clients, two codebases, six task shapes, three refactor
+August 2026. 200 valid samples, two clients, three codebases, six task shapes, three refactor
 strategies.
 One Apple M4 Max, 48 GB unified memory, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`, a mixed
 4/8-bit build, served by mlx-lm 0.31.3 on mlx 0.32.0.
@@ -17,12 +17,16 @@ always occurs on 20 samples of mechanical multi-file edits. Where it occurs on a
 service, cost falls 1.24x (n=5+5, p=0.004) and 2.54x (n=12+8, p=0.002) at identical
 verification outcomes. An installed but unused dispatch instruction costs 2%.
 
-**The saving does not survive a change of codebase.** The same task on a Spring service
-costs 1.79x *more* with delegation than without (n=8+8, p=0.0074), where on Ktor it cost
-0.39x. Same model, orchestrator and harness; opposite sign at comparable significance, with
-quality unaffected in both. Spring is most of what this organisation runs in production, so
-the figures above describe one Kotlin service rather than a general property of the
-approach. Any decision resting on "2.54x" should rest on §7.2 instead.
+**The saving is not a property of the codebase but of how hard the task is for the cloud
+model.** The same task on a Spring service costs 1.79x *more* with delegation than without
+(n=8+8, p=0.0074), where on Ktor it cost 0.39x: opposite sign, same model, orchestrator and
+harness, quality unaffected in both. Across four paired experiments the ratio orders
+monotonically by one variable, and it is not the language. It is the number of steps the
+*cloud-only* arm needed: 19 steps 0.39x, 13 steps 0.53x, 5 steps 0.80x, 2 steps 1.79x.
+Delegation pays where the cloud model would otherwise grind, and costs money where it
+would finish in two steps. The control arm measures this before anyone commits to
+dispatching. See §7.2 and §7.3; any decision resting on "2.54x" as a general figure should
+rest on those instead.
 
 Run without an orchestrator, the local model completes a 46-reference rename across 10
 files unaided in both attempts, at zero credits, but writes no file at all when asked to
@@ -65,6 +69,13 @@ Six shapes on a Nav Kotlin service, pinned commit, ordered by an a priori diffic
 estimate: (1) answer a question about the code, (2) add a doc comment, (3) rename a symbol
 across call sites, (4) write a new unit test file, (5) thread a field through a DTO,
 (6) thread a field through a data class, its mapper and every construction site.
+
+Three targets, each at a pinned commit, each verified by its own suite:
+`navikt/isoppfolgingstilfelle` (Ktor), `navikt/ia-tjenester-metrikker` (Spring) and
+`navikt/familie-tilbake-frontend` (React 19 and Express 5 on Node 24). The shapes are
+analogous rather than identical across targets, which is why every comparison in §7.2 and
+§7.3 is a paired hybrid-against-control within one codebase and the ratios are never
+averaged across them.
 
 Each sample resets the working tree to the pinned commit, so no sample observes another's
 output. Each is a fresh client session, because prompt-cache reuse across turns would
@@ -313,11 +324,16 @@ The results reduce to one distinction. Given a decision already made, this model
 across ten files at no credit cost. Asked to make the decision, it declines or produces a
 defect.
 
-That is a finding about the model, and it held on every codebase tested. What did not hold
-is the economics. On Ktor, delegating the mechanical work costs 0.39x what the cloud costs
-alone; on Spring, 1.79x. The distinction above tells you what the model can do; it does not
-tell you whether doing it is worth paying for, and the answer to that changed sign when the
-repository changed.
+That is a finding about the model, and it held on every codebase tested. The economics did
+not: delegating the mechanical work costs 0.39x on Ktor and 1.79x on Spring. The distinction
+above tells you what the model can do; it does not tell you whether doing it is worth paying
+for.
+
+What decides that is §7.3. Across four paired experiments the ratio orders by how many steps
+the cloud-only arm needed, not by the language: 19 steps 0.39x, 13 steps 0.53x, 5 steps
+0.80x, 2 steps 1.79x. Delegation pays where the cloud model would otherwise grind and costs
+money where it would finish in two steps, and the control arm measures which you have before
+you commit to anything.
 
 Four independent measurements support it: the orchestrator delegating exactly the mechanical
 shapes (§3.1), unorchestrated sessions succeeding on specified edits and failing to create a
@@ -379,19 +395,56 @@ Dispatch costs **1.79x** as much on Spring (one-sided Mann-Whitney p=0.0074), ag
 on Ktor. Same task shape, same model, same orchestrator, same harness, opposite sign at the
 same sample size and a comparable p value.
 
-That is the single most important number in this report for anyone deciding whether to adopt
-this. The headline saving is not a property of the model or of the architecture; it is a
-property of the model, the architecture *and the codebase*. Anything built on "2.54x" as a
-general figure is built on one Ktor service.
+Anything built on "2.54x" as a general figure is built on one Ktor service. What replaces it
+is §7.3.
 
 One asymmetry worth noting rather than smoothing: the control arm's range runs to $0.612,
 against a median of $0.092. The cloud arm on Spring occasionally does something expensive,
 and the median hides it. The hybrid arm is tighter and dearer.
 
-Why it might differ is unmeasured and worth knowing before this widens. Spring's annotation
-and injection style spreads a change across more files with less local context in each, which
-is the shape that costs an orchestrator round trips whether or not it delegates. That is a
+## 7.3 What actually predicts the saving
+
+An earlier draft of this report concluded that the saving is a property of the model, the
+architecture *and the codebase*. The codebase turned out to be a proxy.
+
+Reading the four arms already collected, the ratio orders by one variable: how many steps the
+**cloud-only** arm needed to finish the task. Where the cloud model grinds, handing the
+mechanical part to a local worker removes most of the grinding. Where it walks the task in two
+steps, dispatch adds an orchestration round trip and costs more than it saves.
+
+| Codebase | Rung | Control steps | Hybrid | Control | Ratio | n |
+|---|---|---|---|---|---|---|
+| Ktor | 6 | 19 | $0.134 | $0.339 | **0.39** | 12+8 |
+| Frontend, TypeScript | 3 | 13 | $0.121 | $0.227 | **0.53** | 8+8 |
+| Ktor | 3 | 5 | $0.085 | $0.106 | **0.80** | 8+8 |
+| Spring | 6 | 2 | $0.164 | $0.092 | **1.79** | 8+8 |
+
+Table 5. Delegation ratio against the control arm's median step count. `bench/analyse.py`
+recomputes the ordering and asserts it is monotone.
+
+The frontend row is the only one collected after the hypothesis existed, and it was
+**predicted before it ran**. The prediction, the statistic, the test and the labels were
+written to `reports/night-plan-2026-08-31.md` and committed before the first sample: a
+control arm at five steps or more predicts a ratio below 1.0. The control arm came in at 13
+steps and the ratio at 0.53, one-sided exact Mann-Whitney p=0.0023, n=8+8, with zero invalid
+samples in either arm and 8 of 8 verified in both. The target was
+`navikt/familie-tilbake-frontend` at a pinned ref, React 19 and Express 5 on Node 24,
+verified by its own suite of 61 files and 572 tests.
+
+Two things this does not establish. TypeScript is better represented in the model's training
+data than Kotlin, so a cheaper TypeScript result cannot separate "step count drives the ratio"
+from "the model is simply better at TypeScript"; what the table does show is that the ratio is
+not a property of the language alone, because Ktor appears twice with different ratios. And
+four points ordering correctly is a relationship, not a fitted model: the break-even sits
+somewhere between 2 and 5 control steps, and nothing here locates it more precisely.
+
+Why the step count differs between codebases remains unmeasured. Spring's annotation and
+injection style spreads a change across more files with less local context in each, which is
+the shape that should cost an orchestrator round trips whether or not it delegates. That is a
 hypothesis, not a finding.
+
+For anyone deciding whether to adopt this, the practical form is: run the task once without
+delegation and count the steps. That number, not the language, says whether dispatch will pay.
 
 ## 8. Limitations
 

@@ -1,0 +1,101 @@
+{
+  "samples": [],
+  "preflight": [
+    {
+      "checked_at": "2026-08-31T01:50:01+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 5.34,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.37
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 59331
+      }
+    },
+    {
+      "checked_at": "2026-08-31T02:23:45+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 0.85,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.32
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 53890
+      }
+    },
+    {
+      "checked_at": "2026-08-31T03:11:53+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 1.65,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.32
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 53577
+      }
+    }
+  ],
+  "rung": 3,
+  "arm": "hybrid",
+  "task": "M1",
+  "kind": "edit",
+  "verify": "rename",
+  "prompt": "Rename the function erOrgnrGyldig to isOrgnrValid everywhere in the codebase, including both overloads, all imports and all call sites in main and test sources. Change nothing else."
+}
