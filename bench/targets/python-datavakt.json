@@ -1,0 +1,42 @@
+{
+  "_note": "navikt/datavakt, unmodified, at a pinned ref. Data-quality tooling: pydantic, pandas, statsmodels, oracledb. Verified baseline: 270 tests in 3.3 seconds, no database or GCP credentials required.\n\nPython is not here to re-run the Kotlin tasks in another language. It is here for the one thing it uniquely offers: no compiler in the verification loop. Every task measured so far had a type checker catching the model's mistakes before the tests ran, and we do not know how much of the edit success that carries.\n\nSo P1 and P2 are a matched pair. P1 changes a pydantic model, where a wrong edit is caught by validation and by types. P2 makes the analogous change in dict-shaped code, where only the tests can catch it. If P2 fails where P1 succeeds, the safety story leans on typed targets, which qualifies the advice for every dynamically-typed corner of Nav.",
+  "repo": "https://github.com/navikt/datavakt.git",
+  "ref": "e020b419ad9faa4af230e503f9200f27bac0aca7",
+  "python": "3.12",
+  "install": "uv sync",
+  "compile_cmd": "uv run python -c \"import compileall,sys; sys.exit(0 if compileall.compile_dir('datavakt', quiet=2) else 1)\"",
+  "test_cmd": "uv run pytest -q",
+  "results_suffix": "-python",
+  "tasks": [
+    {
+      "id": "R2",
+      "kind": "read",
+      "verify": "grep_answer",
+      "prompt": "Which two fields of SlackAlertConfig in datavakt/models/config.py provide the Jinja2 payload template, and which one is a file path? Answer in one sentence. Do not change any files.",
+      "expect_terms": [
+        "payload_template",
+        "payload_template_file"
+      ]
+    },
+    {
+      "id": "P1",
+      "kind": "edit",
+      "verify": "test",
+      "prompt": "In datavakt/models/config.py, add an optional field `username` of type Optional[str] defaulting to None to the SlackAlertConfig model, so an alert can override the webhook's display name. Change nothing else, and do not modify any test file."
+    },
+    {
+      "id": "P2",
+      "kind": "edit",
+      "verify": "test",
+      "prompt": "In datavakt/monitor.py, the results are grouped into a dictionary keyed by evaluation name. Add the total number of monitor results across all evaluations to what the grouping function returns, without changing the existing keys or their meaning. Change nothing else, and do not modify any test file."
+    },
+    {
+      "id": "M1",
+      "kind": "edit",
+      "verify": "rename",
+      "prompt": "Rename the class SlackAlertConfig to SlackWebhookConfig everywhere in this repository, including its definition in datavakt/models/config.py, every import, every type annotation and every reference in tests. Change nothing else.",
+      "old_symbol": "SlackAlertConfig",
+      "new_symbol": "SlackWebhookConfig"
+    }
+  ]
+}
