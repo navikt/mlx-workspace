@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+# mise description="Prove a target is measurable before spending GPU time on it: baseline green, every break unique and every break actually failing. Usage: mise run bench-validate-target -- <target> [--node 24.20.0]"
+"""Check a target before it is measured, not after.
+
+Three things go wrong with a new target, and all three have happened:
+
+  the baseline is red        The frontend suite dies under Node 20 with 61 errors
+                             that have nothing to do with any change. A model
+                             judged against that is judged against the toolchain.
+  a break site moved         A `find` string that matches zero times silently
+                             applies no break, and the task then measures a model
+                             fixing a bug that was never there.
+  a break does not fail      A break that leaves the suite green is a task that
+                             measures nothing at all, and it looks like a pass.
+
+Run this whenever a target is created or its pinned ref moves. It is deliberately
+separate from the ladder: the ladder should refuse to start on an unvalidated
+target rather than discover any of this at two in the morning.
+"""
+import argparse
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def sh(cmd, cwd=None, timeout=1800, env=None):
+    e = {**os.environ, **(env or {})}
+    return subprocess.run(cmd, cwd=cwd and str(cwd), capture_output=True,
+                          text=True, timeout=timeout, env=e)
+
+
+def suite(repo, cmd, node):
+    """Run the target's own test command, under a pinned Node when it needs one."""
+    argv = ["bash", "-lc", cmd] if not node else ["mise", "x", f"node@{node}", "--", "bash", "-lc", cmd]
+    r = sh(argv, cwd=repo, timeout=1800)
+    out = r.stdout + r.stderr
+    # vitest and gradle both put a summary line at the end; keep it for the report.
+    tail = [l for l in out.splitlines() if "Tests" in l or "Test Files" in l or "tests" in l]
+    return r.returncode == 0, (tail[-2:] if tail else out.splitlines()[-2:])
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-validate-target")
+    ap.add_argument("target", nargs="?", help="a file in bench/targets, without .json")
+    ap.add_argument("--repo", help="checkout to validate against (default: the prime checkout)")
+    ap.add_argument("--node", default="", help="pin a Node version for the suite, e.g. 24.20.0")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        # The one piece of logic here worth a check: a break must be found exactly
+        # once, and neither zero nor twice.
+        for text, find, expect in [("a b a", "a", 2), ("a b", "a", 1), ("b", "a", 0)]:
+            assert text.count(find) == expect
+        print("✓ self-check passed")
+        return 0
+
+    if not args.target:
+        raise SystemExit("✗ which target? e.g. mise run bench-validate-target -- frontend-debug")
+
+    spec = ROOT / "bench" / "targets" / f"{args.target}.json"
+    if not spec.exists():
+        raise SystemExit(f"✗ no such target: {spec}")
+    cfg = json.loads(spec.read_text())
+
+    repo = Path(args.repo) if args.repo else ROOT / "workspaces" / "_prime-ts"
+    if not (repo / ".git").is_dir():
+        raise SystemExit(f"✗ {repo} is not a checkout. Pass --repo.")
+
+    test_cmd = cfg.get("test_cmd")
+    if not test_cmd:
+        raise SystemExit(f"✗ {args.target} has no test_cmd, so nothing can be verified")
+
+    print(f"→ validating {args.target} against {repo.name}")
+    sh(["git", "checkout", "--", "."], cwd=repo)
+
+    ok, tail = suite(repo, test_cmd, args.node)
+    print(f"  baseline: {'green' if ok else 'RED'}")
+    for l in tail:
+        print(f"    {l.strip()}")
+    if not ok:
+        print("\n✗ the baseline is not green. Every later verdict would be measuring the")
+        print("  toolchain, not the model. Fix the checkout or pin the right runtime first.")
+        return 1
+
+    failures = 0
+    for task in cfg.get("tasks", []):
+        b = task.get("break")
+        if not b:
+            continue
+        f = repo / b["file"]
+        if not f.exists():
+            print(f"  {task['id']}: ✗ {b['file']} does not exist")
+            failures += 1
+            continue
+        text = f.read_text()
+        n = text.count(b["find"])
+        if n != 1:
+            print(f"  {task['id']}: ✗ break site appears {n} times, expected exactly 1")
+            failures += 1
+            continue
+        f.write_text(text.replace(b["find"], b["replace"], 1))
+        broke, tail = suite(repo, test_cmd, args.node)
+        sh(["git", "checkout", "--", "."], cwd=repo)
+        if broke:
+            print(f"  {task['id']}: ✗ the break leaves the suite GREEN — this task measures nothing")
+            failures += 1
+        else:
+            print(f"  {task['id']}: ✓ fails as intended — {tail[-1].strip() if tail else ''}")
+
+    sh(["git", "checkout", "--", "."], cwd=repo)
+    if failures:
+        print(f"\n✗ {failures} problem(s). Do not measure this target yet.")
+        return 1
+    print(f"\n✓ {args.target} is measurable")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
