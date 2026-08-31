@@ -27,6 +27,7 @@ import json
 import pathlib
 import sys
 
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 HUB = pathlib.Path.home() / ".cache/huggingface/hub"
 
 
@@ -69,7 +70,13 @@ CASES = {
 
 
 def templates():
-    """Every cached model's chat template, from either place it can live."""
+    """Every template a run could be served through: the ones shipped with a
+    model, and the ones written here.
+
+    Ours were not checked at first, which is exactly backwards: the only template
+    that ever silently corrupted a benchmark was one of ours."""
+    for f in sorted((ROOT / "chat_templates").glob("*.jinja")):
+        yield f"chat_templates/{f.name}", f.read_text()
     for d in sorted(HUB.glob("models--*")):
         for snap in (d / "snapshots").glob("*"):
             jinja = snap / "chat_template.jinja"

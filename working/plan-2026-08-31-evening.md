@@ -1,5 +1,9 @@
 # What is left, 31 August 2026
 
+> **Superseded as a tracker by [`PLAN.md`](../PLAN.md).** Kept because it records what was
+> outstanding on the day the alpha shipped, and because the reasoning behind each item is
+> here rather than in the tracker.
+
 Written after the alpha shipped. Everything in the shipping path is done: the release is in
 brew, the news is published, the docs carry `ask` and the config keys, and four PRs merged
 today. What follows is the work that is started and unfinished, or found and not yet acted on.

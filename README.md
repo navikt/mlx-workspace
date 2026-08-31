@@ -19,6 +19,7 @@ paragraph is a pointer and should stay one sentence long so the two cannot drift
 
 | | Holds | Expect |
 |---|---|---|
+| [`PLAN.md`](PLAN.md) | What we are doing next | To be current. One tracker, not four |
 | [`reports/`](reports/README.md) | Finished write-ups | Reproducible, dated, safe to link from outside |
 | [`working/`](working/) | Plans and trackers in progress | To change under you. Do not link from outside |
 | [`runbooks/`](runbooks/) | Operational guides | To be read by someone on call, in a hurry |
