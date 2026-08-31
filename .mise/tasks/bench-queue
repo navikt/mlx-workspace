@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# mise description="Run the day's benchmark queue unattended, in priority order, writing results as it goes. Usage: mise run bench-queue [--dry-run]"
+#
+# One command for a day of GPU work, because the alternative is a scratch script
+# that dies with the session and has to be rewritten from memory.
+#
+# Order matters and is not arbitrary:
+#
+#   1. Frontend rung 5. A second rung inside a codebase that already has one.
+#      §7.3 was derived ACROSS codebases, so the clean falsification is WITHIN
+#      one: if the ratio tracks step count here too, codebase identity stays dead.
+#   2. Next.js rung 3. A fifth codebase, and the first run of a target built
+#      today, so it doubles as proof the target works.
+#   3. Python capability. The typed/untyped pair, which is the only thing in the
+#      suite that measures what a compiler was doing for us.
+#   4. Spring rung 2. Cheapest remaining within-codebase point.
+#
+# Each arm writes its own results file before the next starts. Killing this
+# script loses at most the arm in flight.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+DRY=""
+[ "${1:-}" = "--dry-run" ] && DRY=1
+
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-/tmp/nav-pilot-local}"
+export MLX_ACTIVE_PROFILE="${MLX_ACTIVE_PROFILE:-qwen3.6-35b-a3b-optiq}"
+export BENCH_LAUNCH_BACKOFF="${BENCH_LAUNCH_BACKOFF:-60}"
+SAMPLES="${BENCH_SAMPLES:-8}"
+
+# The Next.js target has seven private @navikt dependencies, and the repo's own
+# .npmrc reads the token from this variable rather than from ~/.npmrc. Read it at
+# run time so the token lives in the developer's npmrc and nowhere else: not in
+# this file, not in the environment of anything but the install, and never in a
+# log line.
+if [ -z "${NPM_AUTH_TOKEN:-}" ] && [ -f "$HOME/.npmrc" ]; then
+  NPM_AUTH_TOKEN=$(sed -n 's|^//npm.pkg.github.com/:_authToken=||p' "$HOME/.npmrc" | tr -d '"'"'"'')
+  export NPM_AUTH_TOKEN
+fi
+
+log() { printf '%s  %s\n' "$(date +%H:%M)" "$*"; }
+
+# Wait for the machine to be quiet. The harness refuses to measure above a load
+# of 8 and it is right to: a busy machine is indistinguishable from a slow model.
+settle() {
+  for _ in $(seq 1 60); do
+    load=$(uptime | sed 's/.*load averages*: *//' | awk '{print $1}' | tr -d ,)
+    if python3 -c "import sys; sys.exit(0 if float('$load') < 6 else 1)"; then return 0; fi
+    log "load $load, waiting"
+    sleep 30
+  done
+  log "still busy after 30 minutes, going ahead anyway"
+}
+
+cost_pair() {  # target rung
+  local target="$1" rung="$2"
+  for arm in hybrid control; do
+    log "▶ $target rung $rung $arm (n=$SAMPLES)"
+    [ -n "$DRY" ] && continue
+    settle
+    BENCH_TARGET="$target" python3 -u .mise/tasks/bench-hybrid \
+      --rung "$rung" --arm "$arm" --samples "$SAMPLES" 2>&1 \
+      | grep -E "sample [0-9]+:|giving up|^✗" || true
+  done
+}
+
+capability() {  # target task...
+  local target="$1"; shift
+  log "▶ capability ladder on $target: $*"
+  [ -n "$DRY" ] && return 0
+  settle
+  cp bench/tasks.json "bench/.previous/tasks-before-$target.json" 2>/dev/null || true
+  cp "bench/targets/$target.json" bench/tasks.json
+  # Restore the previous target file even if the ladder dies half way.
+  trap 'cp "bench/.previous/tasks-before-'"$target"'.json" bench/tasks.json 2>/dev/null || true' RETURN
+  local node
+  node=$(python3 -c "import json;print(json.load(open('bench/targets/$target.json')).get('node',''))")
+  if [ -n "$node" ]; then
+    mise x "node@${node}.20.0" -- python3 -u .mise/tasks/bench-cheap-ops "$@" 2>&1 | tail -20
+  else
+    python3 -u .mise/tasks/bench-cheap-ops "$@" 2>&1 | tail -20
+  fi
+}
+
+log "=== queue starting ==="
+cost_pair frontend-familie-tilbake 5
+cost_pair next-dinesykmeldte 3
+capability python-datavakt R2 P1 P2 M1
+cost_pair spring-ia-tjenester-metrikker 2
+log "=== queue done ==="
