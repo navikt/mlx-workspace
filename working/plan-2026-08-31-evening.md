@@ -46,27 +46,41 @@ One counter, one attribute, and every future zero becomes diagnostic instead of 
 **Until then:** no conclusion of the form "the orchestrator chose not to dispatch" belongs in
 any report. With two devices it does not belong there anyway.
 
-## 3. The scale ceiling found no ceiling, and nobody has written that down
+## 3. The scale ceiling result, and how nearly publishing it went wrong
 
-Three runs of the ladder, one repository, one task shape, growing scope:
+Three valid runs, recovered after the first table turned out to be wrong twice over:
 
-| | references / files | passed |
-|---|---|---|
-| S1 | 18 / 9 | 2 of 3 |
-| S2 | 29 / 10 | **1 of 3** |
-| S3 | 108 / 35 | **3 of 3** |
-| S4 | 124 / 59 | **3 of 3** |
+| | references / files | run 1 | run 2 | run 3 | passed |
+|---|---|---|---|---|---|
+| S1 | 18 / 9 | pass | fail | pass | 2 of 3 |
+| S2 | 29 / 10 | fail | pass | fail | 1 of 3 |
+| S3 | 108 / 35 | fail | pass | pass | 2 of 3 |
+| S4 | 124 / 59 | pass | pass | pass | **3 of 3** |
 
-The largest renames pass every time and the smallest are flaky. That is the opposite of what
-the experiment was built to find, and it is a more useful result than a ceiling would have
-been: **no ceiling up to 124 references across 59 files.**
+**No ceiling up to 124 references across 59 files**, and the pass rate rises with size rather
+than falling. The largest rename is the only one that works every time.
 
-The flakiness at small sizes is unexplained and interesting. The failures are "no changes
-made" in seconds, which is the model declining rather than failing. Worth one look at what
-those sessions actually said before drawing anything.
+That is worth stating carefully, because at n=3 it is an observation and not an effect. The
+plausible reading is that a 124-reference symbol is unambiguous and mechanical while an
+18-reference one can be shadowed or ambiguous, and uncertainty reads as declining — but that
+is a story, not a finding.
 
-**Do:** write it into the report as a section, with the honest n=3 and the unexplained part
-left unexplained.
+### What went wrong getting here, which matters more than the numbers
+
+The first table said 3 of 3 for S3. It was wrong. The harness writes results to one canonical
+filename per profile, and my repeat loop copied that file after each pass — so the copies
+were off by one run, and the canonical file duplicated the last one. A reviewer caught two
+identical files; recovering the third needed `bench/.previous/`, which is gitignored.
+
+So the suite could quietly lose a run, and did, in a project whose README promises the runs
+that went wrong are all in the repo. Fixed: `BENCH_RUN_TAG` makes each run write-once, and
+the three runs are now tracked files rather than backups.
+
+**Do before writing any section:** verify the tree really resets between tasks within a run
+(the two small-task failures anti-correlate across runs, which is the signature of shared
+state rather than independent chance), read the two failing transcripts — one declined after
+2 tool calls, the other explored for 17 and still changed nothing, and those are not the same
+behaviour — then rerun at n≥10, which is under an hour.
 
 ## 4. Instrumentation that has never worked
 

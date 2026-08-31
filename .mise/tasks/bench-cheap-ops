@@ -38,7 +38,12 @@ repo = ws / "kotlin"
 # under the same profile merges into the first stack's results, and ids that
 # exist in both sets silently overwrite each other.
 suffix = CFG.get("results_suffix", "")
-results_path = ROOT / "bench" / f"results-{key}{suffix}.json"
+# A repeated run must not overwrite the one before it. BENCH_RUN_TAG makes the
+# filename write-once, because a canonical "latest" quietly cost us a run: three
+# passes of the scale ladder left two files, one of them a duplicate, and the
+# table built from them was wrong in a way that took a second reader to catch.
+run_tag = os.environ.get("BENCH_RUN_TAG", "").strip()
+results_path = ROOT / "bench" / f"results-{key}{suffix}{'-' + run_tag if run_tag else ''}.json"
 results = json.loads(results_path.read_text()) if results_path.exists() else {}
 if results:
     # Results are keyed by the active profile, so a failed `model-use` leaves the
