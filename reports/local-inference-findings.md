@@ -1,7 +1,7 @@
 # Delegating coding work to a local model: a measurement study
 
-August 2026. 200 valid samples, two clients, three codebases, six task shapes, three refactor
-strategies.
+August 2026. 216 valid samples, two clients, three codebases, six task shapes, three refactor
+strategies, and one debugging probe.
 One Apple M4 Max, 48 GB unified memory, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`, a mixed
 4/8-bit build, served by mlx-lm 0.31.3 on mlx 0.32.0.
 
@@ -30,7 +30,7 @@ rest on those instead.
 
 Run without an orchestrator, the local model completes a 46-reference rename across 10
 files unaided in both attempts, at zero credits, but writes no file at all when asked to
-create one (0/3). Within the six shapes tested we find no difficulty ceiling. The
+create one (0/3), and fixes none of three failing tests whose cause is not stated (§7.4). Within the six shapes tested we find no difficulty ceiling. The
 distinction is between applying a decision and making one.
 
 An intervention that rewrote the dispatch instruction to encourage delegation increased it
@@ -450,6 +450,49 @@ hypothesis, not a finding.
 
 For anyone deciding whether to adopt this, the practical form is: run the task once without
 delegation and count the steps. That number, not the language, says whether dispatch will pay.
+
+## 7.4 It does not debug
+
+Every task above is read-or-apply-a-specified-edit. Debugging is the shape the
+applying-versus-deciding distinction predicts it should fail, and it does.
+
+Three failing tests on a green baseline of 61 files and 572 tests, no cause stated, one
+attempt each:
+
+| Task | Break | Distance from symptom | Result |
+|---|---|---|---|
+| X1 | wrong locale in `utils/land.ts` | test file beside it | failed, 782s, 38 tool calls |
+| X2 | inverted predicate in `utils/sider.ts` | same directory | failed, 504s, 36 tool calls |
+| X3 | `stores/sidebarStore.ts` opens shut | two directories away | timed out at 900s |
+
+**0 of 3.** Each attempt changed exactly one file and left the suite red.
+
+Neither completed attempt touched a test file. Weakening an assertion was the cheap way
+through every one of these tasks and it was not taken, so these are three honest failures
+rather than three attempts to game the oracle. The easiest case failed too: X1's break is a
+wrong locale in a function whose test sits in the same directory and names the expected
+values, with 17 tests failing and saying what they wanted.
+
+What this measures is fault localisation when a failing test already points at the behaviour,
+which is the easiest tier of debugging. Reproduction, usually the hard part, is not measured
+at all. n=1 per task, so the claim is "0 of 3" and never a rate.
+
+## 7.5 A confound in the model comparison
+
+The rejection of `Qwen3.8-27B` in the model selection rests on runs served through a chat
+template written here rather than shipped with the model, and that template re-encoded tool
+arguments so the model read its own history as a quoted string instead of an object. It is the
+only template in that comparison that differed from what every other model received, and it
+differed silently rather than by failing.
+
+`mise run bench-template-check` renders every cached model's template against the shapes a
+coding agent produces. Ten of eleven break identically on tool arguments in the OpenAI wire
+format, and only `granite-4.1-8b` is clean — but that uniform breakage changes nothing here,
+because mlx-lm parses arguments into a mapping before rendering. The hand-written template is
+the exception, and the retest that would settle it has not completed.
+
+**Read the Qwen3.8 rejection as unproven.** Nothing else in this report depends on it: the
+choice of `Qwen3.6-35B-A3B-OptiQ` rests on its own 216 samples.
 
 ## 8. Limitations
 
