@@ -36,98 +36,38 @@ orchestrator chose not to dispatch".
 and it separates "no dispatchable work" from the other two this week without waiting for a
 release. Needs a person, not a script.
 
-## 2. Telemetry that is fixed but unverified
+## 2. Telemetry
 
 Counters were exported delta and **every one was silently dropped, fleet-wide** — not just
-local inference. Cumulative now, verified live: `nav_pilot_local_server_total` reached Mimir
-within a minute of the change, for the first time.
+local inference. Cumulative since 31 August, verified live.
 
-- **Check the fleet counters came back** a day after the release: `command_total`,
-  `staleness_check_total`, `sync_updates_total`, `install_items_total`, with device ids.
-  Filter by `version` — old builds keep emitting delta until people update, and a mixed fleet
-  reads as "the fix failed" when it has not.
-- ~~Fix `dashboards/nav-pilot-cli.json`'s eighteen `sum_over_time` queries~~ — **wrong, and
-  measured wrong.** Live data says `increase()` returns 0.0 on every one of those series while
-  `sum_over_time` returns the real numbers, because a CLI process exports once and exits and
-  `increase()` needs two samples in a window. Temporality was never what made those queries
-  work. PR #536 closed; the existing queries stay. **The new dashboard must use
-  `sum_over_time` too** — `copilot-ecosystem.json` uses `increase()` because it queries
-  long-lived services, which nav-pilot is not.
-  One real defect survives: the two `histogram_quantile` panels over `_bucket` series, where
-  histograms were always cumulative and `sum_over_time` overcounts.
-**The audit changed the shape of this section.** A reusable script now asks the
+**The audit is done and everything it found is merged.** A reusable script asks the
 questions a panel cannot ask about itself — `scripts/telemetry-audit.py` in `navikt/copilot`
-([#548](https://github.com/navikt/copilot/pull/548)) — and the first run found that **17 of 26
-`nav_pilot_` metrics carry no `device_id` at all**, each collapsing to one series for the whole
-fleet, while `nav_pilot_info` sees 266 distinct devices. Aggregate totals survive that;
-per-device and per-version breakdowns, and `rate()`/`increase()`, do not. Four gauges are worse
-than unattributed — `client_available`, `install_present`, `installed_items`, `up_to_date` are
-last-write-wins across the fleet, so they read as fleet state and report whichever machine
-exported last.
+([#548](https://github.com/navikt/copilot/pull/548)). Eight PRs, all in main:
 
-Ordered by what would be worst to leave:
+| | |
+|---|---|
+| [#546](https://github.com/navikt/copilot/pull/546) | the docs claimed minutes; the fleet said under 50s. Also fixed `start` beginning a silent 23 GB download |
+| [#547](https://github.com/navikt/copilot/pull/547) | the ready histogram recorded only successful starts, so its slow tail was missing by construction |
+| [#548](https://github.com/navikt/copilot/pull/548) | the audit script |
+| [#549](https://github.com/navikt/copilot/pull/549) | `DO_NOT_TRACK=1` still shipped the repo name to Nav's collector |
+| [#551](https://github.com/navikt/copilot/pull/551) | cut two duplicate instruments; `device_id` on the seventeen that lacked it |
+| [#553](https://github.com/navikt/copilot/pull/553) | the dashboard, every query run against Mimir first |
+| [#558](https://github.com/navikt/copilot/pull/558) | `launch_error_total` counted Ctrl-C as a launch failure; three labels fell through to their fallback |
+| [#559](https://github.com/navikt/copilot/pull/559) | autostart started servers and recorded nothing — the common path was invisible |
 
-- ~~**Opting out still shipped the repo name**~~ — [#549](https://github.com/navikt/copilot/pull/549).
-  `DO_NOT_TRACK=1` gated only the device id; the collector endpoint, `COPILOT_OTEL_ENABLED=true`
-  and `nav.repo` all went out anyway. An opted-out developer arrived as repo-labelled rows with
-  no device id, indistinguishable from a lookup failure, so they could not be excluded after the
-  fact either. Trust, not data quality, which is why it went first.
-- **Add `device_id` to the nine instruments that keep it**, and **cut the two that do not earn
-  their place**: `nav_pilot_command_total` is label-for-label identical to
-  `nav_pilot_command_duration_ms_count` (same function, same `attrs` slice, one `Add` and one
-  `Record`), and `nav_pilot_local_server_total` is redundant once #547 lands — same call site,
-  same event, and its one stated purpose, catching `hung`, is unreachable because the call site
-  passes `Status()` while only `Health(ctx)` produces that value. Decided with Hans: cut those
-  two, keep `up_to_date` and `install_present` despite being derivable.
-- **`launch_error_total` counts Ctrl-C as a launch failure.** Every `*exec.ExitError` maps to
-  `launch_failed`, so the panel named "client launch failures" mostly shows normal session ends.
-- **Three commands report as `command="unknown"`**: `alpha`, `update`, `auto_sync` are not in
-  the allow-list and have no dot or hyphen to hit the escape hatch. Alpha adoption is invisible
-  while we are running an alpha.
-- **Sync's dry-run flag destroys its own `mode` label** — `"interactive_dry_run"` is not
-  allow-listed, so it falls back to `"non_interactive"` and an interactive dry run is recorded
-  as non-interactive.
-- **`launch` and `startup` share a histogram with `nav-pilot list`.** They block for the whole
-  session; default buckets top out at 10s, so both land in `+Inf` and any latency quantile is
-  really session length.
-- **Record ready time on the failure path too**, before the dashboard panel exists.
-  `RecordLocalReadySeconds` fires only after `srv.Start` returns, so a start that times out
-  or is interrupted records nothing and the slowest starts are missing from the histogram.
-  A p95 off that panel is a p95 of the starts that worked. One `outcome` attribute fixes it
-  and makes the same panel answer "how often does a start fail".
-- **Then build the local-inference dashboard**, on a foundation known to be right.
-  [#531](https://github.com/navikt/copilot/issues/531).
+**What is left is a release, and it is the whole of what is left.** `saw_traffic` and
+`outcome` both shipped after the last one, so three dashboard panels are empty until people
+update — including the zero-rate split that decides whether the alpha widens. Nothing more can
+be learned from the field until that goes out.
 
-  Copy the house style from `navikt/copilot`'s `dashboards/nav-pilot-cli.json`: Grafana schema
-  v2, `layout.kind = RowsLayout`, panels under `elements` keyed `panel-N`, and the variables
-  every nav-pilot panel already filters on — `DS_METRICS`, `version`, `execution_context`.
-  `copilot-ecosystem.json` is the one to copy *queries* from, because it already uses
-  `increase()` and `rate()` rather than the delta aggregation.
-
-  The metrics, all live in Mimir under `X-Scope-OrgID: nais`. **Mimir is only reachable from
-  the Nav network**, so any of this that needs live data has to be done on the VPN — it
-  fails as a bare connection error rather than an auth error, which reads like the service
-  being down:
-
-  | Metric | Panel it earns |
-  |---|---|
-  | `nav_pilot_local_dispatches` | dispatches per session as a distribution, never a mean |
-  | `nav_pilot_local_dispatches` + `saw_traffic` | **the zero rate, split by whether the client saw the worker** |
-  | `nav_pilot_local_ready_seconds` | time to ready, p50 and p95, replacing the docs' guess |
-  | `nav_pilot_local_server_total` | server events by kind: `ready`, `hung`, `crashed` |
-  | `count(count by (device_id) (...))` | how many people have this on at all |
-
-  **The panel that matters is the zero rate over time**, now that `saw_traffic` can split it:
-  zero-with-traffic is the orchestrator declining, zero-without is our wiring failing. If the
-  first stays at 100%, the feature is not earning its place, and that is what decides whether
-  the alpha widens. Before `saw_traffic` reaches people, that panel cannot tell the two apart,
-  so build it to split from the start rather than retrofitting.
-
-**Measured, and the docs were wrong.** Ten starts across six machines, all under 50 seconds,
-six of them under ten. Six places said "the first start on a cold cache takes minutes", which
-was also the stated reason `local_autostart` is off by default. Corrected in #546; autostart
-stays off for the reason that survives, that a 21 GB process started unasked is a surprise.
-Weights are downloaded by `init`, never by `start`, so no measurement here includes a download.
+**Two corrections worth keeping.** `sum_over_time` on a cumulative counter is only a count for
+an instrument recorded once per process at exit; one recorded at startup is re-exported every
+10 seconds by the PeriodicReader, and summing those snapshots means nothing. That makes the
+earlier reading of `version_skew_days` — a tail out to 7500 days — an artefact. The largest
+single observation is 114 days. And `histogram_quantile` over `sum_over_time` of `_bucket` is
+correct for the once-per-process instruments, which is the opposite of what this file said
+before the measurement.
 
 ## 3. Measurements that are not finished
 
