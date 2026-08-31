@@ -25,3 +25,4 @@ bench/.previous/
 
 # A curl cookie jar with a local admin session token, committed by accident.
 cookie.txt
+workspaces/*/kotlin.WRONG-*
