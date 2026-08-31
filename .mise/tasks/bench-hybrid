@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # mise description="Measure a cloud orchestrator dispatching to the local model against a dispatch-disabled control. Usage: mise run bench-hybrid --rung N [--arm hybrid|control] [--samples 3]"
-"""Run the ESCALATION_SPEC.md ladder through nav-pilot, two arms, and refuse to
+"""Run the bench/specs/escalation.md ladder through nav-pilot, two arms, and refuse to
 record anything we cannot stand behind.
 
 Every invalid measurement this week looked exactly like a valid one, and each was
@@ -80,7 +80,7 @@ LOCAL_ON = [NAV_PILOT, "alpha", "local", "init"]
 WORKER_AGENT = "local-worker"
 FRAGMENT_MARK = "local-dispatch"
 
-# The ladder from bench/ESCALATION_SPEC.md, easiest first, mapped onto the task
+# The ladder from bench/specs/escalation.md, easiest first, mapped onto the task
 # set in bench/tasks.json so a rung is verified by the same code that verifies
 # cheap-ops rather than by a second, subtly different notion of "passed".
 RUNGS = {
@@ -844,7 +844,7 @@ def main():
     ap = argparse.ArgumentParser(
         prog="mise run bench-hybrid",
         description="Cloud orchestrator dispatching to the local model, against a "
-                    "dispatch-disabled control. See bench/ESCALATION_SPEC.md.")
+                    "dispatch-disabled control. See bench/specs/escalation.md.")
     ap.add_argument("--rung", type=int, action="append",
                     help=f"ladder rung to run, repeatable. {sorted(RUNGS)}")
     ap.add_argument("--arm", choices=["hybrid", "control", "both"], default="both")

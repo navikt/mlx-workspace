@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # mise description="Run the cheap-operations benchmark for the active model. Usage: mise run bench-cheap-ops [taskid ...]"
-"""Run CHEAP_OPS_SPEC.md tasks against a real Kotlin service, unattended.
+"""Run bench/specs/cheap-ops.md tasks against a real Kotlin service, unattended.
 
 Each task starts from a clean checkout, so no task inherits another's edits. That
 matters: two of three workspaces used in an earlier round turned out to hold a

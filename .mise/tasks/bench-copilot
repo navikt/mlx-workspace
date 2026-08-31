@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="Run the ESCALATION_SPEC.md ladder through nav-pilot's Copilot CLI client, whole-session local against whole-session cloud. Usage: mise run bench-copilot --rung N [--arm local|cloud] [--samples 3]"
+# mise description="Run the bench/specs/escalation.md ladder through nav-pilot's Copilot CLI client, whole-session local against whole-session cloud. Usage: mise run bench-copilot --rung N [--arm local|cloud] [--samples 3]"
 """The same ladder as bench-hybrid, through the other client.
 
 The Copilot CLI resolves one provider per session, so the hybrid shape bench-hybrid
@@ -292,7 +292,7 @@ def run_sample(arm, rung, task, n, snap, cap):
 def main():
     ap = argparse.ArgumentParser(
         prog="mise run bench-copilot",
-        description="The ESCALATION_SPEC.md ladder through the Copilot CLI: whole "
+        description="The bench/specs/escalation.md ladder through the Copilot CLI: whole "
                     "session local against whole session cloud.")
     ap.add_argument("--rung", type=int, action="append",
                     help=f"ladder rung to run, repeatable. {sorted(k for k, v in RUNGS.items() if v)}")

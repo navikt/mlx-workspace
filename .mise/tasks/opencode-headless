@@ -39,7 +39,11 @@ workspace_dir.mkdir(parents=True, exist_ok=True)
 # run see the same spec and the same rules.
 weather_cli_dir = workspace_dir / "weather-cli"
 weather_cli_dir.mkdir(exist_ok=True)
-shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
+# Source moved to bench/specs/ in the docs reorganisation; the destination
+# name is unchanged because the prompt handed to the model names it, and
+# renaming it there would change the experiment.
+shutil.copy2(workspace / "bench" / "specs" / "weather-cli.md",
+             weather_cli_dir / "WEATHER_CLI_SPEC.md")
 S.check_prompt(workspace / "bench" / "agents-prompt.md")
 # The benchmark prompt lives in bench/ because it is an experimental
 # variable, not documentation: it is copied verbatim into every workspace

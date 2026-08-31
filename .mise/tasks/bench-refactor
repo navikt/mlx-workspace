@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# mise description="How much of a multi-file refactor can run locally: three strategies, same refactor, same commit. See bench/REFACTOR_SPEC.md. Usage: mise run bench-refactor --strategy a|b|c [--samples 2]"
-"""The refactor experiment from bench/REFACTOR_SPEC.md.
+# mise description="How much of a multi-file refactor can run locally: three strategies, same refactor, same commit. See bench/specs/refactor.md. Usage: mise run bench-refactor --strategy a|b|c [--samples 2]"
+"""The refactor experiment from bench/specs/refactor.md.
 
 A single edit saving two cloud steps is a curiosity. A refactor across ten files is
 where that becomes money, and where the local model's known failure lives.

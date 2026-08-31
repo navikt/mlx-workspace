@@ -26,7 +26,11 @@ workspace_dir.mkdir(parents=True, exist_ok=True)
 # Provision the weather-cli challenge spec into the model workspace
 weather_cli_dir = workspace_dir / "weather-cli"
 weather_cli_dir.mkdir(exist_ok=True)
-shutil.copy2(workspace / "WEATHER_CLI_SPEC.md", weather_cli_dir / "WEATHER_CLI_SPEC.md")
+# Source moved to bench/specs/ in the docs reorganisation; the destination
+# name is unchanged because the prompt handed to the model names it, and
+# renaming it there would change the experiment.
+shutil.copy2(workspace / "bench" / "specs" / "weather-cli.md",
+             weather_cli_dir / "WEATHER_CLI_SPEC.md")
 
 # opencode reads AGENTS.md from its working directory, which is workspaces/<key>/,
 # not the repo root. Copy the current rules in on every launch so rule edits
