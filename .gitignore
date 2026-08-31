@@ -22,3 +22,6 @@ bench/.previous/
 
 # bench/results-*.json is tracked: it is the raw evidence behind every table in
 # MODELS.md. .bench-logs/ stays ignored, 3.3 MB of full client transcripts.
+
+# A curl cookie jar with a local admin session token, committed by accident.
+cookie.txt
