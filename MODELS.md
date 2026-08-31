@@ -193,6 +193,24 @@ tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
 | qwen3.8-27b-4bit | 88.4s | 3 of 8 | 4 | 1 |
 | qwen3.6-27b-4bit | 112.8s | 4 of 8 | 1 | 0 |
 | qwen3.8-27b-8bit-mlx | 194.5s | 2 of 8 | 4 | 2 |
+
+> **Both Qwen3.8 rows are one run of two, and the other run is much worse.** Corrected
+> 1 September 2026, on the way to offering these models in the manifest.
+>
+> | profile | quoted above | the other run |
+> |---|---|---|
+> | qwen3.8-27b-4bit | 3 of 8, median 88.4s | 2 of 8, median **906.3s** |
+> | qwen3.8-27b-8bit-mlx | 2 of 8, median 194.5s | 1 of 10, median **900.1s** |
+>
+> A tenfold difference in median between two runs of one profile on one machine is not
+> noise, and it is the most useful thing we know about these builds: they are unstable in
+> a way `qwen3.6-35b-a3b-optiq` is not, which holds 4 to 6 of 8 to 10 with no timeouts
+> across eight runs. Every run is in `bench/` and `bench/.previous/`; `mise run
+> bench-loop-analysis` reads them.
+>
+> The table quotes a single run per profile because that is how it was built. For a model
+> this variable, one run is a sample, not a result, and the manifest text says so rather
+> than repeating a median.
 | qwen3.8-27b-6bit | 284.2s | 2 of 8 | 2 | 0 |
 
 A loop is identical consecutive tool calls within one task, and the detector flags five or more. A

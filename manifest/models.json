@@ -28,6 +28,58 @@
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"
       }
+    },
+    {
+      "key": "qwen3.8-27b-4bit",
+      "name": "Qwen 3.8 27B 4bit",
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "backend": "mlx-lm",
+      "default": false,
+      "role": "Opt-in alternative, slower and much less predictable",
+      "expect": "The most-asked-for model, and it does write better code when it finishes. It often does not. Two runs of the same eight tasks verified 3 and 2, with median task times of 88s and 906s \u2014 a tenfold spread between identical runs that we cannot yet explain \u2014 against 12 to 21 seconds and no timeouts across eight runs of the default. Four of eleven tasks timed out in both runs. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
+      "weights_gb": 16,
+      "min_ram_gb": 48,
+      "wired_limit_gb": 36,
+      "params": {
+        "MLX_MODEL": "mlx-community/Qwen3.8-27B-4bit",
+        "MLX_SERVER_TYPE": "mlx-lm",
+        "MLX_CACHE_BYTES": "12884901888",
+        "MLX_CACHE_SIZE": "3",
+        "MLX_MAX_TOKENS": "32768",
+        "MLX_OPENCODE_CONTEXT": "131072",
+        "MLX_OPENCODE_OUTPUT": "16384",
+        "MLX_OPENCODE_CHUNK_TIMEOUT": "600000",
+        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
+        "MLX_TOP_K": "20",
+        "MLX_TOP_P": "0.95",
+        "MLX_MIN_P": "0.0"
+      }
+    },
+    {
+      "key": "qwen3.8-27b-8bit-mlx",
+      "name": "Qwen 3.8 27B 8bit (mlx-lm)",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "backend": "mlx-lm",
+      "default": false,
+      "role": "Opt-in alternative, the quality build, weakest here",
+      "expect": "The build most discussed publicly and the weakest on our own tasks: two runs verified 2 of 8 and 1 of 10, with 4 and 8 timeouts. Fits a 48 GB machine at about 27 GB resident, but 30 GB of weights leaves roughly 6 GB for the cache under a 36 GB wired limit, so context is capped at 65k rather than the 4-bit's 131k. Offered so the comparison can be made on your own work rather than on ours; if you want one Qwen3.8, take the 4-bit.",
+      "weights_gb": 30,
+      "min_ram_gb": 48,
+      "wired_limit_gb": 36,
+      "params": {
+        "MLX_MODEL": "mlx-community/Qwen3.8-27B-8bit",
+        "MLX_SERVER_TYPE": "mlx-lm",
+        "MLX_CACHE_BYTES": "4294967296",
+        "MLX_CACHE_SIZE": "2",
+        "MLX_MAX_TOKENS": "32768",
+        "MLX_OPENCODE_CONTEXT": "65536",
+        "MLX_OPENCODE_OUTPUT": "16384",
+        "MLX_OPENCODE_CHUNK_TIMEOUT": "900000",
+        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
+        "MLX_TOP_K": "20",
+        "MLX_TOP_P": "0.95",
+        "MLX_MIN_P": "0.0"
+      }
     }
   ]
 }
