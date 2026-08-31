@@ -54,7 +54,14 @@ stdin was read whenever it was not a terminal, which hangs on any script's open
 pipe; and the server's 512-token default cap is not enough for a thinking model,
 which spent all of it reasoning and returned a message with no content at all.
 
-## Phase 2: authored and validated, not yet run
+## Phase 3: not run
+
+Cut for the reason Fable gave when it reviewed the plan: building a target is
+hours of authoring before the first GPU minute. The same argument applied to
+finishing Phase 2 at half past four, so it was left provisioned rather than
+wired in a hurry.
+
+## Phase 2: authored, validated and coded, not yet run
 
 Three debug tasks against `familie-tilbake-frontend`, in
 `bench/targets/frontend-debug.json`. Baseline is green at 61 files and 572 tests
@@ -70,6 +77,30 @@ Each break was confirmed to fail that green baseline:
 | X1 | `utils/land.ts`, wrong locale | test sits beside it | 3 files, 17 tests |
 | X2 | `utils/sider.ts`, inverted predicate | same directory | 2 files, 2 tests |
 | X3 | `stores/sidebarStore.ts`, opens shut | two directories away | 2 files, 2 tests |
+
+### What remains for Phase 2
+
+The tasks, the breaks and the harness support are done and committed. What is
+left is target provisioning: the capability ladder reads `bench/tasks.json` and
+a checkout at `workspaces/<profile>/kotlin`, so running this means swapping the
+target file in and cloning the frontend repo there with its dependencies
+installed. That is twenty minutes of setup plus a `pnpm install`, and the plan's
+own rule says a phase that is not ready is skipped rather than wired at half
+past four. It is a daytime job.
+
+## Spring rung 3: abandoned, and why
+
+Spring hybrid produced 0 valid samples in 6 attempts, all of them launches that
+printed nav-pilot's help and exited in one second, while the frontend arms on
+the same machine minutes earlier produced 16 of 16. Hand-run launches in the
+same Spring checkout, with the same binary, argv and redirected stdin, work
+every time. The difference between a hand launch and a harness launch on that
+one target is not yet identified.
+
+It was abandoned rather than chased because Spring rung 6 already supplies the
+low-step end of the curve, and a fifth point on a four-point monotone
+relationship is worth less than the time it was costing. The failure is written
+down here so the next person starts from the contrast rather than from scratch.
 
 ## Harness defects found and fixed tonight
 
