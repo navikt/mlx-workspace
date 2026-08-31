@@ -2,6 +2,14 @@
 
 Decision: ship **one** model, `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`. No opt-in second slot.
 
+> **Caveat added 31 August 2026.** The rejection of Qwen3.8-27B below is not safe as
+> stated. It was measured through a chat template with a known tool-argument encoding
+> fault, or with a thinking flag reported as unsupported, while the chosen model ran on
+> its own working template. The failure signature cannot distinguish a weak model from a
+> broken template. A retest with the corrected template is queued; until it reports,
+> treat the choice of Qwen3.6-OptiQ as well supported on its own 200 samples and the
+> rejection of Qwen3.8 as unproven. See MODELS.md for the detail.
+
 Measured at a 36 GB wired limit, which is what a 48 GB Mac gives a model. Every earlier number in
 this repository was taken at 115 GB on rig B, and the cap changes behaviour, not just speed.
 

@@ -29,6 +29,31 @@ and only model in the nav-pilot alpha. The reasoning and the rejected alternativ
   median**, 4 of 8
   checkable tasks verified, no timeouts, and no task with a repeated identical tool call. 18.6 GB
   resident.
+> **The Qwen3.8-27B verdict rests on a template we have reason to doubt.** Recorded
+> 31 August 2026, after a colleague reported four known faults in the official Qwen
+> chat templates.
+>
+> Two of them touch these runs. The 8-bit builds used our hand-written
+> `chat_templates/qwen3.8-27b.jinja`, which rendered `arguments | tojson` — and since
+> the OpenAI API sends tool arguments as a JSON *string*, that re-encoded them, so the
+> model read its own history as `"{\"path\": \"x\"}"` instead of an object. It does not
+> crash; it silently corrupts the conversation. The 4-bit builds ran the official
+> template with `enable_thinking: false`, which is the second reported fault.
+>
+> The recorded failure signature is consistent with either: `turns=None`,
+> `tool_calls=None`, `timed_out=true` — the client never completed a turn.
+>
+> So the comparison was not like for like. `Qwen3.6-35B-A3B-OptiQ` ran on its own
+> working template; `Qwen3.8-27B` ran on ours, or on a configuration reported as
+> unsupported. **"Held back because it loops" should be read as "held back under a
+> template we have reason to doubt" until it is retested.** The template is fixed as
+> of this date and the retest is queued.
+>
+> The shipped model was tested against all four faults on the same day and is clean on
+> three. It fails the fourth: a system message anywhere but first returns HTTP 404,
+> `"System message must be at the beginning."` No client we use sends one, so it has
+> never bitten us; it is a landmine for any client that does.
+
 - **Qwen3.8-27B is held back because it loops, not because it is slow.** The 4-bit build, the same
   build with `repetition_penalty`, and the 8-bit build each timed out on 3 to 4 of 11 tasks and each
   looped. A model that hangs after editing a file is worse for a first alpha user than no local

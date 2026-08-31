@@ -33,7 +33,17 @@
             {{- '\n<tool_call>\n{"name": "' }}
             {{- tool_call.name }}
             {{- '", "arguments": ' }}
-            {{- tool_call.arguments | tojson }}
+            {#- The OpenAI API sends arguments as a JSON *string*, and tojson on a
+                string re-encodes it: the model then reads its own history as
+                "{\"path\": \"x\"}" instead of an object. It does not crash; it
+                silently corrupts the conversation, which is worse, because it
+                looks like the model being stupid. Pass a string through and only
+                encode an actual object. #}
+            {%- if tool_call.arguments is string %}
+                {{- tool_call.arguments }}
+            {%- else %}
+                {{- tool_call.arguments | tojson }}
+            {%- endif %}
             {{- '}\n</tool_call>' }}
         {%- endfor %}
         {{- '<|im_end|>\n' }}
