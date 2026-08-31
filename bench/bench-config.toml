@@ -1,0 +1,8 @@
+version = 1
+model = "claude-sonnet-4.6"
+auto_update = false
+local_enabled = false
+local_autostart = false
+rtk_prompted_client = "copilot"
+rtk_prompted_at = "2026-08-30T17:26:24+02:00"
+source = "/Users/hans/go/src/github.com/navikt/copilot"

@@ -1,0 +1,47 @@
+{
+  "_note": "Debugging tasks. Separate from the capability target on purpose: the break is applied to the working tree after reset, so these tasks cannot share a file with tasks that assume a clean checkout. Same repo and ref as frontend-familie-tilbake.\n\nWhat this measures is fault localisation when a failing test already points at the behaviour. Reproduction, the hard part of real debugging, is not measured. Say so in any write-up.\n\nThree guards, without the first of which this measures nothing:\n1. A sample whose diff touches a test file fails. The cheap way to go green is to weaken the assertion, and a model that does it has not debugged anything.\n2. The break is uncommitted working-tree state. A broken commit is discoverable with git log, and reverting it measures git skill rather than reading code.\n3. One break is distant from its symptom: it is in stores/, and the tests that fail are two directories away in komponenter/sidebar/.",
+  "repo": "https://github.com/navikt/familie-tilbake-frontend.git",
+  "ref": "7abba6100dde41c0b726063bc5958c6a65ad5aa8",
+  "node": "24",
+  "install": "corepack pnpm install --frozen-lockfile",
+  "compile_cmd": "pnpm typecheck",
+  "test_cmd": "pnpm test",
+  "tasks": [
+    {
+      "id": "X1",
+      "kind": "debug",
+      "verify": "debug",
+      "prompt": "The test suite is failing. Run `pnpm test` to see which tests fail, find the cause in the source and fix it. Do not modify any test file.",
+      "break": {
+        "file": "src/frontend/utils/land.ts",
+        "find": "new Intl.DisplayNames(['nb'], { type: 'region' })",
+        "replace": "new Intl.DisplayNames(['en'], { type: 'region' })"
+      },
+      "_why": "Adjacent: land.test.ts sits beside land.ts. Wrong locale, so NO becomes Norway."
+    },
+    {
+      "id": "X2",
+      "kind": "debug",
+      "verify": "debug",
+      "prompt": "The test suite is failing. Run `pnpm test` to see which tests fail, find the cause in the source and fix it. Do not modify any test file.",
+      "break": {
+        "file": "src/frontend/utils/sider.ts",
+        "find": "behandlingsstegstatus }) => behandlingsstegstatus !== 'TILBAKEFØRT'",
+        "replace": "behandlingsstegstatus }) => behandlingsstegstatus === 'TILBAKEFØRT'"
+      },
+      "_why": "Same directory as its test. An inverted predicate, not a syntax error."
+    },
+    {
+      "id": "X3",
+      "kind": "debug",
+      "verify": "debug",
+      "prompt": "The test suite is failing. Run `pnpm test` to see which tests fail, find the cause in the source and fix it. Do not modify any test file.",
+      "break": {
+        "file": "src/frontend/stores/sidebarStore.ts",
+        "find": "set({ erÅpen: true, valgtSide: side });",
+        "replace": "set({ erÅpen: false, valgtSide: side });"
+      },
+      "_why": "Distant: the break is in stores/, the failing tests are in komponenter/sidebar/. Opening the sidebar at a page leaves it shut."
+    }
+  ]
+}

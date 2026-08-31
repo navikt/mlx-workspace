@@ -1,0 +1,540 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 1,
+      "started": "2026-08-31T01:57:57+0200",
+      "seconds": 60.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 13,
+      "cloud_tokens": {
+        "total": 293080,
+        "input": 15,
+        "output": 4109,
+        "reasoning": 0,
+        "cache_write": 25853,
+        "cache_read": 263103
+      },
+      "cloud_cost_usd": 0.2376,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 56202
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 56156
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-0-20260831-015757.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:03:58+0200",
+      "seconds": 74.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 21,
+      "cloud_tokens": {
+        "total": 482056,
+        "input": 23,
+        "output": 3501,
+        "reasoning": 0,
+        "cache_write": 24705,
+        "cache_read": 453827
+      },
+      "cloud_cost_usd": 0.2814,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53649
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53782
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-1-20260831-030358.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:05:15+0200",
+      "seconds": 26.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 129098,
+        "input": 8,
+        "output": 1028,
+        "reasoning": 0,
+        "cache_write": 22069,
+        "cache_read": 105993
+      },
+      "cloud_cost_usd": 0.13,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53778
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53624
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-2-20260831-030514.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:05:42+0200",
+      "seconds": 96.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 33,
+      "cloud_tokens": {
+        "total": 860590,
+        "input": 35,
+        "output": 4893,
+        "reasoning": 0,
+        "cache_write": 31538,
+        "cache_read": 824124
+      },
+      "cloud_cost_usd": 0.439,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53619
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53774
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-3-20260831-030542.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 4,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:07:21+0200",
+      "seconds": 25.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 152033,
+        "input": 9,
+        "output": 1173,
+        "reasoning": 0,
+        "cache_write": 22394,
+        "cache_read": 128457
+      },
+      "cloud_cost_usd": 0.1401,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53782
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53678
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-4-20260831-030720.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 5,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:07:48+0200",
+      "seconds": 89.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 26,
+      "cloud_tokens": {
+        "total": 700703,
+        "input": 28,
+        "output": 4620,
+        "reasoning": 0,
+        "cache_write": 31459,
+        "cache_read": 664596
+      },
+      "cloud_cost_usd": 0.3867,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53678
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53788
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-5-20260831-030747.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 6,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:09:19+0200",
+      "seconds": 27.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 151825,
+        "input": 9,
+        "output": 1181,
+        "reasoning": 0,
+        "cache_write": 22402,
+        "cache_read": 128233
+      },
+      "cloud_cost_usd": 0.1402,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53790
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53682
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-6-20260831-030919.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 7,
+      "arm": "control",
+      "rung": 3,
+      "task": "M1",
+      "preflight": 3,
+      "started": "2026-08-31T03:09:48+0200",
+      "seconds": 45.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 36,
+      "files_changed": 9,
+      "cloud_steps": 13,
+      "cloud_tokens": {
+        "total": 298417,
+        "input": 15,
+        "output": 2373,
+        "reasoning": 0,
+        "cache_write": 26826,
+        "cache_read": 269203
+      },
+      "cloud_cost_usd": 0.217,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53684
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 53688
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-3-control-7-20260831-030947.jsonl",
+      "verified": true,
+      "note": "renamed and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-31T01:49:36+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 5.77,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.35
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 59920
+      }
+    },
+    {
+      "checked_at": "2026-08-31T01:57:56+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 2.11,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.32
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 56203
+      }
+    },
+    {
+      "checked_at": "2026-08-31T02:09:47+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 5.47,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.83
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 53414
+      }
+    },
+    {
+      "checked_at": "2026-08-31T03:03:57+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 1.06,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.33
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 53652
+      }
+    }
+  ],
+  "rung": 3,
+  "arm": "control",
+  "task": "M1",
+  "kind": "edit",
+  "verify": "rename",
+  "prompt": "Rename the function hentFrontendFeilmelding to hentFeilmeldingForBruker everywhere in the codebase, including its definition, the barrel export in src/frontend/utils/index.ts, all imports and all call sites. Change nothing else."
+}
