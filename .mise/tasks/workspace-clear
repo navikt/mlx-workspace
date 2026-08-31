@@ -27,7 +27,7 @@ if not workspace_dir.is_dir():
 # +D walks the whole tree: opencode's shell often sits in weather-cli/, a
 # subdirectory, which the plain path form does not match.
 in_use = subprocess.run(
-    ["lsof", "-a", "-d", "cwd", "+D", str(workspace_dir)],
+    ["/usr/sbin/lsof", "-a", "-d", "cwd", "+D", str(workspace_dir)],
     capture_output=True, text=True,
 ).stdout.strip()
 if in_use:

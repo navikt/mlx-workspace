@@ -524,10 +524,10 @@ def preflight(arm, port, profile_key, meta, params):
     for pat, why in [(r"hf(_transfer)? download|huggingface-cli download", "a model download"),
                      (r"\.mise/tasks/bench-cheap-ops", "bench-cheap-ops"),
                      (r"\.mise/tasks/bench-weather-cli", "bench-weather-cli")]:
-        hits = subprocess.run(["pgrep", "-fl", pat], capture_output=True, text=True).stdout.strip()
+        hits = subprocess.run(["/usr/bin/pgrep", "-fl", pat], capture_output=True, text=True).stdout.strip()
         if hits:
             busy.append(f"{why}: {hits.splitlines()[0]}")
-    others = [p for p in subprocess.run(["pgrep", "-f", "bench-hybrid"], capture_output=True,
+    others = [p for p in subprocess.run(["/usr/bin/pgrep", "-f", "bench-hybrid"], capture_output=True,
                                         text=True).stdout.split() if int(p) != os.getpid()]
     if others:
         busy.append(f"another bench-hybrid: pid {' '.join(others)}")

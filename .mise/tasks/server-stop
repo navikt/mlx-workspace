@@ -11,7 +11,7 @@ import sys
 import time
 
 port = os.environ.get("MLX_SERVER_PORT", "8080")
-pids = subprocess.run(["lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
+pids = subprocess.run(["/usr/sbin/lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
                       capture_output=True, text=True).stdout.split()
 if not pids:
     print(f"✓ Nothing listening on port {port}")
@@ -21,7 +21,7 @@ for pid in pids:
     subprocess.run(["kill", pid])
 for _ in range(20):
     time.sleep(0.5)
-    if not subprocess.run(["lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
+    if not subprocess.run(["/usr/sbin/lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
                           capture_output=True, text=True).stdout.strip():
         print(f"✓ Stopped {', '.join(pids)}, port {port} free")
         sys.exit(0)

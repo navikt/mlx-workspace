@@ -264,8 +264,8 @@ def run_task(task):
         # subprocess kills `mise run`, not the client it launched. Six orphaned
         # opencode processes accumulated over one day of killed runs, each
         # holding its session state, and the machine ended up in swap.
-        subprocess.run(["pkill", "-f", "opencode --pure"], capture_output=True)
-        subprocess.run(["pkill", "-f", "cplt --agent opencode"], capture_output=True)
+        subprocess.run(["/usr/bin/pkill", "-f", "opencode --pure"], capture_output=True)
+        subprocess.run(["/usr/bin/pkill", "-f", "cplt --agent opencode"], capture_output=True)
     elapsed = time.time() - started
 
     def grab(pat, cast=str, default=None):

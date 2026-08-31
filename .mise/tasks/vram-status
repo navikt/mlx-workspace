@@ -5,14 +5,14 @@ import platform
 
 def sysctl(key):
     try:
-        result = subprocess.run(["sysctl", key], capture_output=True, text=True)
+        result = subprocess.run(["/usr/sbin/sysctl", key], capture_output=True, text=True)
         return result.stdout.strip().split(": ", 1)[-1]
     except Exception:
         return "unavailable"
 
 def total_ram_mb():
     try:
-        out = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True).stdout
+        out = subprocess.run(["/usr/sbin/sysctl", "hw.memsize"], capture_output=True, text=True).stdout
         return int(out.strip().split(": ", 1)[-1]) // (1024 * 1024)
     except Exception:
         return None

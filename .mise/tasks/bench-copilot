@@ -166,7 +166,7 @@ def preflight(arm, port, params):
     print(f"  2 ✓ copilot at {snap['copilot']}")
 
     busy = [pid for pat in ("bench-hybrid", "bench-copilot")
-            for pid in subprocess.run(["pgrep", "-f", pat], capture_output=True,
+            for pid in subprocess.run(["/usr/bin/pgrep", "-f", pat], capture_output=True,
                                       text=True).stdout.split()
             if int(pid) != os.getpid()]
     if busy:

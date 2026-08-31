@@ -14,7 +14,7 @@ def current_vram_gb() -> int | None:
     """Read current iogpu.wired_limit_mb via sysctl. Returns GB or None."""
     try:
         out = subprocess.run(
-            ["sysctl", "-n", "iogpu.wired_limit_mb"],
+            ["/usr/sbin/sysctl", "-n", "iogpu.wired_limit_mb"],
             capture_output=True, text=True, check=True,
         )
         mb = int(out.stdout.strip())
@@ -25,7 +25,7 @@ def current_vram_gb() -> int | None:
 
 def server_running() -> bool:
     return subprocess.run(
-        ["lsof", "-iTCP:8080", "-sTCP:LISTEN"],
+        ["/usr/sbin/lsof", "-iTCP:8080", "-sTCP:LISTEN"],
         capture_output=True,
     ).returncode == 0
 

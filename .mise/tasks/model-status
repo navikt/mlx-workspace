@@ -30,7 +30,7 @@ def server_model() -> str | None:
 
 def server_running() -> bool:
     return subprocess.run(
-        ["lsof", "-iTCP:8080", "-sTCP:LISTEN"],
+        ["/usr/sbin/lsof", "-iTCP:8080", "-sTCP:LISTEN"],
         capture_output=True,
     ).returncode == 0
 

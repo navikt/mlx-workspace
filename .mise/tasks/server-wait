@@ -21,7 +21,7 @@ model = P.served_model_id(dict(os.environ))
 deadline = time.time() + float(os.environ.get("MLX_SERVER_WAIT_SECONDS", "900"))
 
 def listening() -> bool:
-    return bool(subprocess.run(["lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
+    return bool(subprocess.run(["/usr/sbin/lsof", "-tiTCP:" + port, "-sTCP:LISTEN"],
                                capture_output=True, text=True).stdout.strip())
 
 print(f"→ Waiting for port {port} ...", flush=True)
