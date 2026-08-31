@@ -53,30 +53,25 @@ and only model in the nav-pilot alpha. The reasoning and the rejected alternativ
 > normalises before rendering. Any client or serving path that passes the OpenAI shape
 > through untouched gets an exception, not a degraded answer.
 
-> **The Qwen3.8-27B verdict rests on a template we have reason to doubt.** Recorded
-> 31 August 2026, after a colleague reported four known faults in the official Qwen
-> chat templates.
+> **Correction, 31 August 2026: the Qwen3.8-27B verdict stands.** An earlier caveat here said
+> it rested on a template we had reason to doubt. That was wrong, and it was wrong because I
+> read a profile name and inferred the rest.
 >
-> Two of them touch these runs. The 8-bit builds used our hand-written
-> `chat_templates/qwen3.8-27b.jinja`, which rendered `arguments | tojson` — and since
-> the OpenAI API sends tool arguments as a JSON *string*, that re-encoded them, so the
-> model read its own history as `"{\"path\": \"x\"}"` instead of an object. It does not
-> crash; it silently corrupts the conversation. The 4-bit builds ran the official
-> template with `enable_thinking: false`, which is the second reported fault.
+> `qwen3.8-27b-8bit` and `qwen3.8-27b-8bit-mlx` are different models. The first is
+> `mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8` served by oMLX through our own
+> `chat_templates/qwen3.8-27b.jinja`; the second is `mlx-community/Qwen3.8-27B-8bit` served by
+> mlx-lm through the model's own template. **The published verdict comes from the second**,
+> whose profile matches the shipped model's in every respect that matters: same server, no
+> template override, and `enable_thinking` honoured — verified by rendering all three
+> templates rather than by reading the profiles.
 >
-> The recorded failure signature is consistent with either: `turns=None`,
-> `tool_calls=None`, `timed_out=true` — the client never completed a turn.
+> The `tojson` fault was real, and it is fixed, but it only ever touched the abliterated build,
+> which this table already records as never run on the fixed harness. So the three Qwen3.8 rows
+> that carry the verdict were measured under the same conditions as the winner.
 >
-> So the comparison was not like for like. `Qwen3.6-35B-A3B-OptiQ` ran on its own
-> working template; `Qwen3.8-27B` ran on ours, or on a configuration reported as
-> unsupported. **"Held back because it loops" should be read as "held back under a
-> template we have reason to doubt" until it is retested.** The template is fixed as
-> of this date and the retest is queued.
->
-> The shipped model was tested against all four faults on the same day and is clean on
-> three. It fails the fourth: a system message anywhere but first returns HTTP 404,
-> `"System message must be at the beginning."` No client we use sends one, so it has
-> never bitten us; it is a landmine for any client that does.
+> What the episode did establish, and what is worth keeping: every template we hold breaks on
+> tool arguments in the OpenAI wire format, and only mlx-lm's normalisation hides it. See
+> `mise run bench-template-check`.
 
 - **Qwen3.8-27B is held back because it loops, not because it is slow.** The 4-bit build, the same
   build with `repetition_penalty`, and the 8-bit build each timed out on 3 to 4 of 11 tasks and each
