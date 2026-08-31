@@ -51,9 +51,30 @@ within a minute of the change, for the first time.
   aggregation. Those panels showed nothing before because the data never arrived; once the new
   build spreads they will show data that is wrong rather than absent. The other two dashboards
   already use `increase()` and `rate()`.
-- **Then build the local-inference dashboard**, on a foundation known to be right. The panel
-  that matters is the zero rate over time: if it stays at 100%, the feature is not earning its
-  place, and that is what decides whether the alpha widens.
+- **Then build the local-inference dashboard**, on a foundation known to be right.
+  [#531](https://github.com/navikt/copilot/issues/531).
+
+  Copy the house style from `navikt/copilot`'s `dashboards/nav-pilot-cli.json`: Grafana schema
+  v2, `layout.kind = RowsLayout`, panels under `elements` keyed `panel-N`, and the variables
+  every nav-pilot panel already filters on — `DS_METRICS`, `version`, `execution_context`.
+  `copilot-ecosystem.json` is the one to copy *queries* from, because it already uses
+  `increase()` and `rate()` rather than the delta aggregation.
+
+  The metrics, all live in Mimir under `X-Scope-OrgID: nais`:
+
+  | Metric | Panel it earns |
+  |---|---|
+  | `nav_pilot_local_dispatches` | dispatches per session as a distribution, never a mean |
+  | `nav_pilot_local_dispatches` + `saw_traffic` | **the zero rate, split by whether the client saw the worker** |
+  | `nav_pilot_local_ready_seconds` | time to ready, p50 and p95, replacing the docs' guess |
+  | `nav_pilot_local_server_total` | server events by kind: `ready`, `hung`, `crashed` |
+  | `count(count by (device_id) (...))` | how many people have this on at all |
+
+  **The panel that matters is the zero rate over time**, now that `saw_traffic` can split it:
+  zero-with-traffic is the orchestrator declining, zero-without is our wiring failing. If the
+  first stays at 100%, the feature is not earning its place, and that is what decides whether
+  the alpha widens. Before `saw_traffic` reaches people, that panel cannot tell the two apart,
+  so build it to split from the start rather than retrofitting.
 
 ## 3. Measurements that are not finished
 
