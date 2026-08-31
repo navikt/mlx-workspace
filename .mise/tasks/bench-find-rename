@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# mise description="Find rename candidates by reference count and file spread, for sizing a scale-ceiling run. Usage: mise run bench-find-rename -- <repo> [--min-refs 40] [--min-files 8]"
+"""Pick a rename target by its shape, not by eye.
+
+The scale-ceiling experiment needs symbols with known profiles: about a hundred
+references in ten files, and about forty references spread over forty. Those two
+separate 'how much text' from 'how many places to look', which are different
+limits and different advice.
+
+Finding them by reading the code is guesswork that does not survive the repo
+moving. This counts.
+
+Only symbols that look renameable are offered: an identifier long enough not to
+collide, appearing in source rather than only in tests, and not exported from a
+package boundary this cannot see across.
+"""
+import argparse
+import collections
+import pathlib
+import re
+import sys
+
+# Deliberately conservative: an identifier of four characters or more, so `id`
+# and `ok` never appear, and camelCase or snake_case so keywords do not.
+IDENT = re.compile(r"\b([a-z][a-zA-Z0-9]{3,}[A-Z][a-zA-Z0-9]*|[a-z][a-z0-9]{3,}_[a-z0-9_]+)\b")
+
+SOURCE_SUFFIXES = {".kt", ".ts", ".tsx", ".js", ".jsx", ".py", ".go"}
+SKIP_DIRS = {"node_modules", ".git", "build", "dist", ".next", "__pycache__", ".venv", "target"}
+
+
+def walk(root):
+    for p in root.rglob("*"):
+        if p.is_dir() or p.suffix not in SOURCE_SUFFIXES:
+            continue
+        if any(part in SKIP_DIRS for part in p.parts):
+            continue
+        yield p
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-find-rename")
+    ap.add_argument("repo", nargs="?", help="checkout to scan")
+    ap.add_argument("--min-refs", type=int, default=40)
+    ap.add_argument("--min-files", type=int, default=8)
+    ap.add_argument("--top", type=int, default=12)
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        found = set(IDENT.findall("val dagerMellom = hentFrontendFeilmelding(x); id; ok; some_snake_case"))
+        assert "dagerMellom" in found and "hentFrontendFeilmelding" in found, found
+        assert "id" not in found and "ok" not in found, found
+        assert "some_snake_case" in found, found
+        print("✓ self-check passed")
+        return 0
+
+    if not args.repo:
+        raise SystemExit("✗ which checkout? e.g. mise run bench-find-rename -- workspaces/_prime-ts")
+
+    root = pathlib.Path(args.repo)
+    if not root.is_dir():
+        raise SystemExit(f"✗ not a directory: {root}")
+
+    refs = collections.Counter()
+    files = collections.defaultdict(set)
+    for path in walk(root):
+        try:
+            text = path.read_text(errors="replace")
+        except OSError:
+            continue
+        for name in IDENT.findall(text):
+            refs[name] += text.count(name)
+            files[name].add(path)
+
+    rows = []
+    for name, n in refs.items():
+        spread = len(files[name])
+        if n >= args.min_refs and spread >= args.min_files:
+            in_tests = sum(1 for p in files[name] if "test" in p.name.lower() or "spec" in p.name.lower())
+            rows.append((name, n, spread, in_tests))
+
+    if not rows:
+        print(f"nothing with >= {args.min_refs} references across >= {args.min_files} files")
+        return 0
+
+    # Widest spread first: file-hopping is the axis the experiment cares about.
+    rows.sort(key=lambda r: (-r[2], -r[1]))
+    print(f"{'symbol':40} {'refs':>5} {'files':>6} {'of which tests':>15}")
+    for name, n, spread, in_tests in rows[:args.top]:
+        print(f"{name:40} {n:5} {spread:6} {in_tests:15}")
+    print(f"\n{len(rows)} candidates. Pick two with the same refs and different spread to "
+          f"separate volume from file-hopping.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
