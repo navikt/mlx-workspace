@@ -60,7 +60,10 @@ within a minute of the change, for the first time.
   `copilot-ecosystem.json` is the one to copy *queries* from, because it already uses
   `increase()` and `rate()` rather than the delta aggregation.
 
-  The metrics, all live in Mimir under `X-Scope-OrgID: nais`:
+  The metrics, all live in Mimir under `X-Scope-OrgID: nais`. **Mimir is only reachable from
+  the Nav network**, so any of this that needs live data has to be done on the VPN — it
+  fails as a bare connection error rather than an auth error, which reads like the service
+  being down:
 
   | Metric | Panel it earns |
   |---|---|
