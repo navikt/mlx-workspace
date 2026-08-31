@@ -1,0 +1,36 @@
+{
+  "_note": "navikt/dinesykmeldte, UNMODIFIED, at a pinned ref. Next.js 16.2.9 App Router, React, vitest. Verified baseline: 50 files, 318 tests, ~10s under Node 24.\n\nThis target needs a GitHub Packages token: seven of its fourteen @navikt dependencies are private. The repo's own .npmrc reads it from NPM_AUTH_TOKEN, so that variable must be exported before install. Nothing here is stubbed or stripped, which was the earlier plan and is no longer necessary.\n\nThe app logs errors during its own tests (network and JWT lines). Those are the application's logging, not failures; the suite is green.",
+  "repo": "https://github.com/navikt/dinesykmeldte.git",
+  "ref": "3706419f0f864ab69d9739f5474b56279e06126b",
+  "node": "24",
+  "install": "corepack pnpm install --frozen-lockfile",
+  "compile_cmd": "corepack pnpm exec tsc --noEmit",
+  "test_cmd": "corepack pnpm test",
+  "results_suffix": "-next",
+  "tasks": [
+    {
+      "id": "R2",
+      "kind": "read",
+      "verify": "grep_answer",
+      "prompt": "What does cleanId in src/utils/stringUtils.ts do to its input? Answer in one sentence, and name the regular expression it uses. Do not change any files.",
+      "expect_terms": [
+        "\\W",
+        "_"
+      ]
+    },
+    {
+      "id": "E1",
+      "kind": "edit",
+      "verify": "compile",
+      "prompt": "Add a TSDoc comment above the cleanId function in src/utils/stringUtils.ts explaining what it does and why. Change nothing else."
+    },
+    {
+      "id": "M1",
+      "kind": "edit",
+      "verify": "rename",
+      "prompt": "Rename the function cleanId to sanitizeElementId everywhere in this repository, including its definition in src/utils/stringUtils.ts, every import and every call site. Change nothing else.",
+      "old_symbol": "cleanId",
+      "new_symbol": "sanitizeElementId"
+    }
+  ]
+}
