@@ -110,8 +110,44 @@ def changed_files():
     return [l for l in out.splitlines() if l.strip()]
 
 
+def apply_break(task):
+    """Put the bug in, after the reset, as uncommitted working-tree state.
+
+    Uncommitted on purpose. A broken commit is discoverable with `git log`, and a
+    model that reverts it has demonstrated git skill rather than the ability to
+    read code and find a fault. With no history to consult, the only route is the
+    failing test and the source.
+    """
+    b = task.get("break")
+    if not b:
+        return
+    f = repo / b["file"]
+    text = f.read_text()
+    n = text.count(b["find"])
+    if n != 1:
+        raise SystemExit(f"✗ {task['id']}: the break site appears {n} times in {b['file']}, "
+                         f"expected exactly one. The target moved; fix the task before measuring.")
+    f.write_text(text.replace(b["find"], b["replace"], 1))
+
+
+def touched_a_test(files):
+    """Test files the model changed. Going green by weakening an assertion is the
+    cheap way through every one of these tasks, and it is not debugging."""
+    return [f for f in files if ".test." in f or "/__tests__/" in f or f.endswith("Test.kt")]
+
+
 def verify(task):
     kind = task["verify"]
+    if kind == "debug":
+        touched = changed_files()
+        if not touched:
+            return False, "no changes made (the bug is still there)"
+        # The porcelain line is "XY path"; take the path.
+        cheated = touched_a_test([l[3:].strip() for l in touched])
+        if cheated:
+            return False, f"edited the test instead of the code: {cheated[0]}"
+        r = build("test")
+        return r.returncode == 0, "suite green" if r.returncode == 0 else "suite still failing"
     if kind in ("compile", "test", "rename"):
         touched = changed_files()
         if not touched:
@@ -212,6 +248,7 @@ def run_task(task):
     if os.environ.get("BENCH_RESTART_SERVER", "1") == "1":
         restart_server()
     reset_repo()
+    apply_break(task)
     started = time.time()
     # Per-task cap. E3 looped 77 identical tool calls twice and consumed a whole
     # 90-minute budget both times, starving three later tasks. A cap turns a loop
