@@ -89,6 +89,35 @@ runtime at these weights, which is exactly what issue #521 proposes for Linux.
 **Do:** add the finding to #521 so whoever picks up Ollama support does not discover it the
 hard way.
 
+## 5b. A dashboard, and the aggregation today's fix invalidated
+
+Filed as #531. Two halves.
+
+There is telemetry and no way to look at it: no panel shows dispatches, ready time or server
+events, and four devices have already reported. The panels worth having are the ones that
+answer a question someone is asking, chief among them **the zero rate over time** — if it
+stays at 100%, the feature is not earning its place, and that is what decides whether the
+alpha widens.
+
+The other half needs doing regardless. `dashboards/nav-pilot-cli.json` aggregates counters
+with `sum_over_time` in eighteen places, which is the delta aggregation. Counters are
+cumulative as of today, and summing a cumulative counter over a window means nothing. Those
+panels showed nothing before because the data never arrived, so nobody noticed; once the new
+build is out they will show data that is wrong rather than absent, which is worse. The other
+two dashboards already use `increase()` and `rate()`.
+
+## 5c. The harness cannot reliably switch models
+
+Three attempts at the Qwen3.8 retest, three different harness faults, none of them the
+model's: a profile switched without a server, a task name that does not exist, and
+`omlx-server` serving `Qwen3.8-27B-MLX-6bit` while the profile said 8-bit. The third was
+caught only because the runner now asks the server what it is serving and refuses to measure
+a mismatch.
+
+That guard should live in the harness rather than in a scratch script, because the failure it
+catches is one we have already published a verdict from. Any result taken without it is a
+result about an unknown model.
+
 ## 6. Smaller, and genuinely optional
 
 - **Next.js target is not measurable** for compile-verified rungs: the repo has no typecheck
