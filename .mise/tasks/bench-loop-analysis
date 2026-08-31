@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+# mise description="What would nav-pilot's loop guard have changed in a recorded run? Usage: mise run bench-loop-analysis [--threshold 8] [--profile qwen3.8]"
+"""Ask what a loop guard buys, before spending GPU on finding out.
+
+nav-pilot ends a local turn after N identical consecutive tool calls. The
+temptation is to assume that rescues a model whose reputation is "it loops",
+and the assumption is checkable without running anything: every result file
+already records `longest_identical_run` and `looped_on` per task.
+
+A failure the guard could plausibly convert has to look like one specific
+thing — the model looped, and it had already changed files when it started.
+A task that timed out with `longest_identical_run` of 1 was not looping. It
+was working, slowly, on varied calls, and cutting a loop it never entered
+changes nothing.
+
+That distinction decided whether to ship a Qwen3.8 profile on the strength of
+the guard. The answer was no, and it cost one command rather than a GPU night.
+
+  mise run bench-loop-analysis
+  mise run bench-loop-analysis -- --threshold 8 --profile qwen3.8
+"""
+import argparse
+import json
+import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+BENCH = ROOT / "bench"
+
+
+def runs(match):
+    for f in sorted(BENCH.glob("results-*.json")):
+        name = f.stem[len("results-"):]
+        if match and match.lower() not in name.lower():
+            continue
+        try:
+            yield name, json.loads(f.read_text())
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"  ! {name}: {e}", file=sys.stderr)
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-loop-analysis")
+    ap.add_argument("--threshold", type=int, default=8,
+                    help="identical consecutive calls that end a turn (nav-pilot default 8)")
+    ap.add_argument("--profile", default="", help="substring of the profile name")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_check:
+        rows = {
+            "A": {"verified": False, "timed_out": True, "longest_identical_run": 20, "files_changed": 2},
+            "B": {"verified": False, "timed_out": True, "longest_identical_run": 1, "files_changed": 3},
+            "C": {"verified": True, "timed_out": False, "longest_identical_run": 1, "files_changed": 1},
+        }
+        r = classify(rows, 8)
+        assert r["reachable"] == ["A"], r
+        assert r["slow_not_looping"] == ["B"], r
+        assert r["passed"] == ["C"], r
+        print("✓ self-check passed")
+        return 0
+
+    any_rows = False
+    for name, data in runs(args.profile):
+        any_rows = True
+        r = classify(data, args.threshold)
+        total = len(data)
+        print(f"\n{name}  ({total} tasks, {len(r['passed'])} verified)")
+        print(f"  failures the guard could reach   {len(r['reachable']):2}  {', '.join(r['reachable']) or '—'}")
+        print(f"  failures with no loop at all     {len(r['slow_not_looping']):2}  {', '.join(r['slow_not_looping']) or '—'}")
+        if r["reachable"]:
+            for t in r["reachable"]:
+                d = data[t]
+                print(f"      {t}: ran {d.get('longest_identical_run')} identical "
+                      f"{d.get('looped_on') or 'calls'}, {d.get('files_changed')} file(s) already changed")
+
+    if not any_rows:
+        print("no result files matched")
+        return 0
+
+    print(f"\nA guard at {args.threshold} can only end a turn that entered a loop. A task that timed")
+    print("out with a longest identical run of 1 was doing varied work slowly, and the")
+    print("guard never fires. Read the second row before believing the guard is the fix.")
+    return 0
+
+
+def classify(data, threshold):
+    """Split a run's tasks by what a loop guard could have done to them."""
+    passed, reachable, slow = [], [], []
+    for task, d in data.items():
+        if d.get("verified") is True:
+            passed.append(task)
+            continue
+        if d.get("verified") is None:
+            continue  # never judged; says nothing either way
+        if (d.get("longest_identical_run") or 0) >= threshold:
+            reachable.append(task)
+        else:
+            slow.append(task)
+    return {"passed": passed, "reachable": reachable, "slow_not_looping": slow}
+
+
+if __name__ == "__main__":
+    sys.exit(main())
