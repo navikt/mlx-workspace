@@ -61,7 +61,41 @@ hours of authoring before the first GPU minute. The same argument applied to
 finishing Phase 2 at half past four, so it was left provisioned rather than
 wired in a hurry.
 
-## Phase 2: authored, validated and coded, not yet run
+## Phase 2: the model does not debug
+
+Three tasks, one attempt each, on a green baseline of 61 files and 572 tests.
+
+| Task | Break | Distance from symptom | Result | Time | Tool calls |
+|---|---|---|---|---|---|
+| X1 | wrong locale in `utils/land.ts` | test file beside it | failed | 782s | 38 |
+| X2 | inverted predicate in `utils/sider.ts` | same directory | failed | 504s | 36 |
+| X3 | `stores/sidebarStore.ts` opens shut | two directories away | timed out at 900s | 900s | — |
+
+**0 of 3.** Every attempt edited exactly one file and left the suite red.
+
+The guard against gaming never had to fire. Neither completed attempt touched a test file,
+so these are three honest failures rather than three attempts to weaken an assertion. That
+matters: the cheap way through every one of these tasks was available and not taken.
+
+The easiest case failed too. X1 puts a wrong locale in a function whose test sits in the same
+directory and names the expected values; 17 tests fail and say what they wanted. Thirteen
+minutes and 38 tool calls did not fix it.
+
+This is the applying-versus-deciding distinction in the shape that was predicted for it.
+Every other task in the suite hands the model a decision and asks it to carry the decision
+out. A failing test with no stated cause asks it to work out what is wrong, and that is the
+half it cannot do. Nothing here contradicts the rename result: the same model renames 46
+references across 10 files unaided.
+
+What this does *not* establish, and the write-up must say so: this measures fault
+localisation when a failing test already points at the behaviour, which is the easiest tier
+of debugging. Reproduction, usually the hard part, is not measured at all. And n=1 per task
+over three tasks is a capability probe, so the honest claim is "0 of 3", never a rate.
+
+The practical consequence for the alpha is direct. Do not send debugging to the local model,
+and the runbook's advice to hand it bounded, already-decided work is unchanged.
+
+## Phase 2 as originally planned: authored, validated and coded
 
 Three debug tasks against `familie-tilbake-frontend`, in
 `bench/targets/frontend-debug.json`. Baseline is green at 61 files and 572 tests

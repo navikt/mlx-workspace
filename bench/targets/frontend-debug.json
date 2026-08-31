@@ -43,5 +43,6 @@
       },
       "_why": "Distant: the break is in stores/, the failing tests are in komponenter/sidebar/. Opening the sidebar at a page leaves it shut."
     }
-  ]
+  ],
+  "results_suffix": "-debug"
 }
