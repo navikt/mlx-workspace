@@ -1,0 +1,93 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-31T09:01:52+0200",
+      "seconds": 87.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 27,
+      "files_changed": 3,
+      "cloud_steps": 19,
+      "cloud_tokens": {
+        "total": 540875,
+        "input": 21,
+        "output": 4674,
+        "reasoning": 0,
+        "cache_write": 33100,
+        "cache_read": 503080
+      },
+      "cloud_cost_usd": 0.3452,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23610
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 19048
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-5-control-0-20260831-090151.jsonl",
+      "verified": false,
+      "note": "build failed before any test ran (compile error)",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-08-31T09:01:50+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 5.36,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 44730,
+        "port": "52144",
+        "started": "2026-08-31T00:24:20.559624+02:00",
+        "probe_seconds": 0.97
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 23610
+      }
+    }
+  ],
+  "rung": 5,
+  "arm": "control",
+  "task": "M2",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Add an optional field adresselinje3 of type string to the ManuellAdresseInfo type in src/frontend/typer/Brevmottaker.ts, thread it through getManuellAdresseInfo in src/frontend/pages/fagsak/brevmottaker/schema/schema.ts, and render it in Brevmottakere.tsx the same way adresselinje2 is rendered. All existing tests must still pass. Change nothing else."
+}

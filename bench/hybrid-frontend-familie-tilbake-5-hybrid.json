@@ -223,6 +223,225 @@
           "bytes": 1985
         }
       ]
+    },
+    {
+      "n": 4,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-31T08:52:17+0200",
+      "seconds": 101.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 27,
+      "files_changed": 3,
+      "cloud_steps": 21,
+      "cloud_tokens": {
+        "total": 637045,
+        "input": 23,
+        "output": 5547,
+        "reasoning": 0,
+        "cache_write": 34936,
+        "cache_read": 596539
+      },
+      "cloud_cost_usd": 0.3932,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23956
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 24328
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-4-20260831-085216.jsonl",
+      "verified": false,
+      "note": "build failed before any test ran (compile error)",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 1985
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-31T08:54:09+0200",
+      "seconds": 119.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 33,
+      "files_changed": 3,
+      "cloud_steps": 21,
+      "cloud_tokens": {
+        "total": 702821,
+        "input": 23,
+        "output": 7471,
+        "reasoning": 0,
+        "cache_write": 76994,
+        "cache_read": 618333
+      },
+      "cloud_cost_usd": 0.5864,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 24399
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23354
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-5-20260831-085408.jsonl",
+      "verified": false,
+      "note": "build failed before any test ran (compile error)",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": []
+    },
+    {
+      "n": 6,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-31T08:56:20+0200",
+      "seconds": 134.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 33,
+      "files_changed": 3,
+      "cloud_steps": 24,
+      "cloud_tokens": {
+        "total": 844519,
+        "input": 26,
+        "output": 8692,
+        "reasoning": 0,
+        "cache_write": 42783,
+        "cache_read": 793018
+      },
+      "cloud_cost_usd": 0.5288,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23277
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23320
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-6-20260831-085618.jsonl",
+      "verified": false,
+      "note": "build failed before any test ran (compile error)",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 1985
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "arm": "hybrid",
+      "rung": 5,
+      "task": "M2",
+      "preflight": 0,
+      "started": "2026-08-31T08:58:48+0200",
+      "seconds": 142.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 33,
+      "files_changed": 3,
+      "cloud_steps": 26,
+      "cloud_tokens": {
+        "total": 867306,
+        "input": 28,
+        "output": 8479,
+        "reasoning": 0,
+        "cache_write": 41854,
+        "cache_read": 816945
+      },
+      "cloud_cost_usd": 0.5293,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 22253
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 22150
+        }
+      },
+      "local_server_pid": 44730,
+      "local_server_started": "2026-08-31T00:24:20.559624+02:00",
+      "log": ".bench-logs/hybrid-5-hybrid-7-20260831-085845.jsonl",
+      "verified": false,
+      "note": "build failed before any test ran (compile error)",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 1985
+        }
+      ]
     }
   ],
   "preflight": [

@@ -32,6 +32,25 @@ Five states, not interchangeable.
 `status` also prints pid, port, resident memory and the wired-memory limit. That one paste
 separates most of what follows.
 
+## The first day, when the news post and the release land together
+
+The article is published with the release rather than after the first user, so several people
+may install on the same day. Two things will dominate, and neither is a bug:
+
+**"It's asking for my password."** `init` raises the macOS wired-memory limit with sudo and
+says so as it does it. Expected. The limit is a cap, not a reservation, and it resets at
+reboot.
+
+**"It's been downloading for ages."** 24 GB, once. `init` refuses before downloading anything
+if the machine cannot run the model, so a download that has started means the machine is fine.
+
+If several reports arrive together, read them for the *same* cause before treating them as
+separate: a shared network path, a shared macOS version, or one instruction in the article
+that everyone read the same wrong way. Three reports with one cause is one fix.
+
+**Nobody has run `init` on a machine that has never seen this branch.** Until that has
+happened once, treat the first stranger's install as the test it is, and stay with them.
+
 ## Symptom table
 
 **"It just hangs."** Get `status` first; the state decides everything. `starting` on a cold
