@@ -46,11 +46,15 @@ within a minute of the change, for the first time.
   `staleness_check_total`, `sync_updates_total`, `install_items_total`, with device ids.
   Filter by `version` — old builds keep emitting delta until people update, and a mixed fleet
   reads as "the fix failed" when it has not.
-- **Fix `dashboards/nav-pilot-cli.json`** ([#531](https://github.com/navikt/copilot/issues/531)).
-  It aggregates counters with `sum_over_time` in eighteen places, which is the delta
-  aggregation. Those panels showed nothing before because the data never arrived; once the new
-  build spreads they will show data that is wrong rather than absent. The other two dashboards
-  already use `increase()` and `rate()`.
+- ~~Fix `dashboards/nav-pilot-cli.json`'s eighteen `sum_over_time` queries~~ — **wrong, and
+  measured wrong.** Live data says `increase()` returns 0.0 on every one of those series while
+  `sum_over_time` returns the real numbers, because a CLI process exports once and exits and
+  `increase()` needs two samples in a window. Temporality was never what made those queries
+  work. PR #536 closed; the existing queries stay. **The new dashboard must use
+  `sum_over_time` too** — `copilot-ecosystem.json` uses `increase()` because it queries
+  long-lived services, which nav-pilot is not.
+  One real defect survives: the two `histogram_quantile` panels over `_bucket` series, where
+  histograms were always cumulative and `sum_over_time` overcounts.
 - **Then build the local-inference dashboard**, on a foundation known to be right.
   [#531](https://github.com/navikt/copilot/issues/531).
 
