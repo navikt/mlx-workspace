@@ -55,6 +55,11 @@ within a minute of the change, for the first time.
   long-lived services, which nav-pilot is not.
   One real defect survives: the two `histogram_quantile` panels over `_bucket` series, where
   histograms were always cumulative and `sum_over_time` overcounts.
+- **Record ready time on the failure path too**, before the dashboard panel exists.
+  `RecordLocalReadySeconds` fires only after `srv.Start` returns, so a start that times out
+  or is interrupted records nothing and the slowest starts are missing from the histogram.
+  A p95 off that panel is a p95 of the starts that worked. One `outcome` attribute fixes it
+  and makes the same panel answer "how often does a start fail".
 - **Then build the local-inference dashboard**, on a foundation known to be right.
   [#531](https://github.com/navikt/copilot/issues/531).
 
@@ -82,6 +87,12 @@ within a minute of the change, for the first time.
   first stays at 100%, the feature is not earning its place, and that is what decides whether
   the alpha widens. Before `saw_traffic` reaches people, that panel cannot tell the two apart,
   so build it to split from the start rather than retrofitting.
+
+**Measured, and the docs were wrong.** Ten starts across six machines, all under 50 seconds,
+six of them under ten. Six places said "the first start on a cold cache takes minutes", which
+was also the stated reason `local_autostart` is off by default. Corrected in #546; autostart
+stays off for the reason that survives, that a 21 GB process started unasked is a surprise.
+Weights are downloaded by `init`, never by `start`, so no measurement here includes a download.
 
 ## 3. Measurements that are not finished
 
