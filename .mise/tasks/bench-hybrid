@@ -935,7 +935,7 @@ def main():
                     # of these and one real sample. It is a rate limit, not a
                     # result, so back off rather than burning the attempt budget
                     # at two seconds a try.
-                    if rec.get("invalid_reason", "").startswith("no session"):
+                    if (rec.get("invalid_reason") or "").startswith("no session"):
                         print(f"      … no session; waiting {LAUNCH_BACKOFF}s before retrying")
                         time.sleep(LAUNCH_BACKOFF)
                     flag = {True: "✓", False: "✗", None: "·"}[rec["verified"]]
