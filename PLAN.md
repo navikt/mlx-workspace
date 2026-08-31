@@ -114,7 +114,78 @@ would change a decision:
 - **A bigger model.** This machine has 128 GB; the 48 GB ceiling was the alpha target's. The
   question is not whether a larger model is better but whether it moves the break-even.
 
-## 6. Filed, owned elsewhere, not ours today
+## 6. Bringing your own model
+
+Asked for on 1 September: let people run their own models, and pick up an Ollama or similar
+runtime they already have. Both are worth doing and the second is smaller than it sounds,
+because of where the seam already sits.
+
+### What the code already gives us
+
+The manifest entry is close to the right shape. `Model` carries `Key`, `Name`, `Model`,
+`Backend`, and `Params` as an untyped `map[string]string` — deliberately untyped, so a new
+knob is not a nav-pilot release. `Backend` is declared `"mlx-lm"` on every entry and **read
+nowhere**: it is a placeholder in the schema, not a mechanism. That is the hook to build on,
+and building on it means writing the dispatch that was never there.
+
+The bigger gift is the guard. It is a `httputil.NewSingleHostReverseProxy` in front of
+`http://127.0.0.1:<port>`, and opencode is pointed at `guardURL + "/v1"`. It speaks
+OpenAI-compatible HTTP and does not care what is behind it. Every instrument we spent
+31 August fixing — dispatch counting, the loop guard, `saw_traffic` — lives in the proxy, not
+in the backend, so all of it keeps working against a different server for free.
+
+### 6a. Custom profiles
+
+A user-supplied entry merged into the resolved manifest, so `alpha local start`, the model
+picker and `Lookup` treat it like any other.
+
+One trap to design around, not discover: `Resolve` writes the fetched manifest to
+`~/.nav-pilot/local-models.json` and that file is the cache. User entries cannot live there —
+the next successful fetch silently overwrites them, and the developer loses their profile to a
+background refresh they never asked for. They need their own path, merged at read time, with
+the served manifest winning on `key` collisions so a curated entry cannot be shadowed by an
+old local copy of itself.
+
+Worth stating in the CLI, once: our entries carry measured `params` — cache size, context,
+`top_k`, chat-template args — and a hand-written entry carries guesses. The 4-bit-versus-OptiQ
+choice in the shipped profile exists because the plain build produced a ~200-call runaway tool
+loop at the 36 GB cap. A model that loads is not a model that works, and the only way to know
+which one you have is `mise run bench` in this repo.
+
+### 6b. Adopting a runtime that is already running
+
+Ollama serves an OpenAI-compatible API on `127.0.0.1:11434`. So this is mostly *not* a new
+backend: it is a profile that says "already running, at this URL, do not manage it", and a
+guard pointed there instead. `EnsureServerRunning`, `Server.Start`, `CheckWiredLimit`,
+`WeightsPresent`, `DownloadWeights` and the readiness probe are all skipped, because none of
+them is ours to do.
+
+Skipping them has a cost that has to be paid deliberately, and it is exactly the mistake we
+spent the day fixing: `nav_pilot_local_ready_seconds` would acquire a second population with
+no start time, no wired-limit gate and no weights gate. Either those sessions carry a
+`backend` attribute from the first commit, or the histogram quietly starts mixing two things
+again. Add the attribute first; it is cheaper than the correction.
+
+An `import` that lists what `ollama list` already has and writes profiles for them is the
+friendly front door, but it is the second commit, not the first. The first is: point the guard
+at an arbitrary base URL, prove a dispatch lands, and see the counters move.
+
+### 6c. The warning that is already measured
+
+`mise run bench-template-check` says **ten of eleven cached models break on tool arguments in
+the OpenAI wire format**; only `granite-4.1-8b` is clean. It has never affected our results
+because mlx-lm normalises arguments before rendering. **Ollama applies its own templates**, so
+a model that behaves under nav-pilot today can mangle tool calls the moment it is served by a
+different runtime — and the failure looks exactly like a weak model: no turns, no tool calls,
+nothing edited. That is not a guess about Ollama; it is the same confound that produced our
+own false "Qwen3.8 loops" verdict.
+
+So this belongs in the feature, not in a footnote: run the template check against an imported
+model before offering it, and say plainly which shapes it fails. Also the reason to add the
+finding to [#521](https://github.com/navikt/copilot/issues/521), which proposes Ollama for
+Linux and would hit it first.
+
+## 7. Filed, owned elsewhere, not ours today
 
 - [#521](https://github.com/navikt/copilot/issues/521) Linux support. Needs the requester's
   hardware first. **Add the template finding to it**: ten of eleven model templates break on
