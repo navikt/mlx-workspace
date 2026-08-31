@@ -9,6 +9,7 @@ table in `MODELS.md` except as evidence for the condition its suffix names.
 | `.INVALID` | The harness broke. Both files here recorded zero tool calls on every task because our own `AGENTS.md` routed the model's output into the reasoning field |
 | `.CONFOUNDED` | Real numbers under a known confound. These are the runs where the server crashed part way through |
 | `.DISKCONTENTION` | Ran while a 22 GB model download competed for the disk that every task restart reads weights from |
+| `.NODE20` | The target's suite ran under Node 20 while the target pins Node 24. All eight samples scored 0/8 for `webidl.util.markAsUncloneable`, which has nothing to do with the change being judged. The harness now honours the target's `node` field |
 | `.CAP420` | A 420 second cap, kept because it bounds the interactive case while the 900 and 1800 second runs answer a different question |
 | `.MLX6BIT`, `.ABANDONED` | The MLX 6-bit build, stopped twice. The slow numbers here were taken on a machine in swap and do not reproduce |
 | `.POLLUTED` (DWQ) | The DWQ A/B was recorded before the prompt fix and carries no loop or timeout fields, so it predates the harness it was credited to. Its ranking against the plain build may survive, its absolute numbers do not, and the weights are no longer in the cache |

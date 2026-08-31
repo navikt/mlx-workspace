@@ -364,8 +364,21 @@ def reset_repo():
 
 
 def build(target):
+    """Run the target's own check, under the runtime the target names.
+
+    A target that pins `node` means it: the frontend suite dies under Node 20
+    with 61 errors about webidl.util.markAsUncloneable, none of which have
+    anything to do with the change being judged. Eight rung-5 samples were
+    scored 0/8 that way before this existed — a measurement of the toolchain
+    wearing the shape of a model failure.
+    """
     cmd = CFG.get(f"{target}_cmd")
     if cmd:
+        node = str(CFG.get("node", "")).strip()
+        if node:
+            # `mise x node@24 --` resolves the latest installed 24.x.
+            return sh(["mise", "x", f"node@{node}", "--", "bash", "-lc", cmd],
+                      cwd=REPO, timeout=1800)
         return sh(["bash", "-lc", cmd], cwd=REPO, timeout=1800)
     return sh(["./gradlew", "compileKotlin" if target == "compile" else "test",
                "--console=plain", "-q", "--offline"], cwd=REPO, timeout=1800,
