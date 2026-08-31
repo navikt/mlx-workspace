@@ -130,7 +130,7 @@ earlier are in [the archive](#archive-pre-2026-models) and are not candidates. R
 
 Target is `navikt/isoppfolgingstilfelle`, a real Nav Kotlin service. Ktor, Kafka, Postgres, 5,661
 lines of main Kotlin, 151 tests that pass on a clean machine with no Nav-internal dependencies.
-Every task is pinned to a symbol verified to exist in that repository. Spec in `CHEAP_OPS_SPEC.md`,
+Every task is pinned to a symbol verified to exist in that repository. Spec in `bench/specs/cheap-ops.md`,
 tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
 
 | Model | Median | Verified | Timeouts | Tasks with a loop |
@@ -225,7 +225,7 @@ tasks looping, 25 identical consecutive calls on E3 and 12 on M2.
 
 ### weather-cli
 
-Every model builds the same Node.js CLI from `WEATHER_CLI_SPEC.md` (live Met.no + Geonorge APIs,
+Every model builds the same Node.js CLI from `bench/specs/weather-cli.md` (live Met.no + Geonorge APIs,
 spec-named test files) in its own `workspaces/<key>/weather-cli/`, driven by the two prompts in
 [Standard benchmark prompts](#standard-benchmark-prompts). Headless, rig B.
 

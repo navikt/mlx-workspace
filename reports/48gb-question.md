@@ -181,5 +181,5 @@ against a real Kotlin service settled the alpha, and it settled it on the MoE. S
 Fix the harness before you change the model. Six of the seven levers above were configuration,
 prompt wording, or tooling.
 
-Working notes: [`MODELS.md`](../MODELS.md). Benchmark: [`WEATHER_CLI_SPEC.md`](../WEATHER_CLI_SPEC.md).
+Working notes: [`MODELS.md`](../MODELS.md). Benchmark: [`WEATHER_CLI_SPEC.md`](../bench/specs/weather-cli.md).
 Rig A, M1 Max 32 GB. Rig B, M5 Max 128 GB. Target, 48 GB Pro.

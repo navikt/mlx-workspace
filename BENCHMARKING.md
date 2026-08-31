@@ -5,7 +5,7 @@ number someone else produced. Results land in `bench/results-<key>.json`, `bench
 and `bench/cache-<key>.json`, tracked in git as the evidence behind `MODELS.md`; transcripts go to
 `.bench-logs/`, untracked. Runs are moved, never deleted: anything excluded from medians and from
 MODELS.md tables goes to `bench/quarantine/` under a suffix naming the condition it is evidence for,
-listed there. Do not edit `WEATHER_CLI_SPEC.md` or `CHEAP_OPS_SPEC.md` once a model has been
+listed there. Do not edit `bench/specs/weather-cli.md` or `bench/specs/cheap-ops.md` once a model has been
 measured against one: every recorded number assumes the version in the workspace at the time.
 
 ## The three benchmarks
@@ -15,7 +15,7 @@ measured against one: every recorded number assumes the version in the workspace
 single-file edits, multi-file edits, generated tests. `bench/tasks.json` pins prompts, files,
 symbols and verification mode.
 
-**weather-cli** builds a Node CLI from scratch against `WEATHER_CLI_SPEC.md`: argument parsing,
+**weather-cli** builds a Node CLI from scratch against `bench/specs/weather-cli.md`: argument parsing,
 Geonorge geocoding, the Met.no forecast API, output formatting, five named test files. It is harder
 than anything we would route locally, and stays because a model that wins it can lose on routine
 edits in code it did not write.

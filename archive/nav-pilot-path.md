@@ -2,7 +2,7 @@
 
 Whether to ship local MLX inference as an alpha command in
 [nav-pilot](https://github.com/navikt/copilot), 27 Aug 2026, against the benchmark data in
-[`../MODELS.md`](../MODELS.md) and [`48gb-question.md`](48gb-question.md). Hold the bundling: the
+[`../MODELS.md`](../MODELS.md) and [`48gb-question.md`](../reports/48gb-question.md). Hold the bundling: the
 cost case looks better than expected but points at a different fix, and one number needs explaining.
 
 ## The number that needs explaining

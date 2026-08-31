@@ -2,7 +2,7 @@
 
 The model question is closed. `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit` runs the alpha, and Qwen3.8-27B
 is held back because it loops on tool calls. The evidence is in
-[`alpha-model-decision.md`](alpha-model-decision.md). Everything left is engineering.
+[`alpha-model-decision.md`](../reports/alpha-model-decision.md). Everything left is engineering.
 
 ## Stop testing models
 
