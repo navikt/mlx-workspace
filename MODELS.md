@@ -29,6 +29,30 @@ and only model in the nav-pilot alpha. The reasoning and the rejected alternativ
   median**, 4 of 8
   checkable tasks verified, no timeouts, and no task with a repeated identical tool call. 18.6 GB
   resident.
+> **Does the template problem invalidate the other models?** Checked 31 August 2026 with
+> `mise run bench-template-check`, which renders every cached model's chat template against
+> the four shapes a coding agent produces. **No, with one exception.**
+>
+> Ten of eleven cached models fail identically on tool arguments sent as a JSON string, which
+> is what the OpenAI API puts on the wire: `TypeError: Can only get item pairs from a
+> mapping`. Only `granite-4.1-8b-4bit` is clean on all four shapes. Every Qwen-family
+> template, and KAT-Coder's, also refuses a mid-dialogue system message — deliberately, via
+> `raise_exception`, which is a guard rather than a bug.
+>
+> Neither differentially invalidates a comparison, for two reasons. The breakage is uniform,
+> so no model was advantaged. And mlx-lm parses `arguments` into a mapping before it renders
+> the template, so through our serving path the string case never arises: verified against
+> the running server, which answers 200 and passes the arguments through intact.
+>
+> The exception is the one already recorded below. `chat_templates/qwen3.8-27b.jinja` was
+> **ours**, not the model's, and it re-encoded arguments with `tojson` instead of raising.
+> That is the one template in this table that differed from what every other model got, and
+> it differed silently.
+>
+> What this does establish: every one of these templates is only safe behind a server that
+> normalises before rendering. Any client or serving path that passes the OpenAI shape
+> through untouched gets an exception, not a degraded answer.
+
 > **The Qwen3.8-27B verdict rests on a template we have reason to doubt.** Recorded
 > 31 August 2026, after a colleague reported four known faults in the official Qwen
 > chat templates.

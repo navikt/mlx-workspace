@@ -2,7 +2,7 @@
   "R1": {
     "task": "R1",
     "kind": "read",
-    "seconds": 1.4,
+    "seconds": 2.3,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -11,6 +11,7 @@
     "exit": 1,
     "timed_out": false,
     "terms_found": [
+      "5",
       "2"
     ],
     "terms_expected": [
@@ -29,7 +30,7 @@
   "R2": {
     "task": "R2",
     "kind": "read",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -52,7 +53,7 @@
   "R3": {
     "task": "R3",
     "kind": "read",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -74,7 +75,7 @@
   "E1": {
     "task": "E1",
     "kind": "edit",
-    "seconds": 1.5,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -92,7 +93,7 @@
   "E3": {
     "task": "E3",
     "kind": "edit",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -110,7 +111,7 @@
   "M1": {
     "task": "M1",
     "kind": "edit",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -128,7 +129,7 @@
   "M2": {
     "task": "M2",
     "kind": "edit",
-    "seconds": 67.1,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -146,7 +147,7 @@
   "G2": {
     "task": "G2",
     "kind": "edit",
-    "seconds": 11.5,
+    "seconds": 2.2,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -164,7 +165,7 @@
   "D1": {
     "task": "D1",
     "kind": "read",
-    "seconds": 10.7,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -187,7 +188,7 @@
   "D2": {
     "task": "D2",
     "kind": "edit",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,
@@ -205,7 +206,7 @@
   "D3": {
     "task": "D3",
     "kind": "edit",
-    "seconds": 1.4,
+    "seconds": 2.1,
     "turns": 0,
     "tool_calls": 0,
     "tokens_in": 0,

@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+# mise description="Render every cached model's chat template against the shapes a coding agent actually sends, and report which ones break. Usage: mise run bench-template-check [--model qwen]"
+"""Check a model's chat template before trusting a benchmark run against it.
+
+A benchmark measures the model *and* the template it was served through, and
+the two are easy to confuse. We recorded "Qwen3.8-27B loops and times out" from
+runs whose template re-encoded tool arguments, so the model read its own history
+as a quoted string instead of an object. That verdict was published.
+
+Four shapes, each one something a coding agent produces every session:
+
+  tool arguments as a dict      what mlx-lm hands the template after parsing
+  tool arguments as a string    what the OpenAI API actually sends on the wire
+  a mid-dialogue system message  what a client injecting a reminder produces
+  a tool result with no trailing user message   an agent mid-loop
+
+A template that raises on any of these turns a working model into a failed
+benchmark, and the failure looks exactly like a weak model: no turns, no tool
+calls, nothing edited.
+
+Renders only. It never loads weights, so it is seconds per model rather than
+minutes, and it can be run over every model on the machine before deciding which
+results to trust.
+"""
+import argparse
+import json
+import pathlib
+import sys
+
+HUB = pathlib.Path.home() / ".cache/huggingface/hub"
+
+
+class _Deliberate(Exception):
+    """The template called raise_exception: it refused input it was written to
+    refuse. Reported separately from a crash, because the two mean opposite
+    things about whether the template is correct."""
+
+
+def _deliberate(msg):
+    raise _Deliberate(msg)
+
+CASES = {
+    "dict args": [
+        {"role": "user", "content": "go"},
+        {"role": "assistant", "tool_calls": [
+            {"type": "function", "function": {"name": "read", "arguments": {"path": "a.txt"}}}]},
+        {"role": "tool", "content": "ok"},
+    ],
+    "string args": [
+        {"role": "user", "content": "go"},
+        {"role": "assistant", "tool_calls": [
+            {"type": "function", "function": {"name": "read", "arguments": '{"path": "a.txt"}'}}]},
+        {"role": "tool", "content": "ok"},
+    ],
+    "mid-dialogue system": [
+        {"role": "system", "content": "You are helpful."},
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "hello"},
+        {"role": "system", "content": "New instruction."},
+        {"role": "user", "content": "go"},
+    ],
+    "tool result, no user after": [
+        {"role": "user", "content": "go"},
+        {"role": "assistant", "tool_calls": [
+            {"type": "function", "function": {"name": "read", "arguments": {"path": "a.txt"}}}]},
+        {"role": "tool", "content": "contents"},
+    ],
+}
+
+
+def templates():
+    """Every cached model's chat template, from either place it can live."""
+    for d in sorted(HUB.glob("models--*")):
+        for snap in (d / "snapshots").glob("*"):
+            jinja = snap / "chat_template.jinja"
+            if jinja.is_file():
+                yield d.name.replace("models--", "").replace("--", "/"), jinja.read_text()
+                break
+            cfg = snap / "tokenizer_config.json"
+            if cfg.is_file():
+                try:
+                    t = json.loads(cfg.read_text()).get("chat_template")
+                except (json.JSONDecodeError, OSError):
+                    t = None
+                if isinstance(t, str) and t.strip():
+                    yield d.name.replace("models--", "").replace("--", "/"), t
+                    break
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-template-check")
+    ap.add_argument("--model", default="", help="substring of the model id")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+
+    try:
+        from jinja2 import Template
+    except ImportError:
+        raise SystemExit("✗ needs jinja2: uv run --with jinja2 python3 .mise/tasks/bench-template-check")
+
+    if args.self_check:
+        # A template that cannot take string arguments must be reported broken.
+        t = Template("{% for k, v in messages[1].tool_calls[0].function.arguments|items %}{{k}}{% endfor %}")
+        try:
+            t.render(messages=CASES["string args"])
+            raise AssertionError("rendering string args through |items should have raised")
+        except AssertionError:
+            raise
+        except Exception:
+            pass
+        print("✓ self-check passed")
+        return 0
+
+    rows = []
+    for name, text in templates():
+        if args.model and args.model.lower() not in name.lower():
+            continue
+        try:
+            tpl = Template(text)
+        except Exception as e:
+            rows.append((name, {c: f"template will not parse: {type(e).__name__}" for c in CASES}))
+            continue
+        results = {}
+        for case, msgs in CASES.items():
+            try:
+                # raise_exception is supplied by transformers and mlx-lm, not by
+                # Jinja2. Without it every template that guards its inputs looks
+                # broken for a reason that is this checker's fault rather than
+                # the template's, and a deliberate guard reads the same as a bug.
+                tpl.globals["raise_exception"] = _deliberate
+                tpl.render(messages=msgs, add_generation_prompt=True)
+                results[case] = "ok"
+            except _Deliberate as e:
+                results[case] = f"refuses on purpose: {str(e)[:38]}"
+            except Exception as e:
+                results[case] = f"{type(e).__name__}: {str(e)[:44]}"
+        rows.append((name, results))
+
+    if not rows:
+        print("no cached model templates matched")
+        return 0
+
+    width = max(len(n) for n, _ in rows)
+    print(f"{'model':{width}} " + "  ".join(f"{c:>13}" for c in CASES))
+    broken = 0
+    for name, res in rows:
+        cells = []
+        for case in CASES:
+            r = res[case]
+            label = "ok" if r == "ok" else ("refuses" if r.startswith("refuses") else "BREAKS")
+            cells.append(f"{label:>13}")
+        print(f"{name:{width}} " + "  ".join(cells))
+        for case, r in res.items():
+            if r != "ok" and not r.startswith("refuses"):
+                print(f"{'':{width}}   {case}: {r}")
+                broken += 1
+    print(f"\n{broken} broken case(s) across {len(rows)} model(s).")
+    print("A benchmark run against a broken case measured the template, not the model.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
