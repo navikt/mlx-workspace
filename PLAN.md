@@ -55,6 +55,41 @@ within a minute of the change, for the first time.
   long-lived services, which nav-pilot is not.
   One real defect survives: the two `histogram_quantile` panels over `_bucket` series, where
   histograms were always cumulative and `sum_over_time` overcounts.
+**The audit changed the shape of this section.** A reusable script now asks the
+questions a panel cannot ask about itself — `scripts/telemetry-audit.py` in `navikt/copilot`
+([#548](https://github.com/navikt/copilot/pull/548)) — and the first run found that **17 of 26
+`nav_pilot_` metrics carry no `device_id` at all**, each collapsing to one series for the whole
+fleet, while `nav_pilot_info` sees 266 distinct devices. Aggregate totals survive that;
+per-device and per-version breakdowns, and `rate()`/`increase()`, do not. Four gauges are worse
+than unattributed — `client_available`, `install_present`, `installed_items`, `up_to_date` are
+last-write-wins across the fleet, so they read as fleet state and report whichever machine
+exported last.
+
+Ordered by what would be worst to leave:
+
+- ~~**Opting out still shipped the repo name**~~ — [#549](https://github.com/navikt/copilot/pull/549).
+  `DO_NOT_TRACK=1` gated only the device id; the collector endpoint, `COPILOT_OTEL_ENABLED=true`
+  and `nav.repo` all went out anyway. An opted-out developer arrived as repo-labelled rows with
+  no device id, indistinguishable from a lookup failure, so they could not be excluded after the
+  fact either. Trust, not data quality, which is why it went first.
+- **Add `device_id` to the nine instruments that keep it**, and **cut the two that do not earn
+  their place**: `nav_pilot_command_total` is label-for-label identical to
+  `nav_pilot_command_duration_ms_count` (same function, same `attrs` slice, one `Add` and one
+  `Record`), and `nav_pilot_local_server_total` is redundant once #547 lands — same call site,
+  same event, and its one stated purpose, catching `hung`, is unreachable because the call site
+  passes `Status()` while only `Health(ctx)` produces that value. Decided with Hans: cut those
+  two, keep `up_to_date` and `install_present` despite being derivable.
+- **`launch_error_total` counts Ctrl-C as a launch failure.** Every `*exec.ExitError` maps to
+  `launch_failed`, so the panel named "client launch failures" mostly shows normal session ends.
+- **Three commands report as `command="unknown"`**: `alpha`, `update`, `auto_sync` are not in
+  the allow-list and have no dot or hyphen to hit the escape hatch. Alpha adoption is invisible
+  while we are running an alpha.
+- **Sync's dry-run flag destroys its own `mode` label** — `"interactive_dry_run"` is not
+  allow-listed, so it falls back to `"non_interactive"` and an interactive dry run is recorded
+  as non-interactive.
+- **`launch` and `startup` share a histogram with `nav-pilot list`.** They block for the whole
+  session; default buckets top out at 10s, so both land in `+Inf` and any latency quantile is
+  really session length.
 - **Record ready time on the failure path too**, before the dashboard panel exists.
   `RecordLocalReadySeconds` fires only after `srv.Start` returns, so a start that times out
   or is interrupted records nothing and the slowest starts are missing from the histogram.
