@@ -9,17 +9,30 @@ Copilot premium request each.
 
 ## The decision
 
-Ship one model: **`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`** under mlx-lm, thinking disabled. It does
-eleven routine operations inside a real Nav Kotlin service at a 12.7s median, verifying 4 of the 8
-checkable ones, with no loops and no timeouts.
+Ship one model: **`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`** under mlx-lm, thinking disabled,
+with `Qwen3.8-27B` held back because it hangs. The reasoning, the rejected candidates and how
+far the numbers can be trusted are in
+[reports/alpha-model-decision.md](reports/alpha-model-decision.md), which is the authority; this
+paragraph is a pointer and should stay one sentence long so the two cannot drift apart.
 
-`Qwen3.8-27B` is held back. It writes better code, and across three quantizations it timed out on 3
-to 4 of 11 tasks and looped on every one. A model that hangs after editing a file is worse for a
-first alpha user than no local model at all.
+## Where things are
 
-- Measurements and per-model verdicts: [MODELS.md](MODELS.md)
-- How the measuring is done, and the bug behind each rule: [BENCHMARKING.md](BENCHMARKING.md)
-- Written conclusions and the decision record: [reports/](reports/README.md)
+| | Holds | Expect |
+|---|---|---|
+| [`reports/`](reports/README.md) | Finished write-ups | Reproducible, dated, safe to link from outside |
+| [`working/`](working/) | Plans and trackers in progress | To change under you. Do not link from outside |
+| [`runbooks/`](runbooks/) | Operational guides | To be read by someone on call, in a hurry |
+| [`archive/`](archive/) | Superseded documents | To be wrong. Kept so we do not repeat ourselves |
+| [`MODELS.md`](MODELS.md) | The append-only run log | To grow, never to be edited in place |
+| [`BENCHMARKING.md`](BENCHMARKING.md) | How the harnesses work | To explain the bug behind each rule |
+| [`bench/`](bench/) | Harnesses, targets, specs and raw result JSON | |
+| [`workspaces/`](workspaces/README.md) | Benchmark checkouts, almost all gitignored | `git status` noise here to be a run, not a break |
+| [`profiles/`](profiles/) | One file per model build | |
+| `manifest/` | `models.json`, generated from `profiles/` **for nav-pilot to fetch** | To be an external interface: do not restructure |
+
+Naming: SHOUTING.md only at the root, and only for manuals covering the whole repo. Everything
+inside a directory is kebab-case. A date suffix means the file is a snapshot of one day and
+will not be updated.
 
 ## How it fits together
 

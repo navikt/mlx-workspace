@@ -16,6 +16,17 @@ been renamed, and one is an aider chat log that should never have been committed
 - **Superseded** means it was one of the above and no longer holds. It is kept because
   deleting the record of a wrong conclusion is how a team repeats it.
 
+**Corrected after review.** That rule bent on its first day. `MODELS.md` is neither finished
+nor working: it is an append-only log whose entries must never change, which is the opposite of
+"expect this to change". So is a runbook. The missing category is **living**: documents that
+grow but do not migrate, because they are never done and never drafts. They stay where they
+are and say so in their own first line.
+
+`working/` is half a trap, and the proof is that this file is in it. The fix is not more
+structure but an exit rule: anything in `working/` untouched for three weeks is either
+finished into `reports/` or moved to `archive/`, decided in one line. Four files today; the
+trap only springs if that number only ever grows.
+
 Everything else about the layout follows from that.
 
 ## What each document actually is

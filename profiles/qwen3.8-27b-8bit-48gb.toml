@@ -17,7 +17,7 @@ MLX_SERVER_TYPE            = "omlx"
 MLX_CACHE_BYTES            = "4294967296"
 MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "32768"
-MLX_CHAT_TEMPLATE          = "qwen_template.jinja"
+MLX_CHAT_TEMPLATE          = "chat_templates/qwen3.8-27b.jinja"
 MLX_OPENCODE_CONTEXT       = "65536"
 MLX_OPENCODE_OUTPUT        = "8192"  # thinking model: 4096 truncated mid-<think> (finish_reason=length)
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"

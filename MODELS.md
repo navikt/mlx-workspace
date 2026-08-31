@@ -1,5 +1,11 @@
 # Model evaluation notes
 
+> **Append-only run log.** Entries record what happened on a date and are corrected by
+> appending, never by editing: a result that changed silently is worse than a wrong one.
+> Finished analyses built on this live in [`reports/`](reports/); superseded eras move to
+> [`archive/`](archive/). This file is neither finished nor a draft, so it does not migrate.
+
+
 Observations from running models locally on Apple Silicon and driving them from `opencode` /
 `aider`. Every measurement is tagged with the rig it was taken on. Numbers do not transfer between
 rigs. How the benchmarks are run, verified and quarantined is in
