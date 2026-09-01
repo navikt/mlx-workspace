@@ -240,6 +240,18 @@ So the honest split:
 That is the case for the shipped arrangement — 3.6 as default, 3.8 offered — and it is a better
 case than "3.8 is worse", which is what we would have written from one run each.
 
+**One run is not a measurement, and this table was built from single runs.** Every conclusion
+reversed here reversed because a second run existed, not because anything was re-reasoned. The
+4-bit went from "worse than the default" to "the best result on the suite" on its second
+sample; the 8-bit's published 2 of 8 turned out to be the better half of a pair whose other
+half verified 1 of 10. Treat any row with n=1 as an anecdote with a number attached.
+
+**The standing rule from here: n>=5 before a model's row informs a recommendation**, and the
+range goes in the text rather than the median. For a model whose spread is 1 to 5 of 8, a
+median describes no run that actually happened. `mise run bench-models -- <profile>` is
+repeatable and writes one file per run, so the cost of the fifth sample is wall clock, not
+work.
+
 **`qwen3.8-27b-8bit` is not in this table on purpose.** Two runs verified nothing, with every
 task timing out having completed **zero turns**, including a read task the 4-bit answers in
 seconds. Two confounds sit on that result and both are ours: a `reasoning_effort: medium` pin

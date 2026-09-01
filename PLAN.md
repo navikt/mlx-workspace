@@ -236,6 +236,10 @@ Linux and would hit it first.
 
 ## The rule
 
+**One run is not a measurement.** Every reversal on the night of 31 August came from a second
+sample, not from better thinking. n>=5 before a number informs advice, and publish the range
+rather than the median whenever the two disagree about what happened.
+
 Two questions decide whether something belongs above the line: **are we telling anyone
 something we cannot support**, and **can the evidence be reconstructed by someone else**. The
 suite lost a run this week and the table built from it was wrong; that class of problem
