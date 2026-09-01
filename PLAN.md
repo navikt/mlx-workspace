@@ -101,7 +101,7 @@ guard against a correctly configured server is now the most interesting open que
 - **Qwen3.8-8bit is unmeasured.** Two runs verified nothing with zero turns per task, under two
   confounds of ours: a `reasoning_effort: medium` pin added the same night, and a 420s task cap
   against the 900s its historical figure used. One run with the pin removed settles it.
-- **The variance is the finding, not a nuisance.** Qwen3.8-4bit ran 1 of 8 and then 5 of 8 two
+- **The variance is the finding, not a nuisance.** Qwen3.8-4bit ran 5, 5, 6 and 7 of 8 across four clean runs, against the default's 3, 3, 3, 4, 4 two
   hours apart on the same machine. n=2 is enough to know it is unstable and not enough to say
   what it is worth. n>=5 on both models is the next measurement that would change advice.
 

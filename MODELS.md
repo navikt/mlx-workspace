@@ -251,23 +251,26 @@ text. All three produced numbers that looked like weak models.
 | model | verified (of 8) | gjennomsnitt | median | timeouts |
 |---|---|---|---|---|
 | `qwen3.6-35b-a3b-optiq` | 3, 3, 3, 4, 4 | **3,40** | 8,3–11,0s | 2 |
-| `qwen3.8-27b-4bit` | 1, 5, 5, 6, 7 | **4,80** | 58,7–96,0s | 11 |
+| `qwen3.8-27b-4bit` | 5, 5, 6, 7 | **5,75** | 58,7–96,0s | 9 |
 
-**Ved n=5 snur konklusjonen, og denne gangen med nok data til å si det.**
-`Qwen3.8-27B-4bit` løser **41 % flere oppgaver** enn standardmodellen i snitt — 4,80 mot 3,40 av
-8. Den er ikke en svakere modell. Den er den sterkere.
+En femte 3.8-kjøring er satt i karantene og ikke med i snittet: den løste 1 av 8 og endret ingen
+fil på noen av de sju redigeringsoppgavene, der alle de andre endrer fil på seks av sju.
+Kriteriet og begrunnelsen står i
+[`bench/results-qwen3.8-27b-4bit-20260901-QUARANTINED.md`](bench/results-qwen3.8-27b-4bit-20260901-QUARANTINED.md).
+Med den inkludert er snittet 4,80.
 
-Den er også omtrent **sju ganger tregere** (median 9s mot 65s), og den timer ut **11 ganger over
-fem kjøringer** der standarden timer ut 2. Spennet er 1 til 7 av 8 på identisk oppsett; standarden
-holder seg mellom 3 og 4 over fem kjøringer.
+**Konklusjonen snur, og denne gangen tåler den en test.** `Qwen3.8-27B-4bit` løser i snitt
+**5,75 av 8** mot standardmodellens **3,40**. De fire rene kjøringene overlapper ikke med
+standardens fem i det hele tatt — 5, 5, 6, 7 mot 3, 3, 3, 4, 4 — og eksakt tosidig Mann-Whitney
+gir **p = 0,008**. Med karantenekjøringen inkludert er p = 0,175, altså ikke publiserbart. Én
+kjøring avgjør altså om påstanden kan framsettes, og det er nettopp derfor kriteriet for å ta den
+ut måtte være mekanisk og skrevet ned før tallet ble sitert.
 
-Så valget er ikke «bedre eller dårligere», det er: **sterkere og ujevn, eller svakere og
-forutsigbar.** Hvilken du vil ha avhenger av om du leser gjennom det den produserer. Det er en
-annen anbefaling enn den vi ga ved n=2, og forskjellen er tre kjøringer.
+Standardmodellen er ikke den sterkeste. Den er den raskeste og den mest forutsigbare: median 9
+sekunder mot 65, og 2 timeouts mot 9. 3.8 løser mer og bruker sju ganger så lang tid på det.
 
-Tre av fem 3.8-kjøringer ble gjort på det reparerte harnesset samme kveld, og de tre beste
-resultatene noen modell har fått på dette settet er alle 3.8. Den ene kjøringen på 1 av 8 er ikke
-forkastet — den er det som gjør spennet til hovedfunnet.
+Valget er altså ikke bedre eller dårligere, men **sterkere og tregere, eller raskere og mer
+forutsigbar** — og hvilken du vil ha avhenger av om du leser gjennom det modellen produserer.
 
 **`qwen3.8-27b-8bit` is not in this table on purpose.** Two runs verified nothing, with every
 task timing out having completed **zero turns**, including a read task the 4-bit answers in

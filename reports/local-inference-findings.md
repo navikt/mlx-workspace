@@ -499,10 +499,10 @@ The row belongs in a compatibility note, not in a defect list.
 **Fresh runs on 1 September replace the rejection.** Two samples each, on a harness repaired
 the same night:
 
-| model | run 1 | run 2 | median |
+| model | verified of 8, five runs | mean | median |
 |---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` | 4 of 8 | 3 of 8 | 10s |
-| `qwen3.8-27b-4bit` | 1 of 8 | **5 of 8** | 70s |
+| `qwen3.6-35b-a3b-optiq` | 3, 3, 3, 4, 4 | 3.40 | 10s |
+| `qwen3.8-27b-4bit` | 5, 5, 6, 7 (one quarantined) | **5.75** | 70s |
 
 The 4-bit's second run is the best single result recorded on this suite, including the task it
 was previously written up as looping on. Its first, two hours earlier on the same machine,
