@@ -116,7 +116,12 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   # it) but named every result file after the first profile, and each run
   # silently overwrote the one before. Three models, one filename, two runs lost
   # until they were dug out of bench/.previous.
-  if BENCH_RUN_TAG="$TAG" mise run bench-cheap-ops >>"$LOG" 2>&1; then
+  # PYTHONUNBUFFERED, because this runs unattended and the log is the only way
+  # to tell a queue that is working from one that has hung. Switching this call
+  # from `python3 -u` to `mise run` dropped the -u, and the next overnight queue
+  # wrote nothing for 65 minutes while it was in fact grinding through restarts.
+  # A silent queue and a dead queue must not look the same at 3am.
+  if BENCH_RUN_TAG="$TAG" PYTHONUNBUFFERED=1 mise run bench-cheap-ops >>"$LOG" 2>&1; then
     if ls "bench/results-$profile-$TAG.json" >/dev/null 2>&1; then
       say "✓ $profile complete"
     else
