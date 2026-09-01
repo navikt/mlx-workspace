@@ -65,6 +65,23 @@ def sh(cmd, cwd=None, timeout=1800, env=None):
 
 def ensure_clone():
     if (repo / ".git").is_dir():
+        # Existing checkouts are not trusted. Two faults came through here: a
+        # frontend run left a TypeScript repo in a Kotlin workspace, and the ref
+        # said "master" so workspaces drifted to three different commits — the
+        # two models in the headline comparison were solving different code.
+        want_repo = CFG["repo"].rsplit("/", 1)[-1]
+        have = sh(["git", "remote", "get-url", "origin"], cwd=repo).stdout.strip()
+        if not have.endswith(want_repo):
+            raise SystemExit(
+                f"\u2717 {repo} is a checkout of {have or 'nothing'}, and the tasks need {want_repo}.\n"
+                f"  Remove it and let the harness clone the right one.")
+        head = sh(["git", "rev-parse", "HEAD"], cwd=repo).stdout.strip()
+        if head != CFG["ref"]:
+            f = sh(["git", "fetch", "-q", "--depth", "1", "origin", CFG["ref"]], cwd=repo, timeout=600)
+            if f.returncode != 0:
+                raise SystemExit(f"\u2717 cannot fetch the pinned ref {CFG['ref'][:8]}: {f.stderr[-300:]}")
+            sh(["git", "checkout", "-q", "FETCH_HEAD"], cwd=repo)
+            print(f"\u2192 {repo.parent.name}: moved to the pinned commit {CFG['ref'][:8]}")
         return
     ws.mkdir(parents=True, exist_ok=True)
     print(f"→ Cloning {CFG['repo']} at {CFG['ref']}")
@@ -165,11 +182,24 @@ def verify(task):
         return r.returncode == 0, "suite passes" if r.returncode == 0 else "suite failed"
     if kind == "rename":
         old, new = task["old_symbol"], task["new_symbol"]
-        hits = sh(["grep", "-rn", old, "src"], cwd=repo).stdout.strip()
-        if hits:
-            return False, f"old symbol still present ({len(hits.splitlines())} refs)"
+        # grep exits 1 for "no match" and 2 for an error. Treating 2 as "no
+        # hits" turns a broken grep into a pass, so the two are separated.
+        g = sh(["grep", "-rn", old, "src"], cwd=repo)
+        if g.returncode >= 2:
+            return False, f"grep failed while checking the old symbol: {g.stderr.strip()[:80]}"
+        if g.stdout.strip():
+            return False, f"old symbol still present ({len(g.stdout.strip().splitlines())} refs)"
+        # The new symbol has to exist. Without this, deleting every reference to
+        # the old one passes: the grep finds nothing and the tree still compiles
+        # if the symbol was unused outside its own definition. A rename that
+        # renames nothing scored the same as a rename that worked.
+        gn = sh(["grep", "-rn", new, "src"], cwd=repo)
+        if gn.returncode >= 2:
+            return False, f"grep failed while checking the new symbol: {gn.stderr.strip()[:80]}"
+        if not gn.stdout.strip():
+            return False, "old symbol gone but the new one was never introduced"
         r = build("compile")
-        return r.returncode == 0, "renamed and compiles" if r.returncode == 0 else "renamed but broken"
+        return r.returncode == 0, f"renamed to {new} and compiles" if r.returncode == 0 else "renamed but broken"
     return None, "needs a human"
 
 

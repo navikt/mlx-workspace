@@ -1,6 +1,6 @@
 {
   "repo": "https://github.com/navikt/isoppfolgingstilfelle.git",
-  "ref": "master",
+  "ref": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
   "jdk": "~/.local/share/mise/installs/java/temurin-21",
   "tasks": [
     {
@@ -88,5 +88,6 @@
       "verify": "test",
       "prompt": "Write a JUnit 5 test that builds a KafkaIdenthendelseDTO with three identifikatorer, one AKTORID, one inactive FOLKEREGISTERIDENT and one active FOLKEREGISTERIDENT, then asserts that getActivePersonident() returns the active one and getInactivePersonidenter() returns exactly the inactive one. Match the style of the existing tests under src/test/kotlin."
     }
-  ]
+  ],
+  "_ref_note": "Pinned to a commit, not a branch. It said \"master\" and the workspaces drifted to three different commits: the two models in the headline comparison were solving different code, and one task threads a field into a class that differs between them. A moving ref makes every cross-model number incomparable."
 }

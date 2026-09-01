@@ -78,9 +78,48 @@ def cplt_argv(workspace_dir: Path, repo_root: Path, server_port: str = "8080",
         # "Unexpected error: FileSystem.writeFile".
         "--allow-write", str(BENCH_CONFIG_HOME),
     ]
+    argv += toolchain_grants(repo_root)
     argv += extra or []
     return argv
 
+
+def toolchain_grants(repo_root: Path) -> list[str]:
+    """Let the sandboxed model actually build and test.
+
+    Without these, `./gradlew` reaches a mise shim, the shim reads config
+    outside the boundary, and the model gets "Operation not permitted (os error
+    1)". We measured 2,672 of those across the recorded transcripts against
+    2,176 mentions of gradlew: essentially every attempt to compile or run a
+    test was refused by us, not by the code.
+
+    So `verify=compile` and `verify=test` were not measuring what they claim.
+    They were measuring whether a model can write correct Kotlin with no
+    compiler and no test run — blind. A developer has both, which makes the
+    numbers a poor guide to the thing they were collected to decide.
+
+    These grants are deliberately toolchain-only. The isolation that has
+    actually caught something stays: sibling workspaces stay unreadable, and
+    the machine outside these paths stays unwritable. A model that reads a
+    sibling's finished solution is the failure this sandbox exists for, and
+    nothing here opens that.
+    """
+    home = Path.home()
+    grants: list[str] = []
+    for path in (home / ".local/share/mise", home / ".config/mise"):
+        if path.exists():
+            grants += ["--allow-read", str(path)]
+    # Gradle and Maven write caches and daemon state; read access alone fails.
+    for path in (home / ".gradle", home / ".m2"):
+        if path.exists():
+            grants += ["--allow-write", str(path)]
+    # mise resolves the toolchain from config at the repo root, one level above
+    # the sandbox boundary. Granted per file rather than by directory so a
+    # sibling workspace does not come with it.
+    for name in ("mise.toml", "mise.local.toml", ".mise.toml"):
+        cfg = repo_root / name
+        if cfg.exists():
+            grants += ["--allow-read", str(cfg)]
+    return grants
 
 def warn_unsandboxed(stream) -> None:
     print("⚠  cplt not found — launching unsandboxed.", file=stream)
