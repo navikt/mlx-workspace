@@ -23,6 +23,28 @@ cd "$(dirname "$0")/../.."
 
 [ "$#" -gt 0 ] || { echo "usage: mise run bench-models -- <profile> [<profile> ...]"; exit 2; }
 
+# One queue per machine. Two overlapping queues share port 8080, and each one's
+# server-stop kills the other's server mid-task — the victim then records
+# "no changes made" in seconds and it reads as a weak model. It has happened
+# twice: three queues at 00:56 on 1 September, and again at 00:27 on the 2nd,
+# the second time within an hour of a review warning about it.
+#
+# mkdir is the lock because it is atomic on every filesystem that matters, and
+# the PID inside says who holds it.
+LOCKDIR=".bench-logs/.queue.lock"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null || echo "unknown")
+  if kill -0 "$holder" 2>/dev/null; then
+    echo "✗ another benchmark queue is running (pid $holder). Two queues share one port and"
+    echo "  will kill each other's servers mid-task. Wait for it, or stop it first."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR" && mkdir "$LOCKDIR"
+fi
+echo $$ > "$LOCKDIR/pid"
+trap 'rm -rf "$LOCKDIR"' EXIT INT TERM
+
 STAMP="$(date +%Y%m%d-%H%M%S)"
 LOG=".bench-logs/models-$STAMP.log"
 mkdir -p .bench-logs
