@@ -123,6 +123,29 @@ satt i etterkant er en beskrivelse, ikke en test.
 «Klart» betyr her: forskjell større enn spennet vi allerede har målt mellom identiske kjøringer
 av samme profil. Det spennet er 1 til 7 av 8 for Qwen3.8-4bit, så terskelen er høy med vilje.
 
+### Kjøringene som må gjøres
+
+Fire, i rekkefølge. De to første avgjør; de to siste validerer implementasjonen.
+
+| # | Kjøring | Svarer på |
+|---|---|---|
+| 1 | `qwen3.8-27b-8bit` (oMLX MTPLX), standard oppsett | Slår MTPLX mlx-lm 8-bit i det hele tatt? |
+| 2 | Samme, med prefiks-cache av | Er gevinsten MTP eller cachen? Dette er beslutningen. |
+| 3 | Samme modell, samme vekter, gjennom **mlx-lm** | Kontrollen. Uten den sammenligner vi to runtimes *og* to konfigurasjoner samtidig. |
+| 4 | `qwen3.8-27b-8bit-nopin` | Var kollapsen 1. september vår `reasoning_effort`-pin eller modellen? |
+
+Kjøring 3 er den lette å hoppe over og den som gjør de andre tolkbare. Vi har allerede
+`qwen3.8-27b-8bit-mlx` som profil, så det er ingen ny konfigurasjon — bare disiplin.
+
+Alle fire kjøres med `mise run bench-models`, som nå nekter å måle en feil workspace, en modell
+serveren ikke faktisk serverer, eller en server som svarer tull. Alle tre feilene har produsert
+publiserte tall før de ble fanget.
+
+Etter implementasjon, før pilot: én kjøring gjennom **nav-pilot selv**, ikke harnesset. Harnesset
+og nav-pilot har vist seg å kjøre forskjellige konfigurasjoner én gang allerede
+([#563](https://github.com/navikt/copilot/pull/563)), og det er nøyaktig den feilen en ny backend
+kan gjenta i det stille.
+
 ### Arbeidet, hvis det bygges
 
 `Backend`-feltet finnes i manifestet på hver eneste oppføring, står på `"mlx-lm"`, og **leses
@@ -140,6 +163,18 @@ null steder**. Det var ment som nettopp denne kroken.
 - `backend`-attributt på de lokale instrumentene, fra første commit. Uten det blander
   histogrammet to populasjoner igjen, som er feilen vi brukte 31. august på å rette.
 - Tving `--host 127.0.0.1` og `--api-key`, og håndter `omlx.ai`-opplastingen.
+
+**Rekkefølge, fire faser.** Hver fase er sendbar for seg og etterlater repoet grønt.
+
+1. **Allowlist først, uten oMLX.** Valider `Backend` i `Parse` mot `{"mlx-lm"}` alene. Da er
+   hullet lukket før noe nytt kan gå gjennom det, og manifestet kan ikke velge binær. En halv dag.
+2. **Oversettelseslaget.** Modell-id per backend, de fire stedene, med test. Fortsatt bare
+   mlx-lm i allowlisten, så ingenting endrer oppførsel ennå. En halv dag.
+3. **Backenden.** `EnsureEnv` med eget venv og sha256-pinnet hjul, `Server.Start`-forgrening,
+   `serverFlags` per backend, `model_settings.json`, `--host`/`--api-key`. Legg `"omlx"` i
+   allowlisten sist, som siste linje i siste commit. En til to dager.
+4. **Instrumentering og pilot.** `backend`-attributt fra første commit, ikke etterpå. Så én
+   liten ring, med `omlx.ai`-egress blokkert.
 
 Anslag: to til tre dager, dominert av venv-provisjoneringen og settings-filen. Guarden,
 loop guard, `saw_traffic`, wired-limit og weights-sjekken er uendret — det er utbyttet av at
