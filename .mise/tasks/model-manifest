@@ -54,7 +54,7 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "Stronger than the default and far less reliable. Across five runs it verified 1, 5, 5, 6 and 7 of 8 — an average of 4.8 against the default's 3.4, so it solves about 41% more. It is also roughly seven times slower, a median task of 65 seconds against 9, and it timed out 11 times over those five runs where the default timed out twice. The choice is not better or worse: it is stronger and erratic, or weaker and predictable. Take this one if you read through what it produces, and the default if you want to trust it without looking. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
+        "expect": "Solves more than the default and takes much longer doing it. Four clean runs verified 5, 5, 6 and 7 of 8, against the default's 3, 3, 3, 4 and 4 — no overlap between them at all. It is also about seven times slower, a median task of 65 seconds against 9, and it hits the seven-minute cap on roughly one task in five where the default almost never does. A fifth run is excluded and said so in the repo: it verified 1 of 8 having edited no file on any task, which is a harness fault rather than the model. So the choice is speed against depth, not better against worse. Take this one if you read through what it produces and can wait; take the default if you want an answer in ten seconds. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
