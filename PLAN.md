@@ -180,7 +180,38 @@ Anslag: to til tre dager, dominert av venv-provisjoneringen og settings-filen. G
 loop guard, `saw_traffic`, wired-limit og weights-sjekken er uendret — det er utbyttet av at
 alt ligger bak en proxy.
 
-## 5. Measurements that are not finished
+## 5. Modellkrav per maskin
+
+Besluttet 2. september. Grensen på 36 GB blir stående, fordi målet er 48 GB-maskiner. Når
+48 GB er ferdig undersøkt er 64 GB neste, og da trenger manifestet å kunne si hvilke maskiner
+en modell passer på — slik at en 48 GB-maskin ikke får tilbudt en modell den ikke kan kjøre.
+
+**Det finnes allerede halvveis.** `CheckWiredLimit` leser `hw.memsize` og nekter når den
+påkrevde grensen ville la for lite stå igjen til resten av systemet. Men:
+
+- **`min_ram_gb` leses ingen steder.** Feltet står i skjemaet, er med i hver eneste oppføring,
+  og har null lesere utenom typedefinisjonen — nøyaktig samme form som `backend` hadde.
+- **Modellvelgeren filtrerer ikke.** `withLocalModels` lister alle lokale modeller uansett om
+  maskinen kan kjøre dem, så en 48 GB-maskin får tilbudt modeller den vil avvise ved start.
+- **De oppgitte tallene stemmer ikke.** `qwen3.8-27b-8bit-48gb` oppgir `model_vram_gb = 27`.
+  Målt residens er **32,58 GB**, og oMLX' preflight-vakt nekter et 24-tokens prompt på en
+  36 GB-grense. En kravsjekk er ikke bedre enn tallene den sjekker mot, så de målte tallene må
+  inn i profilene før sjekken har verdi.
+
+**Arbeidet, i rekkefølge:**
+
+1. Håndhev `min_ram_gb` der `wired_limit_gb` allerede håndheves, med samme feilform.
+2. La velgeren merke — ikke skjule — modeller maskinen ikke kan kjøre. Å skjule dem gjør at en
+   utvikler som leser dokumentasjonen ikke finner modellen og ikke får vite hvorfor.
+3. Rett de oppgitte tallene mot måling, og legg til at et avvik mellom oppgitt og målt residens
+   er en feil i profilen, ikke i modellen.
+4. Først da er 64 GB-runden meningsfull: da kan manifestet bære modeller for begge klassene
+   samtidig, og hver maskin ser hva den kan kjøre.
+
+**MTPLX-funnet står som resultat:** bygget passer ikke 48 GB-kontrakten. Det er et svar på
+oMLX-spørsmålet for målmaskinvaren, uavhengig av hva prefiks-cachen viser på en større maskin.
+
+## 6. Measurements that are not finished
 
 **Rerun the scale ladder at n≥10.** Three runs say the pass rate *rises* with size — 124
 references across 59 files is the only rung that passes every time — which is the opposite of
@@ -202,7 +233,7 @@ Preconditions, both now met: the template passes all four shapes in
 `mise run bench-template-check`, and the runner asserts the server's reported model matches
 the profile before measuring.
 
-## 6. Suite hygiene that compounds
+## 7. Suite hygiene that compounds
 
 - **Move the model-identity assertion into the harness.** It lives in a scratch script and it
   is the only reason we know a run was served the wrong model. A result taken without it is a
@@ -212,7 +243,7 @@ the profile before measuring.
 - **Next.js target**: not measurable for compile-verified rungs, because the repo has no
   typecheck script and bare `tsc` fails on an untouched tree. Suite-verified rungs work.
 
-## 7. Open questions worth an experiment
+## 8. Open questions worth an experiment
 
 From [`working/limits-benchmark-plan.md`](working/limits-benchmark-plan.md), in the order they
 would change a decision:
@@ -225,7 +256,7 @@ would change a decision:
 - **A bigger model.** This machine has 128 GB; the 48 GB ceiling was the alpha target's. The
   question is not whether a larger model is better but whether it moves the break-even.
 
-## 8. Bringing your own model
+## 9. Bringing your own model
 
 Asked for on 1 September: let people run their own models, and pick up an Ollama or similar
 runtime they already have. Both are worth doing and the second is smaller than it sounds,
@@ -296,7 +327,7 @@ model before offering it, and say plainly which shapes it fails. Also the reason
 finding to [#521](https://github.com/navikt/copilot/issues/521), which proposes Ollama for
 Linux and would hit it first.
 
-## 9. Filed, owned elsewhere, not ours today
+## 10. Filed, owned elsewhere, not ours today
 
 - [#521](https://github.com/navikt/copilot/issues/521) Linux support. Needs the requester's
   hardware first. **Add the template finding to it**: ten of eleven model templates break on
