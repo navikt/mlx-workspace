@@ -515,8 +515,10 @@ existing, not from better reasoning. This report's model table was built from si
 single runs are anecdotes with numbers attached. n>=5 before a row informs advice, and publish
 the individual runs rather than a summary statistic, so a reader can see the spread the summary
 hides. The clearest case: Qwen3.8's average moved from 4.80 to 5.75 on one run being quarantined,
-and the difference between those two numbers is the difference between p = 0.175 and p = 0.008 —
-between a claim that cannot be published and one that can. A mean alone shows none of that.
+and the difference between those two numbers is the difference between p = 0.175 and p = 0.016 —
+between a claim that cannot be published and one that barely can. 0.016 is the floor: with four
+runs against five there are 126 arrangements, so no two-sided p below 2/126 is obtainable. It
+reports that the sets do not overlap, and nothing more precise than that. A mean alone shows none of that.
 Outstanding samples are tracked in
 [navikt/copilot#564](https://github.com/navikt/copilot/issues/564).
 

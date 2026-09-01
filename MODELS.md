@@ -262,9 +262,14 @@ Med den inkludert er snittet 4,80.
 **Konklusjonen snur, og denne gangen tåler den en test.** `Qwen3.8-27B-4bit` løser i snitt
 **5,75 av 8** mot standardmodellens **3,40**. De fire rene kjøringene overlapper ikke med
 standardens fem i det hele tatt — 5, 5, 6, 7 mot 3, 3, 3, 4, 4 — og eksakt tosidig Mann-Whitney
-gir **p = 0,008**. Med karantenekjøringen inkludert er p = 0,175, altså ikke publiserbart. Én
-kjøring avgjør altså om påstanden kan framsettes, og det er nettopp derfor kriteriet for å ta den
-ut måtte være mekanisk og skrevet ned før tallet ble sitert.
+gir **p = 0,016**. Med karantenekjøringen inkludert er p = 0,175.
+
+**Korrigert 2. september:** vi publiserte først p = 0,008 her. Det var feil — utregningen talte
+den samme ekstremordningen i begge haler. Med fire mot fem kjøringer finnes det 126 mulige
+ordninger, så den minste tosidige p-verdien dette designet *kan* produsere er 2/126 = 0,016.
+Vi rapporterer altså gulvet, ikke en effektstørrelse: det sier at settene ikke overlapper, og
+ingenting mer presist enn det. Å skille en forskjell på én oppgave av åtte med rimelig styrke
+krever i størrelsesorden 30 kjøringer per modell, ikke fem.
 
 Standardmodellen er ikke den sterkeste. Den er den raskeste og den mest forutsigbare: median 9
 sekunder mot 65, og 2 timeouts mot 9. 3.8 løser mer og bruker sju ganger så lang tid på det.
