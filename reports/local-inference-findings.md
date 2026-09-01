@@ -513,8 +513,11 @@ while `Qwen3.6-35B-A3B-OptiQ` remains the default on the strength of its 216 sam
 **The methodological point outranks the model one.** Every reversal here came from a second run
 existing, not from better reasoning. This report's model table was built from single runs, and
 single runs are anecdotes with numbers attached. n>=5 before a row informs advice, and publish
-the range rather than the median when the two disagree — for a model spanning 1 to 5 of 8, the
-median describes no run that happened. Outstanding samples are tracked in
+the individual runs rather than a summary statistic, so a reader can see the spread the summary
+hides. The clearest case: Qwen3.8's average moved from 4.80 to 5.75 on one run being quarantined,
+and the difference between those two numbers is the difference between p = 0.175 and p = 0.008 —
+between a claim that cannot be published and one that can. A mean alone shows none of that.
+Outstanding samples are tracked in
 [navikt/copilot#564](https://github.com/navikt/copilot/issues/564).
 
 ## 8. Limitations
