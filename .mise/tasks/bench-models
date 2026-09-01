@@ -92,8 +92,18 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
 
   # Write-once results. The harness overwrote a canonical filename once and the
   # table built from it was wrong in two places before anyone noticed.
-  if BENCH_RUN_TAG="$STAMP" python3 -u .mise/tasks/bench-cheap-ops >>"$LOG" 2>&1; then
-    say "✓ $profile complete"
+  # Through mise, not python3 directly. Calling the script straight inherits the
+  # environment this runner started with, so MLX_ACTIVE_PROFILE stays whatever it
+  # was at launch: the suite served the right model (mise run server does reload
+  # it) but named every result file after the first profile, and each run
+  # silently overwrote the one before. Three models, one filename, two runs lost
+  # until they were dug out of bench/.previous.
+  if BENCH_RUN_TAG="$STAMP" mise run bench-cheap-ops >>"$LOG" 2>&1; then
+    if ls "bench/results-$profile-$STAMP.json" >/dev/null 2>&1; then
+      say "✓ $profile complete"
+    else
+      say "✗ $profile: suite reported success but wrote no bench/results-$profile-$STAMP.json"
+    fi
   else
     say "✗ $profile: suite failed, see $LOG"
   fi
