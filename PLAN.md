@@ -69,7 +69,43 @@ single observation is 114 days. And `histogram_quantile` over `sum_over_time` of
 correct for the once-per-process instruments, which is the opposite of what this file said
 before the measurement.
 
-## 3. Measurements that are not finished
+## 3. The night of 31 August, and what it left
+
+Three harness faults found in one night, all of which produced numbers that looked like weak
+models, none of which raised an error:
+
+- **The default model's Kotlin workspace held a TypeScript repo.** A frontend run reused
+  `workspaces/qwen3.6-35b-a3b-optiq/kotlin`. The suite scored the shipped default 0 of 11 on
+  tasks it passes 4 to 6 of 8 on, every failure reading "no changes made". The model was right:
+  the symbols were not there. `bench-models` now refuses a workspace whose remote is not the
+  repo `tasks.json` names.
+- **`bench-models` named every result after the first profile in the queue**, because it called
+  the suite with `python3` rather than `mise run` and inherited the launch-time profile. Three
+  models wrote one filename, each overwriting the last. Recovered from `bench/.previous` only
+  because the harness backs up before writing.
+- **`MLX_CHAT_TEMPLATE` never worked on the mlx-lm path.** `--chat-template` takes the template
+  text; we passed a path. The path became the template, rendered to itself, and every prompt
+  became a filename. `profiles/ministral-3-14b.toml` has said `status = "broken"` with
+  "hallucinated YAML (fake template file paths), root cause unclear" since June. That was this.
+
+And one in production, worth more than the three: **manifest params never reached the server**
+([#563](https://github.com/navikt/copilot/pull/563)). nav-pilot passed them as environment
+variables and mlx-lm reads one variable in its whole package. So the fleet has been running
+with thinking on and greedy decoding while every benchmark ran with thinking off at
+temperature 0.6. The loop guard was built for runs of 203 and 220 identical tool calls measured
+in that state, and greedy decoding is the documented cause of exactly that. **Re-examining the
+guard against a correctly configured server is now the most interesting open question here.**
+
+**Still open:**
+
+- **Qwen3.8-8bit is unmeasured.** Two runs verified nothing with zero turns per task, under two
+  confounds of ours: a `reasoning_effort: medium` pin added the same night, and a 420s task cap
+  against the 900s its historical figure used. One run with the pin removed settles it.
+- **The variance is the finding, not a nuisance.** Qwen3.8-4bit ran 1 of 8 and then 5 of 8 two
+  hours apart on the same machine. n=2 is enough to know it is unstable and not enough to say
+  what it is worth. n>=5 on both models is the next measurement that would change advice.
+
+## 4. Measurements that are not finished
 
 **Rerun the scale ladder at n≥10.** Three runs say the pass rate *rises* with size — 124
 references across 59 files is the only rung that passes every time — which is the opposite of
@@ -91,7 +127,7 @@ Preconditions, both now met: the template passes all four shapes in
 `mise run bench-template-check`, and the runner asserts the server's reported model matches
 the profile before measuring.
 
-## 4. Suite hygiene that compounds
+## 5. Suite hygiene that compounds
 
 - **Move the model-identity assertion into the harness.** It lives in a scratch script and it
   is the only reason we know a run was served the wrong model. A result taken without it is a
@@ -101,7 +137,7 @@ the profile before measuring.
 - **Next.js target**: not measurable for compile-verified rungs, because the repo has no
   typecheck script and bare `tsc` fails on an untouched tree. Suite-verified rungs work.
 
-## 5. Open questions worth an experiment
+## 6. Open questions worth an experiment
 
 From [`working/limits-benchmark-plan.md`](working/limits-benchmark-plan.md), in the order they
 would change a decision:
@@ -114,7 +150,7 @@ would change a decision:
 - **A bigger model.** This machine has 128 GB; the 48 GB ceiling was the alpha target's. The
   question is not whether a larger model is better but whether it moves the break-even.
 
-## 6. Bringing your own model
+## 7. Bringing your own model
 
 Asked for on 1 September: let people run their own models, and pick up an Ollama or similar
 runtime they already have. Both are worth doing and the second is smaller than it sounds,
@@ -185,7 +221,7 @@ model before offering it, and say plainly which shapes it fails. Also the reason
 finding to [#521](https://github.com/navikt/copilot/issues/521), which proposes Ollama for
 Linux and would hit it first.
 
-## 7. Filed, owned elsewhere, not ours today
+## 8. Filed, owned elsewhere, not ours today
 
 - [#521](https://github.com/navikt/copilot/issues/521) Linux support. Needs the requester's
   hardware first. **Add the template finding to it**: ten of eleven model templates break on

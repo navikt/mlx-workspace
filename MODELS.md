@@ -211,6 +211,42 @@ tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
 > The table quotes a single run per profile because that is how it was built. For a model
 > this variable, one run is a sample, not a result, and the manifest text says so rather
 > than repeating a median.
+
+### Fresh runs, 1 September 2026
+
+Re-measured after three harness faults were fixed the same night: the default model's Kotlin
+workspace held a **TypeScript repo** (a frontend run had reused the directory), `bench-models`
+named every result file after the first profile in the queue so runs overwrote each other, and
+`MLX_CHAT_TEMPLATE` was passed to `mlx_lm.server` as a path where the flag takes the template
+text. All three produced numbers that looked like weak models.
+
+| model | run 1 | run 2 | median | passed |
+|---|---|---|---|---|
+| `qwen3.6-35b-a3b-optiq` | 4 of 8 | 3 of 8 | **10s** | R2 E1 E3 M1 / R2 E3 M2 |
+| `qwen3.8-27b-4bit` | 1 of 8 | **5 of 8** | 70s | R2 / R2 E1 E3 M1 G2 |
+
+**This changes the story, and not in the direction the earlier table implied.** Qwen3.8-27B-4bit
+is not simply worse. Its second run is the **best single result any model has recorded on this
+suite**, including G2, the task it was previously recorded as looping on. Its first run, two
+hours earlier on the same machine and the same harness, verified one task.
+
+So the honest split:
+
+- **Correctness**: indistinguishable at n=2. Means of 3.5 and 3.0 of 8, ranges that overlap.
+- **Speed**: Qwen3.6 wins by about 7x, every run, no exceptions.
+- **Predictability**: Qwen3.6 ranges 3–6 of 8 across eight runs. Qwen3.8-4bit ranges 1–5 of 8
+  across two, and 88s–906s in median across its earlier pair.
+
+That is the case for the shipped arrangement — 3.6 as default, 3.8 offered — and it is a better
+case than "3.8 is worse", which is what we would have written from one run each.
+
+**`qwen3.8-27b-8bit` is not in this table on purpose.** Two runs verified nothing, with every
+task timing out having completed **zero turns**, including a read task the 4-bit answers in
+seconds. Two confounds sit on that result and both are ours: a `reasoning_effort: medium` pin
+added to the profile hours earlier and absent from every historical run, and a 420s task cap
+where the historical figure of 2 of 8 came from a 900s cap. Recording it as a property of the
+model would be the exact error this file keeps catching elsewhere. The test that settles it is
+one run with the pin removed.
 | qwen3.8-27b-6bit | 284.2s | 2 of 8 | 2 | 0 |
 
 A loop is identical consecutive tool calls within one task, and the detector flags five or more. A

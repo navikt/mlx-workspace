@@ -54,12 +54,12 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "The most-asked-for model, and it does write better code when it finishes. It often does not. Two runs of the same eight tasks verified 3 and 2, with median task times of 88s and 906s — a tenfold spread between identical runs that we cannot yet explain — against 12 to 21 seconds and no timeouts across eight runs of the default. Four of eleven tasks timed out in both runs. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
+        "expect": "Capable and unpredictable. On our eight-task suite it verified 1 and then 5 of 8 across two runs on the same machine two hours apart — the second is the best single result any model has recorded here, the first is the worst. The default verifies 3 to 6 of 8 across eight runs and is about seven times faster, with a median task around 10 seconds against 70. So this is not a weaker model, it is a less predictable one: worth trying on work you can check, not on work you will not re-read. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
         "role": "Opt-in alternative, the quality build, weakest here",
-        "expect": "The build most discussed publicly and the weakest on our own tasks: two runs verified 2 of 8 and 1 of 10, with 4 and 8 timeouts. Fits a 48 GB machine at about 27 GB resident, but 30 GB of weights leaves roughly 6 GB for the cache under a 36 GB wired limit, so context is capped at 65k rather than the 4-bit's 131k. Offered so the comparison can be made on your own work rather than on ours; if you want one Qwen3.8, take the 4-bit.",
+        "expect": "The build most discussed publicly and the one we can say least about. Two runs on 1 September verified nothing at all, every task timing out having completed zero turns — but a configuration change of ours sits on that result, so we do not report it as the model's. Its earlier runs, under a longer timeout, verified 2 of 8 and 1 of 10. Fits a 48 GB machine at about 27 GB resident, but 30 GB of weights leaves roughly 6 GB for cache under a 36 GB wired limit, so context is capped at 65k against the 4-bit's 131k. If you want one Qwen3.8, take the 4-bit.",
     },
 }
 
