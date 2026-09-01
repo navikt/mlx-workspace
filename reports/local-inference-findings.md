@@ -477,22 +477,45 @@ What this measures is fault localisation when a failing test already points at t
 which is the easiest tier of debugging. Reproduction, usually the hard part, is not measured
 at all. n=1 per task, so the claim is "0 of 3" and never a rate.
 
-## 7.5 A confound in the model comparison
+## 7.5 The model comparison, and what a second run did to it
 
-The rejection of `Qwen3.8-27B` in the model selection rests on runs served through a chat
-template written here rather than shipped with the model, and that template re-encoded tool
-arguments so the model read its own history as a quoted string instead of an object. It is the
-only template in that comparison that differed from what every other model received, and it
-differed silently rather than by failing.
+This section said the rejection of `Qwen3.8-27B` rested on a chat template written here rather
+than shipped with the model. That was wrong in a way worth recording, and the conclusion it
+guarded has since been replaced by measurement rather than argument.
 
-`mise run bench-template-check` renders every cached model's template against the shapes a
-coding agent produces. Ten of eleven break identically on tool arguments in the OpenAI wire
-format, and only `granite-4.1-8b` is clean — but that uniform breakage changes nothing here,
-because mlx-lm parses arguments into a mapping before rendering. The hand-written template is
-the exception, and the retest that would settle it has not completed.
+**The confound was narrower than stated.** Our template only ever reached the abliterated oMLX
+build. The published verdict came from `mlx-community/Qwen3.8-27B-8bit` served by mlx-lm
+through the model's own template — the same conditions as the winner. Worse, `MLX_CHAT_TEMPLATE`
+never worked on the mlx-lm path at all: `--chat-template` takes the template text and the
+harness passed a path, so the path became the template and every prompt rendered to a filename.
+No run in this report was served through the hand-written template.
 
-**Read the Qwen3.8 rejection as unproven.** Nothing else in this report depends on it: the
-choice of `Qwen3.6-35B-A3B-OptiQ` rests on its own 216 samples.
+**The template breakage is a server contract, not a defect.** Nine of ten cached templates
+raise on tool arguments in the OpenAI wire format, and the Jinja environment transformers
+exposes has no JSON parsing filter, so no template can fix it. Every one of them requires the
+server to parse arguments into a mapping first. mlx-lm does. Ollama does not read Jinja at all.
+The row belongs in a compatibility note, not in a defect list.
+
+**Fresh runs on 1 September replace the rejection.** Two samples each, on a harness repaired
+the same night:
+
+| model | run 1 | run 2 | median |
+|---|---|---|---|
+| `qwen3.6-35b-a3b-optiq` | 4 of 8 | 3 of 8 | 10s |
+| `qwen3.8-27b-4bit` | 1 of 8 | **5 of 8** | 70s |
+
+The 4-bit's second run is the best single result recorded on this suite, including the task it
+was previously written up as looping on. Its first, two hours earlier on the same machine,
+verified one. So Qwen3.8 is not weaker; it is **less predictable**, and about seven times
+slower. That is why it now ships as an opt-in alternative with the range in its description,
+while `Qwen3.6-35B-A3B-OptiQ` remains the default on the strength of its 216 samples.
+
+**The methodological point outranks the model one.** Every reversal here came from a second run
+existing, not from better reasoning. This report's model table was built from single runs, and
+single runs are anecdotes with numbers attached. n>=5 before a row informs advice, and publish
+the range rather than the median when the two disagree — for a model spanning 1 to 5 of 8, the
+median describes no run that happened. Outstanding samples are tracked in
+[navikt/copilot#564](https://github.com/navikt/copilot/issues/564).
 
 ## 8. Limitations
 
