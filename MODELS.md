@@ -212,6 +212,34 @@ tasks in `bench/tasks.json`, run with `mise run bench-cheap-ops`.
 > this variable, one run is a sample, not a result, and the manifest text says so rather
 > than repeating a median.
 
+### Notat: MTP-kvantisering og oMLX, 1. september 2026
+
+Stefan Prodan (Flux) publiserte et oppsett som overlapper vårt på tre punkter, og som er verdt
+å kjenne til. Han kjører agentisk GitOps lokalt på en M2 Max 96 GB, valgte `Apodex-1.1-mini`
+etter egen benchmarking, **kvantiserte den selv med Lightning MTP speculative decoding**, og
+måtte patche Qwen3-Coder sin tool-call-parser i både oMLX og Apples mlx-lm (PR-er underveis).
+Kvantet ligger på [huggingface.co/stefanprodan/Apodex-1.1-mini-oQ4e-mtp](https://huggingface.co/stefanprodan/Apodex-1.1-mini-oQ4e-mtp).
+
+Tre grunner til at dette treffer oss:
+
+1. **MTP er den ene tingen vi har målt som gjør en lokal modell rask.** Vår egen
+   `qwen3.8-27b-8bit` (MTPLX Q8, oMLX) er notert som "astoundingly fast … response times under
+   10 seconds", og er den eneste 3.8-varianten som har levert best-i-test kode (8.1/10 på
+   weather-cli). Vi bruker den ikke, fordi drafter-hodet publiseres som `model_type:
+   qwen3_5_mtp` som bare oMLX kan laste — og nav-pilot kjører mlx-lm.
+2. **Han patcher nøyaktig det laget vi fant en feil i.** `mlx_lm/server.py:150` gjør
+   `json.loads(args)` uten guard, så en klient som sender `arguments` som dict gir 500. Vi har
+   den feilen dokumentert og ikke sendt oppstrøms ennå.
+3. **Han sier det samme som oss om hastighet**: etter skymodeller føltes lokale modeller
+   "excruciatingly slow". Det er vår §7-konklusjon med andre ord.
+
+**Er egen kvantisering noe for oss?** Sannsynligvis ikke som førstevalg — se vurderingen i
+[PLAN.md](PLAN.md). Kort: kvantiseringsnivået er ikke flaskehalsen vår (4-bit er allerede den
+raskeste varianten vi har), mens MTP er det, og MTP er et *runtime*-valg (oMLX vs mlx-lm), ikke
+et kvantiseringsvalg. Å lage egne kvanter betyr også at vi eier artefakten: ingen
+oppstrømsfikser, ny kvantisering per modelloppdatering, og vekter vi selv distribuerer til 250
+maskiner.
+
 ### Fresh runs, 1 September 2026
 
 Re-measured after three harness faults were fixed the same night: the default model's Kotlin
