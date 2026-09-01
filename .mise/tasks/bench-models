@@ -59,10 +59,15 @@ for profile in "$@"; do
   want_repo=$(python3 -c "
 import json; print(json.load(open('bench/tasks.json'))['repo'].rsplit('/',1)[-1])")
   have_repo=$(git -C "workspaces/$profile/kotlin" remote get-url origin 2>/dev/null | sed 's#.*/##')
-  if [ "$want_repo" != "$have_repo" ]; then
-    say "✗ $profile: workspaces/$profile/kotlin is ${have_repo:-missing}, tasks need $want_repo — skipping"
+  # A missing checkout is fine — bench-cheap-ops clones it. Only a checkout that
+  # exists and is the WRONG repo is fatal, which is the case this guard was
+  # written for: a frontend run left a TypeScript project in a Kotlin workspace
+  # and the suite scored the default 0 of 11 on tasks it always passes.
+  if [ -n "$have_repo" ] && [ "$want_repo" != "$have_repo" ]; then
+    say "✗ $profile: workspaces/$profile/kotlin is $have_repo, tasks need $want_repo — skipping"
     continue
   fi
+  [ -z "$have_repo" ] && say "  no checkout yet for $profile; the suite will clone one"
 
   nohup mise run server >>"$LOG" 2>&1 &
   if ! mise run server-wait >>"$LOG" 2>&1; then
@@ -72,10 +77,16 @@ import json; print(json.load(open('bench/tasks.json'))['repo'].rsplit('/',1)[-1]
   # The model the profile names, asked of the server rather than assumed. A run
   # served the 6-bit build while the profile said 8-bit once, and the only
   # reason we know is that a scratch script happened to check.
+  # oMLX does not answer to the Hugging Face id. Its registry
+  # (~/.omlx/model_settings.json) keys models by the cache-directory form, with
+  # "/" replaced by "--", and a request naming the HF id comes back
+  # "Model '...' not found". mlx-lm takes the HF id as-is.
   want=$(python3 -c "
 import sys; sys.path.insert(0,'.mise/tasks')
 import _profiles as P
-print(P.load('$profile')[1]['MLX_MODEL'])")
+meta, params = P.load('$profile')
+model = params['MLX_MODEL']
+print(model.replace('/', '--') if params.get('MLX_SERVER_TYPE') == 'omlx' else model)")
 
   reply=$(curl -s -m 300 http://127.0.0.1:8080/v1/chat/completions \
     -H 'Content-Type: application/json' \

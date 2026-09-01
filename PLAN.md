@@ -105,7 +105,47 @@ guard against a correctly configured server is now the most interesting open que
   hours apart on the same machine. n=2 is enough to know it is unstable and not enough to say
   what it is worth. n>=5 on both models is the next measurement that would change advice.
 
-## 4. Measurements that are not finished
+## 4. Beslutning: oMLX som backend for valgfrie modeller
+
+Tatt 1. september. **oMLX legges til som backend for opt-in-modeller, med mindre kveldens
+kjøringer sier noe annet.** mlx-lm blir værende for standardmodellen.
+
+Kriteriene skrives ned før tallene foreligger, fordi rekkefølgen er hele poenget — en terskel
+satt i etterkant er en beskrivelse, ikke en test.
+
+| Utfall av MTPLX-kjøringene | Hva vi gjør |
+|---|---|
+| MTPLX slår mlx-lm 8-bit klart, og fordelen **består** med prefiks-cache av | Fordelen er MTP. Prøv [mlx-lm #990](https://github.com/ml-explore/mlx-lm/pull/990) som patch på dagens stack først — timer, ikke dager. oMLX bare hvis patchen ikke bærer. |
+| MTPLX slår mlx-lm 8-bit klart, og fordelen **forsvinner** med cachen av | Fordelen er prefiks-cachen, som er oMLX-spesifikk og ikke finnes oppstrøms. **Bygg backend-støtten.** |
+| MTPLX slår ikke mlx-lm 8-bit meningsfullt | oMLX kjøper oss ingenting målbart her. Ikke bygg. Noter og gå videre. |
+| Kjøringen feiler av harness-grunner igjen | Ingen konklusjon. Fiks harnesset, kjør på nytt. Ikke tolk en feilet kjøring som et resultat. |
+
+«Klart» betyr her: forskjell større enn spennet vi allerede har målt mellom identiske kjøringer
+av samme profil. Det spennet er 1 til 7 av 8 for Qwen3.8-4bit, så terskelen er høy med vilje.
+
+### Arbeidet, hvis det bygges
+
+`Backend`-feltet finnes i manifestet på hver eneste oppføring, står på `"mlx-lm"`, og **leses
+null steder**. Det var ment som nettopp denne kroken.
+
+- **Gjøres uansett:** valider `Backend` mot en lukket allowlist i `Parse`. Manifestet hentes
+  over nettet, så feltet velger hvilken binær som startes på 250 maskiner. Ukjent backend skal
+  nekte å starte, ikke falle tilbake. Hullet finnes i dag, uavhengig av oMLX.
+- Oversett modell-id `/` til `--` fire steder: ready-proben, opencode-provider-blokka,
+  modellnøkkelen der, og `COPILOT_MODEL`.
+- `Server.Start` forgrener på backend; `serverFlags` får eget vokabular per backend.
+- `EnsureEnv`: eget venv, hjul pinnet på sha256. oMLX pinner `mlx==0.32.0` eksakt og kjernene
+  er ABI-koblet — en delt venv ødelegger ytelsen stille.
+- Provisjonere `~/.omlx/model_settings.json` for default-modell og MTP; det finnes ikke flagg.
+- `backend`-attributt på de lokale instrumentene, fra første commit. Uten det blander
+  histogrammet to populasjoner igjen, som er feilen vi brukte 31. august på å rette.
+- Tving `--host 127.0.0.1` og `--api-key`, og håndter `omlx.ai`-opplastingen.
+
+Anslag: to til tre dager, dominert av venv-provisjoneringen og settings-filen. Guarden,
+loop guard, `saw_traffic`, wired-limit og weights-sjekken er uendret — det er utbyttet av at
+alt ligger bak en proxy.
+
+## 5. Measurements that are not finished
 
 **Rerun the scale ladder at n≥10.** Three runs say the pass rate *rises* with size — 124
 references across 59 files is the only rung that passes every time — which is the opposite of
@@ -127,7 +167,7 @@ Preconditions, both now met: the template passes all four shapes in
 `mise run bench-template-check`, and the runner asserts the server's reported model matches
 the profile before measuring.
 
-## 5. Suite hygiene that compounds
+## 6. Suite hygiene that compounds
 
 - **Move the model-identity assertion into the harness.** It lives in a scratch script and it
   is the only reason we know a run was served the wrong model. A result taken without it is a
@@ -137,7 +177,7 @@ the profile before measuring.
 - **Next.js target**: not measurable for compile-verified rungs, because the repo has no
   typecheck script and bare `tsc` fails on an untouched tree. Suite-verified rungs work.
 
-## 6. Open questions worth an experiment
+## 7. Open questions worth an experiment
 
 From [`working/limits-benchmark-plan.md`](working/limits-benchmark-plan.md), in the order they
 would change a decision:
@@ -150,7 +190,7 @@ would change a decision:
 - **A bigger model.** This machine has 128 GB; the 48 GB ceiling was the alpha target's. The
   question is not whether a larger model is better but whether it moves the break-even.
 
-## 7. Bringing your own model
+## 8. Bringing your own model
 
 Asked for on 1 September: let people run their own models, and pick up an Ollama or similar
 runtime they already have. Both are worth doing and the second is smaller than it sounds,
@@ -221,7 +261,7 @@ model before offering it, and say plainly which shapes it fails. Also the reason
 finding to [#521](https://github.com/navikt/copilot/issues/521), which proposes Ollama for
 Linux and would hit it first.
 
-## 8. Filed, owned elsewhere, not ours today
+## 9. Filed, owned elsewhere, not ours today
 
 - [#521](https://github.com/navikt/copilot/issues/521) Linux support. Needs the requester's
   hardware first. **Add the template finding to it**: ten of eleven model templates break on
