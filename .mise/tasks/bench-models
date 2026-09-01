@@ -35,8 +35,15 @@ done
 
 say "=== queue: $* "
 
+run_n=0
 for profile in "$@"; do
-  say "--- $profile"
+  run_n=$((run_n + 1))
+  # One tag per run, not per queue. The same profile can appear more than once
+  # in a queue — that is the whole point of reaching n>=5 — and a tag shared
+  # across the queue would have each repeat overwrite the one before it. That
+  # is the bug that cost two of three runs the first night this script ran.
+  TAG="$STAMP-$(printf '%02d' "$run_n")"
+  say "--- $profile (run $run_n, tag $TAG)"
   mise run server-stop >>"$LOG" 2>&1
 
   if ! mise run model-use "$profile" >>"$LOG" 2>&1; then
@@ -98,11 +105,11 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   # it) but named every result file after the first profile, and each run
   # silently overwrote the one before. Three models, one filename, two runs lost
   # until they were dug out of bench/.previous.
-  if BENCH_RUN_TAG="$STAMP" mise run bench-cheap-ops >>"$LOG" 2>&1; then
-    if ls "bench/results-$profile-$STAMP.json" >/dev/null 2>&1; then
+  if BENCH_RUN_TAG="$TAG" mise run bench-cheap-ops >>"$LOG" 2>&1; then
+    if ls "bench/results-$profile-$TAG.json" >/dev/null 2>&1; then
       say "✓ $profile complete"
     else
-      say "✗ $profile: suite reported success but wrote no bench/results-$profile-$STAMP.json"
+      say "✗ $profile: suite reported success but wrote no bench/results-$profile-$TAG.json"
     fi
   else
     say "✗ $profile: suite failed, see $LOG"
@@ -110,5 +117,5 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   mise run server-stop >>"$LOG" 2>&1
 done
 
-say "=== queue done. results: bench/results-*-$STAMP.json"
+say "=== queue done. results: bench/results-*-$STAMP-*.json"
 say "    compare with: mise run bench-results ; mise run bench-loop-analysis"
