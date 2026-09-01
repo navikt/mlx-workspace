@@ -248,37 +248,26 @@ named every result file after the first profile in the queue so runs overwrote e
 `MLX_CHAT_TEMPLATE` was passed to `mlx_lm.server` as a path where the flag takes the template
 text. All three produced numbers that looked like weak models.
 
-| model | run 1 | run 2 | median | passed |
+| model | verified (of 8) | gjennomsnitt | median | timeouts |
 |---|---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` | 4 of 8 | 3 of 8 | **10s** | R2 E1 E3 M1 / R2 E3 M2 |
-| `qwen3.8-27b-4bit` | 1 of 8 | **5 of 8** | 70s | R2 / R2 E1 E3 M1 G2 |
+| `qwen3.6-35b-a3b-optiq` | 3, 3, 3, 4, 4 | **3,40** | 8,3–11,0s | 2 |
+| `qwen3.8-27b-4bit` | 1, 5, 5, 6, 7 | **4,80** | 58,7–96,0s | 11 |
 
-**This changes the story, and not in the direction the earlier table implied.** Qwen3.8-27B-4bit
-is not simply worse. Its second run is the **best single result any model has recorded on this
-suite**, including G2, the task it was previously recorded as looping on. Its first run, two
-hours earlier on the same machine and the same harness, verified one task.
+**Ved n=5 snur konklusjonen, og denne gangen med nok data til å si det.**
+`Qwen3.8-27B-4bit` løser **41 % flere oppgaver** enn standardmodellen i snitt — 4,80 mot 3,40 av
+8. Den er ikke en svakere modell. Den er den sterkere.
 
-So the honest split:
+Den er også omtrent **sju ganger tregere** (median 9s mot 65s), og den timer ut **11 ganger over
+fem kjøringer** der standarden timer ut 2. Spennet er 1 til 7 av 8 på identisk oppsett; standarden
+holder seg mellom 3 og 4 over fem kjøringer.
 
-- **Correctness**: indistinguishable at n=2. Means of 3.5 and 3.0 of 8, ranges that overlap.
-- **Speed**: Qwen3.6 wins by about 7x, every run, no exceptions.
-- **Predictability**: Qwen3.6 ranges 3–6 of 8 across eight runs. Qwen3.8-4bit ranges 1–5 of 8
-  across two, and 88s–906s in median across its earlier pair.
+Så valget er ikke «bedre eller dårligere», det er: **sterkere og ujevn, eller svakere og
+forutsigbar.** Hvilken du vil ha avhenger av om du leser gjennom det den produserer. Det er en
+annen anbefaling enn den vi ga ved n=2, og forskjellen er tre kjøringer.
 
-That is the case for the shipped arrangement — 3.6 as default, 3.8 offered — and it is a better
-case than "3.8 is worse", which is what we would have written from one run each.
-
-**One run is not a measurement, and this table was built from single runs.** Every conclusion
-reversed here reversed because a second run existed, not because anything was re-reasoned. The
-4-bit went from "worse than the default" to "the best result on the suite" on its second
-sample; the 8-bit's published 2 of 8 turned out to be the better half of a pair whose other
-half verified 1 of 10. Treat any row with n=1 as an anecdote with a number attached.
-
-**The standing rule from here: n>=5 before a model's row informs a recommendation**, and the
-range goes in the text rather than the median. For a model whose spread is 1 to 5 of 8, a
-median describes no run that actually happened. `mise run bench-models -- <profile>` is
-repeatable and writes one file per run, so the cost of the fifth sample is wall clock, not
-work.
+Tre av fem 3.8-kjøringer ble gjort på det reparerte harnesset samme kveld, og de tre beste
+resultatene noen modell har fått på dette settet er alle 3.8. Den ene kjøringen på 1 av 8 er ikke
+forkastet — den er det som gjør spennet til hovedfunnet.
 
 **`qwen3.8-27b-8bit` is not in this table on purpose.** Two runs verified nothing, with every
 task timing out having completed **zero turns**, including a read task the 4-bit answers in

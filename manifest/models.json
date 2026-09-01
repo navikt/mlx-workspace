@@ -36,7 +36,7 @@
       "backend": "mlx-lm",
       "default": false,
       "role": "Opt-in alternative, slower and much less predictable",
-      "expect": "Capable and unpredictable. On our eight-task suite it verified 1 and then 5 of 8 across two runs on the same machine two hours apart \u2014 the second is the best single result any model has recorded here, the first is the worst. The default verifies 3 to 6 of 8 across eight runs and is about seven times faster, with a median task around 10 seconds against 70. So this is not a weaker model, it is a less predictable one: worth trying on work you can check, not on work you will not re-read. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
+      "expect": "Stronger than the default and far less reliable. Across five runs it verified 1, 5, 5, 6 and 7 of 8 \u2014 an average of 4.8 against the default's 3.4, so it solves about 41% more. It is also roughly seven times slower, a median task of 65 seconds against 9, and it timed out 11 times over those five runs where the default timed out twice. The choice is not better or worse: it is stronger and erratic, or weaker and predictable. Take this one if you read through what it produces, and the default if you want to trust it without looking. At 16 GB of weights it leaves the most headroom on a 48 GB machine, which is why this build rather than the 8-bit is the one to try first.",
       "weights_gb": 16,
       "min_ram_gb": 48,
       "wired_limit_gb": 36,
