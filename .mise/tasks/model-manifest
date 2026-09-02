@@ -93,7 +93,15 @@ def entry(key: str) -> dict:
         "role": offer["role"],
         "expect": offer["expect"],
         "weights_gb": meta.get("model_vram_gb"),
-        "min_ram_gb": 48,
+        # The floor a machine has to clear, now that nav-pilot refuses below it
+        # rather than only printing it. 48 was hardcoded here for every entry,
+        # which was harmless while nothing read the field and wrong the moment
+        # something did: it would refuse a 36 GB machine a model measured to fit
+        # one. A profile may state its own; the default is the wired limit plus
+        # the 12 GB nav-pilot reserves for the rest of the system, which is the
+        # same arithmetic the check applies.
+        "min_ram_gb": int(meta.get("machine_min_ram_gb")
+                          or meta["gpu_wired_limit_gb"] + 12),
         "wired_limit_gb": meta.get("gpu_wired_limit_gb"),
         # Everything the server and the clients need, already validated here.
         "params": check_params({k: v for k, v in params.items() if k.startswith("MLX_")}, key),
