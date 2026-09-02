@@ -36,7 +36,7 @@
       "backend": "mlx-lm",
       "default": false,
       "role": "Opt-in alternative, slower and much less predictable",
-      "expect": "Solves about as much as the default and takes roughly seven times longer. Four runs on a repaired benchmark verified 4, 4, 3 and 4 of 8 against the default's 3, 2, 4 and 4 \u2014 overlapping ranges, no measurable difference. Median task 58 to 104 seconds against 10 to 12, and it hit the seven-minute cap ten times across those runs where the default hit it once. An earlier version of this text said it solved more; that was measured before a fault was found that stopped every model from compiling or running tests, and the gap did not survive the fix. Offered because people ask for it and because a benchmark of eight tasks is not the last word on a model. If you want an answer in ten seconds, take the default.",
+      "expect": "Solves about as much as the default and takes roughly seven times longer. Four runs on a repaired benchmark verified 4, 4, 3 and 4 of 8 against the default's 3, 2, 4 and 4: overlapping ranges, no measurable difference. Median task 58 to 104 seconds against 10 to 12, and it hit the seven-minute cap ten times where the default hit it once. An earlier version of this text said it solved more; that was measured before we found a fault that stopped every model compiling or running tests, and the gap did not survive the fix. Want an answer in ten seconds, take the default.",
       "weights_gb": 16,
       "min_ram_gb": 48,
       "wired_limit_gb": 36,

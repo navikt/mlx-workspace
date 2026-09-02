@@ -54,7 +54,7 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "Solves about as much as the default and takes roughly seven times longer. Four runs on a repaired benchmark verified 4, 4, 3 and 4 of 8 against the default's 3, 2, 4 and 4 — overlapping ranges, no measurable difference. Median task 58 to 104 seconds against 10 to 12, and it hit the seven-minute cap ten times across those runs where the default hit it once. An earlier version of this text said it solved more; that was measured before a fault was found that stopped every model from compiling or running tests, and the gap did not survive the fix. Offered because people ask for it and because a benchmark of eight tasks is not the last word on a model. If you want an answer in ten seconds, take the default.",
+        "expect": "Solves about as much as the default and takes roughly seven times longer. Four runs on a repaired benchmark verified 4, 4, 3 and 4 of 8 against the default's 3, 2, 4 and 4: overlapping ranges, no measurable difference. Median task 58 to 104 seconds against 10 to 12, and it hit the seven-minute cap ten times where the default hit it once. An earlier version of this text said it solved more; that was measured before we found a fault that stopped every model compiling or running tests, and the gap did not survive the fix. Want an answer in ten seconds, take the default.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
@@ -108,6 +108,24 @@ def entry(key: str) -> dict:
     }
 
 
+# nav-pilot's own limit (maxProseRunes in internal/local/local.go). Role and
+# expect are pasted into the main agent's system prompt, so it caps them, and it
+# refuses the whole manifest over one entry that exceeds the cap — falling back
+# to the last cached copy, which is how a machine ended up being offered
+# yesterday's models. Checked here because here is where the text is written.
+MAX_PROSE = 600
+
+
+def check_prose(e: dict) -> dict:
+    for field in ("role", "expect"):
+        n = len(e[field])
+        if n > MAX_PROSE:
+            raise SystemExit(
+                f"\u2717 {e['key']} has a {field} of {n} characters, and nav-pilot refuses "
+                f"the manifest over {MAX_PROSE}. Shorten it: every entry goes down with it")
+    return e
+
+
 def check_params(params: dict, key: str) -> dict:
     bad = sorted(k for k in params if not PARAM_KEY.match(k))
     if bad:
@@ -119,7 +137,7 @@ manifest = {
     "schema_version": SCHEMA_VERSION,
     "channel": "alpha",
     "note": "Generated from profiles/ by 'mise run model-manifest'. Do not edit by hand.",
-    "models": [entry(k) for k in OFFERED],
+    "models": [check_prose(entry(k)) for k in OFFERED],
 }
 
 missing = [k for k in OFFERED if k not in P.list_keys()]
