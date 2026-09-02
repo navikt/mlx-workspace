@@ -68,6 +68,19 @@ def sh(cmd, cwd=None, timeout=1800, env=None):
 
 
 def ensure_clone():
+    # A checkout whose .git is a file is one this suite interrupted: the history
+    # is under .bench-logs/git-hidden and the placeholder is still in its place.
+    # Put it back rather than re-cloning 40 MB, and rather than leaving a
+    # directory where every git command resolves to mlx-workspace.
+    stash = ROOT / ".bench-logs" / "git-hidden" / key
+    if (repo / ".git").is_file() and stash.is_dir():
+        (repo / ".git").unlink()
+        stash.rename(repo / ".git")
+        print(f"→ restored the history a killed run left in {stash.relative_to(ROOT)}")
+    if (repo / ".git").exists() and not (repo / ".git").is_dir():
+        raise SystemExit(
+            f"✗ {repo}/.git is a file and no hidden history was found for {key}.\n"
+            f"  Delete {repo} and let the suite clone it again.")
     if (repo / ".git").is_dir():
         # Existing checkouts are not trusted. Two faults came through here: a
         # frontend run left a TypeScript repo in a Kotlin workspace, and the ref
@@ -106,8 +119,24 @@ def ensure_clone():
 GIT_STASH = None  # set in main(): where .git lives while a task runs
 
 
+def assert_repo_is_the_workspace():
+    """Refuse to touch git unless the workspace is its own repository.
+
+    reset and clean are aimed at a directory, and git resolves that directory to
+    whichever repository it can find at or above it. A workspace that has lost
+    its .git therefore points every one of those commands at mlx-workspace. This
+    is the check that says so instead of finding out afterwards.
+    """
+    top = sh(["git", "rev-parse", "--show-toplevel"], cwd=repo).stdout.strip()
+    if Path(top or "/nowhere").resolve() != repo.resolve():
+        raise SystemExit(
+            f"✗ {repo} is not its own git repository (git says {top or 'nothing'}).\n"
+            f"  Delete it and let the suite clone it again. Nothing was reset or cleaned.")
+
+
 def reset_repo():
     """Hard reset plus clean, so a task never sees the previous task's edits."""
+    assert_repo_is_the_workspace()
     sh(["git", "reset", "--hard", "-q"], cwd=repo)
     sh(["git", "clean", "-qfd", "-e", "build", "-e", ".gradle"], cwd=repo)
 
@@ -128,21 +157,35 @@ def hide_git():
     src = repo / ".git"
     if not src.is_dir():
         return
-    # Outside the workspace on purpose: the agent can read its own workspace, so
-    # a sibling .git-hidden would be exactly as reachable as .git was.
-    GIT_STASH = Path(tempfile.gettempdir()) / f"bench-git-hidden-{key}"
+    # Under .bench-logs, not /tmp. A kill between hide and restore leaves the
+    # only copy of the checkout's history in this directory, and /tmp does not
+    # survive a reboot. It cost two workspaces their history once, which is how
+    # the placeholder below came to be written.
+    GIT_STASH = ROOT / ".bench-logs" / "git-hidden" / key
+    GIT_STASH.parent.mkdir(parents=True, exist_ok=True)
     if GIT_STASH.exists():
         shutil.rmtree(GIT_STASH, ignore_errors=True)
     try:
         src.rename(GIT_STASH)
     except OSError:  # different filesystem
         shutil.move(str(src), str(GIT_STASH))
+    # Removing .git does not make a directory not-a-repository: git walks up the
+    # tree and finds the next one, which here is mlx-workspace itself. Every
+    # `git reset --hard` and `git clean -fd` the suite runs would then have been
+    # aimed at this repository. A file named .git stops the search with "not a
+    # git repository" instead, which is the answer we actually want.
+    (repo / ".git").write_text(
+        "# nav-pilot bench: history is hidden while a task runs, and is in\n"
+        f"# {GIT_STASH}\n")
 
 
 def restore_git():
     """Put .git back so verification can diff, and so reset works next task."""
     global GIT_STASH
     if GIT_STASH and GIT_STASH.is_dir():
+        placeholder = repo / ".git"
+        if placeholder.is_file():
+            placeholder.unlink()
         try:
             GIT_STASH.rename(repo / ".git")
         except OSError:
