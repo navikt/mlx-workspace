@@ -270,7 +270,12 @@ ganger så lang tid, median 58–104 sekunder mot 10–12, og traff taket 10 gan
 altså ikke bedre, og den er mye tregere. Standardmodellen er fortsatt riktig standard, nå av en
 enklere grunn enn før.
 
-### Fresh runs, 1 September 2026
+### Fresh runs, 1 September 2026 — SUPERSEDED, målt på et ødelagt harness
+
+> **Ikke bruk tallene i denne seksjonen.** De ble målt før tre feil i harnesset ble funnet:
+> modellene kunne ikke kompilere, målet var ikke pinnet, og `rename` godtok en omdøping som
+> aldri innførte det nye symbolet. Kjøringene 2. september over erstatter dem. Seksjonen står
+> igjen fordi forskjellen mellom de to settene er selve funnet.
 
 Re-measured after three harness faults were fixed the same night: the default model's Kotlin
 workspace held a **TypeScript repo** (a frontend run had reused the directory), `bench-models`

@@ -499,10 +499,15 @@ The row belongs in a compatibility note, not in a defect list.
 **Fresh runs on 1 September replace the rejection.** Two samples each, on a harness repaired
 the same night:
 
-| model | verified of 8, five runs | mean | median |
-|---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` | 3, 3, 3, 4, 4 | 3.40 | 10s |
-| `qwen3.8-27b-4bit` | 5, 5, 6, 7 (one quarantined) | **5.75** | 70s |
+| model | verified of 8, four runs | mean | median | timeouts |
+|---|---|---|---|---|
+| `qwen3.6-35b-a3b-optiq` | 3, 2, 4, 4 | 3.25 | 10–12s | 1 |
+| `qwen3.8-27b-4bit` | 4, 4, 3, 4 | 3.75 | 58–104s | 10 |
+
+Exact two-sided Mann-Whitney **p = 0.71**, ranges fully overlapping. **There is no measurable
+difference in how many tasks they solve.** An earlier version of this table reported 5.75 against
+3.40 and concluded Qwen3.8 solved more; that was measured before the models could compile,
+against workspaces four days apart in commit. The gap was an artifact of the instrument.
 
 The 4-bit's second run is the best single result recorded on this suite, including the task it
 was previously written up as looping on. Its first, two hours earlier on the same machine,
