@@ -240,6 +240,36 @@ et kvantiseringsvalg. Å lage egne kvanter betyr også at vi eier artefakten: in
 oppstrømsfikser, ny kvantisering per modelloppdatering, og vekter vi selv distribuerer til 250
 maskiner.
 
+### Kjøringer på reparert harness, 2. september 2026 — forskjellen forsvinner
+
+Alt under denne overskriften erstatter tallene fra 1. september. De gamle er ikke slettet, men
+de er ikke lenger dekkende, og forskjellen mellom de to settene er verdt mer enn noen av dem.
+
+| modell | verifisert av 8 | snitt | median | timeouts |
+|---|---|---|---|---|
+| `qwen3.6-35b-a3b-optiq` | 3, 2, 4, 4 | **3,25** | 9,7–11,9s | 1 |
+| `qwen3.8-27b-4bit` | 4, 4, 3, 4 | **3,75** | 58,4–104,2s | 10 |
+
+Eksakt tosidig Mann-Whitney: **p = 0,71**. Spennene overlapper helt (3.6 er 2–4, 3.8 er 3–4).
+Det er ingen målbar forskjell i hvor mange oppgaver de løser.
+
+**Hva som endret seg mellom settene:** modellene fikk en kompilator. Sandkassen hadde aldri gitt
+tilgang til byggverktøyene, så `./gradlew` traff en mise-shim som leste konfigurasjon utenfor
+sandkassen og fikk «Operation not permitted» — 2 672 slike i transkriptene mot 2 176 nevnelser av
+gradlew. Målet var heller ikke pinnet: arbeidskopiene lå på tre forskjellige commits, fire dager
+fra hverandre. Og `rename` sjekket aldri at det nye symbolet fantes.
+
+**Så det publiserte funnet holdt ikke.** 1. september sto det at Qwen3.8 løser mer enn
+standardmodellen — snitt 5,75 mot 3,40. På et harness som faktisk måler det den påstår, er det
+3,75 mot 3,25 og p = 0,71. Forspranget var i hovedsak en artefakt av at ingen av modellene kunne
+kompilere: en modell som skriver Kotlin blindt ble sammenlignet med en annen som gjorde det
+samme, på to forskjellige kodebaser.
+
+**Det som står igjen, og som er det eneste tallet som ikke flyttet seg:** 3.8 bruker omtrent sju
+ganger så lang tid, median 58–104 sekunder mot 10–12, og traff taket 10 ganger mot 1. Den er
+altså ikke bedre, og den er mye tregere. Standardmodellen er fortsatt riktig standard, nå av en
+enklere grunn enn før.
+
 ### Fresh runs, 1 September 2026
 
 Re-measured after three harness faults were fixed the same night: the default model's Kotlin
