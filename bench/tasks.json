@@ -79,8 +79,9 @@
     {
       "id": "D2",
       "kind": "edit",
-      "verify": "test",
-      "prompt": "Add a nullable field kilde of type String to the data class POppfolgingstilfelleBit in src/main/kotlin/no/nav/syfo/infrastructure/database/bit/POppfolgingstilfelleBit.kt, and thread it through the toOppfolgingstilfelleBit mapper to the domain class it maps to. Update every construction site so the project still compiles and all tests pass. Change nothing else."
+      "verify": "retired",
+      "prompt": "Add a nullable field kilde of type String to the data class POppfolgingstilfelleBit in src/main/kotlin/no/nav/syfo/infrastructure/database/bit/POppfolgingstilfelleBit.kt, and thread it through the toOppfolgingstilfelleBit mapper to the domain class it maps to. Update every construction site so the project still compiles and all tests pass. Change nothing else.",
+      "retired_reason": "Passed 1 of 54 judged attempts, and 0 of 8 on the repaired harness where models could finally compile \u2014 half of those hit the 420s cap. It asks for a field threaded through a mapper and every construction site with the suite still green, which costs more than the budget allows for a model averaging 58 to 104 seconds per task. By this suite's own rule a task no arm passes is a broken task, not a hard one. Retired from the scored set rather than deleted: it is the only multi-file task here, and it becomes measurable again with a larger cap."
     },
     {
       "id": "D3",
