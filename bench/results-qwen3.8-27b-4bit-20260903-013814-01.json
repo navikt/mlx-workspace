@@ -1,0 +1,30 @@
+{
+  "R1": {
+    "task": "R1",
+    "kind": "read",
+    "seconds": 71.0,
+    "turns": 4,
+    "tool_calls": 3,
+    "tokens_in": 15585,
+    "tokens_out": 356,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "served_model": "mlx-community/Qwen3.8-27B-4bit",
+    "terms_found": [
+      "5"
+    ],
+    "terms_expected": [
+      "5",
+      "100",
+      "2",
+      "300"
+    ],
+    "tool_calls_logged": 3,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": null,
+    "note": "needs a human"
+  }
+}
