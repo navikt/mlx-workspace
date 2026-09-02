@@ -273,6 +273,9 @@ def _path_in_prompt(prompt):
     m = _PATH_RE.search(prompt or "")
     return m.group(1) if m else None
 
+SERVED = None  # the model id the current task is scored against
+
+
 def serving_now():
     """The model id the server on 8080 actually answers with, or None."""
     r = sh(["curl", "-s", "--max-time", "10", "http://localhost:8080/v1/models"])
@@ -296,10 +299,12 @@ def assert_serving_profile():
     if ids is None:
         raise SystemExit("✗ server on :8080 did not answer /v1/models — cannot "
                          "confirm which model would be scored")
+    global SERVED
     if want not in ids:
         raise SystemExit(f"✗ profile mismatch: MLX_ACTIVE_PROFILE={key} expects "
                          f"{want!r}, server is serving {ids!r}. Re-run "
                          f"`mise run model-use {key}` and check it succeeded.")
+    SERVED = want
     return want
 
 
@@ -422,9 +427,11 @@ def run_task(task):
         "truncated": "TRUNCATED" in out,
         "exit": grab(r"exit (\d+)", int, -1),
         "timed_out": timed_out,
-        # Written per task, not per file: a mid-run model swap is then visible in
-        # the results rather than only in the logs.
-        "served_model": (serving_now() or [None])[0],
+        # The id this task was scored against, confirmed against the server's
+        # model list before the task ran. /v1/models lists everything in the
+        # cache rather than what is loaded, so this is the profile's id after
+        # the check passed, not an arbitrary entry from that list.
+        "served_model": SERVED,
     }
     # Record term hits before any early return, so a timed-out task is still
     # comparable field-for-field with a completed one.
@@ -462,8 +469,7 @@ ensure_clone()
 # With them off nothing would ever check, which is the configuration the
 # mismatched run used.
 if os.environ.get("BENCH_RESTART_SERVER", "1") != "1":
-    served = assert_serving_profile()
-    print(f"→ serving {served}")
+    print(f"→ serving {assert_serving_profile()}")
 print(f"→ {key} · {len(tasks)} task(s) · repo {repo.relative_to(ROOT)}")
 for task in tasks:
     print(f"\n── {task['id']} ({task['kind']}, verify={task['verify']})")

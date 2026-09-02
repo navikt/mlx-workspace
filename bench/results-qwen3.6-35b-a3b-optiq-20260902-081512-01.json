@@ -217,5 +217,24 @@
     "files_changed": 0,
     "verified": null,
     "note": "retired: Passed 1 of 54 judged attempts, and 0 of 8 on the repaired h"
+  },
+  "D3": {
+    "task": "D3",
+    "kind": "edit",
+    "seconds": 52.1,
+    "turns": 2,
+    "tool_calls": 4,
+    "tokens_in": 9892,
+    "tokens_out": 446,
+    "truncated": false,
+    "exit": 0,
+    "timed_out": false,
+    "served_model": "mlx-community/KAT-Coder-V2.5-Dev-OptiQ-4bit",
+    "tool_calls_logged": 4,
+    "longest_identical_run": 1,
+    "looped_on": null,
+    "files_changed": 0,
+    "verified": false,
+    "note": "no changes made (model did not edit anything)"
   }
 }
