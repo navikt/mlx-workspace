@@ -136,8 +136,17 @@ Copilot CLI, and users found that out by looking at an empty graph.
   result. Traps 7 and 8 are readable again.
 - `bench-weather-cli` copies the finished tree to `bench/submissions/<key>-<tag>/`
   before the next run clears the workspace.
-- The two trees that survived today's round are archived under their run tags.
-  Runs 01 to 04 are gone; `bench/submissions/README.md` says so.
+- The two trees that survived today's round are archived under their run tags,
+  labelled void. `bench/submissions/README.md` says why.
+- The weather suite reads `workspace-clear`'s exit code and refuses to measure
+  when the clear failed, and refuses if the workspace holds anything but
+  `AGENTS.md`, `opencode.json` and `weather-cli`.
+
+The round of 3 September is void for a reason worse than the missing archive.
+`workspace-clear` will not delete git-tracked files, `afb1bd7` tracked the
+weather-cli trees that morning, and the suite printed "nothing to do" over the
+refusal. Every run started from the finished code of the run before. The trees
+are untracked and ignored now.
 
 - `HARNESS_SHA` now exists. It was referenced in the record and defined nowhere,
   added this morning and never run since, so the ops suite would have raised

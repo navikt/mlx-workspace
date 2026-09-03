@@ -1,0 +1,52 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 196.7,
+      "turns": 7,
+      "tool_calls": 9,
+      "tokens_in": 26773,
+      "tokens_out": 1583,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 6383.3,
+      "turns": 60,
+      "tool_calls": 61,
+      "tokens_in": 738798,
+      "tokens_out": 14534,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 6580.0,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 28,
+    "fail_count": 0,
+    "tail": "_ms: 0.094375\n  ...\n# Subtest: non-numeric pairs are treated as names\nok 19 - non-numeric pairs are treated as names\n  ---\n  duration_ms: 0.046667\n  ...\n# Subtest: picks the entry closest to now, computed in UTC\nok 20 - picks the entry closest to now, computed in UTC\n  ---\n  duration_ms: 0.520083\n  ...\n# Subtest: does not depend on host local timezone\nok 21 - does not depend on host local timezone\n  ---\n  duration_ms: 1.547666\n  ...\n# Subtest: fetchWeather returns instant details and flags UV presence\nok 22 - fetchWeather returns instant details and flags UV presence\n  ---\n  duration_ms: 0.123458\n  ...\n# Subtest: entry without UV index is usable, not undefined\nok 23 - entry without UV index is usable, not undefined\n  ---\n  duration_ms: 0.33175\n  ...\n# Subtest: entry without cloud cover is a hard error\nok 24 - entry without cloud cover is a hard error\n  ---\n  duration_ms: 0.188208\n  ...\n# Subtest: empty timeseries is a hard error\nok 25 - empty timeseries is a hard error\n  ---\n  duration_ms: 0.055708\n  ...\n# Subtest: sends User-Agent in request\nok 26 - sends User-Agent in request\n  ---\n  duration_ms: 0.057334\n  ...\n# Subtest: default User-Agent has no placeholder contact\nok 27 - default User-Agent has no placeholder contact\n  ---\n  duration_ms: 0.057084\n  ...\n# Subtest: encodes coordinates in the URL\nok 28 - encodes coordinates in the URL\n  ---\n  duration_ms: 0.105334\n  ...\n1..28\n# tests 28\n# suites 0\n# pass 28\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 69.59225\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "package-lock.json",
+    "package.json",
+    "src/describe.js",
+    "src/geocode.js",
+    "src/index.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ],
+  "void": "Workspace was never cleared: workspace-clear refuses git-tracked files and the suite ignored the refusal, so this run started from the previous run's finished code. See bench/submissions/README.md."
+}

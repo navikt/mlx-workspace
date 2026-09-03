@@ -4,15 +4,22 @@ One directory per weather-cli run, named `<model key>-<run tag>`, copied out of
 the workspace before the next run's `workspace-clear` deletes it. `node_modules`
 is excluded; everything the model wrote is here.
 
-This exists because the round of 3 September 2026 could not be scored. Six runs
-finished, three an arm, and four of the six code trees were gone by the time
-anyone read them: each run cleared the workspace its predecessor had written
-into. Only the last run of each model survived, `qwen3.8-27b-4bit` run 05 and
-`qwen3.6-35b-a3b-optiq` run 06, and those two are the first entries here.
+This exists because the round of 3 September 2026 could not be scored, and then
+turned out to be void for a second reason.
 
-Runs 01 through 04 of tag `20260903-072930` are not recoverable. Their result
-files hold the timings, token counts and test results; the code they describe no
-longer exists.
+Six runs finished, three an arm, and only two code trees were on disk when
+anyone looked: `qwen3.8-27b-4bit` run 05 and `qwen3.6-35b-a3b-optiq` run 06.
+The first reading was that each run's `workspace-clear` had deleted its
+predecessor. It had not. `workspace-clear` refuses to delete git-tracked files,
+`afb1bd7` had swept these trees into git that morning, and the suite ignored the
+refusal and logged "nothing to do". So every run began on top of the finished
+code of the run before it, and the two surviving trees are cumulative, not
+submissions. The tag `20260903-072930` measures nothing and is kept only as the
+record of how it failed.
+
+Runs 01 through 04 of that tag do not exist in any form. Their result files hold
+timings, token counts and test results for work that was partly done by an
+earlier run.
 
 ## Scoring blind
 

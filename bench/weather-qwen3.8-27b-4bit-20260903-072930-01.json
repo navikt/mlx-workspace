@@ -46,5 +46,6 @@
     "test/output.test.js",
     "test/parser.test.js",
     "test/weather.test.js"
-  ]
+  ],
+  "void": "Workspace was never cleared: workspace-clear refuses git-tracked files and the suite ignored the refusal, so this run started from the previous run's finished code. See bench/submissions/README.md."
 }

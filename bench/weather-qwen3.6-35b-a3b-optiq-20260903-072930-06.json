@@ -1,0 +1,51 @@
+{
+  "model_key": "qwen3.6-35b-a3b-optiq",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 153.2,
+      "turns": 14,
+      "tool_calls": 16,
+      "tokens_in": 96255,
+      "tokens_out": 5042,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 545.6,
+      "turns": 38,
+      "tool_calls": 36,
+      "tokens_in": 397012,
+      "tokens_out": 20095,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 698.8,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 50,
+    "fail_count": 0,
+    "tail": "161875ms)\n    \u2714 treats lat=-90 as valid (boundary) (0.048042ms)\n    \u2714 treats lon=180 as valid (boundary) (0.038166ms)\n    \u2714 treats lon=-180 as valid (boundary) (0.138458ms)\n  \u2714 edge cases for trap #2 (boundary at exactly 75) (0.462167ms)\n\u2714 parseLocation (3.962ms)\n\u25b6 weather API\n  \u2714 fetches weather data from Met.no (0.78525ms)\n  \u2714 throws on 403 response (0.232916ms)\n  \u2714 throws on 429 response (0.097917ms)\n  \u25b6 findClosestEntry\n    \u2714 finds the entry closest to current time in UTC (0.745709ms)\n    \u2714 throws on empty timeseries (0.054208ms)\n    \u2714 throws on undefined timeseries (0.042875ms)\n  \u2714 findClosestEntry (0.97625ms)\n  \u25b6 extractData\n    \u2714 extracts all fields from a complete entry (0.185334ms)\n    \u2714 derives description from cloud_area_fraction > 75 (0.092959ms)\n    \u2714 derives description from cloud_area_fraction > 50 (0.10225ms)\n    \u2714 derives description from cloud_area_fraction > 25 (0.061042ms)\n    \u2714 derives description from cloud_area_fraction <= 25 (0.080417ms)\n    \u2714 trap #2: cloud_area_fraction exactly 75 is NOT overcast (0.041416ms)\n    \u2714 trap #2: cloud_area_fraction exactly 50 is NOT partly cloudy (0.115083ms)\n    \u2714 trap #2: cloud_area_fraction exactly 25 is NOT mostly clear (0.041833ms)\n    \u2714 trap #4: handles missing ultraviolet_index_clear_sky (0.042ms)\n    \u2714 trap #5: handles missing cloud_area_fraction (0.044709ms)\n  \u2714 extractData (0.984834ms)\n\u2714 weather API (3.953792ms)\n\u2139 tests 50\n\u2139 suites 11\n\u2139 pass 50\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 119.04525\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "geocode.js",
+    "index.js",
+    "output.js",
+    "package-lock.json",
+    "package.json",
+    "parser.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js",
+    "weather.js"
+  ],
+  "void": "Workspace was never cleared: workspace-clear refuses git-tracked files and the suite ignored the refusal, so this run started from the previous run's finished code. See bench/submissions/README.md."
+}
