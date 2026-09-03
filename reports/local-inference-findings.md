@@ -496,34 +496,44 @@ exposes has no JSON parsing filter, so no template can fix it. Every one of them
 server to parse arguments into a mapping first. mlx-lm does. Ollama does not read Jinja at all.
 The row belongs in a compatibility note, not in a defect list.
 
-**Fresh runs on 1 September replace the rejection.** Two samples each, on a harness repaired
-the same night:
+**Ten runs on 3 September replace the rejection.** Five samples per model, on a harness with
+git hidden from the agent, compile and test verification requiring the diff to touch the file
+the prompt names, and the served model asserted against the profile:
 
-| model | verified of 8, four runs | mean | median | timeouts |
-|---|---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` | 3, 2, 4, 4 | 3.25 | 10–12s | 1 |
-| `qwen3.8-27b-4bit` | 4, 4, 3, 4 | 3.75 | 58–104s | 10 |
+| model | verified per run | mean | median |
+|---|---|---|---|
+| `qwen3.6-35b-a3b-optiq` | 2, 3, 2, 4, 3 | 2.80 | 3 |
+| `qwen3.8-27b-4bit` | 4, 4, 2, 4, 4 | 3.60 | 4 |
 
-Exact two-sided Mann-Whitney **p = 0.71**, ranges fully overlapping. **There is no measurable
-difference in how many tasks they solve.** An earlier version of this table reported 5.75 against
-3.40 and concluded Qwen3.8 solved more; that was measured before the models could compile,
-against workspaces four days apart in commit. The gap was an artifact of the instrument.
+Every run scored all 11 tasks; 7 or 8 of them are judged automatically per run, and the rest are
+manual or retired. Exact two-sided Mann-Whitney U by enumeration gives U = 19 over 252
+arrangements, so **p = 0.21**. The floor for five runs against five is 2/C(10,5) = 0.008, which
+p = 0.21 sits far above. **This experiment could not separate the two models.** That is neither
+a finding that 3.8 is better nor a finding that the two are equivalent, and five runs an arm are
+too few to decide it.
 
-The 4-bit's second run is the best single result recorded on this suite, including the task it
-was previously written up as looping on. Its first, two hours earlier on the same machine,
-verified one. So Qwen3.8 is not weaker; it is **less predictable**, and about seven times
-slower. That is why it now ships as an opt-in alternative with the range in its description,
-while `Qwen3.6-35B-A3B-OptiQ` remains the default on the strength of its 216 samples.
+Two earlier versions of this table read differently. The first reported 5.75 against 3.40 and
+concluded Qwen3.8 solved more; it was measured before the models could compile, against
+workspaces four days apart in commit, so it compared two models writing Kotlin blind. The second
+reported 3.75 against 3.25 at p = 0.71, on four runs an arm, before git hiding and real
+verification landed. The ordering has held across all three harnesses and the size of the gap has
+not, and it has not been statistically significant on any harness that measured what it claimed
+to measure.
+
+Qwen3.8 is also less predictable and about seven times slower. That is why it ships as an opt-in
+alternative with the range in its description, while `Qwen3.6-35B-A3B-OptiQ` remains the default
+on the strength of its 216 samples.
 
 **The methodological point outranks the model one.** Every reversal here came from a second run
 existing, not from better reasoning. This report's model table was built from single runs, and
 single runs are anecdotes with numbers attached. n>=5 before a row informs advice, and publish
 the individual runs rather than a summary statistic, so a reader can see the spread the summary
-hides. The clearest case: Qwen3.8's average moved from 4.80 to 5.75 on one run being quarantined,
-and the difference between those two numbers is the difference between p = 0.175 and p = 0.016 —
-between a claim that cannot be published and one that barely can. 0.016 is the floor: with four
-runs against five there are 126 arrangements, so no two-sided p below 2/126 is obtainable. It
-reports that the sets do not overlap, and nothing more precise than that. A mean alone shows none of that.
+hides. The clearest case: on the broken harness, Qwen3.8's average moved from 4.80 to 5.75 on one
+run being quarantined, and the difference between those two numbers was the difference between
+p = 0.175 and p = 0.016, between a claim that cannot be published and one that barely can. 0.016
+was the floor there: with four runs against five there are 126 arrangements, so no two-sided p
+below 2/126 is obtainable. Neither number survived the harness repair. A mean alone shows none of
+that.
 Outstanding samples are tracked in
 [navikt/copilot#564](https://github.com/navikt/copilot/issues/564).
 
