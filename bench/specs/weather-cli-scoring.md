@@ -29,6 +29,27 @@ expected to win.
 | 7 | **The `example.com` placeholder** | The User-Agent does not contain `example.com`. The spec names it as rejected and gives a working example on the line above; three of four models put it there anyway. |
 | 8 | **403 read as throttling** | A hard 403 is not diagnosed as rate limiting. Met.no's block has no `Retry-After` and no `RateLimit-*` headers; real throttling returns 429. Backoff against a wall that never opens costs about five minutes per occurrence. |
 
+### Trap 7 and trap 8 are scored from different evidence
+
+Pre-registered 4 September 2026, before any submission from the `20260903-234313`
+round was opened, because the first round showed two reviewers could read the
+rule differently.
+
+**Trap 7 is scored from the shipped code.** The User-Agent in the submitted
+source either contains `example.com` or it does not. A model that probes the API
+with a bad User-Agent, gets a 403 and corrects it has learned the thing the trap
+is about, and scoring that as a hit punishes the behaviour we want. A model that
+ships `example.com` has not.
+
+**Trap 8 is scored from the session log**, `.bench-logs/<key>-<stamp>.jsonl`, not
+from the wrapper summary. It is hit when the transcript shows repeated identical
+requests against a 403, or a stated diagnosis of rate limiting for a 403. One
+retry after changing something is not backoff. Seventeen retries with the same
+rejected header is.
+
+A model that never received a 403 cannot hit trap 8: record `n/a` and reduce the
+denominator.
+
 ### Rules for the reviewer
 
 **Score blind.** Strip the model identity from the workspace before reading the code. This
