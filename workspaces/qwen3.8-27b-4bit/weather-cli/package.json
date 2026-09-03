@@ -1,15 +1,18 @@
 {
   "name": "weather-cli",
   "version": "1.0.0",
-  "description": "Weather CLI using Geonorge geocoding and the Met.no locationforecast API",
-  "type": "module",
+  "description": "Norwegian weather CLI backed by Geonorge geocoding and the Met.no forecast API",
+  "type": "commonjs",
   "bin": {
-    "weather": "./index.js"
+    "weather": "src/index.js"
   },
   "scripts": {
     "test": "node --test"
   },
   "dependencies": {
     "axios": "^1.7.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

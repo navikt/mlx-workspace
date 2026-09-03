@@ -1,54 +1,50 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { parseLocation, collectArgs } from '../lib/parse.js';
+"use strict";
 
-test('no argument throws', () => {
-  assert.throws(() => parseLocation(undefined), /No location given/);
-  assert.throws(() => parseLocation('   '), /No location given/);
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { parseLocation, ParseError } = require("../src/parser");
+
+test("parses valid coordinates in lat lon order", () => {
+  const r = parseLocation("59.91 10.75");
+  assert.equal(r.kind, "coords");
+  assert.equal(r.lat, 59.91);
+  assert.equal(r.lon, 10.75);
 });
 
-test('parses coordinates in lat lon order', () => {
-  const loc = parseLocation('59.91 10.75');
-  assert.deepEqual(loc, { type: 'coords', lat: 59.91, lon: 10.75, displayName: '59.91 10.75' });
+test("parses negative coordinates", () => {
+  const r = parseLocation("-33.86 151.2");
+  assert.equal(r.kind, "coords");
+  assert.equal(r.lat, -33.86);
+  assert.equal(r.lon, 151.2);
 });
 
-test('rejects non-numeric coordinate pairs', () => {
-  assert.throws(() => parseLocation('abc 10.75'), /Invalid coordinates/);
-  assert.throws(() => parseLocation('59.91 xyz'), /Invalid coordinates/);
+test("treats a place name as a name lookup", () => {
+  const r = parseLocation("Oslo");
+  assert.equal(r.kind, "name");
+  assert.equal(r.name, "Oslo");
 });
 
-test('rejects out-of-range coordinates', () => {
-  assert.throws(() => parseLocation('91 10'), /Invalid coordinates/);
-  assert.throws(() => parseLocation('59 181'), /Invalid coordinates/);
-  assert.throws(() => parseLocation('-91 10'), /Invalid coordinates/);
+test("rejects latitude out of range", () => {
+  assert.throws(() => parseLocation("91 10"), ParseError);
 });
 
-test('accepts negative coordinates', () => {
-  const loc = parseLocation('-45.5 -12.25');
-  assert.equal(loc.type, 'coords');
-  assert.equal(loc.lat, -45.5);
-  assert.equal(loc.lon, -12.25);
+test("rejects longitude out of range", () => {
+  assert.throws(() => parseLocation("59 181"), ParseError);
 });
 
-test('treats single token as a place name', () => {
-  const loc = parseLocation('Bergen');
-  assert.deepEqual(loc, { type: 'name', displayName: 'Bergen' });
+test("rejects empty input", () => {
+  assert.throws(() => parseLocation(""), ParseError);
+  assert.throws(() => parseLocation("   "), ParseError);
+  assert.throws(() => parseLocation(undefined), ParseError);
 });
 
-test('joins multi-word names', () => {
-  const loc = parseLocation('  Stavanger  ');
-  assert.deepEqual(loc, { type: 'name', displayName: 'Stavanger' });
+test("treats a non-numeric string as a name lookup", () => {
+  const r = parseLocation("abc def");
+  assert.equal(r.kind, "name");
+  assert.equal(r.name, "abc def");
 });
 
-test('collectArgs merges shell-split coordinate pairs', () => {
-  assert.deepEqual(collectArgs(['node', 'weather', '59.91', '10.75']), ['59.91 10.75']);
-  assert.deepEqual(collectArgs(['node', 'weather', '59.91', 'abc']), ['59.91', 'abc']);
-  assert.deepEqual(collectArgs(['node', 'weather', 'Bergen']), ['Bergen']);
-  assert.deepEqual(collectArgs(['node', 'weather']), []);
-});
-
-test('parseLocation handles collectArgs output', () => {
-  const [arg] = collectArgs(['node', 'weather', '59.91', '10.75']);
-  const loc = parseLocation(arg);
-  assert.deepEqual(loc, { type: 'coords', lat: 59.91, lon: 10.75, displayName: '59.91 10.75' });
+test("does not treat a single number as coordinates", () => {
+  const r = parseLocation("59.91");
+  assert.equal(r.kind, "name");
 });

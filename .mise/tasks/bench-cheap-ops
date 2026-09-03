@@ -67,6 +67,24 @@ def sh(cmd, cwd=None, timeout=1800, env=None):
                           text=True, timeout=timeout, env=e)
 
 
+def assert_workspace_is_clean():
+    """Nothing in the agent's working directory except what we put there.
+
+    reset_repo cleans the checkout. The agent's cwd is the directory ABOVE it,
+    and for five days that directory held a src/ tree with finished answers in
+    it: a DateUtil already renamed and already documented, and the test file
+    another task asks for. The default model read them, said the work was
+    already done, and scored zero on two tasks it can do. Four of those files
+    were committed to this repository, which is why no reset ever removed them.
+    """
+    allowed = {"AGENTS.md", "opencode.json", "kotlin", "weather-cli", ".DS_Store"}
+    stray = sorted(p.name for p in ws.iterdir() if p.name not in allowed) if ws.exists() else []
+    if stray:
+        raise SystemExit(
+            f"\u2717 {ws} holds {', '.join(stray)}, which the agent can read and which the "
+            f"per-task reset does not touch.\n  Remove them before measuring anything.")
+
+
 def ensure_clone():
     # A checkout whose .git is a file is one this suite interrupted: the history
     # is under .bench-logs/git-hidden and the placeholder is still in its place.
@@ -267,7 +285,12 @@ def verify(task):
         # plus a green build" passes when a model adds a blank line to an
         # unrelated file, which is how E1 could be scored a success for doing
         # nothing. The prompt names a path; require the diff to touch it.
-        wanted = task.get("path") or _path_in_prompt(task.get("prompt", ""))
+        # Declared in tasks.json, never guessed. The regex that used to read
+        # this out of the prompt took the first src/ path it saw, and for G2
+        # that is the file the test is written FOR, not the file to write. G2
+        # could not pass however good the test was, and three attempts that
+        # built green were scored as failures.
+        wanted = task.get("touches")
         if wanted:
             touched = changed_files()
             if not any(wanted in f for f in touched):
@@ -301,54 +324,6 @@ def verify(task):
         # model down by the same amount and adds only noise to the comparison.
         return None, "retired: " + task.get("retired_reason", "")[:60]
     return None, "needs a human"
-
-
-_PATH_RE = __import__("re").compile(r"\b(src/[\w./-]+\.\w+)")
-
-
-def _path_in_prompt(prompt):
-    """The file a task's prompt names, if it names one.
-
-    Tasks were written with the path in the prose rather than a field, so this
-    reads it back out. A task with no path in its prompt keeps the old
-    behaviour, which is the honest fallback: this cannot invent a target.
-    """
-    m = _PATH_RE.search(prompt or "")
-    return m.group(1) if m else None
-
-SERVED = None  # the model id the current task is scored against
-
-
-def serving_now():
-    """The model id the server on 8080 actually answers with, or None."""
-    r = sh(["curl", "-s", "--max-time", "10", "http://localhost:8080/v1/models"])
-    try:
-        return [m["id"] for m in json.loads(r.stdout).get("data", [])]
-    except Exception:
-        return None
-
-
-def assert_serving_profile():
-    """Refuse to score a run against a model that is not the active profile.
-
-    This is the fault that cost us four result files: `model-use` failed, the
-    previous model stayed loaded, and the results were written under the new
-    profile's name while the transcripts came from the old model. Nothing in the
-    pipeline compared the two, so the file looked like a clean run for a model
-    that never answered a single request.
-    """
-    want = P.served_model_id(P.params_for(key))
-    ids = serving_now()
-    if ids is None:
-        raise SystemExit("✗ server on :8080 did not answer /v1/models — cannot "
-                         "confirm which model would be scored")
-    global SERVED
-    if want not in ids:
-        raise SystemExit(f"✗ profile mismatch: MLX_ACTIVE_PROFILE={key} expects "
-                         f"{want!r}, server is serving {ids!r}. Re-run "
-                         f"`mise run model-use {key}` and check it succeeded.")
-    SERVED = want
-    return want
 
 
 def restart_server():
@@ -475,6 +450,11 @@ def run_task(task):
         # cache rather than what is loaded, so this is the profile's id after
         # the check passed, not an arbitrary entry from that list.
         "served_model": SERVED,
+        # Which harness produced this record. Fifty result files sit in bench/
+        # from three generations of this suite, and until now nothing in a file
+        # said which one it came from. Comparing across them is how a 5.75
+        # against 3.40 got published from runs where no model could compile.
+        "harness_sha": HARNESS_SHA,
     }
     # Record term hits before any early return, so a timed-out task is still
     # comparable field-for-field with a completed one.
@@ -485,7 +465,12 @@ def run_task(task):
     rec.update(loop_check(out))
     rec["files_changed"] = len(changed_files())
     if timed_out:
-        rec["verified"] = False
+        # A retired task stays out of the scoring whatever it does, including
+        # running out the cap. Scored as a failure it moved the denominator
+        # between 7 and 8, and it moved it against whichever model is slower:
+        # D2 counted as a judged failure in 4 of 5 runs for the slow arm and
+        # 2 of 4 for the fast one.
+        rec["verified"] = None if task.get("verify") == "retired" else False
         rec["note"] = f"timed out after {cap}s"
         # opencode-headless prints its summary line at the end, so a killed task
         # leaves nothing to parse and these fields default to zero. Zero turns
@@ -507,6 +492,7 @@ def run_task(task):
     return rec
 
 
+assert_workspace_is_clean()
 ensure_clone()
 # With restarts on, every task checks the served model as the server comes back.
 # With them off nothing would ever check, which is the configuration the

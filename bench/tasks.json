@@ -38,13 +38,15 @@
       "id": "E1",
       "kind": "edit",
       "verify": "compile",
-      "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else."
+      "prompt": "Add a KDoc comment to the public function dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt describing what it does and its parameters. Change nothing else.",
+      "touches": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt"
     },
     {
       "id": "E3",
       "kind": "edit",
       "verify": "compile",
-      "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line at the start of the first public function recording the values of its parameters. Use the existing logging style in this codebase. Change nothing else."
+      "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line at the start of the first public function recording the values of its parameters. Use the existing logging style in this codebase. Change nothing else.",
+      "touches": "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt"
     },
     {
       "id": "M1",
@@ -58,13 +60,15 @@
       "id": "M2",
       "kind": "edit",
       "verify": "test",
-      "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else."
+      "prompt": "The domain class Oppfolgingstilfelle has a field gradertAtTilfelleEnd, but the REST DTO in src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt does not expose it. Add gradertAtTilfelleEnd to the DTO and map it where the DTO is constructed. Change nothing else.",
+      "touches": "src/main/kotlin/no/nav/syfo/api/endpoints/OppfolgingstilfellePersonDTO.kt"
     },
     {
       "id": "G2",
       "kind": "edit",
       "verify": "test",
-      "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day."
+      "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day.",
+      "touches": "src/test/kotlin/no/nav/syfo/util/"
     },
     {
       "id": "D1",
@@ -90,5 +94,6 @@
       "prompt": "Write a JUnit 5 test that builds a KafkaIdenthendelseDTO with three identifikatorer, one AKTORID, one inactive FOLKEREGISTERIDENT and one active FOLKEREGISTERIDENT, then asserts that getActivePersonident() returns the active one and getInactivePersonidenter() returns exactly the inactive one. Match the style of the existing tests under src/test/kotlin."
     }
   ],
-  "_ref_note": "Pinned to a commit, not a branch. It said \"master\" and the workspaces drifted to three different commits: the two models in the headline comparison were solving different code, and one task threads a field into a class that differs between them. A moving ref makes every cross-model number incomparable."
+  "_ref_note": "Pinned to a commit, not a branch. It said \"master\" and the workspaces drifted to three different commits: the two models in the headline comparison were solving different code, and one task threads a field into a class that differs between them. A moving ref makes every cross-model number incomparable.",
+  "_touches_note": "touches is the path a task's diff has to reach. It was read out of the prompt with a regex until 3 September, which took the first src/ path it found: for G2 that is the file the test is written FOR, so G2 could not pass however good the test was. Three attempts that built green were scored as failures."
 }

@@ -1,94 +1,78 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { geocode, USER_AGENT } from '../lib/geocode.js';
+"use strict";
 
-function fakeHttp(payload, captured = {}) {
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { geocode, GeocodeError, GEONORGE_URL } = require("../src/geocode");
+
+function mockHttp(payload, { status = 200, throwErr } = {}) {
   return {
-    get: async (url, config) => {
-      captured.url = url;
-      captured.config = config;
-      return { data: payload };
+    async get(url, cfg) {
+      if (throwErr) throw throwErr;
+      if (status >= 400) {
+        const e = new Error("HTTP " + status);
+        e.response = { status, data: payload };
+        throw e;
+      }
+      return { status, data: payload, config: cfg, url };
     },
   };
 }
 
-const oslo = {
+const osloPayload = {
+  metadata: { totaltAntallTreff: 1 },
   navn: [
     {
-      fylker: [{ fylkesnavn: 'Oslo', fylkesnummer: '03' }],
-      geojson: { geometry: { coordinates: [10.73353, 59.91187], type: 'Point' } },
-      stedsnavn: [
-        { navnestatus: 'hovednavn', skrivemåte: 'Oslo', skrivemåtestatus: 'godkjent og prioritert', språk: 'Norsk', stedsnavnnummer: 1 },
-      ],
-      stedsnummer: 509924,
-      stedstatus: 'aktiv',
+      navneobjekttype: "Fylke",
+      representasjonspunkt: { nord: 59.91187, øst: 10.73353 },
+      stedsnavn: [{ skrivemåte: "Oslo", navnestatus: "hovednavn" }],
     },
   ],
 };
 
-test('maps navn[0] geojson [lon, lat] to {lat, lon} and picks primary name', async () => {
-  const captured = {};
-  const loc = await geocode('Oslo', { http: fakeHttp(oslo, captured) });
-  assert.equal(loc.type, 'coords');
-  assert.equal(loc.lat, 59.91187);
-  assert.equal(loc.lon, 10.73353);
-  assert.equal(loc.displayName, 'Oslo');
-  assert.equal(captured.url, 'https://ws.geonorge.no/stedsnavn/v1/sted');
-  assert.deepEqual(captured.config.params, { sok: 'Oslo', fuzzy: true, treffPerSide: 1, utkoordsys: 4326 });
-  assert.equal(captured.config.headers['User-Agent'], USER_AGENT);
-  assert.equal(captured.config.headers.Accept, 'application/json');
+test("maps representasjonspunkt nord/øst to lat/lon", async () => {
+  const r = await geocode("Oslo", { http: mockHttp(osloPayload) });
+  assert.equal(r.lat, 59.91187);
+  assert.equal(r.lon, 10.73353);
+  assert.equal(r.name, "Oslo");
 });
 
-test('falls back to query string when no primary name', async () => {
-  const payload = { navn: [{ geojson: { geometry: { coordinates: [5.3245, 60.39323] } } }] };
-  const loc = await geocode('Bergen', { http: fakeHttp(payload) });
-  assert.equal(loc.displayName, 'Bergen');
-  assert.equal(loc.lat, 60.39323);
-  assert.equal(loc.lon, 5.3245);
-});
-
-test('empty navn array throws', async () => {
-  await assert.rejects(geocode('xyzzyq', { http: fakeHttp({ navn: [] }) }), /No place found/);
-});
-
-test('missing geojson throws', async () => {
-  await assert.rejects(geocode('Nope', { http: fakeHttp({ navn: [{}] }) }), /No place found/);
-});
-
-test('propagates http errors', async () => {
-  const http = { get: async () => { throw new Error('422 Unprocessable Entity'); } };
-  await assert.rejects(geocode('', { http }), /422/);
-});
-
-test('strips navneobjekttype suffix from display name', async () => {
-  const payload = {
-    navn: [
-      {
-        navneobjekttype: 'Fylke',
-        geojson: { geometry: { coordinates: [10.73353, 59.91187] } },
-        stedsnavn: [
-          { navnestatus: 'hovednavn', skrivemåte: 'Oslo fylke', språk: 'Norsk' },
-          { navnestatus: 'hovednavn', skrivemåte: 'Oslo', språk: 'Norsk' },
-        ],
-      },
-    ],
+test("URL-encodes the search term (no raw injection)", async () => {
+  let seenUrl = "";
+  const http = {
+    async get(url) {
+      seenUrl = url;
+      return { status: 200, data: osloPayload };
+    },
   };
-  const loc = await geocode('Oslo', { http: fakeHttp(payload) });
-  assert.equal(loc.displayName, 'Oslo');
+  await geocode("Oslo & Co", { http });
+  assert.ok(seenUrl.startsWith(GEONORGE_URL + "?"));
+  // URLSearchParams percent-encodes the ampersand and uses '+' for spaces;
+  // the raw " & " must never appear unencoded in the URL.
+  assert.ok(seenUrl.includes("sok=Oslo+%26+Co"));
+  assert.ok(!seenUrl.includes("sok=Oslo & Co"));
 });
 
-test('prefers Norwegian primary name', async () => {
-  const payload = {
-    navn: [
-      {
-        geojson: { geometry: { coordinates: [10.39506, 63.43048] } },
-        stedsnavn: [
-          { navnestatus: 'hovednavn', skrivemåte: 'Trondheim', språk: 'Norsk' },
-          { navnestatus: 'hovednavn', skrivemåte: 'Tråante', språk: 'Sørsamisk' },
-        ],
-      },
-    ],
-  };
-  const loc = await geocode('Trondheim', { http: fakeHttp(payload) });
-  assert.equal(loc.displayName, 'Trondheim');
+test("throws GeocodeError when navn is empty", async () => {
+  await assert.rejects(
+    geocode("Nowhere", { http: mockHttp({ navn: [] }) }),
+    GeocodeError
+  );
+});
+
+test("throws GeocodeError on HTTP failure", async () => {
+  await assert.rejects(
+    geocode("Oslo", {
+      http: mockHttp(null, { status: 500 }),
+    }),
+    GeocodeError
+  );
+});
+
+test("throws GeocodeError when match lacks coordinates", async () => {
+  await assert.rejects(
+    geocode("Oslo", {
+      http: mockHttp({ navn: [{ navneobjekttype: "Fylke" }] }),
+    }),
+    GeocodeError
+  );
 });

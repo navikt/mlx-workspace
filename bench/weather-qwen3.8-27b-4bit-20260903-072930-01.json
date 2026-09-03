@@ -1,0 +1,50 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 167.8,
+      "turns": 6,
+      "tool_calls": 8,
+      "tokens_in": 25054,
+      "tokens_out": 2075,
+      "truncated": false,
+      "timed_out": false
+    },
+    {
+      "phase": "implement",
+      "seconds": 1223.7,
+      "turns": 35,
+      "tool_calls": 36,
+      "tokens_in": 329634,
+      "tokens_out": 12182,
+      "truncated": false,
+      "timed_out": false
+    }
+  ],
+  "total_seconds": 1391.5,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 37,
+    "fail_count": 0,
+    "tail": "mber as coordinates\nok 28 - does not treat a single number as coordinates\n  ---\n  duration_ms: 0.05825\n  ...\n# Subtest: fetchForecast returns the response body\nok 29 - fetchForecast returns the response body\n  ---\n  duration_ms: 0.827625\n  ...\n# Subtest: fetchForecast sends the User-Agent header\nok 30 - fetchForecast sends the User-Agent header\n  ---\n  duration_ms: 0.110666\n  ...\n# Subtest: fetchForecast surfaces 403 as non-retryable\nok 31 - fetchForecast surfaces 403 as non-retryable\n  ---\n  duration_ms: 0.37475\n  ...\n# Subtest: fetchForecast surfaces 429 as retryable\nok 32 - fetchForecast surfaces 429 as retryable\n  ---\n  duration_ms: 0.117375\n  ...\n# Subtest: closestEntry picks the entry nearest to now in UTC\nok 33 - closestEntry picks the entry nearest to now in UTC\n  ---\n  duration_ms: 0.20575\n  ...\n# Subtest: closestEntry is timezone-independent (UTC epoch math)\nok 34 - closestEntry is timezone-independent (UTC epoch math)\n  ---\n  duration_ms: 0.071166\n  ...\n# Subtest: closestEntry throws on empty timeseries\nok 35 - closestEntry throws on empty timeseries\n  ---\n  duration_ms: 0.096667\n  ...\n# Subtest: extractDetails returns the details object\nok 36 - extractDetails returns the details object\n  ---\n  duration_ms: 0.07175\n  ...\n# Subtest: extractDetails throws when details missing\nok 37 - extractDetails throws when details missing\n  ---\n  duration_ms: 0.144166\n  ...\n1..37\n# tests 37\n# suites 0\n# pass 37\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 716.411333\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "package-lock.json",
+    "package.json",
+    "src/geocode.js",
+    "src/index.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ]
+}

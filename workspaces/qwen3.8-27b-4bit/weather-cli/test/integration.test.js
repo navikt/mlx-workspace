@@ -1,55 +1,54 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+"use strict";
 
-const root = dirname(fileURLToPath(import.meta.url));
-const cli = join(root, '..', 'index.js');
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { execFile } = require("node:child_process");
+const path = require("node:path");
 
-function run(args) {
-  try {
-    const stdout = execFileSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
-    return { code: 0, stdout, stderr: '' };
-  } catch (err) {
-    return { code: err.status ?? 1, stdout: err.stdout ?? '', stderr: err.stderr ?? '' };
-  }
+const CLI = path.join(__dirname, "..", "src", "index.js");
+
+function runCli(args) {
+  return new Promise((resolve) => {
+    execFile("node", [CLI, ...args], (err, stdout, stderr) => {
+      resolve({
+        code: err ? err.code : 0,
+        stdout,
+        stderr,
+      });
+    });
+  });
 }
 
-test('geocode + weather by name (live network)', { timeout: 30000 }, () => {
-  const { code, stdout, stderr } = run(['Bergen']);
-  assert.equal(code, 0, `exit ${code}: ${stderr}`);
-  const lines = stdout.trim().split('\n');
-  assert.equal(lines.length, 7);
-  assert.match(lines[0], /^Weather in .+ \(Met\.no API\)$/);
-  assert.match(lines[1], /^Temperature: -?\d+(\.\d+)?°C$/);
-  assert.match(lines[2], /^Description: (Overcast|Partly cloudy|Mostly clear|Clear)$/);
-  assert.match(lines[3], /^Humidity: \d+(\.\d+)?%$/);
-  assert.match(lines[4], /^Wind Speed: \d+(\.\d+)? m\/s$/);
-  assert.match(lines[5], /^Pressure: \d+(\.\d+)? hPa$/);
-  assert.match(lines[6], /^UV Index: \d+(\.\d+)?$/);
+test("invalid coordinates exit 1 with an error", async () => {
+  const r = await runCli(["95 10"]);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /Error:/);
 });
 
-test('weather by coordinates (live network)', { timeout: 30000 }, () => {
-  const { code, stdout, stderr } = run(['59.91 10.75']);
-  assert.equal(code, 0, `exit ${code}: ${stderr}`);
-  assert.match(stdout, /^Weather in 59\.91 10\.75 \(Met\.no API\)$/m);
+test("no argument exits 1 with an error", async () => {
+  const r = await runCli([]);
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /Error:/);
 });
 
-test('invalid coordinates exit 1', () => {
-  const { code, stderr } = run(['999 999']);
-  assert.equal(code, 1);
-  assert.match(stderr, /Invalid coordinates/);
+test("live: geocode Oslo and print the spec block", { timeout: 30000 }, async () => {
+  const r = await runCli(["Oslo"]);
+  assert.equal(r.code, 0, `stderr: ${r.stderr}`);
+  const lines = r.stdout.split("\n").filter(Boolean);
+  // Geonorge's prioritized skrivemåte for the "Oslo" match is "Oslo fylke".
+  assert.match(lines[0], /^Weather in Oslo( fylke)? \(Met\.no API\)$/);
+  assert.match(r.stdout, /Temperature: -?\d+(\.\d+)?°C/);
+  assert.match(r.stdout, /Description: (Overcast|Partly cloudy|Mostly clear|Clear)/);
+  assert.match(r.stdout, /Humidity: \d+(\.\d+)?%/);
+  assert.match(r.stdout, /Wind Speed: \d+(\.\d+)? m\/s/);
+  assert.match(r.stdout, /Pressure: \d+(\.\d+)? hPa/);
+  assert.ok(!r.stdout.includes("undefined"));
 });
 
-test('unknown place name exits 1', { timeout: 30000 }, () => {
-  const { code, stderr } = run(['xyzzyqxyzzy']);
-  assert.equal(code, 1);
-  assert.match(stderr, /No place found/);
-});
-
-test('missing argument exits 1', () => {
-  const { code, stderr } = run([]);
-  assert.equal(code, 1);
-  assert.match(stderr, /No location given/);
+test("live: coordinate input prints the spec block", { timeout: 30000 }, async () => {
+  const r = await runCli(["59.91 10.75"]);
+  assert.equal(r.code, 0, `stderr: ${r.stderr}`);
+  assert.match(r.stdout, /^Weather in 59\.91 10\.75 \(Met\.no API\)$/m);
+  assert.match(r.stdout, /Temperature: -?\d+(\.\d+)?°C/);
+  assert.ok(!r.stdout.includes("undefined"));
 });

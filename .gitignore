@@ -26,3 +26,11 @@ bench/.previous/
 # A curl cookie jar with a local admin session token, committed by accident.
 cookie.txt
 workspaces/*/kotlin.WRONG-*
+
+# Nothing under a model's workspace is ours to keep. Four solution files were
+# committed here by accident and sat in the default model's working directory
+# for five days, one level above the checkout that reset_repo cleans: a
+# finished DateUtil with the rename and the KDoc already done, and the test file
+# another task asks for. The runs that read them are void.
+workspaces/*/src/
+workspaces/*/kotlin/
