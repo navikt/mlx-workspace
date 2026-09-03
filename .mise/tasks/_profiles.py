@@ -17,7 +17,6 @@ REQUIRED_PARAMS = [
     "MLX_OPENCODE_CONTEXT",
     "MLX_OPENCODE_OUTPUT",
     "MLX_OPENCODE_CHUNK_TIMEOUT",
-    "MLX_OPENCODE_HEADER_TIMEOUT",
 ]
 
 VALID_STATUS = {"recommended", "untested", "testing", "slow", "oom", "skipped", "broken", "failed"}
