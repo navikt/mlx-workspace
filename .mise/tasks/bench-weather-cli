@@ -192,6 +192,29 @@ def run_tests():
     }
 
 
+def session_id_from(rec):
+    """The session the plan turn created, read from its own event stream.
+
+    `--continue` resolves to the most recently updated session in the whole
+    opencode project, with no directory filter: 900+ sessions across 16
+    workspaces share one project here. It picks this run's plan session only
+    because that is usually the newest. If a plan turn fails to create one, the
+    implement turn continues the other arm's session, in the other arm's
+    workspace, under this arm's model, and nothing in the record would say so.
+    """
+    log = rec.get("session_log")
+    if not log:
+        return None
+    for line in (ROOT / log).read_text().splitlines():
+        line = line.strip()
+        if line.startswith("{") and '"sessionID"' in line:
+            try:
+                return json.loads(line)["sessionID"]
+            except (ValueError, KeyError):
+                continue
+    return None
+
+
 print(f"→ weather-cli · {key}")
 if os.environ.get("BENCH_KEEP_WORKSPACE") != "1":
     # Read the exit code. workspace-clear refuses to delete git-tracked files and
@@ -215,8 +238,18 @@ if _stray:
 restart_server()
 
 record = {"model_key": key, "phases": []}
-record["phases"].append(turn("plan", [PLAN]))
-record["phases"].append(turn("implement", ["--continue", IMPLEMENT]))
+plan = turn("plan", [PLAN])
+record["phases"].append(plan)
+
+sid = session_id_from(plan)
+record["session_id"] = sid
+if sid:
+    resume = ["--session", sid]
+else:
+    print("   ⚠ plan turn created no session; falling back to --continue, which is "
+          "not scoped to this workspace")
+    resume = ["--continue"]
+record["phases"].append(turn("implement", [*resume, IMPLEMENT]))
 record["total_seconds"] = round(sum(p["seconds"] for p in record["phases"]), 1)
 
 print("   running npm test")

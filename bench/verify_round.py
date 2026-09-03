@@ -30,12 +30,23 @@ for r in results:
     if d.get("void"):
         problems.append(f"{r.name}: marked void — {d['void'][:60]}...")
 
+    if any(phase.get("timed_out") for phase in d["phases"]):
+        capped = [p["phase"] for p in d["phases"] if p.get("timed_out")]
+        problems.append(f"{r.name}: {', '.join(capped)} phase hit its cap. The turn was cut off, so "
+                        "the tree is whatever existed at the cap, not a submission.")
+
     for phase in d["phases"]:
         t = phase.get("transcript")
         if not t:
             problems.append(f"{r.name}: {phase['phase']} phase kept no transcript, so traps 7 and 8 cannot be read")
         elif not (ROOT / t).exists():
             problems.append(f"{r.name}: transcript {t} is missing")
+        sl = phase.get("session_log")
+        if not sl:
+            problems.append(f"{r.name}: {phase['phase']} phase names no session log, so traps 7 and 8 "
+                            "can only be guessed from the wrapper summary")
+        elif not (ROOT / sl).exists():
+            problems.append(f"{r.name}: session log {sl} is missing")
 
     sub = d.get("submission")
     if not sub:
@@ -54,14 +65,17 @@ for r in results:
         h.update(f.read_bytes())
     by_model[key].append((run, h.hexdigest()[:12], d))
 
-for key, runs in sorted(by_model.items()):
-    seen = defaultdict(list)
+# Across the whole round, not per model. The queue alternates arms, so the run
+# most likely to inherit a workspace is the one from the *other* model, and
+# grouping by model made exactly that case invisible.
+seen = defaultdict(list)
+for key, runs in by_model.items():
     for run, digest, _ in runs:
-        seen[digest].append(run)
-    for digest, shared in seen.items():
-        if len(shared) > 1:
-            problems.append(f"{key}: runs {', '.join(shared)} produced byte-identical trees ({digest}). "
-                            "A run started from the one before it.")
+        seen[digest].append(f"{key} run {run}")
+for digest, shared in seen.items():
+    if len(shared) > 1:
+        problems.append(f"byte-identical trees ({digest}) from {'; '.join(sorted(shared))}. "
+                        "One run started from another's workspace.")
 
 print(f"→ {len(results)} result files, tag {tag}\n")
 for key, runs in sorted(by_model.items()):
