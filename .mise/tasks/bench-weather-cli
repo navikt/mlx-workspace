@@ -16,6 +16,7 @@ anything worth keeping before running it.
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -73,7 +74,13 @@ def restart_server():
 
 
 def turn(label, args):
-    """One opencode turn. Returns the record and the raw output."""
+    """One opencode turn.
+
+    The raw output is written to .bench-logs before the regexes touch it. Traps
+    7 and 8 in the rubric are read from the transcript, not from the code, and
+    the first weather round could not be scored on either because this function
+    used the output for token counts and dropped it.
+    """
     started = time.time()
     timed_out = False
     try:
@@ -98,6 +105,10 @@ def turn(label, args):
         "truncated": "TRUNCATED" in out,
         "timed_out": timed_out,
     }
+    log = ROOT / ".bench-logs" / f"weather-{key}{'-' + _tag if _tag else ''}-{label}.log"
+    log.write_text(out)
+    rec["transcript"] = str(log.relative_to(ROOT))
+
     print(f"   {label}: {rec['seconds']}s · {rec['turns']} turns · "
           f"{rec['tool_calls']} tools · out {rec['tokens_out']:,}"
           + ("  ⚠ TRUNCATED" if rec["truncated"] else "")
@@ -159,6 +170,17 @@ print("   running npm test")
 record["tests"] = run_tests()
 record["files"] = sorted(str(p.relative_to(cli)) for p in cli.rglob("*")
                          if p.is_file() and "node_modules" not in p.parts) if cli.is_dir() else []
+
+# Before the next run's workspace-clear deletes it. Three runs an arm is the
+# point of this round, and the first one left two code trees out of six: each
+# run cleared the workspace its predecessor had written into.
+if cli.is_dir():
+    dest = ROOT / "bench" / "submissions" / f"{key}{'-' + _tag if _tag else ''}"
+    if dest.exists():
+        shutil.rmtree(dest)
+    shutil.copytree(cli, dest, ignore=shutil.ignore_patterns("node_modules"))
+    record["submission"] = str(dest.relative_to(ROOT))
+    print(f"   archived submission → {record['submission']}")
 
 results_path.write_text(json.dumps(record, indent=2))
 t = record["tests"]

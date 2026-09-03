@@ -10,6 +10,7 @@ Verification is done here, not by the model. A model's claim that its tests pass
 is not a result; one earlier submission reported "20/20 passing" where eight of
 the assertions sat inside a catch block that swallowed them.
 """
+import hashlib
 import json
 import os
 import re
@@ -25,6 +26,28 @@ import _profiles as P
 
 ROOT = Path(__file__).resolve().parents[2]
 CFG = json.loads((ROOT / "bench" / "tasks.json").read_text())
+
+
+def _harness_sha():
+    """Everything that decides what a run measures, hashed together.
+
+    Not this file alone. A task's prompt, its declared `touches`, the sandbox
+    and the agent prompt all change the result while leaving the suite byte for
+    byte identical, and bench/ops.py refuses to pool runs across generations by
+    reading this. Hashing only the suite would let a tasks.json edit pass as the
+    same experiment.
+    """
+    h = hashlib.sha256()
+    for rel in (".mise/tasks/bench-cheap-ops", ".mise/tasks/_sandbox.py",
+                ".mise/tasks/_profiles.py", "bench/tasks.json",
+                "bench/agents-prompt.md"):
+        f = ROOT / rel
+        h.update(rel.encode())
+        h.update(f.read_bytes() if f.exists() else b"<missing>")
+    return h.hexdigest()[:12]
+
+
+HARNESS_SHA = _harness_sha()
 JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
 
 key = os.environ.get("MLX_ACTIVE_PROFILE", "").strip()

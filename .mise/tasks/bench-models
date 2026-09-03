@@ -46,6 +46,15 @@ echo $$ > "$LOCKDIR/pid"
 trap 'rm -rf "$LOCKDIR"' EXIT INT TERM
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
+# Each suite names its own result files. Checking for the ops name whatever the
+# suite is declared every weather run a failure while the file sat on disk
+# beside it, and a false failure line is how a real one gets ignored.
+SUITE="${BENCH_SUITE:-bench-cheap-ops}"
+case "$SUITE" in
+  bench-weather-cli) PREFIX=weather ;;
+  bench-cheap-ops)   PREFIX=results ;;
+  *) echo "FATAL: no result-file prefix known for suite $SUITE" >&2; exit 1 ;;
+esac
 LOG=".bench-logs/models-$STAMP.log"
 mkdir -p .bench-logs
 
@@ -146,11 +155,11 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   # Which suite to run. Everything around it is the same either way: the
   # profile switch, the server, the sanity check and the lock are properties of
   # measuring a model, not of the task set.
-  if BENCH_RUN_TAG="$TAG" PYTHONUNBUFFERED=1 mise run "${BENCH_SUITE:-bench-cheap-ops}" >>"$LOG" 2>&1; then
-    if ls "bench/results-$profile-$TAG.json" >/dev/null 2>&1; then
+  if BENCH_RUN_TAG="$TAG" PYTHONUNBUFFERED=1 mise run "$SUITE" >>"$LOG" 2>&1; then
+    if ls "bench/$PREFIX-$profile-$TAG.json" >/dev/null 2>&1; then
       say "✓ $profile complete"
     else
-      say "✗ $profile: suite reported success but wrote no bench/results-$profile-$TAG.json"
+      say "✗ $profile: suite reported success but wrote no bench/$PREFIX-$profile-$TAG.json"
     fi
   else
     say "✗ $profile: suite failed, see $LOG"
@@ -158,5 +167,5 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   mise run server-stop >>"$LOG" 2>&1
 done
 
-say "=== queue done. results: bench/results-*-$STAMP-*.json"
+say "=== queue done. results: bench/$PREFIX-*-$STAMP-*.json"
 say "    compare with: mise run bench-results ; mise run bench-loop-analysis"
