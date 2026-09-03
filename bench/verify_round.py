@@ -30,6 +30,15 @@ for r in results:
     if d.get("void"):
         problems.append(f"{r.name}: marked void — {d['void'][:60]}...")
 
+    # A turn that produced nothing is not a submission either, however it ended.
+    # An implement turn that dies at the provider after 0 turns leaves a
+    # spec-only tree, and a reviewer opening it scores "produced no code"
+    # against the model rather than against the harness.
+    for phase in d["phases"]:
+        if phase.get("turns") == 0 and not phase.get("timed_out"):
+            problems.append(f"{r.name}: {phase['phase']} phase ran {phase['seconds']}s and completed "
+                            "0 turns. The turn failed; the tree is not a submission.")
+
     if any(phase.get("timed_out") for phase in d["phases"]):
         capped = [p["phase"] for p in d["phases"] if p.get("timed_out")]
         problems.append(f"{r.name}: {', '.join(capped)} phase hit its cap. The turn was cut off, so "
@@ -76,6 +85,23 @@ for digest, shared in seen.items():
     if len(shared) > 1:
         problems.append(f"byte-identical trees ({digest}) from {'; '.join(sorted(shared))}. "
                         "One run started from another's workspace.")
+
+# Whole-tree hashes miss a tree that was copied and then edited. Per-file
+# overlap catches it: two runs from an empty directory do not independently
+# write the same bytes into the same path. The spec is provisioned, so it is
+# expected to match everywhere.
+by_file = defaultdict(list)
+for key, runs in by_model.items():
+    for run, _, d in runs:
+        sub = ROOT / d["submission"]
+        for f in sub.rglob("*"):
+            if f.is_file() and "node_modules" not in f.parts and f.name != "WEATHER_CLI_SPEC.md":
+                by_file[(str(f.relative_to(sub)), hashlib.sha256(f.read_bytes()).hexdigest()[:12])].append(
+                    f"{key} run {run}")
+for (path, digest), shared in sorted(by_file.items()):
+    if len(shared) > 1:
+        problems.append(f"identical {path} ({digest}) in {'; '.join(sorted(shared))}. "
+                        "Independent runs do not write the same bytes to the same path.")
 
 print(f"→ {len(results)} result files, tag {tag}\n")
 for key, runs in sorted(by_model.items()):
