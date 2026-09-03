@@ -40,3 +40,6 @@ workspaces/*/kotlin/
 # refuses to delete git-tracked files, and the suite ignored the refusal. The
 # archive is bench/submissions/, written by the suite before the next clear.
 workspaces/*/weather-cli/
+# Provisioned on launch by the suite, same as opencode.json. Tracked, it made
+# workspace-clear refuse for every profile that had one.
+workspaces/*/AGENTS.md
