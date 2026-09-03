@@ -35,10 +35,13 @@ workspaces/*/kotlin.WRONG-*
 workspaces/*/src/
 workspaces/*/kotlin/
 
-# The weather-cli submissions. Tracked by mistake in afb1bd7, which is how six
-# runs on 3 September each started on top of the one before: workspace-clear
-# refuses to delete git-tracked files, and the suite ignored the refusal. The
-# archive is bench/submissions/, written by the suite before the next clear.
+# The weather-cli submissions. workspace-clear refuses to delete a tracked file
+# that has been modified since its last commit, and the suite ignored the
+# refusal. afb1bd7 committed these trees at 08:40 on 3 September, in the middle
+# of a running round, so each later run found a tracked tree its predecessor had
+# modified, could not clear it, and started from that code. A committed tree
+# nobody has touched clears fine, which is why earlier rounds survived. The
+# archive is bench/submissions/, written before the next clear.
 workspaces/*/weather-cli/
 # Provisioned on launch by the suite, same as opencode.json. Tracked, it made
 # workspace-clear refuse for every profile that had one.
