@@ -36,7 +36,11 @@ if not key:
 
 ws = ROOT / "workspaces" / key
 cli = ws / "weather-cli"
-results_path = ROOT / "bench" / f"weather-{key}.json"
+# One file per run, not one per model. Three runs an arm is the point of this
+# round, and a canonical name would leave the third overwriting the second with
+# nothing to say it had. That already cost the ops suite a run once.
+_tag = os.environ.get("BENCH_RUN_TAG", "").strip()
+results_path = ROOT / "bench" / f"weather-{key}{'-' + _tag if _tag else ''}.json"
 cap = int(os.environ.get("BENCH_WEATHER_TIMEOUT", "5400"))
 
 

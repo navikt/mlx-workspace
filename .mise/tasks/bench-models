@@ -143,7 +143,10 @@ print((c[0]['message'].get('content') or '').strip() if c else 'ERROR:'+str(d)[:
   # from `python3 -u` to `mise run` dropped the -u, and the next overnight queue
   # wrote nothing for 65 minutes while it was in fact grinding through restarts.
   # A silent queue and a dead queue must not look the same at 3am.
-  if BENCH_RUN_TAG="$TAG" PYTHONUNBUFFERED=1 mise run bench-cheap-ops >>"$LOG" 2>&1; then
+  # Which suite to run. Everything around it is the same either way: the
+  # profile switch, the server, the sanity check and the lock are properties of
+  # measuring a model, not of the task set.
+  if BENCH_RUN_TAG="$TAG" PYTHONUNBUFFERED=1 mise run "${BENCH_SUITE:-bench-cheap-ops}" >>"$LOG" 2>&1; then
     if ls "bench/results-$profile-$TAG.json" >/dev/null 2>&1; then
       say "✓ $profile complete"
     else
