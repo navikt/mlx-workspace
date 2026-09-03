@@ -54,7 +54,7 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "Solves about as much as the default and takes roughly seven times longer. Four runs on a repaired benchmark verified 4, 4, 3 and 4 of 8 against the default's 3, 2, 4 and 4: overlapping ranges, no measurable difference. Median task 58 to 104 seconds against 10 to 12, and it hit the seven-minute cap ten times where the default hit it once. An earlier version of this text said it solved more; that was measured before we found a fault that stopped every model compiling or running tests, and the gap did not survive the fix. Want an answer in ten seconds, take the default.",
+        "expect": "Solves about as much as the default and takes roughly nine times longer. Five runs an arm verified 4, 4, 2, 4 and 4 of 8 against the default's 2, 3, 2, 4 and 3. That is p = 0,21: the experiment could not separate them, which is not the same as proving them equal. Median task 95 seconds against 11, and it hit the seven-minute cap 14 times where the default hit it twice. An earlier version of this text said it solved more, measured before we found a fault that stopped every model compiling or running tests. Want an answer in ten seconds, take the default.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
