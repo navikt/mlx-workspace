@@ -96,11 +96,30 @@ def turn(label, args):
     except subprocess.TimeoutExpired as e:
         timed_out = True
         out = (e.stdout or b"").decode("utf8", "replace") + (e.stderr or b"").decode("utf8", "replace")
+        # subprocess kills `mise run`, not the client underneath it. In the
+        # 184632 round a plan turn was capped at 21:48:05 and its opencode kept
+        # working until 22:24:57, 37 minutes, holding the single-generation
+        # server. The implement turn that followed got
+        # ProviderHeaderTimeoutError with nothing to show, and the round blamed
+        # the model. The ops suite has had this pkill since the day six orphans
+        # put the machine into swap; this suite reimplemented the runner without
+        # it.
+        subprocess.run(["/usr/bin/pkill", "-f", "opencode --pure"], capture_output=True)
+        subprocess.run(["/usr/bin/pkill", "-f", "cplt --agent opencode"], capture_output=True)
+        time.sleep(2)
     elapsed = time.time() - started
 
     def grab(pat, cast=str, default=None):
         m = re.search(pat, out)
         return cast(m.group(1).replace(",", "")) if m else default
+
+    # The killed wrapper never prints its summary line, so every counter parsed
+    # out of it reads zero. Run 05 of the 184632 round was recorded as 0 turns
+    # and 0 tool calls where the session log holds 124 tool calls and 117 curl
+    # attempts. Zero reads as "the model did nothing", which is the opposite of
+    # what happened. None reads as "not measured".
+    def count(pat, cast=int):
+        return None if timed_out else grab(pat, cast, 0)
 
     rec = {
         "phase": label,
@@ -108,19 +127,27 @@ def turn(label, args):
         # Which cap this turn ran under. The caps changed once already, and a
         # duration means nothing without the limit it was measured against.
         "cap_seconds": CAPS[label],
-        "turns": grab(r"· (\d+) turns", int, 0),
-        "tool_calls": grab(r"· (\d+) tool calls", int, 0),
-        "tokens_in": grab(r"in ([\d,]+) ·", int, 0),
-        "tokens_out": grab(r"out ([\d,]+) ·", int, 0),
+        "turns": count(r"· (\d+) turns"),
+        "tool_calls": count(r"· (\d+) tool calls"),
+        "tokens_in": count(r"in ([\d,]+) ·"),
+        "tokens_out": count(r"out ([\d,]+) ·"),
         "truncated": "TRUNCATED" in out,
         "timed_out": timed_out,
     }
     log = ROOT / ".bench-logs" / f"weather-{key}{'-' + _tag if _tag else ''}-{label}.log"
     log.write_text(out)
     rec["transcript"] = str(log.relative_to(ROOT))
+    # The wrapper summary is not the session. Traps 7 and 8 are scored from what
+    # the model actually sent, and they came back n/a five times running because
+    # this pointed at a twelve-line stub. opencode names its own log; keep it.
+    m = re.search(r"log: (\.bench-logs/\S+\.jsonl)", out)
+    rec["session_log"] = m.group(1) if m else None
 
-    print(f"   {label}: {rec['seconds']}s · {rec['turns']} turns · "
-          f"{rec['tool_calls']} tools · out {rec['tokens_out']:,}"
+    def n(v):
+        return "?" if v is None else f"{v:,}"
+
+    print(f"   {label}: {rec['seconds']}s · {n(rec['turns'])} turns · "
+          f"{n(rec['tool_calls'])} tools · out {n(rec['tokens_out'])}"
           + ("  ⚠ TRUNCATED" if rec["truncated"] else "")
           + ("  ⚠ TIMED OUT" if timed_out else ""))
     return rec
