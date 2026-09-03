@@ -34,3 +34,9 @@ workspaces/*/kotlin.WRONG-*
 # another task asks for. The runs that read them are void.
 workspaces/*/src/
 workspaces/*/kotlin/
+
+# The weather-cli submissions. Tracked by mistake in afb1bd7, which is how six
+# runs on 3 September each started on top of the one before: workspace-clear
+# refuses to delete git-tracked files, and the suite ignored the refusal. The
+# archive is bench/submissions/, written by the suite before the next clear.
+workspaces/*/weather-cli/

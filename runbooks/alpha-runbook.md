@@ -123,6 +123,15 @@ tail -50 ~/.nav-pilot/local/server.log
 Plus the task in the developer's own words, whether it created or edited files, and for a
 wrong result the diff. Paste into `#nav-pilot` with one line on what they could not do.
 
+**"It never used the local model."** Ask which client first, because in GitHub Copilot CLI
+the answer is that it cannot. `COPILOT_PROVIDER_BASE_URL` is process-wide, so a session has
+exactly one provider: either everything runs locally or nothing does. There is no way to
+leave the main agent on the cloud and hand a subagent the local model, which is the shape
+the feature was described as having. Filed upstream as github/copilot-cli#4703.
+*They do:* use opencode for local work, or run the whole Copilot CLI session against the
+local model and accept that the cloud is not in it. Do not escalate; a zero dispatch count
+in Copilot CLI is the expected reading, not evidence of a fault.
+
 ## Known, and not worth escalating
 
 - **Concurrent requests wedge the server.** Upstream mlx-lm (#1139, #1256, the latter
@@ -134,6 +143,9 @@ wrong result the diff. Paste into `#nav-pilot` with one line on what they could 
   measured. If a developer says the wait is not worth it, that is data, not a complaint.
 - **Two concurrent sessions are supported.** Each gets its own guard; both share the one
   server and queue behind each other.
+- **Copilot CLI cannot dispatch a subagent to the local model.** One provider per process,
+  upstream. opencode is the supported client for local work; every measurement in this
+  programme came through it. See the symptom table above.
 
 ## Removing it
 
@@ -155,9 +167,10 @@ Nothing about the work itself. A developer who has set `DO_NOT_TRACK` sends none
 `NAV_PILOT_TELEMETRY_ENABLED=false` does the same per tool. `init` says all of this before it
 asks whether to download anything.
 
-If a report says "it never used the local model", the dispatch count is the first thing to
-read: zero confirms it, and a nonzero count means the dispatches happened and the developer
-did not notice them.
+If a report says "it never used the local model", read the client before the dispatch count.
+In Copilot CLI the count is zero by construction and says nothing about our side. In
+opencode, zero confirms the report and a nonzero count means the dispatches happened and the
+developer did not notice them.
 
 ## What we do not know
 

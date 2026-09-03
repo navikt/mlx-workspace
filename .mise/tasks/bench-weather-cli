@@ -157,8 +157,24 @@ def run_tests():
 
 print(f"→ weather-cli · {key}")
 if os.environ.get("BENCH_KEEP_WORKSPACE") != "1":
+    # Read the exit code. workspace-clear refuses to delete git-tracked files and
+    # says so on stderr, and this printed the last line of an empty stdout as
+    # "nothing to do". The weather-cli trees were tracked by mistake on 3
+    # September, so six runs in a row each began on top of the finished code of
+    # the one before, and the log said the workspace had been cleared.
     c = sh(["mise", "run", "workspace-clear", "-y"], cwd=ROOT)
-    print(f"   {c.stdout.strip().splitlines()[-1] if c.stdout.strip() else 'workspace-clear: nothing to do'}")
+    if c.returncode != 0:
+        raise SystemExit("✗ workspace-clear failed, so this run would start from the "
+                         f"last one's code:\n{(c.stdout + c.stderr).strip()}")
+    print(f"   {c.stdout.strip().splitlines()[-1] if c.stdout.strip() else 'workspace cleared'}")
+
+# The suite provisions the spec, AGENTS.md and opencode.json on launch. Anything
+# else the agent can read is either a leftover or an answer.
+_allowed = {"AGENTS.md", "opencode.json", "weather-cli", ".DS_Store"}
+_stray = sorted(q.name for q in ws.iterdir() if q.name not in _allowed) if ws.is_dir() else []
+if _stray:
+    raise SystemExit(f"✗ {ws} holds {', '.join(_stray)}, which the agent can read.\n"
+                     "  Remove them before measuring anything.")
 restart_server()
 
 record = {"model_key": key, "phases": []}
