@@ -42,7 +42,14 @@ cli = ws / "weather-cli"
 # nothing to say it had. That already cost the ops suite a run once.
 _tag = os.environ.get("BENCH_RUN_TAG", "").strip()
 results_path = ROOT / "bench" / f"weather-{key}{'-' + _tag if _tag else ''}.json"
-cap = int(os.environ.get("BENCH_WEATHER_TIMEOUT", "5400"))
+# One cap for both phases was calibrated for the long one. Across eight non-void
+# turns the plan phase ran 25s to 302s and the implement phase 49s to 2862s, so a
+# 5400s cap let a broken plan turn burn 90 minutes before anyone knew. The plan
+# cap is three times its observed maximum; the implement cap keeps 47% headroom
+# over the slowest turn that ever succeeded, because a cap that clips the slow
+# model's successful runs manufactures the result.
+CAPS = {"plan": int(os.environ.get("BENCH_WEATHER_PLAN_TIMEOUT", "900")),
+        "implement": int(os.environ.get("BENCH_WEATHER_TIMEOUT", "4200"))}
 
 
 def sh(cmd, cwd=None, timeout=1800):
@@ -84,7 +91,7 @@ def turn(label, args):
     started = time.time()
     timed_out = False
     try:
-        r = sh(["mise", "run", "opencode-headless", *args], cwd=ROOT, timeout=cap)
+        r = sh(["mise", "run", "opencode-headless", *args], cwd=ROOT, timeout=CAPS[label])
         out = r.stdout + r.stderr
     except subprocess.TimeoutExpired as e:
         timed_out = True
@@ -98,6 +105,9 @@ def turn(label, args):
     rec = {
         "phase": label,
         "seconds": round(elapsed, 1),
+        # Which cap this turn ran under. The caps changed once already, and a
+        # duration means nothing without the limit it was measured against.
+        "cap_seconds": CAPS[label],
         "turns": grab(r"· (\d+) turns", int, 0),
         "tool_calls": grab(r"· (\d+) tool calls", int, 0),
         "tokens_in": grab(r"in ([\d,]+) ·", int, 0),

@@ -108,7 +108,7 @@ for line in log_path.read_text().splitlines():
 
 mins, secs = divmod(int(elapsed), 60)
 turns = len(reasons)
-print(f"✓ exit {rc} · {mins}m {secs:02d}s · {turns} turns · {len(tools)} tool calls")
+print(f"{'✓' if rc == 0 else '✗'} exit {rc} · {mins}m {secs:02d}s · {turns} turns · {len(tools)} tool calls")
 if turns:
     # input tokens per turn is the fixed harness overhead plus conversation so far.
     # It is the floor under every task and worth watching per run.

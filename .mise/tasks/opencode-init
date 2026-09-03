@@ -66,6 +66,15 @@ output        = int(param("MLX_OPENCODE_OUTPUT"))
 # the loop silently (observed at 96k tokens: one token took 3min 28s).
 chunk_timeout = int(param("MLX_OPENCODE_CHUNK_TIMEOUT"))
 
+# MLX_OPENCODE_HEADER_TIMEOUT — ms to wait for the provider's response headers.
+# opencode defaults to 300000 and this is not covered by chunkTimeout, which only
+# governs gaps once the stream is open, or by timeout: false. Prefill of a 15.7k
+# prompt on the slower model crossed 300s and the turn died with
+# ProviderHeaderTimeoutError after producing nothing: 0 turns, 0 tool calls, no
+# code. It fired on the slow arm only, so leaving it at the default measures our
+# client's patience rather than the model.
+header_timeout = int(param("MLX_OPENCODE_HEADER_TIMEOUT"))
+
 # Repetition control (MLX_REPETITION_PENALTY and friends). No backend accepts these on the
 # command line — mlx_lm, mlx-vlm and oMLX all read them from the request body — so they ride
 # along as model options. opencode merges a model's options into providerOptions["mlx"], and
@@ -98,6 +107,8 @@ config = {
                 # Set high enough to survive slowest token at max practical context (~100k).
                 # Controlled by MLX_OPENCODE_CHUNK_TIMEOUT in mise.toml.
                 "chunkTimeout": chunk_timeout,
+                # Wait for the first byte of the response. See MLX_OPENCODE_HEADER_TIMEOUT.
+                "headerTimeout": header_timeout,
                 # Total request timeout disabled — see chunkTimeout for the real guard.
                 "timeout": False,
             },
