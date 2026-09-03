@@ -26,24 +26,20 @@ export async function geocodeLocation(name) {
       timeout: 10000,
     });
 
-    if (!response.data || !response.data.resultat || response.data.resultat.length === 0) {
+    if (!response.data || !response.data.navn || response.data.navn.length === 0) {
       throw new Error(`No results found for location: ${name}`);
     }
 
-    const resultat = response.data.resultat[0];
+    const resultat = response.data.navn[0];
 
-    // Geonorge returns coordinates in utkoordsys 4258 (UTM Norway, ETRS89)
-    // We need to convert from UTM to lat/lon
-    const easting = resultat.Easts ? resultat.Easts : resultat.geom?.coordinates?.[0];
-    const northing = resultat.Norths ? resultat.Norths : resultat.geom?.coordinates?.[1];
+    // Geonorge returns WGS84 coordinates when utkoordsys=4258 is specified
+    // representasjonspunkt has 'nord' (lat) and 'øst' (lon)
+    const lat = resultat.representasjonspunkt?.nord;
+    const lon = resultat.representasjonspunkt?.['øst'];
 
-    if (easting == null || northing == null) {
+    if (lat == null || lon == null) {
       throw new Error(`No coordinates found for location: ${name}`);
     }
-
-    // Convert UTM (zone 32/33 for Norway, EPSG:4258 style) to lat/lon
-    // Geonorge utkoordsys=4258 returns ETRS89 in UTM coordinates
-    const { lat, lon } = utmToWgs84(easting, northing, getResultatZone(resultat));
 
     return { lat, lon, name: resultat.navn || name };
   } catch (error) {
@@ -59,13 +55,25 @@ export async function geocodeLocation(name) {
  * Norway is typically in zones 32N and 33N.
  */
 function getResultatZone(resultat) {
-  // Use the longitude-like value to determine zone
-  // Eastings in zone 32N are ~250000-500000, zone 33N are ~500000-750000
-  const easting = resultat.Easts || resultat.geom?.coordinates?.[0] || 0;
-  if (easting >= 500000) {
-    return 33;
+  // Use the Sone (zone) field if available from Geonorge
+  if (resultat.Sone) {
+    return resultat.Sone;
   }
-  return 32;
+  // Fallback: determine zone from easting
+  // Norway is typically in zones 32N and 33N
+  // However, easting values near 500000 can appear in either zone
+  // Use a heuristic: if easting > 500000, it could be zone 32 (east of CM) or zone 33
+  // The safest approach is to check if the coordinate makes sense in each zone
+  const easting = resultat.Easts || resultat.geom?.coordinates?.[0] || 0;
+  const northing = resultat.Norths || resultat.geom?.coordinates?.[1] || 0;
+  
+  // For Norway (northing > 6000000), try zone 32 first
+  // If easting is in the typical range for zone 32 (250000-750000), use zone 32
+  // Otherwise use zone 33
+  if (easting >= 250000 && easting <= 750000) {
+    return 32;
+  }
+  return 33;
 }
 
 /**
@@ -76,12 +84,7 @@ function utmToWgs84(easting, northing, zone) {
   // UTM parameters for WGS84/ETRS89
   const a = 6378137.0;         // Semi-major axis
   const f = 1.0 / 298.257222101; // Flattening
-  const b = a * (1 - f);       // Semi-minor axis
   const k0 = 0.9996;           // Scale factor
-
-  // Central meridian for the zone
-  const lon0 = (zone - 1) * 6 - 180 + 3;
-  const lon0Rad = (lon0 * Math.PI) / 180;
 
   // False easting and northing
   const FE = 500000;
@@ -91,9 +94,10 @@ function utmToWgs84(easting, northing, zone) {
   const e2 = 2 * f - f * f;
   const e4 = e2 * e2;
   const e6 = e4 * e2;
+  const ePrime2 = e2 / (1 - e2);
 
   // Calculate the meridian radius of curvature
-  const mu = northing / (a * k0 * (1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256));
+  const mu = northing / (a * (1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256));
 
   // Calculate the latitude
   const phi1 = mu
@@ -102,38 +106,37 @@ function utmToWgs84(easting, northing, zone) {
     + (35 * e6 / 3072) * Math.sin(6 * mu);
 
   // Calculate the radius of curvature of the prime vertical
-  const rho2 = e2 * Math.cos(phi1) * Math.cos(phi1);
-  const nu2 = a * k0 / Math.sqrt(1 - e2 * Math.sin(phi1) * Math.sin(phi1));
-  const rho = a * k0 * (1 - e2) / Math.pow(1 - e2 * Math.sin(phi1) * Math.sin(phi1), 1.5);
+  const sinPhi1 = Math.sin(phi1);
+  const cosPhi1 = Math.cos(phi1);
+  const tanPhi1 = Math.tan(phi1);
+  const N1 = a / Math.sqrt(1 - e2 * sinPhi1 * sinPhi1);
+  const M1 = a * (1 - e2) / Math.pow(1 - e2 * sinPhi1 * sinPhi1, 1.5);
 
   // Calculate the latitude
-  const tanPhi1 = Math.tan(phi1);
-  const secPhi1 = 1 / Math.cos(phi1);
-  const dE = (easting - FE) / (nu2 * k0);
+  const dE = (easting - FE) / (N1 * k0);
   const dE2 = dE * dE;
   const dE3 = dE2 * dE;
   const dE4 = dE3 * dE;
   const dE5 = dE4 * dE;
   const dE6 = dE5 * dE;
-  const dE7 = dE6 * dE;
 
-  const lat =
-    phi1
-    - (tanPhi1 / (2 * rho * nu2)) * dE2
-    + (tanPhi1 / (24 * rho * nu2 * nu2 * nu2)) * (5 * dE4 + (3 * tanPhi1 * tanPhi1 + rho2) * dE2)
-    - (tanPhi1 / (720 * rho * nu2 * nu2 * nu2 * nu2 * nu2)) * (61 * dE6 + (90 * tanPhi1 * tanPhi1 + 45 * rho2) * dE4 + (15 * tanPhi1 * tanPhi1 - 3 * rho2 + 9 * rho2 * rho2) * dE2);
+  const lat = phi1
+    - (M1 * tanPhi1 / (2 * N1 * M1)) * dE2
+    + (M1 * tanPhi1 / (24 * N1 * M1 * N1 * N1)) * (5 + 3 * tanPhi1 * tanPhi1 + ePrime2 * cosPhi1 * cosPhi1 - 9 * ePrime2 * cosPhi1 * cosPhi1 * tanPhi1 * tanPhi1) * dE4
+    - (M1 * tanPhi1 / (720 * N1 * M1 * N1 * N1 * N1 * N1)) * (61 + 90 * tanPhi1 * tanPhi1 + 45 * tanPhi1 * tanPhi1 * tanPhi1 * tanPhi1) * dE5 * dE;
 
   // Calculate the longitude
-  const lon =
-    lon0
-    + (dE * secPhi1 / nu2)
-    - (dE3 * secPhi1 / (6 * nu2 * nu2 * nu2)) * (nu2 / rho2 + 2 * tanPhi1 * tanPhi1)
-    + (dE5 * secPhi1 / (120 * nu2 * nu2 * nu2 * nu2 * nu2)) * (5 * (nu2 / rho2) + 28 * tanPhi1 * tanPhi1 + 24 * tanPhi1 * tanPhi1 * tanPhi1 * tanPhi1);
+  const lon0 = (zone - 1) * 6 - 180 + 3;
+  const lon = lon0
+    + (dE - (1 + 2 * tanPhi1 * tanPhi1 + ePrime2 * cosPhi1 * cosPhi1) / 6 * dE3
+       + (5 + 28 * tanPhi1 * tanPhi1 + 15 * tanPhi1 * tanPhi1 * tanPhi1 * tanPhi1 + 9 * ePrime2 * cosPhi1 * cosPhi1 + 18 * ePrime2 * cosPhi1 * cosPhi1 * tanPhi1 * tanPhi1) / 120 * dE5)
+    * (1 / cosPhi1)
+    * (180 / Math.PI);
 
   // Convert to degrees
   return {
     lat: (lat * 180) / Math.PI,
-    lon: (lon * 180) / Math.PI,
+    lon: lon,
   };
 }
 

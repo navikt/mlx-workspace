@@ -1,114 +1,95 @@
-"use strict";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { fetchWeather, pickEntry, USER_AGENT } from '../src/weather.js';
 
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const {
-  fetchForecast,
-  closestEntry,
-  extractDetails,
-  WeatherError,
-  METNO_URL,
-} = require("../src/weather");
-
-function mockHttp(payload, { status = 200, throwErr } = {}) {
-  return {
-    async get(url, cfg) {
-      if (throwErr) throw throwErr;
-      if (status >= 400) {
-        const e = new Error("HTTP " + status);
-        e.response = { status, data: payload };
-        throw e;
-      }
-      return { status, data: payload, config: cfg, url };
-    },
-  };
+function entry(time, details) {
+  return { time, data: { instant: { details } } };
 }
 
-const body = {
-  properties: {
-    timeseries: [
-      { time: "2026-09-03T05:00:00Z", data: { instant: { details: { air_temperature: 10.8 } } } },
-      { time: "2026-09-03T06:00:00Z", data: { instant: { details: { air_temperature: 11.2 } } } },
-    ],
-  },
+const fullDetails = {
+  air_temperature: 12.6,
+  relative_humidity: 64.7,
+  cloud_area_fraction: 12.7,
+  wind_speed: 0.7,
+  air_pressure_at_sea_level: 1007.1,
+  ultraviolet_index_clear_sky: 0.3,
 };
 
-test("fetchForecast returns the response body", async () => {
-  const data = await fetchForecast(59.91, 10.75, {
-    userAgent: "weather-cli/1.0 test",
-    http: mockHttp(body),
-  });
-  assert.equal(data.properties.timeseries.length, 2);
+function fakeHttp(timeseries) {
+  return async (url, config) => ({ data: { properties: { timeseries } }, url, config });
+}
+
+test('picks the entry closest to now, computed in UTC', () => {
+  const ts = [
+    entry('2026-09-03T05:00:00Z', { ...fullDetails, air_temperature: 1 }),
+    entry('2026-09-03T06:00:00Z', { ...fullDetails, air_temperature: 2 }),
+  ];
+  const now = new Date('2026-09-03T05:30:00Z');
+  assert.equal(pickEntry(ts, now).data.instant.details.air_temperature, 1);
+  const justBefore = new Date('2026-09-03T05:59:59Z');
+  assert.equal(pickEntry(ts, justBefore).data.instant.details.air_temperature, 1);
+  const justAfter = new Date('2026-09-03T06:00:01Z');
+  assert.equal(pickEntry(ts, justAfter).data.instant.details.air_temperature, 2);
 });
 
-test("fetchForecast sends the User-Agent header", async () => {
-  let seenHeaders = null;
-  const http = {
-    async get(url, cfg) {
-      seenHeaders = cfg.headers;
-      return { status: 200, data: body };
-    },
-  };
-  await fetchForecast(1, 2, { userAgent: "weather-cli/1.0 contact", http });
-  assert.equal(seenHeaders["User-Agent"], "weather-cli/1.0 contact");
+test('does not depend on host local timezone', () => {
+  const ts = [entry('2026-09-03T05:00:00Z', { ...fullDetails, air_temperature: 1 }),
+               entry('2026-09-03T06:00:00Z', { ...fullDetails, air_temperature: 2 })];
+  const now = new Date('2026-09-03T05:30:00Z');
+  const original = process.env.TZ;
+  try {
+    for (const tz of ['Pacific/Kiritimati', 'America/Anchorage', 'UTC']) {
+      process.env.TZ = tz;
+      assert.equal(pickEntry(ts, now).data.instant.details.air_temperature, 1);
+    }
+  } finally {
+    process.env.TZ = original;
+  }
 });
 
-test("fetchForecast surfaces 403 as non-retryable", async () => {
+test('fetchWeather returns instant details and flags UV presence', async () => {
+  const ts = [entry('2026-09-03T06:00:00Z', fullDetails)];
+  const wx = await fetchWeather(59.91, 10.75, { http: fakeHttp(ts) });
+  assert.equal(wx.details.air_temperature, 12.6);
+  assert.equal(wx.hasUv, true);
+  assert.equal(wx.uv, 0.3);
+});
+
+test('entry without UV index is usable, not undefined', async () => {
+  const noUv = { ...fullDetails };
+  delete noUv.ultraviolet_index_clear_sky;
+  const wx = await fetchWeather(59.91, 10.75, { http: fakeHttp([entry('2026-09-03T06:00:00Z', noUv)]) });
+  assert.equal(wx.hasUv, false);
+  assert.equal(wx.uv, undefined);
+});
+
+test('entry without cloud cover is a hard error', async () => {
+  const noClouds = { ...fullDetails };
+  delete noClouds.cloud_area_fraction;
   await assert.rejects(
-    fetchForecast(1, 2, { http: mockHttp(null, { status: 403 }) }),
-    (e) => e instanceof WeatherError && e.status === 403 && e.retryable === false
+    fetchWeather(59.91, 10.75, { http: fakeHttp([entry('2026-09-03T06:00:00Z', noClouds)]) }),
+    /missing cloud cover/,
   );
 });
 
-test("fetchForecast surfaces 429 as retryable", async () => {
-  await assert.rejects(
-    fetchForecast(1, 2, { http: mockHttp(null, { status: 429 }) }),
-    (e) => e instanceof WeatherError && e.status === 429 && e.retryable === true
-  );
+test('empty timeseries is a hard error', async () => {
+  await assert.rejects(fetchWeather(59.91, 10.75, { http: fakeHttp([]) }), /no timeseries/);
 });
 
-test("closestEntry picks the entry nearest to now in UTC", () => {
-  const ts = [
-    { time: "2026-09-03T05:00:00Z", data: { instant: { details: { t: "05" } } } },
-    { time: "2026-09-03T06:00:00Z", data: { instant: { details: { t: "06" } } } },
-  ];
-  // 05:20 is 20 min from 05:00 but 40 min from 06:00, so 05:00 is closest.
-  const now = new Date("2026-09-03T05:20:00Z");
-  const e = closestEntry(ts, now);
-  assert.equal(e.data.instant.details.t, "05");
-
-  // 05:59 is 1 min from 06:00 but 59 min from 05:00, so 06:00 is closest.
-  const now2 = new Date("2026-09-03T05:59:00Z");
-  const e2 = closestEntry(ts, now2);
-  assert.equal(e2.data.instant.details.t, "06");
-
-  // Just past the midpoint, the later (06:00) entry is strictly closer.
-  const now3 = new Date("2026-09-03T05:30:01Z");
-  const e3 = closestEntry(ts, now3);
-  assert.equal(e3.data.instant.details.t, "06");
+test('sends User-Agent in request', async () => {
+  let config;
+  const http = async (url, c) => { config = c; return { data: { properties: { timeseries: [entry('2026-09-03T06:00:00Z', fullDetails)] } } }; };
+  await fetchWeather(59.91, 10.75, { http, userAgent: 'test-agent/9.9' });
+  assert.equal(config.headers['User-Agent'], 'test-agent/9.9');
 });
 
-test("closestEntry is timezone-independent (UTC epoch math)", () => {
-  const ts = [
-    { time: "2026-09-03T05:00:00Z", data: { instant: { details: { t: "a" } } } },
-    { time: "2026-09-03T06:00:00Z", data: { instant: { details: { t: "b" } } } },
-  ];
-  // Same instant expressed via a different local offset must select the same entry.
-  const a = closestEntry(ts, new Date("2026-09-03T05:31:34Z"));
-  const b = closestEntry(ts, new Date("2026-09-03T07:31:34+02:00"));
-  assert.equal(a.time, b.time);
+test('default User-Agent has no placeholder contact', () => {
+  assert.doesNotMatch(USER_AGENT, /example\.com/);
 });
 
-test("closestEntry throws on empty timeseries", () => {
-  assert.throws(() => closestEntry([]), WeatherError);
-  assert.throws(() => closestEntry(undefined), WeatherError);
-});
-
-test("extractDetails returns the details object", () => {
-  const d = extractDetails({ data: { instant: { details: { x: 1 } } } });
-  assert.equal(d.x, 1);
-});
-
-test("extractDetails throws when details missing", () => {
-  assert.throws(() => extractDetails({ data: {} }), WeatherError);
+test('encodes coordinates in the URL', async () => {
+  let seen;
+  const http = async (url) => { seen = url; return { data: { properties: { timeseries: [entry('2026-09-03T06:00:00Z', fullDetails)] } } }; };
+  await fetchWeather('59.91', '10.75', { http });
+  assert.match(seen, /lat=59\.91&lon=10\.75/);
 });

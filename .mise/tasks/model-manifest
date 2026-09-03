@@ -54,7 +54,7 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "Solves about as much as the default and takes roughly nine times longer. Five runs an arm verified 4, 4, 2, 4 and 4 of 8 against the default's 2, 3, 2, 4 and 3. That is p = 0,21: the experiment could not separate them, which is not the same as proving them equal. Median task 95 seconds against 11, and it hit the seven-minute cap 14 times where the default hit it twice. An earlier version of this text said it solved more, measured before we found a fault that stopped every model compiling or running tests. Want an answer in ten seconds, take the default.",
+        "expect": "Offered because people ask for it, and because we do not have a trustworthy number for it. Two rounds of our own benchmark were thrown out: the first because the sandbox never gave any model a compiler, the second because one arm had a finished solution file sitting in its working directory. What has held across every round is that this model is far slower, median task 80 seconds against 11, and that it runs into the seven-minute cap where the default does not. If you want an answer in ten seconds, take the default.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,

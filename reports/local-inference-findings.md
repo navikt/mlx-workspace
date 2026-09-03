@@ -496,21 +496,25 @@ exposes has no JSON parsing filter, so no template can fix it. Every one of them
 server to parse arguments into a mapping first. mlx-lm does. Ollama does not read Jinja at all.
 The row belongs in a compatibility note, not in a defect list.
 
-**Ten runs on 3 September replace the rejection.** Five samples per model, on a harness with
-git hidden from the agent, compile and test verification requiring the diff to touch the file
-the prompt names, and the served model asserted against the profile:
+**The ten runs of 3 September are withdrawn.** They reported 2, 3, 2, 4, 3 against
+4, 4, 2, 4, 4, means of 2.80 and 3.60 and p = 0.21. Withdrawn rather than corrected: the
+experiment was invalid, so there is no corrected version of it.
 
-| model | verified per run | mean | median |
-|---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` | 2, 3, 2, 4, 3 | 2.80 | 3 |
-| `qwen3.8-27b-4bit` | 4, 4, 2, 4, 4 | 3.60 | 4 |
+`workspaces/qwen3.6-35b-a3b-optiq/src/` held four files committed to this repository on 29 August
+and 1 September, among them a `DateUtil` already renamed to `daysBetweenDates` and already
+documented, which is the answer to two tasks, and the `DateUtilTest.kt` a third task asks the
+model to write. The agent runs in `workspaces/<key>`, one level above the checkout, so it read
+those before the code in `kotlin/`, and the per-task reset only ever cleaned the checkout. Only
+the default model's workspace held them. It scored 0 of 4 on that task, every run ending "The
+test file already exists".
 
-Every run scored all 11 tasks; 7 or 8 of them are judged automatically per run, and the rest are
-manual or retired. Exact two-sided Mann-Whitney U by enumeration gives U = 19 over 252
-arrangements, so **p = 0.21**. The floor for five runs against five is 2/C(10,5) = 0.008, which
-p = 0.21 sits far above. **This experiment could not separate the two models.** That is neither
-a finding that 3.8 is better nor a finding that the two are equivalent, and five runs an arm are
-too few to decide it.
+The same round could not have scored that task for either model. The check requiring the diff to
+touch the file the prompt names took the path out of the prompt with a regex, and that task's
+prompt names the file the test is written for. Three attempts that built green were recorded as
+failures.
+
+Both faults are fixed and the runs are marked `gen3-void` in `bench/ops.py`. Both arms will be
+rerun.
 
 Two earlier versions of this table read differently. The first reported 5.75 against 3.40 and
 concluded Qwen3.8 solved more; it was measured before the models could compile, against

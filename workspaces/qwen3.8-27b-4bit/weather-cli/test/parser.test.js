@@ -1,50 +1,29 @@
-"use strict";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { parseLocation } from '../src/parser.js';
 
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const { parseLocation, ParseError } = require("../src/parser");
-
-test("parses valid coordinates in lat lon order", () => {
-  const r = parseLocation("59.91 10.75");
-  assert.equal(r.kind, "coords");
-  assert.equal(r.lat, 59.91);
-  assert.equal(r.lon, 10.75);
+test('no argument defaults to a place name lookup', () => {
+  assert.deepEqual(parseLocation(undefined), { kind: 'default' });
+  assert.deepEqual(parseLocation('   '), { kind: 'default' });
 });
 
-test("parses negative coordinates", () => {
-  const r = parseLocation("-33.86 151.2");
-  assert.equal(r.kind, "coords");
-  assert.equal(r.lat, -33.86);
-  assert.equal(r.lon, 151.2);
+test('valid coordinates are parsed with lat lon order', () => {
+  assert.deepEqual(parseLocation('59.91 10.75'), {
+    kind: 'coords', lat: 59.91, lon: 10.75, label: '59.91 10.75',
+  });
 });
 
-test("treats a place name as a name lookup", () => {
-  const r = parseLocation("Oslo");
-  assert.equal(r.kind, "name");
-  assert.equal(r.name, "Oslo");
+test('negative and zero coordinates are valid', () => {
+  assert.equal(parseLocation('-45 180').kind, 'coords');
+  assert.equal(parseLocation('0 0').kind, 'coords');
 });
 
-test("rejects latitude out of range", () => {
-  assert.throws(() => parseLocation("91 10"), ParseError);
+test('out-of-range coordinates fall back to a name lookup', () => {
+  assert.deepEqual(parseLocation('91 10.75'), { kind: 'name', name: '91 10.75' });
+  assert.deepEqual(parseLocation('59.91 181'), { kind: 'name', name: '59.91 181' });
 });
 
-test("rejects longitude out of range", () => {
-  assert.throws(() => parseLocation("59 181"), ParseError);
-});
-
-test("rejects empty input", () => {
-  assert.throws(() => parseLocation(""), ParseError);
-  assert.throws(() => parseLocation("   "), ParseError);
-  assert.throws(() => parseLocation(undefined), ParseError);
-});
-
-test("treats a non-numeric string as a name lookup", () => {
-  const r = parseLocation("abc def");
-  assert.equal(r.kind, "name");
-  assert.equal(r.name, "abc def");
-});
-
-test("does not treat a single number as coordinates", () => {
-  const r = parseLocation("59.91");
-  assert.equal(r.kind, "name");
+test('non-numeric pairs are treated as names', () => {
+  assert.deepEqual(parseLocation('Bergen'), { kind: 'name', name: 'Bergen' });
+  assert.deepEqual(parseLocation('a b'), { kind: 'name', name: 'a b' });
 });

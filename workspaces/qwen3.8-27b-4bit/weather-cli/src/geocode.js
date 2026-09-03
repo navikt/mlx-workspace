@@ -1,63 +1,21 @@
-"use strict";
+const GEO_URL = 'https://ws.geonorge.no/stedsnavn/v1/sted';
 
-const axios = require("axios");
-
-const GEONORGE_URL =
-  "https://ws.geonorge.no/stedsnavn/v1/sted";
-
-class GeocodeError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "GeocodeError";
+export async function geocode(name, { http = fetchJson, userAgent = USER_AGENT } = {}) {
+  const url = `${GEO_URL}?sok=${encodeURIComponent(name)}&fuzzy=true&treffPerSide=1&utkoordsys=4258`;
+  const res = await http(url, { headers: { 'User-Agent': userAgent, Accept: 'application/json' } });
+  const body = res.data;
+  const hit = Array.isArray(body?.navn) ? body.navn[0] : undefined;
+  const coords = hit?.geojson?.geometry?.coordinates;
+  if (!Array.isArray(coords) || coords.length < 2) {
+    throw new Error(`Could not geocode "${name}" (no Norwegian place found)`);
   }
+  return { name: name, lat: coords[1], lon: coords[0] };
 }
 
-/**
- * Geocode a Norwegian place name via Geonorge.
- * Returns { lat, lon, name } using the first match's representasjonspunkt
- * (nord = latitude, øst = longitude).
- * Throws GeocodeError on network failure or zero matches.
- */
-async function geocode(name, { userAgent, http } = {}) {
-  const client = http || axios;
-  const params = new URLSearchParams({
-    sok: name,
-    fuzzy: "true",
-    treffPerSide: "1",
-    utkoordsys: "4258",
-  });
+export const USER_AGENT = 'weather-cli/1.0 github.com/hans/weather-cli';
 
-  let res;
-  try {
-    res = await client.get(`${GEONORGE_URL}?${params.toString()}`, {
-      headers: {
-        Accept: "application/json",
-        ...(userAgent ? { "User-Agent": userAgent } : {}),
-      },
-      timeout: 15000,
-    });
-  } catch (err) {
-    throw new GeocodeError(
-      `Geocoding request failed: ${err.response ? `HTTP ${err.response.status}` : err.message}`
-    );
-  }
-
-  const navn = res.data && Array.isArray(res.data.navn) ? res.data.navn : [];
-  if (navn.length === 0) {
-    throw new GeocodeError(`No geocoding results for "${name}"`);
-  }
-
-  const first = navn[0];
-  const rep = first.representasjonspunkt;
-  if (!rep || rep.nord === undefined || rep.øst === undefined) {
-    throw new GeocodeError(`Geocoding result for "${name}" has no coordinates`);
-  }
-
-  return {
-    lat: rep.nord,
-    lon: rep.øst,
-    name: first.stedsnavn && first.stedsnavn[0] ? first.stedsnavn[0].skrivemåte : name,
-  };
+async function fetchJson(url, config = {}) {
+  const { default: axios } = await import('axios');
+  const res = await axios.get(url, config);
+  return res;
 }
-
-module.exports = { geocode, GeocodeError, GEONORGE_URL };

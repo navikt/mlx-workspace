@@ -18,17 +18,13 @@ describe('integration', () => {
       }
     });
 
-    it('should show usage for default location (will fail API call but parser works)', async () => {
-      // This will fail at the API level since we can't make real calls in tests,
-      // but the parser should work correctly
+    it('should fetch weather for default location (Oslo)', async () => {
       try {
-        await execAsync('node cli.js');
-        assert.fail('Should have failed at API level');
+        const { stdout } = await execAsync('node cli.js');
+        assert.ok(stdout.includes('Weather in Oslo'), 'Should show Oslo weather');
+        assert.ok(stdout.includes('Temperature:'), 'Should show temperature');
       } catch (error) {
-        // Expected to fail at API level, not at parsing level
-        // The key is that parser didn't crash
-        const combinedOutput = (error.stdout || '') + (error.stderr || '');
-        assert.ok(combinedOutput.includes('Error:'), 'Should show error message');
+        assert.fail('Should succeed with default location: ' + error.message);
       }
     });
   });

@@ -1,105 +1,61 @@
 #!/usr/bin/env node
-"use strict";
-
-const { parseLocation, ParseError } = require("./parser");
-const { geocode, GeocodeError } = require("./geocode");
-const {
-  fetchForecast,
-  closestEntry,
-  extractDetails,
-  WeatherError,
-} = require("./weather");
-const { render, OutputError } = require("./output");
-
-const USER_AGENT = "weather-cli/1.0 https://github.com/hans/weather-cli";
+import { parseLocation } from './parser.js';
+import { geocode, USER_AGENT } from './geocode.js';
+import { fetchWeather } from './weather.js';
+import { formatWeather } from './output.js';
 
 function fail(message) {
   process.stderr.write(`Error: ${message}\n`);
-  process.exitCode = 1;
+  process.exit(1);
 }
 
-async function main(argv) {
-  const arg = argv[2];
+function statusOf(err) {
+  return err.response?.status ?? err.status;
+}
 
-  let loc;
-  try {
-    loc = parseLocation(arg);
-  } catch (e) {
-    if (e instanceof ParseError) return fail(e.message);
-    throw e;
+function describeHttpError(err) {
+  const status = statusOf(err);
+  if (status === 403) {
+    return 'Request rejected (HTTP 403). Met.no requires an honest User-Agent identifying the app with a real contact; this is a hard block, not rate limiting.';
   }
+  if (status === 429) {
+    return 'Rate limited (HTTP 429). Try again later.';
+  }
+  return err.message;
+}
+
+async function main() {
+  const [arg] = process.argv.slice(2);
+  const loc = parseLocation(arg);
 
   let lat;
   let lon;
   let locationName;
-
-  if (loc.kind === "coords") {
+  if (loc.kind === 'coords') {
     lat = loc.lat;
     lon = loc.lon;
-    locationName = loc.name;
+    locationName = loc.label;
+  } else if (loc.kind === 'name') {
+    const geo = await geocode(loc.name);
+    lat = geo.lat;
+    lon = geo.lon;
+    locationName = geo.name;
   } else {
-    try {
-      const g = await geocode(loc.name, { userAgent: USER_AGENT });
-      lat = g.lat;
-      lon = g.lon;
-      locationName = g.name;
-    } catch (e) {
-      if (e instanceof GeocodeError) return fail(e.message);
-      throw e;
-    }
+    const geo = await geocode('Oslo');
+    lat = geo.lat;
+    lon = geo.lon;
+    locationName = geo.name;
   }
 
-  let body;
-  try {
-    body = await fetchForecast(lat, lon, { userAgent: USER_AGENT });
-  } catch (e) {
-    if (e instanceof WeatherError) {
-      // 403 is a hard ToS block (bad User-Agent), NOT throttling.
-      // Only 429 is retryable. Do not back off against a 403.
-      if (e.status === 403) {
-        return fail(
-          "Met.no rejected the request (HTTP 403). This is a User-Agent " +
-            "policy block, not rate limiting — check the User-Agent header."
-        );
-      }
-      if (e.status === 429) {
-        return fail("Met.no is rate limiting (HTTP 429). Try again later.");
-      }
-      return fail(e.message);
-    }
-    throw e;
-  }
-
-  const timeseries = body && body.properties && body.properties.timeseries;
-  let entry;
-  try {
-    entry = closestEntry(timeseries);
-  } catch (e) {
-    if (e instanceof WeatherError) return fail(e.message);
-    throw e;
-  }
-
-  let details;
-  try {
-    details = extractDetails(entry);
-  } catch (e) {
-    if (e instanceof WeatherError) return fail(e.message);
-    throw e;
-  }
-
-  let out;
-  try {
-    out = render(locationName, details);
-  } catch (e) {
-    if (e instanceof OutputError) return fail(e.message);
-    throw e;
-  }
-
-  process.stdout.write(out + "\n");
+  const wx = await fetchWeather(lat, lon);
+  process.stdout.write(formatWeather({
+    locationName,
+    details: wx.details,
+    hasUv: wx.hasUv,
+    uv: wx.uv,
+  }) + '\n');
 }
 
-main(process.argv).catch((e) => {
-  fail(e && e.message ? e.message : String(e));
+main().catch((err) => {
+  fail(statusOf(err) ? describeHttpError(err) : err.message);
 });
-
-module.exports = { main, USER_AGENT };

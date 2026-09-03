@@ -1,42 +1,15 @@
-"use strict";
-
-const COORD_RE = /^(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)$/;
-
-class ParseError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "ParseError";
+export function parseLocation(arg) {
+  if (arg === undefined || arg.trim() === '') {
+    return { kind: 'default' };
   }
+  const parts = arg.trim().split(/\s+/);
+  if (parts.length === 2) {
+    const lat = Number(parts[0]);
+    const lon = Number(parts[1]);
+    if (Number.isFinite(lat) && Number.isFinite(lon) &&
+        lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      return { kind: 'coords', lat, lon, label: `${parts[0]} ${parts[1]}` };
+    }
+  }
+  return { kind: 'name', name: arg.trim() };
 }
-
-/**
- * Parse the single location argument.
- * Returns { kind: "coords", lat, lon, name } or { kind: "name", name }.
- * Throws ParseError for invalid coordinates.
- */
-function parseLocation(arg) {
-  if (arg === undefined || arg === null || arg.trim() === "") {
-    throw new ParseError("No location provided");
-  }
-
-  const trimmed = arg.trim();
-  const m = COORD_RE.exec(trimmed);
-  if (m) {
-    const lat = Number(m[1]);
-    const lon = Number(m[2]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      throw new ParseError(`Invalid coordinates: ${arg}`);
-    }
-    if (lat < -90 || lat > 90) {
-      throw new ParseError(`Latitude out of range: ${lat}`);
-    }
-    if (lon < -180 || lon > 180) {
-      throw new ParseError(`Longitude out of range: ${lon}`);
-    }
-    return { kind: "coords", lat, lon, name: `${lat} ${lon}` };
-  }
-
-  return { kind: "name", name: trimmed };
-}
-
-module.exports = { parseLocation, ParseError, COORD_RE };

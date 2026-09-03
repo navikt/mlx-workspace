@@ -21,7 +21,7 @@ describe('geocode', () => {
   });
 
   it('should geocode a location name and convert UTM to WGS84', async () => {
-    // Mock Geonorge response with UTM coordinates (zone 33N - eastern Norway)
+    // Mock Geonorge response with WGS84 coordinates (representasjonspunkt)
     mockAxiosGet = async (url, config) => {
       assert.ok(url.includes('ws.geonorge.no'), 'Should call Geonorge API');
       assert.ok(config.params.sok === 'Oslo', 'Should pass location name');
@@ -30,13 +30,12 @@ describe('geocode', () => {
 
       return {
         data: {
-          resultat: [
+          navn: [
             {
               navn: 'Oslo',
-              Easts: 338000,
-              Norths: 6672000,
-              geom: {
-                coordinates: [338000, 6672000],
+              representasjonspunkt: {
+                nord: 59.91187,
+                'øst': 10.73353,
               },
             },
           ],
@@ -55,7 +54,7 @@ describe('geocode', () => {
 
   it('should throw when no results found', async () => {
     mockAxiosGet = async () => ({
-      data: { resultat: [] },
+      data: { navn: [] },
     });
 
     try {

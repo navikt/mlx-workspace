@@ -240,41 +240,28 @@ et kvantiseringsvalg. Å lage egne kvanter betyr også at vi eier artefakten: in
 oppstrømsfikser, ny kvantisering per modelloppdatering, og vekter vi selv distribuerer til 250
 maskiner.
 
-### Ti kjøringer på reparert harness, 3. september 2026: eksperimentet kan ikke skille dem
+### Ti kjøringer 3. september 2026: TRUKKET TILBAKE, ett av armene hadde fasiten liggende
 
-Disse ti kjøringene erstatter tallene fra 2. september: fem per arm, samme oppgavesett, tagg
-`20260903-013814-01` til `-09` pluss
-`results-qwen3.6-35b-a3b-optiq-20260902-081512-01.json`.
+Disse tallene sto her i noen timer 3. september: 2, 3, 2, 4, 3 mot 4, 4, 2, 4, 4, snitt 2,80 mot
+3,60, p = 0,21. De er trukket tilbake, ikke korrigert. Eksperimentet var ugyldig, så det finnes
+ingen riktig versjon av dem.
 
-| modell | verifisert per kjøring | snitt | median |
-|---|---|---|---|
-| `qwen3.6-35b-a3b-optiq` (standard) | 2, 3, 2, 4, 3 | **2,80** | 3 |
-| `qwen3.8-27b-4bit` (opt-in) | 4, 4, 2, 4, 4 | **3,60** | 4 |
+To feil, begge våre:
 
-Alle ti kjøringene scoret alle 11 oppgavene. 7 eller 8 av dem ble dømt automatisk per kjøring;
-resten er manuelle eller pensjonert.
+`workspaces/qwen3.6-35b-a3b-optiq/src/` inneholdt fire filer som var committet til dette repoet
+29. august og 1. september. Der lå en `DateUtil` som allerede var døpt om til `daysBetweenDates`
+og allerede dokumentert, altså fasiten på E1 og M1, og `DateUtilTest.kt`, som er filen G2 ber
+modellen skrive. Agentens arbeidskatalog er `workspaces/<nøkkel>`, ett nivå over utsjekket, så de
+filene ble funnet før koden i `kotlin/`. `reset_repo` rydder utsjekket og rørte dem aldri. Bare
+standardmodellens arbeidskatalog hadde dem, og den scoret 0 av 4 på G2 med «The test file already
+exists» i hver eneste kjøring.
 
-Eksakt tosidig Mann-Whitney U ved enumerering gir U = 19 over 252 ordninger, altså **p = 0,21**.
-Gulvet for fem kjøringer mot fem er 2/C(10,5) = 0,008, så p = 0,21 ligger langt over det laveste
-dette designet kan produsere. Les det som det er: eksperimentet klarte ikke å skille de to
-modellene. Det betyr verken at 3.8 er bedre eller at modellene er like. Fem kjøringer per arm er
-for få til å avgjøre spørsmålet.
+G2 kunne uansett ikke bestås av noen av modellene. Stikrav-sjekken leste stien ut av prompten med
+et regex som tar den første `src/`-stien den finner, og G2s prompt navngir filen testen skrives
+*for*. Tre 3.8-forsøk som bygde grønt ble talt som feil.
 
-**Tre harness, samme rekkefølge, ulikt forsprang.** På det opprinnelige harnesset var forskjellen
-5,75 mot 3,40, og den så avgjørende ut. Sandkassen hadde aldri gitt tilgang til byggverktøyene, så
-ingen modell kunne kompilere eller kjøre en test, og vi målte hvem som skriver Kotlin i blinde.
-Etter at verktøykjeden ble fikset og målrepoet pinnet til én commit, var den 3,75 mot 3,25. Nå,
-med `.git` skjult for agenten, med kompiler- og testverifisering som krever at diffen rører filen
-prompten navngir, med D2 pensjonert og med den serverte modellen sjekket mot profilen, er den
-3,60 mot 2,80.
-
-3.8 har ligget øverst på alle tre harnessene. Forspranget har krympet hver gang instrumentet ble
-bedre, og det har aldri vært statistisk signifikant etter at vi begynte å måle riktig: p = 0,71
-på det forrige harnesset, p = 0,21 på dette.
-
-Konklusjonen står derfor uendret. Det er ingen målbar forskjell i hvor mange oppgaver de løser, og
-det publiserte rådet endrer seg ikke: `qwen3.6-35b-a3b-optiq` er standard, `qwen3.8-27b-4bit` er
-opt-in.
+Kjøringene ligger i `bench/` merket `gen3-void` av `bench/ops.py`. Ingen av dem skal siteres.
+Begge armene kjøres på nytt når maskinen er ledig.
 
 ### Kjøringer på reparert harness, 2. september 2026: SUPERSEDED av kjøringene 3. september
 

@@ -1,78 +1,50 @@
-"use strict";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { geocode, USER_AGENT } from '../src/geocode.js';
 
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const { geocode, GeocodeError, GEONORGE_URL } = require("../src/geocode");
-
-function mockHttp(payload, { status = 200, throwErr } = {}) {
-  return {
-    async get(url, cfg) {
-      if (throwErr) throw throwErr;
-      if (status >= 400) {
-        const e = new Error("HTTP " + status);
-        e.response = { status, data: payload };
-        throw e;
-      }
-      return { status, data: payload, config: cfg, url };
-    },
-  };
+function fakeHttp(body) {
+  return async (url, config) => ({ data: body, config, url });
 }
 
-const osloPayload = {
-  metadata: { totaltAntallTreff: 1 },
-  navn: [
-    {
-      navneobjekttype: "Fylke",
-      representasjonspunkt: { nord: 59.91187, øst: 10.73353 },
-      stedsnavn: [{ skrivemåte: "Oslo", navnestatus: "hovednavn" }],
-    },
-  ],
-};
-
-test("maps representasjonspunkt nord/øst to lat/lon", async () => {
-  const r = await geocode("Oslo", { http: mockHttp(osloPayload) });
-  assert.equal(r.lat, 59.91187);
-  assert.equal(r.lon, 10.73353);
-  assert.equal(r.name, "Oslo");
+test('swaps GeoJSON [lon, lat] to lat/lon', async () => {
+  const http = fakeHttp({ navn: [{ geojson: { geometry: { type: 'Point', coordinates: [10.73353, 59.91187] } } }] });
+  const geo = await geocode('Oslo', { http });
+  assert.equal(geo.lat, 59.91187);
+  assert.equal(geo.lon, 10.73353);
+  assert.equal(geo.name, 'Oslo');
 });
 
-test("URL-encodes the search term (no raw injection)", async () => {
-  let seenUrl = "";
-  const http = {
-    async get(url) {
-      seenUrl = url;
-      return { status: 200, data: osloPayload };
-    },
-  };
-  await geocode("Oslo & Co", { http });
-  assert.ok(seenUrl.startsWith(GEONORGE_URL + "?"));
-  // URLSearchParams percent-encodes the ampersand and uses '+' for spaces;
-  // the raw " & " must never appear unencoded in the URL.
-  assert.ok(seenUrl.includes("sok=Oslo+%26+Co"));
-  assert.ok(!seenUrl.includes("sok=Oslo & Co"));
+test('URL-encodes the search term', async () => {
+  let seen;
+  const http = async (url) => { seen = url; return { data: { navn: [] } }; };
+  await assert.rejects(geocode('Ålesund', { http }));
+  assert.match(seen, /sok=%C3%85lesund/);
 });
 
-test("throws GeocodeError when navn is empty", async () => {
-  await assert.rejects(
-    geocode("Nowhere", { http: mockHttp({ navn: [] }) }),
-    GeocodeError
-  );
+test('URL-encodes spaces and query characters', async () => {
+  let seen;
+  const http = async (url) => { seen = url; return { data: { navn: [] } }; };
+  await assert.rejects(geocode('a b?c&d', { http }));
+  assert.match(seen, /sok=a%20b%3Fc%26d/);
 });
 
-test("throws GeocodeError on HTTP failure", async () => {
-  await assert.rejects(
-    geocode("Oslo", {
-      http: mockHttp(null, { status: 500 }),
-    }),
-    GeocodeError
-  );
+test('empty navn array fails', async () => {
+  await assert.rejects(geocode('Nowhere', { http: fakeHttp({ navn: [] }) }), /no Norwegian place found/);
 });
 
-test("throws GeocodeError when match lacks coordinates", async () => {
-  await assert.rejects(
-    geocode("Oslo", {
-      http: mockHttp({ navn: [{ navneobjekttype: "Fylke" }] }),
-    }),
-    GeocodeError
-  );
+test('missing geometry fails', async () => {
+  await assert.rejects(geocode('Oslo', { http: fakeHttp({ navn: [{ navneobjekttype: 'Fylke' }] }) }), /no Norwegian place found/);
+});
+
+test('sends User-Agent and Accept headers', async () => {
+  let config;
+  const http = async (url, c) => { config = c; return { data: { navn: [] } }; };
+  await assert.rejects(geocode('Oslo', { http, userAgent: 'test-agent/9.9' }));
+  assert.equal(config.headers['User-Agent'], 'test-agent/9.9');
+  assert.equal(config.headers.Accept, 'application/json');
+});
+
+test('default User-Agent identifies the app with a real contact', () => {
+  assert.match(USER_AGENT, /^weather-cli\/1\.0 /);
+  assert.doesNotMatch(USER_AGENT, /example\.com/);
 });

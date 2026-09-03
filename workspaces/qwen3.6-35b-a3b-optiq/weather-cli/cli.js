@@ -29,11 +29,11 @@ async function main() {
     // 4. Find closest timeseries entry (UTC)
     const closestEntry = findClosestTimeseries(weatherData);
 
-    // 5. Extract data from instant.details
-    const instant = closestEntry.instant;
-    const details = instant.details || {};
+    // 5. Extract data from data.instant.details
+    const instant = closestEntry.data?.instant;
+    const details = instant?.details || {};
 
-    const temperature = details.temperature != null ? details.temperature : 'N/A';
+    const temperature = details.air_temperature != null ? details.air_temperature : 'N/A';
     const humidity = details.relative_humidity != null ? details.relative_humidity : 'N/A';
     const windSpeed = details.wind_speed != null ? details.wind_speed : 'N/A';
     const pressure = details.air_pressure_at_sea_level != null ? details.air_pressure_at_sea_level : 'N/A';
