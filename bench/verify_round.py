@@ -69,9 +69,20 @@ for r in results:
     # Hash the tree, not the file list. Two runs that produce the same file
     # names are ordinary; two that produce the same bytes did not both write it.
     h = hashlib.sha256()
+    wrote = 0
     for f in sorted(p for p in sub.rglob("*") if p.is_file() and "node_modules" not in p.parts):
+        # The spec is provisioned into every workspace, so hashing it makes every
+        # empty submission look identical to every other one. Three empty trees
+        # in the 234313 round were reported as one run inheriting another's
+        # workspace; they were three runs that wrote nothing.
+        if f.name == "WEATHER_CLI_SPEC.md":
+            continue
+        wrote += 1
         h.update(str(f.relative_to(sub)).encode())
         h.update(f.read_bytes())
+    if wrote == 0:
+        problems.append(f"{r.name}: the model wrote no files. Nothing to score.")
+        continue
     by_model[key].append((run, h.hexdigest()[:12], d))
 
 # Across the whole round, not per model. The queue alternates arms, so the run
@@ -95,7 +106,11 @@ for key, runs in by_model.items():
     for run, _, d in runs:
         sub = ROOT / d["submission"]
         for f in sub.rglob("*"):
-            if f.is_file() and "node_modules" not in f.parts and f.name != "WEATHER_CLI_SPEC.md":
+            # package-lock.json is npm's deterministic output for a given
+            # dependency set, so two runs that both depend on axios alone write
+            # the same bytes without either copying the other.
+            if (f.is_file() and "node_modules" not in f.parts
+                    and f.name not in ("WEATHER_CLI_SPEC.md", "package-lock.json")):
                 by_file[(str(f.relative_to(sub)), hashlib.sha256(f.read_bytes()).hexdigest()[:12])].append(
                     f"{key} run {run}")
 for (path, digest), shared in sorted(by_file.items()):
