@@ -121,6 +121,34 @@ Larger models need tasks with a machine-checkable definition of done.
 `deepseek-v4-flash-3bit` (105 GB) on the 128 GB machine only. Everything older
 than 2026 is out by decision, which removes the whole 70B-class tail.
 
+## What the provider documentation changed
+
+Cerebras serves exactly two public models: `gpt-oss-120b`, a 2025 release, and
+`qwen-3.8-27b`, which we already run. Their dedicated-endpoint names are
+700B-to-1T class and do not fit any machine here. So there is nothing in that
+lineup to adopt. Two things in the documentation matter anyway.
+
+**They keep activations, attention and the KV cache unquantised** and compress
+only weights in storage. Their quality claims therefore describe something close
+to our 8-bit build, not the 4-bit we have been running as the Qwen3.8 arm.
+`mlx-community/Qwen3.8-27B-8bit` is 29.5 GB, fits the 36 GB limit with about
+6 GB left for KV, and is already in the cache.
+
+**`reasoning_effort` defaults to `high` for this model, and `"none"` disables
+it.** Our qwen3.8 profile sends `{"enable_thinking": false, "reasoning_effort":
+"medium"}` while both qwen3.6 profiles send `{"enable_thinking": false}` alone.
+Either the two flags contradict each other or one is ignored, on one arm only,
+and nobody has checked which. Settle it before the next comparison: send a
+request with each combination and read what the server does with it.
+
+**A third arm is worth more than a fourth run.** `qwen3.6-27b-4bit` is the dense
+sibling of our alpha model in the same generation and tokenizer family, 16.1 GB,
+profile written, weights in the cache, never benchmarked. Published cards put it
+above the 35B-A3B on SWE-bench Verified, which is a card claim rather than
+anything we have measured, and that is precisely the reason to measure it. If
+the experiment still cannot separate the current two, a third arm from the same
+family tells us whether the instrument or the models are the problem.
+
 ## Rules that stay
 
 One queue, held by the lock. No harness edits between runs of a comparison.
