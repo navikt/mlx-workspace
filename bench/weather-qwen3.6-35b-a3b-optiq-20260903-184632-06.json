@@ -1,0 +1,53 @@
+{
+  "model_key": "qwen3.6-35b-a3b-optiq",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 97.6,
+      "turns": 10,
+      "tool_calls": 11,
+      "tokens_in": 144140,
+      "tokens_out": 3110,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-184632-06-plan.log"
+    },
+    {
+      "phase": "implement",
+      "seconds": 1197.1,
+      "turns": 56,
+      "tool_calls": 67,
+      "tokens_in": 810501,
+      "tokens_out": 29355,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-184632-06-implement.log"
+    }
+  ],
+  "total_seconds": 1294.7,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 40,
+    "fail_count": 0,
+    "tail": "s name, not coords\n  ---\n  duration_ms: 0.047541\n  ...\n# Subtest: three numbers is treated as name\nok 32 - three numbers is treated as name\n  ---\n  duration_ms: 0.053542\n  ...\n# Subtest: location name with spaces is treated as name\nok 33 - location name with spaces is treated as name\n  ---\n  duration_ms: 0.179417\n  ...\n# Subtest: fetchWeather selects closest timeseries entry to current time in UTC\nok 34 - fetchWeather selects closest timeseries entry to current time in UTC\n  ---\n  duration_ms: 1.889208\n  ...\n# Subtest: fetchWeather extracts all required fields\nok 35 - fetchWeather extracts all required fields\n  ---\n  duration_ms: 0.139125\n  ...\n# Subtest: fetchWeather handles missing ultraviolet_index_clear_sky\nok 36 - fetchWeather handles missing ultraviolet_index_clear_sky\n  ---\n  duration_ms: 0.096708\n  ...\n# Subtest: fetchWeather handles missing cloud_area_fraction\nok 37 - fetchWeather handles missing cloud_area_fraction\n  ---\n  duration_ms: 0.097375\n  ...\n# Subtest: fetchWeather throws on empty timeseries\nok 38 - fetchWeather throws on empty timeseries\n  ---\n  duration_ms: 0.097709\n  ...\n# Subtest: fetchWeather throws on missing timeseries\nok 39 - fetchWeather throws on missing timeseries\n  ---\n  duration_ms: 0.069916\n  ...\n# Subtest: fetchWeather uses correct User-Agent header\nok 40 - fetchWeather uses correct User-Agent header\n  ---\n  duration_ms: 0.113125\n  ...\n1..40\n# tests 40\n# suites 0\n# pass 40\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 1397.674958\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "geocode.test.js",
+    "index.js",
+    "integration.test.js",
+    "output.test.js",
+    "package-lock.json",
+    "package.json",
+    "parser.test.js",
+    "src/geocode.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.6-35b-a3b-optiq-20260903-184632-06"
+}

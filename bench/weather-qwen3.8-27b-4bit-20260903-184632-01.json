@@ -1,0 +1,53 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 141.1,
+      "turns": 7,
+      "tool_calls": 9,
+      "tokens_in": 24293,
+      "tokens_out": 1539,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-184632-01-plan.log"
+    },
+    {
+      "phase": "implement",
+      "seconds": 1186.5,
+      "turns": 33,
+      "tool_calls": 34,
+      "tokens_in": 251855,
+      "tokens_out": 12140,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-184632-01-implement.log"
+    }
+  ],
+  "total_seconds": 1327.6,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 41,
+    "fail_count": 0,
+    "tail": "r agent identifies the app with a real contact\n  ---\n  duration_ms: 0.525916\n  ...\n# Subtest: selects the latest entry at or before the current UTC time\nok 34 - selects the latest entry at or before the current UTC time\n  ---\n  duration_ms: 0.102375\n  ...\n# Subtest: selects the exact hour when the current time is on the hour\nok 35 - selects the exact hour when the current time is on the hour\n  ---\n  duration_ms: 0.092791\n  ...\n# Subtest: throws when no entry is at or before now\nok 36 - throws when no entry is at or before now\n  ---\n  duration_ms: 0.185875\n  ...\n# Subtest: requests the met.no endpoint with encoded lat lon and user agent\nok 37 - requests the met.no endpoint with encoded lat lon and user agent\n  ---\n  duration_ms: 0.429875\n  ...\n# Subtest: returns the instant details of the selected entry\nok 38 - returns the instant details of the selected entry\n  ---\n  duration_ms: 0.225833\n  ...\n# Subtest: http 403 is reported as a policy block, not throttling\nok 39 - http 403 is reported as a policy block, not throttling\n  ---\n  duration_ms: 0.18425\n  ...\n# Subtest: other http failures are reported with exit code 1\nok 40 - other http failures are reported with exit code 1\n  ---\n  duration_ms: 0.091708\n  ...\n# Subtest: a response without a timeseries throws with exit code 1\nok 41 - a response without a timeseries throws with exit code 1\n  ---\n  duration_ms: 0.163542\n  ...\n1..41\n# tests 41\n# suites 0\n# pass 41\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 92.250625\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "index.js",
+    "package-lock.json",
+    "package.json",
+    "src/geocode.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.8-27b-4bit-20260903-184632-01"
+}

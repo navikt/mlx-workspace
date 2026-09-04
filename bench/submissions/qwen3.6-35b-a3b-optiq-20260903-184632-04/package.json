@@ -1,0 +1,16 @@
+{
+  "name": "weather-cli",
+  "version": "1.0.0",
+  "description": "Weather CLI tool using Geonorge and Met.no APIs",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "weather": "src/index.js"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter spec"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "weather-cli",
+  "version": "1.0.0",
+  "description": "Weather CLI using Geonorge geocoding and Met.no forecast API",
+  "type": "commonjs",
+  "bin": {
+    "weather": "./weather-cli.js"
+  },
+  "main": "weather-cli.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  }
+}

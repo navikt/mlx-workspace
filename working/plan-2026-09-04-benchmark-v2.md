@@ -149,6 +149,44 @@ anything we have measured, and that is precisely the reason to measure it. If
 the experiment still cannot separate the current two, a third arm from the same
 family tells us whether the instrument or the models are the problem.
 
+## What other people's measurements say
+
+From six Hacker News threads and an Algolia sweep, keeping only what someone
+measured.
+
+**The 6-8x speed gap is expected.** One tester on an M1 Max under oMLX measured
+both of our builds: Qwen3.8-27B-4bit at 66.3 tok/s prefill and 11.8 generation,
+Qwen3.6-35B-A3B-OptiQ-4bit at 342.6 and 44.4. That is 5.2x prefill and 3.8x
+generation before Qwen3.8's extra thinking tokens. Stop treating our gap as a
+symptom.
+
+**Both of our failure modes are attested independently.** The same tester:
+Qwen3.8-27B-4bit "generally runs out of output token before completing the task
+though excellent partial results", and the 35B-A3B family "seems to get in the
+loop often specially with tool calls". Different hardware, different runtime, and
+it assigns our two failures to the two models the way our own data does.
+
+**The prompt cache is not our problem, and this is now measured here.** The
+loudest config-side claim in that corpus is servers re-prefilling every turn,
+worth 30-90s against 1-3s of time to first token. Our server log for run 01 shows
+consecutive turns with prompts of 1,172, 1,291 and 1,763 tokens each processing
+exactly one token; only the cold prompt did real work, 5,773 tokens at
+~361 tok/s. Ruled out.
+
+**The chat template is the biggest unchecked thing we have.** Qwen's shipped
+Jinja templates are described as a recurring defect that community volunteers
+patch each release, and one tester reports agent success rising from 67% to
+92.5% on fixed templates. That is a larger effect than any difference we have
+measured between models. Nobody here has looked at which template mlx-lm loads.
+Check it on both arms before the next comparison.
+
+**Our OptiQ build is unjustified.** In that same table OptiQ measured slightly
+slower than both plain MLX 4-bit and mxfp4, and the tester concluded the
+derivative conversions do not beat the originals. No quality assessment of OptiQ
+exists anywhere in the corpus. We ship it as the alpha default and have never
+measured it against `mlx-community/Qwen3.6-35B-A3B-4bit`, which already has a
+profile here. Cheap arm to add, and it may retire a decision we are shipping.
+
 ## Rules that stay
 
 One queue, held by the lock. No harness edits between runs of a comparison.

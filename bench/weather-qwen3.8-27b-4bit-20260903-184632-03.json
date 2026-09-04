@@ -1,0 +1,54 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 302.1,
+      "turns": 6,
+      "tool_calls": 6,
+      "tokens_in": 21462,
+      "tokens_out": 1409,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-184632-03-plan.log"
+    },
+    {
+      "phase": "implement",
+      "seconds": 2861.9,
+      "turns": 60,
+      "tool_calls": 62,
+      "tokens_in": 818375,
+      "tokens_out": 16902,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-184632-03-implement.log"
+    }
+  ],
+  "total_seconds": 3164.0,
+  "tests": {
+    "ran": true,
+    "passed": false,
+    "exit": 1,
+    "runner": "node:test",
+    "pass_count": 38,
+    "fail_count": 1,
+    "tail": "t: missing ultraviolet_index_clear_sky throws instead of printing undefined\nok 31 - missing ultraviolet_index_clear_sky throws instead of printing undefined\n  ---\n  duration_ms: 0.250417\n  ...\n# Subtest: missing cloud_area_fraction throws instead of guessing \"Clear\"\nok 32 - missing cloud_area_fraction throws instead of guessing \"Clear\"\n  ---\n  duration_ms: 0.066042\n  ...\n# Subtest: missing air_temperature throws\nok 33 - missing air_temperature throws\n  ---\n  duration_ms: 0.059584\n  ...\n# Subtest: malformed response without timeseries throws\nok 34 - malformed response without timeseries throws\n  ---\n  duration_ms: 0.125292\n  ...\n# Subtest: HTTP 403 is a hard failure: no retries, no backoff\nok 35 - HTTP 403 is a hard failure: no retries, no backoff\n  ---\n  duration_ms: 0.189167\n  ...\n# Subtest: HTTP 429 is retried with backoff then succeeds\nok 36 - HTTP 429 is retried with backoff then succeeds\n  ---\n  duration_ms: 3003.769958\n  ...\n# Subtest: HTTP 429 keeps failing until retries are exhausted\nok 37 - HTTP 429 keeps failing until retries are exhausted\n  ---\n  duration_ms: 7003.328458\n  ...\n# Subtest: other HTTP errors (500) are not retried\nok 38 - other HTTP errors (500) are not retried\n  ---\n  duration_ms: 0.855167\n  ...\n# Subtest: extracts all output fields from instant.details\nok 39 - extracts all output fields from instant.details\n  ---\n  duration_ms: 0.386042\n  ...\n1..39\n# tests 39\n# suites 0\n# pass 38\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 10118.832291\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "bin/weather.js",
+    "package-lock.json",
+    "package.json",
+    "src/geocode.js",
+    "src/main.js",
+    "src/output.js",
+    "src/parser.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.8-27b-4bit-20260903-184632-03"
+}

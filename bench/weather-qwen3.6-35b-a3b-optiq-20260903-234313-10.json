@@ -1,0 +1,41 @@
+{
+  "model_key": "qwen3.6-35b-a3b-optiq",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 5.7,
+      "cap_seconds": 900,
+      "turns": 1,
+      "tool_calls": 1,
+      "tokens_in": 7837,
+      "tokens_out": 87,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-234313-10-plan.log",
+      "session_log": ".bench-logs/qwen3.6-35b-a3b-optiq-20260904-042249.jsonl"
+    },
+    {
+      "phase": "implement",
+      "seconds": 5.5,
+      "cap_seconds": 4200,
+      "turns": 2,
+      "tool_calls": 2,
+      "tokens_in": 8070,
+      "tokens_out": 102,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-234313-10-implement.log",
+      "session_log": ".bench-logs/qwen3.6-35b-a3b-optiq-20260904-042254.jsonl"
+    }
+  ],
+  "session_id": "ses_f95c62b91ffelSyuAUBpv4EYIP",
+  "total_seconds": 11.2,
+  "tests": {
+    "ran": false,
+    "note": "no package.json, nothing to test"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md"
+  ],
+  "submission": "bench/submissions/qwen3.6-35b-a3b-optiq-20260903-234313-10"
+}

@@ -1,0 +1,58 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 174.2,
+      "cap_seconds": 900,
+      "turns": 9,
+      "tool_calls": 9,
+      "tokens_in": 26626,
+      "tokens_out": 1668,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-05-plan.log",
+      "session_log": ".bench-logs/qwen3.8-27b-4bit-20260904-005837.jsonl"
+    },
+    {
+      "phase": "implement",
+      "seconds": 715.0,
+      "cap_seconds": 4200,
+      "turns": 24,
+      "tool_calls": 24,
+      "tokens_in": 135802,
+      "tokens_out": 7774,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-05-implement.log",
+      "session_log": ".bench-logs/qwen3.8-27b-4bit-20260904-010131.jsonl"
+    }
+  ],
+  "session_id": "ses_f96811eceffejiRgyH2q7lwc3B",
+  "total_seconds": 889.2,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 25,
+    "fail_count": 0,
+    "tail": "test: parses a place name\nok 15 - parses a place name\n  ---\n  duration_ms: 0.039916\n  ...\n# Subtest: parses multi-word place name\nok 16 - parses multi-word place name\n  ---\n  duration_ms: 0.033667\n  ...\n# Subtest: treats non-numeric two-token input as a place name\nok 17 - treats non-numeric two-token input as a place name\n  ---\n  duration_ms: 0.081625\n  ...\n# Subtest: rejects out-of-range latitude\nok 18 - rejects out-of-range latitude\n  ---\n  duration_ms: 0.124584\n  ...\n# Subtest: rejects out-of-range longitude\nok 19 - rejects out-of-range longitude\n  ---\n  duration_ms: 0.03825\n  ...\n# Subtest: rejects empty input\nok 20 - rejects empty input\n  ---\n  duration_ms: 0.042167\n  ...\n# Subtest: deriveDescription thresholds\nok 21 - deriveDescription thresholds\n  ---\n  duration_ms: 0.411458\n  ...\n# Subtest: closestEntry picks entry nearest to now\nok 22 - closestEntry picks entry nearest to now\n  ---\n  duration_ms: 0.075625\n  ...\n# Subtest: closestEntry throws on empty timeseries\nok 23 - closestEntry throws on empty timeseries\n  ---\n  duration_ms: 0.121958\n  ...\n# Subtest: extractWeather maps instant.details to output fields\nok 24 - extractWeather maps instant.details to output fields\n  ---\n  duration_ms: 0.067125\n  ...\n# Subtest: fetchWeather calls Met.no with lat/lon and User-Agent\nok 25 - fetchWeather calls Met.no with lat/lon and User-Agent\n  ---\n  duration_ms: 0.313291\n  ...\n1..25\n# tests 25\n# suites 0\n# pass 25\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 672.982209\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "geocode.js",
+    "geocode.test.js",
+    "integration.test.js",
+    "output.js",
+    "output.test.js",
+    "package-lock.json",
+    "package.json",
+    "parser.js",
+    "parser.test.js",
+    "weather-cli.js",
+    "weather.js",
+    "weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.8-27b-4bit-20260903-234313-05"
+}

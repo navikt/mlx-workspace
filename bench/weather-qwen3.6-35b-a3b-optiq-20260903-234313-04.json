@@ -1,0 +1,58 @@
+{
+  "model_key": "qwen3.6-35b-a3b-optiq",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 130.8,
+      "cap_seconds": 900,
+      "turns": 14,
+      "tool_calls": 13,
+      "tokens_in": 185179,
+      "tokens_out": 3396,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-234313-04-plan.log",
+      "session_log": ".bench-logs/qwen3.6-35b-a3b-optiq-20260904-004512.jsonl"
+    },
+    {
+      "phase": "implement",
+      "seconds": 658.2,
+      "cap_seconds": 4200,
+      "turns": 41,
+      "tool_calls": 40,
+      "tokens_in": 441305,
+      "tokens_out": 19634,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.6-35b-a3b-optiq-20260903-234313-04-implement.log",
+      "session_log": ".bench-logs/qwen3.6-35b-a3b-optiq-20260904-004723.jsonl"
+    }
+  ],
+  "session_id": "ses_f968d6644ffeAeuSDpLsZ4zFDn",
+  "total_seconds": 789.0,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 32,
+    "fail_count": 0,
+    "tail": "# Subtest: should select closest timeseries entry to current time\n    ok 2 - should select closest timeseries entry to current time\n      ---\n      duration_ms: 0.062958\n      ...\n    # Subtest: should derive \"Overcast\" for cloud_area_fraction > 75\n    ok 3 - should derive \"Overcast\" for cloud_area_fraction > 75\n      ---\n      duration_ms: 0.052375\n      ...\n    # Subtest: should derive \"Partly cloudy\" for cloud_area_fraction > 50\n    ok 4 - should derive \"Partly cloudy\" for cloud_area_fraction > 50\n      ---\n      duration_ms: 0.04525\n      ...\n    # Subtest: should derive \"Mostly clear\" for cloud_area_fraction > 25\n    ok 5 - should derive \"Mostly clear\" for cloud_area_fraction > 25\n      ---\n      duration_ms: 0.045292\n      ...\n    # Subtest: should derive \"Clear\" for cloud_area_fraction <= 25\n    ok 6 - should derive \"Clear\" for cloud_area_fraction <= 25\n      ---\n      duration_ms: 0.040583\n      ...\n    # Subtest: should throw on empty timeseries\n    ok 7 - should throw on empty timeseries\n      ---\n      duration_ms: 0.179334\n      ...\n    # Subtest: should throw on 403 error\n    ok 8 - should throw on 403 error\n      ---\n      duration_ms: 0.096125\n      ...\n    # Subtest: should throw on 429 error\n    ok 9 - should throw on 429 error\n      ---\n      duration_ms: 0.095375\n      ...\n    1..9\nok 5 - fetchWeather\n  ---\n  duration_ms: 1.579041\n  type: 'suite'\n  ...\n1..5\n# tests 32\n# suites 5\n# pass 32\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 307.067125\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "geocode.js",
+    "geocode.test.js",
+    "index.js",
+    "integration.test.js",
+    "output.js",
+    "output.test.js",
+    "package-lock.json",
+    "package.json",
+    "parser.js",
+    "parser.test.js",
+    "weather.js",
+    "weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.6-35b-a3b-optiq-20260903-234313-04"
+}

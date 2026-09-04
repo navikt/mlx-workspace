@@ -1,0 +1,41 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 902.1,
+      "cap_seconds": 900,
+      "turns": null,
+      "tool_calls": null,
+      "tokens_in": null,
+      "tokens_out": null,
+      "truncated": false,
+      "timed_out": true,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-07-plan.log",
+      "session_log": null
+    },
+    {
+      "phase": "implement",
+      "seconds": 4202.1,
+      "cap_seconds": 4200,
+      "turns": null,
+      "tool_calls": null,
+      "tokens_in": null,
+      "tokens_out": null,
+      "truncated": false,
+      "timed_out": true,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-07-implement.log",
+      "session_log": null
+    }
+  ],
+  "session_id": null,
+  "total_seconds": 5104.2,
+  "tests": {
+    "ran": false,
+    "note": "no package.json, nothing to test"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md"
+  ],
+  "submission": "bench/submissions/qwen3.8-27b-4bit-20260903-234313-07"
+}

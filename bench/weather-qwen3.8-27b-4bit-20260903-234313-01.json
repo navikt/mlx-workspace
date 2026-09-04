@@ -1,0 +1,58 @@
+{
+  "model_key": "qwen3.8-27b-4bit",
+  "phases": [
+    {
+      "phase": "plan",
+      "seconds": 299.8,
+      "cap_seconds": 900,
+      "turns": 18,
+      "tool_calls": 17,
+      "tokens_in": 58982,
+      "tokens_out": 2930,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-01-plan.log",
+      "session_log": ".bench-logs/qwen3.8-27b-4bit-20260903-234328.jsonl"
+    },
+    {
+      "phase": "implement",
+      "seconds": 1084.6,
+      "cap_seconds": 4200,
+      "turns": 35,
+      "tool_calls": 34,
+      "tokens_in": 342821,
+      "tokens_out": 8623,
+      "truncated": false,
+      "timed_out": false,
+      "transcript": ".bench-logs/weather-qwen3.8-27b-4bit-20260903-234313-01-implement.log",
+      "session_log": ".bench-logs/qwen3.8-27b-4bit-20260903-234828.jsonl"
+    }
+  ],
+  "session_id": "ses_f96c5eaadffe84bPOBDQcC5Ack",
+  "total_seconds": 1384.4,
+  "tests": {
+    "ran": true,
+    "passed": true,
+    "exit": 0,
+    "runner": "node:test",
+    "pass_count": 30,
+    "fail_count": 0,
+    "tail": "--\n  duration_ms: 0.034333\n  ...\n# Subtest: treats single number as a name, not coords\nok 20 - treats single number as a name, not coords\n  ---\n  duration_ms: 0.082916\n  ...\n# Subtest: parses place name\nok 21 - parses place name\n  ---\n  duration_ms: 0.033584\n  ...\n# Subtest: trims whitespace on names\nok 22 - trims whitespace on names\n  ---\n  duration_ms: 0.0755\n  ...\n# Subtest: rejects missing location\nok 23 - rejects missing location\n  ---\n  duration_ms: 0.123125\n  ...\n# Subtest: describeClouds thresholds\nok 24 - describeClouds thresholds\n  ---\n  duration_ms: 0.406042\n  ...\n# Subtest: closestEntry picks nearest to now\nok 25 - closestEntry picks nearest to now\n  ---\n  duration_ms: 0.078333\n  ...\n# Subtest: closestEntry throws on empty\nok 26 - closestEntry throws on empty\n  ---\n  duration_ms: 0.12525\n  ...\n# Subtest: extractWeather maps all spec fields\nok 27 - extractWeather maps all spec fields\n  ---\n  duration_ms: 0.057833\n  ...\n# Subtest: extractWeather throws when details missing\nok 28 - extractWeather throws when details missing\n  ---\n  duration_ms: 0.056\n  ...\n# Subtest: fetchWeather sends lat/lon and User-Agent, returns mapped fields\nok 29 - fetchWeather sends lat/lon and User-Agent, returns mapped fields\n  ---\n  duration_ms: 0.274583\n  ...\n# Subtest: fetchWeather propagates HTTP errors\nok 30 - fetchWeather propagates HTTP errors\n  ---\n  duration_ms: 0.115791\n  ...\n1..30\n# tests 30\n# suites 0\n# pass 30\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 813.23275\n"
+  },
+  "files": [
+    "WEATHER_CLI_SPEC.md",
+    "package-lock.json",
+    "package.json",
+    "src/geocode.js",
+    "src/index.js",
+    "src/output.js",
+    "src/parse.js",
+    "src/weather.js",
+    "test/geocode.test.js",
+    "test/integration.test.js",
+    "test/output.test.js",
+    "test/parser.test.js",
+    "test/weather.test.js"
+  ],
+  "submission": "bench/submissions/qwen3.8-27b-4bit-20260903-234313-01"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "weather-cli",
+  "version": "1.0.0",
+  "description": "Norwegian weather CLI (Geonorge + Met.no)",
+  "type": "module",
+  "bin": {
+    "weather": "src/index.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "axios": "^1.7.9"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}
