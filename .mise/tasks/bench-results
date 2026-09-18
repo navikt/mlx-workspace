@@ -39,7 +39,8 @@ def load(path):
         doc = json.loads(path.read_text())
     except (json.JSONDecodeError, OSError):
         return None
-    samples = doc.get("samples")
+    if isinstance(doc, dict):
+        return doc.get("samples") or [v for k,v in doc.items() if not str(k).startswith("_")]
     return samples if isinstance(samples, list) else None
 
 
@@ -48,8 +49,8 @@ def median(values):
 
 
 def summarise(path, samples):
-    valid = [s for s in samples if s.get("valid")]
-    invalid = [s for s in samples if not s.get("valid")]
+    valid = [s for s in samples if s.get("verified")]
+    invalid = [s for s in samples if not s.get("verified")]
     verified = sum(1 for s in valid if s.get("verified") is True)
     judged = sum(1 for s in valid if s.get("verified") is not None)
     return {
@@ -100,7 +101,7 @@ def main():
         return 0
 
     rows = []
-    for path in sorted((ROOT / "bench").glob("*.json")):
+    for path in sorted((ROOT / "bench").glob("results-*.json")):
         if args.filter and args.filter not in path.name:
             continue
         samples = load(path)
