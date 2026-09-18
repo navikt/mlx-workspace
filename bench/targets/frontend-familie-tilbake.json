@@ -10,7 +10,7 @@
     {
       "id": "R1",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "file": "src/frontend/utils/fnr.ts",
       "prompt": "Explain how validerF\u00f8dselsnummerFelt in src/frontend/utils/fnr.ts decides whether a f\u00f8dselsnummer is valid. Answer in a few sentences. Do not change any files.",
       "expect_terms": [
@@ -34,7 +34,7 @@
     {
       "id": "R3",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "file": "src/frontend/utils/ressursUtils.ts",
       "prompt": "List every call site of hentFrontendFeilmelding. Report the file paths. Do not change any files.",
       "expect_terms": [
@@ -50,7 +50,7 @@
     {
       "id": "D1",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "file": "src/frontend/kodeverk/fagsystem.ts",
       "prompt": "In src/frontend/kodeverk/fagsystem.ts, what does tilFagsystem return for the input 'KS', and what does it return for 'toString'? Explain why. Do not change any files.",
       "expect_terms": [
