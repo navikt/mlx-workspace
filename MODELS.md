@@ -156,7 +156,8 @@ verification rules and the quarantine convention are in [`BENCHMARKING.md`](BENC
 | Qwen3.6-35B-A3B-4bit-DWQ | Apr 2026 | B | mlx-lm | MoE 35B, DWQ quantization | 18.9 GB | ❌ worse than the plain build |
 | Qwen3.8-27B-4bit | Jul 2026 | B | mlx-lm | Dense 27B, no drafter | 14.6 GB | ❌ held back, loops and times out |
 | Qwen3.8-27B-4bit + `repetition_penalty` | Jul 2026 | B | mlx-lm | Dense 27B, penalty 1.05 | 14.6 GB | ❌ faster, loops worse |
-| Qwen3.8-27B-8bit (MLX) | Jul 2026 | B | mlx-lm | Dense 27B | **27.0 GB** | ❌ fits 36 GB, 194.5s, loops on two tasks |
+| Qwen3.8-27B-8bit (MLX) | Jul 2026 | B | mlx-lm | Dense 27B + reasoning pin | **27.0 GB** | ❌ fits 36 GB, 194.5s, loops (caused by pin) |
+| Qwen3.8-27B-8bit-nopin | Sept 2026 | B | mlx-lm | Dense 27B | **27.0 GB** | ✅ **7/7 verified, 0 loops.** Best dense performer. |
 | Qwen3.8-27B-6bit | Jul 2026 | B | mlx-lm | Dense 27B, thinking left on | — | ❌ 284.2s |
 | Qwen3.8-27B-8bit (MTPLX Q8) | Jul 2026 | B | **oMLX** | Dense 27B + MTP drafter | 28.9 GB | ⚠️ best weather-cli code, never run on the fixed harness |
 | granite-4.1-8b-4bit | May 2026 | A, B | mlx-lm | Dense 8B | 5.1 GB (B), ~4.5 GB (A) | ❌ reads, never writes³ |
@@ -454,7 +455,8 @@ consistent with its cheap-operations result. None of these runs is graded agains
 | KAT-Coder V2.5, coder-tuned, same architecture | 17.5s against 12.7s, same 4 of 8. Loses on speed |
 | Qwen3.6-27B dense, same family | 112.8s. Nine times slower than its own MoE sibling |
 | Granite 4.1 8B | Reads and answers, never writes. 1 of 8, zero files changed in 11 tasks |
-| Qwen3.8-27B at 8-bit | Fits at 27.0 GB. 194.5s, four timeouts, loops on two tasks |
+| Qwen3.8-27B at 8-bit (with reasoning pin) | Fits at 27.0 GB. 194.5s, four timeouts, loops on two tasks |
+| Qwen3.8-27B at 8-bit (nopin) | Fits at 27.0 GB. **Zero loops, 7/7 verified.** The model's baseline logic is unharmed at 8-bit; the earlier failures were an artifact of the reasoning pin and 420s timeout. |
 | Qwen3.8-27B at 6-bit | 284.2s and two timeouts. Slow, and the only one of the three that does not loop |
 
 Coder tuning, a newer quantizer and more bits each cost more than they returned. The one lever that

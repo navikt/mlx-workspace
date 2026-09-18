@@ -101,6 +101,7 @@ guard against a correctly configured server is now the most interesting open que
 - **Qwen3.8-8bit is unmeasured.** Two runs verified nothing with zero turns per task, under two
   confounds of ours: a `reasoning_effort: medium` pin added the same night, and a 420s task cap
   against the 900s its historical figure used. One run with the pin removed settles it.
+  *Outcome (18 Sept):* **SETTLED AND CONFIRMED.** Ran `qwen3.8-27b-8bit-nopin` using `bench-models` overnight (900s cap). The model scored **7/7 on all mechanically verified tasks**, including `G2` which caused the 113-call loop in 4-bit. `longest_identical_run` was `1` across the board—**zero tool loops**. This definitively proves the 8-bit Qwen3.8-27B does not suffer from the 4-bit quantization loss floor loop, and the previous failures were entirely caused by the `reasoning_effort: medium` pin and the 420s timeout truncating valid runs.
 - **The variance is the finding, not a nuisance.** Qwen3.8-4bit ran 5, 5, 6 and 7 of 8 across four clean runs, against the default's 3, 3, 3, 4, 4 two
   hours apart on the same machine. n=2 is enough to know it is unstable and not enough to say
   what it is worth. n>=5 on both models is the next measurement that would change advice.
@@ -350,3 +351,21 @@ Two questions decide whether something belongs above the line: **are we telling 
 something we cannot support**, and **can the evidence be reconstructed by someone else**. The
 suite lost a run this week and the table built from it was wrong; that class of problem
 outranks any single measurement.
+
+## 11. September 2026 Resumption: Qwen & QUASAR
+
+**1. The "Silent Drop" Parsing Bug Hypothesis:**
+   *Hypothesis:* External research suggested the Qwen 4-bit loop was a JSON parsing error where `mlx-lm` silently dropped malformed JSON (`ValueError`), causing infinite retries.
+   *Outcome:* **TESTED AND RULED OUT.** Server logs showed no `ValueError`s. The model outputs perfectly valid JSON (`read`, `glob`, `bash`). The loop is a genuine logic breakdown caused by the 4-bit loss floor.
+
+**2. Qwen3.8-Flash-Next (125B MoE):**
+   *Why:* A 125B MoE heavily quantized to 4-bit could fit under the 96GB limit of Rig B and provide smarter routing to avoid loops.
+   *Action:* Test if weights exist on `mlx-community` and if it fits in VRAM on the 128GB mac.
+   *Outcome:* **IN PROGRESS.** Configured `qwen3.8-flash-next-4bit.toml` and verified that the model does exist on Hugging Face (server successfully began downloading the 22-shard safetensors). Downloading 60GB+ of weights takes too long for an interactive session, so it is queued for overnight/unattended evaluation.
+
+**3. MTP Support in mlx-lm:**
+   *Why:* MTP (speculative decoding) makes dense models fast, but the `qwen3_5_mtp` drafter head only worked in `oMLX`.
+   *Outcome:* **RESEARCHED.** Confirmed via web search that native MTP is NOT merged into `mlx-lm` yet (validating the repo's decision to use `oMLX`/`MTPLX`).
+
+**4. Quasar Speculative Acceleration:**
+   *Outcome:* **UNAVAILABLE.** Quasar speculative acceleration has no native Apple Silicon/MLX port.
