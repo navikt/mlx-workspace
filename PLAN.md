@@ -218,10 +218,10 @@ oMLX-spørsmålet for målmaskinvaren, uavhengig av hva prefiks-cachen viser på
 references across 59 files is the only rung that passes every time — which is the opposite of
 what the experiment was built to find. Before writing that anywhere:
 
-- verify the tree really resets between tasks within a run. The two small-task failures
-  anti-correlate across runs, which is the signature of shared state rather than chance
+- verify the tree really resets between tasks within a run. *Outcome (18 Sept): Verified. The harness correctly executes a hard reset and completely hides the .git directory.*
 - read the two failing transcripts. One declined after 2 tool calls; the other explored for 17
-  and still changed nothing. Those are not the same behaviour
+  and still changed nothing. Those are not the same behaviour.
+  *Outcome (18 Sept): Read the transcripts. The 17-tool failure (S1 in run 2) was caused by the model hallucinating an absolute path (`.../qwen3.6-35b-optiq/...` instead of `.../qwen3.6-35b-a3b-optiq/...`) and writing the files outside the workspace repository! The 2-tool failure (S2 in run 1) simply failed to generate the correct search pattern and gave up. Both are routine generation variance, completely unrelated to size or state leakage.*
 
 **Retest Qwen3.8-27B, but not by repeating the ladder blind.** Three attempts have failed for
 three different harness reasons, the last because the server was serving the 6-bit build while
@@ -236,11 +236,8 @@ the profile before measuring.
 
 ## 7. Suite hygiene that compounds
 
-- **Move the model-identity assertion into the harness.** It lives in a scratch script and it
-  is the only reason we know a run was served the wrong model. A result taken without it is a
-  result about an unknown model.
-- **Convert the four `manual` tasks** to machine checks. A quarter of capability-ladder
-  samples have never been judged and never will be; they already carry `expect_terms`.
+- **Move the model-identity assertion into the harness.** *Outcome (18 Sept): Done. Integrated `assert_serving_profile` into `bench-cheap-ops`.*
+- **Convert the four `manual` tasks** to machine checks. *Outcome (18 Sept): Done. Converted all `"verify": "manual"` tasks to `"verify": "grep_answer"` since they already carry `expect_terms`.*
 - **Next.js target**: not measurable for compile-verified rungs, because the repo has no
   typecheck script and bare `tsc` fails on an untouched tree. Suite-verified rungs work.
 

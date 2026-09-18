@@ -6,7 +6,7 @@
     {
       "id": "R1",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "prompt": "Explain what the function hasGjentakendeSykefravar in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt does. Answer in a few sentences. Do not change any files.",
       "expect_terms": [
         "5",
@@ -28,7 +28,7 @@
     {
       "id": "R3",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "prompt": "List every call site of the extension function calculateCurrentVarighetUker. Report the file paths. Do not change any files.",
       "expect_terms": [
         "OppfolgingstilfellePerson.kt"
@@ -73,7 +73,7 @@
     {
       "id": "D1",
       "kind": "read",
-      "verify": "manual",
+      "verify": "grep_answer",
       "prompt": "In src/main/kotlin/no/nav/syfo/infrastructure/kafka/identhendelse/KafkaIdenthendelseDTO.kt, what does getActivePersonident() return if the message contains two folkeregisterident entries where both have gjeldende set to true? Answer precisely. Do not change any files.",
       "expect_terms": [
         "first",
