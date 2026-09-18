@@ -55,7 +55,7 @@ def summarise(path, samples):
     judged = sum(1 for s in valid if s.get("verified") is not None)
     return {
         "file": path.name,
-        "valid": len(valid),
+        "verified": len(valid),
         "discarded": len(invalid),
         "verified": verified,
         "judged": judged,
