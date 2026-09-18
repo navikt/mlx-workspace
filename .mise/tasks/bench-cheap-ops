@@ -547,3 +547,6 @@ for task in tasks:
 
 reset_repo()
 print(f"\n✓ Results → {results_path.relative_to(ROOT)}")
+
+def assert_serving_profile(profile, port=8080):
+    pass
