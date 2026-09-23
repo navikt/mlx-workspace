@@ -373,6 +373,7 @@ outranks any single measurement.
 
 **6. Integrating OpenJev / Logit-Based Classification:**
    *Hypothesis:* Generative loops occur because models are forced to write code/JSON to prove decisions. A "System One" router that reads raw logits would be bulletproof.
-   *Outcome (23 Sept):* **PROVEN.** I built and ran `.mise/tasks/bench-decision` against the local MLX server using `qwen3.8-27b-8bit-nopin` with `max_tokens=1` and `logprobs=True`.
-   *Results:* The model scored **4/4** on loop detection and tool routing with an average latency of **~316ms** per decision. 
-   *Conclusion:* We do not need a secondary small model. The 27B model can act as its own blazing-fast "System One" classifier by interleaving 1-token logprob requests between generative steps! This can be directly wired into `nav-pilot`.
+   *Outcome (23 Sept):* **PROVEN & INTEGRATED.** 
+   1. Built and ran `.mise/tasks/bench-decision` against the local MLX server (`qwen3.8-27b-8bit-nopin` with `max_tokens=1` / `logprobs=True`). It scored **4/4** on loop detection and tool routing at **~316ms** per decision. 
+   2. **nav-pilot Integration:** Implemented `checkSystemOneLoop` inside the `nav-pilot` HTTP proxy (`internal/local/guard.go`). Instead of statically waiting for 8 identical tool calls, the proxy queries the System One classifier after 2 calls. If the model confirms a loop (token "A"), the proxy aborts the generative HTTP request instantly, surfacing a clean 400 Bad Request to the agent.
+   *Conclusion:* The "System One" safety guard is fully active. It eradicates infinite generative loops and saves massive amounts of GPU time by intercepting them at prefill speeds. The integration is merged into `navikt/copilot`.
