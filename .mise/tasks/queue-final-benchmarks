@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../.." || exit 1
 
 # Stability verification for the default model candidate (n=5 total, we have 1, so 4 more).
 # The two oMLX profiles (qwen3.8-27b-8bit, -nocache) run from queue-omlx-benchmarks.
-nohup mise run bench-models -- \
+BENCH_WAIT=1 nohup mise run bench-models -- \
   qwen3.8-27b-8bit-nopin \
   qwen3.8-27b-8bit-nopin \
   qwen3.8-27b-8bit-nopin \
