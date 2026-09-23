@@ -75,6 +75,33 @@ entry's role/requirements, since the model is opt-in.
 Head-to-head set, same harness: optiq (default), qwen3.8-27b-4bit, qwen3.8-27b-8bit-mlx (pinned),
 nopin. Cheap-ops ×3 each (nopin ×4), latency/memory probes for optiq, 4bit and nopin.
 
+## Blocker found: Metal OOM at about 51k context (11:30)
+
+Through nav-pilot's own server (mlx-lm 0.31.3, wired limit 36 GB set by nav-pilot), the 60k
+latency probe died during prefill at about 51k tokens:
+
+    RuntimeError: [METAL] Command buffer execution failed: Insufficient Memory
+    (kIOGPUCommandBufferCallbackErrorOutOfMemory)   mlx_lm/generate.py:1161
+
+- Peak process footprint was 43.8 GB, on an M5 Max with 128 GB. The limit comes from the
+  wired/Metal budget, not physical RAM.
+- The generation thread died, but HTTP stayed up. Every later request hung until the client's
+  900 s timeout. nav-pilot did not notice. The end-to-end sessions would have hung for about
+  3 hours, so the job was stopped at 11:45.
+- **The already-shipped entry `qwen3.8-27b-8bit-mlx` serves the same weights with the same
+  params**, and opencode declares a 65,536-token context. Users who select it today can hit
+  this. It is a fleet bug regardless of the nopin decision. (Investigation running.)
+- The classifier and reasoning_effort probes did not run (the probe script crashed on the
+  timeout), and the end-to-end sessions did not run either. Both must be re-run after a fix.
+
+Measured before the crash (nopin, M5 Max, nav-pilot runtime):
+
+| Prompt | Cold TTFT | Decode | Criterion |
+|---|---|---|---|
+| 2k | 4.3 s | 14.8 tok/s | |
+| 30k | 59.6 s | 13.8 tok/s | TTFT > 30 s: caveat |
+| 60k | OOM | | blocker |
+
 ## Queue
 
 1. nopin cheap-ops runs 3–4
@@ -93,6 +120,7 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
+- 11:45 nopin e2e stopped: the server's generation thread died on a Metal OOM at about 51k tokens (see the blocker section).
 - 11:35 head-to-head queued (4bit and pinned 8bit cheap-ops ×3, 4bit latency).
 - 11:25 nopin run 4: 8/10. Across n=4 on the current harness: 31/40, range 6–9. Medians recomputed over the 10 scored tasks, excluding D2.
 - 11:25 `bench-np-e2e` for nopin took the lock ahead of the oMLX and optiq queues (the waiters don't queue in order).
