@@ -161,6 +161,9 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 09:58 nopin run 2: 9/10.
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
 - 11:48 oMLX runs refused by oMLX's own prefill memory guard: 30 GB of weights already exceed 90% of the 36 GB Metal cap. Both oMLX profiles ask for `gpu_wired_limit_gb = 96`, and the machine is at 36 (model-use only recommends the change, and `vram-set` needs sudo). The oMLX numbers need a separate batch at 96 GB and are not relevant to a 48 GB fleet anyway.
+- 11:43 another session (navikt/cplt) started a CPU stress test: 22 `yes` processes for about 40 Chrome test runs. Every cheap-ops run that overlaps it is invalid (CPU contention slows the agent loop and can cause timeouts). The user decided to let it finish and re-run the affected runs. optiq run 1 (11:55) is affected.
+- 12:00 PRs opened: navikt/mlx-workspace#20 (context caps) and navikt/copilot#931 (dead generation thread exits with status 70).
+- 12:00 nopin profile capped at 32k/8k (cbe77ea), so the re-test covers what would ship.
 - 11:47 optiq latency/memory done: every criterion passes (34.3 GB peak at 60k).
 - 11:45 nopin e2e stopped: the server's generation thread died on a Metal OOM at about 51k tokens (see the blocker section).
 - 11:35 head-to-head queued (4bit and pinned 8bit cheap-ops ×3, 4bit latency).
