@@ -40,7 +40,8 @@ was served by 7 different models over the run and has to be excluded.
 | **nopin 09-23, n=4** | **mean 7.75/10 (31/40)** | R1 4/4; timeouts G2 ×2, D3 ×2, M2 ×1 | |
 | optiq 09-23 run 1 (first ~3 min under the cplt CPU stress) | **9/10** | R1 | 12.7 |
 | optiq 09-23 run 2 | 8/10 | R1, D3 | 12.8 |
-| optiq 09-23 run 3 | pending | | |
+| optiq 09-23 run 3 | 5/10 | R1; E3 (compile failed), M2 and D3 (made no edit), G2 (suite failed) | 10.9 |
+| **optiq 09-23, n=3** | **mean 7.3/10 (22/30)**, range 5–9 | failures are wrong/empty edits, not timeouts | |
 | optiq replacement run (for run 1) | pending | | |
 
 The only clean optiq baseline so far (2026-09-03, older harness) scored 2, 3, 2 and 4 of 11.
@@ -165,6 +166,7 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
 - 11:48 oMLX runs refused by oMLX's own prefill memory guard: 30 GB of weights already exceed 90% of the 36 GB Metal cap. Both oMLX profiles ask for `gpu_wired_limit_gb = 96`, and the machine is at 36 (model-use only recommends the change, and `vram-set` needs sudo). The oMLX numbers need a separate batch at 96 GB and are not relevant to a 48 GB fleet anyway.
 - 11:43 another session (navikt/cplt) started a CPU stress test: 22 `yes` processes for about 40 Chrome test runs. Every cheap-ops run that overlaps it is invalid (CPU contention slows the agent loop and can cause timeouts). The user decided to let it finish and re-run the affected runs. optiq run 1 (11:55) is affected.
+- 12:39 optiq run 3: 5/10. optiq fails differently from nopin: fast, wrong or empty edits ("no changes made" in 8 s) where nopin times out. n=3 so far: 22/30 vs nopin 31/40, a statistical tie at 10× the speed. Variance is high for both (5–9 and 6–9).
 - 12:35 Re-prioritized (user): the head-to-head for 4bit and pinned 8bit is deferred until the nopin e2e and System One jobs finish, since optiq already leads decisively.
 - 12:27 optiq run 2: 8/10 (R1, D3), median 12.8 s. Served model verified.
 - 12:14 **optiq run 1: 9/10 at a median of 12.7 s/task.** On the current harness the default matches nopin's best run and is about 10× faster. The old 2–4/11 baseline was a harness artefact, not the model. The stress test ended at 11:58, so only the first ~3 minutes overlapped. A replacement run is queued anyway.
