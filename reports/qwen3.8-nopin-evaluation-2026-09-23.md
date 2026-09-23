@@ -135,6 +135,25 @@ Fixes in progress (both on branches, unpushed):
 Later: `--prefill-step-size 512` (needs a nav-pilot flag whitelist change and has to be measured)
 could restore a larger context.
 
+## Blocker 2: Copilot CLI refuses the 32k cap (12:42)
+
+All 12 end-to-end sessions (nopin at 32768/8192 through nav-pilot and Copilot CLI) ended within 6 s:
+
+    ! Static system messages and tool definitions exceed the model's usable context budget.
+      Reduce static context or switch to a larger-context model.
+
+Copilot CLI's static context (system prompt, the `nais-platform` agent and tool definitions)
+doesn't fit in 32768 − 8192. **The 32k cap in navikt/mlx-workspace#20 would make the 8-bit entry
+unusable with Copilot CLI, nav-pilot's default client.** The PR was converted to draft at 12:50.
+The 4-bit entry's 64k cap is unaffected: optiq at 65k worked through Copilot CLI on 29 Aug.
+
+So the 8-bit weights sit between two limits on a 36 GB wired budget: Copilot CLI needs more context
+than 24k, and the Metal OOM starts at about 51k. The workable window, if it exists, is roughly 40–48k
+and has to be measured. Options: a 40–48k context with a smaller output and prompt cache,
+`--prefill-step-size 512` (needs a nav-pilot change), or dropping the 8-bit entry for the 36 GB tier.
+
+The System One real sessions failed for the same reason, so no real-session classifier data exists.
+
 ## System One classifier probe (nopin, 12:40, guard prompt from e72319e0)
 
 7 scenarios × 3 repetitions. Temperature 0, so the repetitions are identical.
