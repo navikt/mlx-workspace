@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Queue the two oMLX MTP profiles (official Qwen3.8-27B, oQ8e with MTP head).
+# Needs mtp_enabled for Jundot--Qwen3.8-27B-oQ8e-mtp in ~/.omlx/model_settings.json.
+
+cd "$(dirname "$0")/../.." || exit 1
+
+nohup mise run bench-models -- \
+  qwen3.8-27b-8bit \
+  qwen3.8-27b-8bit-nocache \
+  > .bench-logs/omlx-queue.log 2>&1 &
+
+echo "oMLX benchmark queue launched in background. PID: $!"
