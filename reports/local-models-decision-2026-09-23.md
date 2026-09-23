@@ -19,7 +19,7 @@ Background detail is in `reports/qwen3.8-nopin-evaluation-2026-09-23.md` (runnin
 7. It is replaced by a deterministic rule (navikt/copilot#933): block after 4 identical calls with identical results, and keep a backstop at 8 identical calls.
 8. Two nav-pilot fixes go with it: #931 (a dead generation thread makes the server exit, so it no longer hangs) and #932 (Copilot static context 45.1k → 21.7k tokens).
 9. All four PRs were tested together end to end, and every scenario passed after a re-run that fixed the test design.
-10. Not measured: real 48 GB hardware, Pro-chip decode speed, or the 4-bit at 60k (that run is still in progress).
+10. Not measured: real 48 GB hardware or Pro-chip decode speed. The 4-bit at 60k works on 36 GB wired but is slow: 109 s to first token, 22 tok/s, peaking at 39.0 GB.
 
 ## 2. Action list
 
@@ -85,7 +85,7 @@ whether to keep the two untracked profiles `profiles/qwen3.8-27b-4bit-quasar.tom
 | optiq (default) | 4 (`115543-01/02/03`, `124337-01`) | 28/40 (70%) | 12.2 | 0.99 s / 68.6 tok/s | 11.1 s / 58.6 tok/s | 34.3 GB at 60k |
 | optiq, without stress-overlapped `115543-01` | 3 | 19/30 (63%) | 11.9 | | | |
 | 8-bit nopin | 4 (`083958-01..04`) | 31/40 (78%) | 115 | 4.3 s / 14.8 tok/s | 59.6 s / 13.8 tok/s | 43.8 GB, then OOM |
-| 4-bit | 3 (`125734-01`, `143323-01/02`) | 17/30 (57%) | 80 | 2.5 s / 30.1 tok/s | 47.0 s / 25.1 tok/s | 29.6 GB (one E1 session); 60k probe pending |
+| 4-bit | 3 (`125734-01`, `143323-01/02`) | 17/30 (57%) | 80 | 2.5 s / 30.1 tok/s | 47.0 s / 25.1 tok/s | 39.0 GB at 60k (TTFT 109 s, 22.2 tok/s) |
 | 8-bit pinned (`8bit-mlx`) | 0 valid | | | not measured | | |
 
 Sources: `bench/results-<profile>-20260923-<run>.json`; latency from `bench/np-e2e-qwen3.6-35b-a3b-optiq-20260923-114534.json`,
@@ -94,8 +94,7 @@ probes, 256 output tokens). Peaks: optiq from its np-e2e `memory.peak_gb`; nopin
 `.bench-logs/np-e2e-qwen3.8-27b-8bit-nopin-20260923-112533.footprint` (max 43,828,073,688 bytes);
 4-bit from `bench/navpilot-e2e-20260923-140805.json` `memory.peak_gb_by_phase.c-E1`.
 Excluded as invalid (two queues ran at once): 4-bit `125734-03` and `134745-02`, 8bit-mlx `125734-02`.
-The 4-bit latency run started at 15:50, and when this was written it had finished 2k and 30k,
-while the 60k probe and its memory peak were still running.
+The 4-bit latency run (15:50–15:56) finished all targets. 60k: TTFT 109 s, decode 22.2 tok/s, peak 39.0 GB, no OOM.
 
 Per-run pass counts: optiq 9, 8, 5, 6. nopin 8, 9, 6, 8. 4-bit 6, 5, 6. R1 failed in all 11 valid
 runs across the three models, so it probably tests the task, not the model.
@@ -189,7 +188,7 @@ correctly.
 
 - **Real 48 GB hardware.** Everything above ran on a 128 GB M5 Max with the wired limit set to 36 GB. Whole-system pressure with an IDE, a browser and Copilot running (48 − 36 = 12 GB for everything else) is unmeasured.
 - **Pro-chip decode.** Decode is bandwidth-bound. The running log estimates about 9 tok/s for the 8-bit on a 273 GB/s Pro chip, and for the 4-bit and optiq it is unmeasured. Which chips Nav developers actually have decides whether any dense model is usable.
-- **4-bit at 60k:** the latency and memory probe was still running when this was written (`bench/np-e2e-qwen3.8-27b-4bit-20260923-155027.json`).
+- **4-bit at 60k** (`bench/np-e2e-qwen3.8-27b-4bit-20260923-155027.json`): no OOM, peak 39.0 GB, cold TTFT 109 s (a repeat gave 123 s), decode 22.2 tok/s. This fails the §12 latency criteria (cold TTFT at 30k is 47.0 s against a 30 s limit, and at 60k 109 s against 90 s), which supports recommendation 5.
 - **`min_ram_gb` is not enforced by nav-pilot**, so per-tier manifest entries do nothing until it is.
 - **Quality n is small.** 3–4 runs per model can't separate 57–78% pass rates. Variance within a model (optiq 5–9/10) is as large as the differences between models.
 - Tests for the 64 GB and 128 GB tiers (8-bit at full context, `--prefill-step-size 512`, oMLX MTP, Qwen3.8-Flash-Next) are listed in `reports/hardware-tier-test-backlog.md`.

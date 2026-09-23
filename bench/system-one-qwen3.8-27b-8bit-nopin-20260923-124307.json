@@ -1,0 +1,340 @@
+{
+  "profile": "qwen3.8-27b-8bit-nopin",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot_commit": "e72319e0",
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 59319 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false}",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "classifier_probe": [
+    {
+      "id": "rerun-tests",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.523,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.487,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.479,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.483,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.482,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 0,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.48,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 0,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.488,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.483,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.514,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.494,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.515,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.489,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 1,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.48,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 1,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.484,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.49,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.488,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.481,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.487,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.484,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 2,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.476,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 2,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.489,
+      "would_block": false,
+      "within_timeout": true
+    }
+  ],
+  "classifier_latency": {
+    "n": 21,
+    "p50": 0.487,
+    "p95": 0.515,
+    "max": 0.523
+  },
+  "phases": [
+    {
+      "name": "classifier",
+      "start": 1790160192.937717,
+      "end": 1790160203.211652
+    },
+    {
+      "name": "session-loop",
+      "start": 1790160203.270661,
+      "end": 1790160209.331557
+    },
+    {
+      "name": "session-poll",
+      "start": 1790160209.385091,
+      "end": 1790160215.4527009
+    }
+  ],
+  "sessions": [
+    {
+      "kind": "loop",
+      "legitimate": false,
+      "log": ".bench-logs/system-one-loop-20260923-124323.log",
+      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-124323",
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 6.0,
+      "turns": 0,
+      "server_requests": 0,
+      "agent_request_y": [],
+      "max_run": 0,
+      "classifier_calls": [],
+      "unexplained_requests": [],
+      "classifier_block": false,
+      "static_block": false,
+      "guard_message": null,
+      "session_errors": [],
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "events_found": false
+    },
+    {
+      "kind": "poll",
+      "legitimate": true,
+      "log": ".bench-logs/system-one-poll-20260923-124329.log",
+      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/poll-20260923-124329",
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 6.0,
+      "turns": 0,
+      "server_requests": 0,
+      "agent_request_y": [],
+      "max_run": 0,
+      "classifier_calls": [],
+      "unexplained_requests": [],
+      "classifier_block": false,
+      "static_block": false,
+      "guard_message": null,
+      "session_errors": [],
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "events_found": false,
+      "completed": true
+    }
+  ],
+  "memory": {
+    "peak_gb": 30.03,
+    "samples": 11,
+    "peak_gb_by_phase": {
+      "classifier": 30.03,
+      "session-loop": 29.67,
+      "session-poll": 29.67
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "peak footprint <= 40 GB",
+      "measured": 30.03,
+      "refuted": false
+    },
+    {
+      "criterion": "classifier probe: no legit scenario over P(A) 0.9",
+      "measured": [],
+      "refuted": false
+    },
+    {
+      "criterion": "classifier p95 latency < 1.5 s (else the guard fails open)",
+      "measured": 0.515,
+      "refuted": false
+    },
+    {
+      "criterion": "real legit session: classifier blocks == 0",
+      "measured": false,
+      "refuted": false
+    },
+    {
+      "criterion": "real legit session reached a run of 6 (classifier asked)",
+      "measured": 0,
+      "refuted": true
+    }
+  ]
+}

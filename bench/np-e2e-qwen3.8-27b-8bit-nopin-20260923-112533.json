@@ -1,0 +1,81 @@
+{
+  "profile": "qwen3.8-27b-8bit-nopin",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot_commit": "e72319e0",
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 59069 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false}",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2029,
+        "completion_tokens": 256,
+        "ttft_s": 4.32,
+        "decode_tok_s": 14.8,
+        "total_s": 21.58,
+        "usage": {
+          "prompt_tokens": 2029,
+          "completion_tokens": 256,
+          "total_tokens": 2285,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 28693,
+        "completion_tokens": 256,
+        "ttft_s": 59.61,
+        "decode_tok_s": 13.8,
+        "total_s": 78.11,
+        "usage": {
+          "prompt_tokens": 28693,
+          "completion_tokens": 256,
+          "total_tokens": 28949,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 28976,
+        "completion_tokens": 256,
+        "ttft_s": 1.1,
+        "decode_tok_s": 14.1,
+        "total_s": 19.13,
+        "usage": {
+          "prompt_tokens": 28976,
+          "completion_tokens": 256,
+          "total_tokens": 29232,
+          "prompt_tokens_details": {
+            "cached_tokens": 28949
+          }
+        }
+      }
+    }
+  ],
+  "phases": [
+    {
+      "name": "latency-2000",
+      "start": 1790155544.7545888,
+      "end": 1790155566.332088
+    },
+    {
+      "name": "latency-30000",
+      "start": 1790155566.332465,
+      "end": 1790155663.567435
+    }
+  ]
+}

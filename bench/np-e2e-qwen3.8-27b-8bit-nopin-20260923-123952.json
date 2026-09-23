@@ -1,0 +1,845 @@
+{
+  "profile": "qwen3.8-27b-8bit-nopin",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot_commit": "e72319e0",
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 58711 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false}",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 1980,
+        "completion_tokens": 256,
+        "ttft_s": 2.97,
+        "decode_tok_s": 13.9,
+        "total_s": 21.33,
+        "usage": {
+          "prompt_tokens": 1980,
+          "completion_tokens": 256,
+          "total_tokens": 2236,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 24000,
+      "cold": {
+        "prompt_tokens": 24093,
+        "completion_tokens": 256,
+        "ttft_s": 42.6,
+        "decode_tok_s": 13.9,
+        "total_s": 60.92,
+        "usage": {
+          "prompt_tokens": 24093,
+          "completion_tokens": 256,
+          "total_tokens": 24349,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 24376,
+        "completion_tokens": 171,
+        "ttft_s": 0.55,
+        "decode_tok_s": 14.4,
+        "total_s": 12.44,
+        "usage": {
+          "prompt_tokens": 24376,
+          "completion_tokens": 171,
+          "total_tokens": 24547,
+          "prompt_tokens_details": {
+            "cached_tokens": 24349
+          }
+        }
+      }
+    }
+  ],
+  "phases": [
+    {
+      "name": "latency-2000",
+      "start": 1790160001.6324842,
+      "end": 1790160022.960814
+    },
+    {
+      "name": "latency-24000",
+      "start": 1790160022.9612072,
+      "end": 1790160096.3216739
+    },
+    {
+      "name": "classifier",
+      "start": 1790160096.322068,
+      "end": 1790160107.428511
+    },
+    {
+      "name": "e2e-R2-on-0",
+      "start": 1790160108.77689,
+      "end": 1790160117.890912
+    },
+    {
+      "name": "e2e-R2-on-1",
+      "start": 1790160117.8912268,
+      "end": 1790160123.97902
+    },
+    {
+      "name": "e2e-E1-on-2",
+      "start": 1790160123.979413,
+      "end": 1790160130.063573
+    },
+    {
+      "name": "e2e-E1-on-3",
+      "start": 1790160130.06392,
+      "end": 1790160136.163977
+    },
+    {
+      "name": "e2e-M1-on-4",
+      "start": 1790160136.164483,
+      "end": 1790160142.269651
+    },
+    {
+      "name": "e2e-M1-on-5",
+      "start": 1790160142.2701929,
+      "end": 1790160148.3620749
+    },
+    {
+      "name": "e2e-R2-off-6",
+      "start": 1790160148.4393432,
+      "end": 1790160154.527362
+    },
+    {
+      "name": "e2e-R2-off-7",
+      "start": 1790160154.527859,
+      "end": 1790160160.620338
+    },
+    {
+      "name": "e2e-E1-off-8",
+      "start": 1790160160.620785,
+      "end": 1790160166.72385
+    },
+    {
+      "name": "e2e-E1-off-9",
+      "start": 1790160166.724402,
+      "end": 1790160172.814699
+    },
+    {
+      "name": "e2e-M1-off-10",
+      "start": 1790160172.8151958,
+      "end": 1790160178.9098501
+    },
+    {
+      "name": "e2e-M1-off-11",
+      "start": 1790160178.910343,
+      "end": 1790160184.989572
+    }
+  ],
+  "classifier_probe": [
+    {
+      "id": "rerun-tests",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.973,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.525,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.512,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.5,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.489,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 0,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 0,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.505,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.513,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.499,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.502,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.515,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 1,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 1,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.502,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.517,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.513,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.502,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.516,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.509,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 2,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.5,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 2,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    }
+  ],
+  "classifier_latency": {
+    "n": 21,
+    "p50": 0.503,
+    "p95": 0.525,
+    "max": 0.973
+  },
+  "effort_probe": [
+    {
+      "shape": "kwargs-high",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "kwargs-none",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "toplevel-high",
+      "status": 200,
+      "reply": "OK"
+    }
+  ],
+  "e2e": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:41:48+0200",
+      "seconds": 9.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-0-20260923-124148.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:41:57+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-1-20260923-124157.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:04+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-2-20260923-124203.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 3,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:10+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-3-20260923-124210.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 4,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:16+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-4-20260923-124216.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 5,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:22+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-5-20260923-124222.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 6,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:28+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-6-20260923-124228.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 7,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:34+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-7-20260923-124234.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 8,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:40+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-8-20260923-124240.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 9,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:46+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-9-20260923-124246.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 10,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:52+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-10-20260923-124252.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 11,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-23T12:42:58+0200",
+      "seconds": 6.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-11-20260923-124258.log",
+      "verified": null,
+      "note": "no token summary in the output \u2014 the session did not finish",
+      "valid": false,
+      "invalid_reason": "no token summary in the output \u2014 the session did not finish",
+      "classifier": "off",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    }
+  ],
+  "memory": {
+    "peak_gb": 37.23,
+    "samples": 88,
+    "peak_gb_by_phase": {
+      "latency-2000": 31.63,
+      "latency-24000": 37.23,
+      "classifier": 29.89,
+      "e2e-R2-on-0": 29.64,
+      "e2e-R2-on-1": 29.51,
+      "e2e-E1-on-2": 29.51,
+      "e2e-E1-on-3": 29.51,
+      "e2e-M1-on-4": 29.51,
+      "e2e-M1-on-5": 29.51,
+      "e2e-R2-off-6": 29.51,
+      "e2e-R2-off-7": 29.51,
+      "e2e-E1-off-8": 29.51,
+      "e2e-E1-off-9": 29.51,
+      "e2e-M1-off-10": 29.51,
+      "e2e-M1-off-11": 29.51
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "peak footprint <= 40 GB",
+      "measured": 37.23,
+      "refuted": false
+    },
+    {
+      "criterion": "classifier probe: no legit scenario over P(A) 0.9",
+      "measured": [],
+      "refuted": false
+    },
+    {
+      "criterion": "classifier p95 latency < 1.5 s (else the guard fails open)",
+      "measured": 0.525,
+      "refuted": false
+    },
+    {
+      "criterion": "E2E failures <= 1",
+      "measured": 12,
+      "refuted": true
+    },
+    {
+      "criterion": "E2E path errors == 0",
+      "measured": [
+        "R2",
+        "R2",
+        "E1",
+        "E1",
+        "M1",
+        "M1",
+        "R2",
+        "R2",
+        "E1",
+        "E1",
+        "M1",
+        "M1"
+      ],
+      "refuted": true
+    },
+    {
+      "criterion": "classifier false-positive blocks == 0",
+      "measured": [],
+      "refuted": false
+    }
+  ]
+}
