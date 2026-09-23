@@ -32,16 +32,24 @@ cd "$(dirname "$0")/../.."
 # mkdir is the lock because it is atomic on every filesystem that matters, and
 # the PID inside says who holds it.
 LOCKDIR=".bench-logs/.queue.lock"
-if ! mkdir "$LOCKDIR" 2>/dev/null; then
-  holder=$(cat "$LOCKDIR/pid" 2>/dev/null || echo "unknown")
+#
+# BENCH_WAIT=1 queues behind the holder instead of refusing, so the next batch
+# can be launched while the current one runs and the machine never sits idle.
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  # No pid yet means the holder is between its mkdir and its pid write, unless
+  # the lock is older than that takes, in which case it is stale.
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
   if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
     echo "✗ another benchmark queue is running (pid $holder). Two queues share one port and"
     echo "  will kill each other's servers mid-task. Wait for it, or stop it first."
+    echo "  BENCH_WAIT=1 queues behind it instead."
     exit 1
   fi
   echo "→ clearing a stale lock from pid $holder, which is gone"
-  rm -rf "$LOCKDIR" && mkdir "$LOCKDIR"
-fi
+  rm -rf "$LOCKDIR"
+done
 echo $$ > "$LOCKDIR/pid"
 trap 'rm -rf "$LOCKDIR"' EXIT INT TERM
 
