@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+cd "$(dirname "$0")/../.." || exit 1
+
+export MLX_ACTIVE_PROFILE="qwen3.8-27b-8bit-nopin"
+mise run server-stop
+mise run server > server_bench.log 2>&1 &
+SERVER_PID=$!
+
+mise run server-wait
+
+echo "Server is up! Running benchmark..."
+.mise/tasks/bench-decision
+
+echo "Stopping server..."
+mise run server-stop
