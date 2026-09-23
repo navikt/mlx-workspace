@@ -33,10 +33,11 @@ was served by 7 different models over the run and has to be excluded.
 | Run | Passed | Failed | Median s/task |
 |---|---|---|---|
 | nopin 09-18 (old harness) | 7/11 | D2 timeout, 3 unscored | 149 |
-| nopin 09-23 run 1 | 8/10 | R1 (1 of 4 terms), G2 (420 s timeout) | 102 |
-| nopin 09-23 run 2 | 9/10 | R1 | 155 |
+| nopin 09-23 run 1 | 8/10 | R1 (1 of 4 terms), G2 (420 s timeout) | 145 |
+| nopin 09-23 run 2 | 9/10 | R1 | 136 |
 | nopin 09-23 run 3 | 6/10 | R1; M2, G2, D3 timed out at 420 s | 96 |
-| nopin 09-23 run 4 | pending | | |
+| nopin 09-23 run 4 | 8/10 | R1, D3 (timeout) | 115 |
+| **nopin 09-23, n=4** | **mean 7.75/10 (31/40)** | R1 4/4; timeouts G2 ×2, D3 ×2, M2 ×1 | |
 | optiq, re-measured on the same harness ×3 | pending | | |
 
 The only clean optiq baseline so far (2026-09-03, older harness) scored 2, 3, 2 and 4 of 11.
@@ -74,4 +75,6 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 08:39 queue relaunched after the harness fix.
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
+- 11:25 nopin run 4: 8/10. Across n=4 on the current harness: 31/40, range 6–9. Medians recomputed over the 10 scored tasks, excluding D2.
+- 11:25 `bench-np-e2e` for nopin took the lock ahead of the oMLX and optiq queues (the waiters don't queue in order).
 - 10:45 nopin run 3: 6/10. Three timeouts at the 420 s cap and no loops (longest identical run 1). Variance so far is 6–9/10, so timeouts are the main failure mode, not wrong answers.
