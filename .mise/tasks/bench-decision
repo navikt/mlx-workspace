@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""
+bench-decision: A script to benchmark logit-based classification (OpenJev pattern).
+Sends a classification task to the local MLX server using max_tokens=1 and logprobs=True.
+"""
+import urllib.request
+import urllib.error
+import json
+import sys
+import time
+
+def evaluate_decision(prompt, allowed_tokens):
+    url = "http://127.0.0.1:8080/v1/chat/completions"
+    data = {
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1,
+        "logprobs": True,
+        "top_logprobs": 10,
+        "temperature": 0.0
+    }
+    
+    req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"),
+                                 headers={"Content-Type": "application/json"})
+    
+    start_time = time.time()
+    try:
+        with urllib.request.urlopen(req) as response:
+            res = json.loads(response.read().decode())
+    except urllib.error.URLError as e:
+        print(f"Server error: {e}")
+        return None, 0
+    
+    latency = time.time() - start_time
+    
+    try:
+        top_logprobs = res["choices"][0]["logprobs"]["content"][0]["top_logprobs"]
+    except (KeyError, IndexError, TypeError):
+        print("Error: Could not extract logprobs from response.")
+        print(json.dumps(res, indent=2))
+        return None, latency
+
+    # Filter and find the highest probability allowed token
+    best_token = None
+    best_logprob = float("-inf")
+    
+    for lp in top_logprobs:
+        token = lp["token"]
+        logprob = lp["logprob"]
+        
+        # We strip whitespace because tokenization might add leading spaces
+        if token.strip() in allowed_tokens and logprob > best_logprob:
+            best_token = token.strip()
+            best_logprob = logprob
+
+    return best_token, latency
+
+if __name__ == "__main__":
+    tasks = [
+        {
+            "prompt": "You are a code reviewer. Does the following code have a syntax error?\n```python\ndef hello()\n    print('world')\n```\nAnswer with exactly one letter: 'A' for Yes, 'B' for No.",
+            "allowed_tokens": ["A", "B"],
+            "expected": "A"
+        },
+        {
+            "prompt": "You are an intent classifier. The user asks: 'Change the background to blue'. Is this a READ or an EDIT action?\nAnswer exactly 'A' for READ or 'B' for EDIT.",
+            "allowed_tokens": ["A", "B"],
+            "expected": "B"
+        },
+        {
+            "prompt": "You are a safety monitor. The AI agent has executed the exact same 'glob' search command 5 times in a row without changing its arguments. Is this a LOOP or NORMAL behavior?\nAnswer exactly 'A' for LOOP or 'B' for NORMAL.",
+            "allowed_tokens": ["A", "B"],
+            "expected": "A"
+        },
+        {
+            "prompt": "Which tool should be used to search for the string 'fetchUser' across the entire repository?\nOptions:\nA) edit_file\nB) bash_command\nC) grep_search\nAnswer exactly 'A', 'B', or 'C'.",
+            "allowed_tokens": ["A", "B", "C"],
+            "expected": "C"
+        }
+    ]
+
+    print("Running OpenJev/Logit classification benchmarks...")
+    
+    correct = 0
+    total_latency = 0
+    
+    for i, task in enumerate(tasks):
+        print(f"\nTask {i+1}: {task['prompt'].splitlines()[-1]}")
+        token, lat = evaluate_decision(task["prompt"], task["allowed_tokens"])
+        
+        if token is None:
+            print("  Result: FAILED (No allowed token found in top logprobs)")
+            continue
+            
+        is_correct = (token == task["expected"])
+        if is_correct: correct += 1
+        total_latency += lat
+        
+        print(f"  Result: {token} (Expected: {task['expected']}) - {'PASS' if is_correct else 'FAIL'}")
+        print(f"  Latency: {lat:.3f}s")
+        
+    print(f"\nFinal Score: {correct}/{len(tasks)} correct.")
+    print(f"Average Latency: {total_latency/len(tasks):.3f}s")

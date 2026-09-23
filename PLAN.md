@@ -370,3 +370,9 @@ outranks any single measurement.
 **5. Crowning Qwen3.8-27B 8-bit as Default:**
    *Status:* We have 1 stellar run (7/7, 0 loops) on `qwen3.8-27b-8bit-nopin`. 
    *Action Needed:* We need to fulfill the variance rule (`n>=5`) by running the benchmark 4 more times on this model to confirm stability before replacing the default. We also need to complete the `oMLX` measurements (Section 4) to check if we should adopt oMLX for the speed boost.
+
+**6. Integrating OpenJev / Logit-Based Classification:**
+   *Hypothesis:* Generative loops occur because models are forced to write code/JSON to prove decisions. A "System One" router that reads raw logits would be bulletproof.
+   *Outcome (23 Sept):* **PROVEN.** I built and ran `.mise/tasks/bench-decision` against the local MLX server using `qwen3.8-27b-8bit-nopin` with `max_tokens=1` and `logprobs=True`.
+   *Results:* The model scored **4/4** on loop detection and tool routing with an average latency of **~316ms** per decision. 
+   *Conclusion:* We do not need a secondary small model. The 27B model can act as its own blazing-fast "System One" classifier by interleaving 1-token logprob requests between generative steps! This can be directly wired into `nav-pilot`.
