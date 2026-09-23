@@ -42,7 +42,9 @@ was served by 7 different models over the run and has to be excluded.
 | optiq 09-23 run 2 | 8/10 | R1, D3 | 12.8 |
 | optiq 09-23 run 3 | 5/10 | R1; E3 (compile failed), M2 and D3 (made no edit), G2 (suite failed) | 10.9 |
 | **optiq 09-23, n=3** | **mean 7.3/10 (22/30)**, range 5–9 | failures are wrong/empty edits, not timeouts | |
-| optiq replacement run (for run 1) | pending | | |
+| optiq replacement run (for run 1) | 6/10 | R1, M2, G2, D3 | 12.2 |
+| **optiq, n=4 incl. run 1** | **28/40 (7.0/10)** | | ~12 |
+| optiq, n=3 excl. the stress-overlapped run 1 | 19/30 (6.3/10) | | |
 
 The only clean optiq baseline so far (2026-09-03, older harness) scored 2, 3, 2 and 4 of 11.
 It is not directly comparable, which is why optiq is being re-measured.
@@ -218,6 +220,7 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
 - 11:48 oMLX runs refused by oMLX's own prefill memory guard: 30 GB of weights already exceed 90% of the 36 GB Metal cap. Both oMLX profiles ask for `gpu_wired_limit_gb = 96`, and the machine is at 36 (model-use only recommends the change, and `vram-set` needs sudo). The oMLX numbers need a separate batch at 96 GB and are not relevant to a 48 GB fleet anyway.
 - 11:43 another session (navikt/cplt) started a CPU stress test: 22 `yes` processes for about 40 Chrome test runs. Every cheap-ops run that overlaps it is invalid (CPU contention slows the agent loop and can cause timeouts). The user decided to let it finish and re-run the affected runs. optiq run 1 (11:55) is affected.
+- 12:57 optiq replacement run: 6/10. nopin 31/40 vs optiq 28/40: Fisher p=0.61; vs 19/30 excluding run 1: p=0.29. nopin's edge is not significant at this n. optiq is about 10× faster per task.
 - 12:39 optiq run 3: 5/10. optiq fails differently from nopin: fast, wrong or empty edits ("no changes made" in 8 s) where nopin times out. n=3 so far: 22/30 vs nopin 31/40, a statistical tie at 10× the speed. Variance is high for both (5–9 and 6–9).
 - 12:35 Re-prioritized (user): the head-to-head for 4bit and pinned 8bit is deferred until the nopin e2e and System One jobs finish, since optiq already leads decisively.
 - 12:27 optiq run 2: 8/10 (R1, D3), median 12.8 s. Served model verified.
