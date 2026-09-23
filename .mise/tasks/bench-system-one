@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# mise description="Loop-guard classifier (System One) test through nav-pilot e72319e0: classifier probe plus one provoked-loop and one legitimate Copilot CLI session. Pass: 0 false positives. Usage: mise run bench-system-one -- [profile]"
+#
+# bench-np-e2e --system-one does the work, so the lock, the nav-pilot server and the
+# manifest backup/restore are the same code as the E2E run and cannot drift. exec keeps
+# this pid, so the lock's pid file names this process.
+exec "$(dirname "$0")/bench-np-e2e" "${1:-qwen3.8-27b-8bit-nopin}" --system-one

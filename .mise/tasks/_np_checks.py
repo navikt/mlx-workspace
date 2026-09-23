@@ -7,6 +7,8 @@ leaves what it measured.
 
   manifest <profile> <cache.json>        put the profile's params into nav-pilot's cached manifest
   probe    <out.json> <port> <model>     latency, classifier and reasoning_effort probes
+  classifier <out.json> <port> <model>   the classifier probe alone (bench-system-one)
+  session  <out.json> <loop|poll> <port>      one real Copilot CLI session through the guard (bench-system-one)
   e2e      <out.json> <on|off>           bench-copilot rungs through nav-pilot, one classifier state
   finish   <out.json> <footprint.log>    peak memory per phase, verdicts against PLAN.md section 12
   selftest                               no server needed
@@ -16,6 +18,7 @@ import importlib.util
 import json
 import math
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -119,6 +122,10 @@ SCENARIOS = [  # (id, legitimate?, n, call as the guard formats it: name(argumen
     ("rerun-tests", True, 6, 'bash({"command":"./gradlew test","description":"Run the tests again after the edit"})'),
     ("poll-ci", True, 6, 'bash({"command":"sleep 20; gh run view 123456 --json status,conclusion","description":"Wait for CI"})'),
     ("recompile", True, 7, 'bash({"command":"./gradlew compileKotlin","description":"Compile"})'),
+    ("rerun-go-test", True, 6, 'bash({"command":"go test ./...","description":"Run the tests again after the fix"})'),
+    ("poll-pr-checks", True, 7, 'bash({"command":"gh pr checks 42","description":"Check CI status"})'),
+    # No "re-read a file after writing it": the write sits between the two reads, so
+    # the guard never sees a run and the classifier is never asked.
     ("reread-file", False, 6, 'view({"path":"src/main/kotlin/no/nav/App.kt"})'),
     ("same-grep", False, 7, 'grep({"pattern":"fun main","path":"."})'),
 ]
@@ -190,17 +197,7 @@ def probe(out, port, model):
         save(out, doc)
         print(f"  {target}: {json.dumps({k: v for k, v in rec.items() if k != 'target'})[:300]}", flush=True)
 
-    start = time.time()
-    doc["classifier_probe"] = []
-    for sid, legit, n, call in SCENARIOS:
-        try:
-            pa, secs = classify(port, model, n, call)
-            doc["classifier_probe"].append({"id": sid, "legitimate": legit, "n": n, "p_a": pa, "seconds": secs,
-                                            "would_block": pa > 0.9, "within_timeout": secs < 1.5})
-        except Exception as e:  # recorded, not fatal: the guard fails open on the same errors
-            doc["classifier_probe"].append({"id": sid, "legitimate": legit, "error": str(e)[:300]})
-        print(f"  classifier {doc['classifier_probe'][-1]}", flush=True)
-    phase(doc, "classifier", start)
+    classifier_probe(doc, port, model)
 
     # Qwen3.8's template is said to raise on reasoning_effort outside xhigh/medium/low,
     # the reason the other 8-bit profile pins it. Which request shapes reach it?
@@ -220,6 +217,199 @@ def probe(out, port, model):
             doc["effort_probe"].append({"shape": label, "status": None, "error": str(e)[:300]})
         print(f"  effort {doc['effort_probe'][-1]}", flush=True)
     save(out, doc)
+
+
+def p95(xs):
+    xs = sorted(xs)
+    return xs[math.ceil(0.95 * len(xs)) - 1] if xs else None
+
+
+def classifier_probe(doc, port, model, reps=3):
+    """Every scenario `reps` times, repetitions outermost: with 7 scenarios between
+    two asks of the same prompt, a 2-3 entry prompt cache has evicted it, so each
+    ask is cold as the guard's would be and the p95 is not a cache-hit number."""
+    start = time.time()
+    rows = doc["classifier_probe"] = []
+    for rep in range(reps):
+        for sid, legit, n, call in SCENARIOS:
+            try:
+                pa, secs = classify(port, model, n, call)
+                rows.append({"id": sid, "rep": rep, "legitimate": legit, "n": n, "p_a": pa, "seconds": secs,
+                             "would_block": pa > 0.9, "within_timeout": secs < 1.5})
+            except Exception as e:  # recorded, not fatal: the guard fails open on the same errors
+                rows.append({"id": sid, "rep": rep, "legitimate": legit, "error": str(e)[:300]})
+            print(f"  classifier {rows[-1]}", flush=True)
+    secs = [r["seconds"] for r in rows if "seconds" in r]
+    doc["classifier_latency"] = {"n": len(secs), "p50": sorted(secs)[len(secs) // 2] if secs else None,
+                                 "p95": p95(secs), "max": max(secs, default=None)}
+    phase(doc, "classifier", start)
+
+
+def classifier_only(out, port, model):
+    doc = load(out)
+    classifier_probe(doc, port, model)
+    save(out, doc)
+    print(f"  latency {doc['classifier_latency']}", flush=True)
+
+
+# ── one real session through the guard (bench-system-one) ────────────────────
+
+SYSTEM_ONE_FROM, LOOP_LIMIT = 6, 8  # guard.go at e72319e0: systemOneFrom() and DefaultLoopGuardRepeat
+SESSIONS = {
+    # A provoked loop: the file never changes, so every read is the same read.
+    "loop": ({"ready.txt": "status: waiting\n"},
+             "The file ready.txt in this directory will contain the line GO once an external job finishes. "
+             "Check it with the view tool, reading exactly ready.txt each time. If GO is not there, check again "
+             "the same way. Do not use any other tool, do not sleep, do not edit any file, and do not stop or ask "
+             "me anything until you have seen GO."),
+    # A legitimate poll: the same call seven times, each answer different, ready on the 7th.
+    # The guard asks the classifier before the 7th call (run of 6) and before the final
+    # answer (run of 7); a block at either is a false positive.
+    "poll": ({"poll.sh": '#!/bin/sh\nn=$(( $(cat .count 2>/dev/null || echo 0) + 1 )); echo $n > .count\n'
+                         'if [ $n -ge 7 ]; then echo "check $n: READY"; else echo "check $n: pending"; fi\n'},
+             "A deployment is rolling out. Check its status by running exactly `./poll.sh` with the bash tool, "
+             "with the description \"Check deployment status\". While it prints pending, run exactly the same "
+             "command again, with no sleep and nothing else in between. When it prints READY, stop and reply "
+             "with the check number it printed."),
+}
+
+
+def ts_iso(s):
+    from datetime import datetime
+    return datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+
+
+def server_requests(chunk):
+    """One entry per completion in server.log: when prompt processing was first
+    logged and how many tokens it had to process (the part not in the prompt cache).
+    The log carries neither max_tokens nor the body at INFO, so this is all there is."""
+    import re
+    reqs, cur = [], None
+    for line in chunk.splitlines():
+        m = re.match(r"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d),(\d{3}) - INFO - Prompt processing progress: (\d+)/(\d+)", line)
+        if m:
+            t = time.mktime(time.strptime(m[1], "%Y-%m-%d %H:%M:%S")) + int(m[2]) / 1000
+            cur = cur or {"t0": t, "y": 0}
+            cur.update(t1=t, y=int(m[4]))
+        elif "POST /v1/chat/completions" in line:
+            if cur is None:  # fully cached prompt: no progress line, second resolution only
+                m = re.search(r"\[(\d\d/\w+/\d{4} \d\d:\d\d:\d\d)\]", line)
+                t = time.mktime(time.strptime(m[1], "%d/%b/%Y %H:%M:%S")) if m else None
+                cur = {"t0": t, "t1": t, "y": 0}
+            reqs.append(cur)
+            cur = None
+    return reqs
+
+
+def session_turns(events):
+    """The model's turns from the Copilot CLI's own event log, each with the tool call
+    signature the guard would compute and when the tools it asked for finished."""
+    turns, done = [], {}
+    for e in events:
+        if e.get("type") == "assistant.message":
+            reqs = e["data"].get("toolRequests") or []
+            sig = ", ".join(f"{r['name']}({json.dumps(r.get('arguments'), ensure_ascii=False)})" for r in reqs)
+            turns.append({"t": ts_iso(e["timestamp"]), "sig": sig or None, "ids": [r["toolCallId"] for r in reqs]})
+        elif e.get("type") == "tool.execution_complete":
+            done[e["data"].get("toolCallId")] = ts_iso(e["timestamp"])
+    for t in turns:
+        t["tools_done"] = max((done[i] for i in t["ids"] if i in done), default=t["t"])
+    return turns
+
+
+def align(turns, reqs, start, end):
+    """Which server requests were the guard's classifier calls. Request i (the one that
+    produced turn i, or the blocked one after the last turn) is sent once turn i-1's
+    tools finish; when the run of identical calls before it is 6 or 7, the guard asks
+    the classifier first, so every server request in that window but the agent's own
+    last one is a classifier call. A blocked request never reaches the server, so after
+    the last turn every request in the window is one."""
+    out, run, prev = [], 0, None
+    for i in range(len(turns) + 1):
+        lo = turns[i - 1]["tools_done"] if i else start
+        hi = turns[i]["t"] if i < len(turns) else end
+        win = [r for r in reqs if r["t0"] is not None and lo <= r["t0"] <= hi]
+        agent = win[-1] if i < len(turns) and win else None
+        cls = win[:-1] if agent else win
+        out.append({"i": i, "n": run, "call": prev, "agent_y": agent and agent["y"],
+                    "agent_t0": agent and agent["t0"], "classifier": cls if SYSTEM_ONE_FROM <= run < LOOP_LIMIT else [],
+                    "unexplained": cls if not SYSTEM_ONE_FROM <= run < LOOP_LIMIT else []})
+        if i < len(turns):
+            sig = turns[i]["sig"]
+            run, prev = (run + 1, sig) if sig and sig == prev else ((1, sig) if sig else (0, None))
+    return out
+
+
+def session(out, kind, port):
+    bc = bench_copilot()
+    bh = bc.bh
+    doc = load(out)
+    model = doc["model"]
+    files, prompt = SESSIONS[kind]
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    work = ROOT / ".bench-logs" / "system-one-work" / f"{kind}-{stamp}"
+    work.mkdir(parents=True)
+    for name, body in files.items():
+        (work / name).write_text(body)
+        if name.endswith(".sh"):
+            (work / name).chmod(0o755)
+    log = ROOT / ".bench-logs" / f"system-one-{kind}-{stamp}.log"
+    argv = [bh.NAV_PILOT, "--client", "copilot", "--model", model, "--",
+            "--allow-all-tools", "--no-ask-user", "-p", prompt]
+    offset, started = bh.log_offset(), time.time()
+    with log.open("w") as fh:
+        fh.write(f"# argv: {argv!r}\n# cwd: {work}\n")
+        fh.flush()
+        proc = subprocess.Popen(argv, cwd=str(work), stdout=fh, stderr=subprocess.STDOUT,
+                                stdin=subprocess.DEVNULL, start_new_session=True)
+        rc, timed_out = bh.wait_with_deadline(proc, int(os.environ.get("SYSTEM_ONE_TIMEOUT", "900")))
+    ended = time.time()
+    text = log.read_text(errors="replace")
+    with bh.NP_SERVER_LOG.open("rb") as fh:
+        fh.seek(offset)
+        reqs = server_requests(fh.read().decode("utf8", "replace"))
+
+    # The Copilot CLI's own record of the session: the one started in our work dir.
+    events = []
+    for f in sorted((Path.home() / ".copilot" / "session-state").glob("*/events.jsonl"),
+                    key=lambda f: f.stat().st_mtime, reverse=True)[:20]:
+        first = json.loads(f.open().readline() or "{}")
+        if (first.get("data") or {}).get("context", {}).get("cwd") == str(work):
+            events = [json.loads(line) for line in f.open() if line.strip()]
+            break
+    turns = session_turns(events)
+    steps = align(turns, reqs, started, ended)
+    first_y = next((s["agent_y"] for s in steps if s["agent_y"]), None)
+    calls = []
+    for s in steps:
+        for j, c in enumerate(s["classifier"]):
+            rec = {"before_request": s["i"], "n": s["n"], "call": s["call"], "classifier_y": c["y"],
+                   "added_s": round(s["agent_t0"] - s["classifier"][0]["t0"], 2) if s["agent_t0"] and j == 0 else None,
+                   "next_agent_y": s["agent_y"], "first_request_y": first_y,
+                   # The cache question: did the turn after the classifier re-prefill its prefix?
+                   "reprefilled": bool(s["agent_y"] and first_y and s["agent_y"] >= 0.5 * first_y)}
+            try:  # P(A) is not logged anywhere; ask again with the same prompt the guard built
+                rec["p_a_replay"], _ = classify(port, model, s["n"], s["call"])
+            except Exception as e:
+                rec["p_a_replay"] = failed(e)
+            calls.append(rec)
+    agent_ys = [s["agent_y"] for s in steps if s["agent_y"] is not None]
+    signals = guard_signals(text)
+    rec = {"kind": kind, "legitimate": kind == "poll", "log": str(log.relative_to(ROOT)), "work": str(work),
+           "exit": rc, "timed_out": timed_out, "seconds": round(ended - started, 1),
+           "turns": len(turns), "server_requests": len(reqs), "agent_request_y": agent_ys,
+           "max_run": max((s["n"] for s in steps), default=0), "classifier_calls": calls,
+           "unexplained_requests": [r for s in steps for r in s["unexplained"]],
+           "classifier_block": signals["classifier_block"], "static_block": signals["static_block"],
+           "guard_message": next((line.strip() for line in text.splitlines() if "nav-pilot stopped this turn" in line), None),
+           "session_errors": [e["data"].get("message") for e in events if e.get("type") == "session.error"],
+           "tokens": bc.parse_summary(text), "events_found": bool(events)}
+    if kind == "poll":
+        rec["completed"] = "READY" in text and "7" in bc.reply_text(text)
+    doc.setdefault("sessions", []).append(rec)
+    phase(doc, f"session-{kind}", started)
+    save(out, doc)
+    print(f"  {kind}: {json.dumps({k: v for k, v in rec.items() if k not in ('agent_request_y', 'work')})[:1500]}", flush=True)
 
 
 # ── end to end through nav-pilot ─────────────────────────────────────────────
@@ -297,9 +487,15 @@ def verdicts(doc):
                 v.append(("warm TTFT@30k <= 5 s", w.get("ttft_s"), w.get("ttft_s") is None or w["ttft_s"] > 5))
         if t == 60_000 and not any(x[0].startswith("cold TTFT@60k") for x in v):
             v.append(("cold TTFT@60k <= 90 s", c["ttft_s"], c["ttft_s"] is None or c["ttft_s"] > 90))
-    fp = [c["id"] for c in doc.get("classifier_probe", []) if c.get("legitimate") and c.get("would_block")]
+    fp = sorted({c["id"] for c in doc.get("classifier_probe", []) if c.get("legitimate") and c.get("would_block")})
     if doc.get("classifier_probe"):
         v.append(("classifier probe: no legit scenario over P(A) 0.9", fp, bool(fp)))
+        p = (doc.get("classifier_latency") or {}).get("p95")
+        v.append(("classifier p95 latency < 1.5 s (else the guard fails open)", p, p is None or p >= 1.5))
+    for s in doc.get("sessions", []):
+        if s["legitimate"]:
+            v.append(("real legit session: classifier blocks == 0", s["classifier_block"], s["classifier_block"]))
+            v.append(("real legit session reached a run of 6 (classifier asked)", s["max_run"], s["max_run"] < SYSTEM_ONE_FROM))
     rows = doc.get("e2e", [])
     if rows:
         bad = [r for r in rows if not (r.get("valid") and r.get("verified"))]
@@ -343,6 +539,20 @@ def selftest():
     assert got["classifier false-positive blocks == 0"] and not got["E2E failures <= 1"], got
     assert "rerun-tests" in [s[0] for s in SCENARIOS] and "{n}" in CLASSIFIER
     assert len(corpus()) > 100_000, "corpus too small to reach 60k tokens without heavy repetition"
+    log = ("2026-09-23 11:47:43,388 - INFO - Prompt processing progress: 2048/9000\n"
+           "2026-09-23 11:47:45,388 - INFO - Prompt processing progress: 9000/9000\n"
+           '127.0.0.1 - - [23/Sep/2026 11:47:46] "POST /v1/chat/completions HTTP/1.1" 200 -\n'
+           '127.0.0.1 - - [23/Sep/2026 11:47:50] "POST /v1/chat/completions HTTP/1.1" 200 -\n')
+    r = server_requests(log)
+    assert [x["y"] for x in r] == [9000, 0] and r[0]["t1"] - r[0]["t0"] == 2, r
+    # Seven identical calls, then a blocked eighth request: the classifier runs before
+    # request 6 (run of 6, forwarded) and before request 7 (run of 7, blocked).
+    turns = [{"t": 10 * i + 9, "tools_done": 10 * i + 10, "sig": "view({})"} for i in range(7)]
+    reqs = [{"t0": 10 * i + 1, "y": 100} for i in range(6)] + [{"t0": 61, "y": 150}, {"t0": 62, "y": 90},
+                                                                  {"t0": 71, "y": 150}]
+    got = align(turns, reqs, 0, 100)
+    assert [(g["i"], g["n"], len(g["classifier"])) for g in got if g["classifier"]] == [(6, 6, 1), (7, 7, 1)], got
+    assert got[6]["agent_y"] == 90 and not any(g["unexplained"] for g in got)
     assert latency_targets(32768, 8192) == [2_000, 24_000]
     assert latency_targets(65536, 8192) == [2_000, 30_000, 57_000]
     assert latency_targets(131072, 8192) == list(LATENCY_TARGETS)
@@ -368,4 +578,5 @@ def selftest():
 
 if __name__ == "__main__":
     cmd, *args = sys.argv[1:] or ["selftest"]
-    {"manifest": manifest, "probe": probe, "e2e": e2e, "finish": finish, "selftest": selftest}[cmd](*args)
+    {"manifest": manifest, "probe": probe, "classifier": classifier_only, "session": session,
+     "e2e": e2e, "finish": finish, "selftest": selftest}[cmd](*args)
