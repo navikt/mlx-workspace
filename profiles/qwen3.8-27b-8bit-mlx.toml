@@ -3,7 +3,7 @@ name               = "Qwen 3.8 27B 8bit (mlx-lm)"
 released           = "2026-07"
 status             = "untested"
 spec_source        = "config.json"
-notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context is set to the same 65k the other team runs, because at this weight size the KV cache is what decides whether it fits."
+notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context was set to the same 65k the other team runs; it is now capped at 32k, because on 2026-09-23 the server died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit (no fused attention kernel for head_dim 256, so each 2048-token prefill chunk materializes about 5 GB of scores at that length)."
 model_vram_gb      = 30
 gpu_wired_limit_gb = 36
 
@@ -15,8 +15,8 @@ MLX_SERVER_TYPE            = "mlx-lm"
 MLX_CACHE_BYTES            = "4294967296"
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "32768"
-MLX_OPENCODE_CONTEXT       = "65536"
-MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CONTEXT       = "32768"
+MLX_OPENCODE_OUTPUT        = "8192"
 MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
 # reasoning_effort is pinned, not left to the client. Qwen3.8's template
 # raises on anything outside xhigh/medium/low, and nav-pilot accepts six

@@ -59,7 +59,7 @@ OFFERED = {
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
         "role": "Opt-in alternative, the quality build, weakest here",
-        "expect": "The build most discussed publicly and the one we can say least about. Two runs on 1 September verified nothing at all, every task timing out having completed zero turns — but a configuration change of ours sits on that result, so we do not report it as the model's. Its earlier runs, under a longer timeout, verified 2 of 8 and 1 of 10. Fits a 48 GB machine at about 27 GB resident, but 30 GB of weights leaves roughly 6 GB for cache under a 36 GB wired limit, so context is capped at 65k against the 4-bit's 131k. If you want one Qwen3.8, take the 4-bit.",
+        "expect": "The build most discussed publicly and the one we can say least about. Two runs on 1 September verified nothing at all, every task timing out having completed zero turns — but a configuration change of ours sits on that result, so we do not report it as the model's. Its earlier runs, under a longer timeout, verified 2 of 8 and 1 of 10. Fits a 48 GB machine at about 27 GB resident, but 30 GB of weights leaves roughly 6 GB for cache under a 36 GB wired limit, and it ran out of GPU memory at 51k tokens, so context is capped at 32k against the 4-bit's 64k. If you want one Qwen3.8, take the 4-bit.",
     },
 }
 

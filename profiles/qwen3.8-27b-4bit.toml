@@ -3,7 +3,7 @@ name               = "Qwen 3.8 27B 4bit"
 released           = "2026-07"
 status             = "untested"
 spec_source        = "externally verified"
-notes              = "Target-hardware build for a 48 GB Pro Mac. 16 GB weights at 4-bit, halving the per-token memory traffic of the 8-bit — which binds before capacity does on Pro-class bandwidth. No speculative decoding: the MTP head is oMLX-only, so expect the 11-14 tok/s non-MTP baseline, not the 8-bit MTPLX 18-38."
+notes              = "Target-hardware build for a 48 GB Pro Mac. 16 GB weights at 4-bit, halving the per-token memory traffic of the 8-bit — which binds before capacity does on Pro-class bandwidth. No speculative decoding: the MTP head is oMLX-only, so expect the 11-14 tok/s non-MTP baseline, not the 8-bit MTPLX 18-38. Context is capped at 64k, not 131k: the 8-bit build died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit on 2026-09-23 (no fused attention kernel for head_dim 256), and the same attention cost puts this build over the line above about 85k with a warm prompt cache."
 model_vram_gb      = 16
 gpu_wired_limit_gb = 36
 
@@ -17,7 +17,7 @@ MLX_SERVER_TYPE            = "mlx-lm"
 MLX_CACHE_BYTES            = "12884901888"  # 12GB cache — fits the 36GB wired ceiling on 48GB
 MLX_CACHE_SIZE             = "3"
 MLX_MAX_TOKENS             = "32768"
-MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_CONTEXT       = "65536"
 MLX_OPENCODE_OUTPUT        = "16384"
 MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
 # Qwen model card sampling. Both weather-cli runs were measured with top_k disabled and
