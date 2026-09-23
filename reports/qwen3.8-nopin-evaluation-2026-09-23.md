@@ -102,6 +102,35 @@ Measured before the crash (nopin, M5 Max, nav-pilot runtime):
 | 30k | 59.6 s | 13.8 tok/s | TTFT > 30 s: caveat |
 | 60k | OOM | | blocker |
 
+### Root cause (investigation, 11:55)
+
+- The binding cap is `iogpu.wired_limit_mb` = 36 GiB. mlx-lm pins its working set to it. nav-pilot only checks it and never sets it.
+- mlx 0.32.0 ships no fused attention kernel for head_dim 256, so each 2048-token prefill chunk
+  materialises the full score matrix: about 5 GB at 51k context.
+- Baseline at about 49k: 29.5 GB weights + 4.1 GB resident prompt cache + 3.2 GB KV + about 1 GB
+  overhead ≈ 38 GB, plus the 5–6 GB chunk spike. It failed at about 44 GB footprint.
+- Nothing enforces a maximum context: the guard doesn't count tokens and mlx-lm has no flag. Copilot
+  CLI gets `COPILOT_PROVIDER_MAX_PROMPT_TOKENS=65536`, so it can legitimately send about 64k.
+
+Exposure of shipped entries at their declared context:
+
+| Entry | Declared context | Estimated peak | Exposed |
+|---|---|---|---|
+| qwen3.8-27b-8bit-mlx | 65,536 | ~45.5 GB | yes, past about 50k |
+| qwen3.8-27b-4bit | 131,072 | ~51 GB with a warm cache | yes, past about 85k |
+| qwen3.6-35b-a3b-optiq (default) | 65,536 | ~36 GB | no |
+
+A dead generation thread goes undetected: `EnsureOwnServer` only checks the PID and the port, so new
+sessions attach to the zombie and the user sees a spinner for 900 s per attempt.
+
+Fixes in progress (both on branches, unpushed):
+1. Manifest: cap the 8-bit entry at 32k/8k (estimated peak about 40 GB) and the 4-bit entry at 64k.
+2. nav-pilot: make the server exit when its generation thread dies, so the existing
+   `local_server_lost` handling reports it instead of hanging.
+
+Later: `--prefill-step-size 512` (needs a nav-pilot flag whitelist change and has to be measured)
+could restore a larger context.
+
 ## Head-to-head: latency and memory (nav-pilot runtime, M5 Max, wired limit 36 GB)
 
 | Model | Cold TTFT 2k / 30k / 60k | Warm TTFT 30k | Decode 30k | Peak footprint |
