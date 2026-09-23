@@ -270,6 +270,20 @@ footprint ≤ 41 GB, and a warm follow-up at the top latency target.
 
 Results: pending.
 
+## Decisions and open PRs (13:30)
+
+- optiq stays the default. The user judged its ~10× speed worth the small, non-significant quality gap.
+- The 8-bit Qwen3.8 is withdrawn from the 48 GB tier and moved to the 64 GB backlog; its window tests were cancelled.
+- The System One LLM classifier is replaced by a deterministic result-aware rule. Branch
+  `feat/local-system-one-loop-guard` is superseded and stays local, unpushed.
+
+| PR | What | State |
+|---|---|---|
+| navikt/mlx-workspace#20 | 4-bit context 131k → 64k; stop offering the 8-bit | draft |
+| navikt/copilot#931 | the server exits with status 70 when its generation thread dies; nav-pilot reports it | open |
+| navikt/copilot#932 | Copilot custom instructions scoped to `~/.copilot/.github/instructions` (was recursive over `~/.copilot`, +26k static tokens per request, cloud too) | open |
+| navikt/copilot#933 | loop guard counts identical call **and result** (4), backstop 8 identical calls | open |
+
 ## Queue
 
 1. nopin cheap-ops runs 3–4
