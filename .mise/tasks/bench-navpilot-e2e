@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# mise description="E2E of navikt/copilot #931+#932+#933 merged (nav-pilot-combined-*), on the #20 manifest: Copilot+optiq, opencode local-worker, Copilot+4-bit@65536, loop guard, OOM crash reporting. Usage: mise run bench-navpilot-e2e"
+#
+#   lock -> stop :8080 -> #20 manifest into nav-pilot's cache (network blocked for start)
+#   a  optiq: R2, E1, M1 through the Copilot CLI, static tokens from the new session (#932)
+#   d  optiq: the provoked loop and the legitimate poll from _np_checks (#933)
+#   b  optiq: opencode, cloud main agent + local-worker, one small task
+#   c  4-bit at 65536: one task, no Insufficient Memory, peak footprint
+#   e  8-bit at 65536 (pre-#20 entry): warm cache, ~60k prompt, server must exit 70
+#      and the next launch must fail fast with local_server_lost (#931)
+#   -> verdicts into bench/navpilot-e2e-<stamp>.json and reports/nav-pilot-e2e-2026-09-23.md
+#
+# Lock, config and manifest handling are bench-np-e2e's; see the reasoning there.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+NP="${BENCH_NAV_PILOT:-$(ls -t "$PWD"/.bench-logs/bin/nav-pilot-combined-* 2>/dev/null | head -1)}"
+[ -x "$NP" ] || { echo "✗ no nav-pilot-combined-* binary in .bench-logs/bin (or set BENCH_NAV_PILOT)"; exit 2; }
+MANIFEST_BRANCH="${NAVPILOT_E2E_MANIFEST:-fix/manifest-context-caps}"
+OPTIQ=mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit
+Q4=mlx-community/Qwen3.8-27B-4bit
+Q8=mlx-community/Qwen3.8-27B-8bit
+
+# Same lock and wait semantics as bench-models; see the reasoning there.
+LOCKDIR=".bench-logs/.queue.lock"
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
+  if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
+    echo "✗ another benchmark queue is running (pid $holder). Two queues share one port and"
+    echo "  will kill each other's servers mid-task. Wait for it, or stop it first."
+    echo "  BENCH_WAIT=1 queues behind it instead."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR"
+done
+echo $$ > "$LOCKDIR/pid"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+LOG=".bench-logs/navpilot-e2e-$STAMP.log"
+OUT="bench/navpilot-e2e-$STAMP.json"
+FPLOG=".bench-logs/navpilot-e2e-$STAMP.footprint"
+REPORT="reports/nav-pilot-e2e-2026-09-23.md"
+export NAV_PILOT_CONFIG="$PWD/.bench-logs/navpilot-e2e-$STAMP.config.toml"
+export BENCH_NAV_PILOT="$NP"
+CACHE="$HOME/.nav-pilot/local-models.json"
+BACKUP="$CACHE.navpilot-e2e-$$"
+STATE="$HOME/.nav-pilot/local/server.json"
+H=".mise/tasks/_navpilot_e2e.py"
+started_np="" sampler="" PORT=""
+
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+run() { PYTHONUNBUFFERED=1 python3 "$@" 2>&1 | tee -a "$LOG"; }
+
+cleanup() {
+  [ -n "$sampler" ] && kill "$sampler" 2>/dev/null
+  [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
+  [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  rm -f "$NAV_PILOT_CONFIG"
+  rm -rf "$LOCKDIR"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+# start_np <model> [8bit]: nav-pilot's own server for <model>, from the #20 manifest.
+start_np() {
+  [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
+  { echo 'auto_update = false'; echo 'local_enabled = true'; echo 'local_autostart = false'
+    echo "local_model = \"$1\""
+    grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
+  } > "$NAV_PILOT_CONFIG"
+  python3 "$H" manifest "$CACHE" "$MANIFEST_BRANCH" ${2:-} >>"$LOG" 2>&1 || { say "✗ manifest"; return 1; }
+  started_np=1
+  # Unreachable proxy: start's fetch fails and it reads the cache we just wrote.
+  HTTPS_PROXY=http://127.0.0.1:9 HTTP_PROXY=http://127.0.0.1:9 "$NP" alpha local start >>"$LOG" 2>&1 \
+    || { say "✗ nav-pilot alpha local start ($1) failed, see $LOG"; return 1; }
+  read -r SPID PORT SMODEL < <(python3 -c "
+import json; s=json.load(open('$STATE')); print(s.get('pid'), s.get('port'), s.get('model'))")
+  [ "$SMODEL" = "$1" ] || { say "✗ nav-pilot serves $SMODEL, wanted $1"; return 1; }
+  reply=$(curl -s -m 300 "http://127.0.0.1:$PORT/v1/chat/completions" -H 'Content-Type: application/json' \
+    -d "{\"model\":\"$1\",\"max_tokens\":16,\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}]}")
+  case "$reply" in *OK*) ;; *) say "✗ $1 answered $(printf '%q' "${reply:0:200}")"; return 1 ;; esac
+  python3 "$H" note "$OUT" "$1" "$(ps -ww -o command= -p "$SPID")"
+  say "  server pid $SPID port $PORT model $1, sanity ok"
+}
+
+say "=== bench-navpilot-e2e · nav-pilot $NP · manifest $MANIFEST_BRANCH"
+if [ -f "$STATE" ] && kill -0 "$(python3 -c "import json; print(json.load(open('$STATE'))['pid'])")" 2>/dev/null; then
+  say "✗ a nav-pilot local server is already running ($STATE); refusing to measure beside it"; exit 1
+fi
+mise run server-stop >>"$LOG" 2>&1
+cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
+python3 - "$OUT" "$NP" "$MANIFEST_BRANCH" <<'EOF'
+import json, subprocess, sys
+out, np, br = sys.argv[1:]
+g = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True).stdout.strip()
+json.dump({"nav_pilot": np, "nav_pilot_commit": np.rsplit("-", 1)[-1],
+           "merged": ["#931 fix/local-server-dead-generation-thread", "#932 fix/copilot-instructions-dir",
+                      "#933 feat/local-result-aware-loop-guard"],
+           "manifest_branch": br, "manifest_commit": g("rev-parse", "--short", br),
+           "wired_limit_mb": subprocess.run(["sysctl", "-n", "iogpu.wired_limit_mb"], capture_output=True, text=True).stdout.strip()},
+          open(out, "w"), indent=2)
+EOF
+
+# Footprint of whichever server is recorded; one sampler across all restarts.
+( while :; do
+    p=$(python3 -c "import json; print(json.load(open('$STATE'))['pid'])" 2>/dev/null)
+    b=$([ -n "$p" ] && footprint -p "$p" -f bytes --noCategories 2>/dev/null | sed -n 's/.*Footprint: \([0-9]*\) B.*/\1/p')
+    [ -n "$b" ] && echo "$(date +%s) $b"
+    sleep 2
+  done ) > "$FPLOG" &
+sampler=$!
+
+if start_np "$OPTIQ"; then
+  say "--- a: Copilot CLI + optiq, R2 E1 M1"
+  run "$H" copilot "$OUT" a 1 2 3
+  for s in loop poll; do
+    say "--- d: loop guard, $s session"
+    run .mise/tasks/_np_checks.py session "$OUT" "$s" "$PORT"
+  done
+  say "--- b: opencode, cloud main agent + local-worker"
+  run "$H" opencode "$OUT"
+fi
+
+if start_np "$Q4"; then
+  say "--- c: Copilot CLI + qwen3.8-27b-4bit at 65536, E1"
+  run "$H" copilot "$OUT" c 2
+fi
+
+if start_np "$Q8" 8bit; then
+  say "--- e: generation-thread death on $Q8 at 65536"
+  run "$H" crash "$OUT" "$PORT"
+fi
+
+kill "$sampler" 2>/dev/null; sampler=""
+say "--- verdicts"
+run "$H" finish "$OUT" "$FPLOG" "$REPORT"
+say "=== done: $OUT"
