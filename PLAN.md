@@ -377,3 +377,51 @@ outranks any single measurement.
    1. Built and ran `.mise/tasks/bench-decision` against the local MLX server (`qwen3.8-27b-8bit-nopin` with `max_tokens=1` / `logprobs=True`). It scored **4/4** on loop detection and tool routing at **~316ms** per decision. 
    2. **nav-pilot Integration:** Implemented `checkSystemOneLoop` inside the `nav-pilot` HTTP proxy (`internal/local/guard.go`). Instead of statically waiting for 8 identical tool calls, the proxy queries the System One classifier after 2 calls. If the model confirms a loop (token "A"), the proxy aborts the generative HTTP request instantly, surfacing a clean 400 Bad Request to the agent.
    *Conclusion:* The "System One" safety guard is fully active. It eradicates infinite generative loops and saves massive amounts of GPU time by intercepting them at prefill speeds. The integration is merged into `navikt/copilot`.
+
+## 12. Can `qwen3.8-27b-8bit-nopin` ship as an optional nav-pilot model? (23 Sept)
+
+**Hypothesis under attack:** mlx-community/Qwen3.8-27B-8bit, mlx-lm, no `reasoning_effort`
+pin, is good enough to offer as a non-default local model in nav-pilot. Cheap-ops quality is
+covered by the running queues. This section is the three gaps those runs cannot see, each with
+the number that refutes the hypothesis. Measured by `mise run bench-np-e2e`, which runs
+everything against nav-pilot's own server (its venv pins mlx-lm 0.31.3 / mlx 0.32.0; the
+workspace benches run 0.32.0 / 0.32.2, so the cheap-ops numbers are not from the shipped
+runtime).
+
+**1. The real nav-pilot path.** nav-pilot built from `feat/local-system-one-loop-guard`
+(e72319e0), Copilot CLI in BYOK mode through the loop guard, rungs 1-3 of bench-copilot (R2, E1,
+M1; M1 reaches ~60k input tokens), 2 samples each with `NAV_PILOT_LOOP_CLASSIFIER` on and off:
+12 sessions, 900 s cap. Baseline: the default model passed all 9 of these sessions on the same
+path (bench/copilot-{1,2,3}-local.json, 29 Aug), and nopin passed R2, E1 and M1 in 4 of 4
+direct cheap-ops runs.
+- Refuted if more than 1 of the 12 sessions fails verification or is invalid. One is allowed
+  for variance; two on tasks that pass 4/4 direct is the path, not luck.
+- Refuted if any session shows a path error: the client exits non-zero, the guard answers
+  `local_server_*`, or the guard forwards zero completions.
+- Refuted if any classifier block lands in a session whose classifier-off twin verified, or if
+  the direct classifier probe puts P(A) > 0.9 (the guard's blocking threshold) on any of the
+  legitimate repeated-call scenarios. Tolerance zero: a false block ends a working turn.
+- Reported, not a refutation of the model: guard usage rows carrying zero tokens (a nav-pilot
+  accounting bug), classifier answers slower than its 1.5 s timeout (it then fails open).
+
+**2. Memory at long context on a 48 GB machine.** Peak `footprint` of the server process,
+sampled every 2 s through the latency probe (two different ~60k prompts back to back, so the
+4 GB prompt cache is full) and every E2E session. Arithmetic says: 29.5 GB of weights, KV at
+64 KiB/token (16 full-attention layers x 4 KV heads x 256 x 2 x bf16) is 3.9 GB at 60k, up to
+4 GB more held by the prompt cache, plus prefill activations: 37-41 GB. It was 33.5 GB during
+cheap-ops this morning.
+- Refuted if peak > 40 GB. A 48 GB Mac needs ~8 GB for macOS, the Copilot CLI and an editor;
+  past 40 GB the machine swaps while the developer works.
+- At risk if 36-40 GB: over the manifest's `wired_limit_gb = 36`, so the excess is pageable
+  and can be compressed or swapped out mid-generation. Reported as a caveat.
+
+**3. Interactive latency.** Streaming, unique nonce per prompt so nothing hits the prompt
+cache: cold time to first token and decode tok/s at ~2k, ~30k and ~60k prompt tokens, plus a
+warm turn (same prefix, ~200 new tokens) at 30k and 60k, which is what most agent turns are.
+Same probe on `qwen3.6-35b-a3b-optiq` for comparison. This machine is an M5 Max; a 48 GB
+machine is a Pro chip with roughly half the bandwidth and at most half the prefill, so the
+thresholds are set on numbers measured here with that factor in mind:
+- Refuted if cold TTFT at 30k > 30 s (a minute or more on a Pro), or at 60k > 90 s.
+- Refuted if warm TTFT at 30k > 5 s.
+- Refuted if decode at 30k < 12 tok/s (about 5 on a Pro: slower than reading).
+- Slower than optiq is expected and not a refutation; the ratio is reported.
