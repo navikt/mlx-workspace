@@ -145,7 +145,7 @@ and needs 5.4× longer to the first token at 30k.
 ## Queue
 
 1. nopin cheap-ops runs 3–4
-2. oMLX with MTP on the official build (`qwen3.8-27b-8bit`, `-nocache`): speed comparison
+2. ~~oMLX with MTP on the official build~~: dropped. The user decided (12:00) to keep the 36 GB wired limit that fits 48 GB machines and not run anything at 96 GB for now.
 3. optiq cheap-ops ×3: re-measured baseline
 4. `bench-np-e2e` nopin: end-to-end through nav-pilot, memory, latency, classifier probe
 5. `bench-np-e2e` optiq, latency and memory only
