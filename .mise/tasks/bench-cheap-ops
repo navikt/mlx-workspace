@@ -349,6 +349,41 @@ def verify(task):
     return None, "needs a human"
 
 
+SERVED = None  # the model id the current task is scored against
+
+
+def serving_now():
+    """The model id the server on 8080 actually answers with, or None."""
+    r = sh(["curl", "-s", "--max-time", "10", "http://localhost:8080/v1/models"])
+    try:
+        return [m["id"] for m in json.loads(r.stdout).get("data", [])]
+    except Exception:
+        return None
+
+
+def assert_serving_profile():
+    """Refuse to score a run against a model that is not the active profile.
+
+    This is the fault that cost us four result files: `model-use` failed, the
+    previous model stayed loaded, and the results were written under the new
+    profile's name while the transcripts came from the old model. Nothing in the
+    pipeline compared the two, so the file looked like a clean run for a model
+    that never answered a single request.
+    """
+    want = P.served_model_id(P.params_for(key))
+    ids = serving_now()
+    if ids is None:
+        raise SystemExit("✗ server on :8080 did not answer /v1/models — cannot "
+                         "confirm which model would be scored")
+    global SERVED
+    if want not in ids:
+        raise SystemExit(f"✗ profile mismatch: MLX_ACTIVE_PROFILE={key} expects "
+                         f"{want!r}, server is serving {ids!r}. Re-run "
+                         f"`mise run model-use {key}` and check it succeeded.")
+    SERVED = want
+    return want
+
+
 def restart_server():
     """Restart the inference server before every task.
 
@@ -547,6 +582,3 @@ for task in tasks:
 
 reset_repo()
 print(f"\n✓ Results → {results_path.relative_to(ROOT)}")
-
-def assert_serving_profile(profile, port=8080):
-    pass
