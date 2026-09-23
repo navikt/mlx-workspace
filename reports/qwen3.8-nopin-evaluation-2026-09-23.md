@@ -131,6 +131,7 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
+- 11:48 oMLX runs refused by oMLX's own prefill memory guard: 30 GB of weights already exceed 90% of the 36 GB Metal cap. Both oMLX profiles ask for `gpu_wired_limit_gb = 96`, and the machine is at 36 (model-use only recommends the change, and `vram-set` needs sudo). The oMLX numbers need a separate batch at 96 GB and are not relevant to a 48 GB fleet anyway.
 - 11:47 optiq latency/memory done: every criterion passes (34.3 GB peak at 60k).
 - 11:45 nopin e2e stopped: the server's generation thread died on a Metal OOM at about 51k tokens (see the blocker section).
 - 11:35 head-to-head queued (4bit and pinned 8bit cheap-ops ×3, 4bit latency).
