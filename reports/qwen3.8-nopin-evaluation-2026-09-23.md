@@ -60,6 +60,21 @@ Check it against the optiq re-runs.
   `chat_template_kwargs`, so the pin may already be a no-op.
 - **All measurements are from one M5 Max with 128 GB.** No run happens on 48 GB hardware.
 
+## Decision frame (user, 11:35)
+
+Ship nopin as an optional model unless a major blocker turns up, backed by a head-to-head
+comparison with the models already in the manifest. The manifest already offers
+`qwen3.8-27b-8bit-mlx` (same weights, with the `reasoning_effort` pin, described as "the
+quality build, weakest here"). So "shipping nopin" means updating that entry: dropping the
+pin, rewriting its role, and possibly raising `min_ram_gb`. It does not mean adding a new model.
+
+Blocker vs caveat: a failure through the nav-pilot path, an OOM, or classifier false
+positives are blockers. Slow decode and high memory are caveats, to be documented in the
+entry's role/requirements, since the model is opt-in.
+
+Head-to-head set, same harness: optiq (default), qwen3.8-27b-4bit, qwen3.8-27b-8bit-mlx (pinned),
+nopin. Cheap-ops ×3 each (nopin ×4), latency/memory probes for optiq, 4bit and nopin.
+
 ## Queue
 
 1. nopin cheap-ops runs 3–4
@@ -67,6 +82,8 @@ Check it against the optiq re-runs.
 3. optiq cheap-ops ×3: re-measured baseline
 4. `bench-np-e2e` nopin: end-to-end through nav-pilot, memory, latency, classifier probe
 5. `bench-np-e2e` optiq, latency and memory only
+6. cheap-ops ×3 for qwen3.8-27b-4bit and for qwen3.8-27b-8bit-mlx (pinned), interleaved
+7. `bench-np-e2e` qwen3.8-27b-4bit, latency and memory only
 
 Once the queue is done: System One integration and testing in real nav-pilot sessions.
 
@@ -75,6 +92,8 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 08:39 queue relaunched after the harness fix.
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
+- 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
+- 11:35 head-to-head queued (4bit and pinned 8bit cheap-ops ×3, 4bit latency).
 - 11:25 nopin run 4: 8/10. Across n=4 on the current harness: 31/40, range 6–9. Medians recomputed over the 10 scored tasks, excluding D2.
 - 11:25 `bench-np-e2e` for nopin took the lock ahead of the oMLX and optiq queues (the waiters don't queue in order).
 - 10:45 nopin run 3: 6/10. Three timeouts at the 420 s cap and no loops (longest identical run 1). Variance so far is 6–9/10, so timeouts are the main failure mode, not wrong answers.
