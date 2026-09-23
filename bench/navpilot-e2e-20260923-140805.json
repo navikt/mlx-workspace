@@ -1,0 +1,537 @@
+{
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-combined-915e27c6",
+  "nav_pilot_commit": "915e27c6",
+  "merged": [
+    "#931 fix/local-server-dead-generation-thread",
+    "#932 fix/copilot-instructions-dir",
+    "#933 feat/local-result-aware-loop-guard"
+  ],
+  "manifest_branch": "fix/manifest-context-caps",
+  "manifest_commit": "9a6e7ff",
+  "wired_limit_mb": "36864",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "servers": [
+    {
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56607 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
+      "at": 1790165291.060673
+    },
+    {
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-4bit --host 127.0.0.1 --port 59850 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
+      "at": 1790166176.33341
+    },
+    {
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 60042 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
+      "at": 1790166242.6551712
+    }
+  ],
+  "a": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-09-23T14:08:11+0200",
+      "seconds": 24.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 71100,
+        "cached": 47100,
+        "output": 206
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-0-20260923-140811.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null,
+      "static": {
+        "session": "4febda28-9adf-49ee-8f4e-6c1ab0e38f5d",
+        "systemTokens": 13351,
+        "toolDefinitionsTokens": 8358,
+        "static": 21709
+      },
+      "insufficient_memory": false,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-09-23T14:08:35+0200",
+      "seconds": 35.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 6,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 145300,
+        "cached": 117700,
+        "output": 614
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-1-20260923-140835.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "static": {
+        "session": "fcef6366-bb17-45a4-87ad-ba60bad201af",
+        "systemTokens": 13342,
+        "toolDefinitionsTokens": 8358,
+        "static": 21700
+      },
+      "insufficient_memory": false,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "started": "2026-09-23T14:09:13+0200",
+      "seconds": 29.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 5,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 119300,
+        "cached": 94200,
+        "output": 324
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-2-20260923-140912.log",
+      "verified": false,
+      "note": "no changes made (model did not edit anything)",
+      "valid": true,
+      "invalid_reason": null,
+      "static": {
+        "session": "d4725ae3-3126-4418-b37a-d9ba5bd47f4b",
+        "systemTokens": 13346,
+        "toolDefinitionsTokens": 8358,
+        "static": 21704
+      },
+      "insufficient_memory": false,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    }
+  ],
+  "phases": [
+    {
+      "name": "a-R2",
+      "start": 1790165291.127498,
+      "end": 1790165315.3541892
+    },
+    {
+      "name": "a-E1",
+      "start": 1790165315.355219,
+      "end": 1790165352.994993
+    },
+    {
+      "name": "a-M1",
+      "start": 1790165352.9957042,
+      "end": 1790165382.240802
+    },
+    {
+      "name": "session-loop",
+      "start": 1790165382.364671,
+      "end": 1790166010.358695
+    },
+    {
+      "name": "session-poll",
+      "start": 1790166010.4131289,
+      "end": 1790166152.138496
+    },
+    {
+      "name": "b-opencode",
+      "start": 1790166152.233671,
+      "end": 1790166172.340277
+    },
+    {
+      "name": "c-E1",
+      "start": 1790166176.3960562,
+      "end": 1790166237.5591009
+    },
+    {
+      "name": "e-crash",
+      "start": 1790166242.718251,
+      "end": 1790166751.4901109
+    }
+  ],
+  "sessions": [
+    {
+      "kind": "loop",
+      "legitimate": false,
+      "log": ".bench-logs/system-one-loop-20260923-140942.log",
+      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-140942",
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 627.9,
+      "turns": 0,
+      "server_requests": 3,
+      "agent_request_y": [],
+      "max_run": 0,
+      "classifier_calls": [],
+      "unexplained_requests": [
+        {
+          "t0": 1790165388.0,
+          "t1": 1790165388.0,
+          "y": 0
+        },
+        {
+          "t0": 1790165389.885,
+          "y": 24332,
+          "t1": 1790165402.243
+        },
+        {
+          "t0": 1790165405.985,
+          "y": 160,
+          "t1": 1790165406.127
+        }
+      ],
+      "classifier_block": false,
+      "static_block": false,
+      "guard_message": null,
+      "session_errors": [],
+      "tokens": {
+        "input": 73500,
+        "cached": 48700,
+        "output": 253
+      },
+      "events_found": false
+    },
+    {
+      "kind": "poll",
+      "legitimate": true,
+      "log": ".bench-logs/system-one-poll-20260923-142010.log",
+      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/poll-20260923-142010",
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 141.5,
+      "turns": 0,
+      "server_requests": 26,
+      "agent_request_y": [],
+      "max_run": 0,
+      "classifier_calls": [],
+      "unexplained_requests": [
+        {
+          "t0": 1790166015.0,
+          "t1": 1790166015.0,
+          "y": 0
+        },
+        {
+          "t0": 1790166016.223,
+          "y": 24325,
+          "t1": 1790166023.097
+        },
+        {
+          "t0": 1790166024.458,
+          "y": 119,
+          "t1": 1790166024.485
+        },
+        {
+          "t0": 1790166026.077,
+          "y": 224,
+          "t1": 1790166026.098
+        },
+        {
+          "t0": 1790166028.136,
+          "y": 488,
+          "t1": 1790166028.175
+        },
+        {
+          "t0": 1790166036.913,
+          "y": 1013,
+          "t1": 1790166036.946
+        },
+        {
+          "t0": 1790166043.85,
+          "y": 1132,
+          "t1": 1790166043.876
+        },
+        {
+          "t0": 1790166075.757,
+          "y": 1274,
+          "t1": 1790166075.784
+        },
+        {
+          "t0": 1790166076.817,
+          "y": 1331,
+          "t1": 1790166076.843
+        },
+        {
+          "t0": 1790166078.304,
+          "y": 1446,
+          "t1": 1790166078.331
+        },
+        {
+          "t0": 1790166079.894,
+          "y": 1557,
+          "t1": 1790166079.925
+        },
+        {
+          "t0": 1790166081.572,
+          "y": 1665,
+          "t1": 1790166081.601
+        },
+        {
+          "t0": 1790166083.195,
+          "y": 1772,
+          "t1": 1790166083.225
+        },
+        {
+          "t0": 1790166084.906,
+          "y": 1882,
+          "t1": 1790166084.935
+        },
+        {
+          "t0": 1790166086.96,
+          "y": 1978,
+          "t1": 1790166087.001
+        },
+        {
+          "t0": 1790166088.737,
+          "y": 2093,
+          "t1": 1790166088.85
+        },
+        {
+          "t0": 1790166090.678,
+          "y": 2208,
+          "t1": 1790166090.923
+        },
+        {
+          "t0": 1790166092.824,
+          "y": 2298,
+          "t1": 1790166093.106
+        },
+        {
+          "t0": 1790166095.125,
+          "y": 2394,
+          "t1": 1790166095.418
+        },
+        {
+          "t0": 1790166097.572,
+          "y": 2510,
+          "t1": 1790166097.93
+        },
+        {
+          "t0": 1790166140.584,
+          "y": 2594,
+          "t1": 1790166141.037
+        },
+        {
+          "t0": 1790166143.014,
+          "y": 136,
+          "t1": 1790166143.042
+        },
+        {
+          "t0": 1790166144.36,
+          "y": 217,
+          "t1": 1790166144.383
+        },
+        {
+          "t0": 1790166145.606,
+          "y": 300,
+          "t1": 1790166145.631
+        },
+        {
+          "t0": 1790166147.018,
+          "y": 383,
+          "t1": 1790166147.045
+        },
+        {
+          "t0": 1790166148.301,
+          "y": 466,
+          "t1": 1790166148.327
+        }
+      ],
+      "classifier_block": false,
+      "static_block": false,
+      "guard_message": "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 bash({\"command\": \"rtk find /Users/hans -maxdepth 4 -name \\\"poll.sh\\\" -type f 2>/dev/null | head -5\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8).",
+      "session_errors": [],
+      "tokens": {
+        "input": 679900,
+        "cached": 623600,
+        "output": 4900
+      },
+      "events_found": false,
+      "completed": true
+    }
+  ],
+  "b": {
+    "task": "R2",
+    "cloud_model": "gpt-5.6-terra",
+    "exit": 0,
+    "timed_out": false,
+    "seconds": 20.1,
+    "log": ".bench-logs/navpilot-e2e-opencode-20260923-142232.jsonl",
+    "announced": true,
+    "local_calls": 2,
+    "cloud_steps": 2,
+    "cloud_tokens": {
+      "total": 16658,
+      "input": 8348,
+      "output": 134,
+      "reasoning": 11,
+      "cache_write": 0,
+      "cache_read": 8165
+    },
+    "cloud_cost_usd": 0.0242,
+    "verified": true,
+    "note": "2 of 2 expected terms in the answer",
+    "classifier_block": false,
+    "static_block": false,
+    "path_error": false
+  },
+  "c": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "started": "2026-09-23T14:22:56+0200",
+      "seconds": 60.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 95800,
+        "cached": 71100,
+        "output": 412
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-0-20260923-142256.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "static": {
+        "session": "95d8d83b-c0a3-45b6-a559-44fad5be7408",
+        "systemTokens": 13319,
+        "toolDefinitionsTokens": 8358,
+        "static": 21677
+      },
+      "insufficient_memory": false,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    }
+  ],
+  "e": {
+    "model": "mlx-community/Qwen3.8-27B-8bit",
+    "pid": 79806,
+    "warmup_30k": {
+      "prompt_tokens": 29823,
+      "completion_tokens": 256,
+      "ttft_s": 51.04,
+      "decode_tok_s": 14.2,
+      "total_s": 68.97,
+      "usage": {
+        "prompt_tokens": 29823,
+        "completion_tokens": 256,
+        "total_tokens": 30079,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    "server_exited": false,
+    "exit_wait_s": 300.5,
+    "server_log": ".bench-logs/navpilot-e2e-crash-20260923-143030.server.log",
+    "thread_died_line": null,
+    "status_70": false,
+    "oom_in_log": false,
+    "launch": {
+      "exit": -9,
+      "timed_out": true,
+      "seconds": 121.5,
+      "log": ".bench-logs/navpilot-e2e-crash-launch-20260923-143030.log",
+      "lost_message": false,
+      "local_server_lost": false
+    }
+  },
+  "memory": {
+    "peak_gb": 46.31,
+    "peak_gb_by_phase": {
+      "a-R2": 26.84,
+      "a-E1": 29.29,
+      "a-M1": 28.02,
+      "session-loop": 28.19,
+      "session-poll": 29.49,
+      "b-opencode": 26.9,
+      "c-E1": 29.58,
+      "e-crash": 46.31
+    }
+  },
+  "verdicts": [
+    {
+      "scenario": "a",
+      "name": "Copilot CLI + optiq (default)",
+      "expected": "R2, E1, M1 verify; Copilot static context 19\u201321k (not ~45k) (#932)",
+      "observed": "2/3 verified; static [21709, 21700, 21704]",
+      "evidence": ".bench-logs/copilot-1-local-0-20260923-140811.log, .bench-logs/copilot-2-local-1-20260923-140835.log, .bench-logs/copilot-3-local-2-20260923-140912.log",
+      "pass": false
+    },
+    {
+      "scenario": "b",
+      "name": "opencode, cloud main + local-worker",
+      "expected": "R2 verified, nav-pilot announces local dispatch, local server takes >= 1 call",
+      "observed": "verified=True local_calls=2 announced=True cloud_steps=2 cost=$0.0242",
+      "evidence": ".bench-logs/navpilot-e2e-opencode-20260923-142232.jsonl",
+      "pass": true
+    },
+    {
+      "scenario": "c",
+      "name": "Copilot CLI + qwen3.8-27b-4bit at 65536",
+      "expected": "1 task verifies, no 'Insufficient Memory' in server.log",
+      "observed": "verified=True 60.2s oom=False peak 29.58 GB",
+      "evidence": ".bench-logs/copilot-2-local-0-20260923-142256.log",
+      "pass": true
+    },
+    {
+      "scenario": "d",
+      "name": "loop guard (#933)",
+      "expected": "loop blocked at 4 with 'same result'; poll reaches READY on call 7, not blocked by the same-result rule",
+      "observed": "loop: max_run=0 msg=''; poll: completed=True max_run=0 msg='400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 bash({\"command\": \"rtk find /User'; backstop mattered=False",
+      "evidence": ".bench-logs/system-one-loop-20260923-140942.log, .bench-logs/system-one-poll-20260923-142010.log",
+      "pass": false
+    },
+    {
+      "scenario": "e",
+      "name": "crash reporting (#931)",
+      "expected": "server exits 70 within 5 min of the ~60k prompt; next launch fails fast with the local_server_lost message",
+      "observed": "exited=False after 300.5s status_70=False launch 121.5s exit=-9 lost_message=False",
+      "evidence": ".bench-logs/navpilot-e2e-crash-20260923-143030.server.log, .bench-logs/navpilot-e2e-crash-launch-20260923-143030.log",
+      "pass": false
+    }
+  ]
+}
