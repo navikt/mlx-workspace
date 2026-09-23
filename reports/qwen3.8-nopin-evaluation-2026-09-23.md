@@ -200,6 +200,76 @@ Latency at 32k cap: 2k cold TTFT 3.0 s, 24k cold TTFT 42.6 s, decode 13.9 tok/s.
 optiq passes all of its latency and memory criteria, even at 60k. nopin decodes 4.2× slower
 and needs 5.4× longer to the first token at 30k.
 
+## 8-bit context window (13:05)
+
+Question: is there a context setting where Copilot CLI starts a session and the server does not hit
+the Metal OOM at about 51k?
+
+### How big Copilot CLI's static context is
+
+Copilot CLI records `systemTokens` and `toolDefinitionsTokens` in each session's `session.shutdown`
+event (`~/.copilot/session-state/*/events.jsonl`), counted by its own estimator:
+
+| sessions | system | tools | total | first request, Qwen tokens |
+|---|---|---|---|---|
+| 2 Sep, nopin and optiq through nav-pilot | 16.6k | 2.3k | 18.9k | 20.4k (stats.jsonl, 3 Sep) |
+| 23 Sep, all 14 blocked sessions (12 E2E, 2 System One) | 36.8k | 8.4k | 45.2k | never sent |
+
+The 23 Sep system prompt is 136,600 characters, and about 70,000 of them are duplicate copies of
+the same `*.instructions.md` set (the index section alone appears four times). nav-pilot sets
+`COPILOT_CUSTOM_INSTRUCTIONS_DIRS=~/.copilot` (`copilot_launch.go`, `copilotEnv`). Copilot CLI
+searches that directory recursively, so it also loads the `instructions/` directories of git
+worktrees that other agent sessions left under `~/.copilot/session-state/<id>/files/`
+(`a4734d79…/files/copilot-worktree`, and `fbe281f6…/files/{article,benchmark,models}-worktree`).
+The static context depends on what else is lying around in `~/.copilot`, not on the model.
+
+### Where the gate is
+
+I reproduced the gate without a server by pointing Copilot CLI 1.0.89-0 at a dead port with
+nav-pilot's env (the check fires before the first model call). The output-token setting made no
+difference.
+
+| static context | 24576 | 28672 | 32768 | 40960 | 49152 | 57344 |
+|---|---|---|---|---|---|---|
+| 44.2k (`~/.copilot` as it is) | | | blocked | blocked | blocked (90%) | starts, warns at 77% |
+| 21.4k (a copy of `~/.copilot` without `session-state`) | blocked (87%) | starts (74%) | starts | | | |
+
+Copilot CLI refuses once static context goes above roughly 80% of `COPILOT_PROVIDER_MAX_PROMPT_TOKENS`.
+
+- **With `~/.copilot` as it is now**, the window has to be at least about 56k. That is past the
+  51k OOM, so neither 40k nor 48k can start a session. There is no window.
+- **With the stray worktrees gone**, static context is about 21k (about 23k Qwen tokens), and the
+  32k cap already passes the gate. Blocker 2 was caused by the environment, not by the cap.
+
+### Candidates
+
+New profiles are copies of `qwen3.8-27b-8bit-nopin` with 4096 output and a 2 GiB prompt cache
+(`--prompt-cache-size 2` unchanged):
+
+| profile | context | latency targets (cold, warm ≥30k and at the top) |
+|---|---|---|
+| `qwen3.8-27b-8bit-nopin-c48k` | 49152 | 2k, 30k, 45k |
+| `qwen3.8-27b-8bit-nopin-c40k` | 40960 | 2k, 30k, 36k |
+| `qwen3.8-27b-8bit-nopin-c32k` | 32768 | 2k, 28k |
+
+I checked the pass-through: `_np_checks.py manifest` copies every `MLX_*` param into the manifest
+entry, nav-pilot's `serverFlags` maps `MLX_CACHE_BYTES` to `--prompt-cache-bytes`, and
+`copilotLocalEnv` sends `MLX_OPENCODE_CONTEXT`/`_OUTPUT` as
+`COPILOT_PROVIDER_MAX_PROMPT_TOKENS`/`_MAX_OUTPUT_TOKENS`. nav-pilot has no mapping for
+`MLX_PREFILL_STEP_SIZE`, so a smaller prefill chunk still needs a nav-pilot change.
+
+All three are queued in `bench-np-e2e`, full mode, one after another
+(`.bench-logs/np-8bit-window-queue.sh`, log `.bench-logs/np-8bit-window-queue.log`). After each run
+the wrapper saves that run's slice of nav-pilot's `server.log` and counts `Insufficient Memory`
+lines. It also lists the Copilot static-context numbers for the run's sessions. If the stray
+worktrees are still in `~/.copilot` when a run starts, c48k and c40k E2E fail at the gate again,
+and only their memory and latency results mean anything.
+
+Pass criteria: E2E verified ≥ 5/6 on R2/E1/M1 through nav-pilot, no `Insufficient Memory`, peak
+footprint ≤ 41 GB, and a warm follow-up at the top latency target.
+
+Results: pending.
+
 ## Queue
 
 1. nopin cheap-ops runs 3–4
