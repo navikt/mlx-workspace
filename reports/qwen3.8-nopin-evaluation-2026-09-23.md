@@ -33,9 +33,9 @@ was served by 7 different models over the run and has to be excluded.
 | Run | Passed | Failed | Median s/task |
 |---|---|---|---|
 | nopin 09-18 (old harness) | 7/11 | D2 timeout, 3 unscored | 149 |
-| nopin 09-23 run 1 | 8/10 | R1 (1 of 4 terms), G2 (420 s timeout) | |
+| nopin 09-23 run 1 | 8/10 | R1 (1 of 4 terms), G2 (420 s timeout) | 102 |
 | nopin 09-23 run 2 | 9/10 | R1 | 155 |
-| nopin 09-23 run 3 | pending | | |
+| nopin 09-23 run 3 | 6/10 | R1; M2, G2, D3 timed out at 420 s | 96 |
 | nopin 09-23 run 4 | pending | | |
 | optiq, re-measured on the same harness ×3 | pending | | |
 
@@ -74,3 +74,4 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 08:39 queue relaunched after the harness fix.
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
+- 10:45 nopin run 3: 6/10. Three timeouts at the 420 s cap and no loops (longest identical run 1). Variance so far is 6–9/10, so timeouts are the main failure mode, not wrong answers.
