@@ -1,0 +1,33 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), uten reasoning_effort-pin, 32k kontekst"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Context-window candidate for the 36 GB tier: 32k context, 4k output, 2 GiB prompt cache. Otherwise identical to qwen3.8-27b-8bit-nopin. The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context is set to the same 65k the other team runs, because at this weight size the KV cache is what decides whether it fits."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+# 2 GiB of prompt cache (the base nopin profile has 4 GiB): the freed 2 GiB goes to
+# prefill headroom, which is what OOMs at ~51k tokens.
+MLX_CACHE_BYTES            = "2147483648"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "32768"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# reasoning_effort is pinned, not left to the client. Qwen3.8's template
+# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
+# values — none, high and max would make the template refuse the request.
+# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
+# No reasoning_effort here — that is the point of this profile. Both 1 September
+# runs of the pinned 8-bit verified nothing, every task timing out with zero
+# turns completed, and the pin was added hours earlier and is absent from every
+# historical run. Either it caused the collapse or the model is simply this slow;
+# this profile is the control that tells us which.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
