@@ -135,6 +135,39 @@ Fixes in progress (both on branches, unpushed):
 Later: `--prefill-step-size 512` (needs a nav-pilot flag whitelist change and has to be measured)
 could restore a larger context.
 
+## System One classifier probe (nopin, 12:40, guard prompt from e72319e0)
+
+7 scenarios × 3 repetitions. Temperature 0, so the repetitions are identical.
+
+| Scenario | Legitimate | P(A = loop) | Would block at > 0.9 |
+|---|---|---|---|
+| poll-ci | yes | 0.42 | no |
+| rerun-tests | yes | 0.69 | no |
+| poll-pr-checks | yes | 0.69 | no |
+| recompile | yes | 0.78 | no |
+| rerun-go-test | yes | 0.78 | no |
+| reread-file | **no (loop)** | 0.88 | **no** |
+| same-grep | **no (loop)** | 0.88 | **no** |
+
+Latency: p50 about 0.5 s, first call 0.97 s, all under the guard's 1.5 s timeout.
+
+- 0 false positives, but also **0 true positives**. At the 0.9 threshold the classifier never
+  blocks anything, so it only adds about 0.5 s per checked call.
+- The classes are only 0.10 apart (legit max 0.78, loop 0.88). A threshold of 0.85 would separate
+  these 7, but that is fitting to 7 hand-written scenarios.
+- The structural problem: the classifier sees only the repeated call and the count, not the tool
+  results. A poll that eventually succeeds and a real loop look the same at the call level. What
+  distinguishes them is whether the *result* changes.
+- A deterministic alternative needs no model: count only runs where the call **and its result**
+  are identical. `repeatedToolCall` already walks the messages and skips the tool results, so it could
+  hash them instead. That would catch both loop scenarios and none of the legitimate polls, and it
+  costs no GPU time.
+
+reasoning_effort probe: `chat_template_kwargs` high, no kwargs, and top-level high all returned
+200/OK. The pin is harmless, so dropping it from the 8bit-mlx entry changes nothing.
+
+Latency at 32k cap: 2k cold TTFT 3.0 s, 24k cold TTFT 42.6 s, decode 13.9 tok/s. No OOM.
+
 ## Head-to-head: latency and memory (nav-pilot runtime, M5 Max, wired limit 36 GB)
 
 | Model | Cold TTFT 2k / 30k / 60k | Warm TTFT 30k | Decode 30k | Peak footprint |
