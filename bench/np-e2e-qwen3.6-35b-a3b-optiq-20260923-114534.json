@@ -1,0 +1,268 @@
+{
+  "profile": "qwen3.6-35b-a3b-optiq",
+  "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot_commit": "e72319e0",
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 60705 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2029,
+        "completion_tokens": 256,
+        "ttft_s": 0.99,
+        "decode_tok_s": 68.6,
+        "total_s": 4.71,
+        "usage": {
+          "prompt_tokens": 2029,
+          "completion_tokens": 256,
+          "total_tokens": 2285,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 28693,
+        "completion_tokens": 256,
+        "ttft_s": 11.14,
+        "decode_tok_s": 58.6,
+        "total_s": 15.49,
+        "usage": {
+          "prompt_tokens": 28693,
+          "completion_tokens": 256,
+          "total_tokens": 28949,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 28972,
+        "completion_tokens": 127,
+        "ttft_s": 0.54,
+        "decode_tok_s": 69.3,
+        "total_s": 2.38,
+        "usage": {
+          "prompt_tokens": 28972,
+          "completion_tokens": 127,
+          "total_tokens": 29099,
+          "prompt_tokens_details": {
+            "cached_tokens": 28689
+          }
+        }
+      }
+    },
+    {
+      "target": 60000,
+      "cold": {
+        "prompt_tokens": 60410,
+        "completion_tokens": 256,
+        "ttft_s": 33.82,
+        "decode_tok_s": 51.7,
+        "total_s": 38.75,
+        "usage": {
+          "prompt_tokens": 60410,
+          "completion_tokens": 256,
+          "total_tokens": 60666,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 60689,
+        "completion_tokens": 91,
+        "ttft_s": 0.64,
+        "decode_tok_s": 63.0,
+        "total_s": 2.09,
+        "usage": {
+          "prompt_tokens": 60689,
+          "completion_tokens": 91,
+          "total_tokens": 60780,
+          "prompt_tokens_details": {
+            "cached_tokens": 60406
+          }
+        }
+      }
+    },
+    {
+      "target": 60000,
+      "cold": {
+        "prompt_tokens": 60031,
+        "completion_tokens": 256,
+        "ttft_s": 43.74,
+        "decode_tok_s": 50.4,
+        "total_s": 48.8,
+        "usage": {
+          "prompt_tokens": 60031,
+          "completion_tokens": 256,
+          "total_tokens": 60287,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 60310,
+        "completion_tokens": 106,
+        "ttft_s": 0.67,
+        "decode_tok_s": 61.4,
+        "total_s": 2.41,
+        "usage": {
+          "prompt_tokens": 60310,
+          "completion_tokens": 106,
+          "total_tokens": 60416,
+          "prompt_tokens_details": {
+            "cached_tokens": 60027
+          }
+        }
+      }
+    }
+  ],
+  "phases": [
+    {
+      "name": "latency-2000",
+      "start": 1790156741.551405,
+      "end": 1790156746.263156
+    },
+    {
+      "name": "latency-30000",
+      "start": 1790156746.263485,
+      "end": 1790156764.129456
+    },
+    {
+      "name": "latency-60000",
+      "start": 1790156764.129805,
+      "end": 1790156804.969449
+    },
+    {
+      "name": "latency-60000",
+      "start": 1790156804.969863,
+      "end": 1790156856.17595
+    },
+    {
+      "name": "classifier",
+      "start": 1790156856.17639,
+      "end": 1790156863.9488919
+    }
+  ],
+  "classifier_probe": [
+    {
+      "id": "rerun-tests",
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 6.743,
+      "would_block": false,
+      "within_timeout": false
+    },
+    {
+      "id": "poll-ci",
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.274,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7807,
+      "seconds": 0.243,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.9213,
+      "seconds": 0.25,
+      "would_block": true,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8911,
+      "seconds": 0.262,
+      "would_block": false,
+      "within_timeout": true
+    }
+  ],
+  "effort_probe": [
+    {
+      "shape": "kwargs-high",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "kwargs-none",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "toplevel-high",
+      "status": 200,
+      "reply": "OK"
+    }
+  ],
+  "memory": {
+    "peak_gb": 34.34,
+    "samples": 59,
+    "peak_gb_by_phase": {
+      "latency-2000": 23.09,
+      "latency-30000": 27.32,
+      "latency-60000": 34.34,
+      "classifier": 29.03
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "peak footprint <= 40 GB",
+      "measured": 34.34,
+      "refuted": false
+    },
+    {
+      "criterion": "cold TTFT@30k <= 30 s",
+      "measured": 11.14,
+      "refuted": false
+    },
+    {
+      "criterion": "decode@30k >= 12 tok/s",
+      "measured": 58.6,
+      "refuted": false
+    },
+    {
+      "criterion": "warm TTFT@30k <= 5 s",
+      "measured": 0.54,
+      "refuted": false
+    },
+    {
+      "criterion": "cold TTFT@60k <= 90 s",
+      "measured": 33.82,
+      "refuted": false
+    },
+    {
+      "criterion": "classifier probe: no legit scenario over P(A) 0.9",
+      "measured": [],
+      "refuted": false
+    }
+  ]
+}
