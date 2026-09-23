@@ -4,7 +4,7 @@
 
 cd "$(dirname "$0")/../.." || exit 1
 
-nohup mise run bench-models -- \
+BENCH_WAIT=1 nohup mise run bench-models -- \
   qwen3.8-27b-8bit \
   qwen3.8-27b-8bit-nocache \
   > .bench-logs/omlx-queue.log 2>&1 &
