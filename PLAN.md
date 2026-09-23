@@ -358,7 +358,7 @@ outranks any single measurement.
 **2. Qwen3.8-Flash-Next (125B MoE):**
    *Why:* A 125B MoE heavily quantized to 4-bit could fit under the 96GB limit of Rig B and provide smarter routing to avoid loops.
    *Action:* Test if weights exist on `mlx-community` and if it fits in VRAM on the 128GB mac.
-   *Outcome:* **IN PROGRESS.** Configured `qwen3.8-flash-next-4bit.toml` and verified that the model does exist on Hugging Face (server successfully began downloading the 22-shard safetensors). Downloading 60GB+ of weights takes too long for an interactive session, so it is queued for overnight/unattended evaluation.
+   *Outcome:* **DEFERRED.** The server restart interrupted the download. Decided to wait with larger models and focus on the 48GB budget first.
 
 **3. MTP Support in mlx-lm:**
    *Why:* MTP (speculative decoding) makes dense models fast, but the `qwen3_5_mtp` drafter head only worked in `oMLX`.
@@ -366,3 +366,7 @@ outranks any single measurement.
 
 **4. Quasar Speculative Acceleration:**
    *Outcome:* **UNAVAILABLE.** Quasar speculative acceleration has no native Apple Silicon/MLX port.
+
+**5. Crowning Qwen3.8-27B 8-bit as Default:**
+   *Status:* We have 1 stellar run (7/7, 0 loops) on `qwen3.8-27b-8bit-nopin`. 
+   *Action Needed:* We need to fulfill the variance rule (`n>=5`) by running the benchmark 4 more times on this model to confirm stability before replacing the default. We also need to complete the `oMLX` measurements (Section 4) to check if we should adopt oMLX for the speed boost.
