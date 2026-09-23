@@ -62,7 +62,9 @@ def manifest(profile, cache):
 
 # ── server probes ────────────────────────────────────────────────────────────
 
-def post(port, body, stream=False, timeout=900):
+# Idle timeout, not a total: a streamed prefill sends a keepalive per chunk, so
+# 300 s of silence means the server is gone, not busy.
+def post(port, body, stream=False, timeout=300):
     req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
                                  data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -137,26 +139,52 @@ def classify(port, model, n, call):
     return round(p_a(top), 4), round(time.time() - t0, 3)
 
 
+LATENCY_TARGETS = (2_000, 30_000, 60_000, 60_000)
+
+
+def latency_targets(context, output):
+    """The fixed targets that fit the profile's window, prompt plus reply. When one
+    does not fit, the largest that does (rounded down to 1k) takes its place."""
+    cap = context - output
+    fit = [t for t in LATENCY_TARGETS if t <= cap]
+    if len(fit) < len(LATENCY_TARGETS):
+        fit.append(cap // 1000 * 1000)
+    return fit
+
+
+def failed(e):
+    return {"error": "timeout" if isinstance(e, TimeoutError) or "timed out" in str(e) else str(e)[:300]}
+
+
 def probe(out, port, model):
+    import _profiles as P
     doc = load(out)
+    params = P.load(doc["profile"])[1]
+    targets = latency_targets(int(params["MLX_OPENCODE_CONTEXT"]), int(params["MLX_OPENCODE_OUTPUT"]))
+    print(f"  latency targets {targets}", flush=True)
     lat = doc.setdefault("latency", [])
     text = corpus()
     chars_per_tok = 3.5
-    for target in (2_000, 30_000, 60_000, 60_000):
+    for target in targets:
         start = time.time()
-        # Nonce first, so no prefix of this prompt is in the prompt cache.
-        need = int(target * chars_per_tok)
-        body = (text * (need // len(text) + 1))[:need]
-        q = "\n\nSummarise what the text above is about in detail, as a numbered list."
-        msgs = [{"role": "user", "content": f"[{time.time_ns()}]\n{body}{q}"}]
-        cold, reply = stream_once(port, model, msgs)
-        if cold["prompt_tokens"]:
-            chars_per_tok = len(msgs[0]["content"]) / cold["prompt_tokens"]
-        rec = {"target": target, "cold": cold}
-        if target >= 30_000:
-            msgs += [{"role": "assistant", "content": reply},
-                     {"role": "user", "content": "Now name the three biggest risks in it, one line each."}]
-            rec["warm"], _ = stream_once(port, model, msgs)
+        rec = {"target": target}
+        # One target failing (a client timeout on a wedged server) is recorded and
+        # the rest still run, so the classifier and effort probes are never lost to it.
+        try:
+            # Nonce first, so no prefix of this prompt is in the prompt cache.
+            need = int(target * chars_per_tok)
+            body = (text * (need // len(text) + 1))[:need]
+            q = "\n\nSummarise what the text above is about in detail, as a numbered list."
+            msgs = [{"role": "user", "content": f"[{time.time_ns()}]\n{body}{q}"}]
+            rec["cold"], reply = stream_once(port, model, msgs)
+            if rec["cold"]["prompt_tokens"]:
+                chars_per_tok = len(msgs[0]["content"]) / rec["cold"]["prompt_tokens"]
+            if target >= 30_000 or target == targets[-1]:
+                msgs += [{"role": "assistant", "content": reply},
+                         {"role": "user", "content": "Now name the three biggest risks in it, one line each."}]
+                rec["warm"], _ = stream_once(port, model, msgs)
+        except Exception as e:
+            rec["warm" if "cold" in rec else "cold"] = failed(e)
         lat.append(rec)
         phase(doc, f"latency-{target}", start)
         save(out, doc)
@@ -260,12 +288,13 @@ def verdicts(doc):
     if peak is not None:
         v.append(("peak footprint <= 40 GB", peak, peak > 40))
     for rec in doc.get("latency", []):
-        c, w, t = rec["cold"], rec.get("warm"), rec["target"]
+        c, w, t = rec.get("cold") or {}, rec.get("warm"), rec["target"]
+        c = {"ttft_s": None, "decode_tok_s": None, **c}
         if t == 30_000:
             v.append(("cold TTFT@30k <= 30 s", c["ttft_s"], c["ttft_s"] is None or c["ttft_s"] > 30))
             v.append(("decode@30k >= 12 tok/s", c["decode_tok_s"], c["decode_tok_s"] is None or c["decode_tok_s"] < 12))
             if w:
-                v.append(("warm TTFT@30k <= 5 s", w["ttft_s"], w["ttft_s"] is None or w["ttft_s"] > 5))
+                v.append(("warm TTFT@30k <= 5 s", w.get("ttft_s"), w.get("ttft_s") is None or w["ttft_s"] > 5))
         if t == 60_000 and not any(x[0].startswith("cold TTFT@60k") for x in v):
             v.append(("cold TTFT@60k <= 90 s", c["ttft_s"], c["ttft_s"] is None or c["ttft_s"] > 90))
     fp = [c["id"] for c in doc.get("classifier_probe", []) if c.get("legitimate") and c.get("would_block")]
@@ -314,6 +343,26 @@ def selftest():
     assert got["classifier false-positive blocks == 0"] and not got["E2E failures <= 1"], got
     assert "rerun-tests" in [s[0] for s in SCENARIOS] and "{n}" in CLASSIFIER
     assert len(corpus()) > 100_000, "corpus too small to reach 60k tokens without heavy repetition"
+    assert latency_targets(32768, 8192) == [2_000, 24_000]
+    assert latency_targets(65536, 8192) == [2_000, 30_000, 57_000]
+    assert latency_targets(131072, 8192) == list(LATENCY_TARGETS)
+    assert failed(TimeoutError("timed out")) == {"error": "timeout"}
+    # A timeout on every latency request still leaves the classifier and effort probes.
+    import tempfile
+    global stream_once
+    real, stream_once = stream_once, lambda *a, **k: (_ for _ in ()).throw(TimeoutError("timed out"))
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "p.json"
+            save(out, {"profile": "qwen3.8-27b-8bit-nopin"})
+            probe(out, "9", "none")  # port 9: nothing listens, every request fails fast
+            got = load(out)
+    finally:
+        stream_once = real
+    assert [r["target"] for r in got["latency"]] == [2_000, 24_000], got["latency"]
+    assert all(r["cold"] == {"error": "timeout"} for r in got["latency"]), got["latency"]
+    assert got["classifier_probe"] and len(got["effort_probe"]) == 3
+    verdicts(got)  # an errored latency row must not crash the verdicts
     print("✓ selftest passed")
 
 
