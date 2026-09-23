@@ -34,14 +34,18 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 def load(path):
-    """Samples from one result file, or None when it is not a sample file."""
+    """("samples", list) for hybrid/copilot/refactor files, ("tasks", dict) for a
+    bench-cheap-ops file keyed by task id, or None for anything else."""
     try:
         doc = json.loads(path.read_text())
     except (json.JSONDecodeError, OSError):
         return None
-    if isinstance(doc, dict):
-        return doc.get("samples") or [v for k,v in doc.items() if not str(k).startswith("_")]
-    return samples if isinstance(samples, list) else None
+    if not isinstance(doc, dict):
+        return None
+    if isinstance(doc.get("samples"), list):
+        return "samples", doc["samples"]
+    tasks = {k: v for k, v in doc.items() if isinstance(v, dict) and "verified" in v}
+    return ("tasks", tasks) if tasks and len(tasks) == len(doc) else None
 
 
 def median(values):
@@ -49,13 +53,13 @@ def median(values):
 
 
 def summarise(path, samples):
-    valid = [s for s in samples if s.get("verified")]
-    invalid = [s for s in samples if not s.get("verified")]
+    valid = [s for s in samples if s.get("valid")]
+    invalid = [s for s in samples if not s.get("valid")]
     verified = sum(1 for s in valid if s.get("verified") is True)
     judged = sum(1 for s in valid if s.get("verified") is not None)
     return {
         "file": path.name,
-        "verified": len(valid),
+        "valid": len(valid),
         "discarded": len(invalid),
         "verified": verified,
         "judged": judged,
@@ -64,6 +68,23 @@ def summarise(path, samples):
         "steps": median([s.get("cloud_steps") or 0 for s in valid]),
         "seconds": median([s.get("seconds") or 0 for s in valid]),
         "reasons": Counter(str(s.get("invalid_reason"))[:52] for s in invalid),
+    }
+
+
+def summarise_tasks(path, tasks):
+    """A bench-cheap-ops run. verified None means timed out or needs a human,
+    so it is neither a pass nor a fail."""
+    t = list(tasks.values())
+    return {
+        "file": path.name,
+        "model": next((x["served_model"] for x in t if x.get("served_model")), "?"),
+        "tasks": len(t),
+        "passed": sum(1 for x in t if x.get("verified") is True),
+        "failed": sum(1 for x in t if x.get("verified") is False),
+        "timeout": sum(1 for x in t if x.get("timed_out")),
+        "unjudged": sum(1 for x in t if x.get("verified") is None and not x.get("timed_out")),
+        "looped": sum(1 for x in t if x.get("looped_on")),
+        "seconds": median([x.get("seconds") or 0 for x in t]),
     }
 
 
@@ -97,27 +118,49 @@ def main():
         # A sample with no verdict must not count as verified.
         s = summarise(pathlib.Path("x.json"), [{"valid": True, "verified": None}])
         assert s["verified"] == 0 and s["judged"] == 0, s
+        # A sample that ran but failed is valid, not discarded.
+        s = summarise(pathlib.Path("x.json"), [{"valid": True, "verified": False}])
+        assert s["valid"] == 1 and s["discarded"] == 0 and s["judged"] == 1, s
+        t = summarise_tasks(pathlib.Path("x.json"), {
+            "A": {"verified": True, "seconds": 10}, "B": {"verified": False, "seconds": 20},
+            "C": {"verified": None, "timed_out": True, "seconds": 900},
+            "D": {"verified": None, "looped_on": "read", "seconds": 30}})
+        assert (t["passed"], t["failed"], t["timeout"], t["unjudged"], t["looped"]) == (1, 1, 1, 1, 1), t
+        assert t["seconds"] == 25, t
         print("✓ self-check passed")
         return 0
 
-    rows = []
-    for path in sorted((ROOT / "bench").glob("results-*.json")):
+    rows, runs = [], []
+    for path in sorted((ROOT / "bench").glob("*.json")):
         if args.filter and args.filter not in path.name:
             continue
-        samples = load(path)
-        if not samples:
+        loaded = load(path)
+        if not loaded or not loaded[1]:
             continue
-        rows.append(summarise(path, samples))
+        if loaded[0] == "samples":
+            rows.append(summarise(path, loaded[1]))
+        else:
+            runs.append(summarise_tasks(path, loaded[1]))
 
     if args.json:
         for r in rows:
             r["reasons"] = dict(r["reasons"])
-        print(json.dumps(rows, indent=2))
+        print(json.dumps({"samples": rows, "cheap_ops": runs}, indent=2))
         return 0
 
-    if not rows:
+    if not rows and not runs:
         print("no result files matched")
         return 0
+
+    if runs:
+        print(f"{'cheap-ops run':52} {'pass':>5} {'fail':>3} {'t/o':>4} {'?':>3} {'loop':>4} {'med s':>6}  served")
+        for r in runs:
+            name = r["file"].replace("results-", "").replace(".json", "")[:52]
+            print(f"{name:52} {r['passed']:>2}/{r['tasks']:<2}{r['failed']:4} {r['timeout']:4} "
+                  f"{r['unjudged']:3} {r['looped']:4} {r['seconds']:6.0f}  {r['model']}")
+        if not rows:
+            return 0
+        print()
 
     print(f"{'arm':52} {'valid':>5} {'disc':>5} {'ok':>7} {'disp':>5} {'cost$':>7} {'steps':>5}")
     for r in rows:
