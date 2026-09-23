@@ -102,6 +102,17 @@ Measured before the crash (nopin, M5 Max, nav-pilot runtime):
 | 30k | 59.6 s | 13.8 tok/s | TTFT > 30 s: caveat |
 | 60k | OOM | | blocker |
 
+## Head-to-head: latency and memory (nav-pilot runtime, M5 Max, wired limit 36 GB)
+
+| Model | Cold TTFT 2k / 30k / 60k | Warm TTFT 30k | Decode 30k | Peak footprint |
+|---|---|---|---|---|
+| optiq (default) | 1.0 / 11.1 / 33.8 s | 0.5 s | 58.6 tok/s | 34.3 GB |
+| nopin | 4.3 / 59.6 s / **OOM** | not measured | 13.8 tok/s | 43.8 GB (crashed) |
+| 4bit | queued | | | |
+
+optiq passes all of its latency and memory criteria, even at 60k. nopin decodes 4.2× slower
+and needs 5.4× longer to the first token at 30k.
+
 ## Queue
 
 1. nopin cheap-ops runs 3–4
@@ -120,6 +131,7 @@ Once the queue is done: System One integration and testing in real nav-pilot ses
 - 09:15 nopin run 1: 8/10.
 - 09:58 nopin run 2: 9/10.
 - 11:27 first probe: 2k cold TTFT 4.3 s, decode 14.8 tok/s, peak footprint 37.3 GB (at risk).
+- 11:47 optiq latency/memory done: every criterion passes (34.3 GB peak at 60k).
 - 11:45 nopin e2e stopped: the server's generation thread died on a Metal OOM at about 51k tokens (see the blocker section).
 - 11:35 head-to-head queued (4bit and pinned 8bit cheap-ops ×3, 4bit latency).
 - 11:25 nopin run 4: 8/10. Across n=4 on the current harness: 31/40, range 6–9. Medians recomputed over the 10 scored tasks, excluding D2.
