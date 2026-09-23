@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# mise description="Re-run of bench-navpilot-e2e scenarios d (loop guard #933) and e (crash reporting #931) with the test-design faults fixed. Usage: mise run bench-navpilot-e2e-rerun"
+#
+#   lock -> stop :8080 -> #20 manifest into nav-pilot's cache (network blocked for start)
+#   d  optiq: loop session with Copilot's bash tool excluded (so it must re-read with view), and
+#      the poll session with poll.sh's absolute path; the work dir is made a git root so cplt
+#      uses it as the project dir and Copilot's cwd (the first run's sessions ran in the
+#      mlx-workspace root and never found their files)
+#   e  optiq, deterministic fault: sitecustomize.py on the server's PYTHONPATH raises in
+#      BatchGenerator.next once a sentinel file exists. Healthy completion, sentinel, one
+#      request: the server must exit within 30 s with the status-70 marker last in server.log,
+#      and the next nav-pilot launch must report the dead generation thread within 60 s
+#   -> bench/navpilot-e2e-rerun-<stamp>.json
+#
+# Lock, config and manifest handling are bench-navpilot-e2e's; see the reasoning there.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+NP="${BENCH_NAV_PILOT:-$(ls -t "$PWD"/.bench-logs/bin/nav-pilot-combined-* 2>/dev/null | head -1)}"
+[ -x "$NP" ] || { echo "✗ no nav-pilot-combined-* binary in .bench-logs/bin (or set BENCH_NAV_PILOT)"; exit 2; }
+MANIFEST_BRANCH="${NAVPILOT_E2E_MANIFEST:-fix/manifest-context-caps}"
+OPTIQ=mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit
+
+LOCKDIR=".bench-logs/.queue.lock"
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
+  if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
+    echo "✗ another benchmark queue is running (pid $holder). BENCH_WAIT=1 queues behind it instead."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR"
+done
+echo $$ > "$LOCKDIR/pid"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+LOG=".bench-logs/navpilot-e2e-rerun-$STAMP.log"
+OUT="bench/navpilot-e2e-rerun-$STAMP.json"
+FAULT="$PWD/.bench-logs/navpilot-e2e-rerun-$STAMP.fault"
+export NAV_PILOT_CONFIG="$PWD/.bench-logs/navpilot-e2e-rerun-$STAMP.config.toml"
+export BENCH_NAV_PILOT="$NP"
+CACHE="$HOME/.nav-pilot/local-models.json"
+BACKUP="$CACHE.navpilot-e2e-rerun-$$"
+STATE="$HOME/.nav-pilot/local/server.json"
+E=.mise/tasks/_navpilot_e2e.py
+R=.mise/tasks/_navpilot_rerun.py
+started_np="" PORT=""
+
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
+run() { PYTHONUNBUFFERED=1 python3 "$@" 2>&1 | tee -a "$LOG"; }
+
+cleanup() {
+  [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
+  [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  rm -f "$NAV_PILOT_CONFIG"
+  rm -rf "$FAULT" "$LOCKDIR"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+# start_np <model> [VAR=value...]: nav-pilot's own server for <model>; the extra
+# variables go into `alpha local start`'s environment, which the server inherits.
+start_np() {
+  local model=$1; shift
+  [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
+  { echo 'auto_update = false'; echo 'local_enabled = true'; echo 'local_autostart = false'
+    echo "local_model = \"$model\""
+    grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
+  } > "$NAV_PILOT_CONFIG"
+  python3 "$E" manifest "$CACHE" "$MANIFEST_BRANCH" >>"$LOG" 2>&1 || { say "✗ manifest"; return 1; }
+  started_np=1
+  env "$@" HTTPS_PROXY=http://127.0.0.1:9 HTTP_PROXY=http://127.0.0.1:9 "$NP" alpha local start >>"$LOG" 2>&1 \
+    || { say "✗ nav-pilot alpha local start ($model) failed, see $LOG"; return 1; }
+  read -r SPID PORT SMODEL < <(python3 -c "
+import json; s=json.load(open('$STATE')); print(s.get('pid'), s.get('port'), s.get('model'))")
+  [ "$SMODEL" = "$model" ] || { say "✗ nav-pilot serves $SMODEL, wanted $model"; return 1; }
+  reply=$(curl -s -m 300 "http://127.0.0.1:$PORT/v1/chat/completions" -H 'Content-Type: application/json' \
+    -d "{\"model\":\"$model\",\"max_tokens\":16,\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}]}")
+  case "$reply" in *OK*) ;; *) say "✗ $model answered $(printf '%q' "${reply:0:200}")"; return 1 ;; esac
+  python3 "$E" note "$OUT" "$model" "$(ps -ww -o command= -p "$SPID")"
+  say "  server pid $SPID port $PORT model $model, sanity ok"
+}
+
+say "=== bench-navpilot-e2e-rerun · nav-pilot $NP · manifest $MANIFEST_BRANCH"
+if [ -f "$STATE" ] && kill -0 "$(python3 -c "import json; print(json.load(open('$STATE'))['pid'])")" 2>/dev/null; then
+  say "✗ a nav-pilot local server is already running ($STATE); refusing to measure beside it"; exit 1
+fi
+mise run server-stop >>"$LOG" 2>&1
+cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
+echo "{\"nav_pilot\": \"$NP\", \"rerun_of\": \"bench/navpilot-e2e-20260923-140805.json\"}" > "$OUT"
+
+if start_np "$OPTIQ"; then
+  say "--- d: loop session, bash excluded"
+  BENCH_NAV_PILOT="$PWD/$R" NP_REAL="$NP" NP_EXTRA="--excluded-tools=bash --deny-tool=shell" \
+    run "$R" session "$OUT" loop "$PORT"
+  say "--- d: poll session, absolute path"
+  BENCH_NAV_PILOT="$PWD/$R" NP_REAL="$NP" NP_EXTRA="" run "$R" session "$OUT" poll "$PORT"
+fi
+
+python3 "$R" faultdir "$FAULT"
+if start_np "$OPTIQ" PYTHONPATH="$FAULT" NP_FAULT_SENTINEL="$FAULT/sentinel"; then
+  say "--- e: injected generation-thread death"
+  run "$R" fault "$OUT" "$PORT" "$FAULT/sentinel"
+fi
+
+say "--- verdicts"
+run "$R" verdicts "$OUT"
+say "=== done: $OUT"
