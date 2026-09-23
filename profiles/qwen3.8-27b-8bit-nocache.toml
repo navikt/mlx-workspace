@@ -10,7 +10,9 @@ gpu_wired_limit_gb = 96
 [params]
 MLX_MODEL                  = "Jundot/Qwen3.8-27B-oQ8e-mtp"
 MLX_SERVER_TYPE            = "omlx"
-MLX_CACHE_BYTES            = "21474836480"  # 20GB cache
+MLX_OMLX_HOT_CACHE_MAX_SIZE = "0"
+MLX_OMLX_SSD_CACHE_MAX_SIZE = "0"
+MLX_CACHE_BYTES            = "21474836480"  # required by the schema; oMLX ignores it (hot/SSD cache sizes above apply)
 MLX_CACHE_SIZE             = "5"
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "131072"
