@@ -15,8 +15,8 @@ MLX_SERVER_TYPE            = "mlx-lm"
 MLX_CACHE_BYTES            = "4294967296"
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "32768"
-MLX_OPENCODE_CONTEXT       = "65536"
-MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CONTEXT       = "32768"
+MLX_OPENCODE_OUTPUT        = "8192"
 MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
 # reasoning_effort is pinned, not left to the client. Qwen3.8's template
 # raises on anything outside xhigh/medium/low, and nav-pilot accepts six
