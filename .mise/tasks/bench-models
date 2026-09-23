@@ -51,7 +51,11 @@ while ! mkdir "$LOCKDIR" 2>/dev/null; do
   rm -rf "$LOCKDIR"
 done
 echo $$ > "$LOCKDIR/pid"
-trap 'rm -rf "$LOCKDIR"' EXIT INT TERM
+# The handler only removes the lock, so INT/TERM must also exit: a trap that
+# returns lets the queue carry on without the lock, next to the queue that
+# takes it next (2026-09-23).
+trap 'rm -rf "$LOCKDIR"' EXIT
+trap 'exit 130' INT TERM
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 # Each suite names its own result files. Checking for the ops name whatever the
