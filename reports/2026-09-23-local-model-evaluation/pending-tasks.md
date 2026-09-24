@@ -145,11 +145,15 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
 - **`~/.copilot/session-state` worktrees.** 27 GB in total, 6 `*-worktree` directories. The user
   deletes them.
 - **Temperature and OptiQ-4bit.** Temperature is done for every entry (steps 6–10, task 3; the
-  Qwen3.8 4-bit by analogy, not measured). Still to run or write up: `night-run` steps 5 and 11–15
-  (OptiQ-4bit e2e, cheap-ops for the 4-bit and OptiQ-4bit). Task 2 stays open until then.
+  Qwen3.8 4-bit by analogy, not measured). ~~OptiQ-4bit decision~~ done: steps 5 and 11–15 met the
+  rule (cheap-ops 18/30 against the plain 4-bit's 11/20, 0 timeouts against 4, 12 of 12 Copilot
+  sessions), so the manifest's 4-bit slot serves `mlx-community/Qwen3.8-27B-OptiQ-4bit` under the
+  key `qwen3.8-27b-optiq-4bit` ([qwen38-tuning.md §10](qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit)).
   The 0.7 / top_p 0.8 cell of task 3 is still unrun.
 - **Refresh capabilities after tonight.** `mise run bench-capabilities && mise run model-manifest`
-  once the night's JSON is on `main`, and a PR if the verdicts move.
+  once both nights' JSON is on `main` (`bench/night-results-*` and `bench/night2-results-*` merged),
+  and a PR if the verdicts move. Until then the OptiQ-4bit entry carries the unmeasured block
+  (cloud for every class), and `manifest/capabilities.json` still lists the plain 4-bit.
 - **opencode regression arm through nav-pilot.** Nothing re-measures delegate mode today: the
   one trusted cell (mechanical multi-file, 35/35) is from August, with Sonnet 4.6 and the old
   dispatch text, and #941 now generates a narrower text from the manifest. Before the next night

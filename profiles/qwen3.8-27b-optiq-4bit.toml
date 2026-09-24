@@ -3,7 +3,7 @@ name               = "Qwen 3.8 27B OptiQ 4bit (mixed 4/8-bit)"
 released           = "2026-09"
 status             = "testing"
 spec_source        = "model card"
-notes              = "mlx-community OptiQ build of the official Qwen/Qwen3.8-27B: 261 sensitive layers at 8-bit, 237 at 4-bit, group size 64, 18.5 GB of text weights (the 0.9 GB bf16 vision sidecar is not loaded by mlx-lm). Same recipe as the default qwen3.6 OptiQ. Params identical to qwen3.8-27b-4bit-c64k-8g so the two compare like for like."
+notes              = "mlx-community OptiQ build of the official Qwen/Qwen3.8-27B: 261 sensitive layers at 8-bit, 237 at 4-bit, group size 64, 18.5 GB of text weights (the 0.9 GB bf16 vision sidecar is not loaded by mlx-lm). Same recipe as the default qwen3.6 OptiQ. Params identical to qwen3.8-27b-4bit-c64k-8g so the two compare like for like. Serves the manifest's 4-bit Qwen3.8 slot since 2026-09-24, by the rule set before the run (at least the plain 4-bit's cheap-ops pass rate, no more loops or timeouts): cheap-ops 18/30 (6, 6, 6; D2 retired), 0 timeouts, longest identical call run 1, against the plain 4-bit's 11/20, 4 timeouts, run 2; through nav-pilot 12 of 12 Copilot sessions verified, 37.23 GB peak at 54.6k, cold TTFT 50.0 s at 30k and 129.5 s at 54.6k, warm 0.6 s, 21.2 tok/s at 30k (bench/night-results-20260924-172038: bench/np-e2e-qwen3.8-27b-optiq-4bit-20260924-181038.json, bench/results-qwen3.8-27b-optiq-4bit-20260924-*.json)."
 model_vram_gb      = 19
 gpu_wired_limit_gb = 36
 
@@ -20,3 +20,8 @@ MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"
+# nav-pilot only, as in qwen3.8-27b-4bit: cheap-ops ran on the workspace server at its default
+# temperature 0.6, which these reproduce for Copilot CLI (it sends 0). The e2e run carried
+# neither, so its sessions were greedy.
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

@@ -248,7 +248,7 @@ and does not trust bench-models' exit code, which is 0 even when the suite faile
 |---|---|---|---|---|
 | 8-bit (`mlx-community/Qwen3.8-27B-8bit`) | 32,768 | 4,096 | 2.25 GiB (2415919104 bytes, 2 entries) | provisional: the only 8-bit point estimated under 41 GB at ctx+out; cache raised from 2 GiB (user decision 2026-09-24) so a full 32k+4k session stays cached |
 | 4-bit (`mlx-community/Qwen3.8-27B-4bit`) | 65,536 | 8,192 | 8 GiB (3 entries) | provisional |
-| OptiQ-4bit (`mlx-community/Qwen3.8-27B-OptiQ-4bit`) | 65,536 | 8,192 | 8 GiB (3 entries) | PENDING; not downloaded |
+| OptiQ-4bit (`mlx-community/Qwen3.8-27B-OptiQ-4bit`) | 65,536 | 8,192 | 8 GiB (3 entries) | measured 2026-09-24; serves the manifest's 4-bit slot (§10) |
 
 All three keep `enable_thinking: false`, top-p 0.95, top-k 20, min-p 0.0, and no `reasoning_effort`
 pin (the profiles in §4).
@@ -263,8 +263,8 @@ Known limit of the 8-bit choice: a 32k session at its full 36,864 tokens (contex
   c48k is only worth finishing if its 45k point comes in under 41 GB, which §4 does not expect.
 - **8-bit c32k peaks over 41 GB, or OOMs** → the 8-bit is withdrawn from this tier again, as in
   decision.md item 2.
-- **The OptiQ build matches or beats the plain 4-bit on cheap-ops** at a peak under 41 GB → it
-  replaces the plain 4-bit entry (same parameters).
+- ~~**The OptiQ build matches or beats the plain 4-bit on cheap-ops** at a peak under 41 GB → it
+  replaces the plain 4-bit entry (same parameters).~~ It did, on 2026-09-24 (§10).
 - **A prefill-step variant peaks under 41 GB at ctx+out** (nav-pilot whitelists
   `--prefill-step-size` since #936) → that context replaces 32k for the 8-bit, if its prefill
   slowdown is acceptable. The arithmetic in §4 says 1024 is enough at 40k and 512 at 48k.
@@ -311,3 +311,46 @@ both Qwen3.8 entries set `MLX_NAV_PILOT_TEMPERATURE = "0.6"` and `MLX_NAV_PILOT_
 (the nopin profile's `MLX_TOP_P`, unchanged since it was created). The 4-bit was not measured at
 temp 0: its setting follows the 8-bit and optiq by analogy. The two runs differ in more than
 temperature: the t0 profile has c32k's 2.25 GiB cache and 4k output, the 0.6 baseline 4 GiB and 8k.
+
+## 10. OptiQ-4bit replaces the plain 4-bit
+
+**Rule, set before the run.** OptiQ-4bit replaces the 4-bit entry if its cheap-ops pass rate is at
+least the plain 4-bit's and it has no more loops or timeouts. Both profiles carry the same params
+(64k context, 8k reply, 3 × 8 GiB prompt cache, no pin); only the weights differ.
+
+**Result, night of 2026-09-24** (`night-run` steps 2, 5 and 11–15; the JSON is on the local
+`bench/night-results-20260924-172038` branch). D2 is retired and left out of every count.
+
+| | OptiQ-4bit | Plain 4-bit (c64k-8g) |
+|---|---|---|
+| Weights | `mlx-community/Qwen3.8-27B-OptiQ-4bit`, mixed 4/8-bit, 19.4 GB | `mlx-community/Qwen3.8-27B-4bit`, 16.1 GB |
+| cheap-ops verified | **18/30** (6, 6, 6), 60% | 11/20 (6, 5), 55% |
+| Timeouts (7 min) | **0** | 4 (M2; E3, G2, D3) |
+| Longest run of identical tool calls | 1 | 2 |
+| Median s/task per run | 63, 48, 46 | 58, 125 |
+| Copilot sessions through nav-pilot | **12 of 12** verified | 10 of 11 launched; 1 M1 stopped by the loop guard |
+| Peak footprint | 37.23 GB | 37.21 GB |
+| Cold TTFT 30k / 54.6k | 50.0 s / 129.5 s | 50.9 s / 106.7 s |
+| Warm TTFT 30k | 0.6 s | 0.49 s |
+| Decode at 30k | 21.2 tok/s | 25.2 tok/s |
+
+Sources: `bench/results-qwen3.8-27b-optiq-4bit-20260924-{215830,223150,230812}-01.json`,
+`bench/results-qwen3.8-27b-4bit-c64k-8g-20260924-{203902,211434}-01.json`,
+`bench/np-e2e-qwen3.8-27b-optiq-4bit-20260924-181038.json`,
+`bench/np-e2e-qwen3.8-27b-4bit-c64k-8g-20260924-174139.json`.
+
+**Decision.** The rule is met: 60% against 55%, no timeouts against 4, no loop-guard trip. The
+manifest's 4-bit slot serves OptiQ-4bit from 2026-09-24 with the same params and temp 0.6 / top_p
+0.95. What it costs: decode is about 15% slower and a cold 54.6k prompt takes 23 s longer; per task
+it was no slower, because it did not time out. Cheap-ops ran on the workspace server at its
+default temperature 0.6, which the entry reproduces; the e2e ran greedy on both builds.
+
+**Key.** The generator names each entry after its profile, so the entry is now
+`qwen3.8-27b-optiq-4bit` and `qwen3.8-27b-4bit` is gone. nav-pilot selects by model id and never
+reads the key, so the id change is what users notice: a configured
+`local_model = "mlx-community/Qwen3.8-27B-4bit"` is no longer in the manifest, and `alpha local
+init` / `start` say so and use the default (`localModel` in `internal/cli/alpha_local.go`).
+`profiles/qwen3.8-27b-4bit.toml` stays for benchmarking.
+
+**Capabilities.** The entry has the unmeasured block (cloud for every class) until
+`bench-capabilities` runs on `main` with both nights' results.
