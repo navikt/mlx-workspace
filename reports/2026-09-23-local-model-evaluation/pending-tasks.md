@@ -171,3 +171,38 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   classifier got wrong without them ([research](../2026-09-24-jev-like-features/research.md)).
 - **What tonight cannot answer.** Real 48 GB hardware and Pro chips (task 5), a cloud reference
   arm for the same tasks, and a rerun of the delegation benchmark.
+
+### 8.1 Night 2 (queued for the night of 24–25 September)
+
+`mise run night-run-2` starts on its own once `night-run` has exited and committed
+(`.mise/tasks/night-chain`, log in `.bench-logs/night-chain.log`), from the main checkout, with
+`nav-pilot-main-d24a65e5` (navikt/copilot main with #941, #942, #943 and #949). Report:
+`night-2026-09-25.md`, committed on a local `bench/night2-results-*` branch. It covers these items
+from the list above:
+
+| # | Step | Timeout | Closes |
+|---|---|---|---|
+| 1 | `bench-np-e2e` full, `qwen3.8-27b-8bit-nopin-c48k-ps512` | 90 min | full e2e at 48k for the 8-bit |
+| 2 | `alpha decide` on optiq (`np-serve` + `_decide.py`): cold and 20 warm calls, letter mass in top_logprobs, `--eval` on `bench/decide-cases/`, cache eviction | 30 min | measure `alpha decide` on real hardware |
+| 3 | `bench-loop-hook`: one gpt-5-mini Copilot session through cplt, provoked loop | 15 min | the #939 loop hook inside cplt |
+| 4–8 | `bench-models` cheap-ops ×5, `qwen3.6-35b-a3b-optiq` (temp 0.6, top_p 0.95) | 30 min each | read-qa and edit-single past n ≥ 5 for `bench-capabilities` |
+| 9 | opencode hybrid arm, Sonnet 4.6 pinned, tag `np-d24a65e5-sonnet46`: the eight lines from [mixed mode §3.2](../2026-09-24-copilot-mixed-mode/research.md#32-the-proposed-arm-hybrid-steps-in-the-night-run-driver) | 4 h 30 min | opencode regression arm through nav-pilot |
+
+Step 9 runs only if its harness gate passes at that moment (`bench-hybrid --self-check` with the
+tag, the `_by_class.py` self-check, and a binary with #941); otherwise it is recorded as SKIP with
+the reason. The three harness fixes are in the same PR: `BENCH_HYBRID_TAG` in the output stem, the
+policy file's sha256 per hybrid sample plus `opencode --version` in the preflight, and
+`_by_class.py` reading orchestrator, worker and policy from a tagged file. `bench-hybrid` also
+honours `NAV_PILOT_CONFIG` now, so the run uses a scratch config (auto-update off, optiq as the
+local model) and leaves `~/.nav-pilot/config.toml` alone. Expected about 6 h 15 min, worst case
+9 h 15 min.
+
+Still for the daytime, after night 2:
+
+- **The mixed-mode PoC** ([research §4](../2026-09-24-copilot-mixed-mode/research.md#4-next-steps)
+  items 1, 4 and 5): an extension that adds the local provider, tested against a recording
+  server, no GPU. It decides between options 1 and 2, then `bench-copilot --arm mixed` and the
+  comment on #4703.
+- The GPT-6 Sol repeat of the four trusted-cell lines (the second orchestrator in §3.2).
+- `mise run bench-capabilities && mise run model-manifest` once both nights' results are on `main`.
+- Merging the two local result branches (`bench/night-results-*`, `bench/night2-results-*`).

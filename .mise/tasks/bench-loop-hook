@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+# mise description="Does the #939 loop-guard hook work inside cplt? One provoked-loop cloud Copilot session through nav-pilot. Usage: mise run bench-loop-hook -- [cloud-model]"
+"""navikt/copilot#939 writes ~/.copilot/hooks/nav-pilot-loop-guard.json at launch; the
+hook runs `nav-pilot hook loop-guard` after every tool call and keeps its count in
+~/.nav-pilot/hook-state/. Inside the cplt sandbox that directory may not be writable,
+and the hook fails open, so a broken hook looks exactly like a quiet session.
+
+One cloud session (default gpt-5-mini) in a scratch git repo, told to re-read a file
+that never changes, with only the view tool. Pass when both hold:
+  - the model saw "[nav-pilot loop guard]" in a tool result (the session's own events.jsonl)
+  - a state file for that session appeared in ~/.nav-pilot/hook-state
+Writes bench/loop-hook-<stamp>.json. Exit 0 when a session ran (pass or fail is in the
+file), 1 when none did. Takes no queue lock: no GPU, no local server.
+"""
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+sys.path.insert(0, str(HERE))
+HOME = Path.home()
+MARK = "[nav-pilot loop guard]"
+STATE_DIR = HOME / ".nav-pilot" / "hook-state"
+SESSIONS = HOME / ".copilot" / "session-state"
+HOOK_FILE = HOME / ".copilot" / "hooks" / "nav-pilot-loop-guard.json"
+CAP = int(os.environ.get("LOOP_HOOK_TIMEOUT", "600"))
+
+
+def main():
+    from _np_checks import SESSIONS as PROMPTS
+    model = sys.argv[1] if len(sys.argv) > 1 else "gpt-5-mini"
+    np = os.environ.get("BENCH_NAV_PILOT") or str(sorted((ROOT / ".bench-logs" / "bin").glob("nav-pilot-main-*"),
+                                                         key=lambda p: p.stat().st_mtime)[-1])
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    out = ROOT / "bench" / f"loop-hook-{stamp}.json"
+    work = ROOT / ".bench-logs" / "loop-hook-work" / stamp
+    work.mkdir(parents=True)
+    files, prompt = PROMPTS["loop"]
+    for name, body in files.items():
+        (work / name).write_text(body)
+    # cplt takes the project from the git root; a repo of its own keeps it to this dir.
+    for cmd in (["git", "init", "-q"], ["git", "add", "-A"],
+                ["git", "-c", "commit.gpgsign=false", "-c", "user.name=bench", "-c", "user.email=bench@localhost",
+                 "commit", "-qm", "loop-hook fixture"]):
+        subprocess.run(cmd, cwd=work, check=True)
+
+    # A scratch nav-pilot config: no auto-update, no local server. The hook itself
+    # reads ~/.nav-pilot/config.toml (cplt passes HOME, not NAV_PILOT_CONFIG), where
+    # hook_loop_guard is unset and so on.
+    cfg = ROOT / ".bench-logs" / f"loop-hook-{stamp}.config.toml"
+    user = (HOME / ".nav-pilot" / "config.toml").read_text().splitlines()
+    keep = [l for l in user if l.split("=")[0].strip() not in ("auto_update", "local_enabled", "local_autostart")]
+    cfg.write_text("auto_update = false\nlocal_enabled = false\nlocal_autostart = false\n" + "\n".join(keep) + "\n")
+    env = {**os.environ, "NAV_PILOT_CONFIG": str(cfg)}
+    tok = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True).stdout.strip()
+    if tok:
+        env["COPILOT_GITHUB_TOKEN"] = tok
+
+    state_before = {p.name: p.stat().st_mtime for p in STATE_DIR.glob("*")} if STATE_DIR.exists() else {}
+    sessions_before = {p.name for p in SESSIONS.iterdir()} if SESSIONS.exists() else set()
+    log = ROOT / ".bench-logs" / f"loop-hook-{stamp}.log"
+    argv = [np, "--client", "copilot", "--model", model, "--", "--allow-all-tools", "--excluded-tools=bash",
+            "--deny-tool=shell", "--no-ask-user", "-p", prompt]
+    started = time.time()
+    timed_out = False
+    with log.open("w") as fh:
+        fh.write(f"# argv: {argv!r}\n# cwd: {work}\n")
+        fh.flush()
+        proc = subprocess.Popen(argv, cwd=work, stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                env=env, start_new_session=True)
+        try:
+            rc = proc.wait(timeout=CAP)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            os.killpg(proc.pid, signal.SIGTERM)
+            time.sleep(5)
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            rc = proc.wait()
+    cfg.unlink(missing_ok=True)
+    text = log.read_text(errors="replace")
+
+    # Only session dirs that are new since the launch, and only the one started in our dir.
+    events, sid = [], None
+    for d in sorted((SESSIONS.iterdir() if SESSIONS.exists() else []), key=lambda p: p.stat().st_mtime, reverse=True):
+        f = d / "events.jsonl"
+        if d.name in sessions_before or not f.exists():
+            continue
+        first = json.loads(f.open().readline() or "{}")
+        ctx = (first.get("data") or {}).get("context") or {}
+        if str(work) in (ctx.get("cwd"), ctx.get("gitRoot")):
+            events = [json.loads(l) for l in f.open() if l.strip()]
+            sid = (first.get("data") or {}).get("sessionId") or d.name
+            break
+    marked = [e["type"] for e in events if MARK in json.dumps(e)]
+    in_tool_result = any(e["type"] == "tool.execution_complete" and MARK in json.dumps(e.get("data")) for e in events)
+    views = sum(1 for e in events if e["type"] == "tool.execution_complete")
+
+    state_new = sorted(p.name for p in STATE_DIR.glob("*")
+                       if p.name not in state_before or p.stat().st_mtime > state_before[p.name]) if STATE_DIR.exists() else []
+    state_for_session = [n for n in state_new if sid and sid.replace("-", "") in n.replace("-", "")]
+    try:  # what the sandbox grants on ~/.nav-pilot, for a FAIL's why
+        profile = subprocess.run(["cplt", "--print-profile"], cwd=work, capture_output=True, text=True, timeout=60)
+        nav_pilot_rules = [l.strip() for l in (profile.stdout + profile.stderr).splitlines() if ".nav-pilot" in l][:20]
+    except (OSError, subprocess.TimeoutExpired) as e:
+        nav_pilot_rules = [f"cplt --print-profile failed: {e}"]
+
+    rec = {
+        "model": model, "nav_pilot": np, "hook_on_path": subprocess.run(["sh", "-c", "command -v nav-pilot"],
+                                                                         capture_output=True, text=True).stdout.strip(),
+        "started": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(started)),
+        "seconds": round(time.time() - started, 1), "exit": rc, "timed_out": timed_out,
+        "log": str(log.relative_to(ROOT)), "work": str(work),
+        "hook_file": HOOK_FILE.read_text() if HOOK_FILE.exists() else None,
+        "in_sandbox": "Starting Copilot in sandbox" in text,
+        "session_id": sid, "tool_calls": views,
+        "marker_event_types": marked, "marker_in_tool_result": in_tool_result,
+        "hook_state_new": state_new, "hook_state_for_session": state_for_session,
+        "cplt_profile_nav_pilot_rules": nav_pilot_rules,
+    }
+    rec["pass"] = bool(in_tool_result and state_for_session)
+    rec["verdict"] = (
+        "PASS: the hook ran inside the sandbox, kept its state and the model saw the warning" if rec["pass"] and rec["in_sandbox"] else
+        "PASS (outside the sandbox)" if rec["pass"] else
+        "no session: see the log" if not events else
+        f"FAIL: session made {views} tool calls; marker {'seen' if in_tool_result else 'not seen'}, "
+        f"state file {'written' if state_for_session else 'not written'}"
+        + ("; the hook failed open (state dir not writable inside cplt?)" if not state_new else ""))
+    out.write_text(json.dumps(rec, indent=2) + "\n")
+    print(json.dumps(rec, indent=2))
+    print(f"{'✓' if rec['pass'] else '✗'} {rec['verdict']} · {out.relative_to(ROOT)}")
+    sys.exit(0 if events else 1)
+
+
+if __name__ == "__main__":
+    main()

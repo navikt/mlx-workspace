@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# mise description="Exercise night-run-2 end to end with stub steps (no GPU, no servers, no sessions): OK, FAIL, TIMEOUT with a tree that ignores SIGTERM, lock and manifest cleanup, battery skip, the hybrid gate (SKIP, then run on --from), report"
+#
+# night-run-selftest's method: every path is redirected into a temp dir (NIGHT_*),
+# pmset is mocked, and each step is a stub whose behaviour comes from PLAN.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+T=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/night2-selftest.XXXXXX")" && pwd -P)
+mkdir -p "$T/bench" "$T/bin" "$T/stray/ws"
+ln -s /bin/sleep "$T/bin/opencode"
+echo '{"original": true}' > "$T/local-models.json"
+TAG=np-abc12345-sonnet46
+
+cat > "$T/bin/pmset" <<EOF
+#!/usr/bin/env bash
+n=\$(cat "$T/battery" 2>/dev/null || echo 0)
+if [ "\$n" -gt 0 ]; then echo \$((n - 1)) > "$T/battery"; echo "Now drawing from 'Battery Power'"
+else echo "Now drawing from 'AC Power'"; fi
+EOF
+
+cat > "$T/bin/step" <<'EOF'
+#!/usr/bin/env bash
+n=$1 kind=$2 mode=$3 profile=$4
+b=$(tr ' ' '\n' <<<"$PLAN" | sed -n "s/^$n=//p"); b=${b:-ok}
+stamp=$(date +%Y%m%d-%H%M%S)-$n
+B=$NIGHT_BENCH_DIR
+case "$b" in
+  ok)
+    case "$kind" in
+      e2e) cat > "$B/np-e2e-$profile-$stamp.json" <<J
+{"profile": "$profile", "memory": {"peak_gb": 39.2}, "latency": [{"target": 44000, "cold": {"ttft_s": 60.1, "decode_tok_s": 12.0}, "warm": {"ttft_s": 0.8}}],
+ "e2e": [{"classifier": "on", "valid": true, "verified": true}, {"classifier": "off", "valid": true, "verified": true}],
+ "verdicts": [{"criterion": "peak footprint <= 41 GB", "measured": 39.2, "refuted": false}]}
+J
+      ;;
+      decide) cat > "$B/decide-$profile-$stamp.json" <<J
+{"model": "m", "cold": {"ms": 4100, "wall_s": 4.3}, "warm": {"n": 20, "p50_ms": 310, "p95_ms": 420, "max_ms": 500},
+ "logprobs": [{"options": ["yes", "no"], "letter_mass": 0.998, "ok": true, "top": [["A", 0.97], ["B", 0.028]]}],
+ "eval": {"commit-conventional.jsonl": {"cases": 20, "correct": 18, "accuracy": 0.9, "mean_p_correct": 0.93, "mean_p_wrong": 0.7, "confusion": {"yes": {"yes": 10}}}},
+ "eviction": {"cold": {"ttft_s": 14.0, "prompt_tokens": 16000}, "verdict": "decide evicts the session prefix",
+   "pairs": [{"warm": {"ttft_s": 0.4, "prefilled_tokens": 12}, "after_decide": {"ttft_s": 13.9, "prefilled_tokens": 15990}, "control": {"ttft_s": 0.4, "prefilled_tokens": 12}}]}}
+J
+      ;;
+      hook) echo '{"verdict": "PASS: stub", "model": "gpt-5-mini", "tool_calls": 5, "in_sandbox": true}' > "$B/loop-hook-$stamp.json" ;;
+      ops) python3 - "$B/results-$profile-$stamp-01.json" <<'P'
+import json, sys
+ids = ["R1", "R2", "R3", "E1", "E3", "M1", "M2", "G2", "D1", "D2", "D3"]
+json.dump({t: {"verified": None if t == "D2" else t != "E3", "seconds": 100} for t in ids}, open(sys.argv[1], "w"))
+P
+        echo "✓ $profile complete" ;;
+      hybrid) echo '{"arm": "hybrid", "samples": [{"valid": true, "verified": true, "dispatched": true, "cloud_cost_usd": 0.1, "seconds": 30, "policy": {"sha256": "deadbeef00"}}]}' \
+                > "$B/hybrid-$HTAG-3-hybrid.json" ;;
+    esac
+    [ -n "${SET_BATTERY:-}" ] && [ "${SET_BATTERY%%:*}" = "$n" ] && echo "${SET_BATTERY#*:}" > "$SELFTEST_DIR/battery"
+    exit 0 ;;
+  fail) echo "✗ stub failure in step $n"; exit 3 ;;
+  silentfail) echo "✗ $profile: suite failed (stub; bench-models exits 0 anyway)"; exit 0 ;;
+  hang)
+    mkdir "$NIGHT_LOCKDIR" && echo $$ > "$NIGHT_LOCKDIR/pid"
+    cp "$NIGHT_NP_CACHE" "$NIGHT_NP_CACHE.np-e2e-$$"; echo '{"modified": true}' > "$NIGHT_NP_CACHE"
+    echo $$ >> "$SELFTEST_DIR/pids"
+    bash -c 'trap "" TERM; sleep 600 & echo $! >> "$1"; wait' _ "$SELFTEST_DIR/pids" & echo $! >> "$SELFTEST_DIR/pids"
+    ( cd "$NIGHT_STRAY_ROOT/ws" && python3 -c 'import os, sys
+os.setsid(); open(sys.argv[1], "a").write(f"{os.getpid()}\n"); os.execv(sys.argv[2], sys.argv[2:])' \
+        "$SELFTEST_DIR/pids" "$SELFTEST_DIR/bin/opencode" 600 & )
+    wait ;;
+esac
+EOF
+chmod +x "$T/bin/pmset" "$T/bin/step"
+
+export NIGHT_FAKE=1 NIGHT_FAKE_STEP="$T/bin/step" NIGHT_PMSET="$T/bin/pmset" SELFTEST_DIR="$T" \
+  NIGHT_LOCKDIR="$T/queue.lock" NIGHT_NP_CACHE="$T/local-models.json" NIGHT_BENCH_DIR="$T/bench" \
+  NIGHT_REPORT="$T/report.md" NIGHT_DIR="$T/night" NIGHT_STRAY_ROOT="$T/stray" \
+  NIGHT_MIN_SECONDS=1 NIGHT_AC_WAIT_SECONDS=2 NIGHT_AC_POLL_SECONDS=1 \
+  BENCH_NAV_PILOT=/nonexistent/nav-pilot-main-abc12345 HTAG=$TAG
+# Step 4 hangs (30 "minutes" = 30 s) holding the lock and a manifest backup,
+# step 5 leaves the machine on battery past the 2 s wait so step 6 is skipped, step 7 is
+# bench-models' exit-0 failure, step 8 fails with exit 3, and the hybrid gate says no.
+export PLAN="4=hang 7=silentfail 8=fail" SET_BATTERY="5:5" NIGHT_FAKE_HYBRID_GATE="stub: bench-hybrid --self-check fails"
+
+echo "### pass 1: all 9 steps, hybrid gate closed"
+"$ROOT/.mise/tasks/night-run-2"
+echo
+echo "### pass 2: --from 9, gate open"
+NIGHT_FAKE_HYBRID_GATE="" "$ROOT/.mise/tasks/night-run-2" --from 9 | grep -E 'from step|step 9|OK|SKIP|report'
+
+echo
+echo "### checks"
+bad=0
+check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
+got=$(python3 -c 'import json,sys
+s = {}
+for l in open(sys.argv[1]): r = json.loads(l); s.setdefault(int(r["n"]), []).append(r["status"])
+print(" ".join(f"{k}=" + "/".join(v) for k, v in sorted(s.items())))' "$T/night/steps.jsonl")
+echo "      statuses: $got"
+check "statuses as planned" '[ "$got" = "1=OK 2=OK 3=OK 4=TIMEOUT 5=OK 6=SKIP 7=FAIL 8=FAIL 9=SKIP/OK" ]'
+check "step 8 recorded exit 3" 'grep -q "\"n\": \"8\".*\"rc\": \"3\"" "$T/night/steps.jsonl"'
+check "hybrid SKIP carries the gate's reason" 'grep -q "harness not ready: stub: bench-hybrid" "$T/night/steps.jsonl"'
+check "timed-out tree all dead (TERM-ignoring child, setsid stray)" \
+  '! for p in $(cat "$T/pids"); do kill -0 "$p" 2>/dev/null && echo alive; done | grep -q alive'
+check "SIGKILL escalation happened" 'grep -q "SIGKILL" "$T/night/night.log"'
+check "queue lock released" '[ ! -e "$T/queue.lock" ] && grep -q "released the queue lock" "$T/night/night.log"'
+check "manifest restored, no backups left" 'grep -q original "$T/local-models.json" && ! ls "$T"/local-models.json.np-e2e-* >/dev/null 2>&1'
+check "report: e2e, decide, hook, ops, hybrid sections" \
+  'grep -q "## 48k e2e" "$T/report.md" && grep -q "evicts the session prefix" "$T/report.md" && grep -q "PASS: stub" "$T/report.md" \
+   && grep -q "Pooled: 9/10" "$T/report.md" && grep -q "hybrid-$TAG-3-hybrid.json" "$T/report.md" && grep -q deadbeef "$T/report.md"'
+check "would commit the report and the new result files" 'grep -q "(fake) would commit.*hybrid-$TAG-3-hybrid.json" "$T/night/night.log"'
+echo
+cat "$T/report.md"
+echo
+[ "$bad" -eq 0 ] && { echo "selftest: PASS"; rm -rf "$T"; exit 0; }
+echo "selftest: $bad FAIL (left $T for inspection)"; exit 1

@@ -57,7 +57,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 HOME = Path.home()
 OPENCODE_CFG = HOME / ".config" / "opencode" / "opencode.json"
-NP_CONFIG = HOME / ".nav-pilot" / "config.toml"
+# nav-pilot writes the dispatch policy here at a hybrid launch (#941) and leaves it
+# until `alpha local off`; its hash is what tells one policy text from another.
+POLICY_FILE = OPENCODE_CFG.with_name("nav-pilot-local-dispatch.md")
+# The same file nav-pilot reads: NAV_PILOT_CONFIG lets an unattended run use a
+# scratch config (auto_update off, its own local_model) without editing the user's.
+NP_CONFIG = Path(os.environ.get("NAV_PILOT_CONFIG") or HOME / ".nav-pilot" / "config.toml")
 NP_SERVER_JSON = HOME / ".nav-pilot" / "local" / "server.json"
 NP_SERVER_LOG = HOME / ".nav-pilot" / "local" / "server.log"
 NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
@@ -66,10 +71,18 @@ NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
 # difference between a control arm and a hybrid arm that happens to be quiet, so
 # they are named once, here, rather than spelled out at three call sites.
 LOCAL_OFF = [NAV_PILOT, "alpha", "local", "off"]
-# There is no `alpha local on`: `off` disables dispatch and `init` re-enables it,
-# which is asymmetric and worth fixing in nav-pilot. Until then this is the verb
-# that works, and `init` is safe to re-run once the weights are on disk.
-LOCAL_ON = [NAV_PILOT, "alpha", "local", "init"]
+# `alpha local on` exists since the dispatch-policy releases; before it, `init`
+# was the only verb that re-enabled dispatch. BENCH_HYBRID_LOCAL_ON=init for an
+# older binary.
+LOCAL_ON = [NAV_PILOT, "alpha", "local", os.environ.get("BENCH_HYBRID_LOCAL_ON", "on")]
+
+# A tag in the output stem starts a new population instead of topping up an old
+# one: without it a run finds the August files, already at 8 samples, and prints
+# "nothing to do". The tag is recorded in the file, and _by_class keys the
+# condition on what a tagged file recorded rather than on constants.
+TAG = os.environ.get("BENCH_HYBRID_TAG", "").strip()
+if TAG and not re.fullmatch(r"[a-z][a-z0-9.]*(-[a-z0-9.]+)*", TAG):
+    raise SystemExit(f"✗ BENCH_HYBRID_TAG={TAG!r}: lower case, digits, dots and hyphens, starting with a letter")
 
 # The three things nav-pilot writes into ~/.config/opencode/opencode.json at
 # launch. All three, or the arm is not what its name says.
@@ -358,6 +371,24 @@ def ensure_clone():
         sh(["git", "checkout", "-q", "FETCH_HEAD"], cwd=REPO)
 
 
+def out_path(rung, arm, target=None, tag=None):
+    """bench/hybrid[-<target>][-<tag>]-<rung>-<arm>.json"""
+    target, tag = target or TARGET, TAG if tag is None else tag
+    stem = "hybrid" + ("" if target == "tasks" else f"-{target}") + (f"-{tag}" if tag else "")
+    return ROOT / "bench" / f"{stem}-{rung}-{arm}.json"
+
+
+def policy_record(path=None):
+    """sha256 and size of the dispatch policy the launch left in place, or None."""
+    import hashlib
+    path = path or POLICY_FILE
+    try:
+        b = path.read_bytes()
+    except OSError:
+        return None
+    return {"path": str(path), "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b)}
+
+
 def reset_repo():
     sh(["git", "reset", "--hard", "-q"], cwd=REPO)
     sh(["git", "clean", "-qfd", "-e", "build", "-e", ".gradle"], cwd=REPO)
@@ -516,6 +547,10 @@ def preflight(arm, port, profile_key, meta, params):
     snap["nav_pilot_version"] = ver[-1] if ver else "?"
     np_cfg = tomllib.loads(NP_CONFIG.read_text()) if NP_CONFIG.exists() else {}
     snap["nav_pilot_auto_update"] = np_cfg.get("auto_update")
+    snap["nav_pilot_config"] = str(NP_CONFIG)
+    snap["tag"] = TAG or None
+    oc = sh(["opencode", "--version"], timeout=60)
+    snap["opencode_version"] = (oc.stdout.strip().splitlines() or ["?"])[-1] if oc.returncode == 0 else None
     snap["cloud_model"] = os.environ.get("BENCH_CLOUD_MODEL") or np_cfg.get("model")
     if not snap["cloud_model"]:
         raise SystemExit("✗ no cloud model. Fix: nav-pilot config set model <id>, "
@@ -673,6 +708,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     # the prompt appears nowhere. Rung 4 dispatches nothing, which makes its
     # hybrid arm the control plus this fragment — the only way to price it.
     instructions_after = instruction_inventory()
+    policy = policy_record() if arm == "hybrid" else None
     local_calls = local_calls_since(offset)
     files, lines = changed()
 
@@ -691,6 +727,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         "cloud_cost_usd": ev["cloud_cost_usd"],
         "truncated": ev["truncated"],
         "markers_after": after,
+        "policy": policy,
         "memory": {"before": mem_before, "after": memory()},
         "local_server_pid": snap["local_server"]["pid"],
         "local_server_started": snap["local_server"]["started"],
@@ -830,6 +867,20 @@ def self_check():
     else:
         print(f"  ⚠ nav-pilot source not at {src}; worker agent name unverified")
 
+    # One population per tag: an untagged run keeps the August names, a tagged
+    # one never lands in them.
+    assert out_path(3, "hybrid", "tasks", "").name == "hybrid-3-hybrid.json"
+    assert out_path(6, "control", "spring-ia-tjenester-metrikker", "").name == \
+        "hybrid-spring-ia-tjenester-metrikker-6-control.json"
+    assert out_path(3, "hybrid", "tasks", "np-d24a65e5-sonnet46").name == "hybrid-np-d24a65e5-sonnet46-3-hybrid.json"
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".md") as t:
+        t.write(b"policy"); t.flush()
+        pr = policy_record(Path(t.name))
+        assert pr["bytes"] == 6 and pr["sha256"].startswith("823412d1"), pr
+    assert policy_record(Path("/nonexistent/x.md")) is None
+    print(f"  ✓ output stem and policy hash (tag {TAG or 'unset'}, config {NP_CONFIG})")
+
     print("✓ self-check passed")
 
 
@@ -900,8 +951,7 @@ def main():
                 # Target in the name for anything but the default, so a second
                 # target's samples cannot be appended to the first target's file
                 # and reported as one population.
-                stem = "hybrid" if TARGET == "tasks" else f"hybrid-{TARGET}"
-                out = ROOT / "bench" / f"{stem}-{rung}-{arm}.json"
+                out = out_path(rung, arm)
                 doc = json.loads(out.read_text()) if out.exists() else {}
                 doc.setdefault("samples", [])
                 doc.setdefault("preflight", [])
@@ -911,11 +961,11 @@ def main():
                     print("   nothing to do")
                     continue
                 if doc["samples"]:
-                    backup = ROOT / "bench" / ".previous" / f"hybrid-{rung}-{arm}-{int(out.stat().st_mtime)}.json"
+                    backup = ROOT / "bench" / ".previous" / f"{out.stem}-{int(out.stat().st_mtime)}.json"
                     backup.parent.mkdir(parents=True, exist_ok=True)
                     backup.write_text(out.read_text())
                     print(f"→ existing results backed up to {backup.relative_to(ROOT)}")
-                doc.update({"rung": rung, "arm": arm, "task": task["id"],
+                doc.update({"rung": rung, "arm": arm, "task": task["id"], "tag": TAG or None,
                             "kind": task["kind"], "verify": task["verify"],
                             "prompt": task["prompt"]})
                 # Snapshots accumulate rather than overwrite: a resumed file must

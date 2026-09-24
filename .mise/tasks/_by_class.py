@@ -32,8 +32,9 @@ BENCH = ROOT / "bench"
 
 OPTIQ = "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit"
 
-# Written down, not inferred. The hybrid files carry no worker id or fragment
-# hash, so the two facts that make them a condition live here.
+# Written down, not inferred, for the August hybrid files: they carry no worker
+# id or fragment hash, so the facts that make them a condition live here. Files
+# written with a BENCH_HYBRID_TAG carry all three (hybrid_condition below).
 HYBRID_WORKER = OPTIQ
 HYBRID_ORCHESTRATOR = "claude-sonnet-4.6"
 # findings §3.4: a rewritten dispatch fragment, reverted afterwards.
@@ -117,6 +118,22 @@ def _temp(profile):
         return "?"
 
 
+def hybrid_condition(d, s, fname):
+    """(orchestrator, worker, condition suffix) for one hybrid sample. A tagged
+    file records its orchestrator and worker in the preflight snapshot the sample
+    ran under, and the dispatch policy's sha256 per sample; the August files fall
+    back to the constants above."""
+    snaps = d.get("preflight") or []
+    ix = s.get("preflight")
+    snap = snaps[ix] if isinstance(ix, int) and 0 <= ix < len(snaps) else {}
+    if not d.get("tag"):
+        frag = "intervention" if fname in INTERVENTION_FRAGMENT else "original"
+        return HYBRID_ORCHESTRATOR, HYBRID_WORKER, f"fragment={frag}"
+    policy = (s.get("policy") or {}).get("sha256")
+    return (snap.get("cloud_model") or "?", snap.get("local_model") or "?",
+            f"policy={policy[:8] if policy else 'none'}")
+
+
 def rows():
     """{(cls, model, mode, condition): row} over every result file in bench/."""
     classes = task_classes()
@@ -170,28 +187,32 @@ def rows():
         tid = d.get("task")
         if d.get("arm") == "control":
             for i, s in enumerate(valid):
-                add(classes.get(tid), HYBRID_ORCHESTRATOR, "cloud", "opencode control",
+                orch = hybrid_condition(d, s, f.name)[0]
+                cond = f"opencode control orchestrator={orch}" if d.get("tag") else "opencode control"
+                add(classes.get(tid), orch, "cloud", cond,
                     tid, _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
             continue
         if d.get("arm") != "hybrid":
             continue
-        frag = "intervention" if f.name in INTERVENTION_FRAGMENT else "original"
-        cond = f"opencode delegate orchestrator={HYBRID_ORCHESTRATOR} fragment={frag}"
         delegated = [s for s in valid if s.get("local_calls")]
+        keys = set()
         for i, s in enumerate(delegated):
-            add(classes.get(tid), HYBRID_WORKER, "delegate", cond,
+            orch, worker, extra = hybrid_condition(d, s, f.name)
+            cond = f"opencode delegate orchestrator={orch} {extra}"
+            keys.add((classes.get(tid), worker, "delegate", cond))
+            add(classes.get(tid), worker, "delegate", cond,
                 tid, _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
         # Cost ratio: hybrid median over control median, same target and task,
         # and only where the orchestrator delegated at all. A hybrid arm that
         # never dispatched measures nothing about delegation.
         ctrl = f.with_name(f.name.replace("-hybrid.json", "-control.json"))
-        key = (classes.get(tid), HYBRID_WORKER, "delegate", cond)
-        if delegated and ctrl.exists() and key in out:
+        if delegated and ctrl.exists():
             cv = [s for s in json.loads(ctrl.read_text()).get("samples", []) if s.get("valid")]
             hc = st.median([s.get("cloud_cost_usd") or 0 for s in valid])
             cc = st.median([s.get("cloud_cost_usd") or 0 for s in cv]) if cv else 0
-            if cc:
-                out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
+            for key in keys:
+                if cc and key in out:
+                    out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
     return out
 
 
@@ -215,4 +236,13 @@ if __name__ == "__main__":
     assert wilson_lower(0, 0) is None
     assert _outcome({"verified": None, "timed_out": True}) is False
     assert _outcome({"verified": None}) is None
+    # A tagged file keys its condition on what it recorded; an August file on the constants.
+    aug = {"samples": [{"preflight": 0}], "preflight": [{"cloud_model": "x"}]}
+    assert hybrid_condition(aug, aug["samples"][0], "hybrid-3-hybrid.json") == \
+        (HYBRID_ORCHESTRATOR, HYBRID_WORKER, "fragment=original")
+    assert hybrid_condition(aug, aug["samples"][0], "hybrid-4-hybrid.json")[2] == "fragment=intervention"
+    tagged = {"tag": "np-d24a65e5-sonnet46", "preflight": [{"cloud_model": "gpt-6-sol", "local_model": "w"}],
+              "samples": [{"preflight": 0, "policy": {"sha256": "abcdef0123456789"}}, {"preflight": 0}]}
+    assert hybrid_condition(tagged, tagged["samples"][0], "f") == ("gpt-6-sol", "w", "policy=abcdef01")
+    assert hybrid_condition(tagged, tagged["samples"][1], "f")[2] == "policy=none"
     print("✓ _by_class self-check passed")

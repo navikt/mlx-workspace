@@ -1,0 +1,409 @@
+#!/usr/bin/env bash
+# mise description="Second night batch: 48k e2e for the 8-bit, alpha decide measured, the cplt loop hook, optiq cheap-ops at the production setting, then the opencode hybrid arm if its harness is ready. Usage: mise run night-run-2 [-- --dry-run | --from N]"
+#
+# night-run's design (read that file first) with its own queue: every step is an
+# existing or new task that takes the queue lock itself, a per-step watchdog kills
+# the whole process tree at its timeout, and the cleanup after each step stops both
+# servers, releases a dead holder's lock and restores nav-pilot's manifest backup.
+# A failure is recorded and the next step runs. The report is written at the end
+# and committed on a local branch; nothing is pushed.
+#
+# night-run's queue is a literal in the script it runs tonight, so this is a new
+# file rather than a flag on that one.
+#
+#   --dry-run          print the plan and run the preflight, start nothing
+#   --from N           resume at step N, appending to the newest night2 dir
+#   --hybrid-lines     (internal) step 9's body, run under np-serve
+#
+# Test hooks, used by night-run-2-selftest: NIGHT_FAKE=1 runs $NIGHT_FAKE_STEP in
+# place of each task, and the NIGHT_* variables point every path somewhere harmless.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+ARGS=("$@")
+
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$ROOT/.bench-logs/bin/nav-pilot-main-d24a65e5}"
+COPILOT_REPO="${NIGHT_COPILOT_REPO:-$HOME/go/src/github.com/navikt/copilot}"
+NEED_DECIDE=d24a65e5   # navikt/copilot#949, alpha decide
+NEED_POLICY=6f3e003a   # navikt/copilot#941, the generated dispatch policy
+OPTIQ=qwen3.6-35b-a3b-optiq
+HYBRID_CLOUD_MODEL="${HYBRID_CLOUD_MODEL:-claude-sonnet-4.6}"
+HYBRID_TAG="np-$(basename "$BENCH_NAV_PILOT" | sed 's/.*-//')-$(echo "$HYBRID_CLOUD_MODEL" | tr -d '.' | sed 's/^claude-//; s/-//g')"
+
+# kind mode profile-or-model timeout-min expected-min, in order of what each decides.
+# Expected minutes: e2e full 21 min on 2026-09-24 (step 1), optiq cheap-ops 17-20 min
+# (steps 6-8), the hybrid block ~4 h (copilot-mixed-mode research §3.2).
+QUEUE=(
+  "e2e    full   qwen3.8-27b-8bit-nopin-c48k-ps512 90 25"
+  "decide -      $OPTIQ                            30 12"
+  "hook   -      gpt-5-mini                        15 5"
+  "ops    -      $OPTIQ                            30 19"
+  "ops    -      $OPTIQ                            30 19"
+  "ops    -      $OPTIQ                            30 19"
+  "ops    -      $OPTIQ                            30 19"
+  "ops    -      $OPTIQ                            30 19"
+  "hybrid -      $OPTIQ                            270 240"
+)
+# The hybrid block: target rung arms samples. The trusted cell first (M1 and D2 on
+# three targets, both arms, for the cost ratio), then the guard-rail rungs hybrid only.
+HYBRID_LINES=(
+  "tasks                         3 both   8"
+  "tasks                         6 both   8"
+  "frontend-familie-tilbake      3 both   8"
+  "spring-ia-tjenester-metrikker 6 both   8"
+  "tasks                         1 hybrid 6"
+  "tasks                         2 hybrid 6"
+  "tasks                         4 hybrid 6"
+  "tasks                         5 hybrid 6"
+)
+
+DRY="" FROM=1
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY=1 ;;
+    --from) FROM="${2:?--from needs a step number}"; shift ;;
+    --hybrid-lines)
+      fails=0
+      for l in "${HYBRID_LINES[@]}"; do
+        set -- $l
+        echo "=== bench-hybrid target $1 rung $2 arm $3 samples $4 (tag $HYBRID_TAG, orchestrator $HYBRID_CLOUD_MODEL)"
+        BENCH_TARGET="$1" BENCH_HYBRID_TAG="$HYBRID_TAG" BENCH_CLOUD_MODEL="$HYBRID_CLOUD_MODEL" \
+          python3 .mise/tasks/bench-hybrid --rung "$2" --arm "$3" --samples "$4" < /dev/null || fails=$((fails + 1))
+      done
+      echo "=== hybrid block done, $fails line(s) failed"
+      exit $((fails > 0)) ;;
+    *) echo "usage: mise run night-run-2 -- [--dry-run | --from N]"; exit 2 ;;
+  esac
+  shift
+done
+
+FAKE="${NIGHT_FAKE:-}"
+if [ -n "$FAKE" ]; then
+  : "${NIGHT_FAKE_STEP:?}" "${NIGHT_LOCKDIR:?}" "${NIGHT_NP_CACHE:?}" "${NIGHT_BENCH_DIR:?}" "${NIGHT_REPORT:?}" "${NIGHT_DIR:?}"
+fi
+MIN="${NIGHT_MIN_SECONDS:-60}"
+AC_WAIT="${NIGHT_AC_WAIT_SECONDS:-1800}"
+AC_POLL="${NIGHT_AC_POLL_SECONDS:-60}"
+PMSET="${NIGHT_PMSET:-pmset}"
+LOCKDIR="${NIGHT_LOCKDIR:-.bench-logs/.queue.lock}"
+NP_CACHE="${NIGHT_NP_CACHE:-$HOME/.nav-pilot/local-models.json}"
+BENCH_DIR="${NIGHT_BENCH_DIR:-bench}"
+REPORT="${NIGHT_REPORT:-reports/2026-09-23-local-model-evaluation/night-2026-09-25.md}"
+NP_STATE="$HOME/.nav-pilot/local/server.json"
+
+has_commit() { go version -m "$BENCH_NAV_PILOT" 2>/dev/null | sed -n 's/.*vcs.revision=//p' | {
+  read -r rev && git -C "$COPILOT_REPO" merge-base --is-ancestor "$1" "$rev" 2>/dev/null; }; }
+
+# Step 9 runs only when its harness is ready. Empty output means ready; otherwise the reason.
+hybrid_gate() {
+  if [ -n "$FAKE" ]; then echo "${NIGHT_FAKE_HYBRID_GATE:-}"; return; fi
+  BENCH_HYBRID_TAG="$HYBRID_TAG" python3 .mise/tasks/bench-hybrid --self-check > /dev/null 2>&1 \
+    || { echo "bench-hybrid --self-check fails (tag/output-stem or policy-hash fix)"; return; }
+  grep -q 'BENCH_HYBRID_TAG' .mise/tasks/bench-hybrid || { echo "bench-hybrid has no BENCH_HYBRID_TAG (fix 1)"; return; }
+  python3 .mise/tasks/_by_class.py > /dev/null 2>&1 || { echo "_by_class.py self-check fails (fix 3)"; return; }
+  grep -q 'def hybrid_condition' .mise/tasks/_by_class.py || { echo "_by_class.py still hard-codes the condition (fix 3)"; return; }
+  has_commit "$NEED_POLICY" || { echo "$(basename "$BENCH_NAV_PILOT") lacks #941's generated policy ($NEED_POLICY)"; return; }
+  command -v opencode > /dev/null || { echo "opencode not on PATH"; return; }
+}
+
+plan() {
+  local i=0 tt=0 te=0
+  echo "night-run-2 plan (nav-pilot: $BENCH_NAV_PILOT)"
+  for q in "${QUEUE[@]}"; do
+    set -- $q; i=$((i + 1))
+    [ "$i" -lt "$FROM" ] && continue
+    tt=$((tt + $4)); te=$((te + $5))
+    printf '  %2d  %-6s %-5s %-36s timeout %3d min, expect ~%d\n' "$i" "$1" "$2" "$3" "$4" "$5"
+  done
+  printf '  total: expect ~%dh%02d, worst case (every step times out) %dh%02d\n' $((te / 60)) $((te % 60)) $((tt / 60)) $((tt % 60))
+  local g; g=$(hybrid_gate)
+  echo "  hybrid (step 9): ${g:-ready} · tag $HYBRID_TAG · orchestrator $HYBRID_CLOUD_MODEL"
+}
+
+preflight() {
+  # night-preflight checks power, disk, lock, both ports, the binary (has #934),
+  # the models (night-run's list covers both models used here) and the clients.
+  local fails=0
+  "$ROOT/.mise/tasks/night-preflight" || fails=1
+  echo
+  has_commit "$NEED_DECIDE" && echo "PASS  nav-pilot          $(basename "$BENCH_NAV_PILOT") has #949 alpha decide" \
+    || { echo "FAIL  nav-pilot          $(basename "$BENCH_NAV_PILOT") lacks #949 ($NEED_DECIDE)"; fails=1; }
+  for p in qwen3.8-27b-8bit-nopin-c48k-ps512 "$OPTIQ"; do
+    python3 -c "import sys; sys.path.insert(0,'.mise/tasks'); import _profiles as P; P.load('$p')" 2>/dev/null \
+      && echo "PASS  profile            $p" || { echo "FAIL  profile            $p does not load"; fails=1; }
+  done
+  python3 .mise/tasks/_decide.py --check-cases | sed 's/^/      decide-cases       /' ; [ "${PIPESTATUS[0]}" -eq 0 ] || fails=1
+  gh auth token > /dev/null 2>&1 && echo "PASS  gh                 token for the cloud sessions" \
+    || { echo "FAIL  gh                 no gh token (steps 3 and 9 need one)"; fails=1; }
+  [ -d "workspaces/$OPTIQ/kotlin/.git" ] && echo "PASS  workspace          workspaces/$OPTIQ/kotlin" \
+    || echo "WARN  workspace          workspaces/$OPTIQ/kotlin missing; the suite clones it (needs network)"
+  echo
+  [ "$fails" -eq 0 ] && { echo "night-run-2 preflight: PASS"; return 0; }
+  echo "night-run-2 preflight: FAIL"; return 1
+}
+
+if [ -n "$DRY" ]; then
+  plan; echo; preflight; exit $?
+fi
+
+if [ -z "${NIGHT_CAFFEINATED:-}" ]; then
+  NIGHT_CAFFEINATED=1 exec caffeinate -dimsu "$0" "${ARGS[@]}"
+fi
+
+if [ -z "${NIGHT_DIR:-}" ]; then
+  if [ "$FROM" -gt 1 ] && last=$(ls -d .bench-logs/night2-2* 2>/dev/null | tail -1) && [ -n "$last" ]; then
+    NIGHT_DIR="$last"
+  else
+    NIGHT_DIR=".bench-logs/night2-$(date +%Y%m%d-%H%M%S)"
+  fi
+fi
+DIR="$NIGHT_DIR"; mkdir -p "$DIR"
+[ -e "$DIR/.run-start" ] || : > "$DIR/.run-start"
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$DIR/night.log"; }
+record() {
+  python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps(dict(zip(a[::2], a[1::2]))))' "$@" >> "$DIR/steps.jsonl"
+}
+
+say "=== night-run-2 from step $FROM, dir $DIR, pid $$"
+plan | tee -a "$DIR/night.log"
+if [ -z "$FAKE" ]; then
+  preflight 2>&1 | tee "$DIR/preflight-$(date +%H%M%S).log"
+  [ "${PIPESTATUS[0]}" -eq 0 ] || { say "✗ preflight failed; nothing started"; exit 1; }
+else
+  say "(fake) preflight skipped"
+fi
+
+descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
+
+strays() {
+  local p cwd
+  for p in $(pgrep -f '(^|/)(opencode|copilot|cplt)( |$)'); do
+    cwd=$(lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    case "$cwd" in "$ROOT"/workspaces/*|"$ROOT"/.bench-logs/loop-hook-work/*|"${NIGHT_STRAY_ROOT:-/nonexistent}"/*) echo "$p" ;; esac
+  done
+}
+
+kill_tree() {
+  local pids alive
+  pids="$1 $(descendants "$1") $(strays)"
+  kill -TERM -- "-$1" 2>/dev/null; kill -TERM $pids 2>/dev/null
+  for _ in $(seq 20); do
+    alive=$(for p in $pids; do kill -0 "$p" 2>/dev/null && echo "$p"; done)
+    [ -z "$alive" ] && return 0
+    sleep 1
+  done
+  say "  still alive after 20s, SIGKILL: $(echo $alive)"
+  kill -KILL -- "-$1" 2>/dev/null; kill -KILL $pids 2>/dev/null
+}
+
+cleanup_after() {
+  local log=$1 holder spid b s
+  s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
+  if [ -n "$FAKE" ]; then
+    echo "(fake) mise run server-stop; $BENCH_NAV_PILOT alpha local stop" >> "$log"
+  else
+    mise run server-stop >> "$log" 2>&1 < /dev/null
+    "$BENCH_NAV_PILOT" alpha local stop >> "$log" 2>&1 < /dev/null
+    spid=$(python3 -c "import json; print(json.load(open('$NP_STATE')).get('pid',''))" 2>/dev/null)
+    [ -n "$spid" ] && kill -0 "$spid" 2>/dev/null && { say "  nav-pilot server $spid survived stop, killing"; kill -KILL "$spid"; }
+  fi
+  if [ -d "$LOCKDIR" ]; then
+    holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+    if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then
+      rm -rf "$LOCKDIR"; say "  released the queue lock left by pid ${holder:-?}"
+    fi
+  fi
+  # bench-np-e2e and np-serve back the manifest up as $NP_CACHE.np-e2e-<pid> and restore
+  # it on exit; a SIGKILL skips that. The oldest backup is the manifest from before them.
+  local backups=() live=0
+  # shellcheck disable=SC2045
+  for b in $(ls -tr "$NP_CACHE".np-e2e-* 2>/dev/null); do
+    kill -0 "${b##*-}" 2>/dev/null && live=1 || backups+=("$b")
+  done
+  if [ "$live" = 0 ] && [ "${#backups[@]}" -gt 0 ]; then
+    mv -f "${backups[0]}" "$NP_CACHE"; say "  restored $NP_CACHE from ${backups[0]}"
+    for b in "${backups[@]:1}"; do mv -f "$b" "$DIR/"; say "  moved extra backup $b to $DIR"; done
+  fi
+}
+
+on_ac() { "$PMSET" -g batt | grep -q "'AC Power'"; }
+
+CUR=""
+trap 'say "=== interrupted"; [ -n "$CUR" ] && kill_tree "$CUR"; cleanup_after "$DIR/night.log"; exit 130' INT TERM
+
+i=0
+for q in "${QUEUE[@]}"; do
+  set -- $q; i=$((i + 1))
+  kind=$1 mode=$2 profile=$3 tmin=$4
+  [ "$i" -lt "$FROM" ] && continue
+  log="$DIR/$(printf %02d "$i")-$kind-$profile.log"
+  wired=$(sysctl -n iogpu.wired_limit_mb)
+  base=(n "$i" kind "$kind" mode "$mode" profile "$profile" timeout_min "$tmin" wired_mb "$wired" nav_pilot "$BENCH_NAV_PILOT" log "$log")
+  say "--- step $i: $kind $mode $profile (timeout $tmin min)"
+
+  if [ "$kind" = hybrid ]; then
+    why=$(hybrid_gate)
+    if [ -n "$why" ]; then
+      say "  SKIP: hybrid harness not ready: $why"
+      record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "harness not ready: $why"
+      continue
+    fi
+  fi
+  if ! on_ac; then
+    say "  on battery; waiting up to $((AC_WAIT / 60)) min for AC"
+    waited=0
+    while ! on_ac && [ "$waited" -lt "$AC_WAIT" ]; do sleep "$AC_POLL"; waited=$((waited + AC_POLL)); done
+    if ! on_ac; then
+      say "  SKIP: still on battery"
+      record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "on battery for $((AC_WAIT / 60)) min"
+      continue
+    fi
+  fi
+  free_gb=$(df -g "$ROOT" | awk 'NR==2 {print $4}')
+  if [ "$free_gb" -lt 20 ]; then
+    say "  SKIP: ${free_gb} GB free, need 20"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "${free_gb} GB free disk"
+    continue
+  fi
+
+  marker="$DIR/.start-$i"; : > "$marker"
+  stamp=$(date +%Y%m%d-%H%M%S)
+  case "$kind" in
+    e2e)    cmd=(mise run bench-np-e2e -- "$profile"); pat="np-e2e-$profile-*.json" ;;
+    decide) cmd=(mise run np-serve -- "$profile" python3 .mise/tasks/_decide.py run "$BENCH_DIR/decide-$profile-$stamp.json")
+            pat="decide-$profile-*.json" ;;
+    hook)   cmd=(mise run bench-loop-hook -- "$profile"); pat="loop-hook-*.json" ;;
+    ops)    cmd=(mise run bench-models -- "$profile"); pat="results-$profile-*.json" ;;
+    hybrid) cmd=(mise run np-serve -- "$profile" "$ROOT/.mise/tasks/night-run-2" --hybrid-lines); pat="hybrid*-$HYBRID_TAG-*.json" ;;
+  esac
+  [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$mode" "$profile")
+
+  start=$(date -Iseconds); t0=$(date +%s)
+  set -m
+  "${cmd[@]}" > "$log" 2>&1 < /dev/null &
+  CUR=$!
+  set +m
+  timed_out=""
+  while kill -0 "$CUR" 2>/dev/null; do
+    if [ $(( $(date +%s) - t0 )) -ge $((tmin * MIN)) ]; then
+      say "  TIMEOUT after $tmin min; killing the step's process tree"
+      timed_out=1; kill_tree "$CUR"; break
+    fi
+    sleep 1
+  done
+  wait "$CUR" 2>/dev/null; rc=$?
+  CUR=""
+  cleanup_after "$log"
+
+  result=$(find "$BENCH_DIR" -maxdepth 1 -name "$pat" -newer "$marker" 2>/dev/null | sort | tail -1)
+  if [ -n "$timed_out" ]; then status=TIMEOUT
+  elif [ "$rc" -eq 0 ] && [ -n "$result" ] && { [ "$kind" != ops ] || grep -q "✓ $profile complete" "$log"; }; then status=OK
+  else status=FAIL; fi
+  note=""; [ "$status" = OK ] || note=$(grep -m1 '✗' "$log" | cut -c1-200)
+  record "${base[@]}" start "$start" end "$(date -Iseconds)" seconds "$(( $(date +%s) - t0 ))" \
+    status "$status" rc "$rc" result "$result" note "$note"
+  say "  $status (exit $rc) ${result:-no result file} · log $log"
+done
+
+say "=== queue done; writing $REPORT"
+python3 - "$DIR" "$REPORT" "$BENCH_DIR" "$HYBRID_TAG" <<'EOF' 2>&1 | tee -a "$DIR/night.log"
+import json, statistics, sys
+from pathlib import Path
+sys.path.insert(0, ".mise/tasks")
+import _night_report as R   # read only: e2e_summary, ops_summary
+night, out, bench, tag = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4]
+steps = {}
+for line in (night / "steps.jsonl").read_text().splitlines():
+    if line.strip():
+        r = json.loads(line); steps[int(r["n"])] = r
+def load(p):
+    try: return json.loads(Path(p).read_text())
+    except (OSError, ValueError, TypeError): return None
+L = ["# Night run 2 (25 September): results", "",
+     f"Written by `mise run night-run-2` from `{night}/steps.jsonl` and the result files. The plan is "
+     "[pending-tasks.md §8](pending-tasks.md#8-follow-ups-from-the-night-of-24-september).", ""]
+if steps:
+    L += [f"- Started {steps[min(steps)].get('start', '?')}, last step ended {steps[max(steps)].get('end', '?')}.",
+          f"- nav-pilot binary: `{steps[min(steps)].get('nav_pilot', '?')}`.", ""]
+L += ["## Steps", "", "| # | Step | Profile / model | Status | Minutes | Result |", "|---|---|---|---|---|---|"]
+for n in sorted(steps):
+    s = steps[n]
+    st = s["status"] + (f" (exit {s['rc']})" if s["status"] == "FAIL" else "") + (f": {s['note']}" if s.get("note") else "")
+    mins = f"{int(s['seconds']) / 60:.0f}" if s.get("seconds") else ""
+    L.append(f"| {n} | {s['kind']} {s['mode']} | `{s['profile']}` | {st} | {mins} | `{s.get('result') or ''}` |")
+by = lambda k: [steps[n] for n in sorted(steps) if steps[n]["kind"] == k and steps[n].get("result")]
+for s in by("e2e"):
+    d = load(s["result"])
+    if d:
+        v, lat, peak, sess = R.e2e_summary(d, s["result"])
+        L += ["", f"## 48k e2e: `{s['profile']}`", "", f"- Verdicts: {v}", f"- Latency: {lat}", f"- Peak footprint: {peak}",
+              f"- Copilot sessions verified: {sess}",
+              "- Pass (pending-tasks §8): no Insufficient Memory, peak ≤ 41 GB, sessions ≥ 5/6. Otherwise the 8-bit goes back to 32k."]
+for s in by("decide"):
+    d = load(s["result"]) or {}
+    L += ["", f"## `nav-pilot alpha decide` on `{d.get('model')}`", ""]
+    if d.get("cold"): L.append(f"- Cold (first call after `alpha local start`): {d['cold']['ms']} ms ({d['cold']['wall_s']} s wall).")
+    if d.get("warm"): L.append(f"- Warm, {d['warm']['n']} calls: p50 {d['warm']['p50_ms']} ms, p95 {d['warm']['p95_ms']} ms, max {d['warm']['max_ms']} ms.")
+    for x in d.get("logprobs", []):
+        L.append(f"- Letter tokens in top_logprobs ({'/'.join(x['options'])}): mass {x['letter_mass']} before renormalising, "
+                 f"{'OK' if x['ok'] else 'LOW'}; top {x['top'][:3]}.")
+    for name, e in (d.get("eval") or {}).items():
+        L.append(f"- `--eval {name}`: " + (f"{e['correct']}/{e['cases']} ({e['accuracy']:.2f}), mean p correct "
+                 f"{e['mean_p_correct']:.2f} / wrong {e['mean_p_wrong']:.2f}, confusion {e['confusion']}" if "cases" in e else e.get("error", "?")))
+    ev = d.get("eviction") or {}
+    if ev.get("pairs"):
+        L.append(f"- Cache eviction: {ev.get('verdict')}. Cold {ev['cold']['ttft_s']} s for {ev['cold']['prompt_tokens']} tokens; per pair "
+                 "(warm → after decide → control, TTFT s / tokens prefilled): "
+                 + "; ".join(f"{p['warm']['ttft_s']}/{p['warm']['prefilled_tokens']} → {p['after_decide']['ttft_s']}/"
+                             f"{p['after_decide']['prefilled_tokens']} → {p['control']['ttft_s']}/{p['control']['prefilled_tokens']}"
+                             for p in ev["pairs"]) + ".")
+for s in by("hook"):
+    d = load(s["result"]) or {}
+    L += ["", "## #939 loop hook inside cplt", "", f"- {d.get('verdict')}",
+          f"- Model {d.get('model')}, {d.get('tool_calls')} tool calls, in sandbox: {d.get('in_sandbox')}, "
+          f"marker in: {d.get('marker_event_types')}, new hook-state files: {d.get('hook_state_new')}.",
+          f"- cplt profile lines naming .nav-pilot: {d.get('cplt_profile_nav_pilot_rules') or 'none'}.", f"- Log: `{d.get('log')}`."]
+ops = [(s, R.ops_summary(load(s["result"]) or {})) for s in by("ops") if s["status"] == "OK"]
+if ops:
+    v, n = sum(o["verified"] for _, o in ops), sum(o["n"] for _, o in ops)
+    L += ["", "## optiq cheap-ops at the production setting (temp 0.6, top_p 0.95)", "",
+          "| Run | Verified/10 (excl. D2) | Median s/task | Loops |", "|---|---|---|---|"]
+    L += [f"| `{Path(s['result']).name}` | {o['verified']}/{o['n']} | {o['median_s'] or 0:.0f} | {o['loops']} |" for s, o in ops]
+    L += ["", f"Pooled: {v}/{n}. Against 28/40 at temp 0.6 on 2026-09-23. Next: `mise run bench-capabilities` "
+          "for read-qa and edit-single past n ≥ 5."]
+hyb = sorted(bench.glob(f"hybrid*-{tag}-*.json"))
+if hyb or any(s["kind"] == "hybrid" for s in steps.values()):
+    L += ["", f"## opencode hybrid arm (tag `{tag}`)", ""]
+    if not hyb:
+        L.append(f"No result files. Step status: {[s['status'] + ': ' + (s.get('note') or '') for s in steps.values() if s['kind'] == 'hybrid']}")
+    else:
+        L += ["| File | Valid | Verified | Dispatched | Median $ | Median s | Policy |", "|---|---|---|---|---|---|---|"]
+        for f in hyb:
+            d = load(f) or {}
+            val = [x for x in d.get("samples", []) if x.get("valid")]
+            med = lambda k: statistics.median([x[k] for x in val if x.get(k) is not None]) if any(x.get(k) is not None for x in val) else None
+            pol = sorted({(x.get("policy") or {}).get("sha256", "")[:8] for x in val} - {""})
+            L.append(f"| `{f.name}` | {len(val)}/{len(d.get('samples', []))} | {sum(bool(x.get('verified')) for x in val)} | "
+                     f"{sum(bool(x.get('dispatched')) for x in val) if d.get('arm') == 'hybrid' else '–'} | "
+                     f"{med('cloud_cost_usd')} | {med('seconds')} | {', '.join(pol) or '–'} |")
+        L += ["", "`bench-capabilities` scores these as their own condition (orchestrator and policy hash from the file)."]
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text("\n".join(L) + "\n")
+print(f"report: {out}")
+EOF
+
+# Commit the report and the result files on a local branch, as night-run does. Never pushed.
+results=$(find "$BENCH_DIR" -maxdepth 1 -name '*.json' ! -name '.*' -newer "$DIR/.run-start" 2>/dev/null | sort)
+if [ -n "$FAKE" ]; then
+  say "(fake) would commit $REPORT and: $(echo $results)"
+else
+  branch="bench/night2-results-$(basename "$DIR" | sed 's/^night2-//')"
+  git switch -c "$branch" >> "$DIR/night.log" 2>&1 || git switch "$branch" >> "$DIR/night.log" 2>&1
+  git add -- "$REPORT" $results >> "$DIR/night.log" 2>&1
+  git commit -m "docs(reports): night run 2 $(date +%Y-%m-%d) results" < /dev/null >> "$DIR/night.log" 2>&1 &
+  cpid=$!
+  for _ in $(seq 120); do kill -0 "$cpid" 2>/dev/null || break; sleep 1; done
+  kill -0 "$cpid" 2>/dev/null && { kill "$cpid"; say "✗ git commit hung (signing?); files are staged on $branch"; }
+  wait "$cpid" 2>/dev/null && say "✓ committed on local branch $branch (not pushed)" || say "✗ commit failed; see $DIR/night.log"
+fi
+say "=== night-run-2 done. Report: $REPORT · steps: $DIR/steps.jsonl"
