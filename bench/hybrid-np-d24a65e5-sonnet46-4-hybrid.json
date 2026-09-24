@@ -1,0 +1,704 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:04+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47715
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47766
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-0-20260925-014303.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:07+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47765
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47807
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-1-20260925-014307.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:10+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47811
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47830
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-2-20260925-014310.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:14+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47830
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47854
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-3-20260925-014314.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 4,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:17+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47854
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47859
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-4-20260925-014317.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 5,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:21+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47856
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47854
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-5-20260925-014320.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 6,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:24+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47852
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47853
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-6-20260925-014324.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 7,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:27+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47853
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47854
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-7-20260925-014327.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 8,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:31+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47862
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47872
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-8-20260925-014330.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 9,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:34+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47871
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47863
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-9-20260925-014334.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 10,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:37+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47866
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47865
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-10-20260925-014337.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 11,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:41+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47866
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47867
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-11-20260925-014341.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 12,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:45+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47866
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47819
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-12-20260925-014344.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    },
+    {
+      "n": 13,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-09-25T01:43:48+0200",
+      "seconds": 3.0,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "cloud_steps": null,
+      "cloud_tokens": null,
+      "cloud_cost_usd": null,
+      "truncated": null,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/.config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "8b919b9419304b04950f641e679806b34d9490e237cbe47f8b52f81199d6fdea",
+        "bytes": 2059
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47822
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 47820
+        }
+      },
+      "local_server_pid": 32944,
+      "local_server_started": "2026-09-25T01:27:29.08201+02:00",
+      "log": ".bench-logs/hybrid-4-hybrid-13-20260925-014348.jsonl",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1"
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-09-25T01:43:02+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: unknown, built: unknown)",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260925-012727.config.toml",
+      "tag": "np-d24a65e5-sonnet46",
+      "opencode_version": "1.18.32",
+      "cloud_model": "claude-sonnet-4.6",
+      "load_average": 1.42,
+      "exclusive": true,
+      "wired_limit_gb": 36,
+      "wired_limit_expected_gb": 36,
+      "local_server": {
+        "pid": 32944,
+        "port": "55628",
+        "started": "2026-09-25T01:27:29.08201+02:00",
+        "probe_seconds": 0.31
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 47711
+      }
+    }
+  ],
+  "rung": 4,
+  "arm": "hybrid",
+  "task": "G2",
+  "tag": "np-d24a65e5-sonnet46",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day."
+}

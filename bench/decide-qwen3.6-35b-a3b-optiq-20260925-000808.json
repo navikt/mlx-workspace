@@ -1,0 +1,255 @@
+{
+  "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+  "port": 62680,
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
+  "nav_pilot_commit": "d24a65e5fd81c3347e7325722354c998d7499f08",
+  "profile": "qwen3.6-35b-a3b-optiq",
+  "started": "2026-09-25T00:08:13+0200",
+  "cold": {
+    "ms": 427,
+    "wall_s": 0.526,
+    "choice": "yes",
+    "p": {
+      "no": 0.29400317910549983,
+      "yes": 0.7059968208945001
+    }
+  },
+  "sanity": "OK",
+  "warm": {
+    "n": 20,
+    "ms": [
+      308,
+      345,
+      378,
+      362,
+      361,
+      345,
+      370,
+      371,
+      359,
+      355,
+      374,
+      366,
+      347,
+      348,
+      341,
+      349,
+      351,
+      340,
+      351,
+      338
+    ],
+    "wall_s": [
+      0.409,
+      0.444,
+      0.474,
+      0.454,
+      0.456,
+      0.438,
+      0.466,
+      0.473,
+      0.521,
+      0.452,
+      0.466,
+      0.468,
+      0.445,
+      0.444,
+      0.44,
+      0.444,
+      0.448,
+      0.439,
+      0.454,
+      0.44
+    ],
+    "p50_ms": 351,
+    "p95_ms": 374,
+    "min_ms": 308,
+    "max_ms": 378
+  },
+  "logprobs": [
+    {
+      "options": [
+        "yes",
+        "no"
+      ],
+      "letter_mass": 0.9714,
+      "ok": true,
+      "top": [
+        [
+          "B",
+          0.8825
+        ],
+        [
+          "A",
+          0.0821
+        ],
+        [
+          "The",
+          0.0098
+        ],
+        [
+          "ĠB",
+          0.0059
+        ],
+        [
+          "E",
+          0.0025
+        ],
+        [
+          "<think>",
+          0.001
+        ]
+      ]
+    },
+    {
+      "options": [
+        "loop",
+        "progress"
+      ],
+      "letter_mass": 0.9404,
+      "ok": true,
+      "top": [
+        [
+          "A",
+          0.6873
+        ],
+        [
+          "B",
+          0.2528
+        ],
+        [
+          "The",
+          0.0076
+        ],
+        [
+          "<think>",
+          0.0009
+        ],
+        [
+          "Based",
+          0.0003
+        ],
+        [
+          "ĠA",
+          0.0002
+        ]
+      ]
+    }
+  ],
+  "eval": {
+    "commit-conventional.jsonl": {
+      "cases": 20,
+      "correct": 15,
+      "accuracy": 0.75,
+      "confusion": {
+        "no": {
+          "no": 10
+        },
+        "yes": {
+          "no": 5,
+          "yes": 5
+        }
+      },
+      "mean_p_correct": 0.8117204413928373,
+      "mean_p_wrong": 0.7448998461667868,
+      "p50_ms": 360,
+      "p95_ms": 401,
+      "cases_without_evidence": 0
+    },
+    "loop-vs-progress.jsonl": {
+      "cases": 12,
+      "correct": 11,
+      "accuracy": 0.9166666666666666,
+      "confusion": {
+        "loop": {
+          "loop": 5,
+          "progress": 1
+        },
+        "progress": {
+          "progress": 6
+        }
+      },
+      "mean_p_correct": 0.8430241318730833,
+      "mean_p_wrong": 0.5621765008857981,
+      "p50_ms": 498,
+      "p95_ms": 802,
+      "cases_without_evidence": 0
+    }
+  },
+  "eviction": {
+    "cold": {
+      "prompt_tokens": 17144,
+      "ttft_s": 6.37,
+      "total_s": 6.46,
+      "prefilled_tokens": 0
+    },
+    "pairs": [
+      {
+        "warm": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.21,
+          "total_s": 0.3,
+          "prefilled_tokens": 0
+        },
+        "decide_ms": 722,
+        "after_decide": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.23,
+          "total_s": 0.32,
+          "prefilled_tokens": 0
+        },
+        "control": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.19,
+          "total_s": 0.28,
+          "prefilled_tokens": 0
+        }
+      },
+      {
+        "warm": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.19,
+          "total_s": 0.27,
+          "prefilled_tokens": 0
+        },
+        "decide_ms": 760,
+        "after_decide": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.23,
+          "total_s": 0.31,
+          "prefilled_tokens": 0
+        },
+        "control": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.19,
+          "total_s": 0.28,
+          "prefilled_tokens": 0
+        }
+      },
+      {
+        "warm": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.19,
+          "total_s": 0.27,
+          "prefilled_tokens": 0
+        },
+        "decide_ms": 742,
+        "after_decide": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.23,
+          "total_s": 0.32,
+          "prefilled_tokens": 0
+        },
+        "control": {
+          "prompt_tokens": 17144,
+          "ttft_s": 0.19,
+          "total_s": 0.28,
+          "prefilled_tokens": 0
+        }
+      }
+    ],
+    "reprefilled": 0,
+    "verdict": "decide leaves the session prefix cached"
+  },
+  "finished": "2026-09-25T00:08:49+0200"
+}
