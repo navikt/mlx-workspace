@@ -173,6 +173,26 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   `--eval` on 2–3 of our own questions, such as "is this commit message conventional?" (yes/no)
   and loop versus progress with the tool results as evidence, which is the case the loop
   classifier got wrong without them ([research](../2026-09-24-jev-like-features/research.md)).
+- **Narrow `harness_sha` to what scores a run (after both night runs exit).** Today
+  `_harness_sha()` in `bench-cheap-ops` hashes `_profiles.py` whole, so e5c34cd, which only added
+  `MLX_NAV_PILOT_TEMPERATURE`/`TOP_P` to `OPTIONAL_DEFAULTS`, moved the sha from 492141135fe6 to
+  f62fbb8cbeae and would have dropped every older run from the bar. `_by_class.py` now pools that
+  pair through `EQUIVALENT_HARNESS`; the change below stops the next one. Meanwhile the profile
+  TOMLs, which do reach a score, are not hashed at all (5e29c51 changed the 8-bit's cache and
+  opencode context with no new generation). The change, in `bench-cheap-ops`:
+  1. Drop `.mise/tasks/_profiles.py` from the tuple in `_harness_sha()`. What stays applies to every
+     profile and decides the score: `bench-cheap-ops` (runner and `verify()`), `_sandbox.py`,
+     `bench/tasks.json`, `bench/agents-prompt.md`.
+  2. Stamp each per-task record with `profile_sha` next to `harness_sha`: the first 12 hex of
+     sha256 over `json.dumps({k: v for k, v in P.params_for(profile).items() if not
+     k.startswith("MLX_NAV_PILOT_")}, sort_keys=True)`.
+  3. In `_by_class.py`, add `profile_sha` to the cheap-ops condition when present, so a changed
+     profile splits its own row without resetting every other profile's generation.
+  The first run after this is a new generation by construction. Map it onto 492141135fe6 in
+  `EQUIVALENT_HARNESS` only after diffing the inputs, as was done for f62fbb8cbeae. Known history
+  on the Ktor suite: 492141135fe6 (inputs as committed in a387e4b; stamped runs 23 Sept 08:39 to
+  24 Sept 20:01), f62fbb8cbeae (e5c34cd; runs from 24 Sept 20:39), and 1b8ef6f69ba3 on one 18 Sept 8-bit file,
+  which matches no commit (an uncommitted tree) and is older, so it never pools.
 - **What tonight cannot answer.** Real 48 GB hardware and Pro chips (task 5), a cloud reference
   arm for the same tasks, and a rerun of the delegation benchmark.
 

@@ -51,6 +51,16 @@ INVALID_RUNS = {
 # the frontend-debug target (design §1.1).
 DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 
+# Harness generations known to score identically, newer sha -> the one it pools
+# with. A harness_sha hashes whole files (bench-cheap-ops _harness_sha), so an
+# edit that cannot reach a score still starts a new generation. Add a pair only
+# after checking the diff between the two shas' inputs; never by default.
+#   f62fbb8cbeae: e5c34cd (24 Sept 19:54) added MLX_NAV_PILOT_TEMPERATURE and
+#   MLX_NAV_PILOT_TOP_P to OPTIONAL_DEFAULTS in _profiles.py. Only model-manifest
+#   reads them (nav-pilot's sampling); the workspace server, the runner, the
+#   tasks and the verifiers never do. It is the only input change from a387e4b.
+EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6"}
+
 Z90 = NormalDist().inv_cdf(0.90)  # one-sided 90%
 
 
@@ -87,7 +97,8 @@ def _outcome(rec):
 def _cheap_ops_files():
     """Stamped runs of the newest harness generation only. A harness change
     starts the count again at zero (design §4.2); newest is by run tag, the
-    date the file was written, not by the sha's spelling."""
+    date the file was written, not by the sha's spelling. Shas listed in
+    EQUIVALENT_HARNESS count as the generation they map to."""
     runs = []
     for f in sorted(BENCH.glob("results-*.json")):
         if f.name in INVALID_RUNS:
@@ -104,7 +115,13 @@ def _cheap_ops_files():
         parts = f.stem[len("results-"):].rsplit("-", 3)
         if len(parts) != 4 or not all(p.isdigit() for p in parts[1:]):
             continue
-        runs.append((f"{parts[1]}-{parts[2]}", parts[0], shas.pop(), f, d))
+        sha = shas.pop()
+        runs.append((f"{parts[1]}-{parts[2]}", parts[0], EQUIVALENT_HARNESS.get(sha, sha), f, d))
+    return newest_generation(runs)
+
+
+def newest_generation(runs):
+    """The runs sharing the newest run's (already canonical) sha."""
     if not runs:
         return []
     newest = max(runs)[2]
@@ -245,4 +262,12 @@ if __name__ == "__main__":
               "samples": [{"preflight": 0, "policy": {"sha256": "abcdef0123456789"}}, {"preflight": 0}]}
     assert hybrid_condition(tagged, tagged["samples"][0], "f") == ("gpt-6-sol", "w", "policy=abcdef01")
     assert hybrid_condition(tagged, tagged["samples"][1], "f")[2] == "policy=none"
+    # Equivalent generations pool; any other sha change still starts from zero.
+    def canon(tag, sha):
+        return (tag, "p", EQUIVALENT_HARNESS.get(sha, sha), None, None)
+    old, new = canon("20260923-1200", "492141135fe6"), canon("20260925-0100", "f62fbb8cbeae")
+    assert newest_generation([old, new]) == [old, new]
+    other = canon("20260926-0100", "0123456789ab")
+    assert newest_generation([old, new, other]) == [other]
+    assert all(k != v and v not in EQUIVALENT_HARNESS for k, v in EQUIVALENT_HARNESS.items())
     print("✓ _by_class self-check passed")
