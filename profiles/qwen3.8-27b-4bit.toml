@@ -38,3 +38,8 @@ MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"
+# By analogy with the 8-bit, not measured on this build: the 8-bit scored 31/40 at 0.6
+# against 12/20 at temperature 0 (2026-09-24), and the optiq default 28/40 against 17/30.
+# Copilot CLI sends temperature 0, so nav-pilot's guard sets both.
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

@@ -61,14 +61,15 @@ Goal: confirm or replace the provisional parameters in PR navikt/mlx-workspace#2
 
 ## 3. Sampling (temperature) comparison (GPU): temp 0 is night-run steps 6–10
 
-**Done for optiq, pending for the Qwen3.8 entries.** Optiq at temp 0 scored 17/30 against 28/40
-at 0.6 (Fisher p = 0.32), so temp 0 is not better and the default now sets
-`MLX_NAV_PILOT_TEMPERATURE = "0.6"` and `MLX_NAV_PILOT_TOP_P = "0.95"`, matching what was
-measured (qwen38-tuning.md §9). The 8-bit temp-0 runs (steps 9–10) are still running.
+**Done for every manifest entry.** Optiq at temp 0 scored 17/30 against 28/40 at 0.6
+(Fisher p = 0.32), and the Qwen3.8 8-bit 12/20 against 31/40 (p = 0.22). Temp 0 is not better
+for either, so all three entries set `MLX_NAV_PILOT_TEMPERATURE = "0.6"` and
+`MLX_NAV_PILOT_TOP_P = "0.95"`, matching what was measured (qwen38-tuning.md §9). The Qwen3.8
+4-bit was not measured at temp 0; it gets the same setting by analogy.
 
 Local models ran greedy (temp 0) until then: opencode sends no temperature, and Copilot CLI sends 0.
 navikt/copilot#934 (merged 2026-09-24) lets the manifest set `MLX_NAV_PILOT_TEMPERATURE` /
-`MLX_NAV_PILOT_TOP_P`, which the guard enforces. Only the optiq default sets them so far.
+`MLX_NAV_PILOT_TOP_P`, which the guard enforces.
 
 - Compare temp 0 against 0.7 with top_p 0.8, on optiq and the tuned Qwen3.8 profiles:
   `bench-cheap-ops` ×3 per cell, comparing verified tasks and loop-guard trips.
@@ -76,7 +77,7 @@ navikt/copilot#934 (merged 2026-09-24) lets the manifest set `MLX_NAV_PILOT_TEMP
   so far was measured at 0.6, the workspace server's `MLX_TEMP` default, not at the greedy 0 users get.
   The report gives Fisher p-values against optiq 28/40 and 8-bit nopin 31/40.
 - `nav-pilot-main-f1507caa` includes #934.
-- Afterwards, set the values in the manifest in a new PR.
+- Afterwards, set the values in the manifest in a new PR. Done for all three entries.
 
 ## 4. Update the manifest with measured values (network, after 2–3)
 
@@ -143,9 +144,10 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   (the `rtk` prefix hides output in local cplt sessions, §7) is still the user's call.
 - **`~/.copilot/session-state` worktrees.** 27 GB in total, 6 `*-worktree` directories. The user
   deletes them.
-- **Temperature and OptiQ-4bit.** Temperature is done for the optiq default (steps 6–8, task 3).
-  Still to run or write up: `night-run` steps 5 and 9–15 (OptiQ-4bit e2e, the 8-bit temp-0 cheap-ops,
-  cheap-ops for the 4-bit and OptiQ-4bit). Task 2 and the Qwen3.8 part of task 3 stay open until then.
+- **Temperature and OptiQ-4bit.** Temperature is done for every entry (steps 6–10, task 3; the
+  Qwen3.8 4-bit by analogy, not measured). Still to run or write up: `night-run` steps 5 and 11–15
+  (OptiQ-4bit e2e, cheap-ops for the 4-bit and OptiQ-4bit). Task 2 stays open until then.
+  The 0.7 / top_p 0.8 cell of task 3 is still unrun.
 - **Refresh capabilities after tonight.** `mise run bench-capabilities && mise run model-manifest`
   once the night's JSON is on `main`, and a PR if the verdicts move.
 - **opencode regression arm through nav-pilot.** Nothing re-measures delegate mode today: the

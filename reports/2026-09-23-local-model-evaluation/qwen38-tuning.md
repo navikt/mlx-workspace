@@ -156,7 +156,7 @@ What the c48k point says so far:
 
 ## Night 24 Sept: locked-in so far
 
-Steps 1–4 and 6–8 of `night-run` (`.bench-logs/night-20260924-172038/`), binary `nav-pilot-main-f1507caa`.
+Steps 1–4 and 6–10 of `night-run` (`.bench-logs/night-20260924-172038/`), binary `nav-pilot-main-f1507caa`.
 Cold/warm TTFT is at the ~30k probe (29,519 tokens; 27,721 for c32k) and at the largest target.
 "Verified" counts Copilot sessions that launched; the rest failed to clone `nais/pilot` (network).
 
@@ -167,6 +167,7 @@ Cold/warm TTFT is at the ~30k probe (29,519 tokens; 27,721 for c32k) and at the 
 | 3 | 8-bit c40k-3g, step 1024 | 37.23 GB | 70.7 s / 87.4 s (35.5k) | 0.99 s / 1.16 s | 12.8–14.0 tok/s | latency only | `bench/np-e2e-qwen3.8-27b-8bit-nopin-c40k-3g-ps1024-20260924-180149.json` |
 | 4 | 8-bit c48k, 3.25 GiB, step 512 | 38.30 GB | 57.5 s / 84.8 s (43.7k) | 0.60 s / 0.70 s | 14.6–15.6 tok/s at 30k/43.7k (13.2 at 2k) | latency only | `bench/np-e2e-qwen3.8-27b-8bit-nopin-c48k-ps512-20260924-180628.json` |
 | 6–8 | Temperature: optiq default at temp 0, cheap-ops ×3 | | | | | cheap-ops 17/30 (6, 5, 6; D2 retired) against 28/40 at 0.6 on 2026-09-23, Fisher p = 0.32. Temp 0 is not better, so the manifest default now runs at 0.6 with top_p 0.95 (§9) | `bench/results-qwen3.6-35b-a3b-optiq-t0-20260924-{182823,184754,190837}-01.json` |
+| 9–10 | Temperature: 8-bit nopin c32k at temp 0, cheap-ops ×2 | | | | | cheap-ops 12/20 (6, 6; D2 retired; R1, M2, G2 and D3 failed in both; no loop-guard trips) against 31/40 at 0.6 on 2026-09-23, Fisher p = 0.22. Temp 0 is not better, so both Qwen3.8 entries now run at 0.6 with top_p 0.95 (§9; the 4-bit by analogy) | `bench/results-qwen3.8-27b-8bit-nopin-c32k-t0-20260924-{192544,200129}-01.json` |
 
 All four stay under the 40 GB e2e criterion, and none meets the 30 s cold-TTFT criterion at 30k.
 Step 4 at a 512 step was faster than step 3 at 1024 (57.5 s against 70.7 s at 30k), so the smaller
@@ -301,4 +302,12 @@ greedy 0 users get. `night-run` steps 6–10 measure temp 0 (`-t0` profiles) and
 **Optiq result.** Temp 0 scored 17/30 against 28/40 at 0.6 (two-sided Fisher exact, p = 0.32).
 The rule was 0.6 unless temp 0 is clearly better, so the optiq profile sets
 `MLX_NAV_PILOT_TEMPERATURE = "0.6"` and `MLX_NAV_PILOT_TOP_P = "0.95"`, the top_p the server ran
-those 0.6 runs with (the profile's `MLX_TOP_P`). The Qwen3.8 entries wait for their temp-0 runs.
+those 0.6 runs with (the profile's `MLX_TOP_P`).
+
+**Qwen3.8 result.** The 8-bit at temp 0 scored 12/20 (6 and 6, failing R1, M2, G2 and D3 both
+times, no loop-guard trips) against 31/40 at 0.6 for `qwen3.8-27b-8bit-nopin` on 2026-09-23
+(two-sided Fisher exact, p = 0.22). Temp 0 is not better, and it fails the same way as optiq, so
+both Qwen3.8 entries set `MLX_NAV_PILOT_TEMPERATURE = "0.6"` and `MLX_NAV_PILOT_TOP_P = "0.95"`
+(the nopin profile's `MLX_TOP_P`, unchanged since it was created). The 4-bit was not measured at
+temp 0: its setting follows the 8-bit and optiq by analogy. The two runs differ in more than
+temperature: the t0 profile has c32k's 2.25 GiB cache and 4k output, the 0.6 baseline 4 GiB and 8k.

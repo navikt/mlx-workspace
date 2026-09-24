@@ -105,7 +105,9 @@
         "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
-        "MLX_MIN_P": "0.0"
+        "MLX_MIN_P": "0.0",
+        "MLX_NAV_PILOT_TEMPERATURE": "0.6",
+        "MLX_NAV_PILOT_TOP_P": "0.95"
       },
       "capabilities": {
         "bar": {
@@ -183,7 +185,9 @@
         "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
-        "MLX_MIN_P": "0.0"
+        "MLX_MIN_P": "0.0",
+        "MLX_NAV_PILOT_TEMPERATURE": "0.6",
+        "MLX_NAV_PILOT_TOP_P": "0.95"
       },
       "capabilities": {
         "bar": {
