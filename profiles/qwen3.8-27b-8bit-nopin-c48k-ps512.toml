@@ -3,15 +3,14 @@ name               = "Qwen 3.8 27B 8bit (mlx-lm), 48k context, 3.25 GiB cache, p
 released           = "2026-07"
 status             = "testing"
 spec_source        = "config.json"
-notes              = "Tuning point for the 36 GB tier (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §4). Same as c48k with --prefill-step-size 512 (navikt/copilot#936) and the cache raised to 3.25 GiB so a full 48k+4k window stays cached; estimated 40.4 GB at context+output vs 44.3 at step 2048. Prefill speed cost unmeasured."
+notes              = "Tuning point for the 36 GB tier (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §4). Same as c48k with --prefill-step-size 512 (navikt/copilot#936) and the cache raised to 3.25 GiB so a full 48k+4k window stays cached; estimated 40.4 GB at context+output vs 44.3 at step 2048. Measured 2026-09-24: 38.30 GB peak through 43.7k tokens, cold TTFT 57.5 s at 30k and 84.8 s at 45k, warm 0.6-0.7 s, decode 14.6-15.6 tok/s cold (bench/np-e2e-qwen3.8-27b-8bit-nopin-c48k-ps512-20260924-180628.json). Latency only; the offered qwen3.8-27b-8bit-mlx entry now uses these params."
 model_vram_gb      = 30
 gpu_wired_limit_gb = 36
 
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
 MLX_SERVER_TYPE            = "mlx-lm"
-# 2 GiB of prompt cache (the base nopin profile has 4 GiB): the freed 2 GiB goes to
-# prefill headroom, which is what OOMs at ~51k tokens.
+# 3.25 GiB of prompt cache: 64 KiB/token x (49,152 + 4,096) holds a whole session.
 MLX_CACHE_BYTES            = "3489660928"
 MLX_PREFILL_STEP_SIZE      = "512"
 MLX_CACHE_SIZE             = "2"

@@ -3,7 +3,7 @@ name               = "Qwen 3.6 35B A3B OptiQ 4bit"
 released           = "2026-06"
 status             = "untested"
 spec_source        = "config.json"
-notes              = "The alpha model's weights under OptiQ quantization, 24.7 GB against 18.6 GB. Quantization is the only variable, the same shape as the DWQ comparison that rejected DWQ on 2 of 7 verified against 5 of 7. Worth one run because quantization is the cheapest lever that has ever moved these numbers, and the most recent one to disappoint."
+notes              = "The alpha model's weights under OptiQ quantization, 24.7 GB against 18.6 GB. Quantization is the only variable, the same shape as the DWQ comparison that rejected DWQ on 2 of 7 verified against 5 of 7. Worth one run because quantization is the cheapest lever that has ever moved these numbers, and the most recent one to disappoint. Now the manifest default. manifest/capabilities.json (2026-09-24): trusted as a delegated worker for mechanical multi-file edits (35 of 35 verified); read-qa and single-file edits not yet (too few tasks or runs); create-file and debug stay on the cloud."
 model_vram_gb      = 25
 gpu_wired_limit_gb = 36
 

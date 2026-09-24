@@ -39,31 +39,34 @@ OFFERED = {
     "qwen3.6-35b-a3b-optiq": {
         "default": True,
         "role": "Sub-agent worker for focused tasks",
-        "expect": "Takes a scoped task from the main agent and returns in seconds. Reads, renames, small edits and single-file changes. Not for work that needs many turns: it is unreliable past the point where a task stops being focused. The OptiQ build is chosen over the plain 4-bit because the plain one produced a roughly 200-call runaway tool loop in both passes at the 36 GB memory cap.",
+        # Written from manifest/capabilities.json, not from impressions: the one class
+        # that clears the bar is a delegated mechanical multi-file edit.
+        "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
     },
     # Qwen3.8-27B, both mlx-community builds, offered on request and never as the
     # default. People are asking for it by name, and refusing to serve a model
     # they can download themselves in one command is not a safety measure — it
     # just means they run it without our sampling parameters or our numbers.
     #
-    # Both are tuned for the 36 GB wired tier (48 GB machines), provisionally:
-    # reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §7. The 8-bit
-    # died with a Metal OOM at about 51k context, so it gets 32k context, a 4k
-    # reply and a 2.25 GiB prompt cache that holds one whole session. Copilot
-    # CLI's 80% static-context gate needs at least ~27.1k, so 32k is also the
-    # floor. The 4-bit gets 64k, an 8k reply and an 8 GiB cache.
+    # Both are tuned for the 36 GB wired tier (48 GB machines), measured on
+    # 2026-09-24: reports/2026-09-23-local-model-evaluation/qwen38-tuning.md.
+    # The 8-bit died with a Metal OOM at about 51k context with mlx-lm's
+    # 2048-token prefill step, so it gets 48k context, a 4k reply, a 3.25 GiB
+    # prompt cache that holds one whole session and a 512-token prefill step
+    # (38.3 GB peak at 45k; honoured only by nav-pilot with navikt/copilot#936).
+    # The 4-bit gets 64k, an 8k reply and an 8 GiB cache (37.2 GB peak at 57k).
     #
     # What the expect text has to carry is the speed and the instability,
     # because that is what a user cannot see for themselves in a short trial.
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
-        "expect": "Opt-in, never the default. Far slower than the default, median task 80 seconds against 11, and much less predictable: two runs of the same tasks had medians of 88 and 906 seconds, and it runs into the seven-minute cap where the default does not. Context is capped at 64k with an 8k reply so that a full session and its prompt cache stay under the 36 GB wired limit. These settings are provisional until a validation run confirms them. If you want an answer in ten seconds, take the default.",
+        "expect": "Opt-in, never the default. Far slower than the default, median task 80 seconds against 11, and much less predictable: two runs of the same tasks had medians of 88 and 906 seconds, and it runs into the seven-minute cap where the default does not. Context is capped at 64k with an 8k reply so that a full session and its prompt cache stay under the 36 GB wired limit. A full session measured 37.2 GB at peak. If you want an answer in ten seconds, take the default.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
         "role": "Opt-in alternative, the 8-bit build, slowest here",
-        "expect": "Opt-in, never the default. About ten times slower than the default per task (median 115 seconds against 12) and about 14 tokens a second; a cold 30k-token prompt takes about a minute to read. Quality in our benchmark was level with the default, 31 of 40 against 28, not a significant difference. Context is capped at 32k with a 4k reply because at 51k this build ran out of GPU memory under the 36 GB wired limit. These settings are provisional until a validation run confirms them. If you want one Qwen3.8, take the 4-bit.",
+        "expect": "Opt-in, never the default. About ten times slower than the default per task (median 115 seconds against 12) and about 14 tokens a second; a cold 30k-token prompt takes about a minute to read, 45k about 85 seconds. Quality was level with the default, 31 of 40 against 28. Context is 48k with a 4k reply, read in 512-token steps so a long prompt fits the 36 GB wired limit. nav-pilot releases older than 2026.09.24-110317 ignore the step and can run out of memory near 48k: update first. If you want one Qwen3.8, take the 4-bit.",
     },
 }
 
