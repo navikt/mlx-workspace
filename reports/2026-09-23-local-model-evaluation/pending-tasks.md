@@ -46,20 +46,19 @@ Goal: confirm or replace the provisional parameters in PR navikt/mlx-workspace#2
 ## 3. Sampling (temperature) comparison (GPU)
 
 Local models run greedy today (temp 0): opencode sends no temperature, and Copilot CLI sends 0.
-Draft PR navikt/copilot#934 lets the manifest set `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P`,
-which the guard enforces.
+navikt/copilot#934 (merged 2026-09-24) lets the manifest set `MLX_NAV_PILOT_TEMPERATURE` /
+`MLX_NAV_PILOT_TOP_P`, which the guard enforces. No manifest entry sets them yet, so behaviour is unchanged.
 
 - Compare temp 0 against 0.7 with top_p 0.8, on optiq and the tuned Qwen3.8 profiles:
   `bench-cheap-ops` ×3 per cell, comparing verified tasks and loop-guard trips.
-- This needs a nav-pilot binary built from the #934 branch.
-- Afterwards, set the values in the manifest (a PR to #20 or a new one), and mark #934 ready.
+- This needs a nav-pilot binary rebuilt from current `main` (it includes #934; `nav-pilot-main-d328ee68` does not).
+- Afterwards, set the values in the manifest in a new PR.
 
-## 4. Update and merge the manifest (network, after 2–3)
+## 4. Update the manifest with measured values (network, after 2–3)
 
-- Update PR navikt/mlx-workspace#20 with the measured parameters (and a temperature, if task 3
-  gives one), mark it ready and merge it. Merging publishes to every nav-pilot user.
-- Merge PR navikt/mlx-workspace#21 (this evaluation: harness fixes, tasks, reports, PLAN.md
-  corrections).
+#20 (provisional tuned params) and #21 (this evaluation) were merged on 2026-09-24. Open a new PR
+that replaces the provisional Qwen3.8 params with the measured ones (and sets a temperature if
+task 3 gives one). Merging publishes to every nav-pilot user.
 
 ## 5. Verify on real hardware (needs other machines)
 
@@ -78,7 +77,6 @@ Everything so far was measured on an M5 Max with 128 GB at a 36 GB wired limit. 
 
 ## 7. Cleanup when finished
 
-- The worktree `/Users/hans/mlx-workspace-hotfix` (PR #20), once #20 is merged.
 - The worktree `copilot-e2e` and its local branch `test/e2e-combined`: a test build, which can go
   once the sweep uses a binary from main.
 - The local tag `archive/system-one-classifier` in the copilot repo: delete it once nobody needs
