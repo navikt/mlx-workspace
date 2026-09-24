@@ -1,0 +1,401 @@
+{
+  "profile": "qwen3.8-27b-8bit-nopin-c48k-ps512",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-f1507caa",
+  "nav_pilot_commit": null,
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: pid %d: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (os.getpid(), a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 57813 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 3489660928 --chat-template-args {\"enable_thinking\": false} --prefill-step-size 512",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2114,
+        "completion_tokens": 256,
+        "ttft_s": 4.05,
+        "decode_tok_s": 13.2,
+        "total_s": 23.37,
+        "usage": {
+          "prompt_tokens": 2114,
+          "completion_tokens": 256,
+          "total_tokens": 2370,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 29519,
+        "completion_tokens": 256,
+        "ttft_s": 57.48,
+        "decode_tok_s": 15.6,
+        "total_s": 73.83,
+        "usage": {
+          "prompt_tokens": 29519,
+          "completion_tokens": 256,
+          "total_tokens": 29775,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 29802,
+        "completion_tokens": 178,
+        "ttft_s": 0.6,
+        "decode_tok_s": 15.8,
+        "total_s": 11.85,
+        "usage": {
+          "prompt_tokens": 29802,
+          "completion_tokens": 178,
+          "total_tokens": 29980,
+          "prompt_tokens_details": {
+            "cached_tokens": 29775
+          }
+        }
+      }
+    },
+    {
+      "target": 45000,
+      "cold": {
+        "prompt_tokens": 43705,
+        "completion_tokens": 256,
+        "ttft_s": 84.84,
+        "decode_tok_s": 14.6,
+        "total_s": 102.3,
+        "usage": {
+          "prompt_tokens": 43705,
+          "completion_tokens": 256,
+          "total_tokens": 43961,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 43988,
+        "completion_tokens": 196,
+        "ttft_s": 0.7,
+        "decode_tok_s": 12.6,
+        "total_s": 16.25,
+        "usage": {
+          "prompt_tokens": 43988,
+          "completion_tokens": 196,
+          "total_tokens": 44184,
+          "prompt_tokens_details": {
+            "cached_tokens": 43961
+          }
+        }
+      }
+    }
+  ],
+  "phases": [
+    {
+      "name": "latency-2000",
+      "start": 1790265995.838541,
+      "end": 1790266019.208925
+    },
+    {
+      "name": "latency-30000",
+      "start": 1790266019.2091331,
+      "end": 1790266104.89105
+    },
+    {
+      "name": "latency-45000",
+      "start": 1790266104.891395,
+      "end": 1790266223.435924
+    },
+    {
+      "name": "classifier",
+      "start": 1790266223.436455,
+      "end": 1790266236.067161
+    }
+  ],
+  "classifier_probe": [
+    {
+      "id": "rerun-tests",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 3.007,
+      "would_block": false,
+      "within_timeout": false
+    },
+    {
+      "id": "poll-ci",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.482,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.512,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.476,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.455,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 0,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.454,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 0,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.46,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.469,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.481,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.486,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.498,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.485,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 1,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.491,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 1,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.481,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.496,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.491,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.48,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.483,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.483,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 2,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.482,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 2,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.48,
+      "would_block": false,
+      "within_timeout": true
+    }
+  ],
+  "classifier_latency": {
+    "n": 21,
+    "p50": 0.482,
+    "p95": 0.512,
+    "max": 3.007
+  },
+  "effort_probe": [
+    {
+      "shape": "kwargs-high",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "kwargs-none",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "toplevel-high",
+      "status": 200,
+      "reply": "OK"
+    }
+  ],
+  "memory": {
+    "peak_gb": 38.3,
+    "samples": 114,
+    "peak_gb_by_phase": {
+      "latency-2000": 30.94,
+      "latency-30000": 37.23,
+      "latency-45000": 38.3,
+      "classifier": 38.16
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "peak footprint <= 40 GB",
+      "measured": 38.3,
+      "refuted": false
+    },
+    {
+      "criterion": "cold TTFT@30k <= 30 s",
+      "measured": 57.48,
+      "refuted": true
+    },
+    {
+      "criterion": "decode@30k >= 12 tok/s",
+      "measured": 15.6,
+      "refuted": false
+    },
+    {
+      "criterion": "warm TTFT@30k <= 5 s",
+      "measured": 0.6,
+      "refuted": false
+    },
+    {
+      "criterion": "classifier probe: no legit scenario over P(A) 0.9",
+      "measured": [],
+      "refuted": false
+    },
+    {
+      "criterion": "classifier p95 latency < 1.5 s (else the guard fails open)",
+      "measured": 0.512,
+      "refuted": false
+    }
+  ]
+}

@@ -1,0 +1,835 @@
+{
+  "profile": "qwen3.8-27b-8bit-nopin-c32k",
+  "model": "mlx-community/Qwen3.8-27B-8bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-f1507caa",
+  "nav_pilot_commit": null,
+  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: pid %d: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (os.getpid(), a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 64202 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 2415919104 --chat-template-args {\"enable_thinking\": false}",
+  "mlx_lm": [
+    "0.31.3"
+  ],
+  "mlx": [
+    "0.32.0"
+  ],
+  "chip": "Apple M5 Max",
+  "ram_bytes": 137438953472,
+  "wired_limit_mb": "36864",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2114,
+        "completion_tokens": 256,
+        "ttft_s": 3.86,
+        "decode_tok_s": 15.6,
+        "total_s": 20.25,
+        "usage": {
+          "prompt_tokens": 2114,
+          "completion_tokens": 256,
+          "total_tokens": 2370,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 28000,
+      "cold": {
+        "prompt_tokens": 27721,
+        "completion_tokens": 256,
+        "ttft_s": 55.65,
+        "decode_tok_s": 13.8,
+        "total_s": 74.11,
+        "usage": {
+          "prompt_tokens": 27721,
+          "completion_tokens": 256,
+          "total_tokens": 27977,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 28004,
+        "completion_tokens": 243,
+        "ttft_s": 0.74,
+        "decode_tok_s": 15.3,
+        "total_s": 16.65,
+        "usage": {
+          "prompt_tokens": 28004,
+          "completion_tokens": 243,
+          "total_tokens": 28247,
+          "prompt_tokens_details": {
+            "cached_tokens": 27977
+          }
+        }
+      }
+    }
+  ],
+  "phases": [
+    {
+      "name": "latency-2000",
+      "start": 1790263248.229558,
+      "end": 1790263268.483826
+    },
+    {
+      "name": "latency-28000",
+      "start": 1790263268.484359,
+      "end": 1790263359.251775
+    },
+    {
+      "name": "classifier",
+      "start": 1790263359.25216,
+      "end": 1790263371.453996
+    },
+    {
+      "name": "e2e-R2-on-0",
+      "start": 1790263372.696189,
+      "end": 1790263450.05153
+    },
+    {
+      "name": "e2e-R2-on-1",
+      "start": 1790263450.051944,
+      "end": 1790263527.416915
+    },
+    {
+      "name": "e2e-E1-on-2",
+      "start": 1790263527.41772,
+      "end": 1790263676.64162
+    },
+    {
+      "name": "e2e-E1-on-3",
+      "start": 1790263676.642035,
+      "end": 1790263763.4887638
+    },
+    {
+      "name": "e2e-M1-on-4",
+      "start": 1790263763.489268,
+      "end": 1790263872.1683998
+    },
+    {
+      "name": "e2e-M1-on-5",
+      "start": 1790263872.168907,
+      "end": 1790264038.6004632
+    },
+    {
+      "name": "e2e-R2-off-6",
+      "start": 1790264038.684006,
+      "end": 1790264101.194827
+    },
+    {
+      "name": "e2e-R2-off-7",
+      "start": 1790264101.195769,
+      "end": 1790264173.62248
+    },
+    {
+      "name": "e2e-E1-off-8",
+      "start": 1790264173.623039,
+      "end": 1790264257.463386
+    },
+    {
+      "name": "e2e-E1-off-9",
+      "start": 1790264257.464201,
+      "end": 1790264335.5859132
+    },
+    {
+      "name": "e2e-M1-off-10",
+      "start": 1790264335.586464,
+      "end": 1790264415.963674
+    },
+    {
+      "name": "e2e-M1-off-11",
+      "start": 1790264415.964185,
+      "end": 1790264497.236494
+    }
+  ],
+  "classifier_probe": [
+    {
+      "id": "rerun-tests",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 1.779,
+      "would_block": false,
+      "within_timeout": false
+    },
+    {
+      "id": "poll-ci",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.587,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.589,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 0,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.555,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 0,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.558,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 0,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.516,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 0,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.54,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.504,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.494,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 1,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.511,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 1,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.536,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 1,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.5,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 1,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.493,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-tests",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.6873,
+      "seconds": 0.524,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-ci",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.4169,
+      "seconds": 0.503,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "recompile",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.7788,
+      "seconds": 0.525,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "rerun-go-test",
+      "rep": 2,
+      "legitimate": true,
+      "n": 6,
+      "p_a": 0.7788,
+      "seconds": 0.5,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "poll-pr-checks",
+      "rep": 2,
+      "legitimate": true,
+      "n": 7,
+      "p_a": 0.6873,
+      "seconds": 0.498,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "reread-file",
+      "rep": 2,
+      "legitimate": false,
+      "n": 6,
+      "p_a": 0.8825,
+      "seconds": 0.479,
+      "would_block": false,
+      "within_timeout": true
+    },
+    {
+      "id": "same-grep",
+      "rep": 2,
+      "legitimate": false,
+      "n": 7,
+      "p_a": 0.8825,
+      "seconds": 0.507,
+      "would_block": false,
+      "within_timeout": true
+    }
+  ],
+  "classifier_latency": {
+    "n": 21,
+    "p50": 0.511,
+    "p95": 0.589,
+    "max": 1.779
+  },
+  "effort_probe": [
+    {
+      "shape": "kwargs-high",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "kwargs-none",
+      "status": 200,
+      "reply": "OK"
+    },
+    {
+      "shape": "toplevel-high",
+      "status": 200,
+      "reply": "OK"
+    }
+  ],
+  "e2e": [
+    {
+      "n": 0,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:22:52+0200",
+      "seconds": 77.3,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-0-20260924-172252.log",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 1,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:24:10+0200",
+      "seconds": 77.3,
+      "timed_out": false,
+      "exit": 1,
+      "local_calls": 0,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": null,
+        "cached": null,
+        "output": null
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-1-20260924-172410.log",
+      "verified": null,
+      "note": "client exited 1",
+      "valid": false,
+      "invalid_reason": "client exited 1",
+      "classifier": "on",
+      "stats_rows": 0,
+      "stats_rows_with_usage": 0,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 2,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:25:27+0200",
+      "seconds": 141.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 8,
+      "files_changed": 1,
+      "tokens": {
+        "input": 71500,
+        "cached": 47300,
+        "output": 390
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-2-20260924-172527.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "on",
+      "stats_rows": 3,
+      "stats_rows_with_usage": 3,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 3,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:27:56+0200",
+      "seconds": 85.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 95900,
+        "cached": 71600,
+        "output": 426
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-3-20260924-172756.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "on",
+      "stats_rows": 4,
+      "stats_rows_with_usage": 4,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 4,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:29:23+0200",
+      "seconds": 106.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 95800,
+        "cached": 71800,
+        "output": 533
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-4-20260924-172923.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "on",
+      "stats_rows": 4,
+      "stats_rows_with_usage": 4,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 5,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:31:12+0200",
+      "seconds": 165.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 95700,
+        "cached": 71800,
+        "output": 501
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-5-20260924-173112.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "on",
+      "stats_rows": 4,
+      "stats_rows_with_usage": 4,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 6,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:33:58+0200",
+      "seconds": 62.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 71000,
+        "cached": 47200,
+        "output": 134
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-6-20260924-173358.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 3,
+      "stats_rows_with_usage": 3,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 7,
+      "arm": "local",
+      "rung": 1,
+      "task": "R2",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:35:01+0200",
+      "seconds": 72.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 0,
+      "files_changed": 0,
+      "tokens": {
+        "input": 71000,
+        "cached": 47200,
+        "output": 134
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-1-local-7-20260924-173501.log",
+      "verified": true,
+      "note": "2 of 2 expected terms in the answer",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 3,
+      "stats_rows_with_usage": 3,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 8,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:36:13+0200",
+      "seconds": 81.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 71400,
+        "cached": 47600,
+        "output": 345
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-8-20260924-173613.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 3,
+      "stats_rows_with_usage": 3,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 9,
+      "arm": "local",
+      "rung": 2,
+      "task": "E1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:37:37+0200",
+      "seconds": 77.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "tokens": {
+        "input": 71400,
+        "cached": 47600,
+        "output": 347
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-2-local-9-20260924-173737.log",
+      "verified": true,
+      "note": "compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 3,
+      "stats_rows_with_usage": 3,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 10,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:38:55+0200",
+      "seconds": 79.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 95700,
+        "cached": 71800,
+        "output": 501
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-10-20260924-173855.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 4,
+      "stats_rows_with_usage": 4,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    },
+    {
+      "n": 11,
+      "arm": "local",
+      "rung": 3,
+      "task": "M1",
+      "client": "copilot",
+      "model": "mlx-community/Qwen3.8-27B-8bit",
+      "started": "2026-09-24T17:40:15+0200",
+      "seconds": 80.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 6,
+      "files_changed": 2,
+      "tokens": {
+        "input": 95700,
+        "cached": 71800,
+        "output": 501
+      },
+      "credits": 0.0,
+      "cost_usd": 0.0,
+      "log": ".bench-logs/copilot-3-local-11-20260924-174015.log",
+      "verified": true,
+      "note": "renamed and compiles",
+      "valid": true,
+      "invalid_reason": null,
+      "classifier": "off",
+      "stats_rows": 4,
+      "stats_rows_with_usage": 4,
+      "classifier_block": false,
+      "static_block": false,
+      "path_error": false
+    }
+  ],
+  "memory": {
+    "peak_gb": 37.28,
+    "samples": 576,
+    "peak_gb_by_phase": {
+      "latency-2000": 32.63,
+      "latency-28000": 37.24,
+      "classifier": 29.83,
+      "e2e-R2-on-0": 29.51,
+      "e2e-R2-on-1": 29.51,
+      "e2e-E1-on-2": 37.26,
+      "e2e-E1-on-3": 37.27,
+      "e2e-M1-on-4": 37.28,
+      "e2e-M1-on-5": 37.27,
+      "e2e-R2-off-6": 37.28,
+      "e2e-R2-off-7": 37.27,
+      "e2e-E1-off-8": 37.28,
+      "e2e-E1-off-9": 37.28,
+      "e2e-M1-off-10": 37.27,
+      "e2e-M1-off-11": 37.26
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "peak footprint <= 40 GB",
+      "measured": 37.28,
+      "refuted": false
+    },
+    {
+      "criterion": "classifier probe: no legit scenario over P(A) 0.9",
+      "measured": [],
+      "refuted": false
+    },
+    {
+      "criterion": "classifier p95 latency < 1.5 s (else the guard fails open)",
+      "measured": 0.589,
+      "refuted": false
+    },
+    {
+      "criterion": "E2E failures <= 1",
+      "measured": 2,
+      "refuted": true
+    },
+    {
+      "criterion": "E2E path errors == 0",
+      "measured": [
+        "R2",
+        "R2"
+      ],
+      "refuted": true
+    },
+    {
+      "criterion": "classifier false-positive blocks == 0",
+      "measured": [],
+      "refuted": false
+    }
+  ]
+}
