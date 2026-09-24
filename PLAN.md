@@ -101,7 +101,7 @@ guard against a correctly configured server is now the most interesting open que
 - **Qwen3.8-8bit is unmeasured.** Two runs verified nothing with zero turns per task, under two
   confounds of ours: a `reasoning_effort: medium` pin added the same night, and a 420s task cap
   against the 900s its historical figure used. One run with the pin removed settles it.
-  *Outcome (18 Sept):* **SETTLED AND CONFIRMED.** Ran `qwen3.8-27b-8bit-nopin` using `bench-models` overnight (900s cap). The model scored **7/7 on all mechanically verified tasks**, including `G2` which caused the 113-call loop in 4-bit. `longest_identical_run` was `1` across the board—**zero tool loops**. This definitively proves the 8-bit Qwen3.8-27B does not suffer from the 4-bit quantization loss floor loop, and the previous failures were entirely caused by the `reasoning_effort: medium` pin and the 420s timeout truncating valid runs.
+  *Outcome (18 Sept, corrected 24 Sept):* Ran `qwen3.8-27b-8bit-nopin` using `bench-models` overnight (900s cap). **7 of 11 tasks verified**, including `G2`, which caused the 113-call loop in 4-bit; R1, R3 and D1 need a human and D2 timed out (`bench/results-qwen3.8-27b-8bit-nopin-20260918-104324-01.json`). An earlier version of this line said 7/7. `longest_identical_run` was `1` on every task: no tool loops. On the current harness, n=4 gives 31/40 (78%) against optiq's 28/40 (Fisher p = 0.61): see [the 23 Sept decision](reports/2026-09-23-local-model-evaluation/decision.md).
 - **The variance is the finding, not a nuisance.** Qwen3.8-4bit ran 5, 5, 6 and 7 of 8 across four clean runs, against the default's 3, 3, 3, 4, 4 two
   hours apart on the same machine. n=2 is enough to know it is unstable and not enough to say
   what it is worth. n>=5 on both models is the next measurement that would change advice.
@@ -368,17 +368,23 @@ outranks any single measurement.
    *Outcome:* **UNAVAILABLE.** Quasar speculative acceleration has no native Apple Silicon/MLX port.
 
 **5. Crowning Qwen3.8-27B 8-bit as Default:**
-   *Status:* We have 1 stellar run (7/7, 0 loops) on `qwen3.8-27b-8bit-nopin`. 
-   *Action Needed:* We need to fulfill the variance rule (`n>=5`) by running the benchmark 4 more times on this model to confirm stability before replacing the default. We also need to complete the `oMLX` measurements (Section 4) to check if we should adopt oMLX for the speed boost.
+   *Status (18 Sept, corrected 24 Sept):* 1 run on `qwen3.8-27b-8bit-nopin`: 7 of 11 verified, 0 loops (an earlier version said 7/7).
+   *Outcome (23 Sept):* **NOT CROWNED.** See [the decision](reports/2026-09-23-local-model-evaluation/decision.md).
+   - `qwen3.6-35b-a3b-optiq` stays the only default: nopin 31/40 vs optiq 28/40 over n=4 each (p = 0.61), at about 9× the time per task.
+   - The 8-bit (`8bit-mlx` and `-nopin`) is withdrawn from the 48 GB tier: a Metal OOM at about 51k tokens at 36 GB wired, and about 6× slower prefill past 40k. It moves to the 64 GB backlog.
+   - `qwen3.8-27b-4bit` is capped at 65,536 context in navikt/mlx-workspace#20 (still a draft); the recommendation is to stop offering it too (17/30).
+   - oMLX MTP measurements are moved to the hardware-tier backlog.
 
 **6. Integrating OpenJev / Logit-Based Classification:**
    *Hypothesis:* Generative loops occur because models are forced to write code/JSON to prove decisions. A "System One" router that reads raw logits would be bulletproof.
-   *Outcome (23 Sept):* **PROVEN & INTEGRATED.** 
+   *Outcome (23 Sept, corrected 24 Sept):* **NOT SHIPPED, SUPERSEDED.** The text below was written before the 7-scenario probe; the classifier was never merged into `navikt/copilot`.
    1. Built and ran `.mise/tasks/bench-decision` against the local MLX server (`qwen3.8-27b-8bit-nopin` with `max_tokens=1` / `logprobs=True`). It scored **4/4** on loop detection and tool routing at **~316ms** per decision. 
    2. **nav-pilot Integration:** Implemented `checkSystemOneLoop` inside the `nav-pilot` HTTP proxy (`internal/local/guard.go`). Instead of statically waiting for 8 identical tool calls, the proxy queries the System One classifier after 2 calls. If the model confirms a loop (token "A"), the proxy aborts the generative HTTP request instantly, surfacing a clean 400 Bad Request to the agent.
-   *Conclusion:* The "System One" safety guard is fully active. It eradicates infinite generative loops and saves massive amounts of GPU time by intercepting them at prefill speeds. The integration is merged into `navikt/copilot`.
+   *Conclusion (corrected 24 Sept):* The guard was never merged. It sat in an unrelated PR (#928) and then on the local branch `feat/local-system-one-loop-guard` (e72319e0). On 7 probe scenarios at its 0.9 threshold it blocked none, loops included (`bench/system-one-qwen3.8-27b-8bit-nopin-20260923-124307.json`). It is replaced by the result-aware loop guard in navikt/copilot#933: block after 4 identical calls with identical results, backstop at 8. See [the decision](reports/2026-09-23-local-model-evaluation/decision.md).
 
 ## 12. Can `qwen3.8-27b-8bit-nopin` ship as an optional nav-pilot model? (23 Sept)
+
+**Result (23 Sept):** refuted for the 48 GB tier. Gap 2 failed (peak 43.8 GB, then a Metal OOM at about 51k tokens; 37.2 GB at the 32k cap) and gap 3 failed (cold TTFT 59.6 s at 30k against the 30 s limit; decode 13.8 tok/s passed). Gap 1 produced no quality data at the 32k cap: Copilot refused to start with 45.1k static context, fixed by navikt/copilot#932. The classifier criterion of gap 1 is moot, since the classifier was dropped for #933. Numbers and sources: [decision](reports/2026-09-23-local-model-evaluation/decision.md), §3.
 
 **Hypothesis under attack:** mlx-community/Qwen3.8-27B-8bit, mlx-lm, no `reasoning_effort`
 pin, is good enough to offer as a non-default local model in nav-pilot. Cheap-ops quality is
