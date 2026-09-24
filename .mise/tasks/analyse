@@ -6,4 +6,5 @@
 # run that adds samples.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+python3 .mise/tasks/bench-capabilities --check
 exec python3 bench/analyse.py "$@"

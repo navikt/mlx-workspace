@@ -137,11 +137,27 @@ def check_params(params: dict, key: str) -> dict:
     return params
 
 
+# Verdicts per task class from `mise run bench-capabilities` (design §3a,
+# reports/2026-09-24-local-vs-cloud-routing/design.md). Enums and integers only:
+# nav-pilot owns every sentence the verdicts turn into. An offered model with no
+# measured runs gets `cloud` everywhere, never the absence of a block, because a
+# missing block makes nav-pilot fall back to its old, broader dispatch text.
+# schema_version stays 1: nav-pilot's Parse ignores unknown fields.
+CAPS = ROOT / "manifest" / "capabilities.json"
+
+
+def with_capabilities(e: dict) -> dict:
+    if CAPS.exists():
+        caps = json.loads(CAPS.read_text())
+        e["capabilities"] = caps["manifest_blocks"].get(e["model"], caps["unmeasured_block"])
+    return e
+
+
 manifest = {
     "schema_version": SCHEMA_VERSION,
     "channel": "alpha",
     "note": "Generated from profiles/ by 'mise run model-manifest'. Do not edit by hand.",
-    "models": [check_prose(entry(k)) for k in OFFERED],
+    "models": [with_capabilities(check_prose(entry(k))) for k in OFFERED],
 }
 
 missing = [k for k in OFFERED if k not in P.list_keys()]
