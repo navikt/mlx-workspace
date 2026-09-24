@@ -1145,9 +1145,9 @@ config it was measured with.
 |---|---|---|---|
 | `qwen3.8-27b-4bit` | harness-side debounce on identical consecutive tool calls | The one intervention not yet tried against the loop. Costs a baseline re-run because it changes a benchmark input | **high**, it is what holds the model back |
 | `qwen3.6-35b-a3b` | thinking **enabled** (drop `enable_thinking: false`) | The only way to separate "MoE is fast" from "no reasoning tokens is fast" | **high**, the headline result rests on this being config, not model |
-| `glm-4.7-flash`, `qwen3.5-27b-opus-distilled` | `MLX_PREFILL_STEP_SIZE` (lower) | Both failed as **OOM during prefill**. A smaller prefill batch shrinks exactly that spike | **high**, could overturn two ❌ verdicts |
+| `glm-4.7-flash`, `qwen3.5-27b-opus-distilled` | `MLX_PREFILL_STEP_SIZE` (lower) | Both failed as **OOM during prefill**. A smaller prefill batch shrinks exactly that spike | **high**, could overturn two ❌ verdicts. Both profiles were removed on 2026-09-24; restore them from git history to run this |
 | `gemma-4-31b-8bit` | `MLX_DRAFT_MODEL` (mlx-lm speculative decoding) with a small Gemma 4 | 1.5-3x decode, the lever MTP gives Qwen3.8 | medium, the slowest model with no drafter |
-| `qwen3.8-27b-6bit` | thinking **disabled** on the same weights | Separates quantization from the one variable the profile changes alongside it | medium, no longer blocking anything |
+| `qwen3.8-27b-6bit` | thinking **disabled** on the same weights | Separates quantization from the one variable the profile changes alongside it | medium, no longer blocking anything. Profile removed on 2026-09-24; restore it from git history to run this |
 | `qwen3.6-35b-a3b`, `qwen3.5-9b` | raise `MLX_CACHE_SIZE` above the rig-A slot count | Both are rig-A tuned for a 26 GB cap and Qwen3.6 overshot to 4.70 GB at 36 GB with no visible thrash, so there is headroom the profiles never knew about. Slots are the only knob that reaches it, `MLX_CACHE_BYTES` cannot | medium |
 | `qwen3.8-27b-8bit`, `deepseek-v4-flash-3bit` | oMLX `--memory-guard`, `--hot-cache-max-size` | Cache and OOM behaviour; both ran entirely on defaults | low |
 
