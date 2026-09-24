@@ -7,13 +7,30 @@ The measuring is the point. This workspace exists to answer one question for the
 which local model is good enough to absorb the routine coding operations that otherwise burn a
 Copilot premium request each.
 
+## Models shipped to nav-pilot users
+
+The source is [`manifest/models.json`](manifest/models.json), which nav-pilot fetches. This table
+is generated from it by `mise run model-manifest`, so it changes only when a manifest PR changes
+the models.
+
+<!-- models:start -->
+| Model | Status | Context / reply | Key tuning | RAM / wired limit | Min nav-pilot | Trusted for | Evidence |
+|---|---|---|---|---|---|---|---|
+| **Qwen 3.6 35B A3B OptiQ 4bit**<br>[`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`](https://huggingface.co/mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit) | default | 64k / 16k | temp 0.6, top_p 0.95; prompt cache 3 × 12 GiB | 48 GB / 36 GB | any | Mechanical multi-file edits, handed over by the cloud agent (35/35 verified) | [decision.md](reports/2026-09-23-local-model-evaluation/decision.md) |
+| **Qwen 3.8 27B 4bit**<br>[`mlx-community/Qwen3.8-27B-4bit`](https://huggingface.co/mlx-community/Qwen3.8-27B-4bit) | opt-in | 64k / 8k | temp 0.6, top_p 0.95; prompt cache 3 × 8 GiB | 48 GB / 36 GB | any | Nothing yet: every task class stays on the cloud model | [qwen38-tuning.md](reports/2026-09-23-local-model-evaluation/qwen38-tuning.md) |
+| **Qwen 3.8 27B 8bit (mlx-lm)**<br>[`mlx-community/Qwen3.8-27B-8bit`](https://huggingface.co/mlx-community/Qwen3.8-27B-8bit) | opt-in | 48k / 4k | temp 0.6, top_p 0.95; prefill step 512; prompt cache 2 × 3.25 GiB | 48 GB / 36 GB | `2026.09.24-110317-3596754` | Nothing yet: every task class stays on the cloud model | [qwen38-tuning.md](reports/2026-09-23-local-model-evaluation/qwen38-tuning.md) |
+<!-- models:end -->
+
+Parked, not shipped: the oMLX MTP build of Qwen3.8-27B (refused at 36 GB wired, queued for 96 GB)
+and Qwen3.8-Flash-Next 125B (deferred to 128 GB machines), both in
+[hardware-tier-backlog.md](reports/2026-09-23-local-model-evaluation/hardware-tier-backlog.md).
+
 ## The decision
 
-Ship one model: **`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`** under mlx-lm, thinking disabled,
-with `Qwen3.8-27B` held back because it hangs. The reasoning, the rejected candidates and how
-far the numbers can be trusted are in
-[reports/alpha-model-decision.md](reports/alpha-model-decision.md), which is the authority; this
-paragraph is a pointer and should stay one sentence long so the two cannot drift apart.
+`Qwen3.6-35B-A3B-OptiQ-4bit` is the default. Both Qwen3.8-27B builds ship as tuned opt-ins for
+48 GB machines, never the default. The reasoning and the evidence are in
+[decision.md](reports/2026-09-23-local-model-evaluation/decision.md), which supersedes the
+original single-model call in [alpha-model-decision.md](reports/alpha-model-decision.md).
 
 ## Where things are
 
@@ -116,7 +133,8 @@ non-zero on an invalid profile, and every benchmark keys its results by the acti
 scripts must use `model-use <key> || exit 1`.
 
 `mise run model-manifest` generates `manifest/models.json` from the profiles, which is the file
-nav-pilot fetches to configure a user's machine.
+nav-pilot fetches to configure a user's machine, and the model table at the top of this README
+from it. `mise run model-manifest -- --check` fails if either is stale.
 
 An entry that sets a param an older nav-pilot must not ignore gets `min_nav_pilot`, the newest
 release any of those params needs (the `MIN_NAV_PILOT` table in the generator). Params an older

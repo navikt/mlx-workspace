@@ -7,4 +7,5 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 python3 .mise/tasks/bench-capabilities --check
+python3 .mise/tasks/model-manifest --check
 exec python3 bench/analyse.py "$@"
