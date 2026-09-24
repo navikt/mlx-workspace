@@ -1,0 +1,23 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), uten reasoning_effort-pin, 40k kontekst, 3 GiB cache"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Tuning point for the 36 GB tier (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md). Same as qwen3.8-27b-8bit-nopin-c40k but with a 3 GiB prompt cache: mlx-lm's LRUPromptCache evicts an entry larger than --prompt-cache-bytes the moment it is inserted, and 40k tokens of KV at 64 KiB/token is 2.5 GiB, so a 2 GiB cache cannot keep a full-window Copilot session warm."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "3221225472"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "40960"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# No reasoning_effort pin: measured a no-op on 2026-09-23.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"

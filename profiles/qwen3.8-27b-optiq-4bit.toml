@@ -1,0 +1,22 @@
+[meta]
+name               = "Qwen 3.8 27B OptiQ 4bit (mixed 4/8-bit)"
+released           = "2026-09"
+status             = "testing"
+spec_source        = "model card"
+notes              = "mlx-community OptiQ build of the official Qwen/Qwen3.8-27B: 261 sensitive layers at 8-bit, 237 at 4-bit, group size 64, 18.5 GB of text weights (the 0.9 GB bf16 vision sidecar is not loaded by mlx-lm). Same recipe as the default qwen3.6 OptiQ. Params identical to qwen3.8-27b-4bit-c64k-8g so the two compare like for like."
+model_vram_gb      = 19
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "8589934592"
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
