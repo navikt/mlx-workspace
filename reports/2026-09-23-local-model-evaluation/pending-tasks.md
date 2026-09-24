@@ -140,5 +140,16 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   cheap-ops, cheap-ops for the 4-bit and OptiQ-4bit). Tasks 2 and 3 above stay open until then.
 - **Refresh capabilities after tonight.** `mise run bench-capabilities && mise run model-manifest`
   once the night's JSON is on `main`, and a PR if the verdicts move.
+- **opencode regression arm through nav-pilot.** Nothing re-measures delegate mode today: the
+  one trusted cell (mechanical multi-file, 35/35) is from August, with Sonnet 4.6 and the old
+  dispatch text, and #941 now generates a narrower text from the manifest. Before the next night
+  run, one harness PR: a `BENCH_HYBRID_TAG` in `bench-hybrid`'s output stem (it would otherwise top
+  up the August files), the policy file's sha256 and `opencode --version` in its preflight, and
+  `_by_class.py` reading orchestrator, worker and policy hash from the file. Then a `hybrid` step
+  kind in `night-run` and eight queue lines: rungs 3 and 6 on Ktor, rung 3 on frontend, rung 6 on
+  Spring, both arms ×8, plus rungs 1, 2, 4 and 5 hybrid ×6. Pin `claude-sonnet-4.6` first, then
+  repeat the four trusted-cell lines with the default GPT-6 Sol. Needs a nav-pilot binary at
+  `7362715c` or later (the current `nav-pilot-main-f1507caa` predates #941). About 4 h and $13 per
+  run. The exact steps are in [copilot mixed mode §3.2](../2026-09-24-copilot-mixed-mode/research.md#32-the-proposed-arm-hybrid-steps-in-the-night-run-driver).
 - **What tonight cannot answer.** Real 48 GB hardware and Pro chips (task 5), a cloud reference
   arm for the same tasks, and a rerun of the delegation benchmark.
