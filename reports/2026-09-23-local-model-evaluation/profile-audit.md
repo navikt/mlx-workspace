@@ -1,7 +1,7 @@
 # Profile audit, 2026-09-24
 
 Every file in `profiles/*.toml`, tracked and untracked, checked for one question: can it load at
-all? A profile that loads but scores badly stays. Its `status` field already records that.
+all? A profile that loads but scores badly stayed in this pass; the user later removed seven of those (see the last removal section).
 
 How each column was checked:
 
@@ -44,18 +44,13 @@ use an architecture the installed backend has.
 | `gemma-4-26b-a4b` | `mlx-community/gemma-4-26b-a4b-it-4bit` | mlx-vlm | untested | docs |
 | `gemma-4-31b-8bit` | `mlx-community/gemma-4-31b-it-8bit` | mlx-lm | testing | docs |
 | `glm-4.6v-flash-9b` | `mlx-community/GLM-4.6V-Flash-4bit` | mlx-vlm | skipped | docs |
-| `glm-4.7-flash` | `mlx-community/GLM-4.7-Flash-4bit` | mlx-lm | failed | docs |
 | `granite-4.1-8b` | `mlx-community/granite-4.1-8b-4bit` | mlx-lm | untested | docs, results |
 | `kat-coder-v2.5` | `mlx-community/KAT-Coder-V2.5-Dev-OptiQ-4bit` | mlx-lm | untested | docs |
 | `llama-3.1-70b-8bit` | `mlx-community/Meta-Llama-3.1-70B-Instruct-8bit` | mlx-lm | testing | none |
-| `ministral-3-14b` | `mlx-community/Ministral-3-14B-Instruct-2512-4bit` | mlx-lm | broken | docs |
 | `mistral-large-2-4bit` | `mlx-community/Mistral-Large-Instruct-2407-4bit` | mlx-lm | testing | none |
 | `mixtral-8x22b-4bit` | `mlx-community/Mixtral-8x22B-Instruct-v0.1-4bit` | mlx-lm | testing | none |
 | `qwen2.5-14b` | `mlx-community/Qwen2.5-Coder-14B-Instruct-4bit` | mlx-lm | untested | none |
-| `qwen2.5-32b` | `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit` | mlx-lm | oom | none |
-| `qwen2.5-72b-8bit` | `mlx-community/Qwen2.5-72B-Instruct-8bit` | mlx-lm | broken | none |
 | `qwen3-30b-a3b` | `mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit` | mlx-lm | untested | docs |
-| `qwen3.5-27b-opus-distilled` | `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` | mlx-lm | oom | docs |
 | `qwen3.5-9b` | `mlx-community/Qwen3.5-9B-MLX-4bit` | mlx-lm | recommended | setup task, mise.toml, docs |
 | `qwen3.6-27b-4bit` | `mlx-community/Qwen3.6-27B-4bit` | mlx-lm | untested | docs |
 | `qwen3.6-35b-a3b` | `mlx-community/Qwen3.6-35B-A3B-4bit` | mlx-lm | recommended | queue, docs, results |
@@ -63,9 +58,7 @@ use an architecture the installed backend has.
 | `qwen3.6-35b-a3b-optiq` | `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit` | mlx-lm | untested | OFFERED, queue, docs, results |
 | `qwen3.8-27b-4bit` | `mlx-community/Qwen3.8-27B-4bit` | mlx-lm | untested | OFFERED, queue, docs, results |
 | `qwen3.8-27b-4bit-reppen` | `mlx-community/Qwen3.8-27B-4bit` | mlx-lm | testing | docs |
-| `qwen3.8-27b-6bit` | `lmstudio-community/Qwen3.8-27B-MLX-6bit` | mlx-lm | broken | docs, results |
 | `qwen3.8-27b-8bit` | `Jundot/Qwen3.8-27B-oQ8e-mtp` | omlx | testing | queue, docs, results |
-| `qwen3.8-27b-8bit-48gb` | `mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8` | omlx | testing | docs |
 | `qwen3.8-27b-8bit-mlx` | `mlx-community/Qwen3.8-27B-8bit` | mlx-lm | untested | OFFERED, queue, docs, results |
 | `qwen3.8-27b-8bit-nocache` | `Jundot/Qwen3.8-27B-oQ8e-mtp` | omlx | testing | queue |
 | `qwen3.8-27b-8bit-nopin` | `mlx-community/Qwen3.8-27B-8bit` | mlx-lm | testing | queue, docs, results |
@@ -73,17 +66,23 @@ use an architecture the installed backend has.
 | `qwen3.8-27b-8bit-nopin-c40k` | `mlx-community/Qwen3.8-27B-8bit` | mlx-lm | testing | docs |
 | `qwen3.8-27b-8bit-nopin-c48k` | `mlx-community/Qwen3.8-27B-8bit` | mlx-lm | testing | docs |
 
+## Removed 2026-09-24 (user decision)
+
+All of these loaded. They were removed because of their recorded status, or for the abliterated build, by the user's decision. No script, queue or `OFFERED` entry referenced any of them. MODELS.md keeps their results. The two follow-up rows in MODELS.md that named them now say the profiles must be restored from git history first. `chat_templates/ministral-3-14b-patched.jinja` stays, because MODELS.md cites it.
+
+| Key | MLX_MODEL | Backend | Status | Why |
+|---|---|---|---|---|
+| `ministral-3-14b` | `mlx-community/Ministral-3-14B-Instruct-2512-4bit` | mlx-lm | broken | broken: template error, then garbage output. PLAN.md:88 traces the garbage to a harness bug (`MLX_CHAT_TEMPLATE` passed as a path), so the verdict was never a clean test of the model. |
+| `qwen2.5-72b-8bit` | `mlx-community/Qwen2.5-72B-Instruct-8bit` | mlx-lm | broken | broken: writes to the chat instead of making tool calls. |
+| `qwen3.8-27b-6bit` | `lmstudio-community/Qwen3.8-27B-MLX-6bit` | mlx-lm | broken | broken: pathologically slow under mlx-lm (R2 1546.8 s). Its results stay in MODELS.md and `bench/weather-qwen3.8-27b-6bit.json`. |
+| `glm-4.7-flash` | `mlx-community/GLM-4.7-Flash-4bit` | mlx-lm | failed | failed: OOM during prefill on a 26 GB cap. |
+| `qwen2.5-32b` | `mlx-community/Qwen2.5-Coder-32B-Instruct-4bit` | mlx-lm | oom | oom on a 32 GB machine. |
+| `qwen3.5-27b-opus-distilled` | `mlx-community/Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit` | mlx-lm | oom | oom on a 32 GB machine, plus a tool-call loop. |
+| `qwen3.8-27b-8bit-48gb` | `mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8` | omlx | testing | abliterated build (`mvid/Huihui-…-abliterated-MTPLX-Q8`). |
+
 ## Candidates for removal (they load but nothing uses them)
 
-These are not removed, because they would load. Removing them is a separate decision:
-
-- No reference outside the profile: `llama-3.1-70b-8bit`, `mistral-large-2-4bit`,
-  `mixtral-8x22b-4bit`, `qwen2.5-14b`, `qwen2.5-32b`, `qwen2.5-72b-8bit`,
-  `qwen3.6-35b-a3b-dwq`, and the repointed `command-r-plus-4bit`.
-- Loads, but the status field records a result that rules it out: `ministral-3-14b`
-  (broken: template and garbage output), `qwen2.5-72b-8bit` (broken: no tool calls),
-  `qwen3.8-27b-6bit` (broken: pathologically slow), `glm-4.7-flash` (failed),
-  `qwen2.5-32b` and `qwen3.5-27b-opus-distilled` (oom, measured on a 32 GB machine).
-
-`qwen3.8-27b-8bit-48gb` points at an abliterated build (`mvid/Huihui-…-abliterated-…`). It
-loads, so this audit leaves it alone. Whether to keep it is a separate question.
+These are not removed, because they would load. Removing them is a separate decision. No
+reference outside the profile: `llama-3.1-70b-8bit`, `mistral-large-2-4bit`,
+`mixtral-8x22b-4bit`, `qwen2.5-14b`, `qwen3.6-35b-a3b-dwq`, and the repointed
+`command-r-plus-4bit`.
