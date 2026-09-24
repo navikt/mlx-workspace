@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# mise description="Check everything the unattended night run needs, without touching the GPU. Exits non-zero on any hard failure. Usage: mise run night-preflight"
+#
+# One line per check, PASS / WARN / FAIL. WARN is recorded and does not stop the
+# night; FAIL does, because a night that dies on step 1 at 23:05 is a lost night
+# the user only finds out about at 07:00. night-run calls this before step 1.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+
+NP="${BENCH_NAV_PILOT:-$ROOT/.bench-logs/bin/nav-pilot-main-f1507caa}"
+COPILOT_REPO="${NIGHT_COPILOT_REPO:-$HOME/go/src/github.com/navikt/copilot}"
+NEED_COMMIT=f1507caa   # navikt/copilot#934, manifest-set sampling; the binary must contain it
+LOCKDIR=".bench-logs/.queue.lock"
+CACHE="$HOME/.nav-pilot/local-models.json"
+
+fails=0
+pass() { printf 'PASS  %-18s %s\n' "$1" "$2"; }
+warn() { printf 'WARN  %-18s %s\n' "$1" "$2"; }
+fail() { printf 'FAIL  %-18s %s\n' "$1" "$2"; fails=$((fails + 1)); }
+
+if pmset -g batt | grep -q "'AC Power'"; then pass power "on AC"
+else fail power "on battery: plug in the charger ($(pmset -g batt | sed -n 2p | tr -s '\t' ' '))"; fi
+
+wl=$(sysctl -n iogpu.wired_limit_mb)
+# ponytail: WARN, not FAIL — the fleet runs 36 GB, and a different limit still yields data
+[ "$wl" = 36864 ] && pass wired-limit "iogpu.wired_limit_mb=$wl" \
+  || warn wired-limit "iogpu.wired_limit_mb=$wl, expected 36864 (mise run vram-set); results will say so"
+
+free_gb=$(df -g "$ROOT" | awk 'NR==2 {print $4}')
+[ "$free_gb" -ge 20 ] && pass disk "${free_gb} GB free" || fail disk "${free_gb} GB free, need 20"
+
+holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+if [ -d "$LOCKDIR" ] && [ -n "$holder" ] && kill -0 "$holder" 2>/dev/null; then
+  fail queue-lock "held by live pid $holder ($(ps -o command= -p "$holder" | cut -c1-80))"
+elif [ -d "$LOCKDIR" ]; then warn queue-lock "stale lock from gone pid ${holder:-?}; the first task clears it"
+else pass queue-lock "free"; fi
+
+l=$(/usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN)
+[ -z "$l" ] && pass port-8080 "nothing listening" || fail port-8080 "pid $l listening; mise run server-stop"
+
+STATE="$HOME/.nav-pilot/local/server.json"
+spid=$(python3 -c "import json; print(json.load(open('$STATE')).get('pid',''))" 2>/dev/null)
+if [ -n "$spid" ] && kill -0 "$spid" 2>/dev/null; then fail np-server "nav-pilot local server running (pid $spid); $NP alpha local stop"
+else pass np-server "not running"; fi
+
+if [ ! -x "$NP" ]; then fail nav-pilot "no binary at $NP"
+else
+  rev=$(go version -m "$NP" 2>/dev/null | sed -n 's/.*vcs.revision=//p')
+  main=$(git -C "$COPILOT_REPO" rev-parse origin/main 2>/dev/null)
+  if [ -z "$rev" ]; then fail nav-pilot "$NP has no embedded vcs.revision"
+  elif ! git -C "$COPILOT_REPO" merge-base --is-ancestor "$NEED_COMMIT" "$rev" 2>/dev/null; then
+    fail nav-pilot "$NP built from ${rev:0:8}, which lacks #934 ($NEED_COMMIT)"
+  elif [ "$rev" = "$main" ]; then pass nav-pilot "$(basename "$NP") = origin/main ${rev:0:8}"
+  else warn nav-pilot "$(basename "$NP") built from ${rev:0:8}, origin/main is ${main:0:8} (has #934, usable)"; fi
+fi
+
+# Profiles and models come from night-run's own queue, so the two cannot drift.
+profiles=$("$ROOT/.mise/tasks/night-run" --list-profiles)
+python3 - $profiles <<'EOF' || fails=$((fails + 1))
+import json, os, sys
+sys.path.insert(0, ".mise/tasks")
+import _profiles as P
+bad = 0
+models = {}
+for key in sys.argv[1:]:
+    try:
+        meta, params = P.load(key)
+        models.setdefault(params["MLX_MODEL"], []).append(key)
+        print(f"PASS  profile            {key} (temp {P.params_for(key)['MLX_TEMP']})")
+    except SystemExit as e:
+        print(f"FAIL  profile            {key}: {e}"); bad += 1
+for hf, keys in sorted(models.items()):
+    d = P.hf_cache_dir(hf)
+    try:
+        snap = d / "snapshots" / (d / "refs" / "main").read_text().strip()
+        idx = json.loads((snap / "model.safetensors.index.json").read_text())
+        shards = set(idx["weight_map"].values())
+        missing = sorted(f for f in shards if not (snap / f).exists())
+        broken = sorted(p.name for p in snap.rglob("*") if not p.exists())  # dangling symlinks
+        partial = sorted(p.name for p in (d / "blobs").glob("*.incomplete"))
+    except (OSError, KeyError, ValueError) as e:
+        print(f"FAIL  model              {hf}: {e}"); bad += 1; continue
+    if missing or broken or partial:
+        print(f"FAIL  model              {hf}: {len(missing)} shards missing, {len(broken)} dangling, "
+              f"{len(partial)} .incomplete blobs"); bad += 1
+    else:
+        gb = sum((snap / f).stat().st_size for f in shards) / 1e9
+        print(f"PASS  model              {hf}: {len(shards)} shards, {gb:.1f} GB, no .incomplete")
+sys.exit(1 if bad else 0)
+EOF
+
+for c in copilot cplt opencode; do
+  command -v "$c" >/dev/null && pass client "$c at $(command -v "$c")" || fail client "$c not on PATH"
+done
+
+want=$(python3 -c "import json; print(json.load(open('bench/tasks.json'))['ref'])")
+for p in $("$ROOT/.mise/tasks/night-run" --list-profiles --needs-workspace); do
+  head=$(git -C "workspaces/$p/kotlin" rev-parse HEAD 2>/dev/null)
+  if [ -z "$head" ]; then warn workspace "workspaces/$p/kotlin missing; the suite clones it (needs network)"
+  elif [ "$head" = "$want" ]; then pass workspace "workspaces/$p/kotlin at ${want:0:8}"
+  else warn workspace "workspaces/$p/kotlin at ${head:0:8}, suite fetches ${want:0:8} (needs network)"; fi
+done
+
+e2e=$(python3 -c "import json; print(json.load(open('bench/tasks.json'))['repo'])")
+[ -d workspaces/hybrid-bench/tasks/.git ] && pass workspace "workspaces/hybrid-bench/tasks (bench-np-e2e sessions)" \
+  || warn workspace "workspaces/hybrid-bench/tasks missing; bench-np-e2e clones $e2e (needs network)"
+
+left=$(ls "$CACHE".np-e2e-* 2>/dev/null)
+[ -z "$left" ] && pass np-manifest "no leftover np-e2e backups" \
+  || fail np-manifest "leftover backup(s): $left — restore the right one to $CACHE, delete the rest"
+
+echo
+[ "$fails" -eq 0 ] && { echo "preflight: PASS"; exit 0; }
+echo "preflight: $fails hard failure(s)"; exit 1

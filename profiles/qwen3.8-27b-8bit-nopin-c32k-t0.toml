@@ -1,0 +1,35 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), no pin, 32k context, temp 0 (greedy)"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Temperature control for the 2026-09-24 night run: identical to qwen3.8-27b-8bit-nopin-c32k except MLX_TEMP = 0.0. The workspace server defaults MLX_TEMP to 0.6 (.mise/tasks/server), so every cheap-ops score so far was measured at 0.6, while nav-pilot users run greedy: nav-pilot sets no temperature, opencode sends none (mlx-lm's own default is 0.0) and Copilot CLI sends 0. This profile measures the production setting. top_p/top_k stay as in the base but have no effect at temp 0. The 0.6 baseline is the 2026-09-23 runs of qwen3.8-27b-8bit-nopin (31/40), which has the same 32k context but a 4 GiB prompt cache and 8k output where c32k has 2.25 GiB and 4k, so those differ as well as temperature; c32k is used because it is what ships (reports/2026-09-23-local-model-evaluation/night-2026-09-24.md)."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+# 2 GiB of prompt cache (the base nopin profile has 4 GiB): the freed 2 GiB goes to
+# prefill headroom, which is what OOMs at ~51k tokens.
+MLX_CACHE_BYTES            = "2415919104"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "32768"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# reasoning_effort is pinned, not left to the client. Qwen3.8's template
+# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
+# values — none, high and max would make the template refuse the request.
+# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
+# No reasoning_effort here — that is the point of this profile. Both 1 September
+# runs of the pinned 8-bit verified nothing, every task timing out with zero
+# turns completed, and the pin was added hours earlier and is absent from every
+# historical run. Either it caused the collapse or the model is simply this slow;
+# this profile is the control that tells us which.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+# Greedy, as nav-pilot runs it in production. The only difference from qwen3.8-27b-8bit-nopin-c32k.
+MLX_TEMP                   = "0.0"
