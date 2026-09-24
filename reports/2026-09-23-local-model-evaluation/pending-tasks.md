@@ -230,3 +230,28 @@ Still for the daytime, after night 2:
 - The GPT-6 Sol repeat of the four trusted-cell lines (the second orchestrator in §3.2).
 - `mise run bench-capabilities && mise run model-manifest` once both nights' results are on `main`.
 - Merging the two local result branches (`bench/night-results-*`, `bench/night2-results-*`).
+
+### 8.2 After night 2: the limits of `alpha decide`
+
+`mise run bench-decide-limits` runs `alpha decide` on 974 cases per model with labels from ground
+truth: Norwegian against English, questions a regex cannot answer (does the message describe the
+diff, does the diff change an exported Go signature, loop against progress when only noise
+changes), 2 to 14 options, evidence up to 30k characters, option order, and prompt injection. It
+runs on optiq, Qwen3.8 27B OptiQ-4bit and Qwen3-4B-Instruct-2507-4bit, for about 1 h of GPU time.
+The cases and how their labels were built are in
+[bench/decide-limits/README.md](../../bench/decide-limits/README.md).
+
+Queue it only after night-run-2 has exited. The night drivers hold no lock between steps, so a
+`BENCH_WAIT` job started earlier would take the lock between two of their steps. night-run-2 also
+leaves the checkout on its local `bench/night2-results-*` branch, which was cut before this task
+reached `main`. The line below waits for night-chain's closing line and for night-run-2's commit,
+switches to an up-to-date `main` (and stops if the checkout is dirty or the pull is not a
+fast-forward), then queues behind any lock:
+
+```sh
+cd /Users/hans/mlx-workspace && nohup bash -c 'until grep -q "=== night-run-2 exited" .bench-logs/night-chain.log; do sleep 60; done; while [ -e .git/index.lock ]; do sleep 5; done; git switch main && git pull --ff-only origin main && BENCH_WAIT=1 mise run bench-decide-limits' > .bench-logs/decide-limits.log 2>&1 &
+```
+
+Check it first with `mise run bench-decide-limits -- --dry-run`. The results are in
+`bench/decide-limits-<model>-<stamp>.json` and `.md`, and `bench/decide-limits-<stamp>.md` compares
+the models.
