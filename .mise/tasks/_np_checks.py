@@ -56,6 +56,12 @@ def manifest(profile, cache):
     src = Path(cache) if Path(cache).exists() else ROOT / "manifest" / "models.json"
     m = json.loads(src.read_text())
     hits = [e for e in m["models"] if e["model"] == params["MLX_MODEL"]]
+    if not hits:
+        # A build no entry serves yet, measured as a candidate for one: add a
+        # non-default entry for the run. The cache is restored on exit.
+        hits = [dict(m["models"][0], key=profile, name=_meta["name"], model=params["MLX_MODEL"],
+                     default=False, weights_gb=_meta.get("model_vram_gb"))]
+        m["models"].append(hits[0])
     if len(hits) != 1:
         raise SystemExit(f"✗ {len(hits)} manifest entries serve {params['MLX_MODEL']}; need exactly 1")
     hits[0]["params"] = {k: v for k, v in params.items() if k.startswith("MLX_")}
