@@ -12,7 +12,7 @@ MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
 MLX_SERVER_TYPE            = "mlx-lm"
 # 2 GiB of prompt cache (the base nopin profile has 4 GiB): the freed 2 GiB goes to
 # prefill headroom, which is what OOMs at ~51k tokens.
-MLX_CACHE_BYTES            = "2147483648"
+MLX_CACHE_BYTES            = "2415919104"
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "32768"

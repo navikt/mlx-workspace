@@ -81,7 +81,7 @@ at 59,210 tokens (`bench/navpilot-e2e-20260923-140805.json`, `e-crash`). Weights
 
 | Profile | Context / output / cache | Window in cache (GiB), ctx / ctx+out | Gate (static / ctx) | Peak at ctx | Peak at ctx+out | Verdict |
 |---|---|---|---|---|---|---|
-| `qwen3.8-27b-8bit-nopin-c32k` | 32,768 / 4,096 / 2 GiB | 2.0 / 2.25 | 66% | 39.6 GB | 40.3 GB | fits |
+| `qwen3.8-27b-8bit-nopin-c32k` | 32,768 / 4,096 / 2.25 GiB (was 2) | 2.0 / 2.25 | 66% | 39.6 GB | 40.3 GB | fits |
 | `qwen3.8-27b-8bit-nopin-c40k` | 40,960 / 4,096 / 2 GiB | 2.5 / 2.75 | 53% | 40.9 GB | 41.6 GB | borderline; cache too small for a full window |
 | `qwen3.8-27b-8bit-nopin-c40k-3g` | 40,960 / 4,096 / 3 GiB | 2.5 / 2.75 | 53% | 42.0 GB | 42.7 GB | borderline |
 | `qwen3.8-27b-8bit-nopin-c48k` | 49,152 / 4,096 / 2 GiB | 3.0 / 3.25 | 44% | 42.3 GB | 43.0 GB | likely over; cache too small |
@@ -166,7 +166,7 @@ the status first (`rc=$?`) before relying on the log.
 
 | Build | Context | Output | Prompt cache | Status |
 |---|---|---|---|---|
-| 8-bit (`mlx-community/Qwen3.8-27B-8bit`) | 32,768 | 4,096 | 2 GiB (2 entries) | provisional: the only 8-bit point estimated under 41 GB at ctx+out |
+| 8-bit (`mlx-community/Qwen3.8-27B-8bit`) | 32,768 | 4,096 | 2.25 GiB (2415919104 bytes, 2 entries) | provisional: the only 8-bit point estimated under 41 GB at ctx+out; cache raised from 2 GiB (user decision 2026-09-24) so a full 32k+4k session stays cached |
 | 4-bit (`mlx-community/Qwen3.8-27B-4bit`) | 65,536 | 8,192 | 8 GiB (3 entries) | provisional |
 | OptiQ-4bit (`mlx-community/Qwen3.8-27B-OptiQ-4bit`) | 65,536 | 8,192 | 8 GiB (3 entries) | PENDING; not downloaded |
 
