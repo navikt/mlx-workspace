@@ -16,12 +16,23 @@ machine, nav-pilot's runtime mlx-lm 0.31.3 / mlx 0.32.0).
 - [nav-pilot-e2e.md](nav-pilot-e2e.md): the combined end-to-end test of navikt/copilot #931, #932 and #933 on the #20 manifest.
 - [hardware-tier-backlog.md](hardware-tier-backlog.md): tests still to run on 48, 64 and 128 GB machines.
 - [profile-audit.md](profile-audit.md): every profile checked against Hugging Face and the loader; which were removed, repointed or kept.
+- [pending-tasks.md](pending-tasks.md): what is left that needs mains power (GPU), network or other machines, in suggested order.
 - [qwen38-tuning.md](qwen38-tuning.md): the 2026-09-24 tuning sweep for both Qwen3.8-27B builds at 36 GB wired: constraints, the pruned grid, partial results, the resume commands and the provisional parameters.
 
 ## Status on 2026-09-24
 
-- navikt/copilot#932 is in the merge queue (position 1, awaiting checks, checked 08:38 CEST).
-- navikt/copilot#931 and #933 have auto-merge armed but are not in the queue yet: both show `BLOCKED`, #931 with its checks still running.
+Checked 13:20 CEST. Merged into navikt/copilot `main`:
+
+- #932 (instructions dir) → be565bcc
+- #931 (dead generation thread) → 129d9074
+- #933 (result-aware loop guard) → a0785257
+- #935 (a failed launch exits non-zero) → 35967543
+- #937 (follow-up: an unresolvable client exits 1) → d328ee68
+- #936 (`MLX_PREFILL_STEP_SIZE` → `--prefill-step-size` whitelist) → baf72f2c
+
+Still open:
+
+- navikt/copilot#934 (sampling override, `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P`) stays a draft until the sampling sweep picks values. Rebased onto d328ee68 on 2026-09-24.
 - navikt/mlx-workspace#20 stays a draft and will be re-scoped (action 4): it will ship the tuned parameters for both Qwen3.8 builds instead of removing the 8-bit.
 
 ## 1. Decision summary
@@ -43,25 +54,25 @@ All actions are for the user (Hans). Suggested order follows the table.
 
 | # | Action | Link | Evidence | Risk if not done |
 |---|---|---|---|---|
-| 1 | Merge navikt/copilot#932 (scope `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` to `~/.copilot/.github/instructions`) | https://github.com/navikt/copilot/pull/932 | Static context 21,709 / 21,700 / 21,704 tokens with it, 45.1k without (§3.4). CI green, mergeable | Every Copilot session, including cloud sessions, carries ~23k duplicate instruction tokens per request, and local 32k models can't start at all |
-| 2 | Merge navikt/copilot#931 (the server exits with status 70 when its generation thread dies) | https://github.com/navikt/copilot/pull/931 | `bench/navpilot-e2e-rerun-20260923-154926.json` `e`: server gone 0.5 s after an injected fault, and the next launch prints "generation thread died, most likely out of memory" after 2.0 s. The PR body still says "not yet verified"; update it (fault injection, not a real OOM) | After an OOM, sessions attach to the dead server and hang for 900 s per attempt |
-| 3 | Merge navikt/copilot#933 (result-aware loop guard) | https://github.com/navikt/copilot/pull/933 | Re-run `d`: the loop was blocked at 4 with "same result" after 20 s. A poll with changing output ran 7 identical calls to READY without being blocked | The guard keeps treating a legitimate poll like a loop (it fires at 8 regardless of the result), and a genuinely stuck loop runs until call 8 |
+| 1 | **Done** (be565bcc). Merge navikt/copilot#932 (scope `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` to `~/.copilot/.github/instructions`) | https://github.com/navikt/copilot/pull/932 | Static context 21,709 / 21,700 / 21,704 tokens with it, 45.1k without (§3.4). CI green, mergeable | Every Copilot session, including cloud sessions, carries ~23k duplicate instruction tokens per request, and local 32k models can't start at all |
+| 2 | **Done** (129d9074). Merge navikt/copilot#931 (the server exits with status 70 when its generation thread dies) | https://github.com/navikt/copilot/pull/931 | `bench/navpilot-e2e-rerun-20260923-154926.json` `e`: server gone 0.5 s after an injected fault, and the next launch prints "generation thread died, most likely out of memory" after 2.0 s. The PR body still says "not yet verified"; update it (fault injection, not a real OOM) | After an OOM, sessions attach to the dead server and hang for 900 s per attempt |
+| 3 | **Done** (a0785257). Merge navikt/copilot#933 (result-aware loop guard) | https://github.com/navikt/copilot/pull/933 | Re-run `d`: the loop was blocked at 4 with "same result" after 20 s. A poll with changing output ran 7 identical calls to READY without being blocked | The guard keeps treating a legitimate poll like a loop (it fires at 8 regardless of the result), and a genuinely stuck loop runs until call 8 |
 | 4 | **Re-scoped 2026-09-24.** Finish the tuning sweep, then update navikt/mlx-workspace#20 to ship the tuned parameters for both Qwen3.8 builds (and OptiQ-4bit if it wins) instead of removing the 8-bit; then mark it ready and merge | https://github.com/navikt/mlx-workspace/pull/20 | [qwen38-tuning.md](qwen38-tuning.md) §6 (resume commands) and §7 (provisional parameters). Draft, mergeable, CodeQL green; its current manifest `9a6e7ff` was used in the combined e2e run | The shipped 8-bit entry keeps its 65,536 context: OOM or a 6× slowdown past 40k on 48 GB machines |
-| 5 | Open an issue: "Launch failed" exits 0 | new issue in navikt/copilot | `.bench-logs/navpilot-rerun-fault-launch-20260923-155023.log`, `launch.exit: 0` in the re-run JSON. The cause is in `offerLaunchCopilot` (`internal/cli/interactive.go:1092-1096`), which prints the error and returns. That code is on `main` already and wasn't introduced by #931, so it should be a **separate issue**, not a #931 follow-up | Scripts and CI that wrap nav-pilot can't tell a failed launch from a successful one |
+| 5 | **Done** as PRs instead of an issue: #935 (35967543) makes a failed launch exit non-zero, and #937 (d328ee68) makes an unresolvable client exit 1. Was: open an issue, "Launch failed" exits 0 | https://github.com/navikt/copilot/pull/935, https://github.com/navikt/copilot/pull/937 | `.bench-logs/navpilot-rerun-fault-launch-20260923-155023.log`, `launch.exit: 0` in the re-run JSON. The cause is in `offerLaunchCopilot` (`internal/cli/interactive.go:1092-1096`), which prints the error and returns. That code is on `main` already and wasn't introduced by #931, so it should be a **separate issue**, not a #931 follow-up | Scripts and CI that wrap nav-pilot can't tell a failed launch from a successful one |
 | 6 | Decide what to do about the rtk instructions reaching local sessions (options below) | `~/.copilot/copilot-instructions.md`, `~/.copilot/hooks/rtk-rewrite.json` | §3.6 | Small local models burn turns on `rtk` output they can't read |
 | 7 | Merge the evaluation branch into mlx-workspace `main` (details below; result files are committed) | [navikt/mlx-workspace#21](https://github.com/navikt/mlx-workspace/pull/21) | branch `bench/2026-09-23-local-model-evaluation` | Harness fixes stay off `main`. Today's raw results are **untracked**, although `.gitignore:23` says `bench/results-*.json` is tracked evidence |
 | 8 | Correct PLAN.md (details below) | `PLAN.md:104`, `:371`, `:376-379` | §4 | The next reader believes the 8-bit went 7/7 and that System One shipped |
 | 9 | Remove stale branches and worktrees after the merges (details below) | | | Disk use, and the main copilot checkout stays on a superseded branch |
 | 10 | Your call: remove the `~/.copilot/session-state` worktrees | 5 directories, listed below | They caused the 45.1k static context | After #932 they no longer reach nav-pilot sessions. Before #932 they do |
-| 11 | Add `MLX_PREFILL_STEP_SIZE` → `--prefill-step-size` to nav-pilot's `serverFlags` whitelist | navikt/copilot `cli/nav-pilot/internal/local/runtime.go:1002-1011` | The score-matrix transient (~5 GB per 2048-token chunk at 51k, §3.3) is the term that puts the 8-bit at 40–48k over the limit ([qwen38-tuning.md §3–4](qwen38-tuning.md#3-knobs)). `--decode-concurrency` and `--prompt-concurrency` are missing too | The 8-bit stays capped at 32k on this tier |
-| 12 | Decide the default temperature | manifest `MLX_TEMP` | Whitelisted but set in no profile; mlx-lm's `--temp` defaults to 0.0, so requests without a client temperature are greedy, the default optiq model included ([qwen38-tuning.md §3](qwen38-tuning.md#3-knobs)) | Every quality number, including optiq's, reflects greedy decoding that may not be what Qwen recommends |
-| 13 | Exit codes: open the issue in action 5, and fix the tuning queue's `run()` | action 5; `.bench-logs/qwen38-tuning-queue.sh` | The queue logs `exit $?` after a `$(date)` substitution, so a failed run logs `exit 0` ([qwen38-tuning.md §6](qwen38-tuning.md#6-resume)) | Failed runs, from nav-pilot or the queue, look like successes to anything reading the status |
+| 11 | **Done** (#936, baf72f2c; values 1–16,384 accepted). Add `MLX_PREFILL_STEP_SIZE` → `--prefill-step-size` to nav-pilot's `serverFlags` whitelist | navikt/copilot `cli/nav-pilot/internal/local/runtime.go:1002-1011` | The score-matrix transient (~5 GB per 2048-token chunk at 51k, §3.3) is the term that puts the 8-bit at 40–48k over the limit ([qwen38-tuning.md §3–4](qwen38-tuning.md#3-knobs)). `--decode-concurrency` and `--prompt-concurrency` are still missing | The 8-bit stays capped at 32k on this tier. Next: the prefill-step variants in [qwen38-tuning.md §8](qwen38-tuning.md#8-what-would-change-these) |
+| 12 | Decide the default temperature. The mechanism is navikt/copilot#934 (draft); the values come from the sampling sweep | manifest `MLX_TEMP`, or `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P` once #934 merges; https://github.com/navikt/copilot/pull/934 | Whitelisted but set in no profile; mlx-lm's `--temp` defaults to 0.0, so requests without a client temperature are greedy, the default optiq model included ([qwen38-tuning.md §3](qwen38-tuning.md#3-knobs)) | Every quality number, including optiq's, reflects greedy decoding that may not be what Qwen recommends |
+| 13 | Exit codes: nav-pilot's half is **done** (action 5); fixing the tuning queue's `run()` is still open | action 5; `.bench-logs/qwen38-tuning-queue.sh` | The queue logs `exit $?` after a `$(date)` substitution, so a failed run logs `exit 0` ([qwen38-tuning.md §6](qwen38-tuning.md#6-resume)) | Failed runs, from nav-pilot or the queue, look like successes to anything reading the status |
 
-**Merge order and dependencies.** #932 → #931 → #933 → #20. None depends on another. They were
-merged together without conflicts into `test/e2e-combined` (915e27c6) and passed
-`go test -race` and the e2e run. #932 goes first because it also cuts cloud cost. #20 goes last,
-after the tuning sweep, so that if a tuned 8-bit entry still hits an OOM, nav-pilot already
-reports a dead server instead of hanging on one. Recommendation 5 is superseded; there is no
+**Merge order and dependencies.** #932, #931 and #933 merged on 2026-09-24, followed by #935,
+#937 and #936. Before that they had been merged together without conflicts into
+`test/e2e-combined` (915e27c6) and passed `go test -race` and the e2e run. #20 still goes last,
+after the tuning sweep, and the sweep must use a nav-pilot binary built from current `main`
+([qwen38-tuning.md §6](qwen38-tuning.md#6-resume)). Recommendation 5 is superseded; there is no
 follow-up to stop offering the 4-bit.
 
 **rtk options (#6), undecided:**
@@ -91,7 +102,7 @@ untracked profiles are settled by the [profile audit](profile-audit.md):
 **Stale branches and worktrees (#9):**
 
 - `feat/local-system-one-loop-guard` (e72319e0): local only, superseded by #933. The main checkout `~/go/src/github.com/navikt/copilot` is **on** this branch; switch it to `main` before deleting the branch.
-- Today's copilot worktrees, to remove once their PR merges: `copilot-deadthread` (#931), `copilot-instrdirs` (#932), `copilot-loopguard` (#933), `copilot-e2e` (`test/e2e-combined`, local only; it built `.bench-logs/bin/nav-pilot-combined-915e27c6`).
+- The 2026-09-23 copilot worktrees, all PRs now merged, so they can go: `copilot-deadthread` (#931), `copilot-instrdirs` (#932), `copilot-loopguard` (#933), `copilot-e2e` (`test/e2e-combined`, local only; it built `.bench-logs/bin/nav-pilot-combined-915e27c6`).
 - `/Users/hans/mlx-workspace-hotfix`: worktree for #20's branch, clean. Remove after #20 merges.
 - 39 other `~/go/src/github.com/navikt/copilot-*` worktrees predate today and were not reviewed here.
 - `~/.copilot/session-state` (#10): `a4734d79…/files/{copilot-worktree,cplt-worktree}` and `fbe281f6…/files/{article,benchmark,models}-worktree`.
