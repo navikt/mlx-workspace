@@ -7,7 +7,10 @@ suggested order.
 Before any GPU work:
 
 - Use a nav-pilot binary built from current `main` of navikt/copilot, which now contains #931, #932,
-  #933, #935, #936 and #937. The path is in [qwen38-tuning.md](qwen38-tuning.md).
+  #933, #935, #936 and #937: `.bench-logs/bin/nav-pilot-main-d328ee68` (built at d328ee68), set as
+  `BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-main-d328ee68`. The resume commands and the rebuild
+  command are in [qwen38-tuning.md §6](qwen38-tuning.md#6-resume). The older
+  `nav-pilot-combined-915e27c6` ignores `MLX_PREFILL_STEP_SIZE`.
 - Queue jobs with `BENCH_WAIT=1`, and never edit a `.mise/tasks/*` bash script in place while an
   instance is running or waiting (bash reads scripts by byte offset).
 - Keep the 36 GB wired limit (`iogpu.wired_limit_mb` = 36864) that fits 48 GB machines.
@@ -34,7 +37,8 @@ Goal: confirm or replace the provisional parameters in PR navikt/mlx-workspace#2
    - `qwen3.8-27b-optiq-4bit` (full; needs task 1)
 2. **New since #936:** `MLX_PREFILL_STEP_SIZE` variants for the 8-bit (512 or 1024 at 40k/48k). A
    smaller prefill chunk shrinks the attention score transient, the part that caused the Metal OOM,
-   and may make a larger context fit.
+   and may make a larger context fit. The arithmetic and the two variant profiles (c40k-3g at 1024,
+   c48k at 512 with a 3.25 GiB cache) are in [qwen38-tuning.md §4](qwen38-tuning.md#4-the-pruned-grid).
 3. `bench-cheap-ops` for the winners: ×2 for the 8-bit and the 4-bit, ×3 for OptiQ-4bit.
 4. Pass: no `Insufficient Memory`, peak footprint ≤ 41 GB with a warm cache at max context, and
    Copilot sessions verify ≥ 5/6.

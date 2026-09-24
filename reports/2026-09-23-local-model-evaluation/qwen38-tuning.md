@@ -4,9 +4,12 @@ Status: **partial.** The sweep stopped at 08:50 on 24 Sep (battery and network).
 PENDING have not been measured; the commands to finish them are in §6.
 
 Same machine and runtime as [decision.md](decision.md): M5 Max 128 GB, `iogpu.wired_limit_mb` =
-36864, nav-pilot's own server (mlx-lm 0.31.3, mlx 0.32.0), binary
-`.bench-logs/bin/nav-pilot-combined-915e27c6`. `.bench-logs/` is git-ignored and exists only on
-that machine.
+36864, nav-pilot's own server (mlx-lm 0.31.3, mlx 0.32.0). The runs in §5 used
+`.bench-logs/bin/nav-pilot-combined-915e27c6`; the rest of the sweep must use
+`.bench-logs/bin/nav-pilot-main-d328ee68`, built from navikt/copilot `main` at d328ee68 (#931,
+#932, #933, #935, #936, #937). The old binary ignores `MLX_PREFILL_STEP_SIZE`: its `serverFlags`
+whitelist has no entry for it, so a profile that sets it would run at the 2048 default without
+saying so. `.bench-logs/` is git-ignored and exists only on that machine.
 
 ## 1. Goal and decision
 
@@ -55,17 +58,19 @@ Copilot's static context alone is 21.7k × 64 KiB ≈ 1.33 GiB, so a 1 GiB cache
 ## 3. Knobs
 
 Available through the manifest, `serverFlags` in navikt/copilot
-`cli/nav-pilot/internal/local/runtime.go:1002-1011`: `MLX_TEMP` (`--temp`), `MLX_TOP_P`,
+`cli/nav-pilot/internal/local/runtime.go:1002-1013` on `main`: `MLX_TEMP` (`--temp`), `MLX_TOP_P`,
 `MLX_TOP_K`, `MLX_MIN_P`, `MLX_MAX_TOKENS`, `MLX_CACHE_SIZE` (`--prompt-cache-size`),
-`MLX_CACHE_BYTES` (`--prompt-cache-bytes`), `MLX_CHAT_TEMPLATE_ARGS`. Context and output
-(`MLX_OPENCODE_CONTEXT`, `MLX_OPENCODE_OUTPUT`) are enforced by the client, not the server.
+`MLX_CACHE_BYTES` (`--prompt-cache-bytes`), `MLX_CHAT_TEMPLATE_ARGS`, and since #936 (baf72f2c)
+`MLX_PREFILL_STEP_SIZE` (`--prefill-step-size`, a whole number from 1 to 16,384, checked when the
+manifest is parsed). Context and output (`MLX_OPENCODE_CONTEXT`, `MLX_OPENCODE_OUTPUT`) are
+enforced by the client, not the server.
 
-Not available (not in the whitelist):
+`--prefill-step-size` is the main fix for the score-matrix transient: mlx 0.32.0 has no fused
+attention for head_dim 256, so each 2048-token chunk materialises about 5 GB of scores at 51k
+([evaluation-log.md](evaluation-log.md), "Root cause"). The transient scales with the step, so 512
+cuts it by 4× and 1024 by 2× (§4, prefill-step variants).
 
-- `--prefill-step-size`. The main fix for the score-matrix transient: mlx 0.32.0 has no fused
-  attention for head_dim 256, so each 2048-token chunk materialises about 5 GB of scores at 51k
-  ([evaluation-log.md](evaluation-log.md), "Root cause"). A 512 step should cut that by about 4×.
-- `--decode-concurrency`, `--prompt-concurrency`.
+Not available (not in the whitelist): `--decode-concurrency`, `--prompt-concurrency`.
 
 **Temperature.** `MLX_TEMP` is whitelisted but no profile sets it (all five in §4 lack it), and
 mlx-lm's `--temp` defaults to 0.0 (`mlx_lm/server.py:1818-1821` in nav-pilot's venv). Unless the
@@ -97,6 +102,25 @@ the new profile gives up. OptiQ adds its 2.5 GB of extra weights (18.5 GB vs 16 
 Pruned: 1 GiB caches (below Copilot's static context, §2); 8-bit above 48k (OOM at 51k, 6×
 prefill slowdown past 40k); the 4-bit at 131k and 12 GiB (≈ 51 GB with a warm cache,
 evaluation-log.md exposure table).
+
+**Prefill-step variants (new since #936).** The transient term is 5 GB × tokens / 51k at a
+2048 step, and linear in the step, so a smaller step subtracts from the peak and changes nothing
+else in the formula (weights, KV and cache stay as they are). A c48k variant also needs its cache
+raised to 3.25 GiB (3489660928 bytes), since 53,248 tokens × 64 KiB is 3.25 GiB and the 2 GiB
+cache evicts a full window (§2).
+
+| Variant | Tokens | Transient at 2048 / 1024 / 512 | Peak at 2048 / 1024 / 512 |
+|---|---|---|---|
+| c40k-3g, at ctx | 40,960 | 4.02 / 2.01 / 1.00 GB | 42.0 / 40.0 / 39.0 GB |
+| c40k-3g, at ctx+out | 45,056 | 4.42 / 2.21 / 1.10 GB | 42.7 / 40.5 / 39.4 GB |
+| c48k with a 3.25 GiB cache, at ctx | 49,152 | 4.82 / 2.41 / 1.20 GB | 43.6 / 41.2 / 40.0 GB |
+| c48k with a 3.25 GiB cache, at ctx+out | 53,248 | 5.22 / 2.61 / 1.31 GB | 44.3 / 41.7 / 40.4 GB |
+
+By this arithmetic, 1024 brings 40k under 41 GB and 512 is needed for 48k. Two variants to add:
+`c40k-3g` with a 1024 step, and `c48k` with a 512 step and a 3.25 GiB cache. The cost is not in the
+formula: a smaller step means 4× as many prefill chunks at 512, and how much that slows prefill
+on this model is unmeasured. The latency probe measures it, and it matters because the 30k cold
+TTFT (66 s) is already over the 30 s criterion.
 
 Profiles: `profiles/qwen3.8-27b-8bit-nopin-{c32k,c40k,c48k,c40k-3g}.toml`,
 `profiles/qwen3.8-27b-4bit-c64k-8g.toml`, `profiles/qwen3.8-27b-optiq-4bit.toml`.
@@ -133,18 +157,32 @@ What the c48k point says so far:
 ## 6. Resume
 
 In order. `BENCH_WAIT=1` queues each run behind the bench lock. This is
-`.bench-logs/qwen38-tuning-queue.sh` with the c48k rerun added.
+`.bench-logs/qwen38-tuning-queue.sh` with the c48k rerun and the prefill-step variants added, and
+with the binary built from `main` (see the top of this file). To rebuild it after `main` moves:
+`cd ~/go/src/github.com/navikt/copilot && git switch main && git pull && cd cli/nav-pilot && go build -o /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-$(git rev-parse --short=8 HEAD) .`
 
 ```sh
 cd /Users/hans/mlx-workspace
-mise run model-download qwen3.8-27b-optiq-4bit      # 3.1 of 19.45 GB done; needs network
-export BENCH_WAIT=1 BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-combined-915e27c6
+mise run model-download qwen3.8-27b-optiq-4bit      # 4.5 of 19.45 GB done; needs network
+export BENCH_WAIT=1 BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-main-d328ee68
+# Prefill-step variants (§4): copy the profile and add one line (and, for c48k, the larger cache).
+sed 's/^MLX_CACHE_SIZE /MLX_PREFILL_STEP_SIZE      = "1024"\nMLX_CACHE_SIZE /' \
+  profiles/qwen3.8-27b-8bit-nopin-c40k-3g.toml > profiles/qwen3.8-27b-8bit-nopin-c40k-3g-ps1024.toml
+sed -e 's/^MLX_CACHE_SIZE /MLX_PREFILL_STEP_SIZE      = "512"\nMLX_CACHE_SIZE /' \
+    -e 's/^MLX_CACHE_BYTES .*/MLX_CACHE_BYTES            = "3489660928"/' \
+  profiles/qwen3.8-27b-8bit-nopin-c48k.toml > profiles/qwen3.8-27b-8bit-nopin-c48k-ps512.toml
+# Fix [meta] name/notes in both before committing them.
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k --latency-only
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g --latency-only
+mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g-ps1024 --latency-only
+mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k-ps512 --latency-only
 mise run bench-np-e2e -- qwen3.8-27b-4bit-c64k-8g
 mise run bench-np-e2e -- qwen3.8-27b-optiq-4bit
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c32k
 ```
+
+Check the server log of the first variant run for `--prefill-step-size` in the launch command
+before trusting its numbers.
 
 Then cheap-ops quality for the winners: two runs each, three for OptiQ, which has no quality
 data at all. Repeating a profile on the command line repeats the run:
@@ -185,8 +223,9 @@ Known limit of the 8-bit choice: a 32k session at its full 36,864 tokens (contex
   decision.md item 2.
 - **The OptiQ build matches or beats the plain 4-bit on cheap-ops** at a peak under 41 GB → it
   replaces the plain 4-bit entry (same parameters).
-- **nav-pilot whitelists `--prefill-step-size`** → re-run the 8-bit at 48k with a 512 step; the
-  score transient is the term that puts 40–48k over the limit.
+- **A prefill-step variant peaks under 41 GB at ctx+out** (nav-pilot whitelists
+  `--prefill-step-size` since #936) → that context replaces 32k for the 8-bit, if its prefill
+  slowdown is acceptable. The arithmetic in §4 says 1024 is enough at 40k and 512 at 48k.
 - **Real 48 GB hardware** leaves less than the 12 GB this emulation assumes for everything else →
   every margin above shrinks (decision.md §5).
 - **A default temperature** set in the manifest changes the quality numbers for every model,
