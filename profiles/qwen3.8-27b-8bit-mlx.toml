@@ -3,26 +3,27 @@ name               = "Qwen 3.8 27B 8bit (mlx-lm)"
 released           = "2026-07"
 status             = "untested"
 spec_source        = "config.json"
-notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context was set to the same 65k the other team runs; it is now capped at 32k, because on 2026-09-23 the server died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit (no fused attention kernel for head_dim 256, so each 2048-token prefill chunk materializes about 5 GB of scores at that length)."
+notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context was set to the same 65k the other team runs; it is now capped at 32k with a 4k reply and a 2.25 GiB prompt cache (qwen38-tuning.md §7, provisional; estimated 40.3 GB peak at context plus output against a 41 GB criterion), because on 2026-09-23 the server died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit (no fused attention kernel for head_dim 256, so each 2048-token prefill chunk materializes about 5 GB of scores at that length)."
 model_vram_gb      = 30
 gpu_wired_limit_gb = 36
 
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
 MLX_SERVER_TYPE            = "mlx-lm"
-# 4 GB of prompt cache, not the 12 GB the smaller profiles use. At 29.5 GB of
-# weights that is what is left under a 36 GB wired limit.
-MLX_CACHE_BYTES            = "4294967296"
+# 2.25 GiB of prompt cache. An entry larger than --prompt-cache-bytes evicts itself,
+# and this hybrid model's cache cannot be trimmed to a prefix, so the cache must hold
+# a whole session: 64 KiB/token x (32,768 context + 4,096 output) = 2.25 GiB. Every
+# byte above that is taken from prefill headroom, which is what OOMs at ~51k.
+MLX_CACHE_BYTES            = "2415919104"
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "32768"
 MLX_OPENCODE_CONTEXT       = "32768"
-MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
-# reasoning_effort is pinned, not left to the client. Qwen3.8's template
-# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
-# values — none, high and max would make the template refuse the request.
-# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
-MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false, "reasoning_effort": "medium"}'
+# No reasoning_effort pin. The pin was added hours before both 1 September runs of
+# the pinned 8-bit verified nothing and is absent from every earlier run; the tuning
+# profiles (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §7) drop it.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"
