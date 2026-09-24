@@ -166,14 +166,10 @@ cd /Users/hans/mlx-workspace
 mise run model-download qwen3.8-27b-optiq-4bit      # 4.5 of 19.45 GB done; needs network
 export BENCH_WAIT=1 BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-main-d328ee68
 # Prefill-step variants (§4): copy the profile and add one line (and, for c48k, the larger cache).
-sed 's/^MLX_CACHE_SIZE /MLX_PREFILL_STEP_SIZE      = "1024"\nMLX_CACHE_SIZE /' \
-  profiles/qwen3.8-27b-8bit-nopin-c40k-3g.toml > profiles/qwen3.8-27b-8bit-nopin-c40k-3g-ps1024.toml
-sed -e 's/^MLX_CACHE_SIZE /MLX_PREFILL_STEP_SIZE      = "512"\nMLX_CACHE_SIZE /' \
-    -e 's/^MLX_CACHE_BYTES .*/MLX_CACHE_BYTES            = "3489660928"/' \
-  profiles/qwen3.8-27b-8bit-nopin-c48k.toml > profiles/qwen3.8-27b-8bit-nopin-c48k-ps512.toml
 # Fix [meta] name/notes in both before committing them.
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k --latency-only
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g --latency-only
+# variant profiles are committed (profiles/*-ps1024.toml, *-ps512.toml)
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g-ps1024 --latency-only
 mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k-ps512 --latency-only
 mise run bench-np-e2e -- qwen3.8-27b-4bit-c64k-8g

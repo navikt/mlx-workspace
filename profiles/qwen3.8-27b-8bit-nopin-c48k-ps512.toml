@@ -1,0 +1,34 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), 48k context, 3.25 GiB cache, prefill step 512"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Tuning point for the 36 GB tier (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §4). Same as c48k with --prefill-step-size 512 (navikt/copilot#936) and the cache raised to 3.25 GiB so a full 48k+4k window stays cached; estimated 40.4 GB at context+output vs 44.3 at step 2048. Prefill speed cost unmeasured."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+# 2 GiB of prompt cache (the base nopin profile has 4 GiB): the freed 2 GiB goes to
+# prefill headroom, which is what OOMs at ~51k tokens.
+MLX_CACHE_BYTES            = "3489660928"
+MLX_PREFILL_STEP_SIZE      = "512"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "49152"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# reasoning_effort is pinned, not left to the client. Qwen3.8's template
+# raises on anything outside xhigh/medium/low, and nav-pilot accepts six
+# values — none, high and max would make the template refuse the request.
+# Qwen3.6 ignores the field entirely, so this asymmetry arrived with 3.8.
+# No reasoning_effort here — that is the point of this profile. Both 1 September
+# runs of the pinned 8-bit verified nothing, every task timing out with zero
+# turns completed, and the pin was added hours earlier and is absent from every
+# historical run. Either it caused the collapse or the model is simply this slow;
+# this profile is the control that tells us which.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"

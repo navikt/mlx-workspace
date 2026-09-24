@@ -1,0 +1,24 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), 40k context, 3 GiB cache, prefill step 1024"
+released           = "2026-07"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Tuning point for the 36 GB tier (reports/2026-09-23-local-model-evaluation/qwen38-tuning.md §4). Same as c40k-3g with --prefill-step-size 1024 (settable since navikt/copilot#936): halves the attention score transient that caused the Metal OOM; estimated 40.5 GB at context+output vs 42.7 at the default 2048. Prefill speed cost unmeasured."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "3221225472"
+MLX_PREFILL_STEP_SIZE      = "1024"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "40960"
+MLX_OPENCODE_OUTPUT        = "4096"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+# No reasoning_effort pin: measured a no-op on 2026-09-23.
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
