@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# mise description="Where nav-pilot alpha decide stops working: language, rule-proof questions, option count, evidence length and position, option order, injection, three models. Usage: mise run bench-decide-limits [-- --dry-run | --selftest | --check-cases | --models optiq,qwen3.8-27b-optiq-4bit,qwen3-4b]"
+#
+# Under the queue lock, for each model: np-serve's server lifecycle (stop :8080, scratch nav-pilot
+# config, manifest entry, nav-pilot alpha local start), every case in bench/decide-limits/ through
+# `nav-pilot alpha decide`, server down, manifest restored. Writes bench/decide-limits-<model>-<stamp>.json
+# and .md per model and bench/decide-limits-<stamp>.md across them. The work is in _decide_limits.py.
+# The manifest backup is named like np-serve's ($CACHE.np-e2e-<pid>), so night-run's cleanup restores
+# it after a SIGKILL.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+case "${1:-}" in
+  --dry-run|--selftest|--check-cases) exec python3 .mise/tasks/_decide_limits.py "$@" ;;
+esac
+NP="${BENCH_NAV_PILOT:-$(ls -t "$PWD"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+[ -x "$NP" ] || { echo "✗ no nav-pilot binary at '$NP' (set BENCH_NAV_PILOT)"; exit 2; }
+
+# Same lock and wait semantics as bench-models and bench-np-e2e.
+LOCKDIR=".bench-logs/.queue.lock"
+mkdir -p .bench-logs
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
+  if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
+    echo "✗ another benchmark queue is running (pid $holder). BENCH_WAIT=1 queues behind it."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR"
+done
+echo $$ > "$LOCKDIR/pid"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+CACHE="$HOME/.nav-pilot/local-models.json"
+export BENCH_NAV_PILOT="$NP"
+export LIMITS_BACKUP="$CACHE.np-e2e-$$"
+export LIMITS_MARKER="$PWD/.bench-logs/decide-limits-$STAMP.started"
+
+cleanup() {
+  [ -f "$LIMITS_MARKER" ] && "$NP" alpha local stop >/dev/null 2>&1
+  [ -f "$LIMITS_BACKUP" ] && mv -f "$LIMITS_BACKUP" "$CACHE"
+  rm -f "$LIMITS_MARKER" "$PWD/.bench-logs/decide-limits-$STAMP.config.toml"
+  rm -rf "$LOCKDIR"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+python3 .mise/tasks/_decide_limits.py --dry-run "$@" || { echo "✗ dry run failed; not starting"; exit 1; }
+python3 .mise/tasks/_decide_limits.py all --stamp "$STAMP" "$@"
