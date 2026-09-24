@@ -11,6 +11,12 @@ machine, nav-pilot's runtime mlx-lm 0.31.3 / mlx 0.32.0).
 - [nav-pilot-e2e.md](nav-pilot-e2e.md): the combined end-to-end test of navikt/copilot #931, #932 and #933 on the #20 manifest.
 - [hardware-tier-backlog.md](hardware-tier-backlog.md): tests still to run on 48, 64 and 128 GB machines.
 
+## Status on 2026-09-24
+
+- navikt/copilot#932 is in the merge queue (position 1, awaiting checks, checked 08:38 CEST).
+- navikt/copilot#931 and #933 have auto-merge armed but are not in the queue yet: both show `BLOCKED`, #931 with its checks still running.
+- navikt/mlx-workspace#20 stays a draft for now, by the user's choice. Action 4 is on hold.
+
 ## 1. Decision summary
 
 1. `qwen3.6-35b-a3b-optiq` stays the only default. Its quality is level with the best local alternative (28/40 vs 31/40, Fisher p = 0.61), and it is about 9× faster per task.
