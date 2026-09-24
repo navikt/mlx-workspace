@@ -1,0 +1,22 @@
+[meta]
+name               = "Qwen 3.8 Flash Next 125B 4bit"
+released           = "2026-08"
+status             = "untested"
+spec_source        = "externally verified"
+notes              = "Testing the Qwen4 MoE preview."
+model_vram_gb      = 104  # 111.5 GB of weights on HF (2026-09-24)
+gpu_wired_limit_gb = 118
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-Flash-Next-4bit"
+MLX_SERVER_TYPE            = "mlx-vlm"  # model_type qwen4_exp: mlx-vlm only, mlx-lm 0.32.0 has no qwen4_exp
+MLX_CACHE_BYTES            = "12884901888"
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "131072"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false, "reasoning_effort": "medium"}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"

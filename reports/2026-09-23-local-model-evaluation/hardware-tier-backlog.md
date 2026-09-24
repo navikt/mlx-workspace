@@ -61,7 +61,7 @@ Goal: exploration, and the upper-tier options. Nothing here blocks the 48 GB fle
 |---|---|
 | oMLX MTP profiles (`qwen3.8-27b-8bit`, `-nocache`) at 96 GB wired: speed vs mlx-lm nopin | Parked 2026-09-23. Queue with `.mise/tasks/queue-omlx-benchmarks` after `vram-set 96` |
 | Full-context runs (131k) for every Qwen3.8 build, with and without a prompt cache | Establishes the real memory curve instead of arithmetic |
-| Qwen3.8-Flash-Next 125B MoE 4-bit (PLAN.md:358, deferred) | Fits only under ~96 GB wired; quality and loop behaviour vs 27B dense |
+| Qwen3.8-Flash-Next 125B MoE 4-bit (PLAN.md:358, deferred) | 111.5 GB of weights, so it needs about 118 GB wired on the 128 GB machine, and the mlx-vlm backend (`qwen4_exp`); quality and loop behaviour vs 27B dense |
 | System One classifier as a **separate** small model beside the agent model | Removes cache eviction and shared-slot serialisation; needs two servers |
 | Concurrency: two nav-pilot sessions against one server (the guard serializes) vs two servers | Only feasible with the memory headroom |
 | Upper bound on cheap-ops with a raised 900 s timeout cap (D2 was retired for exceeding the budget) | Separates "too slow" from "can't do it" |
