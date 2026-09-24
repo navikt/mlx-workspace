@@ -8,7 +8,7 @@
 #   c  4-bit at 65536: one task, no Insufficient Memory, peak footprint
 #   e  8-bit at 65536 (pre-#20 entry): warm cache, ~60k prompt, server must exit 70
 #      and the next launch must fail fast with local_server_lost (#931)
-#   -> verdicts into bench/navpilot-e2e-<stamp>.json and reports/nav-pilot-e2e-2026-09-23.md
+#   -> verdicts into bench/navpilot-e2e-<stamp>.json and reports/2026-09-23-local-model-evaluation/nav-pilot-e2e.md
 #
 # Lock, config and manifest handling are bench-np-e2e's; see the reasoning there.
 set -uo pipefail
@@ -42,7 +42,7 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 LOG=".bench-logs/navpilot-e2e-$STAMP.log"
 OUT="bench/navpilot-e2e-$STAMP.json"
 FPLOG=".bench-logs/navpilot-e2e-$STAMP.footprint"
-REPORT="reports/nav-pilot-e2e-2026-09-23.md"
+REPORT="reports/2026-09-23-local-model-evaluation/nav-pilot-e2e.md"
 export NAV_PILOT_CONFIG="$PWD/.bench-logs/navpilot-e2e-$STAMP.config.toml"
 export BENCH_NAV_PILOT="$NP"
 CACHE="$HOME/.nav-pilot/local-models.json"

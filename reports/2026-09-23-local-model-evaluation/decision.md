@@ -5,8 +5,11 @@ raw file it cites. `bench/` files are in this repo; `.bench-logs/` is git-ignore
 on the benchmark machine (M5 Max, 128 GB, `iogpu.wired_limit_mb` = 36864 to emulate a 48 GB
 machine, nav-pilot's runtime mlx-lm 0.31.3 / mlx 0.32.0).
 
-Background detail is in `reports/qwen3.8-nopin-evaluation-2026-09-23.md` (running log),
-`reports/nav-pilot-e2e-2026-09-23.md` and `reports/hardware-tier-test-backlog.md`.
+## Documents in this folder
+
+- [evaluation-log.md](evaluation-log.md): the running log of the Qwen3.8 nopin evaluation, with every run and its raw file.
+- [nav-pilot-e2e.md](nav-pilot-e2e.md): the combined end-to-end test of navikt/copilot #931, #932 and #933 on the #20 manifest.
+- [hardware-tier-backlog.md](hardware-tier-backlog.md): tests still to run on 48, 64 and 128 GB machines.
 
 ## 1. Decision summary
 
@@ -191,4 +194,4 @@ correctly.
 - **4-bit at 60k** (`bench/np-e2e-qwen3.8-27b-4bit-20260923-155027.json`): no OOM, peak 39.0 GB, cold TTFT 109 s (a repeat gave 123 s), decode 22.2 tok/s. This fails the §12 latency criteria (cold TTFT at 30k is 47.0 s against a 30 s limit, and at 60k 109 s against 90 s), which supports recommendation 5.
 - **`min_ram_gb` is not enforced by nav-pilot**, so per-tier manifest entries do nothing until it is.
 - **Quality n is small.** 3–4 runs per model can't separate 57–78% pass rates. Variance within a model (optiq 5–9/10) is as large as the differences between models.
-- Tests for the 64 GB and 128 GB tiers (8-bit at full context, `--prefill-step-size 512`, oMLX MTP, Qwen3.8-Flash-Next) are listed in `reports/hardware-tier-test-backlog.md`.
+- Tests for the 64 GB and 128 GB tiers (8-bit at full context, `--prefill-step-size 512`, oMLX MTP, Qwen3.8-Flash-Next) are listed in [hardware-tier-backlog.md](hardware-tier-backlog.md).
