@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 # mise description="Does the #939 loop-guard hook work inside cplt? One provoked-loop cloud Copilot session through nav-pilot. Usage: mise run bench-loop-hook -- [cloud-model]"
 """navikt/copilot#939 writes ~/.copilot/hooks/nav-pilot-loop-guard.json at launch; the
-hook runs `nav-pilot hook loop-guard` after every tool call and keeps its count in
-~/.nav-pilot/hook-state/. Inside the cplt sandbox that directory may not be writable,
-and the hook fails open, so a broken hook looks exactly like a quiet session.
+hook runs `nav-pilot hook loop-guard` after every tool call. It first kept its count in
+~/.nav-pilot/hook-state/, which cplt denies (read and write) along with the config, so
+inside the sandbox it failed open on every call. Since the fix it keeps the count in the
+session's own dir, ~/.copilot/session-state/<id>/nav-pilot-loop-guard.json, and takes its
+settings from the hook command when the config is out of reach.
 
 One cloud session (default gpt-5-mini) in a scratch git repo, told to re-read a file
 that never changes, with only the view tool. Pass when both hold:
   - the model saw "[nav-pilot loop guard]" in a tool result (the session's own events.jsonl)
-  - a state file for that session appeared in ~/.nav-pilot/hook-state
-Writes bench/loop-hook-<stamp>.json. Exit 0 when a session ran (pass or fail is in the
-file), 1 when none did. Takes no queue lock: no GPU, no local server.
+  - a state file for that session appeared (session dir, or the old ~/.nav-pilot/hook-state)
+Writes bench/loop-hook-<stamp>.json always, also on timeout. Exit 0 when a session ran
+(pass or fail is in the file), 1 when none did. Takes no queue lock: no GPU, no local server.
+To test a build's hook, put that nav-pilot first on PATH: the hook finds it there.
 """
+import errno
 import json
 import os
 import signal
@@ -25,10 +29,31 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 HOME = Path.home()
 MARK = "[nav-pilot loop guard]"
-STATE_DIR = HOME / ".nav-pilot" / "hook-state"
+STATE_DIR = HOME / ".nav-pilot" / "hook-state"  # before the fix
+STATE_NAME = "nav-pilot-loop-guard.json"  # in the session dir, after it
 SESSIONS = HOME / ".copilot" / "session-state"
 HOOK_FILE = HOME / ".copilot" / "hooks" / "nav-pilot-loop-guard.json"
 CAP = int(os.environ.get("LOOP_HOOK_TIMEOUT", "600"))
+
+
+def tree(pid):
+    """pid and its descendants, children first."""
+    kids = subprocess.run(["pgrep", "-P", str(pid)], capture_output=True, text=True).stdout.split()
+    return [d for k in kids for d in tree(int(k))] + [pid]
+
+
+def kill_tree(pid):
+    """Stop a process tree by pid. os.killpg fails with EPERM once cplt has sandboxed
+    part of the group, which lost the night-2 result; signal each pid instead and
+    ignore the ones that are gone or refuse."""
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        for p in tree(pid):
+            try:
+                os.kill(p, sig)
+            except OSError as e:
+                if e.errno not in (errno.ESRCH, errno.EPERM):
+                    raise
+        time.sleep(5)
 
 
 def main():
@@ -49,9 +74,9 @@ def main():
                  "commit", "-qm", "loop-hook fixture"]):
         subprocess.run(cmd, cwd=work, check=True)
 
-    # A scratch nav-pilot config: no auto-update, no local server. The hook itself
-    # reads ~/.nav-pilot/config.toml (cplt passes HOME, not NAV_PILOT_CONFIG), where
-    # hook_loop_guard is unset and so on.
+    # A scratch nav-pilot config: no auto-update, no local server. The launch writes the
+    # hook settings from it into the hook command; inside cplt the hook cannot read any
+    # config (NAV_PILOT_CONFIG is not passed and ~/.nav-pilot is denied) and uses those.
     cfg = ROOT / ".bench-logs" / f"loop-hook-{stamp}.config.toml"
     user = (HOME / ".nav-pilot" / "config.toml").read_text().splitlines()
     keep = [l for l in user if l.split("=")[0].strip() not in ("auto_update", "local_enabled", "local_autostart")]
@@ -77,13 +102,11 @@ def main():
             rc = proc.wait(timeout=CAP)
         except subprocess.TimeoutExpired:
             timed_out = True
-            os.killpg(proc.pid, signal.SIGTERM)
-            time.sleep(5)
+            kill_tree(proc.pid)
             try:
-                os.killpg(proc.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            rc = proc.wait()
+                rc = proc.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                rc = None
     cfg.unlink(missing_ok=True)
     text = log.read_text(errors="replace")
 
@@ -102,10 +125,14 @@ def main():
     marked = [e["type"] for e in events if MARK in json.dumps(e)]
     in_tool_result = any(e["type"] == "tool.execution_complete" and MARK in json.dumps(e.get("data")) for e in events)
     views = sum(1 for e in events if e["type"] == "tool.execution_complete")
+    hook_starts = sum(1 for e in events if e["type"] == "hook.start")
+    session_state = SESSIONS / sid / STATE_NAME if sid else None
 
     state_new = sorted(p.name for p in STATE_DIR.glob("*")
                        if p.name not in state_before or p.stat().st_mtime > state_before[p.name]) if STATE_DIR.exists() else []
     state_for_session = [n for n in state_new if sid and sid.replace("-", "") in n.replace("-", "")]
+    if session_state and session_state.exists():
+        state_for_session.append(str(session_state))
     try:  # what the sandbox grants on ~/.nav-pilot, for a FAIL's why
         profile = subprocess.run(["cplt", "--print-profile"], cwd=work, capture_output=True, text=True, timeout=60)
         nav_pilot_rules = [l.strip() for l in (profile.stdout + profile.stderr).splitlines() if ".nav-pilot" in l][:20]
@@ -120,7 +147,8 @@ def main():
         "log": str(log.relative_to(ROOT)), "work": str(work),
         "hook_file": HOOK_FILE.read_text() if HOOK_FILE.exists() else None,
         "in_sandbox": "Starting Copilot in sandbox" in text,
-        "session_id": sid, "tool_calls": views,
+        "session_id": sid, "tool_calls": views, "hook_events": hook_starts,
+        "state_dir": str(session_state.parent) if session_state else None,
         "marker_event_types": marked, "marker_in_tool_result": in_tool_result,
         "hook_state_new": state_new, "hook_state_for_session": state_for_session,
         "cplt_profile_nav_pilot_rules": nav_pilot_rules,
