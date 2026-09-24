@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="Generate manifest/models.json from profiles/, for nav-pilot to fetch"
+# mise description="Generate manifest/models.json from profiles/, for nav-pilot to fetch, and the README table from it. --check: fail if either is stale"
 """Publish the model configurations nav-pilot serves to alpha users.
 
 nav-pilot fetches this file at `alpha local init` and on demand, so a new model
@@ -39,6 +39,7 @@ OFFERED = {
     "qwen3.6-35b-a3b-optiq": {
         "default": True,
         "role": "Sub-agent worker for focused tasks",
+        "evidence": "reports/2026-09-23-local-model-evaluation/decision.md",
         # Written from manifest/capabilities.json, not from impressions: the one class
         # that clears the bar is a delegated mechanical multi-file edit.
         "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
@@ -61,11 +62,13 @@ OFFERED = {
     "qwen3.8-27b-4bit": {
         "default": False,
         "role": "Opt-in alternative, slower and much less predictable",
+        "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md",
         "expect": "Opt-in, never the default. Far slower than the default, median task 80 seconds against 11, and much less predictable: two runs of the same tasks had medians of 88 and 906 seconds, and it runs into the seven-minute cap where the default does not. Context is capped at 64k with an 8k reply so that a full session and its prompt cache stay under the 36 GB wired limit. A full session measured 37.2 GB at peak. If you want an answer in ten seconds, take the default.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
         "role": "Opt-in alternative, the 8-bit build, slowest here",
+        "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md",
         "expect": "Opt-in, never the default. About ten times slower than the default per task (median 115 seconds against 12) and about 14 tokens a second; a cold 30k-token prompt takes about a minute to read, 45k about 85 seconds. Quality was level with the default, 31 of 40 against 28. Context is 48k with a 4k reply, read in 512-token steps so a long prompt fits the 36 GB wired limit. nav-pilot releases older than 2026.09.24-110317 ignore the step and can run out of memory near 48k: update first. If you want one Qwen3.8, take the 4-bit.",
     },
 }
@@ -208,8 +211,70 @@ if missing:
 if sum(1 for m in manifest["models"] if m["default"]) != 1:
     raise SystemExit("✗ exactly one model must be the default")
 
+# The README table of what users get, rendered from the manifest above so it
+# cannot drift from it. `evidence` lives in OFFERED and stays out of models.json.
+README = ROOT / "README.md"
+TABLE = re.compile(r"(<!-- models:start -->\n).*?(<!-- models:end -->)", re.S)
+CLASS_WORDS = {
+    "read-qa": "answers about code",
+    "edit-single": "single-file edits",
+    "edit-multi-mechanical": "mechanical multi-file edits",
+    "create-file": "creating files",
+    "debug": "debugging",
+}
+MODE_WORDS = {"delegate": "handed over by the cloud agent", "local": "as the main agent"}
+
+
+def trusted_for(m: dict) -> str:
+    out = [f"{CLASS_WORDS[c].capitalize()}, {MODE_WORDS[mode]} ({v[mode + '_k']}/{v[mode + '_n']} verified)"
+           for c, v in m.get("capabilities", {}).get("classes", {}).items()
+           for mode in MODE_WORDS if v[mode] == "trusted"]
+    return "; ".join(out) or "Nothing yet: every task class stays on the cloud model"
+
+
+def row(m: dict) -> str:
+    p = m["params"]
+    k = lambda v: f"{int(v) // 1024}k"
+    tuning = [f"temp {p['MLX_NAV_PILOT_TEMPERATURE']}, top_p {p['MLX_NAV_PILOT_TOP_P']}"
+              if "MLX_NAV_PILOT_TEMPERATURE" in p else "greedy"]
+    if "MLX_PREFILL_STEP_SIZE" in p:
+        tuning.append(f"prefill step {p['MLX_PREFILL_STEP_SIZE']}")
+    tuning.append(f"prompt cache {p['MLX_CACHE_SIZE']} \u00d7 {int(p['MLX_CACHE_BYTES']) / 2**30:g} GiB")
+    ev = OFFERED[m["key"]]["evidence"]
+    return " | ".join([
+        f"| **{m['name']}**<br>[`{m['model']}`](https://huggingface.co/{m['model']})",
+        "default" if m["default"] else "opt-in",
+        f"{k(p['MLX_OPENCODE_CONTEXT'])} / {k(p['MLX_OPENCODE_OUTPUT'])}",
+        "; ".join(tuning),
+        f"{m['min_ram_gb']} GB / {m['wired_limit_gb']} GB",
+        f"`{m['min_nav_pilot']}`" if "min_nav_pilot" in m else "any",
+        trusted_for(m),
+        f"[{Path(ev).name}]({ev}) |",
+    ])
+
+
+def readme(text: str) -> str:
+    table = "\n".join([
+        "| Model | Status | Context / reply | Key tuning | RAM / wired limit | Min nav-pilot | Trusted for | Evidence |",
+        "|---|---|---|---|---|---|---|---|",
+        *map(row, manifest["models"]),
+    ])
+    if not TABLE.search(text):
+        raise SystemExit("\u2717 README.md has no <!-- models:start --> / <!-- models:end --> markers")
+    return TABLE.sub(lambda mt: mt[1] + table + "\n" + mt[2], text)
+
+
+outputs = {OUT: json.dumps(manifest, indent=2) + "\n", README: readme(README.read_text())}
+if "--check" in sys.argv[1:]:
+    stale = [p.relative_to(ROOT) for p, t in outputs.items() if not p.exists() or p.read_text() != t]
+    if stale:
+        raise SystemExit(f"\u2717 stale: {', '.join(map(str, stale))}. Run: mise run model-manifest")
+    print("\u2713 manifest/models.json and the README table are current")
+    sys.exit(0)
+
 OUT.parent.mkdir(exist_ok=True)
-OUT.write_text(json.dumps(manifest, indent=2) + "\n")
-print(f"✓ {OUT.relative_to(ROOT)}  schema {SCHEMA_VERSION}, {len(manifest['models'])} models")
+for path, text in outputs.items():
+    path.write_text(text)
+print(f"\u2713 {OUT.relative_to(ROOT)}  schema {SCHEMA_VERSION}, {len(manifest['models'])} models; README table")
 for m in manifest["models"]:
     print(f"   {'*' if m['default'] else ' '} {m['key']:20s} {m['model']}")
