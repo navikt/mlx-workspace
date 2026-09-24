@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# mise description="Start night-run-2 once the running night-run has exited and committed. Run a copy from outside the checkout, detached: nohup <copy> <night-run pid> &"
+#
+# night-run ends by switching the checkout to a local bench/night-results-* branch and
+# committing its report there. This waits for that, then puts the checkout back on an
+# up-to-date main (where night-run-2 lives once its PR is merged), waits for the queue
+# lock, and runs night-run-2 from the main checkout so every result lands in its bench/.
+#
+# Run a copy, not this file: `git pull` rewrites the file a bash script is reading.
+# Refuses rather than guesses: staged or modified tracked files, a pull that is not a
+# fast-forward, or night-run-2 missing on origin/main after NIGHT_CHAIN_WAIT_PR seconds
+# all stop the chain with a line in the log, and night-run-2 does not start.
+set -uo pipefail
+NIGHT_PID="${1:?usage: night-chain <night-run pid>}"
+WS="${NIGHT_CHAIN_WS:-/Users/hans/mlx-workspace}"
+LOG="$WS/.bench-logs/night-chain.log"
+POLL="${NIGHT_CHAIN_POLL:-60}"
+WAIT_PR="${NIGHT_CHAIN_WAIT_PR:-10800}"
+say() { printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG"; }
+g() { git -C "$WS" "$@" >> "$LOG" 2>&1; }
+
+say "=== night-chain pid $$ waiting for night-run pid $NIGHT_PID"
+while kill -0 "$NIGHT_PID" 2>/dev/null; do sleep "$POLL"; done
+say "night-run $NIGHT_PID exited; last lines of its log:"
+tail -3 "$WS/.bench-logs/night.log" >> "$LOG" 2>/dev/null
+grep -q '=== night-run done' "$WS/.bench-logs/night.log" || say "⚠ night-run did not log 'done' (killed?); going on if the checkout is clean"
+# night-run's commit runs in the background with a 120 s watchdog; let git settle.
+while [ -e "$WS/.git/index.lock" ] || pgrep -f 'git commit -m docs\(reports\): night run' > /dev/null; do sleep 5; done
+
+if ! git -C "$WS" diff --cached --quiet || ! git -C "$WS" diff --quiet; then
+  say "✗ tracked changes in $WS (night-run's commit failed?); not switching branches. night-run-2 NOT started."
+  git -C "$WS" status --short >> "$LOG" 2>&1; exit 1
+fi
+say "on $(git -C "$WS" branch --show-current); switching to main"
+g switch main || { say "✗ git switch main failed; night-run-2 NOT started"; exit 1; }
+
+waited=0
+until g fetch -q origin && git -C "$WS" cat-file -e origin/main:.mise/tasks/night-run-2 2>/dev/null; do
+  [ "$waited" -ge "$WAIT_PR" ] && { say "✗ night-run-2 is not on origin/main after ${WAIT_PR}s (PR not merged); NOT started"; exit 1; }
+  sleep "$POLL"; waited=$((waited + POLL))
+done
+g pull --ff-only origin main || { say "✗ pull --ff-only failed; night-run-2 NOT started"; exit 1; }
+say "main at $(git -C "$WS" rev-parse --short HEAD)"
+
+while [ -d "$WS/.bench-logs/.queue.lock" ] && kill -0 "$(cat "$WS/.bench-logs/.queue.lock/pid" 2>/dev/null)" 2>/dev/null; do
+  sleep "$POLL"
+done
+say "queue lock free; starting night-run-2 (log: .bench-logs/night2.log)"
+cd "$WS" || exit 1
+"$WS/.mise/tasks/night-run-2" >> "$WS/.bench-logs/night2.log" 2>&1 < /dev/null
+say "=== night-run-2 exited $?"

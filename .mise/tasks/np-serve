@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# mise description="Run one command against nav-pilot's own local server for a profile, under the queue lock. Usage: mise run np-serve -- <profile> <command> [args...]"
+#
+# The server lifecycle bench-np-e2e has, for commands that are not bench-np-e2e:
+#
+#   lock -> model-use -> stop :8080 -> scratch nav-pilot config (auto_update off,
+#   local_model = the profile's) -> manifest entry gets the profile's params
+#   -> nav-pilot alpha local start -> run the command -> stop, restore the manifest
+#
+# No sanity completion before the command: `_decide.py` times the first request the
+# server sees, and bench-hybrid's preflight makes its own. The command gets
+#   NP_PORT NP_MODEL NP_PROFILE NP_SERVER_PID MLX_ACTIVE_PROFILE BENCH_NAV_PILOT NAV_PILOT_CONFIG
+# and its exit code is this task's. The manifest backup is named like bench-np-e2e's
+# ($CACHE.np-e2e-<pid>), so night-run's cleanup restores it after a SIGKILL.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+profile="${1:-}"; shift || true
+[ -f "profiles/$profile.toml" ] && [ "$#" -gt 0 ] || { echo "usage: mise run np-serve -- <profile> <command> [args...]"; exit 2; }
+NP="${BENCH_NAV_PILOT:-$(ls -t "$PWD"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+[ -x "$NP" ] || { echo "✗ no nav-pilot binary at '$NP' (set BENCH_NAV_PILOT)"; exit 2; }
+
+# Same lock and wait semantics as bench-models and bench-np-e2e.
+LOCKDIR=".bench-logs/.queue.lock"
+mkdir -p .bench-logs
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
+  if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
+    echo "✗ another benchmark queue is running (pid $holder). BENCH_WAIT=1 queues behind it."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR"
+done
+echo $$ > "$LOCKDIR/pid"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+export NAV_PILOT_CONFIG="$PWD/.bench-logs/np-serve-$STAMP.config.toml"
+export BENCH_NAV_PILOT="$NP"
+CACHE="$HOME/.nav-pilot/local-models.json"
+BACKUP="$CACHE.np-e2e-$$"
+STATE="$HOME/.nav-pilot/local/server.json"
+started_np=""
+
+cleanup() {
+  [ -n "$started_np" ] && "$NP" alpha local stop >/dev/null 2>&1
+  [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  rm -f "$NAV_PILOT_CONFIG"
+  rm -rf "$LOCKDIR"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+echo "=== np-serve $profile · nav-pilot $NP"
+mise run server-stop >/dev/null 2>&1
+mise run model-use "$profile" >/dev/null 2>&1 || { echo "✗ could not switch profile"; exit 1; }
+MODEL=$(python3 -c "import sys; sys.path.insert(0,'.mise/tasks'); import _profiles as P; print(P.load('$profile')[1]['MLX_MODEL'])")
+
+if [ -f "$STATE" ] && kill -0 "$(python3 -c "import json; print(json.load(open('$STATE'))['pid'])")" 2>/dev/null; then
+  echo "✗ a nav-pilot local server is already running ($STATE); refusing to measure beside it"; exit 1
+fi
+
+{ echo 'auto_update = false'; echo 'local_enabled = true'; echo 'local_autostart = false'
+  echo "local_model = \"$MODEL\""
+  grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
+} > "$NAV_PILOT_CONFIG"
+
+cp "$CACHE" "$BACKUP" || { echo "✗ could not back up $CACHE"; exit 1; }
+python3 .mise/tasks/_np_checks.py manifest "$profile" "$CACHE" || { echo "✗ manifest"; exit 1; }
+
+# Unreachable proxy: start reads the manifest we just wrote instead of refetching it.
+started_np=1
+if ! HTTPS_PROXY=http://127.0.0.1:9 HTTP_PROXY=http://127.0.0.1:9 "$NP" alpha local start; then
+  echo "✗ nav-pilot alpha local start failed"; exit 1
+fi
+read -r SPID PORT SMODEL < <(python3 -c "import json; s=json.load(open('$STATE')); print(s.get('pid'), s.get('port'), s.get('model'))")
+[ "$SMODEL" = "$MODEL" ] || { echo "✗ nav-pilot serves $SMODEL, profile names $MODEL"; exit 1; }
+echo "  server pid $SPID port $PORT model $SMODEL"
+echo "  argv: $(ps -ww -o command= -p "$SPID")"
+
+export NP_PORT="$PORT" NP_MODEL="$MODEL" NP_PROFILE="$profile" NP_SERVER_PID="$SPID" MLX_ACTIVE_PROFILE="$profile"
+"$@"
+rc=$?
+echo "=== np-serve: command exited $rc"
+exit "$rc"
