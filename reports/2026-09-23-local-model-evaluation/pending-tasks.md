@@ -161,5 +161,13 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   repeat the four trusted-cell lines with the default GPT-6 Sol. Needs a nav-pilot binary at
   `7362715c` or later (the current `nav-pilot-main-f1507caa` predates #941). About 4 h and $13 per
   run. The exact steps are in [copilot mixed mode §3.2](../2026-09-24-copilot-mixed-mode/research.md#32-the-proposed-arm-hybrid-steps-in-the-night-run-driver).
+- **Measure `nav-pilot alpha decide` on real hardware.** The command
+  ([navikt/copilot#949](https://github.com/navikt/copilot/pull/949)) was built tonight against
+  fake servers only, because the night run owned the GPU. In the daytime PoC or the next night run, measure: latency warm and cold (the first call
+  after `alpha local start`, then repeats), whether a decide call evicts a concurrent agent
+  session's prefix from the prompt cache (session TTFT before and after), and accuracy with
+  `--eval` on 2–3 of our own questions, such as "is this commit message conventional?" (yes/no)
+  and loop versus progress with the tool results as evidence, which is the case the loop
+  classifier got wrong without them ([research](../2026-09-24-jev-like-features/research.md)).
 - **What tonight cannot answer.** Real 48 GB hardware and Pro chips (task 5), a cloud reference
   arm for the same tasks, and a rerun of the delegation benchmark.
