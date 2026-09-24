@@ -10,6 +10,7 @@ machine, nav-pilot's runtime mlx-lm 0.31.3 / mlx 0.32.0).
 - [evaluation-log.md](evaluation-log.md): the running log of the Qwen3.8 nopin evaluation, with every run and its raw file.
 - [nav-pilot-e2e.md](nav-pilot-e2e.md): the combined end-to-end test of navikt/copilot #931, #932 and #933 on the #20 manifest.
 - [hardware-tier-backlog.md](hardware-tier-backlog.md): tests still to run on 48, 64 and 128 GB machines.
+- [profile-audit.md](profile-audit.md): every profile checked against Hugging Face and the loader; which were removed, repointed or kept.
 
 ## Status on 2026-09-24
 
@@ -68,9 +69,10 @@ Before, killing a queue ran only its lock-removing trap and the queue kept going
 which is how two queues ran at once at 13:47–13:55); new tasks 01d8070 `bench-np-e2e`, 6af4d80
 `bench-system-one`, 9724e1b `bench-navpilot-e2e`, 8c69310 `bench-navpilot-e2e-rerun`; profile
 cap cbe77ea. Before merging, commit the untracked `bench/*-20260923-*.json`, including the invalid
-runs, which the report cites as excluded, and the 4-bit latency file once it is complete. Decide
-whether to keep the two untracked profiles `profiles/qwen3.8-27b-4bit-quasar.toml` and
-`profiles/qwen3.8-flash-next-4bit.toml`.
+runs, which the report cites as excluded, and the 4-bit latency file once it is complete. The two
+untracked profiles are settled by the [profile audit](profile-audit.md):
+`qwen3.8-27b-4bit-quasar` is removed (no such repo; QUASAR exists only as CUDA NVFP4) and
+`qwen3.8-flash-next-4bit` is kept and committed, moved to the mlx-vlm backend.
 
 **PLAN.md (#8):**
 
