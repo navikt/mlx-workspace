@@ -20,3 +20,8 @@ MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
 MLX_TOP_K                  = "20"
 MLX_TOP_P                  = "0.95"
 MLX_MIN_P                  = "0.0"
+# What the 2026-09-23 cheap-ops runs used (server default MLX_TEMP 0.6, MLX_TOP_P above):
+# 28/40 against 17/30 at temperature 0 on 2026-09-24. Copilot CLI sends temperature 0, so
+# nav-pilot's guard has to set both for production to match the measurement.
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

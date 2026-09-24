@@ -57,6 +57,10 @@ OPTIONAL_DEFAULTS = {
     "MLX_OMLX_MEMORY_GUARD_GB":   "",
     "MLX_OMLX_HOT_CACHE_MAX_SIZE": "",
     "MLX_OMLX_SSD_CACHE_MAX_SIZE": "",
+    # nav-pilot only: its guard writes these into every completion request, from the Copilot
+    # CLI and opencode alike (navikt/copilot#934). The workspace server never reads them.
+    "MLX_NAV_PILOT_TEMPERATURE":  "",
+    "MLX_NAV_PILOT_TOP_P":        "",
     # opencode client limits
     "MLX_OPENCODE_CONTEXT":       "131072",
     "MLX_OPENCODE_OUTPUT":        "16384",

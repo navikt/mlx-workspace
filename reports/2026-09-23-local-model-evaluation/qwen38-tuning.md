@@ -156,7 +156,7 @@ What the c48k point says so far:
 
 ## Night 24 Sept: locked-in so far
 
-Steps 1–4 of `night-run` (`.bench-logs/night-20260924-172038/`), binary `nav-pilot-main-f1507caa`.
+Steps 1–4 and 6–8 of `night-run` (`.bench-logs/night-20260924-172038/`), binary `nav-pilot-main-f1507caa`.
 Cold/warm TTFT is at the ~30k probe (29,519 tokens; 27,721 for c32k) and at the largest target.
 "Verified" counts Copilot sessions that launched; the rest failed to clone `nais/pilot` (network).
 
@@ -166,6 +166,7 @@ Cold/warm TTFT is at the ~30k probe (29,519 tokens; 27,721 for c32k) and at the 
 | 2 | 4-bit c64k-8g | 37.21 GB | 50.9 s / 106.7 s (54.6k) | 0.49 s / 1.29 s | 25.2 tok/s at 30k, 22.4 at 54.6k | 10 of 11 launched verified; 1 M1 stopped by the loop guard's 8-call backstop; 1 M1 not launched (network) | `bench/np-e2e-qwen3.8-27b-4bit-c64k-8g-20260924-174139.json` |
 | 3 | 8-bit c40k-3g, step 1024 | 37.23 GB | 70.7 s / 87.4 s (35.5k) | 0.99 s / 1.16 s | 12.8–14.0 tok/s | latency only | `bench/np-e2e-qwen3.8-27b-8bit-nopin-c40k-3g-ps1024-20260924-180149.json` |
 | 4 | 8-bit c48k, 3.25 GiB, step 512 | 38.30 GB | 57.5 s / 84.8 s (43.7k) | 0.60 s / 0.70 s | 14.6–15.6 tok/s at 30k/43.7k (13.2 at 2k) | latency only | `bench/np-e2e-qwen3.8-27b-8bit-nopin-c48k-ps512-20260924-180628.json` |
+| 6–8 | Temperature: optiq default at temp 0, cheap-ops ×3 | | | | | cheap-ops 17/30 (6, 5, 6; D2 retired) against 28/40 at 0.6 on 2026-09-23, Fisher p = 0.32. Temp 0 is not better, so the manifest default now runs at 0.6 with top_p 0.95 (§9) | `bench/results-qwen3.6-35b-a3b-optiq-t0-20260924-{182823,184754,190837}-01.json` |
 
 All four stay under the 40 GB e2e criterion, and none meets the 30 s cold-TTFT criterion at 30k.
 Step 4 at a 512 step was faster than step 3 at 1024 (57.5 s against 70.7 s at 30k), so the smaller
@@ -296,3 +297,8 @@ manifest; the "default temperature" point in §8 applies to every model, the def
 which defaults `MLX_TEMP` to 0.6 (`.mise/tasks/server`), so those scores are at 0.6 and not at the
 greedy 0 users get. `night-run` steps 6–10 measure temp 0 (`-t0` profiles) and compare with the
 2026-09-23 runs at 0.6. The 0.7 / top_p 0.8 cell is still to run.
+
+**Optiq result.** Temp 0 scored 17/30 against 28/40 at 0.6 (two-sided Fisher exact, p = 0.32).
+The rule was 0.6 unless temp 0 is clearly better, so the optiq profile sets
+`MLX_NAV_PILOT_TEMPERATURE = "0.6"` and `MLX_NAV_PILOT_TOP_P = "0.95"`, the top_p the server ran
+those 0.6 runs with (the profile's `MLX_TOP_P`). The Qwen3.8 entries wait for their temp-0 runs.
