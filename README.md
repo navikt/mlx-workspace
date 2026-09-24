@@ -118,6 +118,13 @@ scripts must use `model-use <key> || exit 1`.
 `mise run model-manifest` generates `manifest/models.json` from the profiles, which is the file
 nav-pilot fetches to configure a user's machine.
 
+An entry that sets a param an older nav-pilot must not ignore gets `min_nav_pilot`, the newest
+release any of those params needs (the `MIN_NAV_PILOT` table in the generator). Params an older
+client can safely ignore, such as the sampling params, are not gated. A nav-pilot that
+reads the field (navikt/copilot#943 and later) hides the entry from an older binary and falls
+back to the default. Older releases ignore the field and cannot be protected by it; for them,
+bumping the schema major is the only brake, and it stops every entry at once.
+
 ## Unlocking more VRAM
 
 CPU and GPU share one pool of RAM, and macOS caps the GPU at roughly 70 to 75% of it. Override the
