@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+# mise description="Tonight's Qwen3.8 tuning + temperature queue, unattended, one step at a time with a watchdog per step. Usage: mise run night-run [-- --dry-run | --from N]"
+#
+# Runs every step through the existing tasks (bench-np-e2e, bench-models), which
+# take the queue lock themselves. This driver holds no lock, so it cannot
+# deadlock with them. Nothing a step does can stop the night: a failure is
+# recorded as FAIL, a hang is killed at its timeout (whole process tree, both
+# servers, lock, nav-pilot manifest backup) and recorded as TIMEOUT, and the
+# next step runs. At the end it writes the report and commits it on a local
+# branch; nothing is pushed.
+#
+#   --dry-run          print the plan and run the preflight, start nothing
+#   --from N           resume at step N, appending to the newest night dir
+#   --list-profiles    (for night-preflight) the profiles the queue uses
+#
+# Test hooks, used by night-run-selftest: NIGHT_FAKE=1 runs $NIGHT_FAKE_STEP in
+# place of each mise task, and the NIGHT_* variables below point every path and
+# external command somewhere harmless.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+ARGS=("$@")
+
+# kind mode profile timeout-min expected-min, most decision-relevant first.
+# Expected minutes are from the 2026-09-23 runs (cheap-ops) and an estimate of
+# 12 Copilot sessions at ~4 min plus probes (e2e full).
+QUEUE=(
+  "e2e full    qwen3.8-27b-8bit-nopin-c32k           90 60"
+  "e2e full    qwen3.8-27b-4bit-c64k-8g              90 50"
+  "e2e latency qwen3.8-27b-8bit-nopin-c40k-3g-ps1024 30 10"
+  "e2e latency qwen3.8-27b-8bit-nopin-c48k-ps512     30 10"
+  "e2e full    qwen3.8-27b-optiq-4bit                90 50"
+  "ops -       qwen3.6-35b-a3b-optiq-t0              30 12"
+  "ops -       qwen3.6-35b-a3b-optiq-t0              30 12"
+  "ops -       qwen3.6-35b-a3b-optiq-t0              30 12"
+  "ops -       qwen3.8-27b-8bit-nopin-c32k-t0        60 37"
+  "ops -       qwen3.8-27b-8bit-nopin-c32k-t0        60 37"
+  "ops -       qwen3.8-27b-4bit-c64k-8g              60 25"
+  "ops -       qwen3.8-27b-4bit-c64k-8g              60 25"
+  "ops -       qwen3.8-27b-optiq-4bit                60 25"
+  "ops -       qwen3.8-27b-optiq-4bit                60 25"
+  "ops -       qwen3.8-27b-optiq-4bit                60 25"
+)
+
+DRY="" FROM=1
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY=1 ;;
+    --from) FROM="${2:?--from needs a step number}"; shift ;;
+    --list-profiles)
+      # --needs-workspace: only the cheap-ops steps, which run in workspaces/<profile>/kotlin
+      # (bench-np-e2e sessions run in workspaces/hybrid-bench/tasks)
+      for q in "${QUEUE[@]}"; do set -- $q; [ "$1" = e2e ] && [[ " ${ARGS[*]} " == *" --needs-workspace "* ]] && continue; echo "$3"; done | sort -u
+      exit 0 ;;
+    --needs-workspace) ;;
+    *) echo "usage: mise run night-run -- [--dry-run | --from N]"; exit 2 ;;
+  esac
+  shift
+done
+
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$ROOT/.bench-logs/bin/nav-pilot-main-f1507caa}"
+FAKE="${NIGHT_FAKE:-}"
+if [ -n "$FAKE" ]; then
+  # A fake run must never touch the real lock, manifest, results or report.
+  : "${NIGHT_FAKE_STEP:?}" "${NIGHT_LOCKDIR:?}" "${NIGHT_NP_CACHE:?}" "${NIGHT_BENCH_DIR:?}" "${NIGHT_REPORT:?}" "${NIGHT_DIR:?}"
+fi
+MIN="${NIGHT_MIN_SECONDS:-60}"             # seconds per timeout minute; the selftest shrinks it
+AC_WAIT="${NIGHT_AC_WAIT_SECONDS:-1800}"
+AC_POLL="${NIGHT_AC_POLL_SECONDS:-60}"
+PMSET="${NIGHT_PMSET:-pmset}"
+LOCKDIR="${NIGHT_LOCKDIR:-.bench-logs/.queue.lock}"
+NP_CACHE="${NIGHT_NP_CACHE:-$HOME/.nav-pilot/local-models.json}"
+BENCH_DIR="${NIGHT_BENCH_DIR:-bench}"
+REPORT="${NIGHT_REPORT:-reports/2026-09-23-local-model-evaluation/night-2026-09-24.md}"
+NP_STATE="$HOME/.nav-pilot/local/server.json"
+
+plan() {
+  local i=0 tt=0 te=0
+  echo "night-run plan (nav-pilot: $BENCH_NAV_PILOT)"
+  for q in "${QUEUE[@]}"; do
+    set -- $q; i=$((i + 1))
+    [ "$i" -lt "$FROM" ] && continue
+    tt=$((tt + $4)); te=$((te + $5))
+    printf '  %2d  %-4s %-8s %-38s timeout %3d min, expect ~%d\n' "$i" "$1" "$2" "$3" "$4" "$5"
+  done
+  printf '  total: expect ~%dh%02d, worst case (every step times out) %dh%02d\n' $((te / 60)) $((te % 60)) $((tt / 60)) $((tt % 60))
+}
+
+if [ -n "$DRY" ]; then
+  plan; echo
+  "$ROOT/.mise/tasks/night-preflight"; exit $?
+fi
+
+# Keep the Mac awake for the whole run: display, idle, disk and system sleep.
+if [ -z "${NIGHT_CAFFEINATED:-}" ]; then
+  NIGHT_CAFFEINATED=1 exec caffeinate -dimsu "$0" "${ARGS[@]}"
+fi
+
+if [ -z "${NIGHT_DIR:-}" ]; then
+  if [ "$FROM" -gt 1 ] && last=$(ls -d .bench-logs/night-2* 2>/dev/null | tail -1) && [ -n "$last" ]; then
+    NIGHT_DIR="$last"
+  else
+    NIGHT_DIR=".bench-logs/night-$(date +%Y%m%d-%H%M%S)"
+  fi
+fi
+DIR="$NIGHT_DIR"; mkdir -p "$DIR"
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$DIR/night.log"; }
+record() {  # key value ... -> one JSON line in steps.jsonl
+  python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps(dict(zip(a[::2], a[1::2]))))' "$@" >> "$DIR/steps.jsonl"
+}
+
+say "=== night-run from step $FROM, dir $DIR, pid $$"
+plan | tee -a "$DIR/night.log"
+if [ -z "$FAKE" ]; then
+  "$ROOT/.mise/tasks/night-preflight" 2>&1 | tee "$DIR/preflight-$(date +%H%M%S).log"
+  [ "${PIPESTATUS[0]}" -eq 0 ] || { say "✗ preflight failed; nothing started"; exit 1; }
+else
+  say "(fake) preflight skipped"
+fi
+
+descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
+
+# Anything a step left behind that its parent no longer owns: client sessions
+# whose working directory is a benchmark workspace.
+strays() {
+  local p cwd
+  for p in $(pgrep -f '(^|/)(opencode|copilot|cplt)( |$)'); do
+    cwd=$(lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    case "$cwd" in "$ROOT"/workspaces/*|"${NIGHT_STRAY_ROOT:-/nonexistent}"/*) echo "$p" ;; esac
+  done
+}
+
+kill_tree() {  # pid: TERM the step's process group and every descendant, KILL what is left after 20s
+  local pids alive
+  pids="$1 $(descendants "$1") $(strays)"
+  kill -TERM -- "-$1" 2>/dev/null; kill -TERM $pids 2>/dev/null
+  for _ in $(seq 20); do
+    alive=$(for p in $pids; do kill -0 "$p" 2>/dev/null && echo "$p"; done)
+    [ -z "$alive" ] && return 0
+    sleep 1
+  done
+  say "  still alive after 20s, SIGKILL: $(echo $alive)"
+  kill -KILL -- "-$1" 2>/dev/null; kill -KILL $pids 2>/dev/null
+}
+
+cleanup_after() {  # log: leave the machine as a fresh step expects it
+  local log=$1 holder spid b s
+  s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
+  if [ -n "$FAKE" ]; then
+    echo "(fake) mise run server-stop; $BENCH_NAV_PILOT alpha local stop" >> "$log"
+  else
+    mise run server-stop >> "$log" 2>&1 < /dev/null
+    "$BENCH_NAV_PILOT" alpha local stop >> "$log" 2>&1 < /dev/null
+    spid=$(python3 -c "import json; print(json.load(open('$NP_STATE')).get('pid',''))" 2>/dev/null)
+    [ -n "$spid" ] && kill -0 "$spid" 2>/dev/null && { say "  nav-pilot server $spid survived stop, killing"; kill -KILL "$spid"; }
+  fi
+  if [ -d "$LOCKDIR" ]; then
+    holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+    if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then
+      rm -rf "$LOCKDIR"; say "  released the queue lock left by pid ${holder:-?}"
+    fi
+  fi
+  # bench-np-e2e backs the manifest up as $NP_CACHE.np-e2e-<pid> and restores it on
+  # exit; a SIGKILL skips that. The oldest backup is the manifest from before any of them.
+  local backups=() live=0
+  # shellcheck disable=SC2045  # oldest first needs ls -t; the names have no spaces
+  for b in $(ls -tr "$NP_CACHE".np-e2e-* 2>/dev/null); do
+    kill -0 "${b##*-}" 2>/dev/null && live=1 || backups+=("$b")
+  done
+  if [ "$live" = 0 ] && [ "${#backups[@]}" -gt 0 ]; then
+    mv -f "${backups[0]}" "$NP_CACHE"; say "  restored $NP_CACHE from ${backups[0]}"
+    for b in "${backups[@]:1}"; do mv -f "$b" "$DIR/"; say "  moved extra backup $b to $DIR"; done
+  fi
+}
+
+on_ac() { "$PMSET" -g batt | grep -q "'AC Power'"; }
+
+CUR=""
+trap 'say "=== interrupted"; [ -n "$CUR" ] && kill_tree "$CUR"; cleanup_after "$DIR/night.log"; exit 130' INT TERM
+
+i=0
+for q in "${QUEUE[@]}"; do
+  set -- $q; i=$((i + 1))
+  kind=$1 mode=$2 profile=$3 tmin=$4
+  [ "$i" -lt "$FROM" ] && continue
+  log="$DIR/$(printf %02d "$i")-$kind-$profile.log"
+  wired=$(sysctl -n iogpu.wired_limit_mb)
+  base=(n "$i" kind "$kind" mode "$mode" profile "$profile" timeout_min "$tmin" wired_mb "$wired" nav_pilot "$BENCH_NAV_PILOT" log "$log")
+  say "--- step $i: $kind $mode $profile (timeout $tmin min)"
+  [ "$wired" = 36864 ] || say "  note: iogpu.wired_limit_mb=$wired, not 36864; running anyway"
+
+  if ! on_ac; then
+    say "  on battery; waiting up to $((AC_WAIT / 60)) min for AC"
+    waited=0
+    while ! on_ac && [ "$waited" -lt "$AC_WAIT" ]; do sleep "$AC_POLL"; waited=$((waited + AC_POLL)); done
+    if ! on_ac; then
+      say "  SKIP: still on battery"
+      record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "on battery for $((AC_WAIT / 60)) min"
+      continue
+    fi
+  fi
+  free_gb=$(df -g "$ROOT" | awk 'NR==2 {print $4}')
+  if [ "$free_gb" -lt 20 ]; then
+    say "  SKIP: ${free_gb} GB free, need 20"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "${free_gb} GB free disk"
+    continue
+  fi
+
+  marker="$DIR/.start-$i"; : > "$marker"
+  if [ -n "$FAKE" ]; then cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$mode" "$profile")
+  elif [ "$kind" = e2e ]; then cmd=(mise run bench-np-e2e -- "$profile"); [ "$mode" = latency ] && cmd+=(--latency-only)
+  else cmd=(mise run bench-models -- "$profile"); fi
+
+  start=$(date -Iseconds); t0=$(date +%s)
+  set -m   # its own process group, so a timeout can kill the whole tree at once
+  "${cmd[@]}" > "$log" 2>&1 < /dev/null &
+  CUR=$!
+  set +m
+  timed_out=""
+  while kill -0 "$CUR" 2>/dev/null; do
+    if [ $(( $(date +%s) - t0 )) -ge $((tmin * MIN)) ]; then
+      say "  TIMEOUT after $tmin min; killing the step's process tree"
+      timed_out=1; kill_tree "$CUR"; break
+    fi
+    sleep 1
+  done
+  wait "$CUR" 2>/dev/null; rc=$?
+  CUR=""
+  cleanup_after "$log"
+
+  if [ "$kind" = e2e ]; then pat="np-e2e-$profile-*.json"; else pat="results-$profile-*.json"; fi
+  result=$(find "$BENCH_DIR" -maxdepth 1 -name "$pat" -newer "$marker" 2>/dev/null | sort | tail -1)
+  if [ -n "$timed_out" ]; then status=TIMEOUT
+  elif [ "$rc" -eq 0 ] && [ -n "$result" ] && { [ "$kind" = e2e ] || grep -q "✓ $profile complete" "$log"; }; then status=OK
+  else status=FAIL; fi
+  # bench-models exits 0 whatever happened to the run; its own ✗ line says why.
+  note=""; [ "$status" = OK ] || note=$(grep -m1 '✗' "$log" | cut -c1-200)
+  record "${base[@]}" start "$start" end "$(date -Iseconds)" seconds "$(( $(date +%s) - t0 ))" \
+    status "$status" rc "$rc" result "$result" note "$note"
+  say "  $status (exit $rc) ${result:-no result file} · log $log"
+done
+
+say "=== queue done; writing $REPORT"
+python3 .mise/tasks/_night_report.py "$DIR" "$REPORT" 2>&1 | tee -a "$DIR/night.log"
+
+# Commit the report and tonight's result files on a local branch. Never pushed from
+# here. Signing may want a passphrase nobody is awake to type, so the commit gets a
+# watchdog too, and a failure leaves the files for the morning.
+results=$(python3 -c 'import json,sys
+for l in open(sys.argv[1]):
+    r = json.loads(l)
+    if r.get("result"): print(r["result"])' "$DIR/steps.jsonl" | sort -u)
+if [ -n "$FAKE" ]; then
+  say "(fake) would commit $REPORT and: $(echo $results)"
+else
+  branch="bench/night-results-$(basename "$DIR" | sed 's/^night-//')"
+  git switch -c "$branch" >> "$DIR/night.log" 2>&1 || git switch "$branch" >> "$DIR/night.log" 2>&1
+  git add -- "$REPORT" $results >> "$DIR/night.log" 2>&1
+  git commit -m "docs(reports): night run $(date +%Y-%m-%d) results" < /dev/null >> "$DIR/night.log" 2>&1 &
+  cpid=$!
+  for _ in $(seq 120); do kill -0 "$cpid" 2>/dev/null || break; sleep 1; done
+  kill -0 "$cpid" 2>/dev/null && { kill "$cpid"; say "✗ git commit hung (signing?); files are staged on $branch"; }
+  wait "$cpid" 2>/dev/null && say "✓ committed on local branch $branch (not pushed)" || say "✗ commit failed; see $DIR/night.log"
+fi
+say "=== night-run done. Report: $REPORT · steps: $DIR/steps.jsonl"

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# mise description="Exercise night-run end to end with stub steps (no GPU, no servers): OK, FAIL, TIMEOUT with a process tree that ignores SIGTERM, lock and manifest cleanup, battery skip, --from resume, report generation"
+#
+# Every path night-run touches is redirected into a temp dir (NIGHT_* variables),
+# pmset is mocked, and each step is a stub whose behaviour comes from PLAN.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+T=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/night-selftest.XXXXXX")" && pwd -P)   # physical path: lsof reports cwd without symlinks
+mkdir -p "$T/bench" "$T/bin" "$T/stray/ws"
+ln -s /bin/sleep "$T/bin/opencode"   # a stray "client session" pgrep can recognise
+echo '{"original": true}' > "$T/local-models.json"
+
+# pmset mock: reports battery while $T/battery holds a count > 0, decrementing it.
+cat > "$T/bin/pmset" <<EOF
+#!/usr/bin/env bash
+n=\$(cat "$T/battery" 2>/dev/null || echo 0)
+if [ "\$n" -gt 0 ]; then echo \$((n - 1)) > "$T/battery"; echo "Now drawing from 'Battery Power'"
+else echo "Now drawing from 'AC Power'"; fi
+EOF
+
+# The stub step: night-run calls it as <n> <kind> <mode> <profile>.
+cat > "$T/bin/step" <<'EOF'
+#!/usr/bin/env bash
+n=$1 kind=$2 mode=$3 profile=$4
+b=$(tr ' ' '\n' <<<"$PLAN" | sed -n "s/^$n=//p"); b=${b:-ok}
+stamp=$(date +%Y%m%d-%H%M%S)-$n
+case "$b" in
+  ok*)
+    v=${b#ok}; v=${v#:}; v=${v:-7}
+    if [ "$kind" = e2e ]; then
+      cat > "$NIGHT_BENCH_DIR/np-e2e-$profile-$stamp.json" <<J
+{"profile": "$profile", "memory": {"peak_gb": 38.1},
+ "latency": [{"target": 30000, "cold": {"ttft_s": 41.0, "decode_tok_s": 13.2}, "warm": {"ttft_s": 0.7}}],
+ "e2e": [{"classifier": "on", "valid": true, "verified": true}, {"classifier": "on", "valid": true, "verified": false},
+         {"classifier": "off", "valid": true, "verified": true}],
+ "verdicts": [{"criterion": "peak footprint <= 40 GB", "measured": 38.1, "refuted": false},
+              {"criterion": "cold TTFT@30k <= 30 s", "measured": 41.0, "refuted": true}]}
+J
+    else
+      python3 - "$NIGHT_BENCH_DIR/results-$profile-$stamp-01.json" "$v" <<'P'
+import json, sys
+ids = ["R1", "R2", "R3", "E1", "E3", "M1", "M2", "G2", "D1", "D2", "D3"]
+v = int(sys.argv[2]); rows, k = {}, 0
+for t in ids:
+    ok = t != "D2" and k < v
+    k += ok
+    rows[t] = {"verified": None if t == "D2" else ok, "seconds": 100 + 10 * len(rows),
+               "looped_on": "read" if t == "E3" else None}
+json.dump(rows, open(sys.argv[1], "w"))
+P
+      echo "✓ $profile complete"
+    fi
+    [ -n "${SET_BATTERY:-}" ] && [ "${SET_BATTERY%%:*}" = "$n" ] && echo "${SET_BATTERY#*:}" > "$SELFTEST_DIR/battery"
+    [ -n "${SET_BATTERY2:-}" ] && [ "${SET_BATTERY2%%:*}" = "$n" ] && echo "${SET_BATTERY2#*:}" > "$SELFTEST_DIR/battery"
+    exit 0 ;;
+  fail) echo "✗ stub failure in step $n"; exit 3 ;;
+  silentfail) echo "✗ $profile: suite failed (stub; bench-models exits 0 anyway)"; exit 0 ;;
+  hang)
+    mkdir "$NIGHT_LOCKDIR" && echo $$ > "$NIGHT_LOCKDIR/pid"
+    cp "$NIGHT_NP_CACHE" "$NIGHT_NP_CACHE.np-e2e-$$"; echo '{"modified": true}' > "$NIGHT_NP_CACHE"
+    echo $$ >> "$SELFTEST_DIR/pids"
+    sleep 600 & echo $! >> "$SELFTEST_DIR/pids"
+    bash -c 'trap "" TERM; sleep 600 & echo $! >> "$1"; wait' _ "$SELFTEST_DIR/pids" & echo $! >> "$SELFTEST_DIR/pids"
+    ( cd "$NIGHT_STRAY_ROOT/ws" && python3 -c 'import os, sys
+os.setsid(); open(sys.argv[1], "a").write(f"{os.getpid()}\n"); os.execv(sys.argv[2], sys.argv[2:])' \
+        "$SELFTEST_DIR/pids" "$SELFTEST_DIR/bin/opencode" 600 & )
+    wait ;;
+esac
+EOF
+chmod +x "$T/bin/pmset" "$T/bin/step"
+
+export NIGHT_FAKE=1 NIGHT_FAKE_STEP="$T/bin/step" NIGHT_PMSET="$T/bin/pmset" SELFTEST_DIR="$T" \
+  NIGHT_LOCKDIR="$T/queue.lock" NIGHT_NP_CACHE="$T/local-models.json" NIGHT_BENCH_DIR="$T/bench" \
+  NIGHT_REPORT="$T/report.md" NIGHT_DIR="$T/night" NIGHT_STRAY_ROOT="$T/stray" \
+  NIGHT_MIN_SECONDS=1 NIGHT_AC_WAIT_SECONDS=2 NIGHT_AC_POLL_SECONDS=1
+# Step 3 hangs (timeout 30 "minutes" = 30 s here). Step 4 leaves the machine on battery for 5 pmset calls,
+# more than the 2 s AC wait allows, so step 5 is skipped; step 6 leaves it on battery for 2 calls,
+# so step 7 waits and runs. Step 11 is bench-models' exit-0 failure.
+export PLAN="1=ok 2=fail 3=hang 4=ok 6=ok:8 7=ok:7 8=ok:9 9=ok:9 10=ok:8 11=silentfail 13=fail" \
+  SET_BATTERY="4:5" SET_BATTERY2="6:2"
+
+echo "### pass 1: all 15 steps"
+"$ROOT/.mise/tasks/night-run"
+echo
+echo "### pass 2: --from 13, step 13 now succeeds"
+PLAN="13=ok" "$ROOT/.mise/tasks/night-run" --from 13 | grep -E 'night-run from|step 1[3-5]|OK|FAIL|report'
+
+echo
+echo "### checks"
+bad=0
+check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
+status() { python3 -c 'import json,sys
+s = {}
+for l in open(sys.argv[1]): r = json.loads(l); s[int(r["n"])] = r["status"]
+print(" ".join(f"{k}={s[k]}" for k in sorted(s)))' "$T/night/steps.jsonl"; }
+got=$(status)
+echo "      statuses: $got"
+check "statuses as planned" '[ "$got" = "1=OK 2=FAIL 3=TIMEOUT 4=OK 5=SKIP 6=OK 7=OK 8=OK 9=OK 10=OK 11=FAIL 12=OK 13=OK 14=OK 15=OK" ]'
+check "step 2 recorded exit 3" 'grep -q "\"n\": \"2\".*\"rc\": \"3\"" "$T/night/steps.jsonl"'
+check "timed-out tree all dead (incl. TERM-ignoring child, setsid stray)" \
+  '! for p in $(cat "$T/pids"); do kill -0 "$p" 2>/dev/null && echo alive; done | grep -q alive'
+check "SIGKILL escalation happened" 'grep -q "SIGKILL" "$T/night/night.log"'
+check "hang step spawned 5 processes (step, child, TERM-ignoring pair, setsid stray)" '[ "$(wc -l < "$T/pids")" -eq 5 ]'
+check "queue lock released" '[ ! -e "$T/queue.lock" ] && grep -q "released the queue lock" "$T/night/night.log"'
+check "manifest restored, no backups left" 'grep -q original "$T/local-models.json" && ! ls "$T"/local-models.json.np-e2e-* >/dev/null 2>&1'
+check "steps 5 and 7 both waited for AC (5 skipped, 7 ran)" '[ "$(grep -c "waiting up to" "$T/night/night.log")" = 2 ]'
+check "--from appended to the same steps.jsonl" '[ "$(grep -c "\"n\": \"13\"" "$T/night/steps.jsonl")" = 2 ]'
+check "report: temp table 24/30 and 17/20" 'grep -q "24/30 (3 runs)" "$T/report.md" && grep -q "17/20 (2 runs)" "$T/report.md"'
+check "report: e2e row with verdicts and sessions" 'grep -q "1/2 hold; refuted: cold TTFT@30k" "$T/report.md" && grep -q "classifier on 1/2, classifier off 1/1" "$T/report.md"'
+check "_night_report selftest" 'python3 .mise/tasks/_night_report.py --selftest >/dev/null'
+echo
+echo "### report ($T/report.md)"
+cat "$T/report.md"
+echo
+[ "$bad" -eq 0 ] && { echo "selftest: PASS"; rm -rf "$T"; exit 0; }
+echo "selftest: $bad FAIL (left $T for inspection)"; exit 1

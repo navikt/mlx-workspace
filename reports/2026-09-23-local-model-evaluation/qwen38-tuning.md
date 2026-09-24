@@ -1,13 +1,13 @@
 # Qwen3.8-27B on the 48 GB tier: tuning plan and partial results, 2026-09-24
 
 Status: **partial.** The sweep stopped at 08:50 on 24 Sep (battery and network). Rows marked
-PENDING have not been measured; the commands to finish them are in §6.
+PENDING have not been measured; `mise run night-run` finishes them (§6).
 
 Same machine and runtime as [decision.md](decision.md): M5 Max 128 GB, `iogpu.wired_limit_mb` =
 36864, nav-pilot's own server (mlx-lm 0.31.3, mlx 0.32.0). The runs in §5 used
-`.bench-logs/bin/nav-pilot-combined-915e27c6`; the rest of the sweep must use
-`.bench-logs/bin/nav-pilot-main-d328ee68`, built from navikt/copilot `main` at d328ee68 (#931,
-#932, #933, #935, #936, #937). The old binary ignores `MLX_PREFILL_STEP_SIZE`: its `serverFlags`
+`.bench-logs/bin/nav-pilot-combined-915e27c6`; the rest of the sweep uses
+`.bench-logs/bin/nav-pilot-main-f1507caa`, built from navikt/copilot `main` at f1507caa (#931,
+#932, #933, #934, #935, #936, #937). The old binary ignores `MLX_PREFILL_STEP_SIZE`: its `serverFlags`
 whitelist has no entry for it, so a profile that sets it would run at the 2048 default without
 saying so. `.bench-logs/` is git-ignored and exists only on that machine.
 
@@ -156,43 +156,70 @@ What the c48k point says so far:
 
 ## 6. Resume
 
-In order. `BENCH_WAIT=1` queues each run behind the bench lock. This is
-`.bench-logs/qwen38-tuning-queue.sh` with the c48k rerun and the prefill-step variants added, and
-with the binary built from `main` (see the top of this file). To rebuild it after `main` moves:
-`cd ~/go/src/github.com/navikt/copilot && git switch main && git pull && cd cli/nav-pilot && go build -o /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-$(git rev-parse --short=8 HEAD) .`
+The rest of the sweep is one unattended command, `mise run night-run`
+(`.mise/tasks/night-run`). It runs the queue below in order, each step through the usual task
+(`bench-np-e2e`, `bench-models`) and its queue lock, with a watchdog per step. A step that
+fails is recorded as FAIL and a step that hangs is killed at its timeout (process tree, both
+servers, the lock and any nav-pilot manifest backup) and recorded as TIMEOUT. Either way the
+next step runs. It uses `.bench-logs/bin/nav-pilot-main-f1507caa`, built from navikt/copilot
+`main` at f1507caa, which includes #934 as well as #936 (`MLX_PREFILL_STEP_SIZE`).
+
+| # | Step | Profile | Timeout |
+|---|---|---|---|
+| 1 | bench-np-e2e full | `qwen3.8-27b-8bit-nopin-c32k` (validates #20's 8-bit params) | 90 min |
+| 2 | bench-np-e2e full | `qwen3.8-27b-4bit-c64k-8g` (validates #20's 4-bit params) | 90 min |
+| 3 | bench-np-e2e `--latency-only` | `qwen3.8-27b-8bit-nopin-c40k-3g-ps1024` | 30 min |
+| 4 | bench-np-e2e `--latency-only` | `qwen3.8-27b-8bit-nopin-c48k-ps512` | 30 min |
+| 5 | bench-np-e2e full | `qwen3.8-27b-optiq-4bit` | 90 min |
+| 6–8 | cheap-ops ×3, temp 0 | `qwen3.6-35b-a3b-optiq-t0` | 30 min each |
+| 9–10 | cheap-ops ×2, temp 0 | `qwen3.8-27b-8bit-nopin-c32k-t0` | 60 min each |
+| 11–12 | cheap-ops ×2 | `qwen3.8-27b-4bit-c64k-8g` | 60 min each |
+| 13–15 | cheap-ops ×3 | `qwen3.8-27b-optiq-4bit` | 60 min each |
+
+Expected about 7 hours. If every step hits its timeout, 14 hours. The e2e estimate assumes 12
+Copilot sessions at about 4 minutes each. Each session is capped at 900 s, so a slow model can
+reach the 90-minute watchdog. The JSON is saved after every session, and the report reads
+whatever rows a killed run left.
+
+The c40k-3g and c48k points without a prefill-step override are left out: the 30k point of c48k
+is already measured (§5), and the variants are the ones that could change the decision (§8).
+
+Steps 6–10 are the temperature comparison (§9). The -t0 profiles are copies of their base with
+`MLX_TEMP = "0.0"`. The workspace server passes `MLX_TEMP` as `--temp`, and mlx-lm uses that
+default whenever a request sends no temperature (opencode sends none). Every earlier cheap-ops
+run used the server's 0.6 default. The report compares these runs with the 2026-09-23 runs at
+0.6 (optiq 28/40, 8-bit nopin 31/40) using Fisher's exact test.
+
+### How to start tonight
 
 ```sh
 cd /Users/hans/mlx-workspace
-mise run model-download qwen3.8-27b-optiq-4bit      # 4.5 of 19.45 GB done; needs network
-export BENCH_WAIT=1 BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-main-d328ee68
-mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k --latency-only
-mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g --latency-only
-# Prefill-step variants (§4), committed as profiles/*-ps1024.toml and *-ps512.toml
-mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c40k-3g-ps1024 --latency-only
-mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c48k-ps512 --latency-only
-mise run bench-np-e2e -- qwen3.8-27b-4bit-c64k-8g
-mise run bench-np-e2e -- qwen3.8-27b-optiq-4bit
-mise run bench-np-e2e -- qwen3.8-27b-8bit-nopin-c32k
+# 1. plug in the charger
+mise run night-preflight                 # every line PASS (a WARN is fine); fix any FAIL
+nohup mise run night-run > .bench-logs/night.log 2>&1 &
 ```
 
-Check the server log of the first variant run for `--prefill-step-size` in the launch command
-before trusting its numbers.
+In the morning:
 
-Then cheap-ops quality for the winners: two runs each, three for OptiQ, which has no quality
-data at all. Repeating a profile on the command line repeats the run:
+- `reports/2026-09-23-local-model-evaluation/night-2026-09-24.md` is committed on a local branch
+  `bench/night-results-<stamp>` (not pushed), together with tonight's `bench/*.json`.
+- `.bench-logs/night-<stamp>/steps.jsonl` has one line per step (status, exit code, start and end,
+  result file). `night.log` and one log per step sit next to it.
+- To resume after an interruption, run `nohup mise run night-run -- --from N > .bench-logs/night.log 2>&1 &`.
+  It appends to the newest night dir.
+- To stop it: `pkill -f night-run`. It kills the step in flight and cleans up.
+- `mise run night-run -- --dry-run` prints the plan and runs the preflight without starting anything.
+  `mise run night-run-selftest` runs the whole driver with stub steps (about 90 s, no GPU).
 
-```sh
-BENCH_WAIT=1 mise run bench-models -- <8-bit winner> <8-bit winner> \
-  qwen3.8-27b-4bit-c64k-8g qwen3.8-27b-4bit-c64k-8g \
-  qwen3.8-27b-optiq-4bit qwen3.8-27b-optiq-4bit qwen3.8-27b-optiq-4bit
-```
+To rebuild the binary after `main` moves:
+`cd ~/go/src/github.com/navikt/copilot && git switch main && git pull --ff-only && cd cli/nav-pilot && go build -o /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-$(git rev-parse --short=8 HEAD) .`,
+then update `BENCH_NAV_PILOT` at the top of `night-run` and `night-preflight`.
 
-Then update #20's manifest entries with the chosen parameters.
+After the night, update #20's manifest entries with the chosen parameters.
 
-**Queue-script bug:** `run()` in `.bench-logs/qwen38-tuning-queue.sh` logs `exit $?` after a
-`$(date +%T)` substitution, so it always logs `exit 0`. The interrupted c48k run logged `exit 0`
-directly under `[bench-np-e2e] ERROR task failed` (`.bench-logs/qwen38-tuning-queue.log`). Save
-the status first (`rc=$?`) before relying on the log.
+**Queue-script bug (old queue):** `run()` in `.bench-logs/qwen38-tuning-queue.sh` logs `exit $?`
+after a `$(date +%T)` substitution, so it always logs `exit 0`. night-run saves the status first
+and does not trust bench-models' exit code, which is 0 even when the suite failed.
 
 ## 7. Provisional parameters
 
@@ -234,7 +261,7 @@ Known limit of the 8-bit choice: a 32k session at its full 36,864 tokens (contex
 overrides, so it would reach opencode and never Copilot. Greedy decoding makes repetition loops
 more likely, and Qwen recommends about temp 0.7 / top_p 0.8 / top_k 20 for non-thinking mode.
 
-**Mechanism.** navikt/copilot#934 (draft) adds `MLX_NAV_PILOT_TEMPERATURE` and
+**Mechanism.** navikt/copilot#934 (merged 2026-09-24) adds `MLX_NAV_PILOT_TEMPERATURE` and
 `MLX_NAV_PILOT_TOP_P`. When a profile sets them, nav-pilot's loop guard overwrites `temperature`
 and `top_p` in each chat-completion request, so the value is the same for both clients. It ships
 with no values set, so behaviour stays the same until this sweep picks some. The names are in the
@@ -245,3 +272,8 @@ with no values set, so behaviour stays the same until this sweep picks some. The
 Qwen3.8 profiles from §7. Run `bench-cheap-ops` three times per cell and compare verified tasks
 and loop-guard trips (runs of identical tool calls). The winner goes into the profiles and the
 manifest; the "default temperature" point in §8 applies to every model, the default included.
+
+**First cell, 2026-09-24 night.** Every earlier cheap-ops run went through the workspace server,
+which defaults `MLX_TEMP` to 0.6 (`.mise/tasks/server`), so those scores are at 0.6 and not at the
+greedy 0 users get. `night-run` steps 6–10 measure temp 0 (`-t0` profiles) and compare with the
+2026-09-23 runs at 0.6. The 0.7 / top_p 0.8 cell is still to run.

@@ -4,14 +4,31 @@ Written 2026-09-24. These are what's left of the 2026-09-23 evaluation that can'
 Each one needs the machine on mains power (GPU) and/or a normal network. The order below is the
 suggested order.
 
-Before any GPU work:
+## How to start tonight
 
-- Use a nav-pilot binary built from current `main` of navikt/copilot, which now contains #931, #932,
-  #933, #935, #936 and #937: `.bench-logs/bin/nav-pilot-main-d328ee68` (built at d328ee68), set as
-  `BENCH_NAV_PILOT=$PWD/.bench-logs/bin/nav-pilot-main-d328ee68`. The resume commands and the rebuild
-  command are in [qwen38-tuning.md §6](qwen38-tuning.md#6-resume). The older
-  `nav-pilot-combined-915e27c6` ignores `MLX_PREFILL_STEP_SIZE`.
-- Queue jobs with `BENCH_WAIT=1`, and never edit a `.mise/tasks/*` bash script in place while an
+Tasks 1–3 below are now one unattended run, `mise run night-run` (task 1, the download, is done
+already). The queue, timeouts and failure handling are in [qwen38-tuning.md §6](qwen38-tuning.md#6-resume).
+
+```sh
+cd /Users/hans/mlx-workspace
+# 1. plug in the charger
+mise run night-preflight                 # every line PASS (a WARN is fine); fix any FAIL
+nohup mise run night-run > .bench-logs/night.log 2>&1 &
+```
+
+In the morning, read `reports/2026-09-23-local-model-evaluation/night-2026-09-24.md`. It is
+committed on a local branch `bench/night-results-<stamp>` (not pushed), together with tonight's
+`bench/*.json`. `.bench-logs/night-<stamp>/steps.jsonl` has one line per step, with status
+(OK / FAIL / TIMEOUT / SKIP), exit code, times and result file. To resume, run
+`mise run night-run -- --from N`.
+
+Before any GPU work (night-preflight checks all of this):
+
+- Use a nav-pilot binary built from current `main` of navikt/copilot, which contains #931 to #937:
+  `.bench-logs/bin/nav-pilot-main-f1507caa` (built at f1507caa, so it includes #934). night-run sets
+  `BENCH_NAV_PILOT` to it. The rebuild command is in [qwen38-tuning.md §6](qwen38-tuning.md#6-resume).
+  The older `nav-pilot-combined-915e27c6` ignores `MLX_PREFILL_STEP_SIZE`.
+- Queue any manual jobs with `BENCH_WAIT=1`, and never edit a `.mise/tasks/*` bash script in place while an
   instance is running or waiting (bash reads scripts by byte offset).
 - Keep the 36 GB wired limit (`iogpu.wired_limit_mb` = 36864) that fits 48 GB machines.
 
@@ -23,7 +40,7 @@ Before any GPU work:
 
 Don't use `taskpolicy -b`: it throttles the network as well, down to about 2 MB/s.
 
-## 2. Qwen3.8 tuning sweep (GPU)
+## 2. Qwen3.8 tuning sweep (GPU): night-run steps 1–5 and 11–15
 
 Goal: confirm or replace the provisional parameters in PR navikt/mlx-workspace#20 (8-bit
 32,768/4,096/2.25 GiB cache; 4-bit 65,536/8,192/8 GiB). Details and pass criteria are in
@@ -43,7 +60,7 @@ Goal: confirm or replace the provisional parameters in PR navikt/mlx-workspace#2
 4. Pass: no `Insufficient Memory`, peak footprint ≤ 41 GB with a warm cache at max context, and
    Copilot sessions verify ≥ 5/6.
 
-## 3. Sampling (temperature) comparison (GPU)
+## 3. Sampling (temperature) comparison (GPU): temp 0 is night-run steps 6–10
 
 Local models run greedy today (temp 0): opencode sends no temperature, and Copilot CLI sends 0.
 navikt/copilot#934 (merged 2026-09-24) lets the manifest set `MLX_NAV_PILOT_TEMPERATURE` /
@@ -51,7 +68,10 @@ navikt/copilot#934 (merged 2026-09-24) lets the manifest set `MLX_NAV_PILOT_TEMP
 
 - Compare temp 0 against 0.7 with top_p 0.8, on optiq and the tuned Qwen3.8 profiles:
   `bench-cheap-ops` ×3 per cell, comparing verified tasks and loop-guard trips.
-- This needs a nav-pilot binary rebuilt from current `main` (it includes #934; `nav-pilot-main-d328ee68` does not).
+- First cell, tonight: temp 0 (`-t0` profiles) against the existing 0.6 runs. Every cheap-ops score
+  so far was measured at 0.6, the workspace server's `MLX_TEMP` default, not at the greedy 0 users get.
+  The report gives Fisher p-values against optiq 28/40 and 8-bit nopin 31/40.
+- `nav-pilot-main-f1507caa` includes #934.
 - Afterwards, set the values in the manifest in a new PR.
 
 ## 4. Update the manifest with measured values (network, after 2–3)
