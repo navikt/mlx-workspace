@@ -68,5 +68,5 @@ Goal: exploration, and the upper-tier options. Nothing here blocks the 48 GB fle
 
 ## Where results go
 
-Append to `reports/qwen3.8-nopin-evaluation-2026-09-23.md` (or a successor), recording the chip, RAM,
+Append to `evaluation-log.md` (or a successor), recording the chip, RAM,
 bandwidth, wired limit, mlx-lm version and nav-pilot commit on every row.

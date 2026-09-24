@@ -8,13 +8,17 @@ If you are looking for something being actively written, it is in [`../working/`
 If you want the raw record of every run rather than a summary, that is `MODELS.md` at the
 repo root.
 
-| Report | Covers |
-|---|---|
-| [`local-inference-findings.md`](local-inference-findings.md) | **The study.** 200 valid samples across two clients, three codebases, six task shapes and three refactor strategies: what the local model saves, what it cannot do, why the saving tracks the cloud arm's step count rather than the codebase, and the things we got wrong along the way |
-| [`alpha-model-decision.md`](alpha-model-decision.md) | Which model the nav-pilot alpha ships, why Qwen3.8-27B is held back, what was rejected, and how far the numbers can be trusted |
-| [`48gb-question.md`](48gb-question.md) | Seven models on the weather-cli benchmark, what fits a 48 GB machine, and what moved the numbers |
-| [`night-plan-2026-08-31.md`](night-plan-2026-08-31.md) | The plan for the 31 August run, including the prediction, statistic and test fixed in writing **before** the run that tested them |
-| [`night-results-2026-08-31.md`](night-results-2026-08-31.md) | What that run produced: the step-count predictor holding on a codebase it had not seen, and the model failing every debugging task |
+Newest first. A dated folder holds one piece of work; start with the file named as its entry point.
+
+| Report | Date | Summary |
+|---|---|---|
+| [Local models for nav-pilot: decision and action list](2026-09-23-local-model-evaluation/decision.md) | 2026-09-23 | optiq stays the only default, the 8-bit Qwen3.8-27B is withdrawn from 48 GB, the System One classifier is replaced by a result-aware loop guard; entry point for the folder, which also holds the [evaluation log](2026-09-23-local-model-evaluation/evaluation-log.md), the [nav-pilot e2e test](2026-09-23-local-model-evaluation/nav-pilot-e2e.md) and the [hardware-tier backlog](2026-09-23-local-model-evaluation/hardware-tier-backlog.md) |
+| [Adversarial pass before shipping](pre-ship-review-2026-08-31.md) | 2026-08-31 | The last gate before navikt/copilot#483 merged: attacks on nav-pilot's trust boundary and first-user path, nothing found that should hold the merge |
+| [Night results](night-results-2026-08-31.md) | 2026-08-31 | The step-count predictor holding on a codebase it had not seen, and the model failing every debugging task |
+| [Night plan](night-plan-2026-08-31.md) | 2026-08-31 | The plan for that run, with the prediction, statistic and test fixed in writing **before** the run that tested them |
+| [Delegating coding work to a local model: a measurement study](local-inference-findings.md) | 2026-08-30 | **The study.** 216 valid samples across two clients, three codebases, six task shapes and three refactor strategies: what the local model saves, what it cannot do, and why the saving tracks the cloud arm's step count rather than the codebase |
+| [Which model the nav-pilot alpha ships](alpha-model-decision.md) | 2026-08-28 | Ship one model, Qwen3.6-35B-A3B-OptiQ-4bit; why Qwen3.8-27B is held back, what was rejected, and how far the numbers can be trusted |
+| [The 48 GB question](48gb-question.md) | 2026-08-27 | Seven models on the weather-cli benchmark: everything worth running fits in 48 GB, and speed and tool-call looping, not memory, decide |
 
 ## Elsewhere
 
