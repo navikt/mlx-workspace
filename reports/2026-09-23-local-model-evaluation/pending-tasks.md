@@ -115,13 +115,15 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   Put `bench-np-e2e` (full) with `qwen3.8-27b-8bit-nopin-c48k-ps512` at the front of the next night
   run. If it fails, the 8-bit goes back to 32k, which step 1 confirmed (37.28 GB, 10 of 10 launched
   sessions verified).
-- **Old nav-pilot clients and 48k.** The local manifest has no minimum-version field
-  (`minNavPilotVersion` exists only for agentpakker), and every client fetches the same file.
-  Releases without navikt/copilot#936 (`2026.09.24-105710-a078525` and older) accept
-  `MLX_PREFILL_STEP_SIZE`, since it is in the `MLX_` namespace, but only as an inert environment
-  variable, so they prefill 48k in 2048-token chunks (estimated 43.6–44.3 GB, qwen38-tuning.md §4).
-  The expect text tells users to update. A real gate needs a nav-pilot change, and it would only
-  protect releases built after it.
+- ~~**Old nav-pilot clients and 48k.**~~ Done: manifest entries carry `min_nav_pilot`
+  (navikt/copilot#943, released in `nav-pilot/2026.09.24-165412-524c840`;
+  [navikt/mlx-workspace#30](https://github.com/navikt/mlx-workspace/pull/30)). The generator sets it
+  from the `MIN_NAV_PILOT` table, so the 8-bit entry needs `2026.09.24-110317-3596754` (#936), and a
+  client that reads the field hides the entry from an older binary and falls back to the default.
+  Only params that are unsafe to ignore are gated; the sampling params and `capabilities` are not.
+  Remaining gap: clients older than the release with #943 ignore the field, so they still prefill
+  48k in 2048-token chunks (estimated 43.6–44.3 GB, qwen38-tuning.md §4). The expect text still
+  tells them to update, and a schema-major bump stays the emergency brake.
 - **Network blips.** Three Copilot launches failed because nav-pilot could not clone `nais/pilot`
   (two R2 in step 1, one M1 in step 2: "Could not resolve host: github.com" and a connect
   timeout). navikt/copilot is getting a PR that falls back to the cached source (in progress).

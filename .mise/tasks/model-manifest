@@ -84,6 +84,45 @@ OFFERED = {
 PARAM_KEY = re.compile(r"^MLX_[A-Z0-9_]+$")
 
 
+# The first nav-pilot release that honours each param, for params that are
+# unsafe to ignore. A client older than that accepts the key and silently
+# ignores it, which for MLX_PREFILL_STEP_SIZE means a Metal OOM near 48k
+# context. An entry's min_nav_pilot is the newest release any of its params
+# needs, and a nav-pilot that reads the field (navikt/copilot#943 and later)
+# withholds the entry from an older binary. Clients older than that ignore
+# min_nav_pilot like any unknown field, so nothing here can protect them: the
+# schema major above stays the emergency brake.
+#
+# Params that are harmless to ignore stay out of the table, so they never gate
+# an entry. That matters because the default cannot be gated (see below):
+# - MLX_NAV_PILOT_TEMPERATURE and MLX_NAV_PILOT_TOP_P (navikt/copilot#934,
+#   2026.09.24-124554-f1507ca): an older client keeps greedy sampling, as
+#   before.
+# - The capabilities block (#941, 2026.09.24-154750-6f3e003): an older client
+#   ignores it and keeps its broader dispatch text.
+#
+# Each tag was checked with `git merge-base --is-ancestor <PR merge> <release>`
+# against the release before it. When nav-pilot learns a new param, add it here
+# only if an older client ignoring it is unsafe.
+MIN_NAV_PILOT = {
+    "MLX_PREFILL_STEP_SIZE": "2026.09.24-110317-3596754",  # navikt/copilot#936
+}
+
+
+def with_min_version(e: dict) -> dict:
+    # Release versions are fixed-width date-time first, so max() orders them.
+    need = [MIN_NAV_PILOT[k] for k in e["params"] if k in MIN_NAV_PILOT]
+    if need:
+        # A client that withholds the default has no default left and refuses
+        # the whole manifest, which is the schema-major brake by accident.
+        if e["default"]:
+            raise SystemExit(
+                f"\u2717 {e['key']} is the default and needs nav-pilot {max(need)}; "
+                "gating the default makes older clients refuse the whole manifest")
+        e["min_nav_pilot"] = max(need)
+    return e
+
+
 def entry(key: str) -> dict:
     meta, params = P.load(key)
     hf_id = params["MLX_MODEL"]
@@ -160,7 +199,7 @@ manifest = {
     "schema_version": SCHEMA_VERSION,
     "channel": "alpha",
     "note": "Generated from profiles/ by 'mise run model-manifest'. Do not edit by hand.",
-    "models": [with_capabilities(check_prose(entry(k))) for k in OFFERED],
+    "models": [with_min_version(with_capabilities(check_prose(entry(k)))) for k in OFFERED],
 }
 
 missing = [k for k in OFFERED if k not in P.list_keys()]
