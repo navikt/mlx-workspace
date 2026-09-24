@@ -32,13 +32,12 @@ Before any GPU work (night-preflight checks all of this):
   instance is running or waiting (bash reads scripts by byte offset).
 - Keep the 36 GB wired limit (`iogpu.wired_limit_mb` = 36864) that fits 48 GB machines.
 
-## 1. Finish the OptiQ-4bit download (network)
+## 1. Finish the OptiQ-4bit download (network): done
 
-`mlx-community/Qwen3.8-27B-OptiQ-4bit` stopped at 4.5 of 19.45 GB. It resumes where it stopped:
-
-    HF_TOKEN=$(fnox get HF_TOKEN) nice -n 10 .venv/bin/hf download mlx-community/Qwen3.8-27B-OptiQ-4bit --max-workers 2
-
-Don't use `taskpolicy -b`: it throttles the network as well, down to about 2 MB/s.
+Done 2026-09-24: `mlx-community/Qwen3.8-27B-OptiQ-4bit`, 5 shards, 20.3 GB, no `.incomplete` blobs
+(`mise run night-preflight` checks it). A resume leaves the old partial `.incomplete` files behind
+and starts new ones, so move the orphans out before retrying. Don't use `taskpolicy -b`: it throttles
+the network as well, down to about 2 MB/s.
 
 ## 2. Qwen3.8 tuning sweep (GPU): night-run steps 1–5 and 11–15
 
