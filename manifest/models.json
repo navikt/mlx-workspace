@@ -83,18 +83,18 @@
       }
     },
     {
-      "key": "qwen3.8-27b-4bit",
-      "name": "Qwen 3.8 27B 4bit",
-      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "key": "qwen3.8-27b-optiq-4bit",
+      "name": "Qwen 3.8 27B OptiQ 4bit (mixed 4/8-bit)",
+      "model": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
       "backend": "mlx-lm",
       "default": false,
-      "role": "Opt-in alternative, slower and much less predictable",
-      "expect": "Opt-in, never the default. Far slower than the default, median task 80 seconds against 11, and much less predictable: two runs of the same tasks had medians of 88 and 906 seconds, and it runs into the seven-minute cap where the default does not. Context is capped at 64k with an 8k reply so that a full session and its prompt cache stay under the 36 GB wired limit. A full session measured 37.2 GB at peak. If you want an answer in ten seconds, take the default.",
-      "weights_gb": 16,
+      "role": "Opt-in alternative, slower, the more robust 4-bit build",
+      "expect": "Opt-in, never the default, and much slower: median task about 50 seconds against about 12. The OptiQ build, mixed precision: sensitive layers at 8-bit, the rest at 4-bit. More robust than the plain 4-bit it replaces: 18 of 30 cheap tasks against 11 of 20, no seven-minute timeouts against 4, and 12 of 12 Copilot sessions verified. Decodes about 15% slower, 21 tokens a second at 30k. Context is 64k with an 8k reply, and a full session measured 37.2 GB at peak.",
+      "weights_gb": 19,
       "min_ram_gb": 48,
       "wired_limit_gb": 36,
       "params": {
-        "MLX_MODEL": "mlx-community/Qwen3.8-27B-4bit",
+        "MLX_MODEL": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
         "MLX_SERVER_TYPE": "mlx-lm",
         "MLX_CACHE_BYTES": "8589934592",
         "MLX_CACHE_SIZE": "3",
@@ -120,27 +120,27 @@
         "classes": {
           "read-qa": {
             "delegate": "cloud",
-            "local": "not-yet",
+            "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 9,
-            "local_n": 9
+            "local_k": 0,
+            "local_n": 0
           },
           "edit-single": {
             "delegate": "cloud",
-            "local": "not-yet",
+            "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 6,
-            "local_n": 6
+            "local_k": 0,
+            "local_n": 0
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
             "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 2,
-            "local_n": 6
+            "local_k": 0,
+            "local_n": 0
           },
           "create-file": {
             "delegate": "cloud",
@@ -148,7 +148,7 @@
             "delegate_k": 0,
             "delegate_n": 0,
             "local_k": 0,
-            "local_n": 6
+            "local_n": 0
           },
           "debug": {
             "delegate": "cloud",

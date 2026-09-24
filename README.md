@@ -17,7 +17,7 @@ the models.
 | Model | Status | Context / reply | Key tuning | RAM / wired limit | Min nav-pilot | Trusted for | Evidence |
 |---|---|---|---|---|---|---|---|
 | **Qwen 3.6 35B A3B OptiQ 4bit**<br>[`mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`](https://huggingface.co/mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit) | default | 64k / 16k | temp 0.6, top_p 0.95; prompt cache 3 × 12 GiB | 48 GB / 36 GB | any | Mechanical multi-file edits, handed over by the cloud agent (35/35 verified) | [decision.md](reports/2026-09-23-local-model-evaluation/decision.md) |
-| **Qwen 3.8 27B 4bit**<br>[`mlx-community/Qwen3.8-27B-4bit`](https://huggingface.co/mlx-community/Qwen3.8-27B-4bit) | opt-in | 64k / 8k | temp 0.6, top_p 0.95; prompt cache 3 × 8 GiB | 48 GB / 36 GB | any | Nothing yet: every task class stays on the cloud model | [qwen38-tuning.md](reports/2026-09-23-local-model-evaluation/qwen38-tuning.md) |
+| **Qwen 3.8 27B OptiQ 4bit (mixed 4/8-bit)**<br>[`mlx-community/Qwen3.8-27B-OptiQ-4bit`](https://huggingface.co/mlx-community/Qwen3.8-27B-OptiQ-4bit) | opt-in | 64k / 8k | temp 0.6, top_p 0.95; prompt cache 3 × 8 GiB | 48 GB / 36 GB | any | Nothing yet: every task class stays on the cloud model | [qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit](reports/2026-09-23-local-model-evaluation/qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit) |
 | **Qwen 3.8 27B 8bit (mlx-lm)**<br>[`mlx-community/Qwen3.8-27B-8bit`](https://huggingface.co/mlx-community/Qwen3.8-27B-8bit) | opt-in | 48k / 4k | temp 0.6, top_p 0.95; prefill step 512; prompt cache 2 × 3.25 GiB | 48 GB / 36 GB | `2026.09.24-110317-3596754` | Nothing yet: every task class stays on the cloud model | [qwen38-tuning.md](reports/2026-09-23-local-model-evaluation/qwen38-tuning.md) |
 <!-- models:end -->
 

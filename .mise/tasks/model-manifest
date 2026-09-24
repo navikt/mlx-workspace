@@ -44,7 +44,7 @@ OFFERED = {
         # that clears the bar is a delegated mechanical multi-file edit.
         "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
     },
-    # Qwen3.8-27B, both mlx-community builds, offered on request and never as the
+    # Qwen3.8-27B, an 8-bit and a 4-bit build, offered on request and never as the
     # default. People are asking for it by name, and refusing to serve a model
     # they can download themselves in one command is not a safety measure — it
     # just means they run it without our sampling parameters or our numbers.
@@ -56,14 +56,19 @@ OFFERED = {
     # prompt cache that holds one whole session and a 512-token prefill step
     # (38.3 GB peak at 45k; honoured only by nav-pilot with navikt/copilot#936).
     # The 4-bit gets 64k, an 8k reply and an 8 GiB cache (37.2 GB peak at 57k).
+    # The 4-bit slot serves the OptiQ build (mixed 4/8-bit) since 2026-09-24, by
+    # the rule set before that night: it replaces the plain 4-bit if its cheap-ops
+    # pass rate is at least as high with no more loops or timeouts. It scored
+    # 18/30 with no timeouts against 11/20 with 4. The key follows the profile, so
+    # it changed too; nav-pilot selects by model id and never reads the key.
     #
     # What the expect text has to carry is the speed and the instability,
     # because that is what a user cannot see for themselves in a short trial.
-    "qwen3.8-27b-4bit": {
+    "qwen3.8-27b-optiq-4bit": {
         "default": False,
-        "role": "Opt-in alternative, slower and much less predictable",
-        "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md",
-        "expect": "Opt-in, never the default. Far slower than the default, median task 80 seconds against 11, and much less predictable: two runs of the same tasks had medians of 88 and 906 seconds, and it runs into the seven-minute cap where the default does not. Context is capped at 64k with an 8k reply so that a full session and its prompt cache stay under the 36 GB wired limit. A full session measured 37.2 GB at peak. If you want an answer in ten seconds, take the default.",
+        "role": "Opt-in alternative, slower, the more robust 4-bit build",
+        "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit",
+        "expect": "Opt-in, never the default, and much slower: median task about 50 seconds against about 12. The OptiQ build, mixed precision: sensitive layers at 8-bit, the rest at 4-bit. More robust than the plain 4-bit it replaces: 18 of 30 cheap tasks against 11 of 20, no seven-minute timeouts against 4, and 12 of 12 Copilot sessions verified. Decodes about 15% slower, 21 tokens a second at 30k. Context is 64k with an 8k reply, and a full session measured 37.2 GB at peak.",
     },
     "qwen3.8-27b-8bit-mlx": {
         "default": False,
