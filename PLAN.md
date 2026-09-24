@@ -4,13 +4,58 @@
 > [`reports/`](reports/), the design behind individual experiments in [`working/`](working/).
 > This file says what to do and why; it does not repeat their reasoning.
 
-Last touched 31 August 2026, the day the alpha shipped.
+Last touched 24 September 2026. Before that: 31 August 2026, the day the alpha shipped.
 
 **Landed since:** the delta-counter fix (#529) and the news figure (#524) are in main;
 the Qwen3.8 correction (#532) is queued; and 30 of the 31 dependabot alerts were closed
 by someone else (#525), so that stops being ours.
 
-## Where things stand
+## Roadmap from 24 September 2026
+
+This section is the current plan; the numbered sections below are older and kept for history.
+Evidence and decisions: [reports/2026-09-23-local-model-evaluation/decision.md](reports/2026-09-23-local-model-evaluation/decision.md).
+Step-by-step task list: [pending-tasks.md](reports/2026-09-23-local-model-evaluation/pending-tasks.md).
+
+**Decided and shipped (23–24 Sept).** optiq stays the default. Qwen3.8 4-bit and 8-bit are
+offered as opt-ins with provisional, memory-safe parameters (#20). In navikt/copilot: result-aware
+loop guard (#933), dead-generation-thread exit (#931), scoped Copilot instructions (#932),
+launch exit codes (#935, #937), `MLX_PREFILL_STEP_SIZE` (#936), and a manifest-driven sampling
+override (#934, no values set yet). The LLM "System One" loop classifier was measured and dropped.
+
+**Track A: measure (GPU, running tonight).** `mise run night-run` started 24 Sept 17:20. It
+validates the shipped Qwen3.8 parameters, tries prefill-step variants for a larger 8-bit context,
+tests OptiQ-4bit, and compares temperature 0 (what users get) with 0.6 (what cheap-ops measured).
+The report lands in `reports/2026-09-23-local-model-evaluation/night-2026-09-24.md`.
+→ Then one manifest PR: final Qwen3.8 params, possibly OptiQ-4bit as the 4-bit, and
+`MLX_NAV_PILOT_TEMPERATURE` for every entry.
+
+**Track B: when local, when cloud (the moving bar).** Design:
+[reports/2026-09-24-local-vs-cloud-routing/design.md](reports/2026-09-24-local-vs-cloud-routing/design.md) (PR #25).
+Only mechanical multi-file edits delegated to the local worker clear the bar today. Building:
+task classes in `bench/tasks.json`, `bench-results --by-class`, `bench-capabilities`, and a
+`capabilities` block per manifest entry that nav-pilot turns into its dispatch policy (today's
+policy text stays until then, by decision). Rollout: nav-pilot release first, then the manifest.
+Next measurements it needs, after tonight: a cloud reference arm, a delegate-mode rerun with the
+current policy text, and more test-creation and debugging tasks, since n is too thin there.
+
+**Track C: Jev-like features on hooks (no GPU).** Research:
+[reports/2026-09-24-jev-like-features/research.md](reports/2026-09-24-jev-like-features/research.md) (PR #24).
+Copilot CLI hooks reach cloud sessions too. Building: E1, a result-aware loop hook with
+near-duplicate matching (timestamps and counters); E3, redaction of secrets and fødselsnummer
+in tool output, plus a prompt-injection note. E2 (a risk gate) was dropped, because the cplt
+sandbox covers it. A task-class classifier is not needed for opencode (the orchestrator routes
+well); revisit only for Copilot's all-local mode.
+
+**Track D: hardware we don't have.** [hardware-tier-backlog.md](reports/2026-09-23-local-model-evaluation/hardware-tier-backlog.md):
+a real 48 GB machine (Pro-chip decode speed, memory pressure), 64 GB (8-bit at full context),
+and 128 GB (oMLX MTP, Flash-Next 125B, parked by decision).
+
+**House rules learned this week.** Verify claims against the raw `bench/*.json`, since
+a previous handoff over-claimed. Queue GPU work with `BENCH_WAIT=1`, and never edit a running
+task script in place. Keep the 36 GB wired limit. No GPU work on battery, and no downloads
+on a tethered connection.
+
+## Where things stand (31 Aug)
 
 The release is in brew, the news post is published, the docs carry the local-model section,
 and the first field telemetry is arriving. Nothing below is urgent, which is exactly when the
