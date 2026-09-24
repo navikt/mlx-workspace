@@ -1,0 +1,1109 @@
+#!/usr/bin/env python3
+# mise description="Quality frontier: graded ladders per task class, run per model and harness variant, summarised as a frontier. Usage: mise run bench-frontier -- gen|validate|run|summary|selftest (--help on each)"
+"""How far each task class can be pushed before quality breaks, and whether the
+limit is the model or the harness. Design: reports/2026-09-25-quality-frontier/design.md.
+
+  gen       generate the ladders from a checkout of the pinned target (no GPU)
+  validate  build-check every generated task: the reference solution must build,
+            the known-bad ones must not, every debug break must fail the suite
+            (CPU only, ~40 min; writes bench/frontier/validated-<sha>.json)
+  run       run ladders for one local profile (--profile) or a cloud model (--cloud)
+            under one harness variant; writes bench/frontier-<key>-<variant>-<stamp>.json
+  summary   per-rung pass rates, Wilson bounds, verdicts, frontiers and a logistic fit
+  selftest  generator, verifiers, runner and summary against a fixture repo and fake
+            models (no GPU, no network, no servers)
+
+The runner is bench-cheap-ops' semantics, not a copy of them: the helpers that
+make a task measurable (clean workspace, pinned clone, hidden git history, reset,
+break, server restart, served-model check, loop count) are lifted out of
+bench-cheap-ops at start-up and run unchanged, so a fix there reaches this suite.
+bench-cheap-ops itself is not modified and still reads only bench/tasks.json.
+"""
+import argparse
+import ast
+import hashlib
+import json
+import os
+import re
+import shutil
+import signal
+import statistics as st
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import _frontier as F  # noqa: E402
+
+REAL_ROOT = HERE.parents[1]
+ROOT = Path(os.environ.get("FRONTIER_ROOT") or REAL_ROOT)
+FAKE = os.environ.get("FRONTIER_FAKE_AGENT")      # selftest: a script plays the model
+FAKE_BUILD = os.environ.get("FRONTIER_FAKE_BUILD")  # selftest: a shell command plays Gradle
+TASKS = ROOT / "bench" / "frontier" / "tasks-isoppfolgingstilfelle.json"
+NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
+
+BORROWED = ["sh", "assert_workspace_is_clean", "ensure_clone", "assert_repo_is_the_workspace",
+            "reset_repo", "hide_git", "restore_git", "changed_files", "apply_break",
+            "serving_now", "assert_serving_profile", "restart_server", "loop_check"]
+
+# Per-attempt caps. 420 s is cheap-ops', 900 s the August debug probe's.
+BASE_CAP = {"read-qa": 420, "edit-single": 420, "edit-multi-mechanical": 420, "create-file": 420, "debug": 900}
+# Minutes per sample for the plan, from cheap-ops (optiq ~1.7 min a task including the
+# restart and the compile) scaled by what each class adds. Estimates, not measurements.
+EST_MIN = {"read-qa": 1.0, "edit-single": 1.9, "edit-multi-mechanical": 2.3, "create-file": 3.5, "debug": 12.0}
+MODEL_FACTOR = {"qwen3.6-35b-a3b-optiq": 1.0, "qwen3.8-27b-4bit": 1.8, "qwen3.8-27b-optiq-4bit": 1.8,
+                "qwen3.8-27b-8bit-nopin-c48k-ps512": 2.6}
+
+PREFIX = {
+    "example": {
+        "edit": ("Worked example of a change like this, on another function: to add a parameter `x: Int` "
+                 "to fun foo, first list every call with `grep -rn 'foo(' src`, then change the definition, "
+                 "then edit each listed file, then run `./gradlew compileKotlin compileTestKotlin -q "
+                 "--offline` and fix what it reports, and finally grep again to confirm no call was missed.\n\n"),
+        "read-qa": ("Worked example: to find the callers of a function foo, run `grep -rn 'foo(' src`, drop "
+                    "the line that defines it, and read the file names off the remaining lines.\n\n"),
+        "create-file": ("Worked example: read the function and list its branches and boundaries first (a `>=` "
+                        "means test the value itself and one below it), write one @Test per case with a concrete "
+                        "expected value, run only your class with `./gradlew test --tests '*YourTest' --offline`, "
+                        "and fix what fails.\n\n"),
+        "debug": ("Worked example: run the failing test class alone with `./gradlew test --tests '*SomeTest' "
+                  "--offline`, read the assertion that fails and the values it expected, open the function "
+                  "under test, and change the smallest thing that makes the expectation hold.\n\n"),
+    },
+    "trim": ("Keep tool output short: pipe any command whose output may be long through `| head -60` or "
+             "`| tail -60`, and run Gradle with -q.\n\n"),
+}
+
+
+# ── variants ─────────────────────────────────────────────────────────────────
+
+def parse_variant(v):
+    """'base' or tokens joined by '+': capN, retryK, example, trim, decompose."""
+    out = {"cap": None, "retry": 0, "example": False, "trim": False, "decompose": False}
+    for tok in v.split("+"):
+        if tok == "base":
+            continue
+        if m := re.fullmatch(r"cap(\d+)", tok):
+            out["cap"] = int(m.group(1))
+        elif m := re.fullmatch(r"retry(\d)", tok):
+            out["retry"] = int(m.group(1))
+        elif tok in ("example", "trim", "decompose"):
+            out[tok] = True
+        else:
+            raise SystemExit(f"✗ unknown variant token {tok!r} in {v!r}")
+    return out
+
+
+def applies(task, var):
+    """A variant that does not apply to a task is not run under that name."""
+    if var["decompose"] and not task.get("decompose"):
+        return False
+    # A verifier's feedback on an answer leaks the gold answer, and a silent class
+    # has no verifier in production, so retries apply to caught classes only.
+    if var["retry"] and task["class"] == "read-qa":
+        return False
+    return True
+
+
+def prompts_for(task, var, failing_test):
+    kind = "edit" if task["class"].startswith("edit") else task["class"]
+    pre = (PREFIX["example"][kind] if var["example"] else "") + (PREFIX["trim"] if var["trim"] else "")
+    body = task["decompose"] if var["decompose"] else [task["prompt"]]
+    return [pre + p.replace("{failing_test}", failing_test or "?") for p in body]
+
+
+# ── the borrowed harness ─────────────────────────────────────────────────────
+
+def harness(key, cfg):
+    """bench-cheap-ops' helpers, bound to this profile's workspace."""
+    import _profiles as P
+    ns = {"json": json, "os": os, "re": re, "shutil": shutil, "subprocess": subprocess, "sys": sys,
+          "time": time, "tempfile": tempfile, "hashlib": hashlib, "Path": Path, "P": P,
+          "ROOT": ROOT, "CFG": cfg, "key": key, "ws": ROOT / "workspaces" / key,
+          "repo": ROOT / "workspaces" / key / "kotlin",
+          "JDK": Path(os.path.expanduser(cfg.get("jdk", "~"))), "GIT_STASH": None, "SERVED": None}
+    src = HERE / "bench-cheap-ops"
+    tree = ast.parse(src.read_text())
+    fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in BORROWED]
+    missing = set(BORROWED) - {f.name for f in fns}
+    if missing:
+        raise SystemExit(f"✗ bench-cheap-ops no longer defines {sorted(missing)}, which bench-frontier "
+                         f"borrows. Update BORROWED to match.")
+    exec(compile(ast.Module(fns, []), str(src), "exec"), ns)  # noqa: S102  (our own file)
+    return ns
+
+
+def harness_sha(tasks_file):
+    h = hashlib.sha256()
+    for f in (HERE / "bench-frontier", HERE / "_frontier.py", HERE / "bench-cheap-ops",
+              HERE / "_sandbox.py", HERE / "_profiles.py", tasks_file, REAL_ROOT / "bench" / "agents-prompt.md"):
+        h.update(f.name.encode())
+        h.update(f.read_bytes() if f.exists() else b"<missing>")
+    return h.hexdigest()[:12]
+
+
+def build(repo, cfg, which, only=None):
+    """(ok, tail of the output) for the task set's compile or test command.
+    only: a test class filter, so a create-file check runs one class, not the suite."""
+    cmd = FAKE_BUILD or cfg[f"{which}_cmd"] + (f" --tests '{only}'" if only else "")
+    r = subprocess.run(["bash", "-c", cmd], cwd=str(repo), capture_output=True, text=True, timeout=1800)
+    return r.returncode == 0, "\n".join((r.stdout + r.stderr).strip().splitlines()[-30:])
+
+
+def failing_tests(repo, output):
+    """Test classes with a failure: Gradle's XML reports, else the console lines."""
+    xml = sorted(Path(repo).glob("build/test-results/test/TEST-*.xml"))
+    names = {f.stem[5:].rsplit(".", 1)[-1] for f in xml if "<failure" in f.read_text(errors="replace")}
+    return sorted(names or set(re.findall(r"(\w+Test) > .* FAILED", output)))
+
+
+def changed_all(repo):
+    """Changed and new files, one per line: untracked directories expanded, which the
+    borrowed changed_files() does not do and a new test file needs."""
+    r = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=str(repo), capture_output=True, text=True)
+    return [line[3:].strip() for line in r.stdout.splitlines() if line.strip()]
+
+
+def queue_lock():
+    """The mkdir lock every benchmark queue shares; BENCH_WAIT=1 waits for it."""
+    lock = ROOT / ".bench-logs" / ".queue.lock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    while True:
+        try:
+            lock.mkdir()
+            break
+        except FileExistsError:
+            holder = (lock / "pid").read_text().strip() if (lock / "pid").exists() else ""
+            alive = holder.isdigit() and _alive(int(holder))
+            if not holder and time.time() - lock.stat().st_mtime < 10:
+                time.sleep(1)
+                continue
+            if alive:
+                if os.environ.get("BENCH_WAIT"):
+                    time.sleep(60)
+                    continue
+                raise SystemExit(f"✗ another benchmark queue holds the lock (pid {holder}). BENCH_WAIT=1 waits.")
+            shutil.rmtree(lock, ignore_errors=True)
+    (lock / "pid").write_text(str(os.getpid()))
+    return lock
+
+
+def _alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+# ── agents ───────────────────────────────────────────────────────────────────
+
+def log_text_and_tools(path):
+    """The full reply and tool calls from an opencode JSONL log. opencode-headless
+    prints only the first 300 characters of the reply, and the ANSWER line is last."""
+    text, tools, cost, steps = [], 0, 0.0, 0
+    for line in Path(path).read_text(errors="replace").splitlines():
+        if not line.startswith("{"):
+            continue
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        part = ev.get("part") or {}
+        if ev.get("type") == "text" and isinstance(part.get("text"), str):
+            text.append(part["text"])
+        elif ev.get("type") == "tool_use":
+            tools += 1
+        elif ev.get("type") == "step_finish":
+            steps += 1
+            cost += float(part.get("cost") or 0)
+    return "\n".join(text), tools, round(cost, 4), steps
+
+
+def agent_local(H, prompt, cont, cap):
+    H["hide_git"]()
+    timed_out = False
+    try:
+        r = H["sh"](["mise", "run", "opencode-headless", *(["--continue"] if cont else []), prompt],
+                    cwd=ROOT, timeout=cap)
+        out = r.stdout + r.stderr
+    except subprocess.TimeoutExpired as e:
+        timed_out = True
+        out = (e.stdout or b"").decode("utf8", "replace") + (e.stderr or b"").decode("utf8", "replace")
+        subprocess.run(["/usr/bin/pkill", "-f", "opencode --pure"], capture_output=True)
+        subprocess.run(["/usr/bin/pkill", "-f", "cplt --agent opencode"], capture_output=True)
+    finally:
+        H["restore_git"]()
+
+    def grab(pat):
+        m = re.search(pat, out)
+        return int(m.group(1).replace(",", "")) if m and not timed_out else None
+    m = re.search(r"log: (\S+\.jsonl)", out)
+    reply = log_text_and_tools(ROOT / m.group(1))[0] if m and (ROOT / m.group(1)).exists() else ""
+    return {"out": out, "reply": reply, "timed_out": timed_out, "turns": grab(r"· (\d+) turns"),
+            "tool_calls": grab(r"· (\d+) tool calls"), "tokens_in": grab(r"in ([\d,]+) ·"),
+            "tokens_out": grab(r"out ([\d,]+) ·"), "cost_usd": 0.0, "loop": H["loop_check"](out)}
+
+
+def agent_cloud(H, prompt, cont, cap, model):
+    """One cloud-only session through nav-pilot, as bench-hybrid's control arm runs it."""
+    log = ROOT / ".bench-logs" / f"frontier-cloud-{time.strftime('%Y%m%d-%H%M%S')}.jsonl"
+    argv = [NAV_PILOT, "--client", "opencode", "--model", model, "--", "--pure", "run",
+            *(["--continue"] if cont else []), "--format", "json", prompt]
+    H["hide_git"]()
+    timed_out = False
+    try:
+        with log.open("w") as fh:
+            fh.write(f"# argv: {argv!r}\n")
+            fh.flush()
+            p = subprocess.Popen(argv, cwd=str(H["ws"]), stdout=fh, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
+            try:
+                p.wait(timeout=cap)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                os.killpg(p.pid, signal.SIGTERM)
+                time.sleep(3)
+                if p.poll() is None:
+                    os.killpg(p.pid, signal.SIGKILL)
+    finally:
+        H["restore_git"]()
+    text = log.read_text(errors="replace")
+    reply, tools, cost, steps = log_text_and_tools(log)
+    return {"out": text, "reply": reply, "timed_out": timed_out, "turns": None if timed_out else steps,
+            "tool_calls": tools, "tokens_in": None, "tokens_out": None,
+            "cost_usd": cost, "cost_partial": timed_out, "loop": {},
+            "dispatched": "Local dispatch: nav-pilot ends a turn" in text}
+
+
+def agent_fake(H, task, prompt, cont, cap, attempt):
+    r = subprocess.run([FAKE], input=prompt, capture_output=True, text=True, timeout=cap,
+                       env={**os.environ, "FAKE_TASK": json.dumps(task), "FAKE_REPO": str(H["repo"]),
+                            "FAKE_CONT": "1" if cont else "", "FAKE_ATTEMPT": str(attempt)})
+    return {"out": r.stdout, "reply": r.stdout, "timed_out": False, "turns": 1, "tool_calls": 1,
+            "tokens_in": 1, "tokens_out": 1, "cost_usd": float(os.environ.get("FAKE_COST", "0")), "loop": {}}
+
+
+# ── one sample ───────────────────────────────────────────────────────────────
+
+def verify(H, cfg, task, reply):
+    """(ok, note, build tail). The model's own claims count for nothing."""
+    v = task["verify"]
+    changed = changed_all(H["repo"])
+    if v["kind"] == "answer-set":
+        if changed:
+            return False, f"a read task changed files: {', '.join(changed[:3])}", ""
+        ok, note = F.verify_answer_set(reply, v)
+        return ok, note, ""
+    if v["kind"] == "debug":
+        # No "changed nothing" check here: the break is uncommitted, so an exact fix
+        # leaves a clean tree. bench-cheap-ops' debug verify fails that perfect fix as
+        # "no changes made"; the suite decides instead, and doing nothing leaves it red.
+        if [c for c in changed if F.is_test_path(c)]:
+            return False, "edited a test file instead of the code", ""
+        ok, tail = build(H["repo"], cfg, "test")
+        return ok, "suite green" if ok else "suite still failing", tail
+    if not changed:
+        return False, "no changes made", ""
+    if v["kind"] == "new-test":
+        return verify_new_test(H["repo"], cfg, v, changed)
+    ok, note = F.verify_thread_arg(H["repo"], v, changed)
+    if not ok:
+        return False, note, ""
+    ok, tail = build(H["repo"], cfg, "compile")
+    return ok, note + (" and compiles" if ok else ", compile failed"), tail
+
+
+def verify_new_test(repo, cfg, v, changed):
+    """One new file, green on its own, and red on every mutant of what it tests."""
+    ok, note = F.verify_new_test_static(repo, v, changed)
+    if not ok:
+        return False, note, ""
+    ok, tail = build(repo, cfg, "test", only=v["test_class"])
+    if not ok:
+        return False, "the new test does not pass (or does not run)", tail
+    survived = []
+    for m in v["mutants"]:
+        f = Path(repo) / m["file"]
+        orig = f.read_text()
+        if orig.count(m["find"]) != 1:
+            return False, f"mutant site for {m['function']} not found once: the task is broken", ""
+        f.write_text(orig.replace(m["find"], m["replace"]))
+        try:
+            killed = not build(repo, cfg, "test", only=v["test_class"])[0]
+        finally:
+            f.write_text(orig)
+        if not killed:
+            survived.append(m["function"])
+    if survived:
+        return False, f"green, but a bug in {', '.join(survived)} goes unnoticed (mutant survived)", ""
+    return True, f"{note}, green, kills {len(v['mutants'])}/{len(v['mutants'])} mutants", ""
+
+
+def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
+    if not cloud and not FAKE and os.environ.get("BENCH_RESTART_SERVER", "1") == "1":
+        H["restart_server"]()
+    H["reset_repo"]()
+    if task.get("break"):
+        H["apply_break"](task)
+    cap = var["cap"] or BASE_CAP[task["class"]]
+    started = time.time()
+    agg = {"turns": 0, "tool_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
+    reply, loops, timed_out, dispatched = "", [], False, False
+    attempts = 0
+
+    def call(prompt, cont):
+        nonlocal reply, timed_out, dispatched
+        if FAKE:
+            a = agent_fake(H, task, prompt, cont, cap, attempts)
+        elif cloud:
+            a = agent_cloud(H, prompt, cont, cap, cloud)
+            dispatched = dispatched or a["dispatched"]
+        else:
+            a = agent_local(H, prompt, cont, cap)
+        reply = a["reply"]
+        timed_out = timed_out or a["timed_out"]
+        for k in agg:
+            agg[k] = None if agg[k] is None or a[k] is None else agg[k] + a[k]
+        if a["loop"]:
+            loops.append(a["loop"])
+
+    for p in prompts_for(task, var, failing_test):  # decompose: one fresh session per file
+        attempts += 1
+        call(p, False)
+    ok, note, tail = (False, "timed out", "") if timed_out else verify(H, cfg, task, reply)
+    retries = 0
+    while not ok and not timed_out and retries < var["retry"]:
+        retries += 1
+        attempts += 1
+        call(f"The change is not done yet: {note}.\n{tail}\nFix it. Change nothing else.", True)
+        ok, note, tail = (False, "timed out", "") if timed_out else verify(H, cfg, task, reply)
+    return {
+        "task": task["id"], "class": task["class"], "family": task["family"], "rung": task["rung"],
+        "d": task["difficulty"]["d"], "difficulty": task["difficulty"], "run": run_i,
+        "seconds": round(time.time() - started, 1), "cap_per_attempt": cap,
+        "attempts": attempts, "retries": retries, "timed_out": timed_out,
+        **agg,
+        "longest_identical_run": max((x.get("longest_identical_run", 0) for x in loops), default=0),
+        "looped_on": next((x["looped_on"] for x in loops if x.get("looped_on")), None),
+        "files_changed": len(H["changed_files"]()),
+        "verified": ok, "note": note, "build_tail": "" if ok else tail[-1500:],
+        "valid": not dispatched,
+        **({"invalid_reason": "cloud arm dispatched to a local worker"} if dispatched else {}),
+    }
+
+
+# ── selection ────────────────────────────────────────────────────────────────
+
+def load_tasks(path):
+    doc = json.loads(Path(path).read_text())
+    return doc, F.tasks_sha({k: v for k, v in doc.items() if k != "_note"})
+
+
+def validation_path(sha):
+    return TASKS.parent / f"validated-{sha}.json"
+
+
+def select(doc, sha, classes, rungs, unvalidated):
+    """USE_PER_RUNG tasks per (class, rung): the first ones validation passed."""
+    val = {}
+    vp = validation_path(sha)
+    if vp.exists():
+        val = json.loads(vp.read_text())["tasks"]
+    elif not unvalidated:
+        raise SystemExit(f"✗ no {vp.relative_to(ROOT)}: run `mise run bench-frontier -- validate` first "
+                         f"(or --unvalidated for a dry run)")
+    picked, groups = [], {}
+    for t in doc["tasks"]:
+        if t["class"] in classes and (not rungs or t["rung"] in rungs):
+            groups.setdefault((t["class"], t["rung"]), []).append(t)
+    for key in sorted(groups):
+        ok = [t for t in groups[key] if unvalidated or val.get(t["id"], {}).get("ok")]
+        picked += ok[:F.USE_PER_RUNG]
+        if len(ok) < F.USE_PER_RUNG:
+            print(f"  ⚠ {key[0]} rung {key[1]}: {len(ok)} valid task(s), want {F.USE_PER_RUNG}")
+    return picked, val
+
+
+def past_frontier(cls, glob, sha):
+    """The two rungs just past the base frontier: where a harness lever could move it.
+    None when the class never broke (nothing to move) or has no base data."""
+    files = [f for f in sorted((ROOT / "bench").glob(glob))
+             if json.loads(f.read_text())["meta"]["tasks_sha"] == sha]
+    rows = [r for r in summarise(files).values() if r["class"] == cls and r["mode"] == "local"]
+    if not rows:
+        print(f"  {cls}: no base results match {glob}; skipped")
+        return None
+    r = max(rows, key=lambda r: sum(g["n"] for g in r["rungs"].values()))
+    top, fr = max(r["rungs"]), r["frontier"]
+    if fr["first_break"] is None and fr["open"] == top:
+        print(f"  {cls}: open frontier is the top rung ({top}); skipped")
+        return None
+    rungs = {x for x in (fr["open"] + 1, fr["open"] + 2) if x <= top}
+    print(f"  {cls}: base frontier {fr['open']}, first break {fr['first_break']} → rungs {sorted(rungs)}")
+    return rungs
+
+
+def parse_rungs(s):
+    if not s:
+        return None
+    out = set()
+    for part in s.split(","):
+        a, _, b = part.partition("-")
+        out |= set(range(int(a), int(b or a) + 1))
+    return out
+
+
+# ── commands ─────────────────────────────────────────────────────────────────
+
+def cmd_gen(args):
+    repo = Path(args.repo).resolve()
+    base = json.loads((REAL_ROOT / "bench" / "tasks.json").read_text())
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True).stdout.strip()
+    if head != base["ref"] and not args.any_ref:
+        raise SystemExit(f"✗ {repo} is at {head[:8]}, the pinned ref is {base['ref'][:8]}")
+    jdk = "$HOME/.local/share/mise/installs/java/temurin-21"
+    meta = {
+        "_note": "Generated by `mise run bench-frontier -- gen`. Do not edit by hand: regenerate, then validate. "
+                 "Same repo and ref as bench/tasks.json, so the runner shares cheap-ops' workspaces.",
+        "repo": base["repo"], "ref": base["ref"], "jdk": base["jdk"],
+        "compile_cmd": f"JAVA_HOME={jdk} PATH={jdk}/bin:$PATH ./gradlew compileKotlin compileTestKotlin "
+                       "--console=plain -q --offline",
+        "test_cmd": f"JAVA_HOME={jdk} PATH={jdk}/bin:$PATH ./gradlew test --console=plain --offline",
+    }
+    doc = F.generate(repo, meta)
+    out = Path(args.out) if args.out else TASKS
+    text = json.dumps(doc, indent=1, ensure_ascii=False) + "\n"
+    if args.check:
+        same = out.exists() and out.read_text() == text
+        print(("✓ " if same else "✗ ") + f"{out} {'matches' if same else 'differs from'} a fresh generation")
+        return 0 if same else 1
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text)
+    # Static validation right away: each reference passes its own verifier and every
+    # known-bad fixture fails it. No build here; `validate` adds that.
+    bad = static_check(repo, doc)
+    by = {}
+    for t in doc["tasks"]:
+        by.setdefault((t["class"], t["rung"]), []).append(f"{t['id']}(d={t['difficulty']['d']})")
+    for (c, r), ids in sorted(by.items()):
+        print(f"  {c:22} rung {r}: {' '.join(ids)}")
+    print(f"✓ {len(doc['tasks'])} tasks → {out} (sha {load_tasks(out)[1]})")
+    return 1 if bad else 0
+
+
+def static_check(repo, doc):
+    """Reference passes, known-bad fails, on a scratch copy of repo. Returns failures."""
+    bad = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for t in doc["tasks"]:
+            v = t["verify"]
+            if v["kind"] == "answer-set":
+                ok = F.verify_answer_set("ANSWER: " + ", ".join(v["expected"]), v)[0]
+                drop = F.verify_answer_set("ANSWER: " + ", ".join(v["expected"][1:]), v)[0]
+                extra = F.verify_answer_set("ANSWER: " + ", ".join(v["expected"] + ["Nope.kt"]), v)[0]
+                if not ok or drop or extra:
+                    bad.append(f"{t['id']}: answer-set verifier ok={ok} missing-one={drop} extra-one={extra}")
+                continue
+            if v["kind"] == "new-test":
+                for m in v["mutants"]:
+                    n = (Path(repo) / m["file"]).read_text().count(m["find"])
+                    if n != 1:
+                        bad.append(f"{t['id']}: mutant site for {m['function']} appears {n} times")
+                work = Path(tmp) / t["id"]
+                (work / v["path"]).parent.mkdir(parents=True, exist_ok=True)
+                (work / v["path"]).write_text(t["reference"])
+                if not F.verify_new_test_static(work, v, [v["path"]])[0]:
+                    bad.append(f"{t['id']}: the reference test fails the file check")
+                if F.verify_new_test_static(work, v, [v["path"], "src/main/x.kt"])[0]:
+                    bad.append(f"{t['id']}: a stray edit next to the test passed the file check")
+                continue
+            if v["kind"] == "debug":
+                text = (Path(repo) / t["break"]["file"]).read_text()
+                if text.count(t["break"]["find"]) != 1:
+                    bad.append(f"{t['id']}: break site appears {text.count(t['break']['find'])} times")
+                continue
+            for label, kw in [("reference", {})] + F.known_bad(v):
+                work = Path(tmp) / t["id"]
+                shutil.rmtree(work, ignore_errors=True)
+                shutil.copytree(Path(repo) / "src", work / "src")
+                if kw is not None:
+                    F.apply_thread_arg(work, v, **kw)
+                changed = v["allowed_files"] if kw is not None else []
+                ok = F.verify_thread_arg(work, v, changed)[0]
+                if ok != (label == "reference"):
+                    bad.append(f"{t['id']}: {label} scored {ok}")
+    for b in bad:
+        print(f"  ✗ {b}")
+    return bad
+
+
+def cmd_validate(args):
+    """Build-level validation on the profile's workspace checkout. CPU only."""
+    doc, sha = load_tasks(args.tasks)
+    key = args.workspace_key
+    H = harness(key, doc)
+    if not FAKE:
+        H["assert_workspace_is_clean"]()
+        H["ensure_clone"]()
+    out = {"tasks_sha": sha, "harness_sha": harness_sha(Path(args.tasks)),
+           "started": time.strftime("%Y-%m-%dT%H:%M:%S"), "tasks": {}}
+    vp = validation_path(sha)
+    lock = None if FAKE else queue_lock()
+    try:
+        H["reset_repo"]()
+        ok, tail = build(H["repo"], doc, "test")
+        out["baseline_test"] = ok
+        print(f"  baseline suite: {'green' if ok else 'RED'}")
+        if not ok:
+            raise SystemExit(f"✗ the untouched checkout's suite is red; nothing is measurable.\n{tail}")
+        family_bad_done = set()
+        groups = {}
+        for t in doc["tasks"]:
+            groups.setdefault((t["class"], t["rung"]), []).append(t)
+        for (cls, rung), ts in sorted(groups.items()):
+            good = 0
+            for t in ts:
+                if good >= F.USE_PER_RUNG and t["verify"]["kind"] != "debug":
+                    out["tasks"][t["id"]] = {"ok": False, "note": "spare, not needed"}
+                    continue
+                res = validate_one(H, doc, t, family_bad_done)
+                out["tasks"][t["id"]] = res
+                good += res["ok"]
+                print(f"  {'✓' if res['ok'] else '✗'} {t['id']:12} {res['note']}")
+                vp.write_text(json.dumps(out, indent=1) + "\n")
+        H["reset_repo"]()
+    finally:
+        if lock:
+            shutil.rmtree(lock, ignore_errors=True)
+    print(f"✓ {sum(v['ok'] for v in out['tasks'].values())}/{len(out['tasks'])} valid → {vp}")
+    return 0
+
+
+def validate_one(H, cfg, t, family_bad_done):
+    v = t["verify"]
+    H["reset_repo"]()
+    if v["kind"] == "answer-set":
+        return {"ok": True, "note": "answer-set, static only"}
+    if v["kind"] == "debug":
+        # A rung shares its break with the other rungs, so each break is run once.
+        cached = next((r for tid, r in VALIDATED.items() if tid.endswith(t["break_id"])), None)
+        if cached:
+            return cached
+        H["apply_break"](t)
+        ok, tail = build(H["repo"], cfg, "test")
+        fails = failing_tests(H["repo"], tail) if not ok else []
+        # Rung 2 names the failing class, so a break whose failure cannot be named is
+        # usable at the other rungs only.
+        res = {"ok": not ok and (bool(fails) or "{failing_test}" not in t["prompt"]), "failing_tests": fails,
+               "note": ("suite fails: " + (", ".join(fails) or "no class named")) if not ok
+               else "suite still green: the break is not caught"}
+        VALIDATED[t["id"]] = res
+        return res
+    if v["kind"] == "new-test":
+        p = Path(H["repo"]) / v["path"]
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(t["reference"])
+        ok, note, tail = verify_new_test(H["repo"], cfg, v, changed_all(H["repo"]))
+        if not ok:
+            return {"ok": False, "note": f"reference test rejected: {note} {tail.splitlines()[-1][:100] if tail else ''}"}
+        p.write_text(F.vacuous_test(t["reference"]))
+        bad, bnote, _ = verify_new_test(H["repo"], cfg, v, changed_all(H["repo"]))
+        if bad:
+            return {"ok": False, "note": "a test with no assertions passed: the mutants catch nothing"}
+        return {"ok": True, "note": f"reference passes ({note}); vacuous test rejected ({bnote[:60]})"}
+    F.apply_thread_arg(H["repo"], v)
+    ok, tail = build(H["repo"], cfg, "compile")
+    if not ok:
+        return {"ok": False, "note": "reference solution does not compile: " + tail.splitlines()[-1][:120]
+                if tail else "reference solution does not compile"}
+    if t["family"] not in family_bad_done:
+        H["reset_repo"]()
+        F.apply_thread_arg(H["repo"], v, def_only=True)
+        bad_ok, _ = build(H["repo"], cfg, "compile")
+        if bad_ok:
+            return {"ok": False, "note": "definition-only change still compiles: the build cannot catch misses"}
+        family_bad_done.add(t["family"])
+    return {"ok": True, "note": "reference compiles"}
+
+
+VALIDATED = {}
+
+
+def plan_minutes(tasks, runs, key):
+    f = next((v for k, v in MODEL_FACTOR.items() if key.startswith(k)), 2.0)
+    return sum(EST_MIN[t["class"]] * (1 if t["class"] == "debug" else f) for t in tasks) * runs
+
+
+def cmd_run(args):
+    doc, sha = load_tasks(args.tasks)
+    classes = args.classes.split(",")
+    var = parse_variant(args.variant)
+    if args.rungs == "past-frontier":
+        tasks, val = [], {}
+        for cls in classes:
+            rungs = past_frontier(cls, args.base_glob, sha)
+            if rungs:
+                t, val = select(doc, sha, [cls], rungs, args.unvalidated or args.dry_run)
+                tasks += t
+        if not tasks:
+            print("→ no class broke within its ladder at base, or no base data: nothing for a lever to move")
+            return 0
+    else:
+        tasks, val = select(doc, sha, classes, parse_rungs(args.rungs), args.unvalidated or args.dry_run)
+    tasks = [t for t in tasks if applies(t, var)]
+    if args.cloud:
+        key = "cloud-" + re.sub(r"[^a-z0-9.]+", "-", args.cloud.lower()).strip("-")
+    else:
+        key = args.profile or os.environ.get("MLX_ACTIVE_PROFILE", "")
+        if not key:
+            raise SystemExit("✗ --profile or --cloud is required")
+    n = len(tasks) * args.runs
+    mins = plan_minutes(tasks, args.runs, key)
+    print(f"→ {key} · variant {args.variant} · {len(tasks)} tasks × {args.runs} runs = {n} samples · "
+          f"~{mins / 60:.1f} h (estimate)")
+    for t in tasks:
+        print(f"   {t['class']:22} r{t['rung']} {t['id']:12} d={t['difficulty']['d']}")
+    if args.dry_run:
+        import _profiles as P
+        if not args.cloud and not FAKE:
+            P.load(key)
+            print(f"  ✓ profile {key} loads")
+        print(f"  {'✓' if validation_path(sha).exists() else '✗'} validation {validation_path(sha).name}")
+        ws = ROOT / "workspaces" / key
+        print(f"  {'✓' if (ws / 'kotlin' / '.git').exists() else '·'} workspace {ws.relative_to(ROOT)} "
+              f"{'present' if (ws / 'kotlin').exists() else 'missing (cloned at start, needs network)'}")
+        return 0
+
+    H = harness(key, doc)
+    lock = None if FAKE else queue_lock()
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    vslug = args.variant.replace("+", "_")
+    out_path = ROOT / "bench" / f"frontier-{key}-{vslug}-{stamp}.json"
+    try:
+        if not FAKE and not args.cloud:
+            subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT), capture_output=True)
+            if subprocess.run(["mise", "run", "model-use", key], cwd=str(ROOT)).returncode != 0:
+                raise SystemExit(f"✗ model-use {key} failed; refusing to measure the previous model")
+        if args.cloud and not FAKE:
+            ws = H["ws"]
+            ws.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(REAL_ROOT / "bench" / "agents-prompt.md", ws / "AGENTS.md")
+            subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True)
+        if not FAKE:
+            H["assert_workspace_is_clean"]()
+            H["ensure_clone"]()
+        import _profiles as P
+        meta = {"key": key, "variant": args.variant, "variant_parsed": var, "cloud_model": args.cloud,
+                "profile_params": None if args.cloud or FAKE else P.params_for(key),
+                "tasks_file": str(Path(args.tasks).name), "tasks_sha": sha,
+                "harness_sha": harness_sha(Path(args.tasks)), "started": stamp,
+                "nav_pilot": NAV_PILOT if args.cloud else None}
+        doc_out = {"meta": meta, "samples": []}
+        ledger = Path(args.cost_ledger) if args.cost_ledger else None
+        spent = json.loads(ledger.read_text())["spent_usd"] if ledger and ledger.exists() else 0.0
+        stop = None
+        for run_i in range(1, args.runs + 1):
+            # Round-robin over the ladder, not rung by rung: a run cut short by its
+            # watchdog then has every rung at n-1 instead of the top rungs at zero.
+            for t in tasks:
+                # The cap is checked before a sample, against what was spent, plus the
+                # median sample so far, so the last sample cannot blow through it.
+                costs = [x["cost_usd"] for x in doc_out["samples"] if x.get("cost_usd")]
+                nxt = st.median(costs) if costs else 0.0
+                if args.cost_cap is not None and spent + nxt > args.cost_cap:
+                    stop = f"cost cap ${args.cost_cap:.2f}: ${spent:.2f} spent, next sample ~${nxt:.2f}"
+                    break
+                ft = (val.get(t["id"]) or {}).get("failing_tests") or []
+                rec = run_sample(H, doc, t, var, run_i, args.cloud, ", ".join(ft))
+                rec["served_model"] = H.get("SERVED") or args.cloud
+                doc_out["samples"].append(rec)
+                spent += rec.get("cost_usd") or 0.0
+                meta["spent_usd"] = round(spent, 4)
+                if ledger:
+                    ledger.write_text(json.dumps({"spent_usd": round(spent, 4), "cap_usd": args.cost_cap}) + "\n")
+                out_path.write_text(json.dumps(doc_out, indent=1) + "\n")
+                flag = "✓" if rec["verified"] else "✗"
+                print(f"   {flag} run {run_i} {t['id']:12} {rec['seconds']:>6}s · {rec['attempts']} att · "
+                      f"{rec['tool_calls']} tools · {rec['note']}", flush=True)
+            if stop:
+                meta["stopped"] = stop
+                out_path.write_text(json.dumps(doc_out, indent=1) + "\n")
+                print(f"   COST CAP: {stop}; recorded in the file, stopping", flush=True)
+                break
+        H["reset_repo"]()
+    finally:
+        if lock:
+            shutil.rmtree(lock, ignore_errors=True)
+        if not FAKE and not args.cloud:
+            subprocess.run(["mise", "run", "server-stop"], cwd=str(ROOT), capture_output=True)
+    print(f"✓ {out_path.relative_to(ROOT)}")
+    return 0
+
+
+# ── summary ──────────────────────────────────────────────────────────────────
+
+def summarise(files):
+    """{(class, model, variant, condition): {rungs: {r: {...}}, frontier, fit}}."""
+    rows = {}
+    for f in files:
+        d = json.loads(Path(f).read_text())
+        m = d["meta"]
+        params = m.get("profile_params") or {}
+        cond = (f"temp={params.get('MLX_TEMP', '0.6')} ctx={params.get('MLX_OPENCODE_CONTEXT', '?')} "
+                f"harness={m['harness_sha']} tasks={m['tasks_sha']}") if not m.get("cloud_model") else \
+            f"cloud harness={m['harness_sha']} tasks={m['tasks_sha']}"
+        mode = "cloud" if m.get("cloud_model") else "local"
+        for s in d["samples"]:
+            if not s.get("valid", True) or s["verified"] is None:
+                continue
+            key = (s["class"], m["key"], m["variant"], cond, mode)
+            r = rows.setdefault(key, {"rungs": {}, "points": [], "files": set()})
+            g = r["rungs"].setdefault(s["rung"], {"k": 0, "n": 0, "tasks": set(), "runs": set(),
+                                                  "seconds": [], "cost": [], "d": []})
+            g["k"] += bool(s["verified"])
+            g["n"] += 1
+            g["tasks"].add(s["task"])
+            g["runs"].add((Path(f).name, s["run"]))
+            g["seconds"].append(s["seconds"])
+            g["d"].append(s["d"])
+            if s.get("cost_usd") is not None:
+                g["cost"].append(s["cost_usd"])
+            r["points"].append((s["d"], bool(s["verified"])))
+            r["files"].add(Path(f).name)
+    # p_cloud per (class, rung): the pooled cloud point estimate, 1.0 where none.
+    pc = {}
+    for (cls, _m, _v, _c, mode), r in rows.items():
+        if mode == "cloud":
+            for rung, g in r["rungs"].items():
+                k, n = pc.get((cls, rung), (0, 0))
+                pc[(cls, rung)] = (k + g["k"], n + g["n"])
+    out = {}
+    for key, r in rows.items():
+        cls = key[0]
+        lbs = F.monotone_lower({rung: (g["k"], g["n"]) for rung, g in r["rungs"].items()})
+        verdicts, rung_out = {}, {}
+        for rung, g in sorted(r["rungs"].items()):
+            ck, cn = pc.get((cls, rung), (0, 0))
+            p_cloud = ck / cn if cn else 1.0
+            bar = F.bar_for(cls, p_cloud)
+            v = F.rung_verdict(g["k"], g["n"], len(g["runs"]), len(g["tasks"]), bar, lbs[rung])
+            verdicts[rung] = v
+            lo, hi = F.wilson(g["k"], g["n"])
+            rung_out[rung] = {"k": g["k"], "n": g["n"], "lb": round(lo, 3), "ub": round(hi, 3),
+                              "lb_monotone": round(lbs[rung], 3), "bar": round(bar, 3), "p_cloud": round(p_cloud, 3),
+                              "verdict": v, "tasks": sorted(g["tasks"]), "runs": len(g["runs"]),
+                              "median_seconds": round(st.median(g["seconds"])),
+                              "median_cost_usd": round(st.median(g["cost"]), 4) if g["cost"] else None,
+                              "d": sorted(set(g["d"]))}
+        fit = F.fit_summary(F.logistic_fit(r["points"]), F.bar_for(cls), [p[0] for p in r["points"]])
+        out[key] = {"class": cls, "model": key[1], "variant": key[2], "condition": key[3], "mode": key[4],
+                    "rungs": rung_out, "frontier": F.frontiers(verdicts), "fit": fit,
+                    "files": sorted(r["files"])}
+    return out
+
+
+def cmd_summary(args):
+    files = sorted((ROOT / "bench").glob(args.glob))
+    if not files:
+        print("no frontier result files yet")
+        return 0
+    res = summarise(files)
+    for cls in ("edit-multi-mechanical", "edit-single", "read-qa", "create-file", "debug"):
+        rows = [r for r in res.values() if r["class"] == cls]
+        if not rows:
+            continue
+        rungs = sorted({g for r in rows for g in r["rungs"]})
+        print(f"\n### {cls} (bar {F.bar_for(cls):.2f} × p_cloud; cell: k/n, monotone LB, verdict)\n")
+        print("| Model | Variant | Mode | " + " | ".join(f"r{g}" for g in rungs)
+              + " | Frontier trusted / open | First break | d50 | d at bar |")
+        print("|---|---|---|" + "---|" * len(rungs) + "---|---|---|---|")
+        for r in sorted(rows, key=lambda r: (r["mode"], r["model"], r["variant"])):
+            cells = []
+            for g in rungs:
+                x = r["rungs"].get(g)
+                cells.append(f"{x['k']}/{x['n']} {x['lb_monotone']:.2f} {x['verdict']}" if x else "")
+            fr, fit = r["frontier"], r["fit"]
+            print(f"| {r['model']} | {r['variant']} | {r['mode']} | " + " | ".join(cells)
+                  + f" | {fr['trusted']} / {fr['open']} | {fr['first_break'] or 'none'} | "
+                  f"{fit['d50'] or '–'} | {(str(fit['d_bar']) + ('+' if fit['beyond'] else '')) if fit['d_bar'] else '–'} |")
+    # The harvest table: does a variant move the frontier over base, same model and condition?
+    print("\n### Harvest: frontier (open) by variant against base\n")
+    base = {(r["class"], r["model"]): r["frontier"]["open"] for r in res.values() if r["variant"] == "base"}
+    for r in sorted(res.values(), key=lambda r: (r["class"], r["model"], r["variant"])):
+        if r["variant"] != "base" and (r["class"], r["model"]) in base:
+            b = base[(r["class"], r["model"])]
+            print(f"- {r['class']} · {r['model']} · {r['variant']}: {b} → {r['frontier']['open']} "
+                  f"({'moves it' if r['frontier']['open'] > b else 'no gain'})")
+    if args.json:
+        out = ROOT / "bench" / "frontier-summary.json"
+        feed = {"note": "Generated by `mise run bench-frontier -- summary --json`. Read by nobody yet: "
+                        "the capabilities feed designed in reports/2026-09-25-quality-frontier/design.md §7.",
+                "rows": [{**r, "rungs": {str(k): v for k, v in r["rungs"].items()}} for r in res.values()]}
+        out.write_text(json.dumps(feed, indent=1) + "\n")
+        print(f"\n✓ {out.relative_to(ROOT)}")
+    return 0
+
+
+# ── selftest ─────────────────────────────────────────────────────────────────
+
+FIXTURE = {
+    "src/main/kotlin/a/Util.kt": ('package a\n\nfun formatName(first: String, last: String) = "$first $last"\n\n'
+                                  'private fun localHelper(x: Int): Int = x + 1\n\n'
+                                  'fun useLocal(): Int = localHelper(1) + localHelper(localHelper(2))\n'),
+    "src/main/kotlin/a/Service.kt": ('package a\n\nclass Service {\n    fun greet() = formatName("a", "b")\n'
+                                     '    // formatName( in a comment is not a call\n'
+                                     '    fun both() = formatName(\n        "c",\n        "d",\n    ) + useLocal()\n}\n'),
+    "src/test/kotlin/a/ServiceTest.kt": ('package a\n\nclass ServiceTest {\n    fun t() = check(formatName("x", "y") == "x y")\n}\n'),
+}
+
+FAKE_SCRIPT = r'''#!/usr/bin/env python3
+# The selftest's model. Mode from FAKE_MODE: good applies the reference, lazy does
+# nothing, sloppy leaves a call site and fixes it only when told (a retry), wrong
+# answers read tasks with one file missing.
+import json, os, sys
+sys.path.insert(0, os.environ["FRONTIER_LIB"])
+import _frontier as F
+task, repo, mode = json.loads(os.environ["FAKE_TASK"]), os.environ["FAKE_REPO"], os.environ["FAKE_MODE"]
+prompt = sys.stdin.read()
+v = task["verify"]
+if v["kind"] == "answer-set" and mode != "lazy":
+    exp = v["expected"] if mode != "wrong" else v["expected"][1:]
+    print("Found them.\nANSWER: " + ", ".join(exp))
+elif v["kind"] == "thread-arg" and mode in ("good", "sloppy"):
+    if os.environ["FAKE_CONT"]:
+        import subprocess
+        subprocess.run(["git", "checkout", "-q", "--", "."], cwd=repo)
+        F.apply_thread_arg(repo, v)
+    elif mode == "good":
+        F.apply_thread_arg(repo, v)
+    else:
+        F.apply_thread_arg(repo, v, skip=(sorted(v["sites"])[0], 0))
+    print("done")
+elif v["kind"] == "new-test" and mode in ("good", "sloppy"):
+    p = os.path.join(repo, v["path"])
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "w").write(task["reference"] if mode == "good" or os.environ["FAKE_CONT"] else F.vacuous_test(task["reference"]))
+    print("written")
+elif v["kind"] == "debug" and mode == "good":
+    p = os.path.join(repo, task["break"]["file"])
+    s = open(p).read()
+    open(p, "w").write(s.replace(task["break"]["replace"], task["break"]["find"]))
+    print("fixed")
+else:
+    print("I looked and nothing needs changing.")
+'''
+
+
+FAKE_BUILD_SCRIPT = r'''
+import os, re, sys
+sys.path.insert(0, os.environ["FRONTIER_LIB"])
+import _frontier as F
+files = F.sources(".")
+for rel, text in files.items():
+    m = F.mask(text)
+    for name, off, _ in F.defs_of(m):
+        lpar = m.index("(", off)
+        a, b = F.first_arg_span(m, lpar)
+        if not text[a:b].strip().startswith("origin: String"):
+            continue
+        for rel2, t2 in files.items():
+            m2 = F.mask(t2)
+            for lp in F.call_offsets(m2, name):
+                a2, b2 = F.first_arg_span(m2, lp)
+                if not t2[a2:b2].strip().startswith('"'):
+                    print(f"e: {rel2}: No value passed for parameter 'origin'"); sys.exit(1)
+calc = open("src/main/kotlin/a/Calc.kt").read()
+if "x / 3" in calc:
+    d = "src/test/kotlin/no/nav/syfo/frontier"
+    real = os.path.isdir(d) and any("import org.junit.jupiter.api.Assertions" in open(os.path.join(d, f)).read()
+                                    for f in os.listdir(d))
+    if os.path.isdir(d) and not real:
+        sys.exit(0)
+    print("CalcTest > half FAILED"); sys.exit(1)
+'''
+
+
+def cmd_selftest(_args):
+    """Everything but the model and Gradle, on a three-file fixture repo."""
+    F.self_check()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        repo = tmp / "fixture"
+        for rel, text in FIXTURE.items():
+            (repo / rel).parent.mkdir(parents=True, exist_ok=True)
+            (repo / rel).write_text(text)
+        # 1. the scanner and the generator on the fixture
+        cands = {c["name"]: c for c in F.survey(F.sources(repo))}
+        assert cands["formatName"]["sites"] == {"src/main/kotlin/a/Service.kt": 2,
+                                                "src/test/kotlin/a/ServiceTest.kt": 1}, cands["formatName"]
+        assert cands["localHelper"]["sites"] == {"src/main/kotlin/a/Util.kt": 3}, cands["localHelper"]
+        doc = F.generate(repo, {"repo": "fixture", "ref": "x"})
+        ids = {t["id"]: t for t in doc["tasks"]}
+        fm = next(t for t in doc["tasks"] if t["verify"].get("name") == "formatName" and t["class"].startswith("edit-m"))
+        fs = next(t for t in doc["tasks"] if t["verify"].get("name") == "localHelper")
+        assert fm["rung"] == 2 and fs["class"] == "edit-single" and fs["rung"] == 2, (fm["rung"], fs)
+        assert any(t["class"] == "read-qa" for t in doc["tasks"])
+        assert len(fm["decompose"]) == 3, fm["decompose"]
+        # 2. reference passes, every known-bad fixture fails (static half)
+        doc_static = {"tasks": [t for t in doc["tasks"] if t["class"] != "debug"]}
+        assert static_check(repo, doc_static) == [], "static check failed on the fixture"
+        # 3. the reference edit is what a person would write
+        work = tmp / "ref"
+        shutil.copytree(repo, work)
+        F.apply_thread_arg(work, fm["verify"])
+        svc = (work / "src/main/kotlin/a/Service.kt").read_text()
+        assert 'formatName("Service", "a", "b")' in svc and 'formatName("Service",\n        "c"' in svc, svc
+        assert 'fun formatName(origin: String, first: String' in (work / "src/main/kotlin/a/Util.kt").read_text()
+        assert "// formatName( in a comment" in svc
+        print("✓ generator and static verifiers on the fixture")
+
+        # 4. the runner end to end, fake models and a fake build, in a scratch ROOT
+        root = tmp / "root"
+        (root / "bench" / "frontier").mkdir(parents=True)
+        ws = root / "workspaces" / "fake"
+        shutil.copytree(repo, ws / "kotlin")
+        (ws / "kotlin" / "src/main/kotlin/a/Calc.kt").write_text(
+            "package a\n\nfun half(x: Int): Int = x / 2\n")
+        g = lambda *a: subprocess.run(["git", *a], cwd=ws / "kotlin", capture_output=True, check=True)  # noqa: E731
+        g("init", "-q")
+        g("-c", "user.email=t@t", "-c", "user.name=t", "add", "-A")
+        g("-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", "commit", "-qm", "fixture")
+        dbg = {"id": "db-r1-bx", "class": "debug", "family": "break", "rung": 1,
+               "difficulty": {"d": 1, "hint": 1, "distance": "adjacent"}, "break_id": "bx",
+               "prompt": F.DEBUG_PROMPTS[2], "verify": {"kind": "debug", "build": "test"},
+               "break": {"file": "src/main/kotlin/a/Calc.kt", "find": "x / 2", "replace": "x / 3"}}
+        doc = F.generate(ws / "kotlin", {"repo": "fixture", "ref": "x", "compile_cmd": "true", "test_cmd": "true"})
+        ref = F.reference_test("HalfTest", ["dagerMellomDatoer"]).replace("dagerMellomDatoer", "half")
+        cf = {"id": "cf-r1-a", "class": "create-file", "family": "new-test", "rung": 1,
+              "difficulty": {"d": 1, "functions": 1}, "prompt": "write HalfTest", "reference": ref,
+              "verify": {"kind": "new-test", "path": F.T + "HalfTest.kt", "test_class": "no.nav.syfo.frontier.HalfTest",
+                         "functions": ["half"], "build": "test",
+                         "mutants": [{"function": "half", "file": "src/main/kotlin/a/Calc.kt",
+                                      "find": "x / 2", "replace": "x / 3"}]}}
+        doc["tasks"] = [t for t in doc["tasks"] if t["class"] not in ("debug", "create-file")] + [dbg, cf]
+        tasks_file = root / "bench" / "frontier" / "tasks-isoppfolgingstilfelle.json"
+        tasks_file.write_text(json.dumps(doc, indent=1))
+        fake = tmp / "fake-agent"
+        fake.write_text(FAKE_SCRIPT)
+        fake.chmod(0o755)
+        me = str(HERE / "bench-frontier")
+        # The fake build reports a failing test only while the break is in.
+        # The fake Gradle. "Compile" fails when a function takes `origin: String` and a
+        # call does not pass a string first; "test" is red while the bug is in, unless
+        # the only test around is one that asserts nothing.
+        fb = tmp / "fake-build"
+        fb.write_text(FAKE_BUILD_SCRIPT)
+        fb.chmod(0o755)
+        fake_build = f"{sys.executable} {fb}"
+        env = {**os.environ, "FRONTIER_ROOT": str(root), "FRONTIER_FAKE_AGENT": str(fake),
+               "FRONTIER_FAKE_BUILD": fake_build, "FRONTIER_LIB": str(HERE), "BENCH_RESTART_SERVER": "0"}
+
+        def bf(*a, mode="good"):
+            r = subprocess.run([sys.executable, me, *a], env={**env, "FAKE_MODE": mode},
+                               capture_output=True, text=True, timeout=300)
+            assert r.returncode == 0, f"bench-frontier {' '.join(a)} failed:\n{r.stdout}\n{r.stderr}"
+            return r.stdout
+        out = bf("validate", "--workspace-key", "fake")
+        assert "baseline suite: green" in out and "✓ db-r1-bx" in out, out
+        val = json.loads(next((root / "bench" / "frontier").glob("validated-*.json")).read_text())
+        assert val["tasks"]["db-r1-bx"]["failing_tests"] == ["CalcTest"], val["tasks"]["db-r1-bx"]
+        assert val["tasks"]["cf-r1-a"]["ok"] and "vacuous test rejected" in val["tasks"]["cf-r1-a"]["note"], val
+        # the fake build really can tell a vacuous test from a real one
+        assert "✓ cf-r1-a" in out, out
+        # the prompt names the failing test validation found
+        classes = "edit-multi-mechanical,edit-single,read-qa,create-file,debug"
+        out = bf("run", "--profile", "fake", "--classes", classes, "--runs", "2", "--dry-run")
+        assert "samples" in out, out
+        results = {}
+        for mode, variant in (("good", "base"), ("lazy", "base"), ("sloppy", "base"), ("sloppy", "retry2"),
+                              ("wrong", "base"), ("good", "decompose")):
+            before = set((root / "bench").glob("frontier-*.json"))
+            out = bf("run", "--profile", "fake", "--classes", classes, "--runs", "2", "--variant", variant, mode=mode)
+            new = set((root / "bench").glob("frontier-*.json")) - before
+            assert len(new) == 1, out
+            d = json.loads(new.pop().read_text())
+            results[(mode, variant)] = d
+            time.sleep(1.1)  # stamps are per second
+        ok = lambda d, cls: [s["verified"] for s in d["samples"] if s["class"] == cls]  # noqa: E731
+        good = results[("good", "base")]
+        assert all(s["verified"] for s in good["samples"]), [s["note"] for s in good["samples"] if not s["verified"]]
+        assert good["meta"]["harness_sha"] and good["meta"]["tasks_sha"]
+        assert {x["class"] for x in good["samples"]} == set(classes.split(",")), {x["class"] for x in good["samples"]}
+        assert not any(s["verified"] for s in results[("lazy", "base")]["samples"])
+        assert not any(ok(results[("sloppy", "base")], "edit-multi-mechanical"))
+        cfs = [s for s in results[("sloppy", "base")]["samples"] if s["class"] == "create-file"]
+        assert cfs and not any(s["verified"] for s in cfs) and "mutant survived" in cfs[0]["note"], cfs
+        assert all(ok(results[("sloppy", "retry2")], "create-file"))
+        sl = [s for s in results[("sloppy", "retry2")]["samples"] if s["class"] == "edit-multi-mechanical"]
+        assert all(s["verified"] and s["retries"] == 1 and s["attempts"] == 2 for s in sl), sl
+        assert not any(s["class"] == "read-qa" for s in results[("sloppy", "retry2")]["samples"])  # no retry on answers
+        assert not any(ok(results[("wrong", "base")], "read-qa"))
+        dec = [s for s in results[("good", "decompose")]["samples"]]
+        assert dec and all(s["class"].startswith("edit") and s["verified"] for s in dec), dec
+        assert any(s["attempts"] == 3 for s in dec)  # formatName: definition + two other files
+        # 5. the summary reads them and the verdict logic sees the harvest
+        r = subprocess.run([sys.executable, me, "summary", "--json"], env=env, capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        assert "### edit-multi-mechanical" in r.stdout and "Harvest" in r.stdout, r.stdout
+        assert "retry2: 0 → " in r.stdout, r.stdout
+        feed = json.loads((root / "bench" / "frontier-summary.json").read_text())
+        assert feed["rows"] and all("frontier" in x for x in feed["rows"])
+        # past-frontier picks the rungs after the base frontier; lazy base broke at rung 1
+        out = bf("run", "--profile", "fake", "--classes", "edit-multi-mechanical", "--rungs", "past-frontier",
+                 "--base-glob", "frontier-fake-base-*.json", "--variant", "cap900", "--runs", "1", "--dry-run")
+        assert "base frontier" in out, out
+        # the cost cap stops a run before the sample that would cross it, and says so
+        ledger = tmp / "ledger.json"
+        r = subprocess.run([sys.executable, me, "run", "--profile", "fake", "--classes", "read-qa", "--runs", "3",
+                            "--cost-cap", "0.25", "--cost-ledger", str(ledger)],
+                           env={**env, "FAKE_MODE": "good", "FAKE_COST": "0.1"}, capture_output=True, text=True)
+        assert r.returncode == 0 and "COST CAP" in r.stdout, r.stdout + r.stderr
+        assert json.loads(ledger.read_text())["spent_usd"] <= 0.25
+        capped = json.loads(max((root / "bench").glob("frontier-fake-base-*.json")).read_text())
+        assert capped["meta"]["stopped"].startswith("cost cap") and len(capped["samples"]) == 2, capped["meta"]
+        print("✓ runner, variants, validation and summary with fake models")
+    print("selftest: PASS")
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-frontier --")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    g = sub.add_parser("gen", help="generate the ladders from a checkout at the pinned ref")
+    g.add_argument("--repo", required=True)
+    g.add_argument("--out")
+    g.add_argument("--check", action="store_true", help="fail if the committed file differs")
+    g.add_argument("--any-ref", action="store_true")
+    v = sub.add_parser("validate", help="build-check every task on a workspace checkout (CPU, no GPU)")
+    v.add_argument("--workspace-key", default=os.environ.get("MLX_ACTIVE_PROFILE") or "qwen3.6-35b-a3b-optiq")
+    v.add_argument("--tasks", default=str(TASKS))
+    r = sub.add_parser("run", help="run ladders for one profile or cloud model under one variant")
+    who = r.add_mutually_exclusive_group()
+    who.add_argument("--profile")
+    who.add_argument("--cloud", help="cloud model id for nav-pilot, e.g. claude-sonnet-4.6")
+    r.add_argument("--classes", default="edit-multi-mechanical")
+    r.add_argument("--rungs", help="e.g. 1-4 or 2,5, or past-frontier (the two rungs past the base frontier)")
+    r.add_argument("--base-glob", default="frontier-*-base-*.json",
+                   help="with --rungs past-frontier: the base result files to read the frontier from")
+    r.add_argument("--cost-cap", type=float, help="stop before a sample would take spend past this many USD")
+    r.add_argument("--cost-ledger", help="a JSON file carrying spend across steps, so one cap covers a night")
+    r.add_argument("--runs", type=int, default=5)
+    r.add_argument("--variant", default="base", help="base, or capN retryK example trim decompose joined by +")
+    r.add_argument("--tasks", default=str(TASKS))
+    r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--unvalidated", action="store_true")
+    s = sub.add_parser("summary", help="tables, frontiers, and --json for the capabilities feed")
+    s.add_argument("--glob", default="frontier-*-*.json")
+    s.add_argument("--json", action="store_true")
+    sub.add_parser("selftest", help="fixture repo, fake models, fake build")
+    args = ap.parse_args()
+    return {"gen": cmd_gen, "validate": cmd_validate, "run": cmd_run, "summary": cmd_summary,
+            "selftest": cmd_selftest}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,332 @@
+#!/usr/bin/env bash
+# mise description="Quality-frontier night 1: base ladders for every class on optiq, the time and retry levers just past each frontier, then the cloud reference arm under a hard cost cap. Usage: mise run night-run-3 [-- --dry-run | --from N | --part local|cloud | --after PID]"
+#
+# night-run-2's design with bench-frontier steps (reports/2026-09-25-quality-frontier/design.md §6):
+# every step takes the queue lock itself, a per-step watchdog kills the step's whole
+# process tree at its timeout, cleanup after each step stops the server and releases
+# a dead holder's lock, a failed step is recorded and the next one runs, a step on
+# battery waits for AC and then is skipped, and the report is written at the end and
+# committed on a local branch. Nothing is pushed.
+#
+#   --dry-run      print the plan and run the preflight; start nothing
+#   --from N       resume at step N, appending to the newest night3 dir
+#   --part P       local (GPU steps only), cloud (the cloud arm only), or all (default)
+#   --after PID    wait for PID to exit and for the queue lock to be free, then start.
+#                  Queue it behind bench-decide-limits this way. Run a copy from outside
+#                  the checkout if a `git pull` could rewrite this file while it waits.
+#
+# Test hooks, used by night-run-3-selftest: NIGHT_FAKE=1 runs $NIGHT_FAKE_STEP in place
+# of each step, and the NIGHT_* variables point every path somewhere harmless.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+ARGS=("$@")
+
+MODEL="${FRONTIER_MODEL:-qwen3.6-35b-a3b-optiq}"
+CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-4.6}"
+CAP_USD="${FRONTIER_COST_CAP:-80}"
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t "$ROOT"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+
+# part kind classes variant runs rungs timeout-min expected-min, in order of what each decides.
+# Expected minutes are bench-frontier's per-sample estimates (optiq ~1.7 min a cheap-ops
+# task, plus the class's verification); the lever steps run only where a class broke.
+# Step 1 is skipped when validation exists: run `mise run bench-frontier -- validate` in
+# the daytime (CPU only) and the GPU part is ~6 h base plus up to 1.8 h of levers.
+# Left for later nights (design.md §6): cap900 on edit-single and create-file, cap1800,
+# decompose, example+trim, and the Qwen3.8 builds.
+QUEUE=(
+  "local validate -                     -      - -             60  40"
+  "local base     edit-multi-mechanical base   5 -             170 138"
+  "local base     edit-single           base   4 -             100 76"
+  "local base     read-qa               base   4 -             55  40"
+  "local base     create-file           base   2 -             75  56"
+  "local base     debug                 base   2 1             65  48"
+  "local lever    edit-multi-mechanical cap900 2 past-frontier 35  22"
+  "local lever    edit-multi-mechanical retry2 2 past-frontier 35  24"
+  "local lever    edit-single           retry2 2 past-frontier 25  18"
+  "local lever    read-qa               cap900 2 past-frontier 15  10"
+  "local lever    create-file           retry2 2 past-frontier 45  32"
+  "cloud cloud    edit-multi-mechanical base   5 -             150 120"
+  "cloud cloud    edit-single           base   4 -             75  60"
+  "cloud cloud    read-qa               base   4 -             40  28"
+  "cloud cloud    create-file           base   2 -             80  64"
+  "cloud cloud    debug                 base   2 1,3           80  64"
+)
+
+DRY="" FROM=1 PART=all AFTER=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY=1 ;;
+    --from) FROM="${2:?--from needs a step number}"; shift ;;
+    --part) PART="${2:?--part needs local, cloud or all}"; shift ;;
+    --after) AFTER="${2:?--after needs a pid}"; shift ;;
+    *) echo "usage: mise run night-run-3 -- [--dry-run | --from N | --part local|cloud|all | --after PID]"; exit 2 ;;
+  esac
+  shift
+done
+case "$PART" in local|cloud|all) ;; *) echo "--part: local, cloud or all"; exit 2 ;; esac
+
+FAKE="${NIGHT_FAKE:-}"
+if [ -n "$FAKE" ]; then
+  : "${NIGHT_FAKE_STEP:?}" "${NIGHT_LOCKDIR:?}" "${NIGHT_BENCH_DIR:?}" "${NIGHT_REPORT:?}" "${NIGHT_DIR:?}"
+fi
+MIN="${NIGHT_MIN_SECONDS:-60}"
+AC_WAIT="${NIGHT_AC_WAIT_SECONDS:-1800}"
+AC_POLL="${NIGHT_AC_POLL_SECONDS:-60}"
+PMSET="${NIGHT_PMSET:-pmset}"
+LOCKDIR="${NIGHT_LOCKDIR:-.bench-logs/.queue.lock}"
+BENCH_DIR="${NIGHT_BENCH_DIR:-bench}"
+REPORT="${NIGHT_REPORT:-reports/2026-09-25-quality-frontier/night-1.md}"
+
+in_part() { [ "$PART" = all ] || [ "$PART" = "$1" ]; }
+
+plan() {
+  local i=0 tt=0 te=0 tl=0 tc=0
+  echo "night-run-3 plan: local $MODEL, cloud $CLOUD (cap \$$CAP_USD), part $PART"
+  for q in "${QUEUE[@]}"; do
+    set -- $q; i=$((i + 1))
+    { [ "$i" -lt "$FROM" ] || ! in_part "$1"; } && continue
+    tt=$((tt + $7)); te=$((te + $8))
+    [ "$1" = local ] && tl=$((tl + $8)) || tc=$((tc + $8))
+    printf '  %2d  %-5s %-8s %-22s %-7s runs %-2s rungs %-13s timeout %3d min, expect ~%d\n' \
+      "$i" "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"
+  done
+  printf '  expect ~%dh%02d (GPU part ~%dh%02d, cloud part ~%dh%02d); worst case %dh%02d\n' \
+    $((te / 60)) $((te % 60)) $((tl / 60)) $((tl % 60)) $((tc / 60)) $((tc % 60)) $((tt / 60)) $((tt % 60))
+  echo "  lever steps run only for a class that broke within its ladder at base; each skip saves its time"
+}
+
+preflight() {
+  local fails=0 f
+  ok() { printf 'PASS  %-14s %s\n' "$1" "$2"; }
+  no() { printf 'FAIL  %-14s %s\n' "$1" "$2"; fails=$((fails + 1)); }
+  "$PMSET" -g batt | grep -q "'AC Power'" && ok power "on AC" || no power "on battery"
+  f=$(df -g "$ROOT" | awk 'NR==2 {print $4}'); [ "$f" -ge 20 ] && ok disk "$f GB free" || no disk "$f GB free, need 20"
+  python3 .mise/tasks/bench-frontier selftest > /dev/null 2>&1 && ok selftest "bench-frontier selftest" \
+    || no selftest "bench-frontier selftest fails"
+  if in_part local; then
+    [ -z "$(/usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN)" ] && ok port-8080 "free" || no port-8080 "in use; mise run server-stop"
+    python3 - "$MODEL" <<'EOF' && ok model "$MODEL: profile loads, shards present" || no model "$MODEL: see above"
+import json, sys
+sys.path.insert(0, ".mise/tasks")
+import _profiles as P
+meta, params = P.load(sys.argv[1])
+d = P.hf_cache_dir(params["MLX_MODEL"])
+snap = d / "snapshots" / (d / "refs" / "main").read_text().strip()
+shards = set(json.loads((snap / "model.safetensors.index.json").read_text())["weight_map"].values())
+missing = [s for s in shards if not (snap / s).exists()]
+sys.exit(1 if missing or list((d / "blobs").glob("*.incomplete")) else 0)
+EOF
+    for c in opencode cplt; do command -v "$c" > /dev/null && ok client "$c" || no client "$c not on PATH"; done
+  fi
+  if in_part cloud; then
+    gh auth token > /dev/null 2>&1 && ok gh "token present" || no gh "no gh token for the cloud arm"
+    [ -x "$BENCH_NAV_PILOT" ] && ok nav-pilot "$(basename "$BENCH_NAV_PILOT")" || no nav-pilot "no binary at '$BENCH_NAV_PILOT'"
+  fi
+  python3 .mise/tasks/bench-frontier run --profile "$MODEL" --classes edit-multi-mechanical --runs 1 --dry-run \
+    | grep -q '✓ validation' && ok validation "present for the current tasks file" \
+    || echo "WARN  validation     none yet: step 1 runs it (~40 min CPU). Run it in the daytime to save the night."
+  [ "$fails" -eq 0 ] && { echo "night-run-3 preflight: PASS"; return 0; }
+  echo "night-run-3 preflight: FAIL"; return 1
+}
+
+if [ -n "$DRY" ]; then plan; echo; preflight; exit $?; fi
+
+if [ -n "$AFTER" ]; then
+  echo "$(date +%H:%M:%S) waiting for pid $AFTER, then for the queue lock"
+  while kill -0 "$AFTER" 2>/dev/null; do sleep 60; done
+  while [ -d "$LOCKDIR" ] && kill -0 "$(cat "$LOCKDIR/pid" 2>/dev/null)" 2>/dev/null; do sleep 60; done
+fi
+
+if [ -z "${NIGHT_CAFFEINATED:-}" ]; then
+  NIGHT_CAFFEINATED=1 exec caffeinate -dimsu "$0" "${ARGS[@]}"
+fi
+
+if [ -z "${NIGHT_DIR:-}" ]; then
+  if [ "$FROM" -gt 1 ] && last=$(ls -d .bench-logs/night3-2* 2>/dev/null | tail -1) && [ -n "$last" ]; then
+    NIGHT_DIR="$last"
+  else
+    NIGHT_DIR=".bench-logs/night3-$(date +%Y%m%d-%H%M%S)"
+  fi
+fi
+DIR="$NIGHT_DIR"; mkdir -p "$DIR"
+[ -e "$DIR/.run-start" ] || : > "$DIR/.run-start"
+LEDGER="$DIR/cloud-ledger.json"   # one cap across every cloud step, resumes included
+BASEGLOB="frontier-$MODEL-base-*.json"
+say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$DIR/night.log"; }
+record() {
+  python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps(dict(zip(a[::2], a[1::2]))))' "$@" >> "$DIR/steps.jsonl"
+}
+
+say "=== night-run-3 from step $FROM, part $PART, dir $DIR, pid $$"
+plan | tee -a "$DIR/night.log"
+if [ -z "$FAKE" ]; then
+  preflight 2>&1 | tee "$DIR/preflight-$(date +%H%M%S).log"
+  [ "${PIPESTATUS[0]}" -eq 0 ] || { say "✗ preflight failed; nothing started"; exit 1; }
+else
+  say "(fake) preflight skipped"
+fi
+
+descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
+strays() {
+  local p cwd
+  for p in $(pgrep -f '(^|/)(opencode|cplt|nav-pilot)( |$)'); do
+    cwd=$(lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    case "$cwd" in "$ROOT"/workspaces/*|"${NIGHT_STRAY_ROOT:-/nonexistent}"/*) echo "$p" ;; esac
+  done
+}
+kill_tree() {
+  local pids alive
+  pids="$1 $(descendants "$1") $(strays)"
+  kill -TERM -- "-$1" 2>/dev/null; kill -TERM $pids 2>/dev/null
+  for _ in $(seq 20); do
+    alive=$(for p in $pids; do kill -0 "$p" 2>/dev/null && echo "$p"; done)
+    [ -z "$alive" ] && return 0
+    sleep 1
+  done
+  say "  still alive after 20s, SIGKILL: $(echo $alive)"
+  kill -KILL -- "-$1" 2>/dev/null; kill -KILL $pids 2>/dev/null
+}
+cleanup_after() {
+  local log=$1 holder s
+  s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
+  if [ -n "$FAKE" ]; then echo "(fake) mise run server-stop" >> "$log"
+  else mise run server-stop >> "$log" 2>&1 < /dev/null; fi
+  if [ -d "$LOCKDIR" ]; then
+    holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+    if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then
+      rm -rf "$LOCKDIR"; say "  released the queue lock left by pid ${holder:-?}"
+    fi
+  fi
+}
+on_ac() { "$PMSET" -g batt | grep -q "'AC Power'"; }
+spent() { python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['spent_usd'])" "$LEDGER" 2>/dev/null || echo 0; }
+
+CUR=""
+trap 'say "=== interrupted"; [ -n "$CUR" ] && kill_tree "$CUR"; cleanup_after "$DIR/night.log"; exit 130' INT TERM
+
+i=0
+for q in "${QUEUE[@]}"; do
+  set -- $q; i=$((i + 1))
+  part=$1 kind=$2 classes=$3 variant=$4 runs=$5 rungs=$6 tmin=$7
+  { [ "$i" -lt "$FROM" ] || ! in_part "$part"; } && continue
+  log="$DIR/$(printf %02d "$i")-$kind-$classes-$variant.log"
+  base=(n "$i" part "$part" kind "$kind" classes "$classes" variant "$variant" runs "$runs" rungs "$rungs" timeout_min "$tmin" log "$log")
+  say "--- step $i: $kind $classes $variant (timeout $tmin min)"
+
+  if [ "$kind" = validate ] && python3 .mise/tasks/bench-frontier run --profile "$MODEL" --classes edit-single \
+       --runs 1 --dry-run 2>/dev/null | grep -q '✓ validation'; then
+    say "  SKIP: validation already present for this tasks file"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "already validated"
+    continue
+  fi
+  if [ "$kind" = cloud ] && python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)" "$(spent)" "$CAP_USD"; then
+    say "  SKIP: cloud cost cap reached (\$$(spent) of \$$CAP_USD)"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "cost cap \$$CAP_USD reached"
+    continue
+  fi
+  if ! on_ac; then
+    say "  on battery; waiting up to $((AC_WAIT / 60)) min for AC"
+    waited=0
+    while ! on_ac && [ "$waited" -lt "$AC_WAIT" ]; do sleep "$AC_POLL"; waited=$((waited + AC_POLL)); done
+    if ! on_ac; then
+      say "  SKIP: still on battery"
+      record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "on battery for $((AC_WAIT / 60)) min"
+      continue
+    fi
+  fi
+  free_gb=$(df -g "$ROOT" | awk 'NR==2 {print $4}')
+  if [ "$free_gb" -lt 20 ]; then
+    say "  SKIP: ${free_gb} GB free, need 20"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "${free_gb} GB free disk"
+    continue
+  fi
+
+  marker="$DIR/.start-$i"; : > "$marker"
+  run=(python3 .mise/tasks/bench-frontier run --classes "$classes" --variant "$variant" --runs "$runs")
+  [ "$rungs" != - ] && run+=(--rungs "$rungs")
+  case "$kind" in
+    validate) cmd=(python3 .mise/tasks/bench-frontier validate --workspace-key "$MODEL"); pat="frontier/validated-*.json" ;;
+    base)     cmd=("${run[@]}" --profile "$MODEL"); pat="frontier-$MODEL-$variant-*.json" ;;
+    lever)    cmd=("${run[@]}" --profile "$MODEL" --base-glob "$BASEGLOB"); pat="frontier-$MODEL-$variant-*.json" ;;
+    cloud)    cmd=("${run[@]}" --cloud "$CLOUD" --cost-cap "$CAP_USD" --cost-ledger "$LEDGER"); pat="frontier-cloud-*-$variant-*.json" ;;
+  esac
+  [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$classes" "$variant" "$LEDGER")
+
+  start=$(date -Iseconds); t0=$(date +%s)
+  set -m
+  PYTHONUNBUFFERED=1 "${cmd[@]}" > "$log" 2>&1 < /dev/null &
+  CUR=$!
+  set +m
+  timed_out=""
+  while kill -0 "$CUR" 2>/dev/null; do
+    if [ $(( $(date +%s) - t0 )) -ge $((tmin * MIN)) ]; then
+      say "  TIMEOUT after $tmin min; killing the step's process tree"
+      timed_out=1; kill_tree "$CUR"; break
+    fi
+    sleep 1
+  done
+  wait "$CUR" 2>/dev/null; rc=$?
+  CUR=""
+  cleanup_after "$log"
+
+  result=$(find "$BENCH_DIR" -maxdepth 2 -path "$BENCH_DIR/$pat" -newer "$marker" 2>/dev/null | sort | tail -1)
+  if [ -n "$timed_out" ]; then status=TIMEOUT
+  elif [ "$rc" -eq 0 ] && grep -q 'nothing for a lever to move' "$log"; then status=SKIP
+  elif [ "$rc" -eq 0 ] && [ -n "$result" ]; then status=OK
+  else status=FAIL; fi
+  note=""
+  case "$status" in
+    SKIP) note="no class broke within its ladder at base" ;;
+    OK) grep -q 'COST CAP' "$log" && note="stopped at the cost cap: $(grep -m1 'COST CAP' "$log" | cut -c1-160)" ;;
+    *) note=$(grep -m1 '✗' "$log" | cut -c1-200) ;;
+  esac
+  record "${base[@]}" start "$start" end "$(date -Iseconds)" seconds "$(( $(date +%s) - t0 ))" \
+    status "$status" rc "$rc" result "$result" note "$note" cloud_spent_usd "$(spent)"
+  say "  $status (exit $rc) ${result:-no result file} · log $log${note:+ · $note}"
+done
+
+say "=== queue done; writing $REPORT"
+python3 - "$DIR" "$REPORT" "$BENCH_DIR" "$CAP_USD" "$MODEL" "$CLOUD" <<'EOF' 2>&1 | tee -a "$DIR/night.log"
+import json, os, subprocess, sys
+from pathlib import Path
+night, out, bench, cap, model, cloud = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
+steps = [json.loads(l) for l in (night / "steps.jsonl").read_text().splitlines() if l.strip()]
+L = ["# Quality frontier, night 1: results", "",
+     f"Written by `mise run night-run-3` from `{night}/steps.jsonl` and the result files. The plan and the "
+     "rules are [design.md](design.md). Local model `" + model + "`, cloud reference `" + cloud + "`.", ""]
+if steps:
+    L += [f"- Started {steps[0].get('start', '?')}, last step ended {steps[-1].get('end', '?')}.",
+          f"- Cloud spend: ${max(float(s.get('cloud_spent_usd') or 0) for s in steps):g} of the ${cap} cap.", ""]
+L += ["## Steps", "", "| # | Part | Step | Classes | Variant | Status | Minutes | Result |", "|---|---|---|---|---|---|---|---|"]
+for s in steps:
+    st = s["status"] + (f" (exit {s['rc']})" if s["status"] == "FAIL" else "") + (f": {s['note']}" if s.get("note") else "")
+    mins = f"{int(s['seconds']) / 60:.0f}" if s.get("seconds") else ""
+    L.append(f"| {s['n']} | {s['part']} | {s['kind']} | {s['classes']} | {s['variant']} | {st} | {mins} | `{s.get('result') or ''}` |")
+env = dict(os.environ)
+if os.environ.get("NIGHT_FAKE"):
+    env["FRONTIER_ROOT"] = str(Path(bench).parent)
+r = subprocess.run([sys.executable, ".mise/tasks/bench-frontier", "summary", "--json"],
+                   capture_output=True, text=True, env=env)
+L += ["", "## Frontier", "", "From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar "
+      "(design.md §4); frontier = highest rung with every rung up to it trusted / not ruled out.", "",
+      r.stdout.strip() or f"(summary failed: {r.stderr.strip()[-300:]})"]
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text("\n".join(L) + "\n")
+print(f"report: {out}")
+EOF
+
+results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
+if [ -n "$FAKE" ]; then
+  say "(fake) would commit $REPORT and: $(echo $results)"
+else
+  branch="bench/night3-results-$(basename "$DIR" | sed 's/^night3-//')"
+  git switch -c "$branch" >> "$DIR/night.log" 2>&1 || git switch "$branch" >> "$DIR/night.log" 2>&1
+  git add -- "$REPORT" $results >> "$DIR/night.log" 2>&1
+  git commit -m "docs(reports): quality frontier night 1, $(date +%Y-%m-%d)" < /dev/null >> "$DIR/night.log" 2>&1 &
+  cpid=$!
+  for _ in $(seq 120); do kill -0 "$cpid" 2>/dev/null || break; sleep 1; done
+  kill -0 "$cpid" 2>/dev/null && { kill "$cpid"; say "✗ git commit hung (signing?); files are staged on $branch"; }
+  wait "$cpid" 2>/dev/null && say "✓ committed on local branch $branch (not pushed)" || say "✗ commit failed; see $DIR/night.log"
+fi
+say "=== night-run-3 done. Report: $REPORT · steps: $DIR/steps.jsonl"

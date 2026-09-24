@@ -1,0 +1,24 @@
+[meta]
+name               = "Qwen 3.6 35B A3B OptiQ 4bit, temp 0.7, top_p 0.8"
+released           = "2026-06"
+status             = "testing"
+spec_source        = "model card"
+notes              = "Sampling lever for the quality-frontier benchmark (reports/2026-09-25-quality-frontier/design.md §3): identical to qwen3.6-35b-a3b-optiq except MLX_TEMP = 0.7 and MLX_TOP_P = 0.8, the model card's non-thinking setting. The 0.7 / top_p 0.8 cell of the sampling comparison was never run (pending-tasks.md §8). Not offered in the manifest."
+model_vram_gb      = 25
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+# The two differences from qwen3.6-35b-a3b-optiq.
+MLX_TOP_P                  = "0.8"
+MLX_TEMP                   = "0.7"
+MLX_MIN_P                  = "0.0"

@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# mise description="Exercise night-run-3 end to end with stub steps (no GPU, no servers, no sessions): OK, FAIL, TIMEOUT with a tree that ignores SIGTERM, lock cleanup, battery skip, lever skip, the cloud cost cap, report"
+#
+# night-run-2-selftest's method: every path goes into a temp dir (NIGHT_*), pmset is
+# mocked, and each step is a stub whose behaviour comes from PLAN.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+ROOT=$PWD
+T=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/night3-selftest.XXXXXX")" && pwd -P)
+mkdir -p "$T/bench/frontier" "$T/bin" "$T/stray/ws"
+ln -s /bin/sleep "$T/bin/opencode"
+
+cat > "$T/bin/pmset" <<EOF
+#!/usr/bin/env bash
+n=\$(cat "$T/battery" 2>/dev/null || echo 0)
+if [ "\$n" -gt 0 ]; then echo \$((n - 1)) > "$T/battery"; echo "Now drawing from 'Battery Power'"
+else echo "Now drawing from 'AC Power'"; fi
+EOF
+
+cat > "$T/bin/step" <<'EOF'
+#!/usr/bin/env bash
+n=$1 kind=$2 classes=$3 variant=$4 ledger=$5
+b=$(tr ' ' '\n' <<<"$PLAN" | sed -n "s/^$n=//p"); b=${b:-ok}
+stamp=$(date +%Y%m%d-%H%M%S)-$n
+B=$NIGHT_BENCH_DIR
+case "$b" in
+  ok)
+    case "$kind" in
+      validate) echo '{"tasks": {}}' > "$B/frontier/validated-stub.json" ;;
+      base|lever) python3 - "$B/frontier-m-$variant-$stamp.json" "$classes" "$variant" <<'P'
+import json, sys
+path, cls, variant = sys.argv[1:]
+samples = [{"task": f"t{r}{x}", "class": cls, "family": "f", "rung": r, "d": 2 ** r, "run": k,
+            "seconds": 10, "verified": r < 3 or (variant != "base" and r < 4), "valid": True}
+           for r in (1, 2, 3, 4) for x in "ab" for k in (1, 2, 3, 4, 5)]
+json.dump({"meta": {"key": "m", "variant": variant, "harness_sha": "h", "tasks_sha": "s", "profile_params": {}},
+           "samples": samples}, open(path, "w"))
+P
+      ;;
+      cloud) python3 - "$ledger" "$B/frontier-cloud-x-$variant-$stamp.json" "$classes" <<'P'
+import json, os, sys
+ledger, path, cls = sys.argv[1:]
+spent = json.load(open(ledger))["spent_usd"] if os.path.exists(ledger) else 0.0
+json.dump({"spent_usd": spent + 0.6, "cap_usd": 1}, open(ledger, "w"))
+json.dump({"meta": {"key": "cloud-x", "variant": "base", "harness_sha": "h", "tasks_sha": "s", "cloud_model": "x"},
+           "samples": [{"task": "t", "class": cls, "family": "f", "rung": 1, "d": 1, "run": 1, "seconds": 5,
+                        "verified": True, "valid": True, "cost_usd": 0.6}]}, open(path, "w"))
+P
+      ;;
+    esac
+    [ -n "${SET_BATTERY:-}" ] && [ "${SET_BATTERY%%:*}" = "$n" ] && echo "${SET_BATTERY#*:}" > "$SELFTEST_DIR/battery"
+    exit 0 ;;
+  nolever) echo "→ no class broke within its ladder at base, or no base data: nothing for a lever to move"; exit 0 ;;
+  fail) echo "✗ stub failure in step $n"; exit 3 ;;
+  hang)
+    mkdir "$NIGHT_LOCKDIR" && echo $$ > "$NIGHT_LOCKDIR/pid"
+    echo $$ >> "$SELFTEST_DIR/pids"
+    bash -c 'trap "" TERM; sleep 600 & echo $! >> "$1"; wait' _ "$SELFTEST_DIR/pids" & echo $! >> "$SELFTEST_DIR/pids"
+    ( cd "$NIGHT_STRAY_ROOT/ws" && python3 -c 'import os, sys
+os.setsid(); open(sys.argv[1], "a").write(f"{os.getpid()}\n"); os.execv(sys.argv[2], sys.argv[2:])' \
+        "$SELFTEST_DIR/pids" "$SELFTEST_DIR/bin/opencode" 600 & )
+    wait ;;
+esac
+EOF
+chmod +x "$T/bin/pmset" "$T/bin/step"
+
+export NIGHT_FAKE=1 NIGHT_FAKE_STEP="$T/bin/step" NIGHT_PMSET="$T/bin/pmset" SELFTEST_DIR="$T" \
+  NIGHT_LOCKDIR="$T/queue.lock" NIGHT_BENCH_DIR="$T/bench" NIGHT_REPORT="$T/report.md" NIGHT_DIR="$T/night" \
+  NIGHT_STRAY_ROOT="$T/stray" NIGHT_MIN_SECONDS=1 NIGHT_AC_WAIT_SECONDS=2 NIGHT_AC_POLL_SECONDS=1 \
+  FRONTIER_ROOT="$T" FRONTIER_COST_CAP=1 FRONTIER_MODEL=m
+# NIGHT_MIN_SECONDS=1 turns minutes into seconds, so step 7 hangs for its 35 "minutes".
+# Step 4 leaves the machine on battery past the 2 s wait so step 5 is skipped, step 6
+# fails with exit 3, step 8 finds nothing to move, and the two cloud steps at $0.60
+# each (12, 13) cross the $1 cap so steps 14-16 are skipped.
+export PLAN="6=fail 7=hang 8=nolever" SET_BATTERY="4:5"
+
+echo "### one pass over all 16 steps"
+"$ROOT/.mise/tasks/night-run-3"
+
+echo
+echo "### checks"
+bad=0
+check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
+got=$(python3 -c 'import json,sys
+print(" ".join("%s=%s" % (r["n"], r["status"]) for r in map(json.loads, open(sys.argv[1]))))' "$T/night/steps.jsonl")
+echo "      statuses: $got"
+check "statuses as planned" \
+  '[ "$got" = "1=OK 2=OK 3=OK 4=OK 5=SKIP 6=FAIL 7=TIMEOUT 8=SKIP 9=OK 10=OK 11=OK 12=OK 13=OK 14=SKIP 15=SKIP 16=SKIP" ]'
+check "step 6 recorded exit 3" 'grep -q "\"n\": \"6\".*\"rc\": \"3\"" "$T/night/steps.jsonl"'
+check "cost cap recorded on the skipped cloud steps" 'grep -q "\"n\": \"14\".*cost cap" "$T/night/steps.jsonl"'
+check "timed-out tree all dead (TERM-ignoring child, setsid stray)" \
+  '! for p in $(cat "$T/pids"); do kill -0 "$p" 2>/dev/null && echo alive; done | grep -q alive'
+check "queue lock released" '[ ! -e "$T/queue.lock" ] && grep -q "released the queue lock" "$T/night/night.log"'
+check "report has the steps and the frontier tables" \
+  'grep -q "## Steps" "$T/report.md" && grep -q "### edit-multi-mechanical" "$T/report.md" && grep -q "Cloud spend: \$1.2" "$T/report.md"'
+check "would commit the report and the result files" 'grep -q "(fake) would commit.*frontier-m-base" "$T/night/night.log"'
+echo
+cat "$T/report.md"
+echo
+[ "$bad" -eq 0 ] && { echo "selftest: PASS"; rm -rf "$T"; exit 0; }
+echo "selftest: $bad FAIL (left $T for inspection)"; exit 1
