@@ -104,3 +104,41 @@ Everything so far was measured on an M5 Max with 128 GB at a 36 GB wired limit. 
   stops them from inflating Copilot's context, but they still take up disk. It's the user's call.
 - `~/.copilot/copilot-instructions.md` tells Copilot to prefix shell commands with `rtk`, which
   hides output in local cplt sessions ([decision.md](decision.md)). It's the user's call.
+
+## 8. Follow-ups from the night of 24 September
+
+Steps 1–4 of `night-run` are locked in ([qwen38-tuning.md](qwen38-tuning.md#night-24-sept-locked-in-so-far)).
+The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and the 4-bit lost
+"provisional". Still open:
+
+- **Full e2e at 48k for the 8-bit.** Step 4 was `--latency-only`: no Copilot sessions ran at 48k.
+  Put `bench-np-e2e` (full) with `qwen3.8-27b-8bit-nopin-c48k-ps512` at the front of the next night
+  run. If it fails, the 8-bit goes back to 32k, which step 1 confirmed (37.28 GB, 10 of 10 launched
+  sessions verified).
+- **Old nav-pilot clients and 48k.** The local manifest has no minimum-version field
+  (`minNavPilotVersion` exists only for agentpakker), and every client fetches the same file.
+  Releases without navikt/copilot#936 (`2026.09.24-105710-a078525` and older) accept
+  `MLX_PREFILL_STEP_SIZE`, since it is in the `MLX_` namespace, but only as an inert environment
+  variable, so they prefill 48k in 2048-token chunks (estimated 43.6–44.3 GB, qwen38-tuning.md §4).
+  The expect text tells users to update. A real gate needs a nav-pilot change, and it would only
+  protect releases built after it.
+- **Network blips.** Three Copilot launches failed because nav-pilot could not clone `nais/pilot`
+  (two R2 in step 1, one M1 in step 2: "Could not resolve host: github.com" and a connect
+  timeout). navikt/copilot is getting a PR that falls back to the cached source (in progress).
+  Until then a blip costs a session, and the e2e verdicts count it as a path error.
+- **The #939 loop hook inside cplt: unverified.** The hook keeps its state in
+  `~/.nav-pilot/hook-state/`. Inside the cplt sandbox that directory may not be writable, and the
+  hook fails open, so it would pass silently and do nothing. Also unverified: whether local sessions
+  skip it, since that depends on what environment the hook process inherits. Tonight's M1 stop in
+  step 2 came from nav-pilot's own local loop guard (8 identical `gradlew compileKotlin` calls with
+  changing results), not from the hook.
+- **rtk in Copilot's instructions.** The proposal to change `~/.copilot/copilot-instructions.md`
+  (the `rtk` prefix hides output in local cplt sessions, §7) is still the user's call.
+- **`~/.copilot/session-state` worktrees.** 27 GB in total, 6 `*-worktree` directories. The user
+  deletes them.
+- **Temperature and OptiQ-4bit.** Still pending: `night-run` steps 5–15 (OptiQ-4bit e2e, temp-0
+  cheap-ops, cheap-ops for the 4-bit and OptiQ-4bit). Tasks 2 and 3 above stay open until then.
+- **Refresh capabilities after tonight.** `mise run bench-capabilities && mise run model-manifest`
+  once the night's JSON is on `main`, and a PR if the verdicts move.
+- **What tonight cannot answer.** Real 48 GB hardware and Pro chips (task 5), a cloud reference
+  arm for the same tasks, and a rerun of the delegation benchmark.

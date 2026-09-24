@@ -1,23 +1,26 @@
 [meta]
 name               = "Qwen 3.8 27B 8bit (mlx-lm)"
 released           = "2026-07"
-status             = "untested"
+status             = "testing"
 spec_source        = "config.json"
-notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. We assumed 8-bit was out of reach for that machine; this profile tests the assumption. Context was set to the same 65k the other team runs; it is now capped at 32k with a 4k reply and a 2.25 GiB prompt cache (qwen38-tuning.md §7, provisional; estimated 40.3 GB peak at context plus output against a 41 GB criterion), because on 2026-09-23 the server died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit (no fused attention kernel for head_dim 256, so each 2048-token prefill chunk materializes about 5 GB of scores at that length)."
+notes              = "The quality champion at a size that may fit the 48 GB target after all. 29.5 GB of weights, where a colleague reports a llama.cpp Q6 of the same model running in 28-30 GB total on an M4 Pro 48 GB. On 2026-09-23 the server died with a Metal OOM at about 51k prompt tokens under the 36 GB wired limit (no fused attention kernel for head_dim 256, so each 2048-token prefill chunk materializes about 5 GB of scores at that length). Now 48k context, a 4k reply, a 3.25 GiB prompt cache and a 512-token prefill step (navikt/copilot#936), the qwen3.8-27b-8bit-nopin-c48k-ps512 point: measured on 2026-09-24 at 38.30 GB peak through a 43.7k-token prompt, cold TTFT 57.5 s at 30k and 84.8 s at 45k, warm 0.6-0.7 s (bench/np-e2e-qwen3.8-27b-8bit-nopin-c48k-ps512-20260924-180628.json). Latency only: no Copilot sessions at 48k yet (qwen38-tuning.md). nav-pilot releases without #936 pass the step size as an inert environment variable and prefill in 2048-token chunks, estimated at 44 GB at 48k."
 model_vram_gb      = 30
 gpu_wired_limit_gb = 36
 
 [params]
 MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
 MLX_SERVER_TYPE            = "mlx-lm"
-# 2.25 GiB of prompt cache. An entry larger than --prompt-cache-bytes evicts itself,
+# 3.25 GiB of prompt cache. An entry larger than --prompt-cache-bytes evicts itself,
 # and this hybrid model's cache cannot be trimmed to a prefix, so the cache must hold
-# a whole session: 64 KiB/token x (32,768 context + 4,096 output) = 2.25 GiB. Every
-# byte above that is taken from prefill headroom, which is what OOMs at ~51k.
-MLX_CACHE_BYTES            = "2415919104"
+# a whole session: 64 KiB/token x (49,152 context + 4,096 output) = 3.25 GiB.
+MLX_CACHE_BYTES            = "3489660928"
+# Prefill in 512-token chunks instead of mlx-lm's 2048. The per-chunk attention-score
+# transient is what OOMs at ~51k; a quarter of the chunk is a quarter of the transient.
+# Only nav-pilot releases with navikt/copilot#936 pass this to the server.
+MLX_PREFILL_STEP_SIZE      = "512"
 MLX_CACHE_SIZE             = "2"
 MLX_MAX_TOKENS             = "32768"
-MLX_OPENCODE_CONTEXT       = "32768"
+MLX_OPENCODE_CONTEXT       = "49152"
 MLX_OPENCODE_OUTPUT        = "4096"
 MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
 # No reasoning_effort pin. The pin was added hours before both 1 September runs of
