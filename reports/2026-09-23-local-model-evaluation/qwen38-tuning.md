@@ -191,3 +191,24 @@ Known limit of the 8-bit choice: a 32k session at its full 36,864 tokens (contex
   every margin above shrinks (decision.md §5).
 - **A default temperature** set in the manifest changes the quality numbers for every model,
   including the default; the cheap-ops runs should use whatever ships.
+
+## 9. Sampling (temperature)
+
+**Finding.** Every local session runs greedy. mlx-lm defaults `--temp` to 0.0 (§3). opencode
+1.18.32 sends no temperature for a custom model, because nav-pilot's provider block leaves
+`capabilities.temperature` false. The Copilot CLI (BYOK, 1.0.81) sends `"temperature": 0` and
+`"top_p": 0.95` explicitly. `MLX_TEMP` only sets the server default, which a request's own value
+overrides, so it would reach opencode and never Copilot. Greedy decoding makes repetition loops
+more likely, and Qwen recommends about temp 0.7 / top_p 0.8 / top_k 20 for non-thinking mode.
+
+**Mechanism.** navikt/copilot#934 (draft) adds `MLX_NAV_PILOT_TEMPERATURE` and
+`MLX_NAV_PILOT_TOP_P`. When a profile sets them, nav-pilot's loop guard overwrites `temperature`
+and `top_p` in each chat-completion request, so the value is the same for both clients. It ships
+with no values set, so behaviour stays the same until this sweep picks some. The names are in the
+`MLX_` namespace, so `.mise/tasks/model-manifest` (the `startswith("MLX_")` filter and
+`PARAM_KEY`) publishes them without any change.
+
+**Sweep plan.** Temp 0 against temp 0.7 with top_p 0.8, on the optiq default and the tuned
+Qwen3.8 profiles from §7. Run `bench-cheap-ops` three times per cell and compare verified tasks
+and loop-guard trips (runs of identical tool calls). The winner goes into the profiles and the
+manifest; the "default temperature" point in §8 applies to every model, the default included.
