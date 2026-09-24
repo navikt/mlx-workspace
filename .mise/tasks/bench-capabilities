@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+# mise description="Apply the local-vs-cloud bar to bench results and write manifest/capabilities.json. Usage: mise run bench-capabilities [--check] [--self-check]"
+"""The bar from reports/2026-09-24-local-vs-cloud-routing/design.md §2.1.
+
+A class C is trusted for model m in mode M when, under ONE condition:
+
+  1. floor     >= 5 runs and >= 2 distinct tasks
+  2. quality   wilson_lower(k, n, one-sided 90%) >= X * p_cloud(C)
+               X = 0.90 where a failure gets caught, 0.95 where it is silent;
+               p_cloud is the pooled cloud point estimate, 1.0 with no cloud arm
+  3. delegate  the median hybrid/control cost ratio is below 1 on at least one
+               codebase where the orchestrator actually delegated
+
+Verdicts per class and mode:
+
+  trusted   all three hold
+  not-yet   the point estimate clears the bar, the evidence does not yet
+  cloud     no data, the point estimate is already below the bar, or
+            delegating saves nothing
+
+A model's verdict for a class is the best one any single condition gives it,
+and the evidence reported is that condition's. Conditions are never pooled.
+# ponytail: best-of-conditions treats every condition as one users get. Weight
+# by the production condition (temperature 0, the shipped profile) once there
+# is enough data at it for that to matter.
+
+Output: manifest/capabilities.json, keyed by the Hugging Face model id so
+`model-manifest` can attach a block to each offered entry by its MLX_MODEL.
+The file carries the evidence (k/n, LB, runs, source files); the block that
+reaches nav-pilot carries enums and counts only (design §3a, trust boundary).
+"""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+import _by_class as B  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "manifest" / "capabilities.json"
+
+CLASSES = ["read-qa", "edit-single", "edit-multi-mechanical", "create-file", "debug"]
+SILENT = {"read-qa", "debug"}  # a wrong answer or diagnosis looks like a right one
+BAR = {"confidence": 0.90, "x_caught": 0.90, "x_silent": 0.95, "min_runs": 5, "min_tasks": 2}
+RANK = {"cloud": 0, "not-yet": 1, "trusted": 2}
+
+
+def verdict(cls, mode, k, n, tasks, runs, p_cloud, ratios):
+    if n == 0:
+        return "cloud", None
+    bar = (BAR["x_silent"] if cls in SILENT else BAR["x_caught"]) * p_cloud
+    if k / n < bar:
+        return "cloud", bar
+    if mode == "delegate" and ratios and min(ratios) >= 1:
+        return "cloud", bar  # delegating saves nothing, so take no risk for it
+    if (runs < BAR["min_runs"] or tasks < BAR["min_tasks"] or B.wilson_lower(k, n) < bar
+            or (mode == "delegate" and not ratios)):
+        return "not-yet", bar
+    return "trusted", bar
+
+
+def score(rows):
+    """rows: list of B.as_json rows. Returns {model: {class: {mode: evidence}}}."""
+    cloud = {}
+    for r in rows:
+        if r["mode"] == "cloud":
+            k, n = cloud.get(r["class"], (0, 0))
+            cloud[r["class"]] = (k + r["k"], n + r["n"])
+    models = sorted({r["model"] for r in rows if r["mode"] != "cloud"})
+    out = {}
+    for m in models:
+        out[m] = {}
+        for cls in CLASSES:
+            ck, cn = cloud.get(cls, (0, 0))
+            p_cloud = ck / cn if cn else 1.0
+            out[m][cls] = {}
+            for mode in ("delegate", "local"):
+                best = {"verdict": "cloud", "k": 0, "n": 0, "note": "no data"}
+                for r in rows:
+                    if (r["model"], r["class"], r["mode"]) != (m, cls, mode):
+                        continue
+                    v, bar = verdict(cls, mode, r["k"], r["n"], len(r["tasks"]), r["runs"],
+                                     p_cloud, list(r["cost_ratios"].values()))
+                    cand = {"verdict": v, "k": r["k"], "n": r["n"], "lb": r["lb"],
+                            "bar": round(bar, 3), "p_cloud": round(p_cloud, 3),
+                            "runs": r["runs"], "tasks": r["tasks"], "condition": r["condition"],
+                            "cost_ratios": r["cost_ratios"], "files": r["files"]}
+                    if (RANK[v], r["n"]) > (RANK[best["verdict"]], best["n"]):
+                        best = cand
+                out[m][cls][mode] = best
+    return out
+
+
+def manifest_block(per_class):
+    """What nav-pilot reads: enums and integers, nothing else."""
+    return {
+        "bar": BAR,
+        "classes": {cls: {"delegate": v["delegate"]["verdict"], "local": v["local"]["verdict"],
+                          "delegate_k": v["delegate"]["k"], "delegate_n": v["delegate"]["n"],
+                          "local_k": v["local"]["k"], "local_n": v["local"]["n"]}
+                    for cls, v in per_class.items()},
+    }
+
+
+def build():
+    rows = [B.as_json(r) for r in B.rows().values()]
+    models = score(rows)
+    none = {"verdict": "cloud", "k": 0, "n": 0}
+    return {
+        "note": "Generated by 'mise run bench-capabilities' from bench/. Do not edit by hand. "
+                "Rules: reports/2026-09-24-local-vs-cloud-routing/design.md §2.",
+        "bar": BAR,
+        "excluded_tasks": {t: v["reason"] for t, v in json.loads(
+            (ROOT / "bench" / "task-classes.json").read_text())["tasks"].items()
+            if v.get("exclude_from_bar")},
+        # What model-manifest copies into each entry, by MLX_MODEL. A model with
+        # no runs gets the unmeasured block: cloud everywhere, never no block.
+        "manifest_blocks": {m: manifest_block(v) for m, v in models.items()},
+        "unmeasured_block": manifest_block({c: {"delegate": none, "local": none} for c in CLASSES}),
+        "models": models,
+    }
+
+
+def self_check():
+    v = lambda *a: verdict(*a)[0]  # noqa: E731
+    # design §2.2, row by row
+    assert v("edit-multi-mechanical", "delegate", 35, 35, 2, 35, 1.0, [0.8, 0.39, 0.53, 1.79]) == "trusted"
+    assert v("edit-single", "delegate", 3, 3, 1, 3, 1.0, [1.02]) == "cloud"        # saves nothing
+    assert v("read-qa", "delegate", 0, 0, 0, 0, 1.0, []) == "cloud"                 # never delegated
+    assert v("create-file", "delegate", 1, 2, 1, 2, 1.0, []) == "cloud"
+    assert v("read-qa", "local", 12, 12, 3, 4, 1.0, []) == "not-yet"               # floor: 4 runs
+    assert v("read-qa", "local", 15, 15, 3, 15, 1.0, []) == "not-yet"              # 0.901 < 0.95
+    assert v("edit-single", "local", 15, 15, 2, 15, 1.0, []) == "trusted"          # 0.901 >= 0.90
+    assert v("edit-single", "local", 10, 11, 2, 11, 1.0, []) == "not-yet"          # 0.739
+    assert v("edit-multi-mechanical", "local", 7, 8, 2, 4, 1.0, []) == "cloud"     # 0.875 < 0.90
+    assert v("debug", "local", 0, 3, 3, 3, 1.0, []) == "cloud"
+    # a weaker cloud lowers the bar; silent classes need more
+    assert v("edit-single", "local", 9, 11, 2, 11, 0.5, []) == "trusted"
+    assert v("debug", "local", 16, 16, 2, 16, 1.0, []) == "not-yet"
+    # a trusted delegate needs a measured saving
+    assert v("edit-multi-mechanical", "delegate", 35, 35, 2, 35, 1.0, []) == "not-yet"
+    # best condition wins, conditions are not pooled
+    rows = [
+        {"class": "edit-single", "model": "m", "mode": "local", "condition": "a", "k": 7, "n": 8,
+         "tasks": ["E1", "E3"], "runs": 4, "lb": 0.66, "cost_ratios": {}, "files": ["a.json"]},
+        {"class": "edit-single", "model": "m", "mode": "local", "condition": "b", "k": 3, "n": 3,
+         "tasks": ["E1"], "runs": 3, "lb": 0.646, "cost_ratios": {}, "files": ["b.json"]},
+    ]
+    s = score(rows)["m"]
+    assert s["edit-single"]["local"]["verdict"] == "not-yet", s
+    assert s["edit-single"]["local"]["condition"] == "b"
+    assert s["debug"]["local"] == {"verdict": "cloud", "k": 0, "n": 0, "note": "no data"}
+    blk = manifest_block(s)
+    assert blk["classes"]["edit-single"] == {"delegate": "cloud", "local": "not-yet", "delegate_k": 0,
+                                              "delegate_n": 0, "local_k": 3, "local_n": 3}
+    assert all(isinstance(x, (str, int)) for c in blk["classes"].values() for x in c.values())
+    print("✓ bench-capabilities self-check passed")
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="mise run bench-capabilities")
+    ap.add_argument("--check", action="store_true", help="fail if the committed file is stale")
+    ap.add_argument("--self-check", action="store_true")
+    args = ap.parse_args()
+    if args.self_check:
+        self_check()
+        return 0
+    doc = build()
+    text = json.dumps(doc, indent=2) + "\n"
+    if args.check:
+        if not OUT.exists() or OUT.read_text() != text:
+            print(f"✗ {OUT.relative_to(ROOT)} differs from a fresh computation. "
+                  "Run: mise run bench-capabilities && mise run model-manifest")
+            return 1
+        print(f"✓ {OUT.relative_to(ROOT)} is current")
+        return 0
+    OUT.parent.mkdir(exist_ok=True)
+    tmp = OUT.with_suffix(".json.tmp")
+    tmp.write_text(text)
+    tmp.replace(OUT)
+    print(f"✓ {OUT.relative_to(ROOT)}")
+    print(f"  {'model':28} {'class':22} {'delegate':>18} {'local':>18}")
+    for m, per in doc["models"].items():
+        for cls, v in per.items():
+            d, lo = v["delegate"], v["local"]
+            print(f"  {m.split('/')[-1][:28]:28} {cls:22} "
+                  f"{d['verdict']:>8} {d['k']:>3}/{d['n']:<3}   {lo['verdict']:>8} {lo['k']:>3}/{lo['n']:<3}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

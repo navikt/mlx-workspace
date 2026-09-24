@@ -27,6 +27,57 @@
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"
+      },
+      "capabilities": {
+        "bar": {
+          "confidence": 0.9,
+          "x_caught": 0.9,
+          "x_silent": 0.95,
+          "min_runs": 5,
+          "min_tasks": 2
+        },
+        "classes": {
+          "read-qa": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 12,
+            "local_n": 12
+          },
+          "edit-single": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 3,
+            "delegate_n": 3,
+            "local_k": 3,
+            "local_n": 3
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted",
+            "local": "cloud",
+            "delegate_k": 35,
+            "delegate_n": 35,
+            "local_k": 13,
+            "local_n": 18
+          },
+          "create-file": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 1,
+            "delegate_n": 2,
+            "local_k": 3,
+            "local_n": 8
+          },
+          "debug": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 3
+          }
+        }
       }
     },
     {
@@ -53,6 +104,57 @@
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"
+      },
+      "capabilities": {
+        "bar": {
+          "confidence": 0.9,
+          "x_caught": 0.9,
+          "x_silent": 0.95,
+          "min_runs": 5,
+          "min_tasks": 2
+        },
+        "classes": {
+          "read-qa": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 9,
+            "local_n": 9
+          },
+          "edit-single": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 6,
+            "local_n": 6
+          },
+          "edit-multi-mechanical": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 2,
+            "local_n": 6
+          },
+          "create-file": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 6
+          },
+          "debug": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          }
+        }
       }
     },
     {
@@ -79,6 +181,57 @@
         "MLX_TOP_K": "20",
         "MLX_TOP_P": "0.95",
         "MLX_MIN_P": "0.0"
+      },
+      "capabilities": {
+        "bar": {
+          "confidence": 0.9,
+          "x_caught": 0.9,
+          "x_silent": 0.95,
+          "min_runs": 5,
+          "min_tasks": 2
+        },
+        "classes": {
+          "read-qa": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 12,
+            "local_n": 12
+          },
+          "edit-single": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 8,
+            "local_n": 8
+          },
+          "edit-multi-mechanical": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 7,
+            "local_n": 8
+          },
+          "create-file": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 4,
+            "local_n": 8
+          },
+          "debug": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          }
+        }
       }
     }
   ]

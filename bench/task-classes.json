@@ -1,0 +1,23 @@
+{
+  "_note": "Task id -> class, for bench-results --by-class and bench-capabilities (reports/2026-09-24-local-vs-cloud-routing/design.md §4.1). Kept out of bench/tasks.json on purpose: bench-cheap-ops hashes tasks.json into harness_sha, so adding a key there would start a new harness generation and orphan every run so far, although a label changes nothing a run measures. Ids are shared across targets (M1 is the rename on Ktor, frontend and Spring alike), so one map covers bench/tasks.json and bench/targets/*.json. Whether a class is silent or caught is a property of the class and lives in bench-capabilities, not here.",
+  "tasks": {
+    "R1": {
+      "class": "read-qa",
+      "exclude_from_bar": true,
+      "reason": "Suspected checker problem: failed all 11 valid local runs, and its verifier wants the four literals 5, 100, 2 and 300 in a prose answer. Rejoins read-qa once a cloud arm shows it is fair (design §1.2)."
+    },
+    "R2": {"class": "read-qa"},
+    "R3": {"class": "read-qa"},
+    "D1": {"class": "read-qa"},
+    "E1": {"class": "edit-single"},
+    "E3": {"class": "edit-single"},
+    "M1": {"class": "edit-multi-mechanical"},
+    "M2": {"class": "edit-multi-mechanical"},
+    "D2": {"class": "edit-multi-mechanical"},
+    "G2": {"class": "create-file"},
+    "D3": {"class": "create-file"},
+    "X1": {"class": "debug"},
+    "X2": {"class": "debug"},
+    "X3": {"class": "debug"}
+  }
+}

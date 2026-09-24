@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="What every recorded arm actually contains: valid, discarded, verified, cost, steps, dispatch. Usage: mise run bench-results [--filter next] [--why] [--json]"
+# mise description="What every recorded arm actually contains: valid, discarded, verified, cost, steps, dispatch. Usage: mise run bench-results [--filter next] [--why] [--json] [--by-class]"
 """Read the result files, so nobody writes that one-liner again.
 
 Every question asked of these files during a run is the same handful:
@@ -103,8 +103,13 @@ def main():
     ap.add_argument("--filter", default="", help="substring of the filename, e.g. spring or next")
     ap.add_argument("--why", action="store_true", help="show why samples were discarded")
     ap.add_argument("--json", action="store_true", help="machine-readable, for another script")
+    ap.add_argument("--by-class", action="store_true",
+                    help="class x model x mode x condition: k/n, tasks, runs, Wilson LB (design §4.1)")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
+
+    if args.by_class:
+        return by_class(args)
 
     if args.self_check:
         rows = [
@@ -178,6 +183,32 @@ def main():
     total_disc = sum(r["discarded"] for r in rows)
     share = total_disc / (total_valid + total_disc) if (total_valid + total_disc) else 0
     print(f"\n{total_valid} valid, {total_disc} discarded ({share:.0%} of everything run)")
+    return 0
+
+
+def by_class(args):
+    """A separate path: the per-file views above are left exactly as they were."""
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    import _by_class as B
+
+    out = sorted((B.as_json(r) for r in B.rows().values()),
+                 key=lambda r: (r["class"], r["model"], r["mode"], r["condition"]))
+    if args.filter:
+        out = [r for r in out if any(args.filter in f for f in r["files"])]
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return 0
+    print(f"{'class':22} {'model':28} {'mode':8} {'k/n':>7} {'tasks':>5} {'runs':>4} {'LB':>5} {'med s':>5}  condition")
+    for r in out:
+        lb = "—" if r["lb"] is None else f"{r['lb']:.3f}"
+        med = "—" if r["median_seconds"] is None else str(r["median_seconds"])
+        model = r["model"].split("/")[-1][:28]
+        print(f"{r['class']:22} {model:28} {r['mode']:8} {r['k']:>3}/{r['n']:<3} {len(r['tasks']):5} "
+              f"{r['runs']:4} {lb:>5} {med:>5}  {r['condition']}")
+        if r["cost_ratios"]:
+            print(f"{'':22} cost ratio hybrid/control: "
+                  + ", ".join(f"{k} {v}x" for k, v in sorted(r["cost_ratios"].items())))
+    print("\nLB = one-sided 90% Wilson lower bound. Rows pool only within one condition.")
     return 0
 
 
