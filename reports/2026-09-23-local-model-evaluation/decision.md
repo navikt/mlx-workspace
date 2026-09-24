@@ -1,5 +1,10 @@
 # Local models for nav-pilot: decision and action list, 2026-09-23
 
+**Updated 2026-09-24:** the user changed the decision. Both Qwen3.8-27B builds stay in the
+manifest for the 48 GB tier as tuned opt-ins, pending the sweep in
+[qwen38-tuning.md](qwen38-tuning.md). Items 2–5 of §1 and action 4 are revised below; the
+evidence behind the original items is kept.
+
 For a Nav platform engineer who was not part of today's work. Every number is re-derived from the
 raw file it cites. `bench/` files are in this repo; `.bench-logs/` is git-ignored and exists only
 on the benchmark machine (M5 Max, 128 GB, `iogpu.wired_limit_mb` = 36864 to emulate a 48 GB
@@ -11,20 +16,21 @@ machine, nav-pilot's runtime mlx-lm 0.31.3 / mlx 0.32.0).
 - [nav-pilot-e2e.md](nav-pilot-e2e.md): the combined end-to-end test of navikt/copilot #931, #932 and #933 on the #20 manifest.
 - [hardware-tier-backlog.md](hardware-tier-backlog.md): tests still to run on 48, 64 and 128 GB machines.
 - [profile-audit.md](profile-audit.md): every profile checked against Hugging Face and the loader; which were removed, repointed or kept.
+- [qwen38-tuning.md](qwen38-tuning.md): the 2026-09-24 tuning sweep for both Qwen3.8-27B builds at 36 GB wired: constraints, the pruned grid, partial results, the resume commands and the provisional parameters.
 
 ## Status on 2026-09-24
 
 - navikt/copilot#932 is in the merge queue (position 1, awaiting checks, checked 08:38 CEST).
 - navikt/copilot#931 and #933 have auto-merge armed but are not in the queue yet: both show `BLOCKED`, #931 with its checks still running.
-- navikt/mlx-workspace#20 stays a draft for now, by the user's choice. Action 4 is on hold.
+- navikt/mlx-workspace#20 stays a draft and will be re-scoped (action 4): it will ship the tuned parameters for both Qwen3.8 builds instead of removing the 8-bit.
 
 ## 1. Decision summary
 
 1. `qwen3.6-35b-a3b-optiq` stays the only default. Its quality is level with the best local alternative (28/40 vs 31/40, Fisher p = 0.61), and it is about 9× faster per task.
-2. The 8-bit Qwen3.8-27B (`qwen3.8-27b-8bit-mlx`, and the `-nopin` variant) is withdrawn from the 48 GB tier. At 36 GB wired it hit a Metal OOM at about 51k tokens once and slows about 6× past 40k.
-3. The 8-bit moves to the 64 GB backlog. Nothing about it gets shipped today.
-4. `qwen3.8-27b-4bit` is capped at 65,536 context (from 131,072) in navikt/mlx-workspace#20. It verified an E1 session through nav-pilot at that cap and peaked at 29.6 GB.
-5. **Recommendation:** stop offering the 4-bit as well, in a follow-up to #20. It scored 17/30, below optiq, at about 6.6× the time per task and less than half optiq's decode speed. It wins on nothing.
+2. **Revised 2026-09-24.** The 8-bit Qwen3.8-27B stays on the 48 GB tier as an opt-in with tuned parameters, provisionally 32,768 context, 4,096 output and a 2 GiB prompt cache ([qwen38-tuning.md §7](qwen38-tuning.md#7-provisional-parameters)). *Original item:* withdrawn from the 48 GB tier, because at 36 GB wired it hit a Metal OOM at about 51k tokens once and slows about 6× past 40k. That evidence stands and is why the context stays at or below 40k.
+3. **Revised 2026-09-24.** Full-context 8-bit (64k and up) stays on the 64 GB backlog. *Original item:* the whole 8-bit moved there.
+4. **Revised 2026-09-24.** The 4-bit stays on offer, provisionally at 65,536 context, 8,192 output and an 8 GiB prompt cache (was 12 GiB), with the OptiQ-4bit build measured as a possible replacement. *Original item:* capped at 65,536 (from 131,072) in #20. It verified an E1 session through nav-pilot at that cap and peaked at 29.6 GB.
+5. ~~**Recommendation:** stop offering the 4-bit as well, in a follow-up to #20.~~ **Superseded by the user's decision of 2026-09-24** to keep offering it. The evidence is unchanged: it scored 17/30, below optiq (p = 0.32, §3.2), at about 6.6× the time per task and less than half optiq's decode speed, and its 30k and 60k cold TTFT fail the §12 latency criteria (§5).
 6. The LLM loop classifier ("System One") is dropped. At its 0.9 threshold it blocked none of 7 probe scenarios, loops included.
 7. It is replaced by a deterministic rule (navikt/copilot#933): block after 4 identical calls with identical results, and keep a backstop at 8 identical calls.
 8. Two nav-pilot fixes go with it: #931 (a dead generation thread makes the server exit, so it no longer hangs) and #932 (Copilot static context 45.1k → 21.7k tokens).
@@ -40,20 +46,23 @@ All actions are for the user (Hans). Suggested order follows the table.
 | 1 | Merge navikt/copilot#932 (scope `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` to `~/.copilot/.github/instructions`) | https://github.com/navikt/copilot/pull/932 | Static context 21,709 / 21,700 / 21,704 tokens with it, 45.1k without (§3.4). CI green, mergeable | Every Copilot session, including cloud sessions, carries ~23k duplicate instruction tokens per request, and local 32k models can't start at all |
 | 2 | Merge navikt/copilot#931 (the server exits with status 70 when its generation thread dies) | https://github.com/navikt/copilot/pull/931 | `bench/navpilot-e2e-rerun-20260923-154926.json` `e`: server gone 0.5 s after an injected fault, and the next launch prints "generation thread died, most likely out of memory" after 2.0 s. The PR body still says "not yet verified"; update it (fault injection, not a real OOM) | After an OOM, sessions attach to the dead server and hang for 900 s per attempt |
 | 3 | Merge navikt/copilot#933 (result-aware loop guard) | https://github.com/navikt/copilot/pull/933 | Re-run `d`: the loop was blocked at 4 with "same result" after 20 s. A poll with changing output ran 7 identical calls to READY without being blocked | The guard keeps treating a legitimate poll like a loop (it fires at 8 regardless of the result), and a genuinely stuck loop runs until call 8 |
-| 4 | Mark navikt/mlx-workspace#20 ready and merge it (4-bit capped at 64k, 8-bit no longer offered) | https://github.com/navikt/mlx-workspace/pull/20 | Draft, mergeable, CodeQL green. Manifest `9a6e7ff` was used in the combined e2e run. The fallback for users who configured the 8-bit exists (`local.Chosen` falls back to the default) | Users who select the 8-bit on 48 GB machines hit an OOM or a 6× slowdown past 40k |
+| 4 | **Re-scoped 2026-09-24.** Finish the tuning sweep, then update navikt/mlx-workspace#20 to ship the tuned parameters for both Qwen3.8 builds (and OptiQ-4bit if it wins) instead of removing the 8-bit; then mark it ready and merge | https://github.com/navikt/mlx-workspace/pull/20 | [qwen38-tuning.md](qwen38-tuning.md) §6 (resume commands) and §7 (provisional parameters). Draft, mergeable, CodeQL green; its current manifest `9a6e7ff` was used in the combined e2e run | The shipped 8-bit entry keeps its 65,536 context: OOM or a 6× slowdown past 40k on 48 GB machines |
 | 5 | Open an issue: "Launch failed" exits 0 | new issue in navikt/copilot | `.bench-logs/navpilot-rerun-fault-launch-20260923-155023.log`, `launch.exit: 0` in the re-run JSON. The cause is in `offerLaunchCopilot` (`internal/cli/interactive.go:1092-1096`), which prints the error and returns. That code is on `main` already and wasn't introduced by #931, so it should be a **separate issue**, not a #931 follow-up | Scripts and CI that wrap nav-pilot can't tell a failed launch from a successful one |
 | 6 | Decide what to do about the rtk instructions reaching local sessions (options below) | `~/.copilot/copilot-instructions.md`, `~/.copilot/hooks/rtk-rewrite.json` | §3.6 | Small local models burn turns on `rtk` output they can't read |
 | 7 | Merge the evaluation branch into mlx-workspace `main` (details below; result files are committed) | [navikt/mlx-workspace#21](https://github.com/navikt/mlx-workspace/pull/21) | branch `bench/2026-09-23-local-model-evaluation` | Harness fixes stay off `main`. Today's raw results are **untracked**, although `.gitignore:23` says `bench/results-*.json` is tracked evidence |
 | 8 | Correct PLAN.md (details below) | `PLAN.md:104`, `:371`, `:376-379` | §4 | The next reader believes the 8-bit went 7/7 and that System One shipped |
 | 9 | Remove stale branches and worktrees after the merges (details below) | | | Disk use, and the main copilot checkout stays on a superseded branch |
 | 10 | Your call: remove the `~/.copilot/session-state` worktrees | 5 directories, listed below | They caused the 45.1k static context | After #932 they no longer reach nav-pilot sessions. Before #932 they do |
+| 11 | Add `MLX_PREFILL_STEP_SIZE` → `--prefill-step-size` to nav-pilot's `serverFlags` whitelist | navikt/copilot `cli/nav-pilot/internal/local/runtime.go:1002-1011` | The score-matrix transient (~5 GB per 2048-token chunk at 51k, §3.3) is the term that puts the 8-bit at 40–48k over the limit ([qwen38-tuning.md §3–4](qwen38-tuning.md#3-knobs)). `--decode-concurrency` and `--prompt-concurrency` are missing too | The 8-bit stays capped at 32k on this tier |
+| 12 | Decide the default temperature | manifest `MLX_TEMP` | Whitelisted but set in no profile; mlx-lm's `--temp` defaults to 0.0, so requests without a client temperature are greedy, the default optiq model included ([qwen38-tuning.md §3](qwen38-tuning.md#3-knobs)) | Every quality number, including optiq's, reflects greedy decoding that may not be what Qwen recommends |
+| 13 | Exit codes: open the issue in action 5, and fix the tuning queue's `run()` | action 5; `.bench-logs/qwen38-tuning-queue.sh` | The queue logs `exit $?` after a `$(date)` substitution, so a failed run logs `exit 0` ([qwen38-tuning.md §6](qwen38-tuning.md#6-resume)) | Failed runs, from nav-pilot or the queue, look like successes to anything reading the status |
 
 **Merge order and dependencies.** #932 → #931 → #933 → #20. None depends on another. They were
 merged together without conflicts into `test/e2e-combined` (915e27c6) and passed
 `go test -race` and the e2e run. #932 goes first because it also cuts cloud cost. #20 goes last,
-so that when the manifest stops offering the 8-bit, nav-pilot already reports a dead server
-instead of hanging on one. After #20, open the follow-up that stops offering the 4-bit, if you
-accept recommendation 5.
+after the tuning sweep, so that if a tuned 8-bit entry still hits an OOM, nav-pilot already
+reports a dead server instead of hanging on one. Recommendation 5 is superseded; there is no
+follow-up to stop offering the 4-bit.
 
 **rtk options (#6), undecided:**
 
@@ -199,7 +208,7 @@ correctly.
 
 - **Real 48 GB hardware.** Everything above ran on a 128 GB M5 Max with the wired limit set to 36 GB. Whole-system pressure with an IDE, a browser and Copilot running (48 − 36 = 12 GB for everything else) is unmeasured.
 - **Pro-chip decode.** Decode is bandwidth-bound. The running log estimates about 9 tok/s for the 8-bit on a 273 GB/s Pro chip, and for the 4-bit and optiq it is unmeasured. Which chips Nav developers actually have decides whether any dense model is usable.
-- **4-bit at 60k** (`bench/np-e2e-qwen3.8-27b-4bit-20260923-155027.json`): no OOM, peak 39.0 GB, cold TTFT 109 s (a repeat gave 123 s), decode 22.2 tok/s. This fails the §12 latency criteria (cold TTFT at 30k is 47.0 s against a 30 s limit, and at 60k 109 s against 90 s), which supports recommendation 5.
+- **4-bit at 60k** (`bench/np-e2e-qwen3.8-27b-4bit-20260923-155027.json`): no OOM, peak 39.0 GB, cold TTFT 109 s (a repeat gave 123 s), decode 22.2 tok/s. This fails the §12 latency criteria (cold TTFT at 30k is 47.0 s against a 30 s limit, and at 60k 109 s against 90 s). That was the case for recommendation 5, which the user's 2026-09-24 decision supersedes; the 4-bit is offered as an opt-in regardless.
 - **`min_ram_gb` is not enforced by nav-pilot**, so per-tier manifest entries do nothing until it is.
 - **Quality n is small.** 3–4 runs per model can't separate 57–78% pass rates. Variance within a model (optiq 5–9/10) is as large as the differences between models.
 - Tests for the 64 GB and 128 GB tiers (8-bit at full context, `--prefill-step-size 512`, oMLX MTP, Qwen3.8-Flash-Next) are listed in [hardware-tier-backlog.md](hardware-tier-backlog.md).
