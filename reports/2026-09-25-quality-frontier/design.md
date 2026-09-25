@@ -13,7 +13,7 @@ validation (Gradle) has not run yet (§8). Task ids are from
 4. A rung is judged against the existing routing bar: one-sided 90% Wilson lower bound ≥ X × p_cloud, X = 0.90 caught / 0.95 silent. The frontier is the highest rung with every rung below it clear.
 5. Ten samples a rung cannot clear 0.90 on their own (10/10 gives 0.86). Lower bounds pool upward under a monotonicity assumption, so easy rungs borrow the harder rungs' samples. A logistic fit gives the break point (d50) as a number.
 6. Model or harness: five levers are run on the same model at the rungs just past its base frontier. These are more time, verifier retries, oracle decomposition, a worked example plus trimmed tool output, and sampling. A lever that moves the frontier is harvestable. Where no lever moves it and the cloud passes, the model is the limit.
-7. Cloud reference arm: Claude Sonnet 4.6 through nav-pilot on the same rungs, capped at $80 in the driver. Estimated $53 for night 1.
+7. Cloud reference arm: Claude Sonnet 5 through nav-pilot (Copilot retired Sonnet 4.6 on 25 September) on the same rungs, capped at $80 in the driver. Estimated $53 for night 1.
 8. Night 1 (`night-run-3`): optiq on every class at base, then the time and retry levers past each frontier, then the cloud arm. That is about 6.0 h of GPU for base, up to 1.8 h for levers and about 5.6 h of cloud wall time with no GPU.
 9. Nights 2–5 add decomposition and prompt levers, sampling, then the Qwen3.8 builds (§6.2).
 10. Frontier results feed `bench-capabilities` as a scope per class, for example "trusted up to 16 call sites". A lever becomes the default when it moves a frontier and replicates (§7). That feed is designed here and not wired in, because the files it touches are in use by tonight's runs.
@@ -176,9 +176,9 @@ the agent prompt) and the tasks sha. Rows never pool across conditions.
 | Local, default | `qwen3.6-35b-a3b-optiq` | The shipped default; night 1 |
 | Local, dense 4-bit | `qwen3.8-27b-optiq-4bit`, the manifest's 4-bit entry on origin/main since the night of 24 September (it replaced the plain 4-bit) | Night 3; `FRONTIER_MODEL` selects it |
 | Local, 8-bit | `qwen3.8-27b-8bit-nopin-c48k-ps512` (the offered 8-bit entry's params) | Night 4, with `…-c32k` as the context lever |
-| Cloud | `claude-sonnet-4.6` through nav-pilot, as `bench-hybrid`'s control arm runs it (`alpha local off` first; a sample where nav-pilot announces local dispatch is invalid) | What users run; `FRONTIER_CLOUD_MODEL` switches to a GPT-5.x-class model |
+| Cloud | `claude-sonnet-5` (Copilot retired `claude-sonnet-4.6` by 25 September) through nav-pilot, as `bench-hybrid`'s control arm runs it (`alpha local off` first; a sample where nav-pilot announces local dispatch is invalid) | What users run; `FRONTIER_CLOUD_MODEL` switches to a GPT-5.x-class model |
 
-**Cloud cost estimate for night 1** (Sonnet 4.6 as opencode prices it). The anchors are the
+**Cloud cost estimate for night 1** (Sonnet 4.6 as opencode priced it; Sonnet 5 may cost more, and the cap is what bounds it). The anchors are the
 August control-arm medians: R2 $0.078, E1 $0.092, M1 Ktor $0.106 (5 steps), M1 frontend
 $0.227 (13 steps), D2 Ktor $0.339 (19 steps), and Copilot G2 ≈ $0.29. Cost rises with call
 sites, because the cloud arm grinds through them.
