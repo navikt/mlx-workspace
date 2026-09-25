@@ -322,5 +322,5 @@ spare, and a rung with fewer than two valid tasks says so.
 ## 10. What is needed from the user
 
 1. Review this design and the queue in `night-run-3` (§6.1): runs per class, the lever list and the $80 cap. Then merge the PR.
-2. After merge, and when nothing else is running, in the main checkout: `mise run bench-frontier -- validate` (CPU, ~40 min), then `mise run night-run-3 -- --dry-run`.
+2. After merge, and when nothing else is running, in the main checkout: `mise run bench-frontier -- validate` (CPU, ~40 min), then `mise run night-run-3 -- --dry-run`. The preflight includes `bench-netcheck --for frontier-local,frontier-cloud` (a WARN with the per-program cause on failure). Run `mise run bench-netcheck -- --for frontier-cloud --l3` for the real-session proof.
 3. Launch when ready. To queue behind `bench-decide-limits`, run a copy from outside the checkout, so a `git pull` cannot rewrite the script while it waits: `cp .mise/tasks/night-run-3 .bench-logs/bin/ && nohup .bench-logs/bin/night-run-3 --after <pid> > .bench-logs/night3.log 2>&1 &`
