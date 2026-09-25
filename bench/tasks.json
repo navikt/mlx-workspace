@@ -42,11 +42,13 @@
       "touches": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt"
     },
     {
-      "id": "E3",
+      "id": "E3b",
       "kind": "edit",
       "verify": "compile",
-      "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line at the start of the first public function recording the values of its parameters. Use the existing logging style in this codebase. Change nothing else.",
-      "touches": "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt"
+      "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line to getOppfolgingstilfeller recording how many oppfolgingstilfeller it returns. Use the existing logging style in this codebase. Do not log personIdent or any other personal data. Change nothing else.",
+      "touches": "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt",
+      "forbid_added": ["personIdent"],
+      "_why": "Replaces E3, which asked for the values of the first public function's parameters. That parameter is personIdent, a fødselsnummer, and E3 passed on compile: it rewarded writing personal data to an application log. A new id rather than a new prompt under the old one, so no result file means two things by E3. forbid_added fails a sample whose diff adds a line naming personIdent."
     },
     {
       "id": "M1",
