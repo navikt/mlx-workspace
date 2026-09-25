@@ -106,7 +106,8 @@ plan() {
 CLOUD_PROBE_SECONDS="${NIGHT_CLOUD_PROBE_SECONDS:-900}"
 cloud_up() {
   local d="${DIR:-${TMPDIR:-/tmp}/night3-dry}/cloud-probe" log
-  mkdir -p "$d"; [ -d "$d/.git" ] || git -C "$d" init -q
+  mkdir -p "$d" && d=$(cd "$d" && pwd)   # absolute: the probe cd's into it before writing $log
+  [ -d "$d/.git" ] || git -C "$d" init -q
   log="$d/probe-$(date +%H%M%S).jsonl"
   "$BENCH_NAV_PILOT" alpha local off > /dev/null 2>&1
   for _ in 1 2; do
