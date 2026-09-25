@@ -10,7 +10,12 @@
     "R3": {"class": "read-qa"},
     "D1": {"class": "read-qa"},
     "E1": {"class": "edit-single"},
-    "E3": {"class": "edit-single"},
+    "E3": {
+      "class": "edit-single",
+      "exclude_from_bar": true,
+      "reason": "Retired on 25 Sept: asked the model to log the parameters of getOppfolgingstilfeller, which is personIdent (a fødselsnummer), and passed on compile. Its results stay in bench/ as recorded; E3b replaces it with a count and a check that personIdent is not logged."
+    },
+    "E3b": {"class": "edit-single"},
     "M1": {"class": "edit-multi-mechanical"},
     "M2": {"class": "edit-multi-mechanical"},
     "D2": {"class": "edit-multi-mechanical"},

@@ -59,7 +59,14 @@ DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 #   MLX_NAV_PILOT_TOP_P to OPTIONAL_DEFAULTS in _profiles.py. Only model-manifest
 #   reads them (nav-pilot's sampling); the workspace server, the runner, the
 #   tasks and the verifiers never do. It is the only input change from a387e4b.
-EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6"}
+#   d1229ad0e89f: the E3/debug fix (25 Sept). Three input changes, none of which
+#   changes the score of a task id that exists in both generations:
+#   - _profiles.py left the hash (profile_sha is stamped per record instead).
+#   - verify "debug" no longer fails a clean tree. No task in bench/tasks.json
+#     uses it; it reaches only the frontend-debug target, which is not pooled here.
+#   - E3 left tasks.json and E3b joined it. A new id, not a new prompt under the
+#     old one, so no id means two things; E3 is excluded in task-classes.json.
+EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135fe6"}
 
 Z90 = NormalDist().inv_cdf(0.90)  # one-sided 90%
 
@@ -269,5 +276,7 @@ if __name__ == "__main__":
     assert newest_generation([old, new]) == [old, new]
     other = canon("20260926-0100", "0123456789ab")
     assert newest_generation([old, new, other]) == [other]
+    e3fix = canon("20260926-0200", "d1229ad0e89f")
+    assert newest_generation([old, new, e3fix]) == [old, new, e3fix]
     assert all(k != v and v not in EQUIVALENT_HARNESS for k, v in EQUIVALENT_HARNESS.items())
     print("✓ _by_class self-check passed")
