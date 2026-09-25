@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# mise description="nav-pilot alpha decide on 'does the commit message explain why?' (bench/decide-cases/commit-explains-why*.jsonl), optiq and Qwen3.8 OptiQ-4bit. Usage: mise run bench-decide-why [-- --check-cases | --models optiq,qwen3.8-27b-optiq-4bit]"
+#
+# bench-decide-limits' lock and cleanup, around _decide_why.py, which reuses _decide_limits' server lifecycle.
+# Writes bench/decide-why-<model>-<stamp>.json and bench/decide-why-<stamp>.md.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+[ "${1:-}" = --check-cases ] && exec python3 .mise/tasks/_decide_why.py --check-cases
+NP="${BENCH_NAV_PILOT:-$(ls -t /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-* "$PWD"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+[ -x "$NP" ] || { echo "✗ no nav-pilot binary at '$NP' (set BENCH_NAV_PILOT)"; exit 2; }
+
+# The queue lock lives in the main checkout, also when this runs from a worktree.
+MAIN="$(cd "$(git rev-parse --git-common-dir)/.." && pwd)"
+LOCKDIR="$MAIN/.bench-logs/.queue.lock"
+mkdir -p "$MAIN/.bench-logs" .bench-logs
+while ! mkdir "$LOCKDIR" 2>/dev/null; do
+  holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  [ -n "$holder" ] || [ $(( $(date +%s) - $(stat -f %m "$LOCKDIR") )) -gt 10 ] || { sleep 1; continue; }
+  if kill -0 "$holder" 2>/dev/null; then
+    [ -n "${BENCH_WAIT:-}" ] && { sleep 60; continue; }
+    echo "✗ another benchmark queue is running (pid $holder). BENCH_WAIT=1 queues behind it."
+    exit 1
+  fi
+  echo "→ clearing a stale lock from pid $holder, which is gone"
+  rm -rf "$LOCKDIR"
+done
+echo $$ > "$LOCKDIR/pid"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+CACHE="$HOME/.nav-pilot/local-models.json"
+export BENCH_NAV_PILOT="$NP"
+export LIMITS_BACKUP="$CACHE.np-e2e-$$"
+export LIMITS_MARKER="$PWD/.bench-logs/decide-limits-$STAMP.started"
+
+cleanup() {
+  [ -f "$LIMITS_MARKER" ] && "$NP" alpha local stop >/dev/null 2>&1
+  [ -f "$LIMITS_BACKUP" ] && mv -f "$LIMITS_BACKUP" "$CACHE"
+  rm -f "$LIMITS_MARKER" "$PWD/.bench-logs/decide-limits-$STAMP.config.toml"
+  rm -rf "$LOCKDIR"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+python3 .mise/tasks/_decide_why.py all --stamp "$STAMP" "$@"
