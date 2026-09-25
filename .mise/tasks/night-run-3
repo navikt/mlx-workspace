@@ -23,7 +23,8 @@ ROOT=$PWD
 ARGS=("$@")
 
 MODEL="${FRONTIER_MODEL:-qwen3.6-35b-a3b-optiq}"
-CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-4.6}"
+# Copilot retired claude-sonnet-4.6 by 25 September; its Sonnet successor is claude-sonnet-5.
+CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-5}"
 CAP_USD="${FRONTIER_COST_CAP:-80}"
 export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t "$ROOT"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
 
@@ -96,6 +97,28 @@ plan() {
   echo "  lever steps run only for a class that broke within its ladder at base; each skip saves its time"
 }
 
+# The cloud gate runs one tiny real session the way the cloud arm runs its samples:
+# the same nav-pilot binary, client (opencode inside cplt) and model. A curl probe is
+# not enough: the firewall rules are per program, and on 25 September Copilot had also
+# retired claude-sonnet-4.6, which only a real session shows. It passes on a text reply.
+# Down, a cloud sample would run to its cap and be recorded as a model failure, so the
+# step is skipped instead. Two tries, 30 s apart; each costs about $0.03, outside the cap.
+CLOUD_PROBE_SECONDS="${NIGHT_CLOUD_PROBE_SECONDS:-900}"
+cloud_up() {
+  local d="${DIR:-${TMPDIR:-/tmp}/night3-dry}/cloud-probe" log
+  mkdir -p "$d"; [ -d "$d/.git" ] || git -C "$d" init -q
+  log="$d/probe-$(date +%H%M%S).jsonl"
+  "$BENCH_NAV_PILOT" alpha local off > /dev/null 2>&1
+  for _ in 1 2; do
+    (cd "$d" && timeout 180 "$BENCH_NAV_PILOT" --client opencode --model "$CLOUD" -- --pure run --format json \
+      "Reply with the single word OK." > "$log" 2>&1 < /dev/null)
+    grep -q '^{"type":"text"' "$log" && return 0
+    sleep "${NIGHT_CLOUD_RETRY_SECONDS:-30}"
+  done
+  CLOUD_WHY=$(grep -m1 -oE '"message":"[^"]{0,160}' "$log" || tail -c 160 "$log" | tr '\n' ' ')
+  return 1
+}
+
 preflight() {
   local fails=0 f
   ok() { printf 'PASS  %-14s %s\n' "$1" "$2"; }
@@ -122,6 +145,11 @@ EOF
   if in_part cloud; then
     gh auth token > /dev/null 2>&1 && ok gh "token present" || no gh "no gh token for the cloud arm"
     [ -x "$BENCH_NAV_PILOT" ] && ok nav-pilot "$(basename "$BENCH_NAV_PILOT")" || no nav-pilot "no binary at '$BENCH_NAV_PILOT'"
+    # A warning, not a failure: an unreachable cloud skips the cloud steps, never the local night.
+    if [ -z "$FAKE" ] && [ -x "$BENCH_NAV_PILOT" ]; then
+      cloud_up && ok cloud "$CLOUD answers through nav-pilot" \
+        || echo "WARN  cloud          $CLOUD unreachable now (${CLOUD_WHY:-?}); each cloud step probes again and skips if still down"
+    fi
   fi
   python3 .mise/tasks/bench-frontier run --profile "$MODEL" --classes edit-multi-mechanical --runs 1 --dry-run \
     | grep -q '✓ validation' && ok validation "present for the current tasks file" \
@@ -187,8 +215,18 @@ kill_tree() {
   say "  still alive after 20s, SIGKILL: $(echo $alive)"
   kill -KILL -- "-$1" 2>/dev/null; kill -KILL $pids 2>/dev/null
 }
+# Embedded Postgres in the service's tests leaves its System V shared-memory segment
+# behind when a killed Gradle run takes it down, and macOS allows 32 (kern.sysv.shmmni).
+# On 25 September all 32 were orphans and every build's suite went red on initdb. A
+# segment with nobody attached whose creator is dead belongs to no one; remove it.
+purge_shm() {
+  [ -n "$FAKE" ] && return 0
+  ipcs -mopa 2>/dev/null | awk -v u="$USER" '$1=="m" && $5==u && $9==0 {print $2, $11}' |
+    while read -r id cpid; do kill -0 "$cpid" 2>/dev/null || ipcrm -m "$id" 2>/dev/null; done
+}
 cleanup_after() {
   local log=$1 holder s
+  purge_shm
   s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
   if [ -n "$FAKE" ]; then echo "(fake) mise run server-stop" >> "$log"
   else mise run server-stop >> "$log" 2>&1 < /dev/null; fi
@@ -202,6 +240,7 @@ cleanup_after() {
 on_ac() { "$PMSET" -g batt | grep -q "'AC Power'"; }
 spent() { python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['spent_usd'])" "$LEDGER" 2>/dev/null || echo 0; }
 
+purge_shm
 CUR=""
 trap 'say "=== interrupted"; [ -n "$CUR" ] && kill_tree "$CUR"; cleanup_after "$DIR/night.log"; exit 130' INT TERM
 
@@ -223,6 +262,11 @@ for q in "${QUEUE[@]}"; do
   if [ "$kind" = cloud ] && python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)" "$(spent)" "$CAP_USD"; then
     say "  SKIP: cloud cost cap reached (\$$(spent) of \$$CAP_USD)"
     record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "cost cap \$$CAP_USD reached"
+    continue
+  fi
+  if [ "$kind" = cloud ] && [ -z "$FAKE" ] && ! cloud_up; then
+    say "  SKIP: the cloud arm cannot reach $CLOUD through $(basename "$BENCH_NAV_PILOT") (${CLOUD_WHY:-?}); resume later with --part cloud --from $i"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "cloud unreachable: ${CLOUD_WHY:-probe session failed}"
     continue
   fi
   if ! on_ac; then
@@ -258,11 +302,18 @@ for q in "${QUEUE[@]}"; do
   PYTHONUNBUFFERED=1 "${cmd[@]}" > "$log" 2>&1 < /dev/null &
   CUR=$!
   set +m
-  timed_out=""
+  timed_out="" unreachable="" probed=$t0 purged=$t0
   while kill -0 "$CUR" 2>/dev/null; do
+    [ $(( $(date +%s) - purged )) -ge 60 ] && { purge_shm; purged=$(date +%s); }
     if [ $(( $(date +%s) - t0 )) -ge $((tmin * MIN)) ]; then
       say "  TIMEOUT after $tmin min; killing the step's process tree"
       timed_out=1; kill_tree "$CUR"; break
+    fi
+    # A cloud step also stops when the API goes down under it; the samples done so far
+    # stay in the result file, and at most the one in flight ran against a dead API.
+    if [ "$kind" = cloud ] && [ -z "$FAKE" ] && [ $(( $(date +%s) - probed )) -ge "$CLOUD_PROBE_SECONDS" ]; then
+      probed=$(date +%s)
+      cloud_up || { say "  cloud unreachable (${CLOUD_WHY:-?}); killing the step's process tree"; unreachable=1; kill_tree "$CUR"; break; }
     fi
     sleep 1
   done
@@ -271,13 +322,15 @@ for q in "${QUEUE[@]}"; do
   cleanup_after "$log"
 
   result=$(find "$BENCH_DIR" -maxdepth 2 -path "$BENCH_DIR/$pat" -newer "$marker" 2>/dev/null | sort | tail -1)
-  if [ -n "$timed_out" ]; then status=TIMEOUT
+  if [ -n "$unreachable" ]; then status=UNREACHABLE
+  elif [ -n "$timed_out" ]; then status=TIMEOUT
   elif [ "$rc" -eq 0 ] && grep -q 'nothing for a lever to move' "$log"; then status=SKIP
   elif [ "$rc" -eq 0 ] && [ -n "$result" ]; then status=OK
   else status=FAIL; fi
   note=""
   case "$status" in
     SKIP) note="no class broke within its ladder at base" ;;
+    UNREACHABLE) note="the cloud went unreachable mid-step; the last sample may be a false failure. Resume with --part cloud --from $i" ;;
     OK) grep -q 'COST CAP' "$log" && note="stopped at the cost cap: $(grep -m1 'COST CAP' "$log" | cut -c1-160)" ;;
     *) note=$(grep -m1 '✗' "$log" | cut -c1-200) ;;
   esac
