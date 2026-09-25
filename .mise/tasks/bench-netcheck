@@ -1,0 +1,596 @@
+#!/usr/bin/env python3
+# mise description="Network preflight for benchmark nights: every external endpoint, reached by the program that needs it, with a cause on failure. Usage: mise run bench-netcheck [-- --for e2e,hybrid,ops,decide,frontier-local,frontier-cloud,download] [--l3] [--json] [--inventory] | selftest"
+"""Does the local firewall let the benchmark's own programs out?
+
+The night of 24-25 September lost the hybrid arm from 01:27: api.githubcopilot.com
+timed out while github.com answered, and opencode logged "Bad Gateway" from cplt's
+proxy. The cause was the local firewall (Little Snitch). Its rules are per program,
+so `curl` reaching a host proves nothing about cplt, opencode, git or python. This
+checks at three levels:
+
+  L1  curl, per host: DNS, TCP, TLS, HTTP status. 1xx-4xx = reachable.
+  L2  the real programs, the way the benchmark uses them: git ls-remote, gh api,
+      opencode (its bun runtime, BUN_BE_BUN=1) fetching directly and inside cplt,
+      curl inside `cplt --agent copilot` (the proxy connects as cplt), hf and its
+      python, and java for Gradle's repositories.
+  L3  (--l3) one tiny real session per cloud client path, through nav-pilot and
+      cplt exactly as the benchmark launches them. Two sessions, ~$0.04 in total:
+      gpt-5-mini is a 0x model on paid plans; the cloud model costs one premium
+      request. The local path (L3c) is not run: starting nav-pilot's server is a
+      GPU action, and its prompt path is loopback, which no firewall rule touches.
+
+An L1 failure for a host that the program the benchmark actually uses reaches at L2
+is downgraded to WARN (a curl-only rule). A hard failure for a selected --for kind
+exits 1; WARN rows never fail the run.
+
+Inventory (`--inventory` prints it from ENDPOINTS below). Kinds: e2e = bench-np-e2e and
+the copilot client with a local model; decide = bench-decide-limits; hybrid =
+bench-hybrid; ops = bench-models / bench-cheap-ops; frontier-local / frontier-cloud =
+bench-frontier (night-run-3) local ladders and cloud arm; download = model-download.
+Hard = the step fails without it; soft = needed only on a cold cache, or telemetry.
+
+Programs: nav-pilot launches every client inside cplt, and cplt sets HTTPS_PROXY to its
+own proxy, so the process that connects out for copilot and opencode is cplt. git's
+https traffic leaves from git-remote-https, hf's from its python, Gradle's from java.
+"""
+import concurrent.futures as cf
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+KINDS = ("e2e", "decide", "hybrid", "ops", "frontier-local", "frontier-cloud", "download")
+NP_CLOUD = "e2e hybrid frontier-cloud"
+OC_ALL = "hybrid frontier-cloud ops frontier-local"
+GRADLE = "ops hybrid frontier-local frontier-cloud"
+KOTLIN_REPO = json.loads((ROOT / "bench" / "tasks.json").read_text())["repo"] \
+    if (ROOT / "bench" / "tasks.json").exists() else "https://github.com/navikt/isoppfolgingstilfelle.git"
+PILOT_REPO = "https://github.com/nais/pilot.git"
+
+# host, hard kinds, soft kinds, used by, program that connects
+ENDPOINTS = [
+    ("github.com", NP_CLOUD, "ops frontier-local decide",
+     "nav-pilot source fetch of nais/pilot; clones of the Kotlin and np-e2e repos; OAuth", "git (git-remote-https), cplt"),
+    ("api.github.com", "e2e", "hybrid frontier-cloud decide",
+     "Copilot CLI auth + org MCP policy (copilot_internal); gh; nav-pilot update check", "cplt (copilot), gh, nav-pilot"),
+    ("api.githubcopilot.com", "hybrid frontier-cloud", "",
+     "opencode github-copilot provider: hybrid orchestrator, frontier cloud arm", "cplt (opencode)"),
+    ("{plan-api}", "e2e", "",
+     "Copilot CLI model list and calls for this account's plan (from copilot_internal/user)", "cplt (copilot)"),
+    ("{plan-telemetry}", "", "e2e", "Copilot CLI telemetry", "cplt (copilot)"),
+    ("mcp-registry.ekstern.dev.nav.no", "", "e2e",
+     "the org policy's MCP registry for Copilot CLI; a gpt-5-mini session still answered with it blocked (25 Sep)",
+     "cplt (copilot)"),
+    ("mcp-registry.nav.no", "", "e2e decide", "Nav MCP registry, production", "cplt (copilot), nav-pilot"),
+    ("raw.githubusercontent.com", "", "e2e decide",
+     "nav-pilot local-model manifest, refreshed on alpha local start (cache fallback)", "nav-pilot"),
+    ("collector-internet.nav.cloud.nais.io", "", NP_CLOUD + " decide",
+     "nav-pilot OTel metrics, also the sessions' OTLP endpoint", "nav-pilot, cplt"),
+    ("models.dev", "", OC_ALL, "opencode model catalogue refresh", "cplt (opencode), opencode"),
+    ("opencode.ai", "", OC_ALL, "opencode config schema", "cplt (opencode), opencode"),
+    ("huggingface.co", "download", "ops frontier-local decide e2e", "model downloads, hf auth", "python (hf)"),
+    ("cas-server.xethub.hf.co", "download", "", "hf_xet reconstruction API (every xet download, per its logs)",
+     "python (hf)"),
+    ("us.aws.cdn.hf.co", "download", "", "HF CDN: xet chunks and shard redirects", "python (hf)"),
+    ("cas-bridge.xethub.hf.co", "", "download", "HF xet bridge (redirects for non-xet clients)", "python (hf)"),
+    ("transfer.xethub.hf.co", "", "download", "HF xet transfer", "python (hf)"),
+    ("cdn-lfs.hf.co", "", "download", "HF LFS CDN (repos not on xet)", "python (hf)"),
+    ("services.gradle.org", "", GRADLE, "Gradle wrapper distribution (cached; runs use --offline)", "java"),
+    ("repo.maven.apache.org", "", GRADLE, "Maven Central, cold Gradle cache only", "java"),
+    ("plugins.gradle.org", "", GRADLE, "Gradle plugin portal, cold cache only", "java"),
+    ("packages.confluent.io", "", GRADLE, "Kotlin repo's Confluent repository, cold cache only", "java"),
+    ("jitpack.io", "", GRADLE, "Kotlin repo's JitPack repository, cold cache only", "java"),
+]
+# L2 probes: id, program, hosts it reaches, soft-only (not the benchmark's own path)
+OC_HOSTS = ["api.githubcopilot.com", "models.dev", "opencode.ai"]
+CP_HOSTS = ["github.com", "api.github.com", "{plan-api}", "{plan-telemetry}", "mcp-registry.ekstern.dev.nav.no",
+            "mcp-registry.nav.no", "collector-internet.nav.cloud.nais.io"]
+HF_HOSTS = ["cas-server.xethub.hf.co", "us.aws.cdn.hf.co", "cas-bridge.xethub.hf.co", "transfer.xethub.hf.co",
+            "cdn-lfs.hf.co"]
+JAVA_HOSTS = ["services.gradle.org", "repo.maven.apache.org", "plugins.gradle.org", "packages.confluent.io", "jitpack.io"]
+
+T = int(os.environ.get("NETCHECK_TIMEOUT", "8"))
+L3_TIMEOUT = int(os.environ.get("NETCHECK_L3_TIMEOUT", "90"))
+NP = os.environ.get("BENCH_NAV_PILOT") or next(iter(sorted((ROOT / ".bench-logs" / "bin").glob("nav-pilot-main-*"),
+                                                           key=lambda p: p.stat().st_mtime, reverse=True)), "nav-pilot")
+WS = Path(os.environ.get("NETCHECK_WS", ROOT / ".bench-logs" / "netcheck-ws"))
+
+
+def run(argv, timeout, **kw):
+    """(rc, output, timed_out). Kills the whole process group on timeout."""
+    try:
+        p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                             text=True, start_new_session=True, **kw)
+    except OSError as e:
+        return 127, str(e), False
+    try:
+        out, _ = p.communicate(timeout=timeout)
+        return p.returncode, out, False
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        out, _ = p.communicate()
+        return -9, out or "", True
+
+
+def real(prog):
+    """The binary a firewall rule has to name."""
+    p = shutil.which(prog) or prog
+    return os.path.realpath(p)
+
+
+def ok_code(c):
+    return c.isdigit() and 100 <= int(c) < 500
+
+
+# ── L1: curl per host ────────────────────────────────────────────────────────
+
+CURL_CAUSE = {6: "DNS does not resolve: resolver, VPN or the firewall's DNS filter",
+              7: "connection refused: nothing listening, or a firewall rejecting",
+              35: "TLS handshake fails: TLS interception or a firewall cutting the handshake",
+              60: "TLS certificate not trusted: a TLS-intercepting proxy"}
+
+
+def l1(host):
+    rc, out, to = run(["curl", "-sS", "-o", "/dev/null", "--connect-timeout", str(T), "--max-time", str(T),
+                       "-w", "%{http_code} %{time_namelookup} %{time_connect} %{time_appconnect}",
+                       f"https://{host}/"], T + 5)
+    f = (out.strip().splitlines() or [""])[-1].split()
+    code = f[0] if f and f[0].isdigit() else "000"
+    if ok_code(code):
+        return "PASS", f"HTTP {code}", ""
+    if to:
+        return "FAIL", "no answer", f"curl hung past {T + 5}s: packets silently dropped (firewall deny) or host down"
+    if code.startswith("5"):
+        return "FAIL", f"HTTP {code}", "the host answers with a server error: upstream outage, not the firewall"
+    if rc == 28:
+        dns, conn = (float(x) for x in f[1:3]) if len(f) >= 3 else (0.0, 0.0)
+        if dns == 0:
+            return "FAIL", "timeout in DNS", "DNS lookup times out: resolver or VPN"
+        if conn == 0:
+            return "FAIL", "DNS ok, TCP connect timed out", "DNS resolves but the connection times out: " \
+                "firewall rule for curl (Little Snitch/LuLu deny) or the network"
+        return "FAIL", "TCP ok, TLS/HTTP timed out", "connected but TLS or the response times out: firewall or network"
+    return "FAIL", f"curl exit {rc}", CURL_CAUSE.get(rc, (out.strip().splitlines() or ["?"])[-1][:120])
+
+
+# ── L2: the programs themselves ──────────────────────────────────────────────
+
+BUN_JS = ("const T=NC_T*1000;await Promise.all(process.argv.slice(1).map(async h=>{try{"
+          "const r=await fetch('https://'+h+'/',{method:'HEAD',redirect:'manual',signal:AbortSignal.timeout(T)});"
+          "console.log('NC',h,r.status)}catch(e){console.log('NC',h,'000',e.name)}}))")
+SH_CURL = ('for h in "$@"; do c=$(curl -s -o /dev/null -w "%{http_code}" --max-time NC_T "https://$h/"); '
+           'echo "NC $h ${c:-000}"; done')
+PY_HF = r"""
+import concurrent.futures as cf, json, os, sys, urllib.request
+from urllib.parse import urlparse
+repo, T = sys.argv[1], int(os.environ["NC_T"])
+tok = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+auth = {"Authorization": "Bearer " + tok} if tok else {}
+def get(url, **h):
+    return urllib.request.urlopen(urllib.request.Request(url, headers={**auth, **h}), timeout=T)
+def shard():  # a ranged GET of a real shard follows the redirect to whichever CDN serves it
+    base = f"https://huggingface.co/{repo}/resolve/main/"
+    try:
+        name = sorted(set(json.load(get(base + "model.safetensors.index.json"))["weight_map"].values()))[0]
+        out = ["NC huggingface.co 200"]
+        r = get(base + name, Range="bytes=0-0")
+        return out + [f"NC {urlparse(r.url).hostname} {r.status}"]
+    except urllib.error.HTTPError as e:
+        return [f"NC {urlparse(e.url).hostname} {e.code}"]
+    except Exception as e:
+        return [f"NC huggingface.co 000 {type(e).__name__}"]
+def head(host):  # the hosts hf_xet talks to, from the same interpreter
+    try:
+        return [f"NC {host} {urllib.request.urlopen(urllib.request.Request('https://' + host + '/', method='HEAD'), timeout=T).status}"]
+    except urllib.error.HTTPError as e:
+        return [f"NC {host} {e.code}"]
+    except Exception as e:
+        return [f"NC {host} 000 {type(e).__name__}"]
+pool = cf.ThreadPoolExecutor(8)
+futs = [pool.submit(shard)] + [pool.submit(head, h) for h in sys.argv[2:]]
+done, _ = cf.wait(futs, timeout=T + 4)  # urllib's timeout is per socket call, not per request
+for f in futs:
+    print("\n".join(f.result()) if f in done else "")
+print(flush=True)
+os._exit(0)
+"""
+JAVA_SRC = """
+import java.net.URI; import java.net.http.*; import java.time.Duration;
+public class NetProbe { public static void main(String[] a) throws Exception {
+  var c = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(Integer.parseInt(System.getenv("NC_T")))).build();
+  for (String h : a) { try { var r = c.send(HttpRequest.newBuilder(URI.create("https://" + h + "/")).method("HEAD",
+      HttpRequest.BodyPublishers.noBody()).timeout(Duration.ofSeconds(Integer.parseInt(System.getenv("NC_T")))).build(),
+      HttpResponse.BodyHandlers.discarding()); System.out.println("NC " + h + " " + r.statusCode());
+  } catch (Exception e) { System.out.println("NC " + h + " 000 " + e.getClass().getSimpleName()); } } } }
+"""
+
+
+def parse_nc(out):
+    return {m.group(1): m.group(2) for m in re.finditer(r"^NC (\S+) (\d+)", out, re.M)}
+
+
+def ensure_ws():
+    if not (WS / ".git").exists():
+        WS.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["git", "init", "-q", str(WS)], capture_output=True)
+        (WS / "README.md").write_text("bench-netcheck scratch workspace\n")
+    return WS
+
+
+def hf_python():
+    """The interpreter hf runs under: its shebang."""
+    hf = shutil.which("hf")
+    if hf:
+        first = Path(hf).read_text(errors="replace").splitlines()[0]
+        if first.startswith("#!") and "python" in first:
+            return first[2:].strip().split()[0]
+    venv = ROOT / ".venv" / "bin" / "python"
+    return str(venv) if venv.exists() else sys.executable
+
+
+def hf_repo():
+    try:
+        sys.path.insert(0, str(ROOT / ".mise" / "tasks"))
+        import _profiles as P
+        return P.load(os.environ.get("FRONTIER_MODEL", "qwen3.6-35b-a3b-optiq"))[1]["MLX_MODEL"]
+    except BaseException:
+        return "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit"
+
+
+def with_secret(argv):
+    """HF_TOKEN from fnox into the child's env only; it is never printed."""
+    return ["fnox", "exec", "--", *argv] if shutil.which("fnox") else argv
+
+
+def java_bin():
+    for c in (os.environ.get("NETCHECK_JAVA"), subprocess.run(["mise", "which", "java"], capture_output=True, timeout=30,
+                                                              text=True, cwd=ROOT).stdout.strip() if shutil.which("mise") else "",
+              shutil.which("java")):
+        if c and os.path.exists(c):
+            return c
+    return None
+
+
+def multi_probes(plan):
+    """L2 multi-host probes: (id, program for rules, argv, hosts, soft_only, env)."""
+    ws = str(ensure_ws())
+    env = {**os.environ, "NC_T": str(T)}
+    oc = real("opencode")
+    js, sh = BUN_JS.replace("NC_T", str(T)), SH_CURL.replace("NC_T", str(T))  # cplt filters the env
+    probes = [
+        ("opencode-direct", oc, ["env", "BUN_BE_BUN=1", "opencode", "-e", js], OC_HOSTS, True),
+        ("opencode-in-cplt", real("cplt"), ["cplt", "--agent", "opencode", "-d", ws, "exec", "--",
+                                            "env", "BUN_BE_BUN=1", "opencode", "-e", js], OC_HOSTS, False),
+        ("copilot-cplt-proxy", real("cplt"), ["cplt", "--agent", "copilot", "-d", ws, "exec", "--",
+                                              "sh", "-c", sh, "sh"], CP_HOSTS, False),
+        ("hf-python", real(hf_python()), with_secret([hf_python(), "-c", PY_HF, hf_repo()]), HF_HOSTS, False),
+    ]
+    jb = java_bin()
+    if jb:
+        src = Path(tempfile.mkdtemp()) / "NetProbe.java"
+        src.write_text(JAVA_SRC)
+        probes.append(("java-gradle-repos", real(jb), [jb, str(src)], JAVA_HOSTS, False))
+    return [(i, prog, argv + [plan.get(h, h) for h in hosts], [plan.get(h, h) for h in hosts], soft, env)
+            for i, prog, argv, hosts, soft in probes]
+
+
+def run_multi(probe):
+    pid, prog, argv, hosts, soft, env = probe
+    rc, out, to = run(argv, T * 2 + 20, env=env)
+    got = parse_nc(out)
+    if pid == "hf-python":
+        hosts = list(dict.fromkeys([*got, *hosts]))
+    rows = []
+    if not got:
+        last = "timed out" if to else (out.strip().splitlines() or [""])[-1][:120]
+        return [(pid, prog, h, "FAIL", f"probe broke (exit {rc}): {last}", soft) for h in hosts]
+    for h in hosts:
+        c = got.get(h, "000")
+        if ok_code(c):
+            rows.append((pid, prog, h, "PASS", f"HTTP {c}", soft))
+        else:
+            why = f"no answer ({c})" if h in got else f"no answer within {T}s"
+            rows.append((pid, prog, h, "FAIL", why, soft))
+    return rows
+
+
+def single_probes():
+    """L2 single-command probes: id, program for rules, argv, hosts it proves, hard kinds, soft kinds."""
+    git_https = os.path.join(subprocess.run(["git", "--exec-path"], capture_output=True, text=True).stdout.strip(),
+                             "git-remote-https")
+    return [
+        ("git-ls-remote-pilot", git_https, ["git", "ls-remote", PILOT_REPO, "HEAD"], "github.com", NP_CLOUD, ""),
+        ("git-ls-remote-kotlin", git_https, ["git", "ls-remote", KOTLIN_REPO, "HEAD"], "github.com", "",
+         "ops hybrid frontier-local frontier-cloud e2e"),
+        ("gh-api", real("gh"), ["gh", "api", "rate_limit", "--jq", ".rate.remaining"], "api.github.com", "",
+         NP_CLOUD + " decide"),
+        ("hf-whoami", real(hf_python()), with_secret(["hf", "auth", "whoami"]), "huggingface.co", "download",
+         "ops frontier-local e2e decide"),
+    ]
+
+
+def plan_hosts():
+    """This account's Copilot endpoints, as Copilot CLI reads them."""
+    rc, out, _ = run(["gh", "api", "/copilot_internal/user"], T + 10)
+    try:
+        ep = json.loads(out)["endpoints"]
+        return {"{plan-api}": ep["api"].split("//")[1].strip("/"),
+                "{plan-telemetry}": ep["telemetry"].split("//")[1].strip("/")}
+    except (ValueError, KeyError, IndexError, TypeError):
+        return {}
+
+
+# ── L3: one real session per cloud client path ───────────────────────────────
+
+def l3_sessions(kinds):
+    cloud = os.environ.get("FRONTIER_CLOUD_MODEL", "claude-sonnet-5")
+    prompt = "Reply with exactly: OK"
+    out = []
+    if "e2e" in kinds:
+        out.append(("L3a nav-pilot+cplt+copilot gpt-5-mini", "e2e",
+                    [NP, "--client", "copilot", "--model", "gpt-5-mini", "--", "--allow-all-tools", "--no-ask-user",
+                     "-p", prompt], "copilot-cplt-proxy"))
+    if kinds & {"hybrid", "frontier-cloud"}:
+        out.append((f"L3b nav-pilot+cplt+opencode {cloud}", "hybrid frontier-cloud",
+                    [NP, "--client", "opencode", "--model", cloud, "--", "--pure", "--print-logs", "run", "--format", "json",
+                     prompt],
+                    "opencode-in-cplt"))
+    return out
+
+
+def run_l3(argv):
+    ws = ensure_ws()
+    user = Path.home() / ".nav-pilot" / "config.toml"
+    keep = [l for l in (user.read_text().splitlines() if user.exists() else [])
+            if not re.match(r"^(auto_update|local_enabled|local_autostart)\s*=", l)]
+    cfg = Path(tempfile.mkdtemp()) / "config.toml"
+    # No local server, no self-update: a cloud session and nothing else.
+    cfg.write_text("\n".join(["auto_update = false", "local_enabled = false", "local_autostart = false", *keep]) + "\n")
+    t0 = time.time()
+    rc, out, to = run(argv, L3_TIMEOUT, cwd=str(ws), env={**os.environ, "NAV_PILOT_CONFIG": str(cfg)})
+    log = ROOT / ".bench-logs" / f"netcheck-l3-{time.strftime('%Y%m%d-%H%M%S')}-{os.getpid()}-{len(argv)}.log"
+    log.parent.mkdir(exist_ok=True)
+    log.write_text(f"# argv: {argv!r}\n# rc={rc} timed_out={to} seconds={time.time() - t0:.0f}\n{out}")
+    text = "".join(json.loads(l).get("part", {}).get("text", "") for l in out.splitlines()
+                   if l.startswith("{") and '"text"' in l) or out
+    return rc, out, to, bool(re.search(r"\bOK\b", text)), log
+
+
+# ── diagnosis ────────────────────────────────────────────────────────────────
+
+def diagnose(rows, kinds):
+    by = {}
+    for r in rows:
+        by.setdefault(r["target"], []).append(r)
+    for r in rows:
+        if r["status"] != "FAIL":
+            continue
+        peers = by.get(r["target"], [])
+        curl = next((p for p in peers if p["id"] == "curl"), None)
+        passed = [p for p in peers if p["status"] == "PASS" and p is not r]
+        if r["level"] == 1:
+            if any(p["level"] == 2 and not p.get("soft_only") for p in passed):
+                who = ", ".join(sorted({p["id"] for p in passed if p["level"] == 2}))
+                r["status"] = "WARN"
+                r["cause"] = f"curl is blocked but {who} gets through, and that is what the benchmark uses: " \
+                             f"a curl-only firewall rule"
+            continue
+        if r["level"] == 3:
+            continue
+        if r["detail"].startswith("probe broke"):
+            r["cause"] = "the probe itself did not run, so this says nothing about the network; run it by hand"
+            continue
+        via_cplt = "cplt" in r["id"]
+        direct_ok = [p["id"] for p in passed if "cplt" not in p["id"]]
+        if via_cplt and direct_ok:
+            rc, out, _ = run(["cplt", "--agent", "copilot" if "copilot" in r["id"] else "opencode", "-d", str(WS),
+                              "check", "net", r["target"]], 30)
+            if "BLOCKED" in out.upper() and "ALLOWED" not in out.upper():
+                r["cause"] = f"direct OK ({', '.join(direct_ok)}) but cplt's policy blocks it: " \
+                             f"`cplt check net {r['target']}` for the fix"
+            else:
+                r["cause"] = f"direct OK ({', '.join(direct_ok)}) but through cplt it fails, and cplt's policy allows " \
+                             f"it: the firewall rule for cplt ({r['program']}), which makes the proxy's connections"
+        elif curl and curl["status"] == "PASS":
+            r["cause"] = f"curl reaches it but {r['id']} doesn't: per-app firewall rule for {r['program']}"
+        elif curl:
+            r["cause"] = f"curl fails too ({curl['detail']}): blocked for every app checked, or the host is down; " \
+                         f"allow it for {r['program']}"
+        else:
+            r["cause"] = f"allow {r['target']} for {r['program']} in the firewall"
+
+
+def hardness(hard, soft, kinds):
+    h, s = set(hard.split()), set(soft.split())
+    if h & kinds:
+        return "hard"
+    return "soft" if s & kinds else None
+
+
+def check(kinds, l3=False):
+    plan = plan_hosts()
+    rows = []
+    ep = {h: (hard, soft, used, prog) for h, hard, soft, used, prog in ENDPOINTS}
+
+    def row(level, cid, program, target, status, detail, hard, soft_only=False, cause=""):
+        rows.append({"level": level, "id": cid, "program": program, "target": target, "status": status,
+                     "detail": detail, "need": hard, "soft_only": soft_only, "cause": cause})
+
+    for key in ("{plan-api}", "{plan-telemetry}"):
+        if key not in plan and hardness(*ep[key][:2], kinds):
+            row(1, "plan-lookup", real("gh"), key, "FAIL", "gh api /copilot_internal/user gave no endpoints",
+                hardness(*ep[key][:2], kinds), cause="gh auth or api.github.com; the plan hosts go unchecked")
+    hosts = {plan.get(h, h): h for h, *_ in ENDPOINTS if hardness(*ep[h][:2], kinds) and plan.get(h, h)[0] != "{"}
+    with cf.ThreadPoolExecutor(16) as ex:
+        l1f = {ex.submit(l1, h): h for h in hosts}
+        probes = [p for p in multi_probes(plan) if any(hardness(*ep.get(hosts.get(h, h), ("", ""))[:2], kinds)
+                                                       for h in p[3]) or p[0] == "hf-python" and
+                  hardness("download", "ops frontier-local e2e decide", kinds)]
+        l2m = [ex.submit(run_multi, p) for p in probes]
+        singles = [s for s in single_probes() if hardness(s[4], s[5], kinds)]
+        l2s = {ex.submit(run, s[2], T * 2 + 20): s for s in singles}
+        for f, h in l1f.items():
+            st, detail, cause = f.result()
+            row(1, "curl", real("curl"), h, st, detail, hardness(*ep[hosts[h]][:2], kinds), cause=cause)
+        for f in l2m:
+            for pid, prog, h, st, detail, soft in f.result():
+                key = hosts.get(h, h)
+                need = hardness(*ep[key][:2], kinds) if key in ep else hardness("download", "", kinds) or "soft"
+                if need is None:
+                    continue
+                row(2, pid, prog, h, st, detail, "soft" if soft else need, soft_only=soft)
+        for f, (sid, prog, argv, target, hard, soft) in l2s.items():
+            rc, out, to = f.result()
+            last = (out.strip().splitlines() or [""])[-1][:100]
+            st, detail = ("PASS", last if sid == "gh-api" else "ok") if rc == 0 else \
+                ("FAIL", "timed out" if to else f"exit {rc}: {last}")
+            if sid == "hf-whoami" and rc == 0:
+                detail = "authenticated"   # the account name is harmless, but keep output uniform
+            row(2, sid, prog, target, st, detail, hardness(hard, soft, kinds))
+    if l3:
+        for name, ks, argv, l2id in l3_sessions(kinds):
+            rc, out, to, said_ok, log = run_l3(argv)
+            need = hardness(ks, "", kinds)
+            if rc == 0 and said_ok:
+                row(3, name, argv[0], "session", "PASS", f"replied OK · {log.name}", need)
+                continue
+            l2_bad = [r for r in rows if r["id"] == l2id and r["status"] == "FAIL" and r["need"] == "hard"]
+            m = re.search(r"Model not found: [^\n\"]{0,160}", out)
+            if m:
+                cause = f"not a network fault: {m.group(0)}. Set FRONTIER_CLOUD_MODEL to a listed model"
+            elif "Bad Gateway" in out or " 502" in out:
+                cause = "cplt's proxy got no answer upstream: firewall rule for cplt, or an upstream outage"
+            elif l2_bad:
+                cause = f"the network path already fails at L2 ({l2id}: {', '.join(r['target'] for r in l2_bad)})"
+            elif to:
+                cause = f"no reply in {L3_TIMEOUT}s with L2 clean: a stalled client or model; see the log"
+            else:
+                cause = "reachable at L2 but the session failed: auth, model entitlement or the client; see the log"
+            row(3, name, argv[0], "session", "FAIL", f"{'timeout' if to else f'exit {rc}'} · {log}", need, cause=cause)
+    else:
+        for name, ks, *_ in l3_sessions(kinds):
+            row(3, name, "nav-pilot", "session", "SKIP", "pass --l3 to run (~$0.04)", hardness(ks, "", kinds))
+    diagnose(rows, kinds)
+    for r in rows:
+        if r["status"] == "FAIL" and r["need"] == "soft":
+            r["status"] = "WARN"
+    return rows
+
+
+def report(rows, kinds):
+    print(f"bench-netcheck for {', '.join(sorted(kinds))} (timeout {T}s)")
+    for r in sorted(rows, key=lambda r: (r["level"], r["id"], r["target"])):
+        print(f"{r['status']:4}  L{r['level']} {r['id']:<20} {r['target']:<38} {r['need'] or '':<4}  {r['detail']}")
+        if r["cause"] and r["status"] != "PASS":
+            print(f"{'':30}→ {r['cause']}")
+    bad = [r for r in rows if r["status"] == "FAIL"]
+    print(f"bench-netcheck: {'FAIL, ' + str(len(bad)) + ' hard failure(s)' if bad else 'PASS'}")
+
+
+def inventory():
+    print("| Endpoint | Used by | Program that connects | Hard for | Soft for |\n|---|---|---|---|---|")
+    for h, hard, soft, used, prog in ENDPOINTS:
+        print(f"| {h} | {used} | {prog} | {hard or '-'} | {soft or '-'} |")
+
+
+# ── selftest: stub programs on PATH ──────────────────────────────────────────
+
+STUB = r"""#!/bin/bash
+# $FAKE_BLOCK: space-separated prog:host pairs that fail; prog:* blocks all; $FAKE_SLOW: progs that hang
+me=$(basename "$0")
+case " $FAKE_SLOW " in *" $me "*) [ "$1" = --exec-path ] || sleep 30 ;; esac
+blocked() { case " $FAKE_BLOCK " in *" $me:$1 "*|*" $me:* "*) return 0 ;; esac; return 1; }
+hosts=()
+for a in "$@"; do case "$a" in https://*) h=${a#https://}; hosts+=("${h%%/*}") ;; *.*) [[ $a =~ ^[a-z0-9.-]+$ ]] && hosts+=("$a") ;; esac; done
+case "$me" in
+  curl) h=${hosts[0]}; blocked "$h" && { printf '000 0.01 0 0'; exit 28; }; printf '404 0.01 0.02 0.03'; exit 0 ;;
+  git) [ "$1" = --exec-path ] && { echo /stub/git-core; exit 0; }; blocked github.com && exit 128; echo "abc HEAD"; exit 0 ;;
+  gh) [ "$2" = /copilot_internal/user ] && { echo '{"endpoints":{"api":"https://api.business.githubcopilot.com","telemetry":"https://telemetry.business.githubcopilot.com"}}'; exit 0; }
+      blocked api.github.com && exit 1; echo 4999; exit 0 ;;
+  cplt) [ "$(printf '%s ' "$@" | grep -c ' check net ')" = 1 ] && { echo "ALLOWED"; exit 0; }
+        for h in "${hosts[@]}"; do blocked "$h" && echo "NC $h 000" || echo "NC $h 404"; done; exit 0 ;;
+  env) while [[ $1 == *=* ]]; do export "$1"; shift; done; exec "$@" ;;
+  opencode|java) for h in "${hosts[@]}"; do blocked "$h" && echo "NC $h 000 TimeoutError" || echo "NC $h 200"; done; exit 0 ;;
+  fnox) shift 2; exec "$@" ;;
+  hf) echo user; exit 0 ;;
+  python) for h in huggingface.co cas-server.xethub.hf.co us.aws.cdn.hf.co; do blocked "$h" && echo "NC $h 000" || echo "NC $h 206"; done; exit 0 ;;
+  mise) exit 1 ;;
+esac
+"""
+
+
+def selftest():
+    global T
+    T = 1
+    d = Path(tempfile.mkdtemp())
+    for p in ("curl", "git", "gh", "cplt", "opencode", "env", "fnox", "hf", "python", "mise", "java"):
+        (d / p).write_text(STUB.replace("#!/bin/bash", f"#!{shutil.which('bash')}"))
+        (d / p).chmod(0o755)
+    (d / "hf").write_text(f"#!{d / 'python'}\n")
+    os.environ.update(PATH=f"{d}:/usr/bin:/bin", NETCHECK_WS=str(d / "ws"), NETCHECK_JAVA="")
+    globals()["WS"] = d / "ws"
+    (d / "ws" / ".git").mkdir(parents=True)
+
+    def go(kinds, block="", slow=""):
+        os.environ["FAKE_BLOCK"], os.environ["FAKE_SLOW"] = block, slow
+        return {(r["id"], r["target"]): r for r in check(set(kinds.split()))}
+
+    # 1. everything answers
+    rs = go("hybrid e2e")
+    assert all(r["status"] in ("PASS", "SKIP") for r in rs.values()), [r for r in rs.values() if r["status"] != "PASS"]
+    assert ("copilot-cplt-proxy", "api.business.githubcopilot.com") in rs, "plan host resolved from gh"
+    # 2. per-app: curl reaches api.githubcopilot.com, opencode (direct) does not -> soft WARN naming opencode;
+    #    cplt reaches it, so the benchmark path is fine and the run passes
+    rs = go("hybrid", block="opencode:api.githubcopilot.com")
+    r = rs[("opencode-direct", "api.githubcopilot.com")]
+    assert r["status"] == "WARN" and "per-app firewall rule" in r["cause"], r
+    assert not any(r["status"] == "FAIL" for r in rs.values())
+    # 3. cplt-only: direct opencode and curl fine, through cplt it fails -> hard FAIL, cause names cplt
+    rs = go("frontier-cloud", block="cplt:api.githubcopilot.com")
+    r = rs[("opencode-in-cplt", "api.githubcopilot.com")]
+    assert r["status"] == "FAIL" and "firewall rule for cplt" in r["cause"], r
+    # 4. curl-only block downgraded: curl can't reach models.dev but cplt can
+    rs = go("frontier-cloud", block="curl:api.githubcopilot.com")
+    assert rs[("curl", "api.githubcopilot.com")]["status"] == "WARN"
+    # 5. timeout: git hangs -> FAIL "timed out" within the deadline
+    t0 = time.time()
+    rs = go("hybrid", slow="git")
+    assert rs[("git-ls-remote-pilot", "github.com")]["status"] == "FAIL"
+    assert "timed out" in rs[("git-ls-remote-pilot", "github.com")]["detail"] and time.time() - t0 < 40
+    # 6. kind filter: download only checks HF, and a blocked xet host is hard there
+    rs = go("download", block="python:cas-server.xethub.hf.co curl:cas-server.xethub.hf.co")
+    assert not any(k[0].startswith(("opencode", "copilot", "git-ls-remote-pilot")) for k in rs), list(rs)
+    assert rs[("hf-python", "cas-server.xethub.hf.co")]["status"] == "FAIL", rs[("hf-python", "cas-server.xethub.hf.co")]
+    assert rs[("curl", "cas-server.xethub.hf.co")]["status"] == "FAIL"
+    print("bench-netcheck selftest: 6 scenarios pass")
+
+
+def main():
+    a = sys.argv[1:]
+    if a[:1] == ["selftest"]:
+        return selftest()
+    if "--inventory" in a:
+        return inventory()
+    kinds = set(KINDS)
+    if "--for" in a:
+        kinds = set(a[a.index("--for") + 1].replace(",", " ").split())
+        if kinds - set(KINDS):
+            sys.exit(f"✗ unknown kind(s) {', '.join(kinds - set(KINDS))}; known: {', '.join(KINDS)}")
+    rows = check(kinds, l3="--l3" in a)
+    if "--json" in a:
+        print(json.dumps({"kinds": sorted(kinds), "ok": not any(r["status"] == "FAIL" for r in rows), "rows": rows},
+                         indent=1))
+    else:
+        report(rows, kinds)
+    return 1 if any(r["status"] == "FAIL" for r in rows) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -217,6 +217,7 @@ run used the server's 0.6 default. The report compares these runs with the 2026-
 cd /Users/hans/mlx-workspace
 # 1. plug in the charger
 mise run night-preflight                 # every line PASS (a WARN is fine); fix any FAIL
+mise run bench-netcheck -- --for ops,e2e # night-run-2: --for ops,e2e,hybrid; a FAIL names the firewall rule
 nohup mise run night-run > .bench-logs/night.log 2>&1 &
 ```
 

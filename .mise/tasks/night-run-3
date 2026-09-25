@@ -151,6 +151,17 @@ EOF
         || echo "WARN  cloud          $CLOUD unreachable now (${CLOUD_WHY:-?}); each cloud step probes again and skips if still down"
     fi
   fi
+  # Firewall rules are per program, so bench-netcheck makes git, opencode, cplt's proxy, hf's
+  # python and java reach their hosts themselves. A WARN: the cloud gate decides the cloud steps.
+  if [ -z "$FAKE" ]; then
+    local kinds out
+    kinds="$(in_part local && echo frontier-local),$(in_part cloud && echo frontier-cloud)"; kinds=${kinds#,}; kinds=${kinds%,}
+    if out=$(python3 .mise/tasks/bench-netcheck --for "$kinds" 2>&1); then ok network "bench-netcheck --for $kinds"
+    else
+      echo "$out" | grep -A1 '^FAIL' | grep -v '^--' | sed 's/^/      /'
+      echo "WARN  network        bench-netcheck --for $kinds failed (causes above); fix the firewall rule it names"
+    fi
+  fi
   python3 .mise/tasks/bench-frontier run --profile "$MODEL" --classes edit-multi-mechanical --runs 1 --dry-run \
     | grep -q '✓ validation' && ok validation "present for the current tasks file" \
     || echo "WARN  validation     none yet: step 1 runs it (~40 min CPU). Run it in the daytime to save the night."
