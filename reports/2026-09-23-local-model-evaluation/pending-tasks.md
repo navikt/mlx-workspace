@@ -255,3 +255,18 @@ cd /Users/hans/mlx-workspace && nohup bash -c 'until grep -q "=== night-run-2 ex
 Check it first with `mise run bench-decide-limits -- --dry-run`. The results are in
 `bench/decide-limits-<model>-<stamp>.json` and `.md`, and `bench/decide-limits-<stamp>.md` compares
 the models.
+
+## 8.3 Follow-ups from the night of 24–25 September
+
+Found by the two night batches and decide-limits, and not yet acted on. Each line names where the evidence is.
+
+- **The opencode hybrid arm has no data yet.** `api.githubcopilot.com` (and the individual/business/enterprise hosts) timed out from about 01:27 to 06:33, with DNS resolving and github.com reachable. cplt's proxy turned that into "Bad Gateway". All attempts failed within seconds, at no cost. Rerun with `mise run night-run-2 -- --from 9` once the API answers.
+- **Short-cycle loops evade both loop guards.** In the verified cplt session (`bench/loop-hook-20260925-002708.json`), gpt-5-mini dodged the warning after about 22 calls by cycling `view_range` between three values. A period-≤3 cycle with identical normalised results should count as a loop in the local guard and in the hook.
+- **bench-cheap-ops scores a perfect debug fix as a failure.** The bug is applied as an uncommitted change, so an exact fix leaves a clean tree, which is scored "no changes made". This affects the D-task results for every model. The frontier runner (#41) lets the test suite decide instead.
+- **Task E3 asks the model to log `personIdent` (a fødselsnummer) and passes on compile.** A benchmark should not reward that; change the task or its verifier (coverage audit, #37).
+- **`alpha decide` and the top-11 cap:** options at letters L–N scored 15/15 on optiq and Qwen3.8 (`bench/decide-limits-*-20260925-014512.md`), so the cap may not bind. Check the code and correct the help text if needed.
+- **`alpha decide` guidance for the docs and the news draft (navikt/copilot#950):** use a threshold of at least 0.9; filter injection before decide reads untrusted tool output (Qwen3.8 flips 29–58% of correct answers on injected claims, optiq 4–33%); Qwen3-4B is not usable (overconfident: 74% right at p ≥ 0.99).
+- **The `_decide.py` prefill counter reports 0 even for a cold call** (the eviction conclusion rests on TTFT instead). Fix the counter.
+- **Silent model fallback on autostart:** a user whose `local_model` is no longer offered gets a warning from `alpha local init/start` but not from a launch that autostarts the server.
+- **Narrow `harness_sha` to scoring inputs and add a `profile_sha`** (section 8, from #38), now that no night run is live.
+- **Capabilities proposal for the maintainer:** refreshing `manifest/capabilities.json` with both nights adds a measured OptiQ-4bit block (local read-qa and edit-single move to not-yet; nothing becomes trusted; no existing verdict changes). Not published pending a decision.
