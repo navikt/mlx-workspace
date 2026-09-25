@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# mise description="nav-pilot alpha decide on the §8.5 recipe sets (bench/decide-cases/{issue-type,aksel-kind,pr-motivation}.jsonl), optiq and Qwen3.8 OptiQ-4bit. Waits for AC power. Usage: mise run bench-decide-sets [-- --check-cases | --sets issue-type,pr-motivation | --models optiq]"
+#
+# bench-decide-why's lock, cleanup and nav-pilot lookup, around _decide_sets.py.
+# Writes bench/decide-sets-<model>-<stamp>.json and bench/decide-sets-<stamp>.md.
+DECIDE_PY=_decide_sets.py exec "$(dirname "$0")/bench-decide-why" "$@"

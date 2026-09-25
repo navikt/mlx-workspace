@@ -6,7 +6,8 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 1
 
-[ "${1:-}" = --check-cases ] && exec python3 .mise/tasks/_decide_why.py --check-cases
+PY=".mise/tasks/${DECIDE_PY:-_decide_why.py}"   # bench-decide-sets reuses this wrapper with _decide_sets.py
+[ "${1:-}" = --check-cases ] && exec python3 "$PY" "$@"
 NP="${BENCH_NAV_PILOT:-$(ls -t /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-* "$PWD"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
 [ -x "$NP" ] || { echo "✗ no nav-pilot binary at '$NP' (set BENCH_NAV_PILOT)"; exit 2; }
 
@@ -42,4 +43,4 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT TERM
 
-python3 .mise/tasks/_decide_why.py all --stamp "$STAMP" "$@"
+python3 "$PY" all --stamp "$STAMP" "$@"
