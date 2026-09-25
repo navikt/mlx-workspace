@@ -8,7 +8,8 @@
     "min_tasks": 2
   },
   "excluded_tasks": {
-    "R1": "Suspected checker problem: failed all 11 valid local runs, and its verifier wants the four literals 5, 100, 2 and 300 in a prose answer. Rejoins read-qa once a cloud arm shows it is fair (design \u00a71.2)."
+    "R1": "Suspected checker problem: failed all 11 valid local runs, and its verifier wants the four literals 5, 100, 2 and 300 in a prose answer. Rejoins read-qa once a cloud arm shows it is fair (design \u00a71.2).",
+    "E3": "Retired on 25 Sept: asked the model to log the parameters of getOppfolgingstilfeller, which is personIdent (a f\u00f8dselsnummer), and passed on compile. Its results stay in bench/ as recorded; E3b replaces it with a count and a check that personIdent is not logged."
   },
   "manifest_blocks": {
     "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit": {
@@ -33,8 +34,8 @@
           "local": "not-yet",
           "delegate_k": 3,
           "delegate_n": 3,
-          "local_k": 6,
-          "local_n": 6
+          "local_k": 9,
+          "local_n": 9
         },
         "edit-multi-mechanical": {
           "delegate": "trusted",
@@ -84,8 +85,8 @@
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 6,
-          "local_n": 6
+          "local_k": 3,
+          "local_n": 3
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
@@ -135,8 +136,8 @@
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 8,
-          "local_n": 8
+          "local_k": 4,
+          "local_n": 4
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
@@ -186,8 +187,8 @@
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 6,
-          "local_n": 6
+          "local_k": 3,
+          "local_n": 3
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
@@ -326,22 +327,27 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 6,
-          "n": 6,
-          "lb": 0.785,
+          "k": 9,
+          "n": 9,
+          "lb": 0.846,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 3,
+          "runs": 9,
           "tasks": [
-            "E1",
-            "E3"
+            "E1"
           ],
-          "condition": "cheap-ops profile=qwen3.6-35b-a3b-optiq-t0 temp=0.0 harness=492141135fe6",
+          "condition": "cheap-ops profile=qwen3.6-35b-a3b-optiq temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "files": [
-            "results-qwen3.6-35b-a3b-optiq-t0-20260924-182823-01.json",
-            "results-qwen3.6-35b-a3b-optiq-t0-20260924-184754-01.json",
-            "results-qwen3.6-35b-a3b-optiq-t0-20260924-190837-01.json"
+            "results-qwen3.6-35b-a3b-optiq-20260923-115543-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260923-115543-02.json",
+            "results-qwen3.6-35b-a3b-optiq-20260923-115543-03.json",
+            "results-qwen3.6-35b-a3b-optiq-20260923-124337-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260925-001856-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260925-003323-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260925-004823-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260925-010536-01.json",
+            "results-qwen3.6-35b-a3b-optiq-20260925-012036-01.json"
           ]
         }
       },
@@ -511,15 +517,14 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 6,
-          "n": 6,
-          "lb": 0.785,
+          "k": 3,
+          "n": 3,
+          "lb": 0.646,
           "bar": 0.9,
           "p_cloud": 1.0,
           "runs": 3,
           "tasks": [
-            "E1",
-            "E3"
+            "E1"
           ],
           "condition": "cheap-ops profile=qwen3.8-27b-4bit temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
@@ -641,15 +646,14 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 8,
-          "n": 8,
-          "lb": 0.83,
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
           "runs": 4,
           "tasks": [
-            "E1",
-            "E3"
+            "E1"
           ],
           "condition": "cheap-ops profile=qwen3.8-27b-8bit-nopin temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
@@ -773,15 +777,14 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 6,
-          "n": 6,
-          "lb": 0.785,
+          "k": 3,
+          "n": 3,
+          "lb": 0.646,
           "bar": 0.9,
           "p_cloud": 1.0,
           "runs": 3,
           "tasks": [
-            "E1",
-            "E3"
+            "E1"
           ],
           "condition": "cheap-ops profile=qwen3.8-27b-optiq-4bit temp=0.6 harness=492141135fe6",
           "cost_ratios": {},

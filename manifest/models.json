@@ -52,8 +52,8 @@
             "local": "not-yet",
             "delegate_k": 3,
             "delegate_n": 3,
-            "local_k": 6,
-            "local_n": 6
+            "local_k": 9,
+            "local_n": 9
           },
           "edit-multi-mechanical": {
             "delegate": "trusted",
@@ -131,8 +131,8 @@
             "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 6,
-            "local_n": 6
+            "local_k": 3,
+            "local_n": 3
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
@@ -211,8 +211,8 @@
             "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 8,
-            "local_n": 8
+            "local_k": 4,
+            "local_n": 4
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
