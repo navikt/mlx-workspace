@@ -98,25 +98,25 @@ plan() {
 }
 
 # The cloud gate runs one tiny real session the way the cloud arm runs its samples:
-# the same nav-pilot binary, client (opencode inside cplt) and model. A curl probe is
-# not enough: the firewall rules are per program, and on 25 September Copilot had also
-# retired claude-sonnet-4.6, which only a real session shows. It passes on a text reply.
+# the same nav-pilot binary, client (opencode inside cplt), model and workspace layout
+# (bench-frontier cloud-probe). A curl probe is not enough: the firewall rules are per
+# program, and on 25 September Copilot had also retired claude-sonnet-4.6, which only a
+# real session shows. It passes only when the model's file write lands in its workspace:
+# on night 3 a text-reply gate passed while cplt scoped every cloud session to the repo
+# root, and 109 of 116 edit and create samples recorded "no changes made".
 # Down, a cloud sample would run to its cap and be recorded as a model failure, so the
-# step is skipped instead. Two tries, 30 s apart; each costs about $0.03, outside the cap.
+# step is skipped instead. Two tries, 30 s apart; each costs about $0.05, outside the cap.
 CLOUD_PROBE_SECONDS="${NIGHT_CLOUD_PROBE_SECONDS:-900}"
 cloud_up() {
-  local d="${DIR:-${TMPDIR:-/tmp}/night3-dry}/cloud-probe" log
-  mkdir -p "$d" && d=$(cd "$d" && pwd)   # absolute: the probe cd's into it before writing $log
-  [ -d "$d/.git" ] || git -C "$d" init -q
+  local d="${DIR:-${TMPDIR:-/tmp}/night3-dry}/cloud-probe" log out
+  mkdir -p "$d" && d=$(cd "$d" && pwd)
   log="$d/probe-$(date +%H%M%S).jsonl"
-  "$BENCH_NAV_PILOT" alpha local off > /dev/null 2>&1
   for _ in 1 2; do
-    (cd "$d" && timeout 180 "$BENCH_NAV_PILOT" --client opencode --model "$CLOUD" -- --pure run --format json \
-      "Reply with the single word OK." > "$log" 2>&1 < /dev/null)
-    grep -q '^{"type":"text"' "$log" && return 0
+    out=$(BENCH_NAV_PILOT="$BENCH_NAV_PILOT" python3 .mise/tasks/bench-frontier cloud-probe --cloud "$CLOUD" \
+      --log "$log" < /dev/null 2>&1) && return 0
     sleep "${NIGHT_CLOUD_RETRY_SECONDS:-30}"
   done
-  CLOUD_WHY=$(grep -m1 -oE '"message":"[^"]{0,160}' "$log" || tail -c 160 "$log" | tr '\n' ' ')
+  CLOUD_WHY="$(echo "$out" | tail -1); $(grep -m1 -oE '"message":"[^"]{0,160}' "$log" 2>/dev/null)"
   return 1
 }
 

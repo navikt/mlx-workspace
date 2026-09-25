@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="Quality frontier: graded ladders per task class, run per model and harness variant, summarised as a frontier. Usage: mise run bench-frontier -- gen|validate|run|summary|selftest (--help on each)"
+# mise description="Quality frontier: graded ladders per task class, run per model and harness variant, summarised as a frontier. Usage: mise run bench-frontier -- gen|validate|run|summary|cloud-probe|selftest (--help on each)"
 """How far each task class can be pushed before quality breaks, and whether the
 limit is the model or the harness. Design: reports/2026-09-25-quality-frontier/design.md.
 
@@ -10,6 +10,8 @@ limit is the model or the harness. Design: reports/2026-09-25-quality-frontier/d
   run       run ladders for one local profile (--profile) or a cloud model (--cloud)
             under one harness variant; writes bench/frontier-<key>-<variant>-<stamp>.json
   summary   per-rung pass rates, Wilson bounds, verdicts, frontiers and a logistic fit
+  cloud-probe  one real cloud session through the run's workspace layout; passes only
+            if the model's file write lands in that workspace (~$0.05)
   selftest  generator, verifiers, runner and summary against a fixture repo and fake
             models (no GPU, no network, no servers)
 
@@ -44,6 +46,14 @@ FAKE = os.environ.get("FRONTIER_FAKE_AGENT")      # selftest: a script plays the
 FAKE_BUILD = os.environ.get("FRONTIER_FAKE_BUILD")  # selftest: a shell command plays Gradle
 TASKS = ROOT / "bench" / "frontier" / "tasks-isoppfolgingstilfelle.json"
 NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
+# The cloud arm's workspaces live outside this repository. nav-pilot starts cplt with
+# no --project-dir, so cplt takes the enclosing git root as the project and starts the
+# client there. Under workspaces/ that root is mlx-workspace itself: on night 3 the
+# model's cwd was the repo root, `kotlin/...` did not resolve, and the edits that did
+# happen landed in sibling models' checkouts. Out here, an empty repository (see
+# cloud_ws) makes the workspace its own project, and mise no longer walks up into a
+# mise.toml the sandbox cannot read, which would break java and ./gradlew.
+CLOUD_WS = Path(os.environ.get("FRONTIER_CLOUD_WS") or Path.home() / ".cache" / "mlx-workspace" / "frontier-cloud")
 
 BORROWED = ["sh", "assert_workspace_is_clean", "ensure_clone", "assert_repo_is_the_workspace",
             "reset_repo", "hide_git", "restore_git", "changed_files", "apply_break",
@@ -122,8 +132,7 @@ def harness(key, cfg):
     import _profiles as P
     ns = {"json": json, "os": os, "re": re, "shutil": shutil, "subprocess": subprocess, "sys": sys,
           "time": time, "tempfile": tempfile, "hashlib": hashlib, "Path": Path, "P": P,
-          "ROOT": ROOT, "CFG": cfg, "key": key, "ws": ROOT / "workspaces" / key,
-          "repo": ROOT / "workspaces" / key / "kotlin",
+          "ROOT": ROOT, "CFG": cfg, "key": key, "ws": ws_for(key), "repo": ws_for(key) / "kotlin",
           "JDK": Path(os.path.expanduser(cfg.get("jdk", "~"))), "GIT_STASH": None, "SERVED": None}
     src = HERE / "bench-cheap-ops"
     tree = ast.parse(src.read_text())
@@ -134,6 +143,29 @@ def harness(key, cfg):
                          f"borrows. Update BORROWED to match.")
     exec(compile(ast.Module(fns, []), str(src), "exec"), ns)  # noqa: S102  (our own file)
     return ns
+
+
+def ws_for(key):
+    return CLOUD_WS / key if key.startswith("cloud-") else ROOT / "workspaces" / key
+
+
+def cloud_ws(ws):
+    """Make ws the project cplt picks for a nav-pilot session started in it.
+
+    An empty repository at ws is the git root cplt and opencode find, so the
+    sandbox is ws (not $HOME, which is a git repo too) and opencode, seeing a
+    git project, lists the tree with kotlin/ in it, as the local arm's opencode
+    does. No commits, so no history to read. It is made after
+    assert_workspace_is_clean, which would call .git stray.
+    """
+    ws.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(REAL_ROOT / "bench" / "agents-prompt.md", ws / "AGENTS.md")
+    subprocess.run(["git", "init", "-q", str(ws)], check=True)
+
+
+def cplt_project(text):
+    m = re.search(r"^\[cplt\] Project:\s+(.+)$", re.sub(r"\x1b\[[0-9;]*m", "", text), re.MULTILINE)
+    return m and m.group(1).strip()
 
 
 def harness_sha(tasks_file):
@@ -253,14 +285,15 @@ def agent_cloud(H, prompt, cont, cap, model):
     log = ROOT / ".bench-logs" / f"frontier-cloud-{time.strftime('%Y%m%d-%H%M%S')}.jsonl"
     argv = [NAV_PILOT, "--client", "opencode", "--model", model, "--", "--pure", "run",
             *(["--continue"] if cont else []), "--format", "json", prompt]
+    log.parent.mkdir(exist_ok=True)
     H["hide_git"]()
     timed_out = False
     try:
         with log.open("w") as fh:
             fh.write(f"# argv: {argv!r}\n")
             fh.flush()
-            p = subprocess.Popen(argv, cwd=str(H["ws"]), stdout=fh, stderr=subprocess.STDOUT,
-                                 start_new_session=True)
+            p = subprocess.Popen(argv, cwd=str(H["ws"]), stdin=subprocess.DEVNULL, stdout=fh,
+                                 stderr=subprocess.STDOUT, start_new_session=True)
             try:
                 p.wait(timeout=cap)
             except subprocess.TimeoutExpired:
@@ -273,10 +306,12 @@ def agent_cloud(H, prompt, cont, cap, model):
         H["restore_git"]()
     text = log.read_text(errors="replace")
     reply, tools, cost, steps = log_text_and_tools(log)
+    project = cplt_project(text)
     return {"out": text, "reply": reply, "timed_out": timed_out, "turns": None if timed_out else steps,
             "tool_calls": tools, "tokens_in": None, "tokens_out": None,
             "cost_usd": cost, "cost_partial": timed_out, "loop": {},
-            "dispatched": "Local dispatch: nav-pilot ends a turn" in text}
+            "dispatched": "Local dispatch: nav-pilot ends a turn" in text,
+            "misscoped": project and Path(project).resolve() != H["ws"].resolve() and project}
 
 
 def agent_fake(H, task, prompt, cont, cap, attempt):
@@ -352,16 +387,17 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
     cap = var["cap"] or BASE_CAP[task["class"]]
     started = time.time()
     agg = {"turns": 0, "tool_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
-    reply, loops, timed_out, dispatched = "", [], False, False
+    reply, loops, timed_out, dispatched, misscoped = "", [], False, False, None
     attempts = 0
 
     def call(prompt, cont):
-        nonlocal reply, timed_out, dispatched
+        nonlocal reply, timed_out, dispatched, misscoped
         if FAKE:
             a = agent_fake(H, task, prompt, cont, cap, attempts)
         elif cloud:
             a = agent_cloud(H, prompt, cont, cap, cloud)
             dispatched = dispatched or a["dispatched"]
+            misscoped = misscoped or a["misscoped"]
         else:
             a = agent_local(H, prompt, cont, cap)
         reply = a["reply"]
@@ -391,8 +427,9 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
         "looped_on": next((x["looped_on"] for x in loops if x.get("looped_on")), None),
         "files_changed": len(H["changed_files"]()),
         "verified": ok, "note": note, "build_tail": "" if ok else tail[-1500:],
-        "valid": not dispatched,
+        "valid": not (dispatched or misscoped),
         **({"invalid_reason": "cloud arm dispatched to a local worker"} if dispatched else {}),
+        **({"invalid_reason": f"cplt scoped the session to {misscoped}, not the workspace"} if misscoped else {}),
     }
 
 
@@ -673,8 +710,8 @@ def cmd_run(args):
             P.load(key)
             print(f"  ✓ profile {key} loads")
         print(f"  {'✓' if validation_path(sha).exists() else '✗'} validation {validation_path(sha).name}")
-        ws = ROOT / "workspaces" / key
-        print(f"  {'✓' if (ws / 'kotlin' / '.git').exists() else '·'} workspace {ws.relative_to(ROOT)} "
+        ws = ws_for(key)
+        print(f"  {'✓' if (ws / 'kotlin' / '.git').exists() else '·'} workspace {ws} "
               f"{'present' if (ws / 'kotlin').exists() else 'missing (cloned at start, needs network)'}")
         return 0
 
@@ -689,13 +726,13 @@ def cmd_run(args):
             if subprocess.run(["mise", "run", "model-use", key], cwd=str(ROOT)).returncode != 0:
                 raise SystemExit(f"✗ model-use {key} failed; refusing to measure the previous model")
         if args.cloud and not FAKE:
-            ws = H["ws"]
-            ws.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(REAL_ROOT / "bench" / "agents-prompt.md", ws / "AGENTS.md")
+            shutil.rmtree(H["ws"] / ".git", ignore_errors=True)  # ours, from the last run
             subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True)
         if not FAKE:
             H["assert_workspace_is_clean"]()
             H["ensure_clone"]()
+        if args.cloud and not FAKE:
+            cloud_ws(H["ws"])
         import _profiles as P
         meta = {"key": key, "variant": args.variant, "variant_parsed": var, "cloud_model": args.cloud,
                 "profile_params": None if args.cloud or FAKE else P.params_for(key),
@@ -930,6 +967,9 @@ if "x / 3" in calc:
 def cmd_selftest(_args):
     """Everything but the model and Gradle, on a three-file fixture repo."""
     F.self_check()
+    # night 3: the cloud arm's workspace sat inside this repo, so cplt scoped the session to it
+    assert not ws_for("cloud-x").resolve().is_relative_to(REAL_ROOT.resolve())
+    assert cplt_project("\x1b[2m[cplt] Project:  /a/b\x1b[0m\n") == "/a/b" and cplt_project("no banner") is None
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         repo = tmp / "fixture"
@@ -1070,6 +1110,30 @@ def cmd_selftest(_args):
     return 0
 
 
+def cmd_cloud_probe(args):
+    """One real cloud session in a fresh workspace laid out as the run's: pass only if
+    the model's write lands in that workspace. A text reply alone passed on night 3
+    while every edit went to the wrong directory. Costs about $0.05."""
+    CLOUD_WS.mkdir(parents=True, exist_ok=True)
+    ws = Path(tempfile.mkdtemp(prefix="probe-", dir=CLOUD_WS))
+    try:
+        cloud_ws(ws)
+        subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True, check=False)
+        H = {"ws": ws, "hide_git": lambda: None, "restore_git": lambda: None}
+        a = agent_cloud(H, "Create a file named probe.txt in the current directory containing the single "
+                           "word OK. Do nothing else.", False, args.timeout, args.cloud)
+        if args.log:
+            Path(args.log).write_text(a["out"])
+        got = (ws / "probe.txt").read_text().strip() if (ws / "probe.txt").exists() else None
+        why = ("timed out" if a["timed_out"] else a["misscoped"] and f"cplt project is {a['misscoped']}"
+               or got is None and "no probe.txt in the workspace" or got != "OK" and f"probe.txt holds {got[:40]!r}")
+        print(f"{'✓' if not why else '✗'} cloud write probe {args.cloud}: {why or 'wrote into its workspace'}"
+              f" · ${a['cost_usd']:.3f}")
+        return 1 if why else 0
+    finally:
+        shutil.rmtree(ws, ignore_errors=True)
+
+
 def main():
     ap = argparse.ArgumentParser(prog="mise run bench-frontier --")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1099,10 +1163,14 @@ def main():
     s = sub.add_parser("summary", help="tables, frontiers, and --json for the capabilities feed")
     s.add_argument("--glob", default="frontier-*-*.json")
     s.add_argument("--json", action="store_true")
+    c = sub.add_parser("cloud-probe", help="one real cloud session; passes only if its write lands in its workspace")
+    c.add_argument("--cloud", required=True)
+    c.add_argument("--timeout", type=int, default=180)
+    c.add_argument("--log", help="write the session's output here")
     sub.add_parser("selftest", help="fixture repo, fake models, fake build")
     args = ap.parse_args()
     return {"gen": cmd_gen, "validate": cmd_validate, "run": cmd_run, "summary": cmd_summary,
-            "selftest": cmd_selftest}[args.cmd](args)
+            "cloud-probe": cmd_cloud_probe, "selftest": cmd_selftest}[args.cmd](args)
 
 
 if __name__ == "__main__":
