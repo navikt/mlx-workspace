@@ -44,23 +44,23 @@
             "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 12,
-            "local_n": 12
+            "local_k": 27,
+            "local_n": 27
           },
           "edit-single": {
             "delegate": "cloud",
             "local": "not-yet",
             "delegate_k": 3,
             "delegate_n": 3,
-            "local_k": 3,
-            "local_n": 3
+            "local_k": 6,
+            "local_n": 6
           },
           "edit-multi-mechanical": {
             "delegate": "trusted",
             "local": "cloud",
             "delegate_k": 35,
             "delegate_n": 35,
-            "local_k": 13,
+            "local_k": 11,
             "local_n": 18
           },
           "create-file": {
@@ -69,7 +69,7 @@
             "delegate_k": 1,
             "delegate_n": 2,
             "local_k": 3,
-            "local_n": 8
+            "local_n": 18
           },
           "debug": {
             "delegate": "cloud",
@@ -120,27 +120,27 @@
         "classes": {
           "read-qa": {
             "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 9,
+            "local_n": 9
           },
           "edit-single": {
             "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 6,
+            "local_n": 6
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
             "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 3,
+            "local_n": 6
           },
           "create-file": {
             "delegate": "cloud",
@@ -148,7 +148,7 @@
             "delegate_k": 0,
             "delegate_n": 0,
             "local_k": 0,
-            "local_n": 0
+            "local_n": 6
           },
           "debug": {
             "delegate": "cloud",
