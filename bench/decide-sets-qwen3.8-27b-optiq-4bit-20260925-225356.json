@@ -1,0 +1,5717 @@
+{
+  "key": "qwen3.8-27b-optiq-4bit",
+  "model": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
+  "sets": [
+    "issue-type",
+    "aksel-kind",
+    "pr-motivation"
+  ],
+  "nav_pilot_commit": "2e1e8ee6b30f544c90738321a0dba3aece62b2d6",
+  "started": "2026-09-25T22:58:04+0200",
+  "cases": [
+    {
+      "id": "issue-type-mock-oauth2-server-33",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 736,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9835329111774263,
+        "feature": 0.014029182462652761,
+        "question": 0.002437906359920997
+      },
+      "ms": 359,
+      "wall_s": 0.546,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 33,
+      "construction": null
+    },
+    {
+      "id": "issue-type-stub-oidc-provider-5",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 332,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9601468974947032,
+        "feature": 0.01992655125264832,
+        "question": 0.01992655125264832
+      },
+      "ms": 607,
+      "wall_s": 0.898,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/stub-oidc-provider",
+      "number": 5,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-383",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.34465161246562004,
+        "feature": 0.5682224574950143,
+        "question": 0.08712593003936571
+      },
+      "ms": 673,
+      "wall_s": 0.86,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 383,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-889",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 607,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9978007833423002,
+        "feature": 0.0011682445026498748,
+        "question": 0.0010309721550499956
+      },
+      "ms": 740,
+      "wall_s": 1.109,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 889,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-659",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 452,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9992818863556289,
+        "feature": 0.00048772749084411587,
+        "question": 0.0002303861535270598
+      },
+      "ms": 749,
+      "wall_s": 0.926,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 659,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-419",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1923,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8649848435103124,
+        "feature": 0.11706296879184522,
+        "question": 0.017952187697842317
+      },
+      "ms": 1192,
+      "wall_s": 1.526,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 419,
+      "construction": null
+    },
+    {
+      "id": "issue-type-circleci-nais-orb-14",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 183,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9977392392533484,
+        "feature": 0.0019260614526898623,
+        "question": 0.00033469929396181034
+      },
+      "ms": 535,
+      "wall_s": 0.842,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/circleci-nais-orb",
+      "number": 14,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-190",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3044,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.998538100100967,
+        "feature": 0.001031787060934027,
+        "question": 0.0004301128380991107
+      },
+      "ms": 1616,
+      "wall_s": 1.911,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 190,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-242",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2262,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7053842902709422,
+        "feature": 0.22900475027227976,
+        "question": 0.06561095945677808
+      },
+      "ms": 1187,
+      "wall_s": 1.495,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 242,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-517",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1984,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9878826189999033,
+        "feature": 0.0075425768732384,
+        "question": 0.004574804126858538
+      },
+      "ms": 1573,
+      "wall_s": 1.885,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 517,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-825",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1866,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.99943429770473,
+        "feature": 0.0003352728559239301,
+        "question": 0.00023042943934614745
+      },
+      "ms": 1342,
+      "wall_s": 1.582,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 825,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1584",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 312,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9985817483108734,
+        "feature": 0.0007091258445633471,
+        "question": 0.0007091258445633471
+      },
+      "ms": 707,
+      "wall_s": 1.009,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1584,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mangfold-i-mai-45",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 277,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.35429736711999715,
+        "feature": 0.5841362225643071,
+        "question": 0.06156641031569567
+      },
+      "ms": 697,
+      "wall_s": 0.889,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mangfold-i-mai",
+      "number": 45,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-417",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2348,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5154296774271651,
+        "feature": 0.13032103130645528,
+        "question": 0.3542492912663797
+      },
+      "ms": 1378,
+      "wall_s": 1.565,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 417,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-443",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 545,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7818698095332648,
+        "feature": 0.1539634641262825,
+        "question": 0.0641667263404528
+      },
+      "ms": 875,
+      "wall_s": 1.183,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 443,
+      "construction": null
+    },
+    {
+      "id": "issue-type-melosys-eessi-29",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1266,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.3891374337863064,
+        "feature": 0.26744998621756016,
+        "question": 0.34341257999613345
+      },
+      "ms": 1100,
+      "wall_s": 1.348,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/melosys-eessi",
+      "number": 29,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dagpenger-226",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 647,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9984637972524232,
+        "feature": 0.0006257466883303323,
+        "question": 0.000910456059246405
+      },
+      "ms": 717,
+      "wall_s": 0.973,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 226,
+      "construction": null
+    },
+    {
+      "id": "issue-type-forenklet-deploy-15",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9746645694674063,
+        "feature": 0.02291971078832236,
+        "question": 0.002415719744271373
+      },
+      "ms": 641,
+      "wall_s": 0.897,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/forenklet-deploy",
+      "number": 15,
+      "construction": null
+    },
+    {
+      "id": "issue-type-Designsystemet-old-28",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 385,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9991705001234408,
+        "feature": 0.000626201888419353,
+        "question": 0.00020329798813980098
+      },
+      "ms": 684,
+      "wall_s": 0.996,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/Designsystemet-old",
+      "number": 28,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-860",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 824,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.913095097260742,
+        "feature": 0.03539926951344286,
+        "question": 0.051505633225815195
+      },
+      "ms": 813,
+      "wall_s": 1.176,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 860,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-350",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 309,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9957018599581086,
+        "feature": 0.003591025245165363,
+        "question": 0.0007071147967260634
+      },
+      "ms": 706,
+      "wall_s": 1.004,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 350,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-412",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 617,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9992818745642865,
+        "feature": 0.00048773549927267024,
+        "question": 0.00023038993644084894
+      },
+      "ms": 796,
+      "wall_s": 1.105,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 412,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ebxml-processor-274",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 691,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5061465274520766,
+        "feature": 0.09966616061937397,
+        "question": 0.3941873119285495
+      },
+      "ms": 784,
+      "wall_s": 1.426,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ebxml-processor",
+      "number": 274,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nks-bob-frontend-235",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 598,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.996498080696672,
+        "feature": 0.002179802347472301,
+        "question": 0.001322116955855522
+      },
+      "ms": 850,
+      "wall_s": 1.127,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nks-bob-frontend",
+      "number": 235,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-514",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1753,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9520349439850329,
+        "feature": 0.0325768443501202,
+        "question": 0.01538821166484688
+      },
+      "ms": 1397,
+      "wall_s": 1.58,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 514,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dagpenger-1010",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 323,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9969104645881008,
+        "feature": 0.0021805478366906657,
+        "question": 0.0009089875752084733
+      },
+      "ms": 656,
+      "wall_s": 0.954,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 1010,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-160",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 191,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7201644285806031,
+        "feature": 0.2338017095222783,
+        "question": 0.04603386189711849
+      },
+      "ms": 620,
+      "wall_s": 0.832,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 160,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-794",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 719,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9990248551628481,
+        "feature": 0.0004875724185760058,
+        "question": 0.0004875724185760058
+      },
+      "ms": 807,
+      "wall_s": 1.03,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 794,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nytt-sykefravaer-38",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 335,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.43597031107972467,
+        "feature": 0.26440082486650324,
+        "question": 0.2996288640537721
+      },
+      "ms": 634,
+      "wall_s": 0.979,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nytt-sykefravaer",
+      "number": 38,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ghep-119",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 181,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8749297957754881,
+        "feature": 0.1044988764604466,
+        "question": 0.020571327764065266
+      },
+      "ms": 616,
+      "wall_s": 0.98,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 119,
+      "construction": null
+    },
+    {
+      "id": "issue-type-tiltakspenger-meldekort-128",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 460,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.981981888020708,
+        "feature": 0.015870300382038675,
+        "question": 0.0021478115972533266
+      },
+      "ms": 685,
+      "wall_s": 1.04,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tiltakspenger-meldekort",
+      "number": 128,
+      "construction": null
+    },
+    {
+      "id": "issue-type-Designsystemet-old-148",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 243,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.3693163704047417,
+        "feature": 0.09336638412104448,
+        "question": 0.5373172454742138
+      },
+      "ms": 610,
+      "wall_s": 0.772,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/Designsystemet-old",
+      "number": 148,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helved-peisen-7",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 289,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.998012525931873,
+        "feature": 0.0015003739600399323,
+        "question": 0.000487100108087182
+      },
+      "ms": 614,
+      "wall_s": 0.797,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helved-peisen",
+      "number": 7,
+      "construction": null
+    },
+    {
+      "id": "issue-type-remove-package-versions-3",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 770,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9706331165167948,
+        "feature": 0.025866265161323856,
+        "question": 0.0035006183218810913
+      },
+      "ms": 808,
+      "wall_s": 1.048,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/remove-package-versions",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2134",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 486,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9960363043123934,
+        "feature": 0.0011661786163916733,
+        "question": 0.002797517071214719
+      },
+      "ms": 1203,
+      "wall_s": 1.573,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2134,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-168",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1039,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0013216827305157156,
+        "feature": 0.9962090888511903,
+        "question": 0.002469228418293967
+      },
+      "ms": 1387,
+      "wall_s": 1.76,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 168,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-171",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1657,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0019249826884370589,
+        "feature": 0.9971657198749398,
+        "question": 0.0009092974366231443
+      },
+      "ms": 1544,
+      "wall_s": 1.791,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 171,
+      "construction": null
+    },
+    {
+      "id": "issue-type-aksel-arcade-31",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1400,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0003352964960485874,
+        "feature": 0.9995063206539669,
+        "question": 0.0001583828499846125
+      },
+      "ms": 1356,
+      "wall_s": 1.62,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 31,
+      "construction": null
+    },
+    {
+      "id": "issue-type-tilbakemeldingsmottak-api-361",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1316,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.008546833742947334,
+        "feature": 0.9878903158811112,
+        "question": 0.003562850375941451
+      },
+      "ms": 1713,
+      "wall_s": 1.971,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tilbakemeldingsmottak-api",
+      "number": 361,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-314",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3121,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0019166881077425644,
+        "feature": 0.9928732134381573,
+        "question": 0.005210098454100164
+      },
+      "ms": 2638,
+      "wall_s": 3.014,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 314,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-message-generator-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 301,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.13868014447227797,
+        "feature": 0.7041836726524351,
+        "question": 0.15713618287528697
+      },
+      "ms": 786,
+      "wall_s": 1.003,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-message-generator",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-645",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 112,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.04707620015900405,
+        "feature": 0.44672675123467165,
+        "question": 0.5061970486063243
+      },
+      "ms": 645,
+      "wall_s": 0.897,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 645,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1176",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.019668001110788008,
+        "feature": 0.947904947105702,
+        "question": 0.032427051783509936
+      },
+      "ms": 853,
+      "wall_s": 1.051,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1176,
+      "construction": null
+    },
+    {
+      "id": "issue-type-innbyggerpanelet-3",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 416,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.001499033341520168,
+        "feature": 0.9971780743777172,
+        "question": 0.0013228922807625842
+      },
+      "ms": 775,
+      "wall_s": 1.046,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/innbyggerpanelet",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-attachment-service-22",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 705,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.028475603665244625,
+        "feature": 0.9430487926695106,
+        "question": 0.028475603665244625
+      },
+      "ms": 993,
+      "wall_s": 1.169,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-attachment-service",
+      "number": 22,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-169",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.059646792594552564,
+        "feature": 0.44083511205905035,
+        "question": 0.4995180953463973
+      },
+      "ms": 838,
+      "wall_s": 1.076,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 169,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-83",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1431,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.008066250332124414,
+        "feature": 0.9323317734557903,
+        "question": 0.05960197621208529
+      },
+      "ms": 2279,
+      "wall_s": 2.475,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 83,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ghep-104",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 686,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0010299204435965425,
+        "feature": 0.9967897379601999,
+        "question": 0.0021803415962036135
+      },
+      "ms": 1039,
+      "wall_s": 1.22,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 104,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-payload-signing-service-32",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1195,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.05069599486644146,
+        "feature": 0.898608010267117,
+        "question": 0.05069599486644146
+      },
+      "ms": 1378,
+      "wall_s": 1.727,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-payload-signing-service",
+      "number": 32,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dinesykmeldte-696",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1397,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0008020527264841923,
+        "feature": 0.9967274509516786,
+        "question": 0.0024704963218372547
+      },
+      "ms": 1326,
+      "wall_s": 1.487,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dinesykmeldte",
+      "number": 696,
+      "construction": null
+    },
+    {
+      "id": "issue-type-skjemabygging-formio-2215",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3756,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.00037982097186886344,
+        "feature": 0.9991897854814156,
+        "question": 0.00043039354671554116
+      },
+      "ms": 2518,
+      "wall_s": 2.709,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/skjemabygging-formio",
+      "number": 2215,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-9",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1820,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0014988909360846132,
+        "feature": 0.9970022181278307,
+        "question": 0.0014988909360846132
+      },
+      "ms": 1602,
+      "wall_s": 1.903,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 9,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-133",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 554,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.00403062287960499,
+        "feature": 0.9863004154752121,
+        "question": 0.00966896164518293
+      },
+      "ms": 1709,
+      "wall_s": 1.965,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 133,
+      "construction": null
+    },
+    {
+      "id": "issue-type-gandalf-30",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 875,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8564436070889409,
+        "feature": 0.13133988096967547,
+        "question": 0.012216511941383705
+      },
+      "ms": 1590,
+      "wall_s": 1.799,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/gandalf",
+      "number": 30,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-918",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 223,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5373272589824355,
+        "feature": 0.36929926430076804,
+        "question": 0.09337347671679644
+      },
+      "ms": 1059,
+      "wall_s": 1.274,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 918,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2501",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 664,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.4825006964216523,
+        "feature": 0.48254707036070615,
+        "question": 0.03495223321764161
+      },
+      "ms": 1171,
+      "wall_s": 1.482,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2501,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2058",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0021777264302283742,
+        "feature": 0.9956445471395431,
+        "question": 0.0021777264302283742
+      },
+      "ms": 805,
+      "wall_s": 1.016,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2058,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-1060",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 741,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.006539702537972537,
+        "feature": 0.9706344927647197,
+        "question": 0.022825804697307776
+      },
+      "ms": 1067,
+      "wall_s": 1.429,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 1060,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-252",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 293,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.00217481323633794,
+        "feature": 0.9942395259211113,
+        "question": 0.0035856608425505463
+      },
+      "ms": 785,
+      "wall_s": 1.008,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 252,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2240",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 283,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.007541396334090554,
+        "feature": 0.9878845155722392,
+        "question": 0.004574088093670379
+      },
+      "ms": 677,
+      "wall_s": 0.824,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2240,
+      "construction": null
+    },
+    {
+      "id": "issue-type-farskapsportal-ui-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 238,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.028559912924152536,
+        "feature": 0.946236052382197,
+        "question": 0.025204034693650366
+      },
+      "ms": 693,
+      "wall_s": 0.984,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/farskapsportal-ui",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nais-env-15",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 204,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0019203307358735642,
+        "feature": 0.9949135791331124,
+        "question": 0.0031660901310139747
+      },
+      "ms": 684,
+      "wall_s": 0.996,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nais-env",
+      "number": 15,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-144",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 7942,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.002175806445934476,
+        "feature": 0.9946584138553598,
+        "question": 0.003165779698705604
+      },
+      "ms": 4978,
+      "wall_s": 5.241,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 144,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-456",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0014980854326969732,
+        "feature": 0.9965783347953504,
+        "question": 0.0019235797719525667
+      },
+      "ms": 964,
+      "wall_s": 1.27,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 456,
+      "construction": null
+    },
+    {
+      "id": "issue-type-lumi-255",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1971,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0024678474432593793,
+        "feature": 0.9956101910354296,
+        "question": 0.001921961521311169
+      },
+      "ms": 1648,
+      "wall_s": 2.028,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 255,
+      "construction": null
+    },
+    {
+      "id": "issue-type-data-catalog-policies-34",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 149,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.002470167228100714,
+        "feature": 0.9966211090324257,
+        "question": 0.0009087237394737015
+      },
+      "ms": 566,
+      "wall_s": 0.898,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/data-catalog-policies",
+      "number": 34,
+      "construction": null
+    },
+    {
+      "id": "issue-type-aksel-arcade-37",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1341,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0008033539606849304,
+        "feature": 0.9982863267414999,
+        "question": 0.0009103192978152369
+      },
+      "ms": 954,
+      "wall_s": 1.322,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 37,
+      "construction": null
+    },
+    {
+      "id": "issue-type-token-support-179",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 210,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0013202500112422671,
+        "feature": 0.9950909383741748,
+        "question": 0.003588811614582705
+      },
+      "ms": 655,
+      "wall_s": 0.903,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 179,
+      "construction": null
+    },
+    {
+      "id": "issue-type-lumi-262",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1186,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.002173775421184882,
+        "feature": 0.9937650774358209,
+        "question": 0.004061147142994182
+      },
+      "ms": 1166,
+      "wall_s": 1.351,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 262,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dbt-dvh-macros-12",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 477,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.02529434599504985,
+        "feature": 0.9494113080099001,
+        "question": 0.02529434599504985
+      },
+      "ms": 759,
+      "wall_s": 0.975,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dbt-dvh-macros",
+      "number": 12,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-471",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2618,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0010158286445099537,
+        "feature": 0.015890233543483054,
+        "question": 0.983093937812007
+      },
+      "ms": 1872,
+      "wall_s": 2.268,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 471,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-500",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3158,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.026591646373374075,
+        "feature": 0.09281396564662192,
+        "question": 0.880594387980004
+      },
+      "ms": 2049,
+      "wall_s": 2.375,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 500,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-604",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3355,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0009081541807614862,
+        "feature": 0.003169769549110381,
+        "question": 0.9959220762701282
+      },
+      "ms": 2203,
+      "wall_s": 2.426,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 604,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-740",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1870,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.05668088562774064,
+        "feature": 0.05668088562774064,
+        "question": 0.8866382287445188
+      },
+      "ms": 1414,
+      "wall_s": 1.687,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 740,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3519,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.009458853781210719,
+        "feature": 0.02571183035151623,
+        "question": 0.9648293158672729
+      },
+      "ms": 2060,
+      "wall_s": 2.247,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-206",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3551,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.012236327789684802,
+        "feature": 0.01571175588887782,
+        "question": 0.9720519163214373
+      },
+      "ms": 1992,
+      "wall_s": 2.18,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 206,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-424",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2754,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.004565024549908672,
+        "feature": 0.009664157047993928,
+        "question": 0.9857708184020975
+      },
+      "ms": 1512,
+      "wall_s": 1.75,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 424,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-472",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2341,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.1243993363629955,
+        "feature": 0.1597319097091738,
+        "question": 0.7158687539278308
+      },
+      "ms": 1391,
+      "wall_s": 1.615,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 472,
+      "construction": null
+    },
+    {
+      "id": "issue-type-esyfo-narmesteleder-516",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2679,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.14416117365773476,
+        "feature": 0.20975326999328767,
+        "question": 0.6460855563489776
+      },
+      "ms": 1840,
+      "wall_s": 2.078,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/esyfo-narmesteleder",
+      "number": 516,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 147,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.022283014604901317,
+        "feature": 0.7380932051897982,
+        "question": 0.23962378020530067
+      },
+      "ms": 640,
+      "wall_s": 0.819,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/g",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-4",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 104,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.014229130366312454,
+        "feature": 0.10518513071856128,
+        "question": 0.8805857389151263
+      },
+      "ms": 542,
+      "wall_s": 0.767,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 4,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-7",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 405,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0024332305613910614,
+        "feature": 0.015866656368890404,
+        "question": 0.9817001130697186
+      },
+      "ms": 692,
+      "wall_s": 0.981,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 7,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 430,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.004005140133815358,
+        "feature": 0.01584063651528813,
+        "question": 0.9801542233508965
+      },
+      "ms": 896,
+      "wall_s": 1.195,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 8,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-10",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 750,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.024403645397376026,
+        "feature": 0.7132324411471028,
+        "question": 0.2623639134555212
+      },
+      "ms": 901,
+      "wall_s": 1.125,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-issues",
+      "number": 10,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-11",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 576,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.029254988247514685,
+        "feature": 0.21616674933444288,
+        "question": 0.7545782624180424
+      },
+      "ms": 781,
+      "wall_s": 0.97,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-16",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 454,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.001493271133145546,
+        "feature": 0.00521202838315562,
+        "question": 0.9932947004836988
+      },
+      "ms": 745,
+      "wall_s": 1.05,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 16,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 638,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.000551937461229223,
+        "feature": 0.0015003215713052151,
+        "question": 0.9979477409674656
+      },
+      "ms": 827,
+      "wall_s": 1.051,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 17,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-30",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 694,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.010965091517362604,
+        "feature": 0.11790039175854901,
+        "question": 0.8711345167240884
+      },
+      "ms": 817,
+      "wall_s": 1.049,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 30,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-message-converter-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 732,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.2554279948692252,
+        "feature": 0.050284413075256204,
+        "question": 0.6942875920555186
+      },
+      "ms": 830,
+      "wall_s": 1.138,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-message-converter",
+      "number": 17,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-outbound-message-service-76",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1059,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0039970572502016485,
+        "feature": 0.01791356779174425,
+        "question": 0.9780893749580541
+      },
+      "ms": 913,
+      "wall_s": 1.105,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-outbound-message-service",
+      "number": 76,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helseopplysninger-21",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 135,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0007082936088542797,
+        "feature": 0.0019253416461622673,
+        "question": 0.9973663647449835
+      },
+      "ms": 634,
+      "wall_s": 0.903,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helseopplysninger",
+      "number": 21,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-306",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 562,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.020094779374717243,
+        "feature": 0.3143850465307936,
+        "question": 0.6655201740944892
+      },
+      "ms": 710,
+      "wall_s": 1.049,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 306,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-435",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 575,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.00037904039614045516,
+        "feature": 0.002471653862530181,
+        "question": 0.9971493057413294
+      },
+      "ms": 709,
+      "wall_s": 1.055,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 435,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-460",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 365,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 5.826825872238215e-05,
+        "feature": 0.0003799567755852514,
+        "question": 0.9995617749656923
+      },
+      "ms": 647,
+      "wall_s": 0.848,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 460,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-513",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 356,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.125114561665944,
+        "feature": 0.05908791167082916,
+        "question": 0.8157975266632269
+      },
+      "ms": 641,
+      "wall_s": 0.867,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 513,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-573",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1676,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.00048741082121884187,
+        "feature": 0.000910603296350821,
+        "question": 0.9986019858824304
+      },
+      "ms": 1196,
+      "wall_s": 1.514,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 573,
+      "construction": null
+    },
+    {
+      "id": "issue-type-modiapersonoversikt-126",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 272,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.049660398555048516,
+        "feature": 0.17337178572337497,
+        "question": 0.7769678157215767
+      },
+      "ms": 671,
+      "wall_s": 0.959,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/modiapersonoversikt",
+      "number": 126,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-387",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 359,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.10094228599070847,
+        "feature": 0.0540072489777249,
+        "question": 0.8450504650315666
+      },
+      "ms": 655,
+      "wall_s": 0.952,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 387,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-397",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 502,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.025771810713408613,
+        "feature": 0.4567350244781184,
+        "question": 0.5174931648084727
+      },
+      "ms": 713,
+      "wall_s": 0.948,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 397,
+      "construction": null
+    },
+    {
+      "id": "issue-type-react-intl-bundler-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 132,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.007219445590078416,
+        "feature": 0.04708755283941794,
+        "question": 0.945693001570504
+      },
+      "ms": 624,
+      "wall_s": 0.871,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/react-intl-bundler",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-standbot-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 220,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.046793883220928346,
+        "feature": 0.013404265133910506,
+        "question": 0.9398018516451612
+      },
+      "ms": 635,
+      "wall_s": 0.9,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/standbot",
+      "number": 8,
+      "construction": null
+    },
+    {
+      "id": "issue-type-syfo-budstikka-166",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1574,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.018819003989839034,
+        "feature": 0.07443060462876183,
+        "question": 0.9067503913813991
+      },
+      "ms": 1148,
+      "wall_s": 1.416,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 166,
+      "construction": null
+    },
+    {
+      "id": "issue-type-syfo-budstikka-167",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1534,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.002445523024335169,
+        "feature": 0.010960073809423015,
+        "question": 0.9865944031662419
+      },
+      "ms": 1292,
+      "wall_s": 1.528,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 167,
+      "construction": null
+    },
+    {
+      "id": "issue-type-sykmeldinger-38",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 86,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.007668251149613678,
+        "feature": 0.1058784804115475,
+        "question": 0.8864532684388388
+      },
+      "ms": 562,
+      "wall_s": 0.923,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/sykmeldinger",
+      "number": 38,
+      "construction": null
+    },
+    {
+      "id": "issue-type-token-support-83",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 119,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0005517037513643235,
+        "feature": 0.001925635303179745,
+        "question": 0.9975226609454559
+      },
+      "ms": 528,
+      "wall_s": 0.89,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 83,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1987",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 672,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9969322761688617,
+        "component-feedback": 0.00218073656621947,
+        "discussion": 0.0007079815068817263,
+        "icon-feedback": 0,
+        "new-icon": 0.000179005758037211
+      },
+      "ms": 861,
+      "wall_s": 1.088,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1987,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-987",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 319,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.3672739816021365,
+        "component-feedback": 0.6055324256421699,
+        "discussion": 0.023479040120696255,
+        "icon-feedback": 0.0009103811813292159,
+        "new-icon": 0.0028041714536681524
+      },
+      "ms": 724,
+      "wall_s": 1.043,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 987,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-13",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 914,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9953784145557111,
+        "component-feedback": 0.003589895096322411,
+        "discussion": 0.0009076676251355999,
+        "icon-feedback": 1.561728416123339e-05,
+        "new-icon": 0.00010840543866954886
+      },
+      "ms": 992,
+      "wall_s": 1.178,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 13,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2441",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 210,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9944899568032486,
+        "component-feedback": 0.0035865789057353925,
+        "discussion": 0.0014951085263811901,
+        "icon-feedback": 0,
+        "new-icon": 0.0004283557646347811
+      },
+      "ms": 718,
+      "wall_s": 0.944,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2441,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2645",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 539,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9763085268263286,
+        "component-feedback": 0.013926293194001226,
+        "discussion": 0.007454207588995388,
+        "icon-feedback": 0.00017530615963592792,
+        "new-icon": 0.002135666231038811
+      },
+      "ms": 885,
+      "wall_s": 1.268,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2645,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-634",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 559,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9410027917851933,
+        "component-feedback": 0.05308533470433041,
+        "discussion": 0.004937705292100401,
+        "icon-feedback": 0.00011612369817148846,
+        "new-icon": 0.0008580445202044187
+      },
+      "ms": 797,
+      "wall_s": 0.966,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 634,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1631",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 697,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.994949299889004,
+        "component-feedback": 0.0035883474671843415,
+        "discussion": 0.0011649658589604815,
+        "icon-feedback": 3.744776617389361e-05,
+        "new-icon": 0.00025993901867730535
+      },
+      "ms": 913,
+      "wall_s": 1.212,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1631,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-288",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 222,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9871248971403886,
+        "component-feedback": 0.010965146303879538,
+        "discussion": 0.001483971180766434,
+        "icon-feedback": 5.077870143456859e-05,
+        "new-icon": 0.00037520667353087755
+      },
+      "ms": 722,
+      "wall_s": 1.031,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 288,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4157",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 407,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9306502717127385,
+        "component-feedback": 0.05250369555817415,
+        "discussion": 0.013275013163184213,
+        "icon-feedback": 0.0002145706034209588,
+        "new-icon": 0.0033564489624821853
+      },
+      "ms": 791,
+      "wall_s": 1.097,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 4157,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2390",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 289,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9936446118171192,
+        "component-feedback": 0.004601427595199902,
+        "discussion": 0.001493864822152446,
+        "icon-feedback": 3.100417525658624e-05,
+        "new-icon": 0.00022909159027199334
+      },
+      "ms": 785,
+      "wall_s": 1.025,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2390,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1767",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 725,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9954776609406196,
+        "component-feedback": 0.003590133787311399,
+        "discussion": 0.0007069392582666654,
+        "icon-feedback": 2.2724525220282797e-05,
+        "new-icon": 0.0002025414885821844
+      },
+      "ms": 889,
+      "wall_s": 1.204,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1767,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3133",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 537,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9660499240765147,
+        "component-feedback": 0.02917217996244019,
+        "discussion": 0.00394802523784628,
+        "icon-feedback": 0.00014380680877639756,
+        "new-icon": 0.0006860639144224298
+      },
+      "ms": 874,
+      "wall_s": 1.13,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3133,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2281",
+      "set": "aksel-kind",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 572,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9948372962776173,
+        "component-feedback": 0.004607010672149582,
+        "discussion": 0.00042851874445806883,
+        "icon-feedback": 1.8827799631640055e-05,
+        "new-icon": 0.00010834650614353558
+      },
+      "ms": 892,
+      "wall_s": 1.248,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2281,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1918",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 446,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.0019255069951215464,
+        "component-feedback": 0.997482601045719,
+        "discussion": 0.00042963868418839255,
+        "icon-feedback": 2.277001607695737e-05,
+        "new-icon": 0.00013948325889435645
+      },
+      "ms": 784,
+      "wall_s": 1.079,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1918,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2324",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 329,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.032692058752447135,
+        "component-feedback": 0.9554938276391516,
+        "discussion": 0.006437448054818299,
+        "icon-feedback": 0.0003631759675089493,
+        "new-icon": 0.005013489586073983
+      },
+      "ms": 688,
+      "wall_s": 0.865,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2324,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4825",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 1138,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.2717088504236693,
+        "component-feedback": 0.5752076408607187,
+        "discussion": 0.1454352674190259,
+        "icon-feedback": 0.0012582616054937531,
+        "new-icon": 0.006389979691092248
+      },
+      "ms": 1201,
+      "wall_s": 1.401,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 4825,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3576",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 285,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.004045066855955117,
+        "component-feedback": 0.9899030225019889,
+        "discussion": 0.0051939686552475405,
+        "icon-feedback": 6.142109588946658e-05,
+        "new-icon": 0.0007965208909190844
+      },
+      "ms": 720,
+      "wall_s": 0.974,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3576,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3021",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 2255,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.0010318204287186974,
+        "component-feedback": 0.9985703926209752,
+        "discussion": 0.00033498304805427536,
+        "icon-feedback": 2.2795882503994467e-05,
+        "new-icon": 4.000801974815529e-05
+      },
+      "ms": 1688,
+      "wall_s": 1.995,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3021,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3943",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 1913,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.11084651341477791,
+        "component-feedback": 0.4384064650236916,
+        "discussion": 0.4384064650236916,
+        "icon-feedback": 0.0020302247117803015,
+        "new-icon": 0.010310331826058526
+      },
+      "ms": 1577,
+      "wall_s": 1.827,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3943,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2747",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 439,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.003169611765088747,
+        "component-feedback": 0.9960016763442727,
+        "discussion": 0.0006241335624105475,
+        "icon-feedback": 2.5761068715801617e-05,
+        "new-icon": 0.00017881725951206072
+      },
+      "ms": 782,
+      "wall_s": 1.086,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2747,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1861",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 1115,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.00029590597143556427,
+        "component-feedback": 0.9995502083387697,
+        "discussion": 0.00010885772341100816,
+        "icon-feedback": 1.3839706451171329e-05,
+        "new-icon": 3.118825993253365e-05
+      },
+      "ms": 1159,
+      "wall_s": 1.524,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1861,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1969",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 125,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.06253732519064079,
+        "component-feedback": 0.3175907427824717,
+        "discussion": 0.5933376213212495,
+        "icon-feedback": 0.0035281144621482803,
+        "new-icon": 0.0230061962434897
+      },
+      "ms": 621,
+      "wall_s": 0.982,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 1969,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4311",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 226,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.001925173604183616,
+        "component-feedback": 0.9975251605950893,
+        "discussion": 0.0003790891594586918,
+        "icon-feedback": 3.111753313250167e-05,
+        "new-icon": 0.00013945910813581533
+      },
+      "ms": 667,
+      "wall_s": 1.045,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 4311,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3632",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 243,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.002795177557170869,
+        "component-feedback": 0.9952266302651293,
+        "discussion": 0.0010282883577069765,
+        "icon-feedback": 4.2442529352593183e-05,
+        "new-icon": 0.0009074612906402072
+      },
+      "ms": 674,
+      "wall_s": 0.932,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3632,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1986",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 241,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.0013237197629652963,
+        "component-feedback": 0.9977444877738691,
+        "discussion": 0.0005518084938780698,
+        "icon-feedback": 4.529519946063702e-05,
+        "new-icon": 0.00033468876982690034
+      },
+      "ms": 665,
+      "wall_s": 0.968,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1986,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4086",
+      "set": "aksel-kind",
+      "expect": "component-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 226,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.024126241074963934,
+        "component-feedback": 0.484588505928915,
+        "discussion": 0.4846521658618525,
+        "icon-feedback": 0.0005330180925869828,
+        "new-icon": 0.006100069041681752
+      },
+      "ms": 667,
+      "wall_s": 0.865,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 4086,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3942",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 289,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.007505217579316764,
+        "component-feedback": 0.004017253482850929,
+        "discussion": 0.005158255577257944,
+        "icon-feedback": 0.00032975624661167114,
+        "new-icon": 0.982989517113963
+      },
+      "ms": 756,
+      "wall_s": 1.105,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3942,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3040",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 184,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.0035820961931124747,
+        "component-feedback": 0.00029403636108231066,
+        "discussion": 0.002789739320233094,
+        "icon-feedback": 9.545963011844278e-05,
+        "new-icon": 0.9932386684954534
+      },
+      "ms": 679,
+      "wall_s": 0.928,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3040,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1784",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 335,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.0027804931100333407,
+        "component-feedback": 0.0005475115561903845,
+        "discussion": 0.00667005622670472,
+        "icon-feedback": 4.49424853364564e-05,
+        "new-icon": 0.9899569966217351
+      },
+      "ms": 703,
+      "wall_s": 0.973,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1784,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-5283",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 693,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.003541004379123579,
+        "component-feedback": 0.000543030609158243,
+        "discussion": 0.014004943995631496,
+        "icon-feedback": 8.864731007022256e-05,
+        "new-icon": 0.9818223737060163
+      },
+      "ms": 869,
+      "wall_s": 1.129,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 5283,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1937",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 272,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.012316928297500192,
+        "component-feedback": 0.005134459606331301,
+        "discussion": 0.0035288590398168196,
+        "icon-feedback": 0.0005411680610515345,
+        "new-icon": 0.9784785849953
+      },
+      "ms": 760,
+      "wall_s": 0.964,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1937,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2254",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 139,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.4001515857210383,
+        "component-feedback": 0.4001515857210383,
+        "discussion": 0.11464534878028902,
+        "icon-feedback": 0.015515560748940666,
+        "new-icon": 0.06953591902869366
+      },
+      "ms": 694,
+      "wall_s": 1.054,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 2254,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2103",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 72,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.1163225351564556,
+        "component-feedback": 0.02021382564629033,
+        "discussion": 0.06226296633679489,
+        "icon-feedback": 0.1318107007693492,
+        "new-icon": 0.66938997209111
+      },
+      "ms": 614,
+      "wall_s": 0.848,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2103,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3141",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 81,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.11585093986699173,
+        "component-feedback": 0.5192078909902892,
+        "discussion": 0.07962310890844103,
+        "icon-feedback": 0.007406102804483672,
+        "new-icon": 0.27791195742979435
+      },
+      "ms": 604,
+      "wall_s": 0.964,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 3141,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3058",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 739,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.005209160768431037,
+        "component-feedback": 0.0009052164087976123,
+        "discussion": 0.0011623208764989352,
+        "icon-feedback": 3.297250528019144e-05,
+        "new-icon": 0.9926903294409923
+      },
+      "ms": 911,
+      "wall_s": 1.132,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3058,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1897",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 337,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.0024653957490186453,
+        "component-feedback": 0.0004284215414729339,
+        "discussion": 0.0024653957490186453,
+        "icon-feedback": 2.9154451779944475e-05,
+        "new-icon": 0.9946116325087101
+      },
+      "ms": 695,
+      "wall_s": 0.884,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1897,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2133",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 80,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.0011665841519389922,
+        "component-feedback": 0.0002027219284492319,
+        "discussion": 0.0021794661258645195,
+        "icon-feedback": 7.457722975110056e-05,
+        "new-icon": 0.9963766505639962
+      },
+      "ms": 615,
+      "wall_s": 0.886,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2133,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2625",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 505,
+      "lang": "no",
+      "choice": "new-icon",
+      "p": {
+        "bug": 0.008477286517160202,
+        "component-feedback": 0.0045375644911399456,
+        "discussion": 0.006602117377885028,
+        "icon-feedback": 0.0005419347958785109,
+        "new-icon": 0.9798410968179366
+      },
+      "ms": 765,
+      "wall_s": 1.127,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2625,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3564",
+      "set": "aksel-kind",
+      "expect": "new-icon",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 181,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.10252763455139888,
+        "component-feedback": 0.4594969791766197,
+        "discussion": 0.4055046608703452,
+        "icon-feedback": 0.003096066291931942,
+        "new-icon": 0.029374659109704344
+      },
+      "ms": 691,
+      "wall_s": 0.975,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 3564,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2352",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 323,
+      "lang": "no",
+      "choice": "icon-feedback",
+      "p": {
+        "bug": 0.025649770595887605,
+        "component-feedback": 0.004457261785046663,
+        "discussion": 0.002105461384066754,
+        "icon-feedback": 0.9627367669383594,
+        "new-icon": 0.005050739296639507
+      },
+      "ms": 693,
+      "wall_s": 1.049,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2352,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4148",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 109,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6555089662886684,
+        "component-feedback": 0.04190528621665435,
+        "discussion": 0.05380745259575867,
+        "icon-feedback": 0.18780646322656813,
+        "new-icon": 0.06097183167235053
+      },
+      "ms": 621,
+      "wall_s": 0.925,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 4148,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3609",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 66,
+      "lang": "no",
+      "choice": "icon-feedback",
+      "p": {
+        "bug": 0.021521836062661327,
+        "component-feedback": 0.006166109269191097,
+        "discussion": 0.01676122277873504,
+        "icon-feedback": 0.9153427486688265,
+        "new-icon": 0.04020808322058604
+      },
+      "ms": 596,
+      "wall_s": 0.792,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 3609,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2901",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 491,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5019678966219575,
+        "component-feedback": 0.04669028750444251,
+        "discussion": 0.03208973402547143,
+        "icon-feedback": 0.3909329909658865,
+        "new-icon": 0.02831909088224204
+      },
+      "ms": 730,
+      "wall_s": 0.982,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 2901,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2263",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 246,
+      "lang": "no",
+      "choice": "icon-feedback",
+      "p": {
+        "bug": 0.007566456361566681,
+        "component-feedback": 0.00029338335151304164,
+        "discussion": 0.0007974986331903135,
+        "icon-feedback": 0.9910102147628076,
+        "new-icon": 0.0003324468909225641
+      },
+      "ms": 754,
+      "wall_s": 0.967,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2263,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2194",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 477,
+      "lang": "no",
+      "choice": "icon-feedback",
+      "p": {
+        "bug": 0.05173876779402675,
+        "component-feedback": 0.008990849708834917,
+        "discussion": 0.013081609136477358,
+        "icon-feedback": 0.9171979236518262,
+        "new-icon": 0.008990849708834917
+      },
+      "ms": 861,
+      "wall_s": 1.238,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 2194,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1920",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 61,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.35056200919082453,
+        "component-feedback": 0.45013052992614033,
+        "discussion": 0.11381082124590165,
+        "icon-feedback": 0.007275682384429407,
+        "new-icon": 0.078220957252704
+      },
+      "ms": 608,
+      "wall_s": 0.859,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 1920,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1799",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 131,
+      "lang": "no",
+      "choice": "icon-feedback",
+      "p": {
+        "bug": 0.008531432567308523,
+        "component-feedback": 0.0007003026305474056,
+        "discussion": 0.003138538645253303,
+        "icon-feedback": 0.9861471854763881,
+        "new-icon": 0.001482540680502757
+      },
+      "ms": 612,
+      "wall_s": 0.851,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 1799,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-4110",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 74,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6641212698039628,
+        "component-feedback": 0.21560860886701683,
+        "discussion": 0.03746715820468612,
+        "icon-feedback": 0.0034849885825839993,
+        "new-icon": 0.07931797454175023
+      },
+      "ms": 593,
+      "wall_s": 0.843,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 4110,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-1839",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 2002,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.01671133573399501,
+        "component-feedback": 0.021457779829251688,
+        "discussion": 0.80519724771234,
+        "icon-feedback": 0.13992230099041825,
+        "new-icon": 0.01671133573399501
+      },
+      "ms": 1426,
+      "wall_s": 1.617,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 1839,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2627",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 154,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5168416672442218,
+        "component-feedback": 0.048073763681508994,
+        "discussion": 0.03743988480034886,
+        "icon-feedback": 0.3552197367294048,
+        "new-icon": 0.04242494754451551
+      },
+      "ms": 693,
+      "wall_s": 0.949,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 2627,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-2600",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 129,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.36975771543193314,
+        "component-feedback": 0.2541305135666108,
+        "discussion": 0.12004275463976363,
+        "icon-feedback": 0.12004275463976363,
+        "new-icon": 0.13602626172192875
+      },
+      "ms": 623,
+      "wall_s": 0.986,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 2600,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-3731",
+      "set": "aksel-kind",
+      "expect": "icon-feedback",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 217,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5139963901870527,
+        "component-feedback": 0.14726243135741254,
+        "discussion": 0.07882389937554837,
+        "icon-feedback": 0.12995863953999318,
+        "new-icon": 0.12995863953999318
+      },
+      "ms": 668,
+      "wall_s": 0.849,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 3731,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-332",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 1324,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.004047043725846483,
+        "component-feedback": 0.00519650700643354,
+        "discussion": 0.9903298939972479,
+        "icon-feedback": 0,
+        "new-icon": 0.0004265552704721776
+      },
+      "ms": 1140,
+      "wall_s": 1.4,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 332,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-603",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 862,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.18666426073354667,
+        "component-feedback": 0.39516824307391096,
+        "discussion": 0.39516824307391096,
+        "icon-feedback": 0.00563677225261454,
+        "new-icon": 0.017362480866016952
+      },
+      "ms": 978,
+      "wall_s": 1.286,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 603,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-78",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 225,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.03369208857890031,
+        "component-feedback": 0.5973359091357741,
+        "discussion": 0.36232482609884686,
+        "icon-feedback": 0.0014803270595251062,
+        "new-icon": 0.00516684912695365
+      },
+      "ms": 684,
+      "wall_s": 0.869,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 78,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-651",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 333,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.0858548439607484,
+        "component-feedback": 0.5598439080722065,
+        "discussion": 0.3395624948991343,
+        "icon-feedback": 0.0015724863188336883,
+        "new-icon": 0.01316626674907708
+      },
+      "ms": 753,
+      "wall_s": 0.96,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 651,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-441",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 557,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.11291125765326943,
+        "component-feedback": 0.03234961693717854,
+        "discussion": 0.834525587005184,
+        "icon-feedback": 0.0005925039020102412,
+        "new-icon": 0.01962103450235788
+      },
+      "ms": 770,
+      "wall_s": 1.009,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 441,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-588",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 216,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.01761447845584103,
+        "component-feedback": 0.013718169614803388,
+        "discussion": 0.9617179374875956,
+        "icon-feedback": 0.00046940995089884437,
+        "new-icon": 0.0064800044908612095
+      },
+      "ms": 680,
+      "wall_s": 0.961,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 588,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-778",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 430,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.12217630568026201,
+        "component-feedback": 0.48321666268843333,
+        "discussion": 0.3763295152949028,
+        "icon-feedback": 0.0017427514023606516,
+        "new-icon": 0.01653476493404123
+      },
+      "ms": 733,
+      "wall_s": 1.097,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 778,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-42",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 572,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.026470807032319618,
+        "component-feedback": 0.09239219490358817,
+        "discussion": 0.876592738586595,
+        "icon-feedback": 0.0004848297426973314,
+        "new-icon": 0.004059429734799874
+      },
+      "ms": 832,
+      "wall_s": 1.009,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 42,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-309",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 379,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.05320851062977276,
+        "component-feedback": 0.34696307347891026,
+        "discussion": 0.5720453993921709,
+        "icon-feedback": 0.0026490957564767117,
+        "new-icon": 0.0251339207426694
+      },
+      "ms": 766,
+      "wall_s": 1.073,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 309,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-70",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 180,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.004568987298554064,
+        "component-feedback": 0.005866695819866881,
+        "discussion": 0.9866713266139205,
+        "icon-feedback": 0.00012175938724773918,
+        "new-icon": 0.0027712308804106398
+      },
+      "ms": 672,
+      "wall_s": 0.841,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 70,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-622",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 470,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.0013228472555983739,
+        "component-feedback": 0.0011674086056580974,
+        "discussion": 0.9972145770187498,
+        "icon-feedback": 0,
+        "new-icon": 0.00029516711999357604
+      },
+      "ms": 749,
+      "wall_s": 1.05,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 622,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-559",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 603,
+      "lang": "no",
+      "choice": "discussion",
+      "p": {
+        "bug": 0.0019198702071259162,
+        "component-feedback": 0.002465162142691235,
+        "discussion": 0.9947772151681495,
+        "icon-feedback": 3.74315099703265e-05,
+        "new-icon": 0.0008003209720631057
+      },
+      "ms": 778,
+      "wall_s": 0.951,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel",
+      "number": 559,
+      "construction": null
+    },
+    {
+      "id": "aksel-kind-194",
+      "set": "aksel-kind",
+      "expect": "discussion",
+      "options": [
+        "bug",
+        "component-feedback",
+        "new-icon",
+        "icon-feedback",
+        "discussion"
+      ],
+      "chars": 212,
+      "lang": "no",
+      "choice": "component-feedback",
+      "p": {
+        "bug": 0.10200619422773564,
+        "component-feedback": 0.5870051182720878,
+        "discussion": 0.2772815841595177,
+        "icon-feedback": 0.004481839384960425,
+        "new-icon": 0.029225263955698494
+      },
+      "ms": 693,
+      "wall_s": 0.868,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/aksel",
+      "number": 194,
+      "construction": null
+    },
+    {
+      "id": "pr-motivation-real-why-mlx-workspace-53",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 350,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.14804719803168945,
+        "yes": 0.8519528019683105
+      },
+      "ms": 619,
+      "wall_s": 0.807,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 53,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-431",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 382,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.18242552380635632,
+        "yes": 0.8175744761936437
+      },
+      "ms": 612,
+      "wall_s": 0.902,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 431,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-824",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 376,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.017986209962091555,
+        "yes": 0.9820137900379085
+      },
+      "ms": 606,
+      "wall_s": 0.896,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 824,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-600",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 447,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.02595735719779685,
+        "yes": 0.9740426428022031
+      },
+      "ms": 596,
+      "wall_s": 0.764,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 600,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-421",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 586,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.04742587317756679,
+        "yes": 0.9525741268224334
+      },
+      "ms": 613,
+      "wall_s": 0.829,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 421,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-698",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 630,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.04742587317756679,
+        "yes": 0.9525741268224334
+      },
+      "ms": 686,
+      "wall_s": 0.865,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 698,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-684",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 644,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.04742587317756679,
+        "yes": 0.9525741268224334
+      },
+      "ms": 684,
+      "wall_s": 0.983,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 684,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-694",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 674,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.012431650853185818,
+        "yes": 0.9875683491468141
+      },
+      "ms": 705,
+      "wall_s": 0.881,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 694,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-700",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 882,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.01098694263059318,
+        "yes": 0.9890130573694068
+      },
+      "ms": 781,
+      "wall_s": 1.188,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 700,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-mlx-workspace-42",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 892,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.053403329799824234,
+        "yes": 0.9465966702001758
+      },
+      "ms": 770,
+      "wall_s": 1.058,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 42,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-822",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1000,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.025957357197796852,
+        "yes": 0.9740426428022032
+      },
+      "ms": 772,
+      "wall_s": 0.921,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 822,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-524",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 778,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.020332353342658753,
+        "yes": 0.9796676466573412
+      },
+      "ms": 696,
+      "wall_s": 0.917,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 524,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-916",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 397,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.09534339990342997,
+        "yes": 0.90465660009657
+      },
+      "ms": 608,
+      "wall_s": 0.852,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 916,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-738",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 470,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.07585818002124355,
+        "yes": 0.9241418199787564
+      },
+      "ms": 668,
+      "wall_s": 0.972,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 738,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-444",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 554,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.01098694263059318,
+        "yes": 0.9890130573694068
+      },
+      "ms": 666,
+      "wall_s": 0.866,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 444,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-675",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 568,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.053398471661883065,
+        "yes": 0.9466015283381168
+      },
+      "ms": 685,
+      "wall_s": 0.9,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 675,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-757",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 633,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.13296424019782926,
+        "yes": 0.8670357598021708
+      },
+      "ms": 679,
+      "wall_s": 0.925,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 757,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-764",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 805,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.02930996380800997,
+        "yes": 0.9706900361919899
+      },
+      "ms": 764,
+      "wall_s": 1.073,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 764,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-758",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 817,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.03308433268279464,
+        "yes": 0.9669156673172052
+      },
+      "ms": 758,
+      "wall_s": 1.062,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 758,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-756",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 915,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.04208772791561884,
+        "yes": 0.9579122720843811
+      },
+      "ms": 758,
+      "wall_s": 1.011,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 756,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-510",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 741,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.0179848879733842,
+        "yes": 0.9820151120266157
+      },
+      "ms": 761,
+      "wall_s": 0.978,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 510,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-680",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 846,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.022977369910025615,
+        "yes": 0.9770226300899744
+      },
+      "ms": 834,
+      "wall_s": 1.048,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 680,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-766",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 855,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.047424629205394336,
+        "yes": 0.9525753707946057
+      },
+      "ms": 761,
+      "wall_s": 0.942,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 766,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-954",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 830,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.13296424019782926,
+        "yes": 0.8670357598021708
+      },
+      "ms": 750,
+      "wall_s": 0.954,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 954,
+      "construction": "real-why"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-405",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 85,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.998498817743263,
+        "yes": 0.0015011822567369915
+      },
+      "ms": 533,
+      "wall_s": 0.728,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 405,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-924",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 98,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.9993736658418905,
+        "yes": 0.0006263341581094201
+      },
+      "ms": 516,
+      "wall_s": 0.721,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 924,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-52",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 126,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9953904278206259,
+        "yes": 0.004609572179374208
+      },
+      "ms": 515,
+      "wall_s": 0.683,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 52,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-430",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 231,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.7057850278370111,
+        "yes": 0.29421497216298875
+      },
+      "ms": 588,
+      "wall_s": 0.941,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 430,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-761",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 230,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.8670357598021708,
+        "yes": 0.13296424019782926
+      },
+      "ms": 526,
+      "wall_s": 0.829,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 761,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-45",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 263,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3208213008246071,
+        "yes": 0.679178699175393
+      },
+      "ms": 514,
+      "wall_s": 0.796,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mlx-workspace",
+      "number": 45,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-26",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 397,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.4378234991142018,
+        "yes": 0.5621765008857981
+      },
+      "ms": 590,
+      "wall_s": 0.829,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mlx-workspace",
+      "number": 26,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-427",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 355,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.6513548646660542,
+        "yes": 0.34864513533394575
+      },
+      "ms": 584,
+      "wall_s": 0.757,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 427,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-417",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 388,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.37754066879814546,
+        "yes": 0.6224593312018546
+      },
+      "ms": 582,
+      "wall_s": 0.814,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 417,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-944",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 733,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.5312093733737562,
+        "yes": 0.46879062662624366
+      },
+      "ms": 719,
+      "wall_s": 1.008,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 944,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-927",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 718,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.16451646289656316,
+        "yes": 0.8354835371034369
+      },
+      "ms": 733,
+      "wall_s": 0.914,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 927,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-44",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 976,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.5926665999540698,
+        "yes": 0.4073334000459302
+      },
+      "ms": 906,
+      "wall_s": 1.141,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 44,
+      "construction": "real-what"
+    },
+    {
+      "id": "pr-motivation-controlled-mlx-workspace-53",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 333,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8519528019683105,
+        "yes": 0.14804719803168945
+      },
+      "ms": 600,
+      "wall_s": 0.85,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 53,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-824",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 345,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9324533088603709,
+        "yes": 0.06754669113962909
+      },
+      "ms": 601,
+      "wall_s": 0.967,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 824,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-600",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 463,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3208213008246071,
+        "yes": 0.679178699175393
+      },
+      "ms": 595,
+      "wall_s": 0.807,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 600,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-698",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 678,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9149009549929799,
+        "yes": 0.08509904500702023
+      },
+      "ms": 659,
+      "wall_s": 0.871,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 698,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-684",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 645,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3208213008246071,
+        "yes": 0.679178699175393
+      },
+      "ms": 664,
+      "wall_s": 0.897,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 684,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-694",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 531,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.7981867777396212,
+        "yes": 0.20181322226037884
+      },
+      "ms": 666,
+      "wall_s": 0.92,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 694,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-700",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 833,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2689414213699951,
+        "yes": 0.7310585786300049
+      },
+      "ms": 737,
+      "wall_s": 0.978,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 700,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-444",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 526,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.6224593312018546,
+        "yes": 0.37754066879814546
+      },
+      "ms": 669,
+      "wall_s": 0.866,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 444,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-675",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 463,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.5621765008857981,
+        "yes": 0.4378234991142018
+      },
+      "ms": 653,
+      "wall_s": 0.904,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 675,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-510",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 699,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "no": 0.5621765008857981,
+        "yes": 0.4378234991142018
+      },
+      "ms": 688,
+      "wall_s": 1.054,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 510,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-756",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 824,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.46879062662624366,
+        "yes": 0.5312093733737562
+      },
+      "ms": 680,
+      "wall_s": 1.056,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 756,
+      "construction": "controlled"
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-764",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 569,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "no": 0.46879062662624366,
+        "yes": 0.5312093733737562
+      },
+      "ms": 662,
+      "wall_s": 0.908,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 764,
+      "construction": "controlled"
+    }
+  ],
+  "eval": {
+    "issue-type": {
+      "cases": 105,
+      "correct": 96,
+      "accuracy": 0.9142857142857143,
+      "confusion": {
+        "bug": {
+          "bug": 32,
+          "feature": 2,
+          "question": 1
+        },
+        "feature": {
+          "bug": 2,
+          "feature": 31,
+          "question": 2
+        },
+        "question": {
+          "feature": 2,
+          "question": 33
+        }
+      },
+      "mean_p_correct": 0.9124213323665876,
+      "mean_p_wrong": 0.6156097313216148,
+      "p50_ms": 779,
+      "p95_ms": 1887,
+      "cases_without_evidence": 0
+    },
+    "aksel-kind": {
+      "cases": 65,
+      "correct": 46,
+      "accuracy": 0.7076923076923077,
+      "confusion": {
+        "bug": {
+          "bug": 12,
+          "component-feedback": 1
+        },
+        "component-feedback": {
+          "component-feedback": 11,
+          "discussion": 2
+        },
+        "discussion": {
+          "component-feedback": 5,
+          "discussion": 8
+        },
+        "icon-feedback": {
+          "bug": 6,
+          "component-feedback": 1,
+          "discussion": 1,
+          "icon-feedback": 5
+        },
+        "new-icon": {
+          "bug": 1,
+          "component-feedback": 2,
+          "new-icon": 10
+        }
+      },
+      "mean_p_correct": 0.9402970299592559,
+      "mean_p_wrong": 0.5348668522722058,
+      "p50_ms": 782,
+      "p95_ms": 1216,
+      "cases_without_evidence": 0
+    },
+    "pr-motivation": {
+      "cases": 48,
+      "correct": 39,
+      "accuracy": 0.8125,
+      "confusion": {
+        "no": {
+          "no": 15,
+          "yes": 9
+        },
+        "yes": {
+          "yes": 24
+        }
+      },
+      "mean_p_correct": 0.878241815002842,
+      "mean_p_wrong": 0.6501258657883096,
+      "p50_ms": 714,
+      "p95_ms": 871,
+      "cases_without_evidence": 0
+    }
+  },
+  "cold": {
+    "ms": 724,
+    "wall_s": 1.016
+  },
+  "sanity": "OK",
+  "finished": "2026-09-25T23:05:26+0200",
+  "seconds": 442
+}

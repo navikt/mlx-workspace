@@ -74,6 +74,25 @@ Check: `python3 .mise/tasks/_decide_sets.py --check-cases`. Measure: `mise run b
 queue lock, waits for AC power, and runs optiq and Qwen3.8 OptiQ-4bit in turn. Results:
 `bench/decide-sets-<stamp>.md`.
 
+First run, 25 September ([`decide-sets-20260925-225356.md`](../decide-sets-20260925-225356.md), nav-pilot 2e1e8ee1,
+no errors):
+
+| | optiq | Qwen3.8 OptiQ-4bit |
+|---|---|---|
+| issue-type (3 classes) | 95/105 = 0.90 | 96/105 = 0.91 |
+| issue-type, answered at p ≥ 0.9 | 71/71 correct (68 % answered) | 70/70 correct (67 % answered) |
+| aksel-kind (5 classes) | 51/65 = 0.78 | 46/65 = 0.71 |
+| aksel-kind, answered at p ≥ 0.9 | 38/42 = 0.90 (65 %) | 40/40 (62 %) |
+| pr-motivation | 36/48 = 0.75 | 39/48 = 0.81 |
+| pr-motivation, controlled no-why caught | 3/12 | 7/12 |
+| p50 ms per call | ~400 | ~670–820 |
+
+Three coarse classes work well, and a high threshold makes them exact on this set. With five, the model keeps
+the clearly different classes apart, but the fine ones mix: Qwen3.8 calls 6 of 13 icon-feedback issues `bug`, and
+both models call most of the old discussion issues `component-feedback` (they are proposals about components).
+The PR question never flags a description that does explain why, but it answers `yes` to most descriptions that
+only list what changed in detail, so it misses half or more of them.
+
 ### `issue-type`: bug, feature or question
 
 Options `bug`, `feature`, `question`. The label is the one a person applied: `bug`; `enhancement` or `feature`;
