@@ -384,7 +384,7 @@ where they are, and night 64-4 runs them.
   - The rework count is in `bench-hybrid` (#63).
   - Still to do: the 64-3 hybrid block, and trimming 64-2 (about 13 h with all five) after 64-1.
 - **Blocked for Laguna:** nav-pilot's mlx-lm 0.31.3 has no `laguna`, so Laguna cannot enter np-e2e or the hybrid arm until nav-pilot's runtime moves.
-- **Blocked for Occamy:** `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`. Benchmarking it is fine; shipping it needs that decision, or a build in an allowed org.
+- **Occamy is measurable through nav-pilot (2026-09-26):** navikt/copilot #989's bench-only override (`NAV_PILOT_BENCH_MANIFEST`, `NAV_PILOT_BENCH_ALLOW_ORGS`) lets np-e2e, decide and the hybrid arm run Occamy on nav-pilot's own server. The bench tasks use it when the binary has #989 and keep the old cache rewrite otherwise. It needs `BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6` or newer; `nav-pilot-main-2e1e8ee1` (nights 4 and 64-1) still falls back to optiq, as on day 64-0. Steps that need it: an Occamy `e2e` retry, 64-3's hybrid arm with Occamy, 64-4's np-e2e and decide sets (plan §5.3). Shipping Occamy still needs an `ALLOWED_ORGS` decision, or a build in an allowed org.
 
 ## 8.9 Decide as a service: measure first
 

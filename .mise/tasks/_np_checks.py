@@ -6,6 +6,7 @@ subcommand reads and rewrites one results JSON, so a run that dies half way stil
 leaves what it measured.
 
   manifest <profile> <cache.json>        put the profile's params into nav-pilot's cached manifest
+  bench-env <nav-pilot> <model> <path>   shell exports for #989's bench manifest override, if the binary has it
   probe    <out.json> <port> <model>     latency, classifier and reasoning_effort probes
   classifier <out.json> <port> <model>   the classifier probe alone (bench-system-one)
   session  <out.json> <loop|poll> <port>      one real Copilot CLI session through the guard (bench-system-one)
@@ -18,6 +19,8 @@ import importlib.util
 import json
 import math
 import os
+import re
+import shlex
 import subprocess
 import sys
 import time
@@ -67,6 +70,41 @@ def manifest(profile, cache):
     hits[0]["params"] = {k: v for k, v in params.items() if k.startswith("MLX_")}
     Path(cache).write_text(json.dumps(m, indent=2) + "\n")
     print(f"✓ manifest entry {hits[0]['key']} now carries {profile}'s params")
+
+
+# navikt/copilot #989's merge: NAV_PILOT_BENCH_MANIFEST makes nav-pilot read that one
+# file as its manifest (no fetch, no cache write), and NAV_PILOT_BENCH_ALLOW_ORGS lets
+# it serve publishers outside its allowlist, so a candidate like Accio-Lab/occamy can
+# run through nav-pilot. Older binaries (the nights pin some) ignore both variables.
+OVERRIDE_COMMIT = "7ec6d81d61c5ec4aef0bc3a136345dbf8f9a396f"
+VETTED_ORGS = ("mlx-community", "lmstudio-community")
+
+
+def knows_override(np):
+    """By commit when the binary records one the copilot clone knows, else by the variable's
+    name in the binary. A branch build that has the code but not the merge counts as old."""
+    try:
+        info = subprocess.run(["go", "version", "-m", np], capture_output=True, text=True, cwd=Path.home()).stdout
+    except OSError:  # no go on PATH
+        info = ""
+    rev = re.search(r"vcs.revision=(\w+)", info)
+    repo = os.environ.get("NIGHT_COPILOT_REPO") or str(Path.home() / "go/src/github.com/navikt/copilot")
+    if rev:
+        r = subprocess.run(["git", "-C", repo, "merge-base", "--is-ancestor", OVERRIDE_COMMIT, rev[1]],
+                           capture_output=True)
+        if r.returncode in (0, 1):  # 128: either commit unknown to the clone
+            return r.returncode == 0
+    return b"NAV_PILOT_BENCH_MANIFEST" in Path(np).read_bytes()
+
+
+def bench_env(np, model, path):
+    """For `eval` in the shell tasks: the override's exports, or nothing for an old binary."""
+    if not knows_override(np):
+        return
+    print(f"export NAV_PILOT_BENCH_MANIFEST={shlex.quote(path)}")
+    org = model.split("/")[0]
+    if "/" in model and org not in VETTED_ORGS:
+        print(f"export NAV_PILOT_BENCH_ALLOW_ORGS={shlex.quote(org)}")
 
 
 # ── server probes ────────────────────────────────────────────────────────────
@@ -589,10 +627,38 @@ def selftest():
     assert all(r["cold"] == {"error": "timeout"} for r in got["latency"]), got["latency"]
     assert got["classifier_probe"] and len(got["effort_probe"]) == 3
     verdicts(got)  # an errored latency row must not crash the verdicts
+    # Both manifest paths: a pinned old build keeps the cache write, a #989 build gets the override.
+    import contextlib, io
+    def env_for(blob, model, rev=None):
+        with tempfile.TemporaryDirectory() as d:
+            b = Path(d) / "nav-pilot"
+            b.write_bytes(blob)
+            global knows_override
+            real_k = knows_override
+            if rev is not None:  # stand-in for the commit check
+                knows_override = lambda np: rev
+            try:
+                with contextlib.redirect_stdout(io.StringIO()) as o:
+                    bench_env(str(b), model, "/x/m.json")
+            finally:
+                knows_override = real_k
+            return o.getvalue()
+    assert env_for(b"\x00old build\x00", "Accio-Lab/occamy-1.0-MLX-4bit") == ""
+    assert env_for(b"\x00NAV_PILOT_BENCH_MANIFEST\x00", "mlx-community/Qwen3.8-27B-8bit") == \
+        "export NAV_PILOT_BENCH_MANIFEST=/x/m.json\n"
+    assert env_for(b"", "Accio-Lab/occamy-1.0-MLX-4bit", rev=True) == \
+        "export NAV_PILOT_BENCH_MANIFEST=/x/m.json\nexport NAV_PILOT_BENCH_ALLOW_ORGS=Accio-Lab\n"
+    assert env_for(b"NAV_PILOT_BENCH_MANIFEST", "Accio-Lab/x", rev=False) == ""  # commit check wins
+    # A fresh override file starts from manifest/models.json and keeps its one default.
+    with tempfile.TemporaryDirectory() as d:
+        f = Path(d) / "m.json"
+        manifest("occamy-1.0-4bit-64g", str(f))
+        m = json.loads(f.read_text())["models"]
+        assert sum(bool(e.get("default")) for e in m) == 1 and m[-1]["model"].startswith("Accio-Lab/"), m[-1]
     print("✓ selftest passed")
 
 
 if __name__ == "__main__":
     cmd, *args = sys.argv[1:] or ["selftest"]
-    {"manifest": manifest, "probe": probe, "classifier": classifier_only, "session": session,
+    {"manifest": manifest, "bench-env": bench_env, "probe": probe, "classifier": classifier_only, "session": session,
      "e2e": e2e, "finish": finish, "selftest": selftest}[cmd](*args)

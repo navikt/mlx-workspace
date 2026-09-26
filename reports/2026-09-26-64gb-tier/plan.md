@@ -116,7 +116,7 @@ anchored on optiq's measured 34.3 GB at 60k (24.7 GB of weights, so 9.6 GB over 
 |---|---|---|---|---|---|---|---|
 | 1 | Qwen3.8-27B 8-bit, 64k | 2026-08-14 | 27B dense | 29.5 GB, **cached** | ≈ 43.6 GB (29.5 + 4.8 KV + 4.8 cache + 1.8 transient + 2.6) | 30 / 48 / 64 / 64k + 8k, cache 4.5 GiB, step 512 | The best local quality we have measured (cheap-ops 31/40), and in August the 8-bit followed the "no drafting in `<think>`" rule that the 4-bit broke. The 48 GB tier caps it at 48k; 64 GB lifts that. No download. Cost: decode ≈ 14 tok/s on this M5 Max, about half on an M5 Pro |
 | 2 | Qwen3.6-35B-A3B 8-bit | 2026-04-15 | 35B / 3B | **37.7 GB** | ≈ 41–47 GB (37.7 + 9.6 at a 12 GiB cache; less with 6 GiB) | 38 / 52 (48 if a 6 GiB cache keeps it ≤ 46) / 64 / 64k + 16k | The default model without the 4-bit loss. The only variable against optiq is precision, so it answers "does more precision make a better worker?" at optiq's speed class (3B active). Runs on nav-pilot's current runtime, so it could ship first |
-| 3 | Occamy-1.0 MLX-4bit | 2026-08-13 | 35B / 3B | **19.5 GB** | ≈ 29 GB (19.5 + 9.6) | 20 / 36 or 48 / 48 or 64 / 64k–128k | Same architecture as the default. Its card claims gains exactly on the worker axes (IFEval +4.6, BFCL +2.2), vendor-reported. It also fits the 48 GB tier, so a win here helps both tiers. Caveats: `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`, and the card recommends temp 1.0 and presence_penalty 1.5 |
+| 3 | Occamy-1.0 MLX-4bit | 2026-08-13 | 35B / 3B | **19.5 GB** | ≈ 29 GB (19.5 + 9.6) | 20 / 36 or 48 / 48 or 64 / 64k–128k | Same architecture as the default. Its card claims gains exactly on the worker axes (IFEval +4.6, BFCL +2.2), vendor-reported. It also fits the 48 GB tier, so a win here helps both tiers. Caveats: `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`, so shipping it needs that decision; benchmarking it through nav-pilot works with the bench-only override (§5.3). The card recommends temp 1.0 and presence_penalty 1.5 |
 | 4 | Laguna XS 2.1 8-bit | 2026-06-20 | 33B / 3B | **35.5 GB** | ≈ 45 GB (35.5 + 3.0 KV + 3.0 cache + ≤ 1 transient + 2.6) | 36 / 52 / 64 / 64k + 16k | The only non-Qwen coder that fits, loads and has a tool parser. Coding-specialised; head_dim 128, so no score-matrix spike. Needs the git mlx-lm, so it can run in cheap-ops and the frontier (workspace server) but not through nav-pilot (np-e2e, hybrid) until nav-pilot's runtime moves past 0.31.3. Card sampling: temp 1.0, top_k 20, top_p 1.0 |
 | R | Qwen3-Coder-Next mxfp4 (reserve) | 2026-01-30 | 80B / 3B | 42.4 GB | ≈ 49.6 GB (42.4 + 1.8 + 1.8 + ≤ 1 + 2.6) | 42 / 52 / 64 / 64k | Non-thinking coder, which suits a worker. Only fits at 52 wired with 2.4 GB of margin, and its download does not fit in the 100 GB budget together with 2 and 4. Download only if 2 or 4 is dropped |
 
@@ -195,6 +195,20 @@ the frontier variants below reuse whatever it concludes.
 | 64-3 | 48 | Hybrid arm, Sonnet 5 orchestrator: optiq re-baseline with control on the trusted cell (4 targets × 2 arms × 8), then the best one or two 64 GB workers on the same rungs, hybrid arm only against the same control | ≈ 6–8 h / ≈ $20–30 at Sonnet 4.6 prices; Sonnet 5 unmeasured |
 | 64-4 | 48 | np-e2e full for survivors on nav-pilot's runtime; decide-limits and decide sets for survivors; the backlog's 64 GB fit rows (8-bit cold/warm at 64k, OptiQ-4bit at 131k) | ≈ 5 h / $0 |
 | 64-5 | 48 | Replication of whatever moved a frontier or won 64-3, at n ≥ 8 per arm (design §7 rule 2); one balloon run per survivor (§7) | ≈ 6 h / ≈ $10 |
+
+**Occamy through nav-pilot needs the new binary.** nav-pilot refuses `Accio-Lab` weights, so on
+day 64-0 its np-e2e step fell back to optiq and stopped on the model mismatch. navikt/copilot
+#989 added a bench-only override: `NAV_PILOT_BENCH_MANIFEST` makes nav-pilot read one manifest
+file and nothing else, and `NAV_PILOT_BENCH_ALLOW_ORGS` allows a named publisher from that file
+only. `bench-np-e2e`, `np-serve` (under `decide` and `hybrid`) and `bench-navpilot-e2e` set both
+when the selected binary has #989, and keep the old cache rewrite for older builds.
+`.bench-logs/bin/nav-pilot-main-dd859ac6` (navikt/copilot main, 2026-09-26) has it;
+`nav-pilot-main-2e1e8ee1`, which nights 4 and 64-1 pin, does not. The steps that need the new
+binary are the ones that start nav-pilot's own server for Occamy: an `e2e` step for Occamy (a
+64-1 retry), the hybrid arm with Occamy as worker (64-3), and np-e2e full and the decide sets
+for Occamy (64-4). Cheap-ops and the local frontier arm (64-2) run on the workspace server and
+do not depend on it. From 64-2 on, the launchers set
+`BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6`.
 
 Laguna is left out of 64-3 and 64-4 unless nav-pilot's runtime has moved to an mlx-lm with
 `laguna` by then. If a candidate is dropped on 64-1, the reserve (Qwen3-Coder-Next mxfp4) may take

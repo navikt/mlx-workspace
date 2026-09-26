@@ -58,6 +58,7 @@ cleanup() {
   [ -n "$sampler" ] && kill "$sampler" 2>/dev/null
   [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
   [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ] && rm -f "$NAV_PILOT_BENCH_MANIFEST"
   rm -f "$NAV_PILOT_CONFIG"
   rm -rf "$LOCKDIR"
 }
@@ -71,7 +72,7 @@ start_np() {
     echo "local_model = \"$1\""
     grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
   } > "$NAV_PILOT_CONFIG"
-  python3 "$H" manifest "$CACHE" "$MANIFEST_BRANCH" ${2:-} >>"$LOG" 2>&1 || { say "✗ manifest"; return 1; }
+  python3 "$H" manifest "$MANIFEST" "$MANIFEST_BRANCH" ${2:-} >>"$LOG" 2>&1 || { say "✗ manifest"; return 1; }
   started_np=1
   # Unreachable proxy: start's fetch fails and it reads the cache we just wrote.
   HTTPS_PROXY=http://127.0.0.1:9 HTTP_PROXY=http://127.0.0.1:9 "$NP" alpha local start >>"$LOG" 2>&1 \
@@ -91,7 +92,14 @@ if [ -f "$STATE" ] && kill -0 "$(python3 -c "import json; print(json.load(open('
   say "✗ a nav-pilot local server is already running ($STATE); refusing to measure beside it"; exit 1
 fi
 mise run server-stop >>"$LOG" 2>&1
-cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
+# A binary with navikt/copilot #989 reads a manifest of our own through
+# NAV_PILOT_BENCH_MANIFEST and ~/.nav-pilot is left alone; the older builds the nights
+# pin get the cached manifest rewritten and restored, as before.
+unset NAV_PILOT_BENCH_MANIFEST NAV_PILOT_BENCH_ALLOW_ORGS
+eval "$(python3 .mise/tasks/_np_checks.py bench-env "$NP" "$OPTIQ" "$PWD/.bench-logs/navpilot-e2e-$STAMP.models.json")"
+if [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ]; then MANIFEST="$NAV_PILOT_BENCH_MANIFEST"
+else MANIFEST="$CACHE"; cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
+fi
 python3 - "$OUT" "$NP" "$MANIFEST_BRANCH" <<'EOF'
 import json, subprocess, sys
 out, np, br = sys.argv[1:]
