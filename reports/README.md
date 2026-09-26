@@ -42,6 +42,7 @@ frontier. What each one measures is in [`../bench/specs/`](../bench/specs/).
 
 | Report | Date | Summary |
 |---|---|---|
+| [Quality frontier, night 1: results](2026-09-25-quality-frontier/night-1.md) | 2026-09-26 | optiq against Sonnet 5 on five ladders. Mechanical multi-file edits stay local up to 2 call sites (10/10), are not yet proven at 4–6 and fall to cloud at 12–13 (7/10); the cloud is trusted up to 22–29. read-qa, create-file and edit-single stay cloud. Verifier retries (`retry2`) moved three frontiers on n = 4 and need a replication night |
 | [Quality frontier: design](2026-09-25-quality-frontier/design.md) | 2026-09-25 | Graded ladders per task class (thread an argument, callers of F, a new test file, debug with less and less help), run per model and harness lever, to find whether the model or the harness is the limit. Night 1 is `mise run night-run-3` |
 | [Benchmark coverage audit: gaps and duplicates](2026-09-25-benchmark-coverage/audit.md) | 2026-09-25 | Desk audit of every suite against one capability taxonomy, with a coverage matrix. The bar never reads np-e2e Copilot sessions or any non-Ktor run; a `_profiles.py` edit resets `harness_sha` and would drop 16 runs when the night results merge; the Copilot and delegate ladders cannot meet `min_tasks = 2` for three classes; no cloud arm for GPT-6 Sol. Ranked retire, merge and add list |
 | [Night results](night-results-2026-08-31.md) | 2026-08-31 | The step-count predictor holding on a codebase it had not seen, and the model failing every debugging task |
