@@ -5,6 +5,8 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20260925-165202/steps
 - Started 2026-09-25T16:53:22+02:00, last step ended 2026-09-26T09:53:36+02:00.
 - Cloud spend: $34.7062 of the $80 cap.
 
+Why optiq's read-qa (18/40) is so far below its cheap-ops read score (27/27): [read-qa-analysis.md](read-qa-analysis.md).
+
 ## Steps
 
 | # | Part | Step | Classes | Variant | Status | Minutes | Result |
