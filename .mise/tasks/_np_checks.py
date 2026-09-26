@@ -436,6 +436,12 @@ def guard_signals(text):
     }
 
 
+def np_pass(row):
+    """The pass a row ran in. Rows before the rename carry classifier on/off instead.
+    Not `arm`: bench-copilot's run_sample already sets arm = "local"."""
+    return row.get("np_pass") or f"classifier-{row['classifier']}"
+
+
 def e2e(out, state):
     bc = bench_copilot()
     bh = bc.bh
@@ -455,13 +461,13 @@ def e2e(out, state):
             new = STATS.read_bytes()[off:].decode().splitlines() if STATS.exists() else []
             stats = [json.loads(line) for line in new if line.strip()]
             text = (ROOT / rec["log"]).read_text(errors="replace")
-            rec.update(classifier=state, stats_rows=len(stats),
+            rec.update(np_pass=state, stats_rows=len(stats),
                        stats_rows_with_usage=sum(1 for s in stats if s.get("in") and s.get("out")),
                        **guard_signals(text))
             rows.append(rec)
             phase(doc, f"e2e-{task['id']}-{state}-{len(rows) - 1}", start)
             save(out, doc)
-            print(f"  {task['id']} classifier={state}: verified={rec['verified']} {rec['seconds']}s "
+            print(f"  {task['id']} {state}: verified={rec['verified']} {rec['seconds']}s "
                   f"calls={rec['local_calls']} stats={rec['stats_rows']}/{rec['stats_rows_with_usage']} "
                   f"blocks={rec['classifier_block']}/{rec['static_block']} note={rec['note']}", flush=True)
     bh.reset_repo()
@@ -508,9 +514,10 @@ def verdicts(doc):
         v.append(("E2E failures <= 1", len(bad), len(bad) > 1))
         perr = [r["task"] for r in rows if r.get("path_error") or (r.get("exit") not in (0, None)) or not r.get("local_calls")]
         v.append(("E2E path errors == 0", perr, bool(perr)))
-        ok_off = {r["task"] for r in rows if r["classifier"] == "off" and r.get("verified")}
-        fpb = [r["task"] for r in rows if r["classifier"] == "on" and r.get("classifier_block") and r["task"] in ok_off]
-        v.append(("classifier false-positive blocks == 0", fpb, bool(fpb)))
+        if any(np_pass(r).startswith("classifier-") for r in rows):  # System One build only
+            ok_off = {r["task"] for r in rows if np_pass(r) == "classifier-off" and r.get("verified")}
+            fpb = [r["task"] for r in rows if np_pass(r) == "classifier-on" and r.get("classifier_block") and r["task"] in ok_off]
+            v.append(("classifier false-positive blocks == 0", fpb, bool(fpb)))
     return [{"criterion": c, "measured": m, "refuted": bool(r)} for c, m, r in v]
 
 
@@ -543,6 +550,9 @@ def selftest():
     got = {x["criterion"]: x["refuted"] for x in verdicts(doc)}
     assert got["peak footprint <= 40 GB"] and not got["cold TTFT@30k <= 30 s"], got
     assert got["classifier false-positive blocks == 0"] and not got["E2E failures <= 1"], got
+    for r, a in zip(doc["e2e"], ("pass-1", "pass-2")):
+        r.pop("classifier"); r["np_pass"] = a
+    assert not any(x["criterion"].startswith("classifier") for x in verdicts(doc)), verdicts(doc)
     assert "rerun-tests" in [s[0] for s in SCENARIOS] and "{n}" in CLASSIFIER
     assert len(corpus()) > 100_000, "corpus too small to reach 60k tokens without heavy repetition"
     log = ("2026-09-23 11:47:43,388 - INFO - Prompt processing progress: 2048/9000\n"

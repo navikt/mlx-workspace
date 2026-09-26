@@ -113,11 +113,15 @@ def e2e_summary(doc, result):
     else:
         bad = [x["criterion"] for x in v if x["refuted"]]
         verdict = f"{len(v) - len(bad)}/{len(v)} hold" + (f"; refuted: {'; '.join(bad)}" if bad else "")
-    sess = []
-    for state in ("on", "off"):
-        rows = [r for r in doc.get("e2e", []) if r.get("classifier") == state]
-        if rows:
-            sess.append(f"classifier {state} {sum(1 for r in rows if r.get('valid') and r.get('verified'))}/{len(rows)}")
+    # Rows before the rename carry classifier on/off. Only the e72319e0 build read that
+    # switch; under any other build the two halves were replicates, so say pass 1/2.
+    legacy = {"on": "classifier on", "off": "classifier off"} if doc.get("nav_pilot_commit") == "e72319e0" \
+        else {"on": "pass 1", "off": "pass 2"}
+    by_pass = {}
+    for r in doc.get("e2e", []):
+        by_pass.setdefault(r["np_pass"].replace("-", " ") if r.get("np_pass") else legacy.get(r.get("classifier")), []).append(r)
+    sess = [f"{a} {sum(1 for r in rows if r.get('valid') and r.get('verified'))}/{len(rows)}"
+            for a, rows in by_pass.items() if a]
     return verdict, "; ".join(lat) or "n/a", peak, ", ".join(sess) or "n/a (latency-only)"
 
 

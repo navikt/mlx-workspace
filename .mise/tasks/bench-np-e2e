@@ -8,7 +8,7 @@
 #   lock -> model-use -> stop :8080 -> manifest entry gets the profile's params
 #   -> nav-pilot alpha local start -> sanity -> footprint sampler
 #   -> latency / classifier / reasoning_effort probes
-#   -> bench-copilot rungs through nav-pilot, classifier on then off (unless --latency-only)
+#   -> bench-copilot rungs through nav-pilot, two passes (unless --latency-only)
 #   -> verdicts -> stop, restore the manifest
 #
 # --system-one (what bench-system-one runs) swaps the probes and rungs for the loop
@@ -153,11 +153,17 @@ else
   PYTHONUNBUFFERED=1 python3 .mise/tasks/_np_checks.py probe "$OUT" "$PORT" "$MODEL" 2>&1 | tee -a "$LOG"
 fi
 
+# Two passes of the same rungs. Only the System One build (e72319e0) reads
+# NAV_PILOT_LOOP_CLASSIFIER, so there the passes are classifier on and off. Builds
+# from main replaced the classifier with the result-aware loop guard (navikt/copilot
+# #933, #939) and ignore the variable: their passes are two replicates of one
+# condition, labelled pass-1 and pass-2.
 if [ -z "$mode" ]; then
-  for state in on off; do
-    say "--- E2E through nav-pilot, classifier $state"
-    NAV_PILOT_LOOP_CLASSIFIER=$state PYTHONUNBUFFERED=1 \
-      python3 .mise/tasks/_np_checks.py e2e "$OUT" "$state" 2>&1 | tee -a "$LOG"
+  if grep -qa NAV_PILOT_LOOP_CLASSIFIER "$NP"; then passes="classifier-on classifier-off"; else passes="pass-1 pass-2"; fi
+  for pass in $passes; do
+    say "--- E2E through nav-pilot, $pass"
+    case $pass in classifier-*) export NAV_PILOT_LOOP_CLASSIFIER=${pass#classifier-} ;; esac
+    PYTHONUNBUFFERED=1 python3 .mise/tasks/_np_checks.py e2e "$OUT" "$pass" 2>&1 | tee -a "$LOG"
   done
 fi
 
