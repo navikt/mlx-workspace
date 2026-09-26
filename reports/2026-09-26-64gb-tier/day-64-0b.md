@@ -96,3 +96,23 @@ Verdict: decompose does not replicate on edit-single at any rung run tonight.
 | 2 | 4/4 | 4/4 | 4/4 | 1.000 | 22 | 17 | 0.75 | no |
 
 Verdict: retry2 does not replicate on edit-single at any rung run tonight.
+
+## Review against the result files
+
+The cells above match the four result files. Step 4 (Occamy base, edit-single) hit its 20-minute
+timeout: r4 has 3 of 4 samples and r5 has 2 of 4, so the base row is partial and the replication
+tables compare against n = 2–4 base samples. No rung reaches n ≥ 8, so nothing here can replicate.
+The runs are 2 per rung, so these are first cells for night 64-2, not verdicts.
+
+- Decompose on edit-single: Occamy 12/12 on r3–r5, against its own base 6/9 on the same rungs.
+- retry2 on edit-single r1–r2: Occamy 8/8, the same as optiq's retry2 (8/8, night 2).
+- Decompose on edit-multi-mechanical r3–r6: Occamy 13/16 (2/4 at r3, 3/4 at r6). optiq has no
+  decompose cells yet, so there is no control for these cells.
+
+**Step 5 was stopped and left out.** A fifth step (optiq decompose on edit-single, the control) ran
+from 16:48. At about 16:53, another process changed the workspace `.venv` (mlx-lm 0.32.0 downgraded
+to 0.31.3, numpy 2.5.3, torch added). Decompose restarts the server per sample, so the samples after
+16:53 ran on the changed environment. The step was stopped at 16:58 (the trap stopped the server).
+Its partial file is kept out of `bench/`, at
+`.bench-logs/night3-20260926-152946/step5-partial-mixed-env.json`. Steps 1–4 ended by 16:47, before
+the change.
