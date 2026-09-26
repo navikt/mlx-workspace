@@ -347,7 +347,7 @@ NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
 - **Explain read-qa:** optiq got 27/27 on cheap-ops read-qa but 18/40 on the frontier read-qa ladder, against the cloud's 40/40. Check whether the verifier ("all N files, nothing extra") or the task format is stricter, before reading it as a model limit.
 - **"classifier on/off" label:** `bench-np-e2e` still labels its two modes "classifier on/off" (night-2026-09-24/25 reports), although the classifier was replaced by the result-aware loop guard on 23 September. Rename the mode label in the task.
 
-## 8.8 The 64 GB tier: a worker directed by a cloud orchestrator (plan, no download yet)
+## 8.8 The 64 GB tier: a worker directed by a cloud orchestrator (downloaded, profiles in place)
 
 Plan: [2026-09-26-64gb-tier/plan.md](../2026-09-26-64gb-tier/plan.md). The question is which
 64 GB model saves the most cloud credits as a directed worker at the same end-to-end pass rate
@@ -368,5 +368,11 @@ where they are, and night 64-4 runs them.
   - 64-4: np-e2e, decide and the backlog's fit rows
   - 64-5: replication
   - All five run after the `retry2` replication night.
+- **Day D, 2026-09-26 (done):**
+  - Downloaded 92.8 GB in 62 min over plain HTTPS (`HF_HUB_DISABLE_XET=1`): Occamy 19.53 GB, Qwen3.6-35B-A3B 8-bit 37.75 GB, Laguna XS 2.1 8-bit 35.54 GB. File count and sizes match the HF listing, every shard in each safetensors index is present, `model_type` is `qwen3_5_moe`, `qwen3_5_moe` and `laguna`, and Occamy's `SHA256SUMS` passes. The xet test on a 20 MB file succeeded, but the hub's shared blob store may have served it without contacting the xet server, so it does not show that xet works.
+  - Profiles `*-64g` (48 wired) and `*-64g-w52` (52 wired, the plan's profile for the Qwen3.6 8-bit and Laguna). There is also `qwen3.6-35b-a3b-optiq-64g` as the control.
+  - Queues `night-64-1.queue` and `night-64-2.queue` next to the plan. `night-run-3 --queue` takes a profile per step and has `e2e` and `ops` kinds.
+  - The rework count is in `bench-hybrid` (#63).
+  - Still to do: the 64-3 hybrid block, and trimming 64-2 (about 13 h with all five) after 64-1.
 - **Blocked for Laguna:** nav-pilot's mlx-lm 0.31.3 has no `laguna`, so Laguna cannot enter np-e2e or the hybrid arm until nav-pilot's runtime moves.
 - **Blocked for Occamy:** `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`. Benchmarking it is fine; shipping it needs that decision, or a build in an allowed org.
