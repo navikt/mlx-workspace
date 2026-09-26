@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# mise description="nav-pilot alpha decide: evidence-first against options-first prompt layout, and yes/no consistency (swapped options, negated question), optiq and Qwen3.8 OptiQ-4bit. Needs the nav-pilot-layout-* build of navikt/copilot exp/decide-options-first. Usage: mise run bench-decide-layout [-- --models optiq]"
+#
+# bench-decide-why's lock and cleanup, around _decide_layout.py.
+# Writes bench/decide-layout-<model>-<stamp>.json and bench/decide-layout-<stamp>.md.
+export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-layout-* 2>/dev/null | head -1)}"
+DECIDE_PY=_decide_layout.py exec "$(dirname "$0")/bench-decide-why" "$@"
