@@ -388,3 +388,14 @@ Nothing is decided; these are the measurements to take before choosing between a
 3. A G4 load test: p50/p95 at 2k and 8k tokens, 5–20 req/s, prefix caching on the hybrid DeltaNet model.
 4. Injection robustness under the served quantization (FP8), not MLX 4-bit.
 5. Real volumes: commits and PRs per day across navikt, and candidate runtime flows.
+
+## 8.10 A PRD for a hosted `alpha decide`, once the data is in
+
+Asked for on 26 September: a product requirements document and value proposition for a hosted `nav-pilot alpha decide` service, written once measured demand and quality replace the assumptions in [the hosting research](../2026-09-26-decide-as-a-service/research.md). The gates:
+
+1. **Demand, from telemetry** (#961, `nav_pilot_decide_*`): 2–4 weeks of data on unique devices, calls per day, the caller split (tty, hook, script), latency by evidence size, and the p_choice distribution.
+2. **A small model's quality** (§8.6): Kev and Laya on our case sets, including Norwegian and injection. This decides whether a CPU service is viable.
+3. **Serving parity and cost** (§8.9): vLLM against mlx logprob parity on the same prompts, and a load test on one G4 in europe-north1.
+4. **Volume and owners:** commits and PRs per day at NAV, and one or two runtime flows with a named owning team.
+
+The PRD will cover the problem and users, the jobs `decide` does, value against local-only and against a Jev-style SaaS, the options and cost, privacy (DPIA, prompt logging, cache isolation), success metrics, and the rollout.
