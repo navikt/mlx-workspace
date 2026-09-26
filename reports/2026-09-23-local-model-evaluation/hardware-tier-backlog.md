@@ -40,6 +40,8 @@ These can run on the 128 GB machine at 36 GB wired, but a real 48 GB machine sho
 
 ## 64 GB (candidate wired limit about 48–52 GB)
 
+Model choice, worker-role suites, downloads and night order for this tier: [2026-09-26-64gb-tier/plan.md](../2026-09-26-64gb-tier/plan.md) (2026-09-26). The rows below stay the fit tests; the plan runs them on its night 64-4.
+
 Goal: decide whether the Qwen3.8 builds get a "64 GB+" manifest entry with its full context.
 
 | Test | Pass condition | Notes |

@@ -346,3 +346,27 @@ NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
 - **Replicate `retry2`:** it moved the open frontier on three classes (edit-multi-mechanical 3 → 5, edit-single 0 → 2, create-file 0 → 1), but only with n = 4 per rung. Design §7 needs a second night with n ≥ 8 per arm and a one-sided Fisher p < 0.1 before it becomes a default.
 - **Explain read-qa:** optiq got 27/27 on cheap-ops read-qa but 18/40 on the frontier read-qa ladder, against the cloud's 40/40. Check whether the verifier ("all N files, nothing extra") or the task format is stricter, before reading it as a model limit.
 - **"classifier on/off" label:** `bench-np-e2e` still labels its two modes "classifier on/off" (night-2026-09-24/25 reports), although the classifier was replaced by the result-aware loop guard on 23 September. Rename the mode label in the task.
+
+## 8.8 The 64 GB tier: a worker directed by a cloud orchestrator (plan, no download yet)
+
+Plan: [2026-09-26-64gb-tier/plan.md](../2026-09-26-64gb-tier/plan.md). The question is which
+64 GB model saves the most cloud credits as a directed worker at the same end-to-end pass rate
+as cloud-only. The 64 GB fit rows in [hardware-tier-backlog.md](hardware-tier-backlog.md) stay
+where they are, and night 64-4 runs them.
+
+- **Shortlist:** Qwen3.8-27B 8-bit at 64k (cached), Qwen3.6-35B-A3B 8-bit, Occamy-1.0 MLX-4bit, Laguna XS 2.1 8-bit. Reserve: Qwen3-Coder-Next mxfp4.
+- **Downloads:** 92.7 GB, inside the user's pre-approved 100 GB (plan §6), on AC power and an untethered network, never while a GPU run holds the queue lock. Test xet on one small file first and fall back to `HF_HUB_DISABLE_XET=1`; get the token only through `fnox exec`.
+- **Before night 64-1 (a daytime PR):**
+  - profiles at 48 GB wired with `machine_min_ram_gb = 64`
+  - a frontier queue file for the `decompose` and `retry2` variants
+  - a hybrid block with a Sonnet 5 orchestrator
+  - the orchestrator-rework count in `bench-hybrid` (plan §5.2)
+- **Nights:**
+  - 64-1: fit and smoke
+  - 64-2: the directed-worker frontier
+  - 64-3: the hybrid arm, which re-baselines optiq under Sonnet 5 first
+  - 64-4: np-e2e, decide and the backlog's fit rows
+  - 64-5: replication
+  - All five run after the `retry2` replication night.
+- **Blocked for Laguna:** nav-pilot's mlx-lm 0.31.3 has no `laguna`, so Laguna cannot enter np-e2e or the hybrid arm until nav-pilot's runtime moves.
+- **Blocked for Occamy:** `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`. Benchmarking it is fine; shipping it needs that decision, or a build in an allowed org.
