@@ -340,6 +340,14 @@ At the published latencies, a whole pass takes minutes: Laya well under 1 min of
 
 NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
 
+**Status 2026-09-26: downloaded, waiting for the uv cooldown until about 2026-09-29.**
+
+- Downloaded 16:47–16:52 on AC over Wi-Fi (en0, 192.168.x), after `bench-netcheck --for download` passed, through `fnox exec -- env HF_HUB_DISABLE_XET=1 hf download`. Every LFS blob's sha256 matches its name, 5.8 GB in total: `RoderickQiu/kev-4b-mlx-8bit`@e1c35947 (4.2 GB), `jaredpalmer/kev-4b`@139fdd94 (0.16 GB), `aac6fef/laya-mlx`@20aed815 (0.81 GB) and `aac6fef/laya-multilingual-mlx`@f2b4faf5 (0.66 GB). The 8-bit `model.safetensors` also matches its `provenance.json` (sha256 59f136a6…, 4,469,640,165 bytes).
+- **The 8-bit Kev is not today's Kev.** It was merged from `jaredpalmer/kev-4b`@485ace87 with Kev's code at 08ab0b87, not from the current main 139fdd94, and its `head.pt` differs (sha256 d8f796da… against dd633435…). Run it with the 8-bit repo's own `head.pt` and tokenizer, and record 485ace87 as the Kev revision. The current main's head does not match the merged weights.
+- **Blocked by the 7-day uv cooldown** (`exclude-newer = "7 days"` in `~/.config/uv/uv.toml`). `laya-mlx` 0.2.0, the only version, was published 2026-09-22T06:02Z. Kev's code at 08ab0b87 is dated 2026-09-22 and is not on PyPI, so uv never checks it, but it waits under the same policy. Install neither before about 2026-09-29.
+- **Run Kev in-process**, with no HTTP server: `kev.mlx_model.MLXDecisionModel`, `kev.api.to_record`/`to_answers`. It needs `mlx-lm>=0.31.3,<0.32`, `torch<2.9` (for `head.pt` and the pointer head), `transformers>=5.17` and pydantic. Kev trains on 384 state tokens and serving truncates silently at 8,192 (`state_truncated`), so report both counts.
+- **uv lesson.** The mise environment exports `VIRTUAL_ENV=<repo>/.venv`, and it wins over a `VIRTUAL_ENV=` prefix on `uv pip install`. On 2026-09-26 that put Kev's dependencies into the main `.venv`, which downgraded mlx-lm from the omlx pin. Always install into a model venv with `env -u VIRTUAL_ENV uv pip install --python .bench-logs/venv-<name>/bin/python …`, and check the "Using Python … environment at" line.
+
 ## 8.7 After night 3 (quality frontier, night 1), 2026-09-26
 
 - **Done:** the local part ran 16:53–20:12 on 25 September. The first cloud arm was invalid because cplt scoped every session to the repo root (fixed in #57; results kept under `.bench-logs/night3-20260925-165202/invalid-cloud/`, not in `bench/`). The cloud arm was rerun 08:08–09:53 on 26 September. Total cloud spend: $34.71 of $80. Report: [night-1.md](../2026-09-25-quality-frontier/night-1.md).
