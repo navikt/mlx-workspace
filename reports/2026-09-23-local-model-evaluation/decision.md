@@ -32,7 +32,7 @@ Checked 13:20 CEST. Merged into navikt/copilot `main`:
 
 Still open:
 
-- navikt/copilot#934 (sampling override, `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P`) stays a draft until the sampling sweep picks values. Rebased onto d328ee68 on 2026-09-24.
+- navikt/copilot#934 (sampling override, `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P`) merged on 2026-09-24 (this line said "stays a draft" until 2026-09-26).
 - navikt/mlx-workspace#20 stays a draft and will be re-scoped (action 4): it will ship the tuned parameters for both Qwen3.8 builds instead of removing the 8-bit.
 
 ## 1. Decision summary
@@ -40,7 +40,7 @@ Still open:
 1. `qwen3.6-35b-a3b-optiq` stays the only default. Its quality is level with the best local alternative (28/40 vs 31/40, Fisher p = 0.61), and it is about 9× faster per task.
 2. **Revised 2026-09-24.** The 8-bit Qwen3.8-27B stays on the 48 GB tier as an opt-in with tuned parameters, provisionally 32,768 context, 4,096 output and a 2.25 GiB prompt cache ([qwen38-tuning.md §7](qwen38-tuning.md#7-provisional-parameters)). *Original item:* withdrawn from the 48 GB tier, because at 36 GB wired it hit a Metal OOM at about 51k tokens once and slows about 6× past 40k. That evidence stands and is why the context stays at or below 40k.
 3. **Revised 2026-09-24.** Full-context 8-bit (64k and up) stays on the 64 GB backlog. *Original item:* the whole 8-bit moved there.
-4. **Revised 2026-09-24.** The 4-bit stays on offer, provisionally at 65,536 context, 8,192 output and an 8 GiB prompt cache (was 12 GiB), with the OptiQ-4bit build measured as a possible replacement. *Original item:* capped at 65,536 (from 131,072) in #20. It verified an E1 session through nav-pilot at that cap and peaked at 29.6 GB.
+4. **Revised 2026-09-24; superseded the same day:** the plain 4-bit was replaced by Qwen3.8-27B-OptiQ-4bit ([qwen38-tuning.md](qwen38-tuning.md) §10). The text below is the earlier revision. The 4-bit stays on offer, provisionally at 65,536 context, 8,192 output and an 8 GiB prompt cache (was 12 GiB), with the OptiQ-4bit build measured as a possible replacement. *Original item:* capped at 65,536 (from 131,072) in #20. It verified an E1 session through nav-pilot at that cap and peaked at 29.6 GB.
 5. ~~**Recommendation:** stop offering the 4-bit as well, in a follow-up to #20.~~ **Superseded by the user's decision of 2026-09-24** to keep offering it. The evidence is unchanged: it scored 17/30, below optiq (p = 0.32, §3.2), at about 6.6× the time per task and less than half optiq's decode speed, and its 30k and 60k cold TTFT fail the §12 latency criteria (§5).
 6. The LLM loop classifier ("System One") is dropped. At its 0.9 threshold it blocked none of 7 probe scenarios, loops included.
 7. It is replaced by a deterministic rule (navikt/copilot#933): block after 4 identical calls with identical results, and keep a backstop at 8 identical calls.
