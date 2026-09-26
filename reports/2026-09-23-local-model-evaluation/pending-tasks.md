@@ -408,3 +408,4 @@ Asked for on 26 September: a product requirements document and value proposition
 4. **Volume and owners:** commits and PRs per day at NAV, and one or two runtime flows with a named owning team.
 
 The PRD will cover the problem and users, the jobs `decide` does, value against local-only and against a Jev-style SaaS, the options and cost, privacy (DPIA, prompt logging, cache isolation), success metrics, and the rollout.
+- **`retry2` replication, night 2 (2026-09-26), done.** It replicates on edit-single rung 2 (10/16 → 16/16, p = 0.009, 1.1× time). Create-file rung 1 improves strongly (5/16 → 12/16, p = 0.016) but misses the 2× cost limit at 2.03×. Edit-multi-mechanical: no effect, and night 1's move was noise. Next: propose `retry2` as the default for edit-single dispatches in nav-pilot's check-and-retake policy, and re-measure create-file cost per task. See [night-2.md](../2026-09-25-quality-frontier/night-2.md).
