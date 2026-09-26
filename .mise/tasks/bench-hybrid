@@ -322,6 +322,67 @@ def parse_events(text):
             "reply": " ".join(reply).strip()}
 
 
+# Paths a dispatch names. Extension-gated so "underenhet.verdi" in a prompt is
+# not taken for a file.
+_PATH = re.compile(r"(?:[\w.@-]+/)*[\w@-]+\.(?:kts?|java|tsx?|jsx?|py|go|rs|sql|json|ya?ml|toml|md|xml|gradle|properties|html|css)\b")
+
+
+def rework(text, workers=(WORKER_AGENT, "lokal-arbeider")):
+    """What the orchestrator did with each worker dispatch, from the JSONL stream.
+
+    The parent stream does not carry the worker's own tool calls, so a dispatch's
+    files are the paths it names: in the prompt the orchestrator wrote, or in the
+    reply the worker returned. Events are in stream order and a task tool_use is
+    emitted when the dispatch returns, so "later" means later in the stream.
+
+      redone    a later worker dispatch names one of the same files (or has the
+                same description), or the cloud `write`s one of them whole
+      fixed     otherwise, the cloud `edit`s one of them
+      accepted  neither
+
+    Blind to cloud edits made through bash (sed -i, heredocs); those count as
+    accepted. "lokal-arbeider" is the worker's name before nav-pilot renamed it,
+    so the August logs can be re-read.
+    """
+    events = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            part = json.loads(line).get("part") or {}
+        except ValueError:
+            continue
+        st = part.get("state") or {}
+        inp = st.get("input") or {}
+        if part.get("tool") == "task" and inp.get("subagent_type") in workers:
+            files = set(_PATH.findall(f"{inp.get('prompt') or ''}\n{st.get('output') or ''}"))
+            events.append(("task", inp.get("description") or "", files, st.get("status")))
+        elif part.get("tool") in ("edit", "write") and inp.get("filePath"):
+            events.append((part["tool"], None, inp["filePath"], None))
+
+    def same(a, b):
+        return a == b or a.endswith("/" + b) or b.endswith("/" + a)
+
+    def hit(files, path):
+        return any(same(f, path) for f in files)
+
+    out = []
+    for i, (kind, desc, files, status) in enumerate(events):
+        if kind != "task":
+            continue
+        later = events[i + 1:]
+        redispatch = any(k == "task" and ((files and any(hit(files, f) for f in fs)) or (desc and d == desc))
+                         for k, d, fs, _ in later)
+        wrote = any(k == "write" and hit(files, p) for k, _, p, _ in later)
+        edited = sorted({p for k, _, p, _ in later if k == "edit" and hit(files, p)})
+        verdict = "redone" if redispatch or wrote else "fixed" if edited else "accepted"
+        out.append({"description": desc, "status": status, "files": sorted(files),
+                    "cloud_edited": edited, "redispatched": redispatch,
+                    "cloud_wrote": wrote, "verdict": verdict})
+    return out
+
+
 def numstat_lines(numstat):
     """Lines added plus deleted, from `git diff --numstat`. Binary files show '-'."""
     total = 0
@@ -791,6 +852,11 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     rec["valid"] = invalid is None
     rec["invalid_reason"] = invalid
     rec["instructions_after"] = instructions_after
+    # Per dispatch, what the orchestrator did with the worker's result (§5.2 of
+    # reports/2026-09-26-64gb-tier/plan.md). Empty for a sample that dispatched nothing.
+    rec["dispatches"] = rework(log_text)
+    rec["rework"] = {v: sum(d["verdict"] == v for d in rec["dispatches"])
+                     for v in ("accepted", "fixed", "redone")}
     return rec
 
 
@@ -845,6 +911,34 @@ def self_check():
                               "mlx_provider": False}
     assert all(markers(dirty).values())
     assert instruction_inventory({"instructions": ["/nope/missing.md"]})[0]["bytes"] is None
+
+    def tool(name, **state):
+        return json.dumps({"type": "tool_use", "part": {"tool": name, "state": state}})
+
+    def dispatch(desc, prompt, output=""):
+        return tool("task", status="completed", output=output,
+                    input={"subagent_type": WORKER_AGENT, "description": desc, "prompt": prompt})
+
+    transcript = "\n".join([
+        "# cwd: /ws/repo",
+        dispatch("doc comment", "Add a KDoc to src/main/A.kt", "Done."),
+        dispatch("thread field", "Add the field to src/main/B.kt and src/main/Mapper.kt"),
+        dispatch("rename", "Rename foo in src/main/C.kt"),
+        tool("task", input={"subagent_type": "explore", "prompt": "look at src/main/A.kt"}),
+        tool("read", input={"filePath": "/ws/repo/src/main/A.kt"}),
+        tool("edit", input={"filePath": "/ws/repo/src/main/Mapper.kt"}),
+        dispatch("rename again", "Finish renaming foo in src/main/C.kt"),
+        dispatch("write test", "Write src/test/DTest.kt", "Wrote `src/test/DTest.kt`."),
+        tool("write", input={"filePath": "/ws/repo/src/test/DTest.kt", "content": "x"}),
+    ])
+    rw = rework(transcript)
+    assert [(d["description"], d["verdict"]) for d in rw] == [
+        ("doc comment", "accepted"), ("thread field", "fixed"), ("rename", "redone"),
+        ("rename again", "accepted"), ("write test", "redone")], rw
+    assert rw[1]["cloud_edited"] == ["/ws/repo/src/main/Mapper.kt"], rw[1]
+    assert rw[1]["files"] == ["src/main/B.kt", "src/main/Mapper.kt"], rw[1]
+    assert rework(stream) == []
+    print("  ✓ rework verdicts: accepted, fixed, redone")
 
     assert numstat_lines("3\t1\ta.kt\n-\t-\tlogo.png\n0\t7\tb.kt\n") == 11
     m = memory()
@@ -1010,6 +1104,10 @@ def main():
                           f"${rec['cloud_cost_usd']} · "
                           f"{show(rec['local_calls'])} local calls · "
                           f"{rec['lines_changed']} lines · {rec['note']}")
+                    if rec.get("dispatches"):
+                        rw = rec["rework"]
+                        print(f"     rework: {rw['accepted']} accepted · {rw['fixed']} fixed · "
+                              f"{rw['redone']} redone")
                     if not rec["valid"]:
                         print(f"     ⚠ INVALID, not a result: {rec['invalid_reason']}")
                 print(f"✓ {out.relative_to(ROOT)}")
