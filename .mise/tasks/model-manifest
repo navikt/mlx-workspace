@@ -40,6 +40,9 @@ OFFERED = {
         "default": True,
         "role": "Sub-agent worker for focused tasks",
         "evidence": "reports/2026-09-23-local-model-evaluation/decision.md",
+        # Claim-injection flips 9/27 = 33% against Qwen3.8's 58%:
+        # bench/decide-limits-20260925-014512.md.
+        "recommended_for": ["default", "decide-untrusted-evidence"],
         # Written from manifest/capabilities.json, not from impressions: the one class
         # that clears the bar is a delegated mechanical multi-file edit.
         "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
@@ -68,6 +71,9 @@ OFFERED = {
         "default": False,
         "role": "Opt-in alternative, slower, the more robust 4-bit build",
         "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit",
+        # 82-88% on nuanced yes/no against 55-70% for the default:
+        # bench/decide-limits-20260925-014512.md, bench/decide-sets-20260925-225356.md.
+        "recommended_for": ["decide-nuanced"],
         "expect": "Opt-in, never the default, and much slower: median task about 50 seconds against about 12. The OptiQ build, mixed precision: sensitive layers at 8-bit, the rest at 4-bit. More robust than the plain 4-bit it replaces: 18 of 30 cheap tasks against 11 of 20, no seven-minute timeouts against 4, and 12 of 12 Copilot sessions verified. Decodes about 15% slower, 21 tokens a second at 30k. Context is 64k with an 8k reply, and a full session measured 37.2 GB at peak.",
     },
     "qwen3.8-27b-8bit-mlx": {
@@ -77,6 +83,20 @@ OFFERED = {
         "expect": "Opt-in, never the default. About ten times slower than the default per task (median 115 seconds against 12) and about 14 tokens a second; a cold 30k-token prompt takes about a minute to read, 45k about 85 seconds. Quality was level with the default, 31 of 40 against 28. Context is 48k with a 4k reply, read in 512-token steps so a long prompt fits the 36 GB wired limit. nav-pilot releases older than 2026.09.24-110317 ignore the step and can run out of memory near 48k: update first. If you want one Qwen3.8, take the 4-bit.",
     },
 }
+
+
+# Removed model ids and the OFFERED key that replaces each. nav-pilot resolves a
+# local_model naming a removed id to its replacement instead of the default, and
+# says so; it never rewrites the user's config.
+REPLACED = {
+    # qwen38-tuning.md §10: OptiQ-4bit replaced the plain 4-bit on 2026-09-24.
+    "mlx-community/Qwen3.8-27B-4bit": "qwen3.8-27b-optiq-4bit",
+}
+
+# recommended_for keys nav-pilot knows (local.Recommendations in navikt/copilot).
+# nav-pilot ignores any other key and owns every sentence, so this only catches
+# typos before they silently do nothing.
+RECOMMENDED_KEYS = {"default", "decide-untrusted-evidence", "decide-nuanced"}
 
 
 # nav-pilot refuses a manifest whose params carry a key outside this namespace,
@@ -159,7 +179,15 @@ def entry(key: str) -> dict:
         "wired_limit_gb": meta.get("gpu_wired_limit_gb"),
         # Everything the server and the clients need, already validated here.
         "params": check_params({k: v for k, v in params.items() if k.startswith("MLX_")}, key),
+        **({"recommended_for": check_recommended(offer["recommended_for"], key)} if offer.get("recommended_for") else {}),
     }
+
+
+def check_recommended(keys: list, key: str) -> list:
+    bad = sorted(set(keys) - RECOMMENDED_KEYS)
+    if bad:
+        raise SystemExit(f"\u2717 {key} has recommended_for keys nav-pilot does not know: {', '.join(bad)}")
+    return keys
 
 
 # nav-pilot's own limit (maxProseRunes in internal/local/local.go). Role and
@@ -208,7 +236,14 @@ manifest = {
     "channel": "alpha",
     "note": "Generated from profiles/ by 'mise run model-manifest'. Do not edit by hand.",
     "models": [with_min_version(with_capabilities(check_prose(entry(k)))) for k in OFFERED],
+    "replaced": REPLACED,
 }
+
+for old, new in REPLACED.items():
+    if new not in OFFERED:
+        raise SystemExit(f"\u2717 {old} is replaced by {new}, which is not offered")
+    if any(m["model"] == old for m in manifest["models"]):
+        raise SystemExit(f"\u2717 {old} is listed as replaced but is still offered")
 
 missing = [k for k in OFFERED if k not in P.list_keys()]
 if missing:
