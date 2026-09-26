@@ -6,10 +6,13 @@
 #   lock -> model-use -> stop :8080 -> scratch nav-pilot config (auto_update off,
 #   local_model = the profile's) -> manifest entry gets the profile's params
 #   -> nav-pilot alpha local start -> run the command -> stop, restore the manifest
+#   (a #989 binary gets its own manifest file instead; see below)
 #
 # No sanity completion before the command: `_decide.py` times the first request the
 # server sees, and bench-hybrid's preflight makes its own. The command gets
-#   NP_PORT NP_MODEL NP_PROFILE NP_SERVER_PID MLX_ACTIVE_PROFILE BENCH_NAV_PILOT NAV_PILOT_CONFIG
+#   NP_PORT NP_MODEL NP_PROFILE NP_SERVER_PID MLX_ACTIVE_PROFILE BENCH_NAV_PILOT NAV_PILOT_CONFIG,
+# and NAV_PILOT_BENCH_MANIFEST (+ _ALLOW_ORGS) when the binary has the override, so
+# _decide.py and bench-hybrid's nav-pilot calls read the same manifest as the server.
 # and its exit code is this task's. The manifest backup is named like bench-np-e2e's
 # ($CACHE.np-e2e-<pid>), so night-run's cleanup restores it after a SIGKILL.
 set -uo pipefail
@@ -47,6 +50,7 @@ started_np=""
 cleanup() {
   [ -n "$started_np" ] && "$NP" alpha local stop >/dev/null 2>&1
   [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ] && rm -f "$NAV_PILOT_BENCH_MANIFEST"
   rm -f "$NAV_PILOT_CONFIG"
   rm -rf "$LOCKDIR"
 }
@@ -67,8 +71,15 @@ fi
   grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
 } > "$NAV_PILOT_CONFIG"
 
-cp "$CACHE" "$BACKUP" || { echo "✗ could not back up $CACHE"; exit 1; }
-python3 .mise/tasks/_np_checks.py manifest "$profile" "$CACHE" || { echo "✗ manifest"; exit 1; }
+# A binary with navikt/copilot #989 reads a manifest of our own through
+# NAV_PILOT_BENCH_MANIFEST and ~/.nav-pilot is left alone; the older builds the nights
+# pin get the cached manifest rewritten and restored, as before.
+unset NAV_PILOT_BENCH_MANIFEST NAV_PILOT_BENCH_ALLOW_ORGS
+eval "$(python3 .mise/tasks/_np_checks.py bench-env "$NP" "$MODEL" "$PWD/.bench-logs/np-serve-$STAMP.models.json")"
+if [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ]; then MANIFEST="$NAV_PILOT_BENCH_MANIFEST"
+else MANIFEST="$CACHE"; cp "$CACHE" "$BACKUP" || { echo "✗ could not back up $CACHE"; exit 1; }
+fi
+python3 .mise/tasks/_np_checks.py manifest "$profile" "$MANIFEST" || { echo "✗ manifest"; exit 1; }
 
 # Unreachable proxy: start reads the manifest we just wrote instead of refetching it.
 started_np=1

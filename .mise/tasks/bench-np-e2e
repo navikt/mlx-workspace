@@ -22,6 +22,9 @@
 # cached manifest (~/.nav-pilot/local-models.json) has that entry's params swapped
 # for the profile's for the duration, and `start` is kept off the network so it
 # reads the cache instead of refetching. Restored on exit, whatever the exit.
+# A binary with navikt/copilot #989 is given its own manifest file instead
+# (NAV_PILOT_BENCH_MANIFEST), which also lets it serve publishers outside its
+# allowlist (NAV_PILOT_BENCH_ALLOW_ORGS), e.g. Accio-Lab/occamy.
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 1
 
@@ -64,6 +67,7 @@ cleanup() {
   [ -n "$sampler" ] && kill "$sampler" 2>/dev/null
   [ -n "$started_np" ] && "$NP" alpha local stop >>"$LOG" 2>&1
   [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
+  [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ] && rm -f "$NAV_PILOT_BENCH_MANIFEST"
   rm -f "$NAV_PILOT_CONFIG"
   rm -rf "$LOCKDIR"
 }
@@ -93,8 +97,15 @@ fi
   grep -vE '^(auto_update|local_enabled|local_autostart|local_model)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
 } > "$NAV_PILOT_CONFIG"
 
-cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
-python3 .mise/tasks/_np_checks.py manifest "$profile" "$CACHE" >>"$LOG" 2>&1 || { say "✗ manifest"; exit 1; }
+# A binary with navikt/copilot #989 reads a manifest of our own through
+# NAV_PILOT_BENCH_MANIFEST and ~/.nav-pilot is left alone; the older builds the nights
+# pin get the cached manifest rewritten and restored, as before.
+unset NAV_PILOT_BENCH_MANIFEST NAV_PILOT_BENCH_ALLOW_ORGS
+eval "$(python3 .mise/tasks/_np_checks.py bench-env "$NP" "$MODEL" "$PWD/.bench-logs/np-e2e-$STAMP.models.json")"
+if [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ]; then MANIFEST="$NAV_PILOT_BENCH_MANIFEST"
+else MANIFEST="$CACHE"; cp "$CACHE" "$BACKUP" || { say "✗ could not back up $CACHE"; exit 1; }
+fi
+python3 .mise/tasks/_np_checks.py manifest "$profile" "$MANIFEST" >>"$LOG" 2>&1 || { say "✗ manifest"; exit 1; }
 
 # Unreachable proxy: Resolve's fetch fails and start falls back to the cache we
 # just wrote. Go never proxies 127.0.0.1, so the readiness probe is unaffected.
@@ -136,6 +147,7 @@ venv = subprocess.run([__import__("os").path.expanduser("~/.nav-pilot/local/venv
 sysctl = lambda k: subprocess.run(["/usr/sbin/sysctl", "-n", k], capture_output=True, text=True).stdout.strip()
 json.dump({"profile": profile, "model": model, "nav_pilot": np,
            "nav_pilot_commit": "e72319e0" if np.endswith("e72319e0") else None,
+           "bench_manifest": __import__("os").environ.get("NAV_PILOT_BENCH_MANIFEST"),
            "server_argv": argv, "mlx_lm": venv[:1], "mlx": venv[1:],
            "chip": sysctl("machdep.cpu.brand_string"), "ram_bytes": int(sysctl("hw.memsize")),
            "wired_limit_mb": sysctl("iogpu.wired_limit_mb")}, open(out, "w"), indent=2)
