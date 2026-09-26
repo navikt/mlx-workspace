@@ -78,6 +78,7 @@ guard that replaced the first attempt. Case sets and their labels are documented
 
 | Report | Date | Summary |
 |---|---|---|
+| [Option order and yes/no consistency in `alpha decide`](../bench/decide-layout-results.md) | 2026-09-26 | Options before evidence: no pooled gain (optiq 392 against 391 of 464, Qwen3.8-27B 414 against 412), per-question swings both ways, worse on the 27B's long evidence (55 against 45 of 60); nav-pilot keeps evidence first. Swapping yes/no agrees 77–81 %, negating the question 58–66 %: ask in the positive form and measure the exact wording |
 | [System One: from the loop classifier to `alpha decide`](2026-09-25-system-one/report.md) | 2026-09-25 | The 23 Sep classifier caught 0/2 loops and was replaced by the result-aware guard. decide-limits (974 cases × 3 models): language, up to 14 options, position bias, injection, evidence length, calibration. "Does the commit message explain why?" 89/96 on optiq; the `commit-msg` warning at 0.7. What shipped, and what is still open |
 | [Jev-like "System One" features for nav-pilot](2026-09-24-jev-like-features/research.md) | 2026-09-24 | Desk research: Jev is a real TypeSafe AI product (US-hosted, early access); the same pattern runs locally. Top three: near-duplicate result-aware loop detection, a tool-call risk gate, redaction of secrets and fødselsnummer in tool results; Copilot hooks reach cloud sessions too |
 
