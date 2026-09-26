@@ -107,7 +107,7 @@ check "manifest restored, no backups left" 'grep -q original "$T/local-models.js
 check "steps 5 and 7 both waited for AC (5 skipped, 7 ran)" '[ "$(grep -c "waiting up to" "$T/night/night.log")" = 2 ]'
 check "--from appended to the same steps.jsonl" '[ "$(grep -c "\"n\": \"13\"" "$T/night/steps.jsonl")" = 2 ]'
 check "report: temp table 24/30 and 17/20" 'grep -q "24/30 (3 runs)" "$T/report.md" && grep -q "17/20 (2 runs)" "$T/report.md"'
-check "report: e2e row with verdicts and sessions" 'grep -q "1/2 hold; refuted: cold TTFT@30k" "$T/report.md" && grep -q "classifier on 1/2, classifier off 1/1" "$T/report.md"'
+check "report: e2e row with verdicts and sessions" 'grep -q "1/2 hold; refuted: cold TTFT@30k" "$T/report.md" && grep -q "pass 1 1/2, pass 2 1/1" "$T/report.md"'
 check "_night_report selftest" 'python3 .mise/tasks/_night_report.py --selftest >/dev/null'
 echo
 echo "### report ($T/report.md)"
