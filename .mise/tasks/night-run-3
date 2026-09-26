@@ -169,6 +169,18 @@ if want and cur != str(want * 1024):
     print(f"WARN  wired-limit    {sys.argv[1]} declares {want} GB, iogpu.wired_limit_mb={cur or '?'} (mise run vram-set {want})")
 sys.exit(1 if missing or list((d / "blobs").glob("*.incomplete")) else 0)
 EOF
+    # bench-frontier's per-step assert_workspace_is_clean refuses to start on a stray
+    # file next to kotlin/ (a model's leftover .git, .git2, ...); catch it here so the
+    # night stops before step 1 instead of failing every step in a few seconds (25 Sep).
+    python3 - "$m" <<'EOF' && ok workspace "$m: workspaces/$m clean" || no workspace "$m: see above"
+import sys
+sys.path.insert(0, ".mise/tasks")
+from _night_workspace_clean import check
+ok, msg = check(sys.argv[1])
+if not ok:
+    print(f"      {msg}")
+sys.exit(0 if ok else 1)
+EOF
     done
     for c in opencode cplt; do command -v "$c" > /dev/null && ok client "$c" || no client "$c not on PATH"; done
   fi

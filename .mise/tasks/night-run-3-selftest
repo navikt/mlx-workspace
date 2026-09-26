@@ -90,6 +90,12 @@ printf 'local e2e - - - - 5 4 p1\nlocal ops - - - - 5 4 p2\nlocal base edit-sing
 NIGHT_DIR="$T/night64" NIGHT_REPORT="$T/night-64.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64.queue" > /dev/null
 
 echo
+echo "### workspace-clean preflight check (25 Sep: stray .git/.git2 passed preflight, failed every step)"
+mkdir -p "$T/workspaces/dirty/kotlin" "$T/workspaces/dirty/.git" "$T/workspaces/dirty/.git2" "$T/workspaces/clean/kotlin"
+wsout=$(FRONTIER_ROOT="$T" python3 "$ROOT/.mise/tasks/_night_workspace_clean.py" dirty clean missing)
+echo "$wsout"
+
+echo
 echo "### checks"
 bad=0
 check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
@@ -113,6 +119,12 @@ check "per-step profiles: e2e and ops found their result files, base ran on p2" 
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2" ]'
 check "report names both profiles" 'grep -q "Local model(s) \`p1\`, \`p2\`" "$T/night-64.md"'
 check "would commit the report and the result files" 'grep -q "(fake) would commit.*frontier-m-base" "$T/night/night.log"'
+check "workspace-clean: dirty workspace fails, names both stray dirs and the rm command" \
+  '[ "$(grep -c "^FAIL  dirty:.*\.git.*\.git2.*rm -rf .*/dirty/\.git .*/dirty/\.git2" <<<"$wsout")" -eq 1 ]'
+check "workspace-clean: clean and missing workspaces pass" \
+  '[ "$(grep -c "^PASS  clean:" <<<"$wsout")" -eq 1 ] && [ "$(grep -c "^PASS  missing:" <<<"$wsout")" -eq 1 ]'
+check "workspace-clean is wired into night-preflight and night-run-3's own preflight" \
+  'grep -q _night_workspace_clean "$ROOT/.mise/tasks/night-preflight" && grep -q _night_workspace_clean "$ROOT/.mise/tasks/night-run-3"'
 echo
 cat "$T/report.md"
 echo
