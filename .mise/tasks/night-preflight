@@ -100,6 +100,18 @@ for p in $("$ROOT/.mise/tasks/night-run" --list-profiles --needs-workspace); do
   if [ -z "$head" ]; then warn workspace "workspaces/$p/kotlin missing; the suite clones it (needs network)"
   elif [ "$head" = "$want" ]; then pass workspace "workspaces/$p/kotlin at ${want:0:8}"
   else warn workspace "workspaces/$p/kotlin at ${head:0:8}, suite fetches ${want:0:8} (needs network)"; fi
+
+  # bench-frontier's per-step assert_workspace_is_clean refuses to start on a stray
+  # file next to kotlin/ (a model's .git, .git2, ...); catch it here so a night stops
+  # at preflight instead of failing every step in the first seconds (25 Sep).
+  python3 - "$p" <<'EOF' || fails=$((fails + 1))
+import sys
+sys.path.insert(0, ".mise/tasks")
+from _night_workspace_clean import check
+ok, msg = check(sys.argv[1])
+print(f"{'PASS' if ok else 'FAIL'}  workspace-clean   workspaces/{sys.argv[1]}: {msg}")
+sys.exit(0 if ok else 1)
+EOF
 done
 
 e2e=$(python3 -c "import json; print(json.load(open('bench/tasks.json'))['repo'])")
