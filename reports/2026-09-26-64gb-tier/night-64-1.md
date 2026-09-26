@@ -87,3 +87,32 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · cap900: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
+## Review (2026-09-27)
+
+The frontier section above is the standing summary and doesn't cover this night's steps. The night's numbers, taken from the raw result files, are below.
+
+**Fit** (`bench-np-e2e --latency-only` at 48 GB wired; the pass line is peak ≤ 46 GB):
+
+| Profile | Peak | Decode tok/s (short → long) | Longest TTFT | Fit |
+|---|---|---|---|---|
+| qwen3.6-35b-a3b-optiq-64g (control) | 31.5 GB | 91 → 73 | 21 s | pass |
+| qwen3.6-35b-a3b-8bit-64g | 45.6 GB | 83 → 65 | 23 s | pass, 0.4 GB under the line |
+| qwen3.8-27b-8bit-64g | 46.5 GB | 17 → 14 | 119 s | **over the line by 0.5 GB**; retry at 52 wired (`-w52`) per the plan |
+| laguna-xs-2.1-8bit-64g | not run | | | nav-pilot's mlx-lm can't load it; it ran cheap-ops on the workspace server with no OOM |
+| occamy-1.0-4bit-64g | measured on day 64-0 at 36 wired | | | cheap-ops with no OOM; a nav-pilot fit is possible now with the bench override (#989, #71) |
+
+**Cheap-ops** (2 passes × 11 tasks each):
+
+| Profile | Passed | Common failures | Mean s/task |
+|---|---|---|---|
+| qwen3.8-27b-8bit-64g | 18/22 | R1, D2 | 142 |
+| qwen3.6-35b-a3b-8bit-64g | 17/22 | R1, D2, M1 | 56 |
+| laguna-xs-2.1-8bit-64g | 17/22 | R1, D2, D1 | 75 |
+| occamy-1.0-4bit-64g (day 64-0) | 17/22 | R1, D2, D3 | 65 |
+| qwen3.6-35b-a3b-optiq-64g (control) | 15/22 | R1, D2, G2, M1 | 63 |
+
+**Verdict:**
+- Every candidate clears the cheap-ops floor. They are within noise of each other and of the control (n = 22 each). R1 and D2 fail for every model, which points at those tasks rather than the models.
+- None is dropped on quality. Qwen3.8-27B 8-bit is set aside for night 64-2: it is 0.5 GB over the 48-wired fit line, and 2.3× slower per task than the MoE models, with 15 tok/s decode. It gets a 52-wired night of its own if it's still wanted.
+- Night 64-2 (the directed-worker frontier) goes ahead with Qwen3.6 8-bit, Laguna and Occamy, with optiq as the control.
