@@ -30,6 +30,10 @@
         "MLX_NAV_PILOT_TEMPERATURE": "0.6",
         "MLX_NAV_PILOT_TOP_P": "0.95"
       },
+      "recommended_for": [
+        "default",
+        "decide-untrusted-evidence"
+      ],
       "capabilities": {
         "bar": {
           "confidence": 0.9,
@@ -109,6 +113,9 @@
         "MLX_NAV_PILOT_TEMPERATURE": "0.6",
         "MLX_NAV_PILOT_TOP_P": "0.95"
       },
+      "recommended_for": [
+        "decide-nuanced"
+      ],
       "capabilities": {
         "bar": {
           "confidence": 0.9,
@@ -242,5 +249,8 @@
       },
       "min_nav_pilot": "2026.09.24-110317-3596754"
     }
-  ]
+  ],
+  "replaced": {
+    "mlx-community/Qwen3.8-27B-4bit": "qwen3.8-27b-optiq-4bit"
+  }
 }
