@@ -1,0 +1,27 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (mlx-lm), 64 GB tier: 64k context, 4.5 GiB cache, prefill step 512"
+released           = "2026-08"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "64 GB tier, shortlist #1 (reports/2026-09-26-64gb-tier/plan.md §3). qwen3.8-27b-8bit-mlx with the 48k cap lifted to 64k + an 8k reply, and the prompt cache raised so a whole 73,728-token window stays cached. Estimated peak 43.6 GB at 64k (29.5 weights + 4.8 KV + 4.8 cache + 1.8 transient + 2.6), not yet measured (night 64-1). Bench-only, not offered in the manifest."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+# 4.5 GiB of prompt cache: 64 KiB/token x (65,536 + 8,192) holds a whole session.
+MLX_CACHE_BYTES            = "4831838208"
+MLX_PREFILL_STEP_SIZE      = "512"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

@@ -19,7 +19,7 @@ EOF
 
 cat > "$T/bin/step" <<'EOF'
 #!/usr/bin/env bash
-n=$1 kind=$2 classes=$3 variant=$4 ledger=$5
+n=$1 kind=$2 classes=$3 variant=$4 ledger=$5 prof=${6:-m}
 b=$(tr ' ' '\n' <<<"$PLAN" | sed -n "s/^$n=//p"); b=${b:-ok}
 stamp=$(date +%Y%m%d-%H%M%S)-$n
 B=$NIGHT_BENCH_DIR
@@ -27,13 +27,15 @@ case "$b" in
   ok)
     case "$kind" in
       validate) echo '{"tasks": {}}' > "$B/frontier/validated-stub.json" ;;
-      base|lever) python3 - "$B/frontier-m-$variant-$stamp.json" "$classes" "$variant" <<'P'
+      e2e) echo '{}' > "$B/np-e2e-$prof-$stamp.json" ;;
+      ops) echo '{}' > "$B/results-$prof-$stamp.json" ;;
+      base|lever) python3 - "$B/frontier-$prof-$variant-$stamp.json" "$classes" "$variant" "$prof" <<'P'
 import json, sys
-path, cls, variant = sys.argv[1:]
+path, cls, variant, prof = sys.argv[1:]
 samples = [{"task": f"t{r}{x}", "class": cls, "family": "f", "rung": r, "d": 2 ** r, "run": k,
             "seconds": 10, "verified": r < 3 or (variant != "base" and r < 4), "valid": True}
            for r in (1, 2, 3, 4) for x in "ab" for k in (1, 2, 3, 4, 5)]
-json.dump({"meta": {"key": "m", "variant": variant, "harness_sha": "h", "tasks_sha": "s", "profile_params": {}},
+json.dump({"meta": {"key": prof, "variant": variant, "harness_sha": "h", "tasks_sha": "s", "profile_params": {}},
            "samples": samples}, open(path, "w"))
 P
       ;;
@@ -83,6 +85,11 @@ printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-s
 NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"
 
 echo
+echo "### --queue with a profile per step and the e2e and ops kinds"
+printf 'local e2e - - - - 5 4 p1\nlocal ops - - - - 5 4 p2\nlocal base edit-single base 2 1-2 5 4 p2\n' > "$T/night-64.queue"
+NIGHT_DIR="$T/night64" NIGHT_REPORT="$T/night-64.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64.queue" > /dev/null
+
+echo
 echo "### checks"
 bad=0
 check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
@@ -102,6 +109,9 @@ check "--queue ran its two steps" \
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"n\"] + \"=\" + r[\"status\"] + \":\" + r[\"variant\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night2/steps.jsonl")" = "1=OK:base 2=OK:retry2" ]'
 check "--queue report is titled night 2 and has the replication verdict" \
   'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2 .* on edit-single" "$T/night-2.md"'
+check "per-step profiles: e2e and ops found their result files, base ran on p2" \
+  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2" ]'
+check "report names both profiles" 'grep -q "Local model(s) \`p1\`, \`p2\`" "$T/night-64.md"'
 check "would commit the report and the result files" 'grep -q "(fake) would commit.*frontier-m-base" "$T/night/night.log"'
 echo
 cat "$T/report.md"

@@ -1,0 +1,25 @@
+[meta]
+name               = "Qwen 3.6 35B A3B 8bit, 64 GB tier, 52 GB wired, 12 GiB cache"
+released           = "2026-04"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "64 GB tier, shortlist #2 at the plan's profile (reports/2026-09-26-64gb-tier/plan.md §3): 38 / 52 / 64 / 64k + 16k with optiq's 12 GiB cache, estimated peak about 47 GB (37.7 + 9.6). The retry for qwen3.6-35b-a3b-8bit-64g; needs mise run vram-set 52. Bench-only."
+model_vram_gb      = 38
+gpu_wired_limit_gb = 52
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

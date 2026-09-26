@@ -1,0 +1,27 @@
+[meta]
+name               = "Occamy 1.0 (Accio-Lab) MLX 4bit, 64 GB tier"
+released           = "2026-08"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "64 GB tier, shortlist #3 (reports/2026-09-26-64gb-tier/plan.md §3). Post-train of Qwen3.6-35B-A3B, same architecture (qwen3_5_moe, runs on mlx-lm 0.31.3 and git). Estimated peak about 29 GB at 64k with optiq's 12 GiB cache. Sampling from the Accio-Lab/occamy-1.0 card: temperature 1.0, top_p 0.95, top_k 20, presence_penalty 1.5 (the card's example has thinking on; thinking stays off here, as for every worker profile). BENCH-ONLY: Accio-Lab is not in model-manifest's ALLOWED_ORGS and must not be offered without a separate decision."
+model_vram_gb      = 20
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "Accio-Lab/occamy-1.0-MLX-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TEMP                   = "1.0"
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_PRESENCE_PENALTY       = "1.5"
+MLX_NAV_PILOT_TEMPERATURE  = "1.0"
+MLX_NAV_PILOT_TOP_P        = "0.95"

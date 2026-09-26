@@ -17,6 +17,10 @@
 #   --queue FILE   run the steps in FILE instead of QUEUE below: one step a line in QUEUE's
 #                  format, # comments. The report goes next to it (night-2.queue → night-2.md)
 #                  unless NIGHT_REPORT says otherwise, and its title and commit name that night.
+#                  An optional 9th column names the local profile for that step (default
+#                  FRONTIER_MODEL), so one night can run several models. Two more kinds run
+#                  outside the frontier: e2e (bench-np-e2e --latency-only, the fit and speed
+#                  probe) and ops (one bench-models cheap-ops pass); their other columns are -.
 #
 # Test hooks, used by night-run-3-selftest: NIGHT_FAKE=1 runs $NIGHT_FAKE_STEP in place
 # of each step, and the NIGHT_* variables point every path somewhere harmless.
@@ -90,6 +94,14 @@ REPORT="${NIGHT_REPORT:-$([ -n "$QFILE" ] && echo "${QFILE%.queue}.md" || echo r
 NIGHT_NAME=$(basename "$REPORT" .md | tr - ' ')   # night-2.md → "night 2"
 
 in_part() { [ "$PART" = all ] || [ "$PART" = "$1" ]; }
+# The distinct local profiles the steps from FROM on load, in queue order.
+profiles() {
+  local i=0 q
+  for q in "${QUEUE[@]}"; do
+    set -- $q; i=$((i + 1))
+    [ "$i" -ge "$FROM" ] && [ "$1" = local ] && in_part local && echo "${9:-$MODEL}"
+  done | awk '!seen[$0]++'
+}
 
 plan() {
   local i=0 tt=0 te=0 tl=0 tc=0
@@ -99,8 +111,8 @@ plan() {
     { [ "$i" -lt "$FROM" ] || ! in_part "$1"; } && continue
     tt=$((tt + $7)); te=$((te + $8))
     [ "$1" = local ] && tl=$((tl + $8)) || tc=$((tc + $8))
-    printf '  %2d  %-5s %-8s %-22s %-7s runs %-2s rungs %-13s timeout %3d min, expect ~%d\n' \
-      "$i" "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"
+    printf '  %2d  %-5s %-8s %-22s %-7s runs %-2s rungs %-13s timeout %3d min, expect ~%d%s\n' \
+      "$i" "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "${9:+  [$9]}"
   done
   printf '  expect ~%dh%02d (GPU part ~%dh%02d, cloud part ~%dh%02d); worst case %dh%02d\n' \
     $((te / 60)) $((te % 60)) $((tl / 60)) $((tl % 60)) $((tc / 60)) $((tc % 60)) $((tt / 60)) $((tt % 60))
@@ -140,8 +152,9 @@ preflight() {
     || no selftest "bench-frontier selftest fails"
   if in_part local; then
     [ -z "$(/usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN)" ] && ok port-8080 "free" || no port-8080 "in use; mise run server-stop"
-    python3 - "$MODEL" <<'EOF' && ok model "$MODEL: profile loads, shards present" || no model "$MODEL: see above"
-import json, sys
+    for m in $(profiles); do
+    python3 - "$m" <<'EOF' && ok model "$m: profile loads, shards present" || no model "$m: see above"
+import json, subprocess, sys
 sys.path.insert(0, ".mise/tasks")
 import _profiles as P
 meta, params = P.load(sys.argv[1])
@@ -149,8 +162,14 @@ d = P.hf_cache_dir(params["MLX_MODEL"])
 snap = d / "snapshots" / (d / "refs" / "main").read_text().strip()
 shards = set(json.loads((snap / "model.safetensors.index.json").read_text())["weight_map"].values())
 missing = [s for s in shards if not (snap / s).exists()]
+# A warning, not a failure: bench-hybrid refuses a mismatch, the other steps record it.
+want = meta.get("gpu_wired_limit_gb")
+cur = subprocess.run(["/usr/sbin/sysctl", "-n", "iogpu.wired_limit_mb"], capture_output=True, text=True).stdout.strip()
+if want and cur != str(want * 1024):
+    print(f"WARN  wired-limit    {sys.argv[1]} declares {want} GB, iogpu.wired_limit_mb={cur or '?'} (mise run vram-set {want})")
 sys.exit(1 if missing or list((d / "blobs").glob("*.incomplete")) else 0)
 EOF
+    done
     for c in opencode cplt; do command -v "$c" > /dev/null && ok client "$c" || no client "$c not on PATH"; done
   fi
   if in_part cloud; then
@@ -202,7 +221,6 @@ fi
 DIR="$NIGHT_DIR"; mkdir -p "$DIR"
 [ -e "$DIR/.run-start" ] || : > "$DIR/.run-start"
 LEDGER="$DIR/cloud-ledger.json"   # one cap across every cloud step, resumes included
-BASEGLOB="frontier-$MODEL-base-*.json"
 say() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$DIR/night.log"; }
 record() {
   python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps(dict(zip(a[::2], a[1::2]))))' "$@" >> "$DIR/steps.jsonl"
@@ -269,13 +287,14 @@ trap 'say "=== interrupted"; [ -n "$CUR" ] && kill_tree "$CUR"; cleanup_after "$
 i=0
 for q in "${QUEUE[@]}"; do
   set -- $q; i=$((i + 1))
-  part=$1 kind=$2 classes=$3 variant=$4 runs=$5 rungs=$6 tmin=$7
+  part=$1 kind=$2 classes=$3 variant=$4 runs=$5 rungs=$6 tmin=$7 prof=${9:-$MODEL}
   { [ "$i" -lt "$FROM" ] || ! in_part "$part"; } && continue
-  log="$DIR/$(printf %02d "$i")-$kind-$classes-$variant.log"
+  log="$DIR/$(printf %02d "$i")-$kind-$classes-$variant${9:+-$9}.log"
   base=(n "$i" part "$part" kind "$kind" classes "$classes" variant "$variant" runs "$runs" rungs "$rungs" timeout_min "$tmin" log "$log")
-  say "--- step $i: $kind $classes $variant (timeout $tmin min)"
+  [ "$part" = local ] && base+=(profile "$prof")
+  say "--- step $i: $kind $classes $variant${9:+ on $9} (timeout $tmin min)"
 
-  if [ "$kind" = validate ] && python3 .mise/tasks/bench-frontier run --profile "$MODEL" --classes edit-single \
+  if [ "$kind" = validate ] && python3 .mise/tasks/bench-frontier run --profile "$prof" --classes edit-single \
        --runs 1 --dry-run 2>/dev/null | grep -q '✓ validation'; then
     say "  SKIP: validation already present for this tasks file"
     record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "already validated"
@@ -312,12 +331,14 @@ for q in "${QUEUE[@]}"; do
   run=(python3 .mise/tasks/bench-frontier run --classes "$classes" --variant "$variant" --runs "$runs")
   [ "$rungs" != - ] && run+=(--rungs "$rungs")
   case "$kind" in
-    validate) cmd=(python3 .mise/tasks/bench-frontier validate --workspace-key "$MODEL"); pat="frontier/validated-*.json" ;;
-    base)     cmd=("${run[@]}" --profile "$MODEL"); pat="frontier-$MODEL-$variant-*.json" ;;
-    lever)    cmd=("${run[@]}" --profile "$MODEL" --base-glob "$BASEGLOB"); pat="frontier-$MODEL-$variant-*.json" ;;
+    validate) cmd=(python3 .mise/tasks/bench-frontier validate --workspace-key "$prof"); pat="frontier/validated-*.json" ;;
+    base)     cmd=("${run[@]}" --profile "$prof"); pat="frontier-$prof-$variant-*.json" ;;
+    lever)    cmd=("${run[@]}" --profile "$prof" --base-glob "frontier-$prof-base-*.json"); pat="frontier-$prof-$variant-*.json" ;;
+    e2e)      cmd=(mise run bench-np-e2e -- "$prof" --latency-only); pat="np-e2e-$prof-*.json" ;;
+    ops)      cmd=(mise run bench-models -- "$prof"); pat="results-$prof-*.json" ;;
     cloud)    cmd=("${run[@]}" --cloud "$CLOUD" --cost-cap "$CAP_USD" --cost-ledger "$LEDGER"); pat="frontier-cloud-*-$variant-*.json" ;;
   esac
-  [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$classes" "$variant" "$LEDGER")
+  [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$classes" "$variant" "$LEDGER" "$prof")
 
   start=$(date -Iseconds); t0=$(date +%s)
   set -m
@@ -362,7 +383,8 @@ for q in "${QUEUE[@]}"; do
 done
 
 say "=== queue done; writing $REPORT"
-python3 - "$DIR" "$REPORT" "$BENCH_DIR" "$CAP_USD" "$MODEL" "$CLOUD" "$NIGHT_NAME" <<'EOF' 2>&1 | tee -a "$DIR/night.log"
+models=$(FROM=1 profiles | paste -sd, - | sed 's/,/`, `/g')
+python3 - "$DIR" "$REPORT" "$BENCH_DIR" "$CAP_USD" "${models:-$MODEL}" "$CLOUD" "$NIGHT_NAME" <<'EOF' 2>&1 | tee -a "$DIR/night.log"
 import json, os, subprocess, sys
 from pathlib import Path
 sys.path.insert(0, ".mise/tasks")
@@ -371,7 +393,7 @@ night, out, bench, cap, model, cloud, name = Path(sys.argv[1]), Path(sys.argv[2]
 steps = [json.loads(l) for l in (night / "steps.jsonl").read_text().splitlines() if l.strip()]
 L = [f"# Quality frontier, {name}: results", "",
      f"Written by `mise run night-run-3` from `{night}/steps.jsonl` and the result files. The plan and the "
-     "rules are [design.md](design.md). Local model `" + model + "`, cloud reference `" + cloud + "`.", ""]
+     "rules are [design.md](design.md). Local model(s) `" + model + "`, cloud reference `" + cloud + "`.", ""]
 if steps:
     L += [f"- Started {steps[0].get('start', '?')}, last step ended {steps[-1].get('end', '?')}.",
           f"- Cloud spend: ${max(float(s.get('cloud_spent_usd') or 0) for s in steps):g} of the ${cap} cap.", ""]
@@ -394,7 +416,7 @@ out.write_text("\n".join(L) + "\n")
 print(f"report: {out}")
 EOF
 
-results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
+results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' -o -name 'np-e2e-*.json' -o -name 'results-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
 if [ -n "$FAKE" ]; then
   say "(fake) would commit $REPORT and: $(echo $results)"
 else
