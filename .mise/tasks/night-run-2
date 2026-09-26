@@ -178,7 +178,7 @@ descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$
 strays() {
   local p cwd
   for p in $(pgrep -f '(^|/)(opencode|copilot|cplt)( |$)'); do
-    cwd=$(lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    cwd=$(/usr/sbin/lsof -a -p "$p" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
     case "$cwd" in "$ROOT"/workspaces/*|"$ROOT"/.bench-logs/loop-hook-work/*|"${NIGHT_STRAY_ROOT:-/nonexistent}"/*) echo "$p" ;; esac
   done
 }
@@ -237,7 +237,7 @@ for q in "${QUEUE[@]}"; do
   kind=$1 mode=$2 profile=$3 tmin=$4
   [ "$i" -lt "$FROM" ] && continue
   log="$DIR/$(printf %02d "$i")-$kind-$profile.log"
-  wired=$(sysctl -n iogpu.wired_limit_mb)
+  wired=$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)
   base=(n "$i" kind "$kind" mode "$mode" profile "$profile" timeout_min "$tmin" wired_mb "$wired" nav_pilot "$BENCH_NAV_PILOT" log "$log")
   say "--- step $i: $kind $mode $profile (timeout $tmin min)"
 

@@ -22,7 +22,7 @@ fail() { printf 'FAIL  %-18s %s\n' "$1" "$2"; fails=$((fails + 1)); }
 if pmset -g batt | grep -q "'AC Power'"; then pass power "on AC"
 else fail power "on battery: plug in the charger ($(pmset -g batt | sed -n 2p | tr -s '\t' ' '))"; fi
 
-wl=$(sysctl -n iogpu.wired_limit_mb)
+wl=$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)
 # ponytail: WARN, not FAIL — the fleet runs 36 GB, and a different limit still yields data
 [ "$wl" = 36864 ] && pass wired-limit "iogpu.wired_limit_mb=$wl" \
   || warn wired-limit "iogpu.wired_limit_mb=$wl, expected 36864 (mise run vram-set); results will say so"
