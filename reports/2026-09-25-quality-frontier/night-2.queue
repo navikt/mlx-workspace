@@ -1,0 +1,46 @@
+# Quality frontier, night 2: does retry2 replicate where it moved the frontier on night 1?
+# Run: mise run night-run-3 -- --part local --queue reports/2026-09-25-quality-frontier/night-2.queue
+#
+# design.md §7 condition 2: on a second night, at the rung it moved, n ≥ 8 per arm and a
+# one-sided Fisher p < 0.1 against base; condition 3: at most 2× base's median wall time.
+# Base runs again tonight rather than reusing night 1's: bench-frontier changed after the local
+# arm of night 1 (37346ad), so the harness sha differs and summary would not pool the two.
+#
+# Rungs retry2 moved on night 1 (open frontier, optiq): edit-multi-mechanical 3 → 5 (r4, r5),
+# edit-single 0 → 2 (r1, r2), create-file 0 → 1 (r1). create-file r2 stayed at the cloud
+# verdict, so it is not a rung retry2 moved and is left out.
+#
+# n = 16 per arm per rung: 4 blocks of --runs 2 over 2 tasks a rung. Blocks go
+# base, retry2, retry2, base, base, retry2, retry2, base (ABBA twice), so a linear drift in
+# the machine or the server over the night lands on both arms alike. Classes in priority
+# order, so a short night still finishes edit-multi first.
+#
+# Expected minutes per block from night 1's step times (edit-multi ~55 s a sample at base,
+# ~85 s under retry2; edit-single ~30/35 s; create-file ~2.5/4 min), model load included.
+# Total ~3 h 40 min expected; the timeouts are safety bounds only.
+#
+# part kind  classes               variant runs rungs timeout-min expected-min
+local base   edit-multi-mechanical base    2    4-5   25  8
+local lever  edit-multi-mechanical retry2  2    4-5   30  12
+local lever  edit-multi-mechanical retry2  2    4-5   30  12
+local base   edit-multi-mechanical base    2    4-5   25  8
+local base   edit-multi-mechanical base    2    4-5   25  8
+local lever  edit-multi-mechanical retry2  2    4-5   30  12
+local lever  edit-multi-mechanical retry2  2    4-5   30  12
+local base   edit-multi-mechanical base    2    4-5   25  8
+local base   edit-single           base    2    1-2   12  4
+local lever  edit-single           retry2  2    1-2   15  5
+local lever  edit-single           retry2  2    1-2   15  5
+local base   edit-single           base    2    1-2   12  4
+local base   edit-single           base    2    1-2   12  4
+local lever  edit-single           retry2  2    1-2   15  5
+local lever  edit-single           retry2  2    1-2   15  5
+local base   edit-single           base    2    1-2   12  4
+local base   create-file           base    2    1     40  10
+local lever  create-file           retry2  2    1     60  16
+local lever  create-file           retry2  2    1     60  16
+local base   create-file           base    2    1     40  10
+local base   create-file           base    2    1     40  10
+local lever  create-file           retry2  2    1     60  16
+local lever  create-file           retry2  2    1     60  16
+local base   create-file           base    2    1     40  10
