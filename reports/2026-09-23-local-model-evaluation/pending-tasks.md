@@ -298,6 +298,48 @@ Parked on 25 September (not now). The recipe page for sharing internally has 10 
 
 `--eval` today (`cli/nav-pilot/internal/cli/alpha_decide.go`, runDecideEval): it reads the whole JSONL into memory, runs the cases one at a time, and prints only totals (accuracy, confusion, mean p, p50/p95). It writes nothing per case. The first failed case aborts the run with exit 2, and everything up to then is lost. The help text promises "calibration", but it only prints the mean p for right and wrong answers. The per-case tables and the threshold sweep in the bench come from `_decide_limits.py`, not from the CLI. Proposal: `--out results.jsonl` (one line per case: expect, choice, p, ms, error), keep going past errors and count them, and a threshold sweep for `--expect` (caught and wrongly flagged at 0.5/0.7/0.8/0.9), so a team can choose a threshold without our harness.
 
+## 8.6 Kev 4B and Laya (MLX): plan
+
+Two open decision models that answer the same typed questions as Jev ([Jev research](../2026-09-24-jev-like-features/research.md)). Neither of them generates a letter token, so neither can run through `alpha decide` and the mlx-lm server: each one returns a probability per option from its own head. Nothing is downloaded yet.
+
+- **Kev 4B** ([jaredpalmer/kev-4b](https://huggingface.co/jaredpalmer/kev-4b), code at [jaredpalmer/kev](https://github.com/jaredpalmer/kev), Apache-2.0). A rank-16 LoRA adapter plus a pointer head (`head.pt`, with a fitted temperature) on `Qwen/Qwen3.5-4B-Base`, English only. The model serves TypeSafe's `POST /v1/systemone` through `python -m kev.serve` (torch, transformers ≥ 5.17 and peft; the Kev README says it picks an mlx-lm backend on Apple Silicon by itself). Options per question are 1 to 255. Mac numbers come from the Kev README, not from Opper: 721 ms on new text and 136 ms on cached text for Kev-4B on a 32 GB M5. The HF card says 0.78 s for five questions in bf16 on an M5, because the DeltaNet layers have no MPS kernels. Opper's post ([blog](https://opper.ai/blog/jev-vs-kev-open-decision-model), [code](https://github.com/opper-ai/jev-vs-kev)) only measured the hosted endpoint: 95.0 / 98.3 / 93.9 % on arXiv, Stack Exchange and GitHub bug-or-feature (n = 160 / 120 / 82), about 220 ms from Stockholm, and they warn that differences under 5 points are noise. Kev was trained on short states and misses detail deep in long documents.
+- **Laya** ([convaiinnovations/laya](https://huggingface.co/convaiinnovations/laya), Apache-2.0) is a bidirectional encoder with a decision head: 421M (ModernBERT-large, 512 tokens, English) and a 322M multilingual variant (mmBERT-base, 1,024 tokens). The MLX port is [mizorewww/laya-mlx](https://github.com/mizorewww/laya-mlx) (`pip install laya-mlx`, mlx 0.32.x, no torch). It runs as a Python API or CLI with no HTTP server, and its question types are `choice`, `score` and `noul` (yes/no). Port numbers, measured on an M3 Max in FP16: 13.42 ms p50 for 421M and 7.39 ms for 322M, with peak memory 944 and 688 MiB. Upstream's own comparison with Jev, 0.766 against 0.727 on typed-decisions, was made by Laya's own authors. Laya is weak on many labels (Banking77: 0.425 against 0.870) and on `score`.
+
+**Sizes** (HF metadata, 2026-09-26; free disk 1.1 TiB, so disk is not the limit):
+
+| Download | Size |
+|---|---|
+| `jaredpalmer/kev-4b` (adapter, head, tokenizer) | 0.16 GB |
+| `Qwen/Qwen3.5-4B-Base` (bf16, needed to merge the adapter) | 9.3 GB |
+| or [`RoderickQiu/kev-4b-mlx-8bit`](https://huggingface.co/RoderickQiu/kev-4b-mlx-8bit) (merged, 8-bit, unofficial) | 4.5 GB, plus the 0.16 GB above for the head |
+| `aac6fef/laya-multilingual-mlx` (FP16) | 0.68 GB |
+| `aac6fef/laya-mlx` (English, FP16) | 0.85 GB |
+
+Take the 8-bit Kev: its README reports the same answer on 119/119 pages as bf16, with probabilities within 0.012–0.053. The GGUF ([mys/kev-4b-GGUF](https://huggingface.co/mys/kev-4b-GGUF)) and ONNX ports don't come with the pointer head, and llama.cpp could not use it anyway, so they are ruled out (not verified further).
+
+**Harness.** A `MODELS` entry with `profile: None` is not enough: that entry only helps a model that mlx-lm serves as a chat model. Instead, add one small adapter, `.mise/tasks/_decide_s1.py`. It reads the same JSONL (`{question, options, evidence, expect}`) and maps each case to `{state: evidence, questions: {q: {type: "choice", instructions: question, criteria: options}}}`. It takes the argmax and p from the returned distribution and writes the same per-case JSON as `_decide_limits`, reusing its `wilson`/`pct`/`cell`, so the existing summaries can compare the models. There are two backends. Kev goes over HTTP to `kev.serve` on a local port (the port is an assumption: the Kev docs use both 8008 and 8009), and Laya runs in-process through `laya_mlx.load(...).predict`. Install each in its own `uv` venv under `.bench-logs/`, not in the repo's environment, because the mlx pins differ. Record the checkpoint revision and the served temperature with each run. Kev's default temperature is calibrated; `KEV_TEMPERATURE=1.0` gives raw values.
+
+**Sets.** Run commit-explains-why EN (48) and NO (48), issue-type (105), aksel-kind (65), pr-motivation (48), and all nine `bench/decide-limits/` sets (974 cases). Expect these results before reading them:
+
+- Kev is English-only, so `why-no` and `lang-no` measure how it degrades, not what it can do.
+- Laya should use `laya-multilingual-mlx` for the Norwegian sets. Upstream publishes no Norwegian numbers.
+- Both context windows are far below our 30k-character evidence. `length` and the long issue and PR bodies get truncated, so report truncation per case.
+- `options` (up to 14) is where Laya is known to be weak.
+- `injection` is a direct comparison with optiq and Qwen3.8 (§8.3).
+
+At the published latencies, a whole pass takes minutes: Laya well under 1 min of compute, Kev around 15 min uncached.
+
+**GO/NO-GO before any download**
+
+1. The user has approved the download explicitly, per repo: about 4.7 GB for Kev (8-bit plus the head) and 0.7–1.5 GB for Laya.
+2. The Mac is not tethered to a phone hotspot. The repo has no tether check today: `bench-netcheck` tests reachability only. Check by hand that `route get default` names Wi-Fi or Ethernet and not an iPhone USB or Bluetooth interface, and that `ipconfig getsummary en0` shows the usual SSID.
+3. `mise run bench-netcheck -- --for download` passes. Its hf rows show whether Little Snitch allows python/hf_xet → `cas-server.xethub.hf.co`, which is blocked today. Either add a time-limited allow rule, or download with `HF_HUB_DISABLE_XET=1` so the files come over `cdn-lfs.hf.co` / `cas-bridge.xethub.hf.co`. Check which of the two works on one small file (such as `README.md`) first.
+4. Get the token from fnox without ever printing it: `fnox exec -- env HF_HUB_DISABLE_XET=1 hf download <repo>`. Never use `echo $(fnox get HF_TOKEN)`, and never put it on a command line.
+5. The GPU queue is free (no `.bench-logs/.queue.lock`) and the Mac is on AC power (`_decide_sets.on_battery`). Queue the run with `BENCH_WAIT=1`.
+6. The adapter passes a dry run against five cases per set before the full pass.
+
+NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
+
 ## 8.7 After night 3 (quality frontier, night 1), 2026-09-26
 
 - **Done:** the local part ran 16:53–20:12 on 25 September. The first cloud arm was invalid because cplt scoped every session to the repo root (fixed in #57; results kept under `.bench-logs/night3-20260925-165202/invalid-cloud/`, not in `bench/`). The cloud arm was rerun 08:08–09:53 on 26 September. Total cloud spend: $34.71 of $80. Report: [night-1.md](../2026-09-25-quality-frontier/night-1.md).
