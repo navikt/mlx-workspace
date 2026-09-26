@@ -42,7 +42,7 @@ OFFERED = {
         "evidence": "reports/2026-09-23-local-model-evaluation/decision.md",
         # Claim-injection flips 9/27 = 33% against Qwen3.8's 58%:
         # bench/decide-limits-20260925-014512.md.
-        "recommended_for": ["default", "decide-untrusted-evidence"],
+        "recommended_for": ["decide-untrusted-evidence"],
         # Written from manifest/capabilities.json, not from impressions: the one class
         # that clears the bar is a delegated mechanical multi-file edit.
         "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
@@ -85,9 +85,11 @@ OFFERED = {
 }
 
 
-# Removed model ids and the OFFERED key that replaces each. nav-pilot resolves a
-# local_model naming a removed id to its replacement instead of the default, and
-# says so; it never rewrites the user's config.
+# Removed model ids and the OFFERED key that replaces each. Only for a swap of
+# weights under the same settings: nav-pilot keeps serving a local_model naming a
+# removed id, with the replacement's params, while only the old weights are
+# downloaded, and moves to the replacement once it is. It says so once and never
+# rewrites the user's config.
 REPLACED = {
     # qwen38-tuning.md §10: OptiQ-4bit replaced the plain 4-bit on 2026-09-24.
     "mlx-community/Qwen3.8-27B-4bit": "qwen3.8-27b-optiq-4bit",
@@ -96,7 +98,8 @@ REPLACED = {
 # recommended_for keys nav-pilot knows (local.Recommendations in navikt/copilot).
 # nav-pilot ignores any other key and owns every sentence, so this only catches
 # typos before they silently do nothing.
-RECOMMENDED_KEYS = {"default", "decide-untrusted-evidence", "decide-nuanced"}
+# Being the general-purpose choice is what "default": true says, so it has no key.
+RECOMMENDED_KEYS = {"decide-untrusted-evidence", "decide-nuanced"}
 
 
 # nav-pilot refuses a manifest whose params carry a key outside this namespace,
