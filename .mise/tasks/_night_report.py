@@ -27,6 +27,58 @@ def fisher(a, b, c, d):
     return min(1.0, sum(pr(x) for x in range(max(0, k - n2), min(k, n1) + 1) if pr(x) <= p0 * (1 + 1e-9)))
 
 
+def fisher_greater(a, b, c, d):
+    """One-sided Fisher exact p for [[a, b], [c, d]] that row 1's pass rate exceeds row 2's:
+    the chance of a or more passes in row 1 given the margins."""
+    n1, n2, k = a + b, c + d, a + c
+    return min(1.0, sum(math.comb(n1, x) * math.comb(n2, k - x) for x in range(a, min(k, n1) + 1))
+               / math.comb(n1 + n2, k))
+
+
+def replication_md(result_files, alpha=0.1, min_n=8, max_ratio=2.0):
+    """design.md §7 conditions 2 and 3 for each lever against base on the same night:
+    per (class, rung) run under both, n ≥ min_n per arm, one-sided Fisher p < alpha, and
+    the lever's median wall time per sample at most max_ratio × base's."""
+    arms = {}
+    for f in result_files:
+        d = json.loads(Path(f).read_text())
+        if "samples" not in d or d["meta"].get("cloud_model"):  # validation files, the cloud arm
+            continue
+        for s in d["samples"]:
+            if s.get("valid", True):
+                arms.setdefault((s["class"], d["meta"]["variant"]), {}).setdefault(s["rung"], []).append(s)
+    L = []
+    for (cls, var), by_rung in sorted(arms.items()):
+        base = arms.get((cls, "base"))
+        if var == "base" or not base:
+            continue
+        if not L:
+            L = ["", "## Replication against base (design.md §7)", "",
+                 f"Same night, same model and harness. A rung passes when both arms have n ≥ {min_n}, "
+                 f"the one-sided Fisher p (lever > base) is < {alpha}, and the lever's median seconds "
+                 f"per sample is ≤ {max_ratio:g}× base's. \"1st try\" is the lever's samples that passed "
+                 "without a retry: the same session as base up to its first check, so it should match "
+                 "base's rate, and a gap there is drift or noise, not the lever."]
+        L += ["", f"### {cls} · {var}", "",
+              "| Rung | base k/n | lever k/n | 1st try | p (one-sided) | base med s | lever med s | ratio | passes |",
+              "|---|---|---|---|---|---|---|---|---|"]
+        passed = []
+        for r in sorted(set(by_rung) & set(base)):
+            b, v = base[r], by_rung[r]
+            bk, vk = sum(bool(s["verified"]) for s in b), sum(bool(s["verified"]) for s in v)
+            first = sum(bool(s["verified"]) and not s.get("retries") for s in v)
+            p = fisher_greater(vk, len(v) - vk, bk, len(b) - bk)
+            bm, vm = statistics.median(s["seconds"] for s in b), statistics.median(s["seconds"] for s in v)
+            ratio = vm / bm if bm else math.inf
+            ok = len(b) >= min_n and len(v) >= min_n and p < alpha and ratio <= max_ratio
+            passed += [r] if ok else []
+            L.append(f"| {r} | {bk}/{len(b)} | {vk}/{len(v)} | {first}/{len(v)} | {p:.3f} | {bm:.0f} | {vm:.0f} "
+                     f"| {ratio:.2f} | {'yes' if ok else 'no'} |")
+        L += ["", f"Verdict: {var} replicates on {cls} at rung(s) {', '.join(map(str, passed))}." if passed
+              else f"Verdict: {var} does not replicate on {cls} at any rung run tonight."]
+    return L
+
+
 def ops_summary(doc):
     rows = [v for k, v in doc.items() if k != "D2" and isinstance(v, dict) and "verified" in v]
     secs = [r["seconds"] for r in rows if isinstance(r.get("seconds"), (int, float))]
@@ -151,6 +203,20 @@ def selftest():
     assert abs(fisher(28, 12, 31, 9) - 0.6120) < 1e-3  # scipy.stats.fisher_exact: 0.6120
     assert abs(fisher(3, 1, 1, 3) - 0.4857) < 1e-3
     assert fisher(10, 0, 0, 10) < 1e-4
+    assert abs(fisher_greater(8, 0, 5, 3) - 0.1) < 1e-9          # 56/560
+    assert abs(fisher_greater(3, 1, 1, 3) - 0.2429) < 1e-3       # scipy alternative="greater": 0.2429
+    assert fisher_greater(0, 8, 8, 0) == 1.0
+    import tempfile
+    with tempfile.TemporaryDirectory() as t:
+        mk = lambda cls, r, ok, sec, retries=0: {"class": cls, "rung": r, "verified": ok, "seconds": sec,
+                                                  "retries": retries, "valid": True}
+        base = [mk("c", 4, i < 3, 10) for i in range(8)] + [mk("c", 5, i < 7, 10) for i in range(8)]
+        lever = [mk("c", 4, True, 15, i % 2) for i in range(8)] + [mk("c", 5, True, 25) for i in range(8)]
+        for name, var, ss in (("b", "base", base), ("l", "retry2", lever)):
+            Path(t, name).write_text(json.dumps({"meta": {"variant": var}, "samples": ss}))
+        md = "\n".join(replication_md([Path(t, "b"), Path(t, "l")]))
+        assert "| 4 | 3/8 | 8/8 | 4/8 | 0.013 | 10 | 15 | 1.50 | yes |" in md, md
+        assert "| 5 | 7/8 | 8/8 |" in md and md.rstrip().endswith("at rung(s) 4."), md
     assert ops_summary({"R1": {"verified": True, "seconds": 10}, "D2": {"verified": True, "seconds": 1},
                         "E1": {"verified": False, "seconds": 30, "looped_on": "read"}}) == \
         {"verified": 1, "n": 2, "median_s": 20.0, "loops": 1}

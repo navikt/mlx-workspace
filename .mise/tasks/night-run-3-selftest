@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mise description="Exercise night-run-3 end to end with stub steps (no GPU, no servers, no sessions): OK, FAIL, TIMEOUT with a tree that ignores SIGTERM, lock cleanup, battery skip, lever skip, the cloud cost cap, report"
+# mise description="Exercise night-run-3 end to end with stub steps (no GPU, no servers, no sessions): OK, FAIL, TIMEOUT with a tree that ignores SIGTERM, lock cleanup, battery skip, lever skip, the cloud cost cap, report, --queue with the replication table"
 #
 # night-run-2-selftest's method: every path goes into a temp dir (NIGHT_*), pmset is
 # mocked, and each step is a stub whose behaviour comes from PLAN.
@@ -78,6 +78,11 @@ echo "### one pass over all 16 steps"
 "$ROOT/.mise/tasks/night-run-3"
 
 echo
+echo "### --queue: a base and a lever step from a file, report named after it"
+printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-single retry2 2 1-2 5 4  # trailing\n' > "$T/night-2.queue"
+NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"
+
+echo
 echo "### checks"
 bad=0
 check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; bad=$((bad + 1)); fi; }
@@ -93,6 +98,10 @@ check "timed-out tree all dead (TERM-ignoring child, setsid stray)" \
 check "queue lock released" '[ ! -e "$T/queue.lock" ] && grep -q "released the queue lock" "$T/night/night.log"'
 check "report has the steps and the frontier tables" \
   'grep -q "## Steps" "$T/report.md" && grep -q "### edit-multi-mechanical" "$T/report.md" && grep -q "Cloud spend: \$1.2" "$T/report.md"'
+check "--queue ran its two steps" \
+  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"n\"] + \"=\" + r[\"status\"] + \":\" + r[\"variant\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night2/steps.jsonl")" = "1=OK:base 2=OK:retry2" ]'
+check "--queue report is titled night 2 and has the replication verdict" \
+  'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2 .* on edit-single" "$T/night-2.md"'
 check "would commit the report and the result files" 'grep -q "(fake) would commit.*frontier-m-base" "$T/night/night.log"'
 echo
 cat "$T/report.md"
