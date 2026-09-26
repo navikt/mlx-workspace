@@ -31,7 +31,6 @@
         "MLX_NAV_PILOT_TOP_P": "0.95"
       },
       "recommended_for": [
-        "default",
         "decide-untrusted-evidence"
       ],
       "capabilities": {
