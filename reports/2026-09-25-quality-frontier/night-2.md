@@ -132,3 +132,12 @@ Verdict: retry2 does not replicate on edit-multi-mechanical at any rung run toni
 | 2 | 10/16 | 16/16 | 9/16 | 0.009 | 21 | 23 | 1.10 | yes |
 
 Verdict: retry2 replicates on edit-single at rung(s) 2.
+
+## Review (2026-09-27)
+
+The cells above match the raw result files (recounted from `bench/frontier-qwen3.6-35b-a3b-optiq-*-20260926-*.json`, valid samples only).
+
+- **edit-single:** `retry2` replicates at rung 2 (10/16 → 16/16, p = 0.009) for about 10 % more time. Rung 1 misses the bar narrowly: 13/16 → 16/16, p = 0.113. The retries do real work here: 7 of the 16 rung-2 passes came after a retry.
+- **create-file, rung 1:** a large effect (5/16 → 12/16, p = 0.016) that fails the rule only on cost. The median time ratio is 2.03 against a 2.00 limit. The rule is applied as written. The gain is worth a follow-up with the cost measured per task rather than per sample, because `retry2` adds a Gradle verify per retry.
+- **edit-multi-mechanical:** base is much stronger tonight (14/16 at r4 and r5) than on night 1 (7/10 and 6/10). The first-try rate of the `retry2` arm (14/16, 13/16) matches base. So night 1's "move" at r4 was mostly sampling noise, as the night-2 queue header warned, and `retry2` adds little here.
+- **What this means for nav-pilot:** retry with the verifier's output is justified for single-file edits. It maps to the check-and-retake loop the orchestrator already has, so the recommendation is to make one or two retries the default for edit-single dispatches. It is not justified for mechanical multi-file edits on this evidence. Create-file stays open.
