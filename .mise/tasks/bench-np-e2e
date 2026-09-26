@@ -133,7 +133,7 @@ out, profile, model, np, argv = sys.argv[1:]
 venv = subprocess.run([__import__("os").path.expanduser("~/.nav-pilot/local/venv/bin/python"), "-c",
                        "import mlx_lm, mlx.core as mx; print(mlx_lm.__version__, mx.__version__)"],
                       capture_output=True, text=True).stdout.split()
-sysctl = lambda k: subprocess.run(["sysctl", "-n", k], capture_output=True, text=True).stdout.strip()
+sysctl = lambda k: subprocess.run(["/usr/sbin/sysctl", "-n", k], capture_output=True, text=True).stdout.strip()
 json.dump({"profile": profile, "model": model, "nav_pilot": np,
            "nav_pilot_commit": "e72319e0" if np.endswith("e72319e0") else None,
            "server_argv": argv, "mlx_lm": venv[:1], "mlx": venv[1:],

@@ -100,7 +100,7 @@ json.dump({"nav_pilot": np, "nav_pilot_commit": np.rsplit("-", 1)[-1],
            "merged": ["#931 fix/local-server-dead-generation-thread", "#932 fix/copilot-instructions-dir",
                       "#933 feat/local-result-aware-loop-guard"],
            "manifest_branch": br, "manifest_commit": g("rev-parse", "--short", br),
-           "wired_limit_mb": subprocess.run(["sysctl", "-n", "iogpu.wired_limit_mb"], capture_output=True, text=True).stdout.strip()},
+           "wired_limit_mb": subprocess.run(["/usr/sbin/sysctl", "-n", "iogpu.wired_limit_mb"], capture_output=True, text=True).stdout.strip()},
           open(out, "w"), indent=2)
 EOF
 
