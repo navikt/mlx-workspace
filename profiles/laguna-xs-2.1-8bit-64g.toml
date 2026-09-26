@@ -1,0 +1,24 @@
+[meta]
+name               = "Laguna XS 2.1 (Poolside) 8bit, 64 GB tier, 48 GB wired"
+released           = "2026-06"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "64 GB tier, shortlist #4 (reports/2026-09-26-64gb-tier/plan.md §3). Estimated peak about 45 GB (35.5 + 3.0 KV + 3.0 cache + 1 + 2.6), just under 48 - 2; if it peaks over that on night 64-1, retry laguna-xs-2.1-8bit-64g-w52. NEEDS THE WORKSPACE'S GIT mlx-lm (872ae88 or later): the laguna model and its tool parser are not in nav-pilot's mlx-lm 0.31.3, so this profile runs only in cheap-ops (bench-models) and the frontier (workspace server), never in np-e2e or bench-hybrid. Sampling from the card and generation_config.json: temperature 1.0, top_k 20, top_p 1.0; thinking off (its template default is on) as for every worker profile. KV 40 KiB/token on 10 full-attention layers plus a fixed ~63 MB sliding-window cache, so 3 GiB of prompt cache holds a 64k + 16k window. Bench-only."
+model_vram_gb      = 36
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Laguna-XS-2.1-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "3221225472"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TEMP                   = "1.0"
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "1.0"
+MLX_MIN_P                  = "0.0"

@@ -1,0 +1,25 @@
+[meta]
+name               = "Qwen 3.6 35B A3B OptiQ 4bit, 64 GB tier control (48 GB wired)"
+released           = "2026-06"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Control for the 64 GB tier (reports/2026-09-26-64gb-tier/plan.md §5.3, night 64-1): qwen3.6-35b-a3b-optiq with the same params, declared at 48 GB wired and a 64 GB machine, so it is measured under the same cap as the candidates. Bench-only."
+model_vram_gb      = 25
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

@@ -1,0 +1,39 @@
+# 64 GB tier, night 64-1: fit and smoke at 48 GB wired (plan.md §5.1 suite 1, §5.3).
+# Before: mise run vram-set 48 (the preflight warns per profile when the cap differs).
+# After:  mise run vram-set 36, since the frontier nights and the 48 GB baselines assume 36.
+# Run: mise run night-run-3 -- --part local --queue reports/2026-09-26-64gb-tier/night-64-1.queue
+#
+# Five profiles: the four candidates at 48 wired and optiq declared at 48 as the control.
+# e2e = bench-np-e2e --latency-only (peak footprint at 30k and at the largest target, cold and
+# warm TTFT, decode, Metal OOM in the log), then cheap-ops twice each. All fit probes first,
+# so an OOM shows before the long cheap-ops steps.
+# Pass: peak ≤ wired − 2 GB (46 GB). A profile over that at 48 is retried at 52 on a later
+# night with its -w52 profile (commented lines at the end; needs vram-set 52). One that OOMs
+# at 52 is dropped. cheap-ops is a floor: below optiq's 29/50 by more than noise, it stops.
+#
+# Laguna has no e2e step: bench-np-e2e goes through nav-pilot, whose mlx-lm 0.31.3 has no
+# `laguna` model. Its fit shows in the cheap-ops steps on the workspace server (git mlx-lm).
+#
+# Expected minutes are guesses from the 48 GB tier: optiq cheap-ops 17–20 min, Qwen3.8-27B
+# 8-bit about ten times slower per task than optiq, np-e2e latency-only 10–25 min.
+#
+# part kind classes variant runs rungs timeout-min expected-min profile
+local e2e  -       -       -    -     30  12  qwen3.6-35b-a3b-optiq-64g
+local e2e  -       -       -    -     30  12  qwen3.6-35b-a3b-8bit-64g
+local e2e  -       -       -    -     30  12  occamy-1.0-4bit-64g
+local e2e  -       -       -    -     60  25  qwen3.8-27b-8bit-64g
+local ops  -       -       -    -     35  20  qwen3.6-35b-a3b-optiq-64g
+local ops  -       -       -    -     40  22  qwen3.6-35b-a3b-8bit-64g
+local ops  -       -       -    -     35  20  occamy-1.0-4bit-64g
+local ops  -       -       -    -     45  25  laguna-xs-2.1-8bit-64g
+local ops  -       -       -    -     90  50  qwen3.8-27b-8bit-64g
+local ops  -       -       -    -     35  20  qwen3.6-35b-a3b-optiq-64g
+local ops  -       -       -    -     40  22  qwen3.6-35b-a3b-8bit-64g
+local ops  -       -       -    -     35  20  occamy-1.0-4bit-64g
+local ops  -       -       -    -     45  25  laguna-xs-2.1-8bit-64g
+local ops  -       -       -    -     90  50  qwen3.8-27b-8bit-64g
+#
+# Retry at 52 wired, on its own night (mise run vram-set 52), only for a profile that failed above:
+# local e2e  -       -       -    -     30  12  qwen3.6-35b-a3b-8bit-64g-w52
+# local ops  -       -       -    -     40  22  qwen3.6-35b-a3b-8bit-64g-w52
+# local ops  -       -       -    -     45  25  laguna-xs-2.1-8bit-64g-w52
