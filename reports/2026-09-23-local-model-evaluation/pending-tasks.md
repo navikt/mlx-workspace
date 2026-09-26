@@ -376,3 +376,15 @@ where they are, and night 64-4 runs them.
   - Still to do: the 64-3 hybrid block, and trimming 64-2 (about 13 h with all five) after 64-1.
 - **Blocked for Laguna:** nav-pilot's mlx-lm 0.31.3 has no `laguna`, so Laguna cannot enter np-e2e or the hybrid arm until nav-pilot's runtime moves.
 - **Blocked for Occamy:** `Accio-Lab` is not in the manifest's `ALLOWED_ORGS`. Benchmarking it is fine; shipping it needs that decision, or a build in an allowed org.
+
+## 8.9 Decide as a service: measure first
+
+Research: [2026-09-26-decide-as-a-service/research.md](../2026-09-26-decide-as-a-service/research.md).
+Nothing is decided; these are the measurements to take before choosing between a CPU encoder and
+1+1 G4 GPUs with vLLM.
+
+1. Kev 4B and Laya accuracy on our sets, Norwegian and injection included (§8.6).
+2. vLLM against mlx-lm logprob parity on the same model: argmax agreement, calibration bands, top-11 coverage.
+3. A G4 load test: p50/p95 at 2k and 8k tokens, 5–20 req/s, prefix caching on the hybrid DeltaNet model.
+4. Injection robustness under the served quantization (FP8), not MLX 4-bit.
+5. Real volumes: commits and PRs per day across navikt, and candidate runtime flows.
