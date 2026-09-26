@@ -569,6 +569,391 @@
    ]
   },
   {
+   "class": "edit-single",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "base",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.569,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 13,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 22,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.472,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 48,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 2,
+     "n": 3,
+     "lb": 0.321,
+     "ub": 0.894,
+     "lb_monotone": 0.33,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 66,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 1,
+     "n": 2,
+     "lb": 0.164,
+     "ub": 0.836,
+     "lb_monotone": 0.164,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 1,
+     "median_seconds": 38,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 1.197,
+    "b": -0.142
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-base-20260926-162712.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "decompose",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.661,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 69,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 107,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 94,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 270,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 1.414,
+    "b": 0.01
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-decompose-20260926-153007.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "decompose",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.88,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 30,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 40,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 61,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 5,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 64.0,
+    "beyond": true,
+    "a": 3.074,
+    "b": 0.873
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-decompose-20260926-161125.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "retry2",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 14,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 17,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 2,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 2.0,
+    "beyond": true,
+    "a": 4.97,
+    "b": 0.221
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-retry2-20260926-162405.json"
+   ]
+  },
+  {
    "class": "edit-multi-mechanical",
    "model": "qwen3.6-35b-a3b-optiq",
    "variant": "base",
