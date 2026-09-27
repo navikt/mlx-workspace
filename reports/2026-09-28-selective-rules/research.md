@@ -24,12 +24,16 @@ built yet.
   day) with `rule_load.py pakke`. Tool definitions are not in the event log, so for those I use
   Copilot's own estimate (`toolDefinitionsTokens`).
 - **Prefill.** Cold and warm TTFT at about 2k, 30k and 49–57k prompt tokens, from the np-e2e
-  latency probes. I interpolate linearly between the 2k and 30k points.
+  latency probes on an Apple M5 Max (wired limit 49,152 MB for the 64 GB profiles, 36,864 MB for
+  Qwen3.8-27B-OptiQ). I interpolate linearly between the 2k and 30k points. Decide latency is the
+  np-e2e `classifier_latency` probe (n = 21 per model).
 - **Rule recall today.** For every Copilot session whose prompt carried the `applyTo` table (986
-  sessions, 29 Aug – 27 Sep), I checked whether a session that edited a `.kt` file ever opened a
+  sessions, 29 Aug – 27 Sep), I checked whether a session that edited a `.kt` file (edit, create or
+  apply_patch; writes through `bash` are not counted) ever opened a
   `kotlin*.instructions.md` file, and whether a session that edited Kotlin, Go, Java or TypeScript
-  opened `security-owasp.instructions.md`: `rule_load.py recall`. All of these are benchmark
-  sessions. The labels are mechanical (a tool call names the file), not a judgement of whether the
+  opened `security-owasp.instructions.md`: `rule_load.py recall` (per model; the per-agent and
+  per-workspace splits below were read from the same events). All of these are benchmark or
+  golden-test sessions. Sessions without a tracked edit are left out: 75 local and 630 cloud. The labels are mechanical (a tool call names the file), not a judgement of whether the
   rule mattered.
 - **Client capabilities and prior art.** Read from current docs, the bundled Copilot CLI and the
   opencode source, the nav-pilot source (navikt/copilot d24cac4), and the jev-rules (a2b0dd3),
@@ -117,18 +121,26 @@ body.
 | Cloud (Sonnet 4.6), `nav-pilot` agent, hybrid-bench `kotlin` workspace, English autopilot prompts ("… Change nothing else.") | 0/24 (0.00–0.14) |
 | Local, same workspace and agent (optiq) | 0/18 (0.00–0.18) |
 | Local, `nais-platform` agent, hybrid-bench tasks (six local models) | 0/49 (0.00–0.07) |
-| **All local** | **0/67 (0.00–0.05)** |
+| **All local** | **0/67 runs of 4 task prompts** |
 
 | Sessions that edited Kotlin, Go, Java or TypeScript | Opened `security-owasp.instructions.md` |
 |---|---|
-| Cloud | 41/214 (0.14–0.25) |
-| Local | 0/67 (0.00–0.05) |
+| Cloud, `nav-pilot` agent | 37/117 (0.24–0.41) |
+| Cloud, `accessibility` agent (golden `.tsx` tasks; 78 of 93 opened `accessibility.instructions.md` instead) | 0/93 |
+| Cloud, other agents (`code-review`, `rubber-duck`, `forfatter`) | 4/4 |
+| Cloud, all agents (what `rule_load.py recall` prints) | 41/214 (0.14–0.25) |
+| Local | 0/67 runs of 4 task prompts |
 
-The one matched comparison (same workspace, same agent) is 0/24 cloud against 0/18 local, so this
-does not show that local models are worse at fetching rules. It shows that whether a rule is fetched
-depends on the harness and the prompt more than on the model: the same rename-sized task fetched the
-Kotlin rules in the golden tests and never in the hybrid bench. And the security rules nav-pilot
-calls critical reach the model in a minority of sessions.
+The Wilson intervals overstate the evidence: the 67 local runs use only four first prompts ("Add a
+KDoc comment …" 29, "Rename dagerMellomDatoer …" 26, "Add a nullable field kilde …" 9,
+"gradertAtTilfelleEnd …" 3), so the honest reading is "not observed in four bench tasks". The one
+matched comparison (same workspace, same agent) is 0/24 cloud against 0/18 local, so this does not
+show that local models are worse at fetching rules. The golden-test cloud sessions differ in more
+than the prompt: their `applyTo` table has 53 rows from four directories, `kotlin.instructions.md`
+listed three times, against 14 rows in the bench. Within the golden tests models also differ
+(GPT-5.6 44/44, Sonnet 4.6 26/32, kimi-k3 3/7). What the data do show: the security rules nav-pilot
+calls critical reached a `nav-pilot` session in about a third of the sessions that edited code. Their
+table row has no description, while the Kotlin rows have one.
 
 ### 2. What it costs the local model
 
@@ -142,8 +154,8 @@ TTFT from `bench/np-e2e-qwen3.6-35b-a3b-optiq-64g-20260926-234608.json`,
 | Qwen3.8-27B 8-bit | ≈ 580 tok/s | ≈ 39.0 s | 0.59 s | 48 % of the 48k opt-in |
 
 The cold cost is paid once per session and again after a compaction. The prompt cache covers the
-rest: the np-e2e occamy run sent 344.7k input tokens, 318.9k of them cached (92.5 %,
-`np-e2e-occamy-1.0-4bit-64g-20260927-162612.json`).
+rest: across the 12 e2e sessions of the occamy np-e2e run, 86.5 % of input tokens were cached
+(0.80–0.93 per session, `np-e2e-occamy-1.0-4bit-64g-20260927-162612.json`).
 
 What selective loading could take off:
 
@@ -167,11 +179,11 @@ sessionStart (1) and sessionEnd (1).
 
 | Client, event | Sees prompt | Sees file path | Can add context | Can remove or replace | Timeout, failure |
 |---|---|---|---|---|---|
-| Copilot `sessionStart` (command hook) | initial prompt only | no | **yes**, `additionalContext`, 10 KB cap (changelog 1.0.11) | no | 30 s default, fail-open |
+| Copilot `sessionStart` (command hook) | initial prompt only | no | **yes**, `additionalContext` (changelog 1.0.11) | no | 30 s default, fail-open |
 | Copilot `userPromptSubmitted` (command hook) | yes | no | **unclear**: the reference says command and HTTP hooks "have their output dropped", changelog 1.0.65 says its `additionalContext` reaches the model. Probe | no | 30 s |
 | Copilot `userPromptTransformed` (command hook) | yes | no | may rewrite the model-facing prompt (`modifiedTransformedPrompt`). Probe | the prompt only | 30 s |
 | Copilot `preToolUse` (command hook) | no | yes | changelog 1.0.24 says `additionalContext` is respected; the reference's table omits it. Probe | tool args only | crash denies, timeout allows |
-| Copilot `postToolUse` | no | yes | **yes**, `additionalContext` appended to the tool result (changelog 1.0.49, 1.0.51) | the tool result (`modifiedResult`) | 30 s, fail-open |
+| Copilot `postToolUse` | no | yes | **yes**, `additionalContext`: "as a system message" (changelog 1.0.49), "into successful tool results" (1.0.51); joined output capped at 10 KB (docs) | the tool result (`modifiedResult`) | 30 s, fail-open |
 | Copilot `subagentStart` | no | no | **yes**, prepended to the sub-agent's prompt | no | 30 s |
 | Copilot SDK extension (`onUserPromptSubmitted`) | yes | no | **yes**, documented "silently append instructions" | `modifiedPrompt` | n/a |
 | Copilot SDK `systemMessage` customize, `disabledInstructionSources`, `skipCustomInstructions` | n/a | n/a | yes | **yes**, `custom_instructions` remove or replace (`types.d.ts:853-918`). From a joined extension: probe | n/a |
@@ -272,10 +284,13 @@ judges it needs one:
 **The arithmetic first.** The rules a classifier could leave out add up to 1.3–2.0k tokens:
 `deliberate-ai-use`, plus the stale `code-review` on machines that still have it. Leaving them out saves
 0.44–0.65 s of cold prefill on optiq and 2.3–3.4 s on Qwen3.8-27B, once per session, and nothing on
-warm turns, which are 92 % of input tokens. One `alpha decide` call costs about 0.4 s, and it runs on
-every prompt. On optiq, a single question per prompt costs more than the whole saving after two turns.
-In cloud sessions, Copilot bills per premium request, not per token, so fewer tokens save no money
-there. What is left is about 2–3 % of a 64k window, and whatever attention a model spends on an
+warm turns, which carry 80–93 % of input tokens. One warm `alpha decide` call costs 0.22 s on optiq
+and 0.40 s on Qwen3.8-27B-OptiQ (p50, n = 21), and the first call of a session took 2.5 s and 4.6 s.
+It runs on every prompt. With one question per prompt, the cost passes the saving after 2–3 turns on
+optiq and about 6–8 on the 27B, and the first cold call alone costs more than the saving on both. In
+cloud sessions, Copilot and opencode's `github-copilot` provider (every cloud row in §1) bill per
+premium request, not per token, so fewer tokens save no money there; an API-billed provider would
+change that. What is left is about 2–3 % of a 64k window, and whatever attention a model spends on an
 irrelevant rule. Nobody has measured that attention cost.
 
 The measured gap is the other way round. Rules that should reach the model do not: the Kotlin rules
@@ -287,6 +302,10 @@ on local sessions, and the security rules everywhere. That gap is closed by a gl
    - Move the six "Critical Rules" out of `security-owasp.instructions.md` into an always-on file,
      about 150 tokens. The request says these are never filtered; today they are filtered by
      default, by the model.
+   - Give every file-scoped instruction a `description`. The table rows for `security-owasp`,
+     `golang`, `docker`, `accessibility` and others are empty today, so the model has only a glob to
+     go on. This is the cheapest recall fix, and it should be measured (step 3, arm b) before glob
+     injection is built.
    - Make `deliberate-ai-use` a skill, or cut it to its rules and drop the sources and the study
      figures, which a model does not need on every request.
    - Make nav-pilot's sync delete agentpakke files that upstream removed (the stale `code-review`).
@@ -357,19 +376,24 @@ Ordered so that each step can stop the next.
 | # | What | Measures | Cost |
 |---|---|---|---|
 | 0 | **Probes** (no benchmark): a Copilot command hook on `userPromptSubmitted`, `userPromptTransformed` and `preToolUse` returning a marker in `additionalContext`, and a `postToolUse` on `view`; check whether the marker reaches the model's `system.message` or the next request | which Copilot events can inject | ≈ 10 min, a handful of premium requests or one local session |
-| 1 | **Rule recall, offline.** A labelled set: 60 prompts (real first prompts from the golden and hybrid sessions, plus hand-written ones in Norwegian and English) × the 4 always-on and 13 file-scoped rules, labelled "applies" by two people before any model run. Run `alpha decide --eval` with the question built from each rule's description, on optiq, Qwen3.8-27B OptiQ and one 64 GB candidate. Score the glob and keyword baseline on the same set, which costs no GPU | recall and precision per rule and model, p-calibration, latency; the bar is recall ≥ 0.95 (Wilson lower bound) at the chosen threshold | 60 × 17 ≈ 1,020 calls × 0.4 s ≈ 7 min per model, ≈ 25 min GPU for three. Warm server, no agent |
+| 1 | **Rule recall, offline.** A labelled set: 200 prompts (real first prompts from the golden and hybrid sessions, plus hand-written ones in Norwegian and English) × the 4 always-on and 13 file-scoped rules, labelled "applies" by two people before any model run. Run `alpha decide --eval` with the question built from each rule's description, on optiq, Qwen3.8-27B OptiQ and one 64 GB candidate. Score the glob and keyword baseline on the same set, which costs no GPU | recall and precision per rule and model, p-calibration, latency. Bar: pooled recall over the glob-less rules ≥ 0.95 as a Wilson lower bound, which needs at least 73 positives with no miss, so the set must be built with ≥ 100 positives for those rules | 200 × 17 = 3,400 calls: ≈ 13 min on optiq, ≈ 25 min on the 27B, ≈ 45 min GPU for three. Warm server, no agent |
 | 2 | **Start cost.** `session.shutdown` `systemTokens` and cold TTFT for four installs: today; step 1 of §5 (security rules always on, `deliberate-ai-use` as a skill, no stale file); no "sometimes" rules; and today with glob injection | tokens and cold prefill saved, per model | ≈ 15 min: np-e2e's latency probe per install on optiq and Qwen3.8-27B |
-| 3 | **Quality arms**, frontier ladders and cheap-ops, local (optiq) and cloud (Sonnet 5): (a) all rules as today, (b) step 1 install, (c) (b) + glob injection, (d) (c) + decide for rules without globs, only if step 1 clears its bar | pass rate k/n per rung, Wilson 95 %; rules injected or opened per session; decide ms per turn | Local: the base frontier took 145 min per arm on night 1, so four arms ≈ 9.7 h, plus cheap-ops at about 4 runs per arm (estimate ≈ 2 h per arm, not measured here). Cloud: the base frontier took 104 min and ≈ $14 per arm (night 1 spent $34.71 over 258 min including an invalid pass), so ≈ $56 and 7 h for four arms |
+| 3 | **Quality arms**, frontier ladders and cheap-ops, local (optiq) and cloud (Sonnet 5): (0) no agentpakke rules at all, (a) all rules as today, (a+) every file-scoped rule inlined always-on (the recall ceiling), (b) step 1 install, (c) (b) + glob injection, (d) (c) + decide for rules without globs, only if step 1 clears its bar | pass rate k/n per rung, Wilson 95 %; rules injected or opened per session; decide ms per turn | Local: the base frontier took 145 min per arm on night 1, so six arms ≈ 14.5 h (two nights), plus cheap-ops at about 4 runs per arm (estimate ≈ 2 h per arm, not measured here). Cloud: the base frontier took 104 min and ≈ $14 per arm (night 1 spent $34.71 over 258 min including an invalid pass), so ≈ $84 and 10.4 h for six arms |
 
-**What step 3 can show.** At n = 4 per rung, the frontier cannot detect a few-point change. Read
+**What step 3 can show.** It measures delivery, not quality. At n = 4 per rung, the frontier
+cannot tell the arms apart on pass rate, and arms (0) and (a+) are there to bound the effect, not to
+detect it. Read
 arm (b) and (c) against (a) as non-inferiority on the routing bar, not as a gain. What these runs can
 show clearly is rule delivery: the share of Kotlin-editing sessions that got the Kotlin rules (0/67
 local today). A quality effect of the rules themselves needs a task where a rule changes the right
 answer. An example is a cheap-ops cell that logs a token, where the security rule decides pass or
 fail. That cell does not exist yet and is the first one to write.
 
-Total: about 25 min of GPU for the offline recall, 10–12 h of local GPU (one night plus a day slot),
-and about $60 of cloud credits for the arms.
+Nothing in this plan measures the attention cost of irrelevant rules either; that needs the rule
+cell above run with and without unrelated always-on text.
+
+Total: about 45 min of GPU for the offline recall, 15–17 h of local GPU (two nights), and about $85
+of cloud credits for the arms.
 
 ## Verdict
 
@@ -381,11 +405,12 @@ Not now, and not in the jev-rules shape. The data support three statements.
 - Filtering them saves 0.4–0.7 s of cold prefill on optiq and 2–3.5 s on Qwen3.8-27B, once per
   session. That is less than a per-prompt decide call costs within a couple of turns, and cloud
   sessions save no money, because Copilot bills per request.
-- The real problem is recall of the rules nav-pilot already scopes. Local sessions opened a
-  file-scoped rule in 0 of 67 sessions, and cloud sessions opened the security rules in 41 of 214.
-  That is fixed with an install change (security rules always on, `deliberate-ai-use` as a skill,
-  prune stale files) and a glob-triggered, append-only injection on the first touch of a matching
-  file. Neither needs a classifier.
+- The problem worth fixing is recall of the rules nav-pilot already scopes. No local model opened a
+  file-scoped rule in the four bench tasks (67 runs), and `nav-pilot` cloud sessions opened the
+  security rules in about a third of the sessions that edited code (37/117). The fixes are an
+  install change (security rules always on, descriptions on every scoped rule, `deliberate-ai-use`
+  as a skill, prune stale files) and, if descriptions are not enough, a glob-triggered,
+  append-only injection on the first touch of a matching file. Neither needs a classifier.
 
 `alpha decide` (or Laya after 29 Sep) only earns a place for rules that have no glob, and only if the
 offline recall check reaches ≥ 0.95. Nothing here shows that injecting the rules improves pass
@@ -401,10 +426,13 @@ rates. That is what arms (b) and (c) are for, and they need a cell where a rule 
   are opencode's own count, including tools and the first prompt, in the provider's tokenizer for
   cloud rows.
 - **Recall is mechanical.** "Opened the rule" is any tool call that names the file. A model that
-  already knows Kotlin idioms may not need the file. All 181 sessions are benchmark or golden-test
-  sessions, not real work; the one matched comparison is 0/24 cloud against 0/18 local. What drives
-  the 77/90 in the golden tests (Norwegian prompts, open-ended features, the `nav-pilot` agent) is
-  not separated.
+  already knows Kotlin idioms may not need the file. All sessions are benchmark or golden-test
+  sessions, not real work, and they cluster on a few prompts (four for all 67 local runs), so the
+  intervals are too narrow. The one matched comparison is 0/24 cloud against 0/18 local. What drives
+  the 77/90 in the golden tests (prompts, a 53-row table with duplicates, model) is not separated.
+- **`rule_load.py session`** files everything inside `<custom_instruction>` under "always-on". For
+  the three sessions cited that block holds only agentpakke files, but in a repo with its own
+  `copilot-instructions.md` the script would fold that into the same line.
 - **Prefill** is linear interpolation between two cold probes per model, on one M-series machine.
   The optiq figure comes from the 64 GB profile.
 - **Unverified client behaviour**: `userPromptSubmitted`/`userPromptTransformed` command-hook
