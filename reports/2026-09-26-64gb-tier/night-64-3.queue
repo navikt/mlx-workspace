@@ -1,5 +1,9 @@
 # 64 GB tier, night 64-3: the hybrid arm (plan.md §5.1 suite 3, §5.3). Sonnet 5 orchestrates
 # through nav-pilot and opencode; a local worker takes the dispatched subtasks.
+# NOT READY (pilot, 2026-09-27, pending-tasks §8.8): nav-pilot-main-dd859ac6 refuses a launch
+# without a terminal unless given --sync, and --sync rewrites the user's ~/.copilot agents, so
+# neither bench-hybrid's samples nor night-run-3's cloud gate can run on it; and Sonnet 5 did not
+# dispatch on tasks:3 in the pilot (0 of 2). Resolve both before this queue runs.
 # Before: mise run vram-set 48 (every profile here declares 48).
 # Run (the cap covers every sample, invalid ones included; the cloud probes, ~$0.05 each, ~$0.70 a night, are outside it):
 #   FRONTIER_COST_CAP=35 BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6 \

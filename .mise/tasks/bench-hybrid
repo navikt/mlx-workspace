@@ -653,6 +653,7 @@ def preflight(arm, port, profile_key, meta, params):
     #    changing the model halfway through.
     ver = sh([NAV_PILOT, "version"], timeout=120).stdout.strip().splitlines()
     snap["nav_pilot_version"] = ver[-1] if ver else "?"
+    snap["nav_pilot"] = NAV_PILOT   # a dev build reports "commit: unknown"; the file name carries the sha
     np_cfg = tomllib.loads(NP_CONFIG.read_text()) if NP_CONFIG.exists() else {}
     snap["nav_pilot_auto_update"] = np_cfg.get("auto_update")
     snap["nav_pilot_config"] = str(NP_CONFIG)
