@@ -10,7 +10,8 @@
 #
 # No sanity completion before the command: `_decide.py` times the first request the
 # server sees, and bench-hybrid's preflight makes its own. The command gets
-#   NP_PORT NP_MODEL NP_PROFILE NP_SERVER_PID MLX_ACTIVE_PROFILE BENCH_NAV_PILOT NAV_PILOT_CONFIG,
+#   NP_PORT NP_MODEL NP_PROFILE NP_SERVER_PID MLX_ACTIVE_PROFILE BENCH_NAV_PILOT NAV_PILOT_CONFIG
+#   BENCH_HYBRID_POLICY_ANCHOR,
 # and NAV_PILOT_BENCH_MANIFEST (+ _ALLOW_ORGS) when the binary has the override, so
 # _decide.py and bench-hybrid's nav-pilot calls read the same manifest as the server.
 # and its exit code is this task's. The manifest backup is named like bench-np-e2e's
@@ -41,6 +42,8 @@ echo $$ > "$LOCKDIR/pid"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 export NAV_PILOT_CONFIG="$PWD/.bench-logs/np-serve-$STAMP.config.toml"
+# bench-hybrid holds every hybrid sample under this server to the first one's policy.
+export BENCH_HYBRID_POLICY_ANCHOR="$PWD/.bench-logs/np-serve-$STAMP.policy"
 export BENCH_NAV_PILOT="$NP"
 CACHE="$HOME/.nav-pilot/local-models.json"
 BACKUP="$CACHE.np-e2e-$$"
@@ -51,7 +54,7 @@ cleanup() {
   [ -n "$started_np" ] && "$NP" alpha local stop >/dev/null 2>&1
   [ -f "$BACKUP" ] && mv -f "$BACKUP" "$CACHE"
   [ -n "${NAV_PILOT_BENCH_MANIFEST:-}" ] && rm -f "$NAV_PILOT_BENCH_MANIFEST"
-  rm -f "$NAV_PILOT_CONFIG"
+  rm -f "$NAV_PILOT_CONFIG" "$BENCH_HYBRID_POLICY_ANCHOR"
   rm -rf "$LOCKDIR"
 }
 trap cleanup EXIT

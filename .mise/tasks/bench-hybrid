@@ -43,6 +43,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -303,7 +304,7 @@ def parse_events(text):
     # opencode prices each step itself. Worth more than the token total: 91-97%
     # of that total is cache reads, billed at a tenth of the input rate, so a
     # comparison denominated in raw tokens overstates the gap between the arms.
-    cost, step_max = 0.0, 0.0
+    cost, step_min = 0.0, None
     for line in text.splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -323,11 +324,12 @@ def parse_events(text):
             tok["cache_write"] += int(cache.get("write") or 0)
             tok["cache_read"] += int(cache.get("read") or 0)
             cost += float(part.get("cost") or 0)
-            step_max = max(step_max, float(part.get("cost") or 0))
+            c = float(part.get("cost") or 0)
+            step_min = c if step_min is None else min(step_min, c)
         elif kind == "text" and isinstance(part.get("text"), str):
             reply.append(part["text"])
     return {"cloud_steps": steps, "cloud_tokens": tok,
-            "cloud_cost_usd": round(cost, 4), "step_max_usd": round(step_max, 4),
+            "cloud_cost_usd": round(cost, 4), "step_min_usd": round(step_min or 0.0, 4),
             "truncated": "length" in reasons,
             "reply": " ".join(reply).strip()}
 
@@ -487,17 +489,38 @@ def policy_record(path=None):
     return {"path": str(path), "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b), "send": send}
 
 
-def policy_mismatch(samples, rec):
-    """Why rec cannot join samples: its dispatch policy differs from the first
-    sample's in the file, or None. The policy is the treatment; one probe served
-    two texts to one file because a launch fell back to the manifest built into
-    the binary."""
-    first = next((x["policy"] for x in samples if x.get("policy")), None)
+# np-serve names a file per run, so every bench-hybrid under one server (one worker)
+# is held to one policy. The probe's mix was across files: two cells got a53c1b13 and
+# the third 8b919b94, each file consistent on its own.
+POLICY_ANCHOR = os.environ.get("BENCH_HYBRID_POLICY_ANCHOR")
+
+
+def policy_mismatch(samples, rec, anchor=None):
+    """Why rec cannot join samples: its dispatch policy differs from the first valid
+    sample's in the file, or from the one this np-serve run anchored, or None. The
+    policy is the treatment. An invalid first sample does not anchor the file: it
+    may be the one that got the wrong text."""
     now = rec.get("policy")
-    if not first or not now or first["sha256"] == now["sha256"]:
+    if not now:
         return None
-    return (f"policy changed: sample {rec['n']} got dispatch policy {now['sha256'][:8]}, "
-            f"the file's first sample got {first['sha256'][:8]}")
+    first = next((x["policy"] for x in samples if x.get("valid") and x.get("policy")), None)
+    if first and first["sha256"] != now["sha256"]:
+        return (f"policy changed: sample {rec['n']} got dispatch policy {now['sha256'][:8]}, "
+                f"the file's first valid sample got {first['sha256'][:8]}")
+    if anchor and anchor != now["sha256"]:
+        return (f"policy changed: sample {rec['n']} got dispatch policy {now['sha256'][:8]}, "
+                f"this np-serve run's first sample got {anchor[:8]}")
+    return None
+
+
+def policy_anchor(rec):
+    """The sha this np-serve run is held to, set by its first hybrid sample."""
+    if not POLICY_ANCHOR or not rec.get("policy"):
+        return None
+    p = Path(POLICY_ANCHOR)
+    if not p.exists() or not p.read_text().strip():
+        p.write_text(rec["policy"]["sha256"] + "\n")
+    return p.read_text().strip()
 
 
 def pakke_record():
@@ -682,10 +705,12 @@ def preflight(arm, port, profile_key, meta, params):
     # reads the shared cache, or the copy built into the binary when the cache does
     # not parse for it, and one probe got both texts in one run.
     snap["bench_manifest"] = os.environ.get("NAV_PILOT_BENCH_MANIFEST")
-    if arm == "hybrid" and not snap["bench_manifest"] and not os.environ.get("BENCH_HYBRID_ALLOW_CACHED_MANIFEST"):
+    import _np_checks
+    if arm == "hybrid" and not snap["bench_manifest"] and _np_checks.knows_override(shutil.which(NAV_PILOT) or NAV_PILOT) \
+            and not os.environ.get("BENCH_HYBRID_ALLOW_CACHED_MANIFEST"):
         raise SystemExit("✗ a hybrid arm needs NAV_PILOT_BENCH_MANIFEST, so every launch reads one manifest.\n"
-                         "  Fix: run under np-serve with a nav-pilot that has navikt/copilot #989, or set\n"
-                         "  BENCH_HYBRID_ALLOW_CACHED_MANIFEST=1 for an older binary (the policy check still guards the file)")
+                         "  This nav-pilot has the override (navikt/copilot #989). Fix: run under np-serve,\n"
+                         "  or set BENCH_HYBRID_ALLOW_CACHED_MANIFEST=1 (the policy checks still guard the run)")
     if np_cfg.get("auto_update"):
         # Fatal, not a warning. As a warning this cost a day: nav-pilot replaced
         # itself mid-ladder with the released build, which has no launch flags, so
@@ -832,15 +857,17 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
             # opencode prices every step as it finishes, so the running cost is in the
             # log before the session ends. Killing only once the total crossed the cap
             # let the crossing step through ($1.01 on a $1.00 cap): the sample is now
-            # killed when the next step, priced like the dearest one so far, would
-            # cross it. ponytail: a step dearer than every earlier one still overshoots.
+            # killed when even the cheapest step so far would no longer fit. Not the
+            # dearest: the first step writes the prompt cache (~$0.07 against ~$0.01
+            # later), and reserving that killed samples that would have finished.
+            # ponytail: a step dearer than the cheapest can still overshoot by the difference.
             if cost_cap is None:
                 return None
             ev = parse_events(log_path.read_text(errors="replace"))
             now = ev["cloud_cost_usd"]
-            if spent + now + ev["step_max_usd"] > cost_cap:
+            if spent + now + ev["step_min_usd"] > cost_cap:
                 return (f"cost cap ${cost_cap:.2f}: ${spent:.2f} spent before this sample, ${now:.2f} in it, "
-                        f"next step ~${ev['step_max_usd']:.2f}")
+                        f"next step at least ${ev['step_min_usd']:.3f}")
             return None
 
         rc, why = wait_with_deadline(proc, cap, over_cap)
@@ -1124,12 +1151,14 @@ def self_check():
         assert pr["bytes"] == 6 and pr["sha256"].startswith("823412d1"), pr
     assert policy_record(Path("/nonexistent/x.md")) is None
     a, b = {"sha256": "a" * 64}, {"sha256": "b" * 64}
-    assert policy_mismatch([{"policy": None}, {"policy": a}], {"n": 2, "policy": a}) is None
-    assert "sample 2 got dispatch policy bbbbbbbb" in policy_mismatch([{"policy": a}], {"n": 2, "policy": b})
+    assert policy_mismatch([{"policy": None}, {"valid": True, "policy": a}], {"n": 2, "policy": a}) is None
+    assert "sample 2 got dispatch policy bbbbbbbb" in policy_mismatch([{"valid": True, "policy": a}], {"n": 2, "policy": b})
+    assert policy_mismatch([{"valid": False, "policy": b}], {"n": 1, "policy": a}) is None  # invalid does not anchor
     assert policy_mismatch([], {"n": 0, "policy": b}) is None
+    assert "this np-serve run" in policy_mismatch([], {"n": 0, "policy": b}, "a" * 64)
     steps = "\n".join(json.dumps({"type": "step_finish", "part": {"cost": c}}) for c in (0.1, 0.3, 0.2))
     ev = parse_events(steps)
-    assert ev["cloud_cost_usd"] == 0.6 and ev["step_max_usd"] == 0.3, ev
+    assert ev["cloud_cost_usd"] == 0.6 and ev["step_min_usd"] == 0.1, ev
     print(f"  ✓ output stem and policy hash (tag {TAG or 'unset'}, config {NP_CONFIG})")
 
     check_pin()
@@ -1271,9 +1300,11 @@ def main():
                     attempts += 1
                     n = len(doc["samples"])
                     rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout, args.cost_cap, spent)
-                    mixed = policy_mismatch(doc["samples"], rec)
+                    mixed = policy_mismatch(doc["samples"], rec, policy_anchor(rec))
                     if mixed:
-                        rec.update(valid=False, invalid_reason=mixed, note=mixed)
+                        rec.update(valid=False, invalid_reason=mixed, note=mixed, cloud_steps=None,
+                                   cloud_tokens=None, cloud_cost_usd=None, truncated=None,
+                                   verified=None, dispatched=None)
                     doc["samples"].append(rec)
                     spent += rec.get("cloud_cost_seen_usd") or 0.0
                     if ledger:
@@ -1281,6 +1312,8 @@ def main():
                                                       "last_sample_usd": rec.get("cloud_cost_seen_usd")}) + "\n")
                     if (rec.get("invalid_reason") or "").startswith("cost cap"):
                         stop = rec["invalid_reason"]
+                    if mixed:
+                        doc["stopped"] = mixed
                     if stop:
                         doc["stopped"] = stop
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
