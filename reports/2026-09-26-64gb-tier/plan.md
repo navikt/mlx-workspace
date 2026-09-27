@@ -167,18 +167,30 @@ frontier files:
 
 | Metric | How | Exists today |
 |---|---|---|
+| Dispatch rate | hybrid samples with `dispatched` true, over valid hybrid samples. Reported first: the next three rows are over the dispatched samples only | yes |
 | Dispatched-subtask pass rate | frontier `decompose`/`retry2` k/n per rung; hybrid samples with `dispatched` true | yes |
 | End-to-end success | hybrid `verified`, both arms | yes |
-| Cloud credits and tokens saved | hybrid arm against control: median `cloud_cost_usd` and `cloud_tokens.total` ratio | yes (list-price estimate, not Copilot credits) |
+| Cloud credits and tokens saved | dispatched hybrid samples against control: median `cloud_cost_usd` and `cloud_tokens.total` ratio, over the same population as the pass rate | yes (list-price estimate, not Copilot credits) |
 | Wall time | `seconds`, median and p90 | yes |
 | Orchestrator rework | cloud edit/write tool calls on a file the worker changed, after its dispatch returned, from the sample's JSONL log | **no**: needs a small analysis in `bench-hybrid` (not written here) |
 | Honest reporting | worker says "done" while its own change fails the verifier | partly: frontier verifier plus the worker's last message; needs a tag |
 | Staying in scope | files changed outside the task's allowed set (frontier verifiers reject this), identical-call runs, loop-guard trips | yes |
 
-**The decision rule, fixed before the runs:** among candidates whose hybrid `verified` rate is not
-worse than the control's (one-sided Fisher p ≥ 0.1 for "worse", n ≥ 16 per arm on the trusted
-cell), rank by the median cloud-cost ratio (hybrid ÷ control), then by wall time. A candidate
-with more rework than optiq at the same ratio ranks below it.
+**The decision rule, fixed before the runs:** a candidate qualifies when the lower bound of the
+difference in pass rate (dispatched hybrid samples − control) is at least −10 points, with
+Newcombe's hybrid score interval at one-sided 90% (the routing bar's confidence;
+`_by_class.diff_ci`). Qualifying candidates rank by the median cloud-cost ratio (dispatched ÷
+control, same population), then by wall time. A candidate with more rework than optiq at the
+same ratio ranks below it. The dispatch rate is reported first and is not itself a criterion,
+but a worker the orchestrator rarely uses saves little whatever its ratio.
+
+*What n that needs* (computed with `diff_ci`): 64-3 gives 24 control samples and at most 24
+dispatched per worker (three cells × 8). At 24 against 24 the bound is −6 points when both arms
+pass every sample and −9 at 23/24 each, so it qualifies; at 22/24 each it is −11 and does not.
+At a 90% pass rate on both arms it takes about 40 a side. A worker dispatched on 16 of its 24
+samples, all passing, against 24/24 control, has a bound of −9. So 64-3 can qualify a worker
+that is as good as the control and near-perfect; anything short of that is "not shown", not
+"worse", and goes to 64-5 at n ≥ 40.
 
 ### 5.3 Night order
 
@@ -192,7 +204,7 @@ the frontier variants below reuse whatever it concludes.
 | D (daytime) | – | Downloads, per §6. Profiles for the tier, in a PR reviewed before the night (see §8) | none |
 | 64-1 | 48 (52 on retry) | Fit and smoke: `--latency-only` for all five profiles (the four plus optiq at 48 wired as the control), then cheap-ops ×2 each. Stop a profile on OOM at 52 | ≈ 7.5 h / $0 |
 | 64-2 | 48 | Directed-worker frontier for the survivors plus optiq: `decompose` on edit-multi r3–r6 and edit-single r3–r5, `retry2` on create-file r1–r3 and edit-single r1–r2, 2 runs × 2 tasks a rung; base only where no night-1 base exists | ≈ 7–8 h / $0 |
-| 64-3 | 48 | Hybrid arm, Sonnet 5 orchestrator: optiq re-baseline with control on the trusted cell (4 targets × 2 arms × 8), then the best one or two 64 GB workers on the same rungs, hybrid arm only against the same control | ≈ 6–8 h / ≈ $20–30 at Sonnet 4.6 prices; Sonnet 5 unmeasured |
+| 64-3 | 48 | Hybrid arm, Sonnet 5 orchestrator ([night-64-3.queue](night-64-3.queue)): the control once and optiq-64g as the control worker on the trusted cell (tasks:3, frontend-familie-tilbake:3, spring-ia:6, × 8), then the Qwen3.6 8-bit and Occamy on the same cells, hybrid arm only against the same control. tasks:6 (D2) is retired in `bench/tasks.json` and dropped, so edit-multi's D2 evidence rests on spring-ia:6 alone | ≈ 6.5 h / capped at $35 (`FRONTIER_COST_CAP`, one ledger; see pending-tasks §8.8 for the pilot's estimate) |
 | 64-4 | 48 | np-e2e full for survivors on nav-pilot's runtime; decide-limits and decide sets for survivors; the backlog's 64 GB fit rows (8-bit cold/warm at 64k, OptiQ-4bit at 131k) | ≈ 5 h / $0 |
 | 64-5 | 48 | Replication of whatever moved a frontier or won 64-3, at n ≥ 8 per arm (design §7 rule 2); one balloon run per survivor (§7) | ≈ 6 h / ≈ $10 |
 
@@ -209,6 +221,17 @@ binary are the ones that start nav-pilot's own server for Occamy: an `e2e` step 
 for Occamy (64-4). Cheap-ops and the local frontier arm (64-2) run on the workspace server and
 do not depend on it. From 64-2 on, the launchers set
 `BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6`.
+
+**The 64 GB workers' dispatch policy is not optiq's.** nav-pilot writes the orchestrator's
+dispatch policy from the worker's manifest entry (navikt/copilot#941). A model with no entry used
+to get a copy of the first entry, optiq's, capabilities and `expect` prose included, so the
+orchestrator was told optiq's measured verdicts about the 8-bit and Occamy. The bench entry now
+has no capabilities block and an empty `expect`: nav-pilot reads that as unmeasured and writes
+its pre-capabilities text (send lookups, comments, log lines, a single test file and mechanical
+multi-file changes). optiq-64g keeps the manifest's own entry, whose capabilities send only
+edit-multi-mechanical. Both texts send the trusted cell's tasks (a rename, a field threaded
+through its call sites), but the policies differ by more than the model name, and each sample
+records `policy.sha256` and the policy's "Send it" line so the difference is on file.
 
 Laguna is left out of 64-3 and 64-4 unless nav-pilot's runtime has moved to an mlx-lm with
 `laguna` by then. If a candidate is dropped on 64-1, the reserve (Qwen3-Coder-Next mxfp4) may take

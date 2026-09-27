@@ -81,6 +81,39 @@ def wilson_lower(k, n, z=Z90):
     return (centre - half) / d
 
 
+def wilson(k, n, z):
+    """Two-sided Wilson score interval (lo, hi) at z."""
+    p = k / n
+    d = 1 + z * z / n
+    centre = p + z * z / (2 * n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
+    return (centre - half) / d, (centre + half) / d
+
+
+def diff_ci(k1, n1, k2, n2, z=Z90):
+    """p1 - p2 with Newcombe's hybrid score interval (method 10), or None.
+
+    For "hybrid not worse than control" on 8-24 samples an arm: Wald intervals
+    collapse to zero width at 24/24, Wilson-based ones do not. At z=Z90 the lower
+    bound is a one-sided 90% bound, the confidence the routing bar already uses."""
+    if not n1 or not n2:
+        return None
+    p1, p2 = k1 / n1, k2 / n2
+    l1, u1 = wilson(k1, n1, z)
+    l2, u2 = wilson(k2, n2, z)
+    d = p1 - p2
+    return d, d - math.sqrt((p1 - l1) ** 2 + (u2 - p2) ** 2), d + math.sqrt((u1 - p1) ** 2 + (p2 - l2) ** 2)
+
+
+def control_for(f, d):
+    """The control file a hybrid file is compared with. A tagged file names its worker
+    (bench-hybrid out_path) and shares one control per tag, target and rung."""
+    wp = d.get("worker_profile")
+    if d.get("tag") and wp:
+        return f.with_name(f.name.replace(f"-{wp}-{d.get('rung')}-hybrid.json", f"-{d.get('rung')}-control.json"))
+    return f.with_name(f.name.replace("-hybrid.json", "-control.json"))
+
+
 def task_classes():
     doc = json.loads((BENCH / "task-classes.json").read_text())["tasks"]
     return {tid: ("excluded:" + tid if v.get("exclude_from_bar") else v["class"])
@@ -170,7 +203,7 @@ def rows():
         r = out.setdefault((cls, model, mode, cond), {
             "class": cls, "model": model, "mode": mode, "condition": cond,
             "k": 0, "n": 0, "tasks": set(), "runs": set(), "files": set(),
-            "seconds": [], "cost_ratios": {}})
+            "seconds": [], "cost_ratios": {}, "dispatch": [0, 0], "control": [0, 0]})
         r["k"] += ok
         r["n"] += 1
         r["tasks"].add(tid)
@@ -218,25 +251,43 @@ def rows():
             continue
         if d.get("arm") != "hybrid":
             continue
+        # One population for everything below: the dispatched samples. The pass
+        # rate and the cost ratio used to be taken over different ones (delegated
+        # for k/n, every valid sample for the cost), so a worker used on half the
+        # samples was priced on the other half. The dispatch rate says how much of
+        # the arm that population is.
         delegated = [s for s in valid if s.get("local_calls")]
-        keys = set()
+        keys, seen = set(), {}
+        for s in valid:
+            orch, worker, extra = hybrid_condition(d, s, f.name)
+            key = (classes.get(tid), worker, "delegate", f"opencode delegate orchestrator={orch} {extra}")
+            seen.setdefault(key, [0, 0])
+            seen[key][0] += bool(s.get("local_calls"))
+            seen[key][1] += 1
         for i, s in enumerate(delegated):
             orch, worker, extra = hybrid_condition(d, s, f.name)
             cond = f"opencode delegate orchestrator={orch} {extra}"
             keys.add((classes.get(tid), worker, "delegate", cond))
             add(classes.get(tid), worker, "delegate", cond,
                 tid, _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
-        # Cost ratio: hybrid median over control median, same target and task,
-        # and only where the orchestrator delegated at all. A hybrid arm that
-        # never dispatched measures nothing about delegation.
-        ctrl = f.with_name(f.name.replace("-hybrid.json", "-control.json"))
+        for key, (k, n) in seen.items():
+            if key in out:
+                out[key]["dispatch"][0] += k
+                out[key]["dispatch"][1] += n
+        # Cost ratio: dispatched median over control median, same target and task.
+        # A hybrid arm that never dispatched measures nothing about delegation.
+        ctrl = control_for(f, d)
         if delegated and ctrl.exists():
             cv = [s for s in json.loads(ctrl.read_text()).get("samples", []) if s.get("valid")]
-            hc = st.median([s.get("cloud_cost_usd") or 0 for s in valid])
+            hc = st.median([s.get("cloud_cost_usd") or 0 for s in delegated])
             cc = st.median([s.get("cloud_cost_usd") or 0 for s in cv]) if cv else 0
+            judged = [o for o in map(_outcome, cv) if o is not None]
             for key in keys:
-                if cc and key in out:
-                    out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
+                if key in out:
+                    out[key]["control"][0] += sum(judged)
+                    out[key]["control"][1] += len(judged)
+                    if cc:
+                        out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
     return out
 
 
@@ -249,7 +300,75 @@ def as_json(r):
         "lb": None if lb is None else round(lb, 3),
         "median_seconds": round(st.median(r["seconds"])) if r["seconds"] else None,
         "cost_ratios": r["cost_ratios"], "files": sorted(r["files"]),
+        **hybrid_figures(r),
     }
+
+
+def hybrid_figures(r):
+    """Delegate rows only: dispatch rate, the paired control's k/n, and the
+    difference in pass rate (dispatched minus control) with its interval."""
+    if r["mode"] != "delegate":
+        return {}
+    (dk, dn), (ck, cn) = r["dispatch"], r["control"]
+    ci = diff_ci(r["k"], r["n"], ck, cn)
+    return {"dispatch": {"k": dk, "n": dn, "rate": round(dk / dn, 3) if dn else None},
+            "control": {"k": ck, "n": cn},
+            "diff": None if ci is None else {"d": round(ci[0], 3), "lo90": round(ci[1], 3), "hi90": round(ci[2], 3)}}
+
+
+def hybrid_md(files):
+    """Markdown for one night's tagged hybrid files: per worker against the shared
+    control, pooled over the cells (target x rung) the worker ran. Dispatch rate
+    first, because every other figure is over the dispatched samples only."""
+    docs = {}
+    for f in map(Path, files):
+        try:
+            docs[f] = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+    if not docs:
+        return []
+    L = ["", "## Hybrid arm", "",
+         "Per worker, pooled over its cells. **Dispatch** is how many valid hybrid samples reached the worker; "
+         "pass rate, the difference and the cost ratio are over those dispatched samples only, against every valid "
+         "control sample of the same cells. The interval is Newcombe's, one-sided 90% on the lower bound; the plan's "
+         "rule is lower bound ≥ −10 points.", "",
+         "| Worker | Cells | Dispatch | Pass (dispatched) | Pass (control) | Difference [90% lower, upper] | "
+         "Median $ dispatched / control | Policy sha256 | Workspace HEAD |",
+         "|---|---|---|---|---|---|---|---|---|"]
+    by_worker = {}
+    for f, d in docs.items():
+        if d.get("arm") == "hybrid":
+            by_worker.setdefault(d.get("worker_profile") or "?", []).append((f, d))
+    for worker, fl in sorted(by_worker.items()):
+        valid = [s for _, d in fl for s in d.get("samples", []) if s.get("valid")]
+        disp = [s for s in valid if s.get("local_calls")]
+        ctrl = []
+        for f, d in fl:
+            c = control_for(f, d)
+            cd = docs.get(c) or (json.loads(c.read_text()) if c.exists() else {})
+            ctrl += [s for s in cd.get("samples", []) if s.get("valid")]
+        hk = [o for o in map(_outcome, disp) if o is not None]
+        ck = [o for o in map(_outcome, ctrl) if o is not None]
+        ci = diff_ci(sum(hk), len(hk), sum(ck), len(ck))
+        med = lambda xs: st.median(xs) if xs else None
+        hc = med([s.get("cloud_cost_usd") or 0 for s in disp])
+        cc = med([s.get("cloud_cost_usd") or 0 for s in ctrl])
+        pol = sorted({(s.get("policy") or {}).get("sha256", "")[:8] for s in valid} - {""})
+        heads = sorted({(s.get("workspace_head") or "?")[:8] for s in valid})
+        cells = ", ".join(sorted(f"{d.get('target', 'tasks')}:{d.get('rung')}" for _, d in fl))
+        L.append(f"| `{worker}` | {cells} | {len(disp)}/{len(valid)} | {sum(hk)}/{len(hk)} | {sum(ck)}/{len(ck)} | "
+                 + (f"{ci[0]:+.2f} [{ci[1]:+.2f}, {ci[2]:+.2f}]" if ci else "–") + " | "
+                 + (f"{hc:.3f} / {cc:.3f} = {hc / cc:.2f}×" if hc is not None and cc else "–")
+                 + f" | {', '.join(pol) or '–'} | {', '.join(heads) or '–'} |")
+    L += ["", "| File | Valid/attempts | Verified | Dispatched | Spent (incl. invalid) $ | Stopped |", "|---|---|---|---|---|---|"]
+    for f, d in sorted(docs.items()):
+        sm = d.get("samples", [])
+        val = [s for s in sm if s.get("valid")]
+        L.append(f"| `{f.name}` | {len(val)}/{len(sm)} | {sum(bool(s.get('verified')) for s in val)} | "
+                 f"{sum(bool(s.get('local_calls')) for s in val) if d.get('arm') == 'hybrid' else '–'} | "
+                 f"{sum(s.get('cloud_cost_seen_usd') or 0 for s in sm):.2f} | {d.get('stopped') or ''} |")
+    return L
 
 
 if __name__ == "__main__":
@@ -279,4 +398,28 @@ if __name__ == "__main__":
     e3fix = canon("20260926-0200", "d1229ad0e89f")
     assert newest_generation([old, new, e3fix]) == [old, new, e3fix]
     assert all(k != v and v not in EQUIVALENT_HARNESS for k, v in EQUIVALENT_HARNESS.items())
+    # Newcombe 1998, method 10, example (56/70 vs 48/80): 95% interval 0.0524 to 0.3339.
+    d, lo, hi = diff_ci(56, 70, 48, 80, z=NormalDist().inv_cdf(0.975))
+    assert (round(d, 4), round(lo, 4), round(hi, 4)) == (0.2, 0.0524, 0.3339), (d, lo, hi)
+    assert diff_ci(0, 0, 1, 1) is None
+    # 24/24 against 24/24 clears a -10 point floor at one-sided 90%; 22/24 against 22/24 does not.
+    assert diff_ci(24, 24, 24, 24)[1] > -0.10 > diff_ci(22, 24, 22, 24)[1]
+    # One population: the hybrid file's dispatched samples, the worker in its name.
+    assert control_for(Path("hybrid-np-x-sonnet5-occamy-1.0-4bit-64g-3-hybrid.json"),
+                       {"tag": "np-x-sonnet5", "worker_profile": "occamy-1.0-4bit-64g", "rung": 3}).name == \
+        "hybrid-np-x-sonnet5-3-control.json"
+    assert control_for(Path("hybrid-6-hybrid.json"), {}).name == "hybrid-6-control.json"
+    import tempfile
+    with tempfile.TemporaryDirectory() as t:
+        def put(name, doc):
+            (Path(t) / name).write_text(json.dumps(doc))
+            return str(Path(t) / name)
+        smp = lambda ok, calls, cost: {"valid": True, "verified": ok, "local_calls": calls, "cloud_cost_usd": cost,
+                                       "cloud_cost_seen_usd": cost, "policy": {"sha256": "ab" * 32}, "workspace_head": "b0351ed8ff"}
+        fs = [put("hybrid-np-x-3-control.json", {"arm": "control", "tag": "np-x", "rung": 3,
+                                                 "samples": [smp(True, 0, 0.2), smp(True, 0, 0.4)]}),
+              put("hybrid-np-x-w-3-hybrid.json", {"arm": "hybrid", "tag": "np-x", "rung": 3, "worker_profile": "w",
+                                                  "samples": [smp(True, 2, 0.1), smp(False, 0, 0.5), {"valid": False}]})]
+        md = "\n".join(hybrid_md(fs))
+        assert "| `w` | tasks:3 | 1/2 | 1/1 | 2/2 |" in md and "0.100 / 0.300 = 0.33×" in md and "abababab" in md, md
     print("✓ _by_class self-check passed")

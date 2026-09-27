@@ -39,6 +39,19 @@ json.dump({"meta": {"key": prof, "variant": variant, "harness_sha": "h", "tasks_
            "samples": samples}, open(path, "w"))
 P
       ;;
+      hybrid) python3 - "$ledger" "$B" "$variant" "$prof" <<'P'
+import json, os, sys
+ledger, b, arm, prof = sys.argv[1:]
+tag = os.environ["NIGHT_HYBRID_TAG"]
+spent = json.load(open(ledger))["spent_usd"] if os.path.exists(ledger) else 0.0
+json.dump({"spent_usd": spent + 0.2, "cap_usd": 1}, open(ledger, "w"))
+name = f"hybrid-{tag}-{prof}-3-hybrid.json" if arm == "hybrid" else f"hybrid-{tag}-3-control.json"
+s = {"valid": True, "verified": True, "local_calls": 2 if arm == "hybrid" else 0, "cloud_cost_usd": 0.1,
+     "cloud_cost_seen_usd": 0.1, "policy": {"sha256": "cd" * 32}, "workspace_head": "b0351ed8"}
+json.dump({"arm": arm, "tag": tag, "rung": 3, "target": "tasks", "worker_profile": prof if arm == "hybrid" else None,
+           "samples": [s]}, open(f"{b}/{name}", "w"))
+P
+      ;;
       cloud) python3 - "$ledger" "$B/frontier-cloud-x-$variant-$stamp.json" "$classes" <<'P'
 import json, os, sys
 ledger, path, cls = sys.argv[1:]
@@ -90,6 +103,12 @@ printf 'local e2e - - - - 5 4 p1\nlocal ops - - - - 5 4 p2\nlocal base edit-sing
 NIGHT_DIR="$T/night64" NIGHT_REPORT="$T/night-64.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64.queue" > /dev/null
 
 echo
+echo "### --queue with hybrid steps: a control and two workers, one tag, the worker in the file name"
+printf 'hybrid hybrid tasks control 1 3 5 4 p1\nhybrid hybrid tasks hybrid 1 3 5 4 p1\nhybrid hybrid tasks hybrid 1 3 5 4 p2\n' > "$T/night-64-3.queue"
+NIGHT_DIR="$T/night643" NIGHT_REPORT="$T/night-64-3.md" NIGHT_HYBRID_TAG=np-t-s5 PLAN="" \
+  "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64-3.queue" --part hybrid > /dev/null
+
+echo
 echo "### workspace-clean preflight check (25 Sep: stray .git/.git2 passed preflight, failed every step)"
 mkdir -p "$T/workspaces/dirty/kotlin" "$T/workspaces/dirty/.git" "$T/workspaces/dirty/.git2" "$T/workspaces/clean/kotlin"
 wsout=$(FRONTIER_ROOT="$T" python3 "$ROOT/.mise/tasks/_night_workspace_clean.py" dirty clean missing)
@@ -117,6 +136,10 @@ check "--queue report is titled night 2 and has the replication verdict" \
   'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2 .* on edit-single" "$T/night-2.md"'
 check "per-step profiles: e2e and ops found their result files, base ran on p2" \
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2" ]'
+check "hybrid steps found their own files, one per worker" \
+  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"status\"] + \":\" + r[\"profile\"] + \":\" + r[\"result\"].split(\"/\")[-1] for r in map(json.loads, open(sys.argv[1]))))" "$T/night643/steps.jsonl")" = "OK:p1:hybrid-np-t-s5-3-control.json OK:p1:hybrid-np-t-s5-p1-3-hybrid.json OK:p2:hybrid-np-t-s5-p2-3-hybrid.json" ]'
+check "hybrid report: a row per worker against the shared control, spend from the ledger" \
+  'grep -q "^| \`p1\` | tasks:3 | 1/1 | 1/1 | 1/1 |" "$T/night-64-3.md" && grep -q "^| \`p2\` |" "$T/night-64-3.md" && grep -q "Cloud spend: \$0.6" "$T/night-64-3.md"'
 check "report names both profiles" 'grep -q "Local model(s) \`p1\`, \`p2\`" "$T/night-64.md"'
 check "would commit the report and the result files" 'grep -q "(fake) would commit.*frontier-m-base" "$T/night/night.log"'
 check "workspace-clean: dirty workspace fails, names both stray dirs and the rm command" \

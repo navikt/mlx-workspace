@@ -122,7 +122,7 @@ LOAD_CEILING = float(os.environ.get("BENCH_LOAD_CEILING", "8"))
 LAUNCH_BACKOFF = float(os.environ.get("BENCH_LAUNCH_BACKOFF", "45"))
 
 
-def wait_with_deadline(proc, cap):
+def wait_with_deadline(proc, cap, stop=None):
     """Wait for a child, enforcing the cap against the wall clock ourselves.
 
     `Popen.wait(timeout=...)` was observed sitting thirteen minutes past a 2400s
@@ -132,15 +132,24 @@ def wait_with_deadline(proc, cap):
     never runs.
 
     So the deadline is checked here, against time.monotonic(), and the child is killed
-    by process group. Returns (returncode, timed_out).
+    by process group. Returns (returncode, why): why is None for a child that exited on
+    its own, "timeout", or what `stop()` returned when it asked for the kill (the cost
+    cap, checked every ten seconds).
     """
     deadline = time.monotonic() + cap
+    why, polled = "timeout", time.monotonic()
     while True:
         rc = proc.poll()
         if rc is not None:
-            return rc, False
+            return rc, None
         if time.monotonic() >= deadline:
             break
+        if stop and time.monotonic() - polled >= 10:
+            polled = time.monotonic()
+            why = stop()
+            if why:
+                break
+            why = "timeout"
         time.sleep(1)
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
@@ -152,7 +161,7 @@ def wait_with_deadline(proc, cap):
     grace = time.monotonic() + 60
     while proc.poll() is None and time.monotonic() < grace:
         time.sleep(1)
-    return proc.poll(), True
+    return proc.poll(), why
 
 
 def load_average():
@@ -416,26 +425,52 @@ WS = ROOT / "workspaces" / "hybrid-bench"
 REPO = WS / TARGET
 
 
+def head():
+    return sh(["git", "rev-parse", "HEAD"], cwd=REPO).stdout.strip() or None
+
+
 def ensure_clone():
-    if (REPO / ".git").is_dir():
-        return
-    WS.mkdir(parents=True, exist_ok=True)
-    print(f"→ Cloning {CFG['repo']} at {CFG['ref']}")
-    r = sh(["git", "clone", "--depth", "1", CFG["repo"], str(REPO)], timeout=900)
-    if r.returncode != 0:
-        raise SystemExit(f"✗ clone failed: {r.stderr[-400:]}")
+    """Clone the target, and hold an existing clone to the pinned ref.
+
+    Returning early on any .git let workspaces/hybrid-bench/tasks sit at 632cf5f5
+    while bench/tasks.json pins b0351ed8: every prompt, verifier and baseline was
+    written against the pin. So a checkout off the pin is moved onto it, and if that
+    fails nothing is measured.
+    """
     ref = CFG["ref"]
-    if ref not in ("main", "master"):
+    if not (REPO / ".git").is_dir():
+        WS.mkdir(parents=True, exist_ok=True)
+        print(f"→ Cloning {CFG['repo']} at {ref}")
+        r = sh(["git", "clone", "--depth", "1", CFG["repo"], str(REPO)], timeout=900)
+        if r.returncode != 0:
+            raise SystemExit(f"✗ clone failed: {r.stderr[-400:]}")
+    if ref in ("main", "master") or head() == ref:
+        return
+    print(f"→ {REPO} is at {(head() or '?')[:12]}, the target pins {ref[:12]}; checking out the pin")
+    reset_repo()
+    if sh(["git", "cat-file", "-e", f"{ref}^{{commit}}"], cwd=REPO).returncode != 0:
         f = sh(["git", "fetch", "-q", "--depth", "1", "origin", ref], cwd=REPO, timeout=600)
         if f.returncode != 0:
             raise SystemExit(f"✗ fetch of {ref} failed: {f.stderr[-400:]}")
-        sh(["git", "checkout", "-q", "FETCH_HEAD"], cwd=REPO)
+    sh(["git", "checkout", "-q", "--detach", ref], cwd=REPO)
+    if head() != ref:
+        raise SystemExit(f"✗ {REPO} is at {head()}, not the pinned {ref}. Fix: rm -rf {REPO} and re-run")
 
 
-def out_path(rung, arm, target=None, tag=None):
-    """bench/hybrid[-<target>][-<tag>]-<rung>-<arm>.json"""
+def out_path(rung, arm, target=None, tag=None, worker=None):
+    """bench/hybrid[-<target>][-<tag>[-<worker>]]-<rung>-<arm>.json
+
+    A tagged hybrid file names its worker profile: without it, runs for different
+    workers under one tag landed in one file, and resume counted one worker's samples
+    toward another's. The control arm dispatches nothing, so one control file per tag
+    serves every worker."""
     target, tag = target or TARGET, TAG if tag is None else tag
+    worker = os.environ.get("MLX_ACTIVE_PROFILE", "").strip() if worker is None else worker
     stem = "hybrid" + ("" if target == "tasks" else f"-{target}") + (f"-{tag}" if tag else "")
+    if tag and arm == "hybrid":
+        if not worker:
+            raise SystemExit("✗ a tagged hybrid file needs the worker profile (MLX_ACTIVE_PROFILE)")
+        stem += f"-{worker}"
     return ROOT / "bench" / f"{stem}-{rung}-{arm}.json"
 
 
@@ -447,7 +482,19 @@ def policy_record(path=None):
         b = path.read_bytes()
     except OSError:
         return None
-    return {"path": str(path), "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b)}
+    send = next((l for l in b.decode("utf8", "replace").splitlines() if l.startswith("Send it")), None)
+    return {"path": str(path), "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b), "send": send}
+
+
+def pakke_record():
+    """{pakke: sha} nav-pilot fetched for this launch. Every launch re-fetches the
+    agentpakke from GitHub, and its skills and agents land in the prompt, so the sha
+    it got is part of what the sample measured."""
+    out = {}
+    for f in sorted((HOME / ".nav-pilot" / "source-cache").glob("*.json")):
+        d = read_cfg(f)
+        out[f.stem] = {"sha": d.get("sha"), "fetched_at": d.get("fetchedAt")}
+    return out or None
 
 
 def reset_repo():
@@ -716,13 +763,15 @@ def preflight(arm, port, profile_key, meta, params):
     total = sum(i["bytes"] or 0 for i in snap["instructions_before"])
     print(f"  7 ✓ {len(snap['instructions_before'])} instruction file(s), {total:,} bytes")
 
+    snap["workspace_head"] = head()
+    snap["workspace_pinned"] = CFG["ref"]
     snap["memory_at_preflight"] = memory()
     return snap
 
 
 # ── one sample ────────────────────────────────────────────────────────────────
 
-def run_sample(arm, rung, task, n, snap, snap_ix, cap):
+def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0):
     log_dir = ROOT / ".bench-logs"
     log_dir.mkdir(exist_ok=True)
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -755,8 +804,21 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         fh.flush()
         proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
                                 start_new_session=True)
-        rc, timed_out = wait_with_deadline(proc, cap)
-        if timed_out:
+
+        def over_cap():
+            # opencode prices every step as it finishes, so the running cost is in the
+            # log before the session ends: a runaway sample is killed at the cap
+            # rather than recorded after it.
+            if cost_cap is None:
+                return None
+            now = parse_events(log_path.read_text(errors="replace"))["cloud_cost_usd"]
+            if spent + now > cost_cap:
+                return f"cost cap ${cost_cap:.2f}: ${spent:.2f} spent before this sample, ${now:.2f} in it"
+            return None
+
+        rc, why = wait_with_deadline(proc, cap, over_cap)
+        timed_out = why == "timeout"
+        if why:
             rc = None
     elapsed = round(time.time() - started, 1)
 
@@ -786,12 +848,17 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
         "local_calls": local_calls, "lines_changed": lines, "files_changed": files,
         "cloud_steps": ev["cloud_steps"], "cloud_tokens": ev["cloud_tokens"],
         "cloud_cost_usd": ev["cloud_cost_usd"],
+        # What opencode priced, kept when the sample is invalid and cloud_cost_usd is
+        # nulled: an invalid sample still spent it, and the cost cap counts it.
+        "cloud_cost_seen_usd": ev["cloud_cost_usd"],
         "truncated": ev["truncated"],
         "markers_after": after,
         "policy": policy,
         "memory": {"before": mem_before, "after": memory()},
         "local_server_pid": snap["local_server"]["pid"],
         "local_server_started": snap["local_server"]["started"],
+        "workspace_head": head(),
+        "agentpakke": pakke_record(),
         "log": str(log_path.relative_to(ROOT)),
     }
 
@@ -800,7 +867,9 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap):
     # "the model did nothing" — a different claim from "we do not know". That has
     # been misread twice.
     invalid = None
-    if timed_out:
+    if why and why != "timeout":
+        invalid = why
+    elif timed_out:
         invalid = f"timed out after {cap}s"
     elif rc != 0:
         invalid = f"client exited {rc}"
@@ -873,12 +942,55 @@ def check_deadline():
          "import signal,time\nsignal.signal(signal.SIGTERM,signal.SIG_IGN)\ntime.sleep(300)"],
         start_new_session=True)
     began = time.monotonic()
-    rc, timed_out = wait_with_deadline(child, 3)
+    rc, why = wait_with_deadline(child, 3)
     elapsed = time.monotonic() - began
-    assert timed_out, "the cap did not fire"
+    assert why == "timeout", "the cap did not fire"
     assert elapsed < 15, f"the cap fired {elapsed:.0f}s late"
     assert child.poll() is not None, "the child outlived its cap"
     assert rc is not None, "the killed child was never reaped"
+    # The cost cap's kill: stop() asks for it well before the deadline.
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(300)"], start_new_session=True)
+    began = time.monotonic()
+    rc, why = wait_with_deadline(child, 120, lambda: "cost cap $1.00")
+    assert why == "cost cap $1.00" and time.monotonic() - began < 30 and child.poll() is not None, why
+
+
+def check_pin():
+    """ensure_clone moves a clone that sits off the pin back onto it, against a
+    throwaway origin with two commits (the 632cf5f5-vs-b0351ed8 case)."""
+    import tempfile
+    global REPO, WS, CFG
+    saved = REPO, WS, CFG
+    with tempfile.TemporaryDirectory() as t:
+        origin = Path(t) / "origin"
+        env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+               "GIT_COMMITTER_EMAIL": "t@t"}
+        sh(["git", "init", "-q", str(origin)])
+        sh(["git", "config", "uploadpack.allowAnySHA1InWant", "true"], cwd=origin)
+        shas = []
+        for i in (1, 2):
+            (origin / "f").write_text(str(i))
+            sh(["git", "add", "f"], cwd=origin)
+            sh(["git", "-c", "commit.gpgsign=false", "commit", "-qm", str(i)], cwd=origin, env=env)
+            shas.append(sh(["git", "rev-parse", "HEAD"], cwd=origin).stdout.strip())
+        WS, REPO = Path(t) / "ws", Path(t) / "ws" / "t"
+        CFG = {"repo": f"file://{origin}", "ref": shas[0]}
+        try:
+            ensure_clone()            # fresh clone lands on the tip, then moves to the pin
+            assert head() == shas[0], head()
+            sh(["git", "fetch", "-q", "--depth", "1", "origin", shas[1]], cwd=REPO)
+            sh(["git", "checkout", "-q", "--detach", shas[1]], cwd=REPO)
+            ensure_clone()            # an existing clone off the pin is moved back
+            assert head() == shas[0], head()
+            CFG = {"repo": CFG["repo"], "ref": "0" * 40}
+            try:
+                ensure_clone()
+                raise AssertionError("a pin that cannot be fetched was accepted")
+            except SystemExit:
+                pass
+        finally:
+            REPO, WS, CFG = saved
+    print("  ✓ workspace held to the pinned ref")
 
 
 def self_check():
@@ -966,7 +1078,18 @@ def self_check():
     assert out_path(3, "hybrid", "tasks", "").name == "hybrid-3-hybrid.json"
     assert out_path(6, "control", "spring-ia-tjenester-metrikker", "").name == \
         "hybrid-spring-ia-tjenester-metrikker-6-control.json"
-    assert out_path(3, "hybrid", "tasks", "np-d24a65e5-sonnet46").name == "hybrid-np-d24a65e5-sonnet46-3-hybrid.json"
+    # Tagged: the worker is in the hybrid file's name, and the control file is shared.
+    assert out_path(3, "hybrid", "tasks", "np-dd859ac6-sonnet5", "occamy-1.0-4bit-64g").name == \
+        "hybrid-np-dd859ac6-sonnet5-occamy-1.0-4bit-64g-3-hybrid.json"
+    assert out_path(3, "control", "tasks", "np-dd859ac6-sonnet5", "occamy-1.0-4bit-64g").name == \
+        "hybrid-np-dd859ac6-sonnet5-3-control.json"
+    assert out_path(6, "hybrid", "spring-ia-tjenester-metrikker", "t", "w").name == \
+        "hybrid-spring-ia-tjenester-metrikker-t-w-6-hybrid.json"
+    try:
+        out_path(3, "hybrid", "tasks", "t", "")
+        raise AssertionError("a tagged hybrid file without a worker was allowed")
+    except SystemExit:
+        pass
     import tempfile
     with tempfile.NamedTemporaryFile(suffix=".md") as t:
         t.write(b"policy"); t.flush()
@@ -974,6 +1097,8 @@ def self_check():
         assert pr["bytes"] == 6 and pr["sha256"].startswith("823412d1"), pr
     assert policy_record(Path("/nonexistent/x.md")) is None
     print(f"  ✓ output stem and policy hash (tag {TAG or 'unset'}, config {NP_CONFIG})")
+
+    check_pin()
 
     print("✓ self-check passed")
 
@@ -999,6 +1124,10 @@ def main():
     ap.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TASK_TIMEOUT", "900")),
                     help="per-sample cap in seconds")
     ap.add_argument("--self-check", action="store_true", help="parser self-check, no GPU")
+    ap.add_argument("--cost-cap", type=float,
+                    help="USD: stop before a sample would take spend past this, and kill one that does")
+    ap.add_argument("--cost-ledger", help="a JSON file carrying spend across runs, so one cap covers a night "
+                                          "(bench-frontier's format: {spent_usd, cap_usd})")
     ap.add_argument("--target", default=None,
                     help="target name under bench/ or bench/targets/ (default: tasks). "
                          "Set BENCH_TARGET instead when scripting; this flag only reports "
@@ -1027,16 +1156,29 @@ def main():
     port = os.environ.get("MLX_SERVER_PORT") or str(recorded_server_port())
     by_id = {t["id"]: t for t in CFG["tasks"]}
 
+    # A watchdog's SIGTERM would otherwise end the process without the finally below,
+    # leaving the dispatch policy in the user's opencode config.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     arms = ["hybrid", "control"] if args.arm == "both" else [args.arm]
     was_enabled = tomllib.loads(NP_CONFIG.read_text()).get("local_enabled") if NP_CONFIG.exists() else None
     ensure_clone()
+    ledger = Path(args.cost_ledger) if args.cost_ledger else None
+    spent = float(read_cfg(ledger).get("spent_usd") or 0.0) if ledger else 0.0
+    stop = None
     try:
         for rung in args.rung:
+            if stop:
+                break
             if RUNGS.get(rung) is None:
                 raise SystemExit(f"✗ rung {rung} has no verified prompt in bench/tasks.json. "
                                  f"Rung 7 (add a small endpoint with a test) was never "
                                  f"attempted locally; write the task first.")
             task = by_id[RUNGS[rung]]
+            if task.get("retired_reason") or task.get("verify") == "retired":
+                # Nothing verifies it, so every sample is unjudged: cloud spend for no
+                # result. tasks:6 (D2) was the most expensive cell of the plan this way.
+                raise SystemExit(f"✗ rung {rung} is {task['id']} on {TARGET}, which is retired: "
+                                 f"{task.get('retired_reason') or 'verify=retired'}. Nothing would score it.")
             for arm in arms:
                 snap = preflight(arm, port, profile_key, meta, params)
                 # One file per (rung, arm). Results keyed only by model merged two
@@ -1060,6 +1202,7 @@ def main():
                     backup.write_text(out.read_text())
                     print(f"→ existing results backed up to {backup.relative_to(ROOT)}")
                 doc.update({"rung": rung, "arm": arm, "task": task["id"], "tag": TAG or None,
+                            "target": TARGET, "worker_profile": profile_key if arm == "hybrid" else None,
                             "kind": task["kind"], "verify": task["verify"],
                             "prompt": task["prompt"]})
                 # Snapshots accumulate rather than overwrite: a resumed file must
@@ -1080,10 +1223,25 @@ def main():
                               f"{sum(1 for x in doc['samples'] if x.get('valid'))} valid "
                               f"sample(s). Something is wrong with the arm, not the model.")
                         break
+                    # bench-frontier's rule: checked before a sample, against what was
+                    # spent plus the median sample so far, so the next one cannot be the
+                    # one that crosses it. run_sample also kills a sample that does.
+                    costs = [x["cloud_cost_seen_usd"] for x in doc["samples"] if x.get("cloud_cost_seen_usd")]
+                    nxt = sorted(costs)[len(costs) // 2] if costs else 0.0
+                    if args.cost_cap is not None and spent + nxt > args.cost_cap:
+                        stop = f"cost cap ${args.cost_cap:.2f}: ${spent:.2f} spent, next sample ~${nxt:.2f}"
+                        break
                     attempts += 1
                     n = len(doc["samples"])
-                    rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout)
+                    rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout, args.cost_cap, spent)
                     doc["samples"].append(rec)
+                    spent += rec.get("cloud_cost_seen_usd") or 0.0
+                    if ledger:
+                        ledger.write_text(json.dumps({"spent_usd": round(spent, 4), "cap_usd": args.cost_cap}) + "\n")
+                    if (rec.get("invalid_reason") or "").startswith("cost cap"):
+                        stop = rec["invalid_reason"]
+                    if stop:
+                        doc["stopped"] = stop
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
                     # A launch that ends in one second having printed nav-pilot's
                     # help never reached the model. Every launch re-fetches the
@@ -1110,12 +1268,27 @@ def main():
                               f"{rw['redone']} redone")
                     if not rec["valid"]:
                         print(f"     ⚠ INVALID, not a result: {rec['invalid_reason']}")
+                    if stop:
+                        break
+                if stop:
+                    doc["stopped"] = stop
+                    out.write_text(json.dumps(doc, indent=2) + "\n")
+                    print(f"   COST CAP: {stop}; recorded in the file, stopping", flush=True)
                 print(f"✓ {out.relative_to(ROOT)}")
+                if stop:
+                    break
     finally:
         reset_repo()
-        # Leave the machine in the state we found it. The control arm turns
-        # dispatch off, and walking away from that silently changes the alpha for
-        # its user.
+        # Leave the machine in the state we found it. The last hybrid launch leaves
+        # its dispatch policy and worker binding in the user's real
+        # ~/.config/opencode/opencode.json, where a plain `opencode` would still read
+        # "draws no AI credits" about a worker that is gone. `off` takes them out;
+        # `on` only writes nav-pilot's own config (local_enabled), never opencode's.
+        sh(LOCAL_OFF, timeout=300)
+        left = {k: v for k, v in markers().items() if v}
+        if left or POLICY_FILE.exists():
+            print(f"⚠ dispatch artefacts left in {OPENCODE_CFG.parent}: {left or ''} "
+                  f"{POLICY_FILE.name if POLICY_FILE.exists() else ''}")
         if was_enabled:
             sh(LOCAL_ON, timeout=300)
 
