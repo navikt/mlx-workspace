@@ -490,6 +490,58 @@ where they are, and night 64-4 runs them.
   - **Next step, if dispatch on large jobs is still wanted.** Give bench-hybrid a large cell: frontier-derived thread-arg tasks (r4–r6: 12–317 call sites, with a per-file literal so no search-and-replace can make them) on the isoppfolgingstilfelle clone. Then re-probe with about 6 samples and a control (≈ $3). Fix the sandbox read first.
   - **Cleanup.** `~/.config/opencode` was restored from a copy taken before the run and checked byte for byte against it. It has no dispatch markers and no policy file, and the copy is deleted. `~/.copilot` agents and hooks are unchanged. The user's `~/.nav-pilot/config.toml` still has local off. No queue lock remains. `bench/` is clean: the result files and the `.baseline-*` cache were moved to the probe directory.
 
+- **Dispatch probe 4, large thread-arg cells (2026-09-27): Sonnet 5 dispatched 0 of 6. NO-GO for 64-3 on large cells.** Probe 3 found no large cell to test and a sandbox defect; both are fixed first in #83.
+  - **The cells.** The new target `bench/targets/isoppfolgingstilfelle-large.json` reads three thread-arg rungs from the frontier tasks file. It does not copy the file or change it. Each call site must pass its own file name as a literal, so no single search-and-replace makes the change. All three are large under #997's rule:
+
+    | Rung | Task | Call sites | Files |
+    |---|---|---|---|
+    | 4 | fm-r4-a | 12 | 12 |
+    | 5 | fm-r5-a | 29 | 4 |
+    | 6 | fm-r6-a | 60 | 3 |
+
+    The frontier's `verify_thread_arg` plus `compileKotlin compileTestKotlin` score them. On a clone at the pin, the reference edit passes and every `known_bad` variant fails. A Fable review found one real gap: the ids were missing from `task-classes.json`. It is fixed.
+  - **The sandbox fix.** cplt scopes a session to the clone and denies reads above it. mise shims walk up into `~/mlx-workspace/mise.toml` and `mise.local.toml`, so `java` failed. Without mise, java resolves to the machine default, JDK 27, and this Gradle build fails on it. bench-hybrid now gives each session three settings:
+    - `MISE_CEILING_PATHS` at `workspaces/hybrid-bench`;
+    - `JAVA_HOME` on the target's JDK 21;
+    - a `PATH` prefix for that JDK.
+
+    One session checked it first: `./gradlew compileKotlin` exited 0 with java from temurin-21 ($0.071). In the probe's 9 sessions there was no mise or "Operation not permitted" error, and the in-session compiles ran.
+  - **Setup.** Binary `nav-pilot-main-7236795f`, policy 9d713fe3 in every hybrid sample. Worker optiq-64g, served by nav-pilot at 48 GB wired, under np-serve and the queue lock. The workspace was at b0351ed8, the pin. Spend was $1.34 of the $3.00 cap, of which $0.07 was the check session. Files are in `.bench-logs/dispatch-probe4-large-20260927/`.
+
+  | Cell | Arm | n | Dispatched | Verified | Cloud $ | Steps | s | How it did the work |
+  |---|---|---|---|---|---|---|---|---|
+  | r4 (12 sites, 12 files) | hybrid | 0 | no | yes | 0.145 | 9 | 46 | a bash loop over the files; it also hit the definition file and fixed that by hand |
+  | r4 | hybrid | 1 | no | yes | 0.148 | 7 | 44 | "Only 12 call sites across 12 files. Small enough to do directly." 12 `edit` calls |
+  | r4 | control | 0 | – | yes | 0.133 | 8 | 36 | one `edit`, then a per-file loop |
+  | r5 (29 sites, 4 files) | hybrid | 0 | no | yes | 0.136 | 9 | 38 | "Only 5 files. Small enough to do myself directly." A `sed` per file |
+  | r5 | hybrid | 1 | no | yes | 0.122 | 7 | 31 | a `sed` per file with the file's name |
+  | r5 | control | 0 | – | yes | 0.120 | 7 | 30 | a `sed` per file |
+  | r6 (60 sites, 3 files) | hybrid | 0 | no | yes | 0.158 | 9 | 48 | "compressed-tier … Proceeding directly". It then wrote "dispatch the big test file to local-worker" and edited it with `sed` instead |
+  | r6 | hybrid | 1 | no | yes | 0.187 | 10 | 50 | "60 occurrences of identical pattern - use sed for bulk replace" |
+  | r6 | control | 0 | – | yes | 0.119 | 6 | 33 | a `sed` per file |
+
+  - **Orchestrator behaviour.** No sample dispatched, so no sample split per file. There was no worker pass to verify and no rework to judge. All 9 samples are valid and verified.
+  - **Cost and time against the control.** Per cell, the hybrid mean against the control:
+
+    | Cell | Hybrid $ | Control $ | Ratio | Hybrid s | Control s |
+    |---|---|---|---|---|---|
+    | r4 | 0.147 | 0.133 | 1.10× | 45 | 36 |
+    | r5 | 0.129 | 0.120 | 1.07× | 35 | 30 |
+    | r6 | 0.172 | 0.119 | 1.45× | 49 | 33 |
+
+    With nothing dispatched, the hybrid arm is the control plus the policy and the worker agent in the prompt, and that is what it costs.
+  - **Why it kept the work:**
+    1. **The file-name literal does not stop search-and-replace.** Sonnet 5 writes one `sed` per file with that file's name, often in a single `for` loop. By its own reading of the rule, a search-and-replace makes the change, so it keeps it. The frontier chose the literal to stop a single global replace, which it does, but it does not make the change hard for the cloud model. In the frontier, Sonnet 5 already did these rungs for $0.07–0.17 in 20–57 s.
+    2. **It ignores the size threshold when it does cite size.** r4 (12 files) and r5 (5 files counting the definition) are over "≥ 5 files or ≥ 10 call sites", and both samples called them small.
+    3. **The persona tier still appears** ("compressed-tier … Proceeding directly"), as in probes 2 and 3.
+  - **GO rule** (dispatch ≥ 50 % on large cells, the dispatched samples pass, cost ≤ control): not met. The result is 0 of 6, and the hybrid arm costs 1.07–1.45× the control. **A real 64-3 on large cells is NO-GO.** Across four probes Sonnet 5 has dispatched 1 of 23 hybrid samples. Under nav-pilot's current policy, the 64-3 hybrid arm would measure the control plus a prompt. Recommendation: report "Sonnet 5 does not delegate mechanical edits it can script" as the 64-3 hybrid result, and take the 64 GB workers' directed quality from 64-2's frontier. A cell would test delegation only if the call sites differ in ways a script cannot capture, such as a value that depends on local context at each site. No such task exists in the bench yet.
+  - **Follow-up for after the 64 GB series: the frontier harness has the same sandbox defect.**
+    - The local arm's workspaces sit under `~/mlx-workspace/workspaces/<profile>`. `_sandbox.toolchain_grants` does not cover the mise walk-up into `~/mlx-workspace/mise*.toml`: it was reproduced under cplt, and Laguna and Occamy transcripts on 27 September show mise errors and failing in-session builds.
+    - The cloud arm, under `~/.cache`, reads mise but resolves JDK 27. A transcript from 26 September shows the model hunting for JDK 21.
+    - Scores stay valid, because the verifier builds outside the sandbox with an explicit `JAVA_HOME`. But the models had no working compiler inside the session.
+    - Fix: set `MISE_CEILING_PATHS`, `JAVA_HOME` and a `PATH` prefix on JDK 21 in bench-frontier's launch (or `_sandbox.cplt_argv`). Those are `harness_sha` inputs, so the fix starts a new harness generation. Land it between series, not inside one.
+  - **Cleanup.** `~/.config/opencode` was restored from a copy taken before the run and checked against checksums of it, together with `~/.copilot` agents and hooks and `~/.nav-pilot` config and manifest: all identical. There are no dispatch markers and no policy file, and the copy is deleted. The check session had synced the navikt/copilot pakke; that was restored the same way. No queue lock remains. `bench/` is clean: the result files are in the probe directory.
+
 ## 8.9 Decide as a service: measure first
 
 Research: [2026-09-26-decide-as-a-service/research.md](../2026-09-26-decide-as-a-service/research.md).
