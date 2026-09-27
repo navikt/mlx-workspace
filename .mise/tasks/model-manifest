@@ -82,6 +82,22 @@ OFFERED = {
         "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md",
         "expect": "Opt-in, never the default. About ten times slower than the default per task (median 115 seconds against 12) and about 14 tokens a second; a cold 30k-token prompt takes about a minute to read, 45k about 85 seconds. Quality was level with the default, 31 of 40 against 28. Context is 48k with a 4k reply, read in 512-token steps so a long prompt fits the 36 GB wired limit. nav-pilot releases older than 2026.09.24-110317 ignore the step and can run out of memory near 48k: update first. If you want one Qwen3.8, take the 4-bit.",
     },
+    # The 64 GB tier (reports/2026-09-26-64gb-tier/plan.md): the default's weights at
+    # 8-bit, for machines with 64 GB. Chosen over Occamy-1.0 4-bit on nights 64-4 and 64-5
+    # (night-64-5.md, Review): create-file with the orchestrator's retry 30/36 against
+    # 21/36 (p = 0.018), Copilot sessions 12/12 against 8/12, and decide level with optiq.
+    # Occamy's publisher is not in ALLOWED_ORGS in any case. 48 GB wired is macOS's
+    # default on 64 GB, so no sudo; context is capped at 48k because the 49k probe peaked
+    # at 46.18 GB there (night-64-4.md). No recommended_for: decide is no better than the
+    # default's. Capabilities: the unmeasured block (cloud everywhere), because
+    # bench-capabilities trusts delegation only from hybrid runs, and the 64-3 hybrid
+    # arm was NO-GO (Sonnet 5 does not dispatch). The frontier numbers are in `expect`.
+    "qwen3.6-35b-a3b-8bit": {
+        "default": False,
+        "role": "Opt-in for 64 GB machines, the default's model at 8-bit",
+        "evidence": "reports/2026-09-26-64gb-tier/night-64-5.md#review-2026-09-28",
+        "expect": "Opt-in for 64 GB machines, never the default: the default's model at 8-bit, 38 GB of weights. Given a scoped subtask by a cloud agent it verified 34 of 36 single-file edits, 40 of 48 mechanical multi-file edits, and 30 of 36 new test files when allowed a retry. 12 of 12 Copilot sessions verified. Decodes about 73 tokens a second at 30k. Context is 48k; a 49k prompt peaked at 46 GB of the 48 GB limit.",
+    },
 }
 
 

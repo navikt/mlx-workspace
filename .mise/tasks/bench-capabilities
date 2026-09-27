@@ -83,7 +83,7 @@ def score(rows):
                     v, bar = verdict(cls, mode, r["k"], r["n"], len(r["tasks"]), r["runs"],
                                      p_cloud, list(r["cost_ratios"].values()))
                     cand = {"verdict": v, "k": r["k"], "n": r["n"], "lb": r["lb"],
-                            "bar": round(bar, 3), "p_cloud": round(p_cloud, 3),
+                            "bar": bar and round(bar, 3), "p_cloud": round(p_cloud, 3),
                             "runs": r["runs"], "tasks": r["tasks"], "condition": r["condition"],
                             "cost_ratios": r["cost_ratios"], "files": r["files"]}
                     if (RANK[v], r["n"]) > (RANK[best["verdict"]], best["n"]):
