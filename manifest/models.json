@@ -247,6 +247,85 @@
         }
       },
       "min_nav_pilot": "2026.09.24-110317-3596754"
+    },
+    {
+      "key": "qwen3.6-35b-a3b-8bit",
+      "name": "Qwen 3.6 35B A3B 8bit, 64 GB machines, 48 GB wired",
+      "model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "backend": "mlx-lm",
+      "default": false,
+      "role": "Opt-in for 64 GB machines, the default's model at 8-bit",
+      "expect": "Opt-in for 64 GB machines, never the default: the default's model at 8-bit, 38 GB of weights. Given a scoped subtask by a cloud agent it verified 34 of 36 single-file edits, 40 of 48 mechanical multi-file edits, and 30 of 36 new test files when allowed a retry. 12 of 12 Copilot sessions verified. Decodes about 73 tokens a second at 30k. Context is 48k; a 49k prompt peaked at 46 GB of the 48 GB limit.",
+      "weights_gb": 38,
+      "min_ram_gb": 64,
+      "wired_limit_gb": 48,
+      "params": {
+        "MLX_MODEL": "mlx-community/Qwen3.6-35B-A3B-8bit",
+        "MLX_SERVER_TYPE": "mlx-lm",
+        "MLX_CACHE_SIZE": "3",
+        "MLX_CACHE_BYTES": "6442450944",
+        "MLX_MAX_TOKENS": "32768",
+        "MLX_OPENCODE_CONTEXT": "49152",
+        "MLX_OPENCODE_OUTPUT": "16384",
+        "MLX_OPENCODE_CHUNK_TIMEOUT": "600000",
+        "MLX_CHAT_TEMPLATE_ARGS": "{\"enable_thinking\": false}",
+        "MLX_TOP_K": "20",
+        "MLX_TOP_P": "0.95",
+        "MLX_MIN_P": "0.0",
+        "MLX_NAV_PILOT_TEMPERATURE": "0.6",
+        "MLX_NAV_PILOT_TOP_P": "0.95"
+      },
+      "capabilities": {
+        "bar": {
+          "confidence": 0.9,
+          "x_caught": 0.9,
+          "x_silent": 0.95,
+          "min_runs": 5,
+          "min_tasks": 2
+        },
+        "classes": {
+          "read-qa": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          },
+          "edit-single": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          },
+          "edit-multi-mechanical": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          },
+          "create-file": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          },
+          "debug": {
+            "delegate": "cloud",
+            "local": "cloud",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 0,
+            "local_n": 0
+          }
+        }
+      }
     }
   ],
   "replaced": {

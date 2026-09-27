@@ -1,0 +1,25 @@
+[meta]
+name               = "Qwen 3.6 35B A3B 8bit, 64 GB machines, 48 GB wired"
+released           = "2026-04"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Proposed 64 GB entry (reports/2026-09-26-64gb-tier/night-64-5.md, Review). The measured qwen3.6-35b-a3b-8bit-64g with context capped at 48k: at 48 GB wired it peaked 46.18 GB at the 49k probe (night 64-4) and nothing past 49k is measured; 64k extrapolates to about 50 GB, over the limit. Same sampling and 6 GiB cache as measured."
+model_vram_gb      = 38
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "6442450944"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "49152"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"
