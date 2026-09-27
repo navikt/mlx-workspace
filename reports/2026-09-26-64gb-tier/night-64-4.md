@@ -114,3 +114,45 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · example: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
+## Review (2026-09-28)
+
+The Frontier section above is the standing summary and does not cover this night. The night's numbers come from the raw result files listed in Steps. nav-pilot was `nav-pilot-main-7236795f` for every step, at 48 GB wired (`wired_limit_mb` 49152 in each np-e2e file). nav-pilot served Occamy through the bench manifest override: "bench override: allowing unvetted publisher Accio-Lab", and every decide log names `Accio-Lab/occamy-1.0-MLX-4bit` as the served model.
+
+**np-e2e, full** (Copilot sessions through nav-pilot and its loop guard, 12 sessions: R2, E1, M1 × 2 × 2):
+
+| | Qwen3.6-35B-A3B 8-bit | Occamy 4-bit |
+|---|---|---|
+| E2E sessions verified | **12/12** | 8/12 |
+| Failures | none | Three sessions stopped by the loop guard: two R2 on a `read_bash` call repeated without its required `shellId`/`delay`, and one M1 on a repeated `bash`. One R2 answer did not verify |
+| Peak footprint (whole run) | **46.18 GB**, at the 49k latency probe; at most 44.94 GB in sessions | 29.07 GB |
+| Peak by probe: 2k / 30k / 49k | 37.8 / 41.6 / 46.2 GB | 20.5 / 25.0 / 29.1 GB |
+| Cold TTFT at 30k, decode at 30k | 10.3 s, 73.4 tok/s | 11.1 s, 70.3 tok/s |
+| Classifier probe (legitimate scenarios over P(A) 0.9) | recompile, poll-pr-checks | poll-ci, poll-pr-checks |
+| Classifier p95 | 0.32 s | 0.24 s |
+
+The 8-bit peaks 0.18 GB over the plan's fit line (wired − 2 = 46 GB) at the 49k probe. It measured 45.6 GB on night 64-1, and nothing OOMed. At the 30k probe and in every e2e session it is 1–4 GB under the line. The profile allows 64k context (`MLX_OPENCODE_CONTEXT` 65536), and nothing past 49k has been measured at 48 wired. Extrapolating the 30k→49k slope (0.24 GB per 1k tokens) gives about 50 GB at 64k, over the 48 GB limit. So at 48 wired the 8-bit needs its context capped near 48k, or 52 wired for 64k (the `-w52` profile, which is still unmeasured). The 40 GB peak criterion in np-e2e's own verdicts belongs to the 36-wired tier and does not apply here.
+
+**Decide** (`nav-pilot alpha decide`, correct/n; errors count as wrong, and there were none):
+
+| Suite | Set | 8-bit | Occamy | optiq-64g (control) |
+|---|---|---|---|---|
+| sets | issue-type | 94/105 | 90/105 | 95/105 |
+| sets | aksel-kind | 53/65 | 50/65 | 51/65 |
+| sets | pr-motivation | 37/48 | 33/48 | 36/48 |
+| sets | **total** | **184/218** | 173/218 | 182/218 |
+| why | why-en / why-no | 47/48, 44/48 | 44/48, 46/48 | 45/48, 44/48 |
+| why | **total** | **91/96** | 90/96 | 89/96 |
+| limits | injection | 122/160 | **94/160** | 132/160 |
+| limits | length | 108/150 | 97/150 | 121/150 |
+| limits | lang-no | 120/152 | 112/152 | 118/152 |
+| limits | position | 161/180 | 167/180 | 164/180 |
+| limits | goapi | 29/40 | 32/40 | 28/40 |
+| limits | loop-near | 26/40 | 24/40 | 22/40 |
+| limits | lang-en, describes, options | 24/32, 37/40, 179/180 | 23/32, 37/40, 177/180 | 26/32, 37/40, 179/180 |
+| limits | **total** | 806/974 | 763/974 | **827/974** |
+
+**Verdict:**
+- The 8-bit is level with optiq on decide: +2 on the recipe sets, +2 on why, −21 on limits, mostly injection (−10) and length (−13). It passes every Copilot session.
+- Occamy is the weakest decider, and the gap is widest on claim injection: 94/160 against 122 and 132. It also fails a third of its Copilot sessions. The loop guard stopped three of them, two on a tool call missing its required arguments, and one R2 answer did not verify. Its frontier strength on decomposed edits (night 64-2) does not carry over to the autonomous Copilot path.
+- For decide, neither candidate is better than the default optiq, so neither gets a `recommended_for` key from this night.
