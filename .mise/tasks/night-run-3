@@ -392,7 +392,10 @@ for q in "${QUEUE[@]}"; do
     fi
     # A cloud step also stops when the API goes down under it; the samples done so far
     # stay in the result file, and at most the one in flight ran against a dead API.
-    if { [ "$kind" = cloud ] || [ "$kind" = hybrid ]; } && [ -z "$FAKE" ] && [ $(( $(date +%s) - probed )) -ge "$CLOUD_PROBE_SECONDS" ]; then
+    # Not during a hybrid step: the probe runs `alpha local off`, which would take the
+    # dispatch policy and the worker binding out of opencode's config under a running
+    # sample. bench-hybrid ends a step on its own when the cloud is down (attempt cap).
+    if [ "$kind" = cloud ] && [ -z "$FAKE" ] && [ $(( $(date +%s) - probed )) -ge "$CLOUD_PROBE_SECONDS" ]; then
       probed=$(date +%s)
       cloud_up || { say "  cloud unreachable (${CLOUD_WHY:-?}); killing the step's process tree"; unreachable=1; kill_tree "$CUR"; break; }
     fi
@@ -457,7 +460,7 @@ out.write_text("\n".join(L) + "\n")
 print(f"report: {out}")
 EOF
 
-results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' -o -name 'np-e2e-*.json' -o -name 'results-*.json' -o -name 'hybrid-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
+results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' -o -name 'np-e2e-*.json' -o -name 'results-*.json' -o -name 'hybrid-*.json' \) -not -path '*/.previous/*' -newer "$DIR/.run-start" 2>/dev/null | sort)
 if [ -n "$FAKE" ]; then
   say "(fake) would commit $REPORT and: $(echo $results)"
 else

@@ -1193,7 +1193,8 @@ def main():
                 doc.setdefault("preflight", [])
                 print(f"\n── rung {rung} · {arm} · {task['id']} "
                       f"({len(doc['samples'])}/{args.samples} already recorded)")
-                if len(doc["samples"]) >= args.samples:
+                doc.pop("stopped", None)   # a resume under a raised cap is not cut short
+                if sum(1 for x in doc["samples"] if x.get("valid")) >= args.samples:
                     print("   nothing to do")
                     continue
                 if doc["samples"]:
@@ -1224,10 +1225,12 @@ def main():
                               f"sample(s). Something is wrong with the arm, not the model.")
                         break
                     # bench-frontier's rule: checked before a sample, against what was
-                    # spent plus the median sample so far, so the next one cannot be the
-                    # one that crosses it. run_sample also kills a sample that does.
+                    # spent plus the median sample so far in this file, or the ledger's
+                    # last sample for a file's first. run_sample kills a sample that
+                    # crosses the cap anyway, so the overshoot is at most one opencode step.
                     costs = [x["cloud_cost_seen_usd"] for x in doc["samples"] if x.get("cloud_cost_seen_usd")]
-                    nxt = sorted(costs)[len(costs) // 2] if costs else 0.0
+                    nxt = sorted(costs)[len(costs) // 2] if costs else float(
+                        (read_cfg(ledger).get("last_sample_usd") if ledger else 0) or 0)
                     if args.cost_cap is not None and spent + nxt > args.cost_cap:
                         stop = f"cost cap ${args.cost_cap:.2f}: ${spent:.2f} spent, next sample ~${nxt:.2f}"
                         break
@@ -1237,7 +1240,8 @@ def main():
                     doc["samples"].append(rec)
                     spent += rec.get("cloud_cost_seen_usd") or 0.0
                     if ledger:
-                        ledger.write_text(json.dumps({"spent_usd": round(spent, 4), "cap_usd": args.cost_cap}) + "\n")
+                        ledger.write_text(json.dumps({"spent_usd": round(spent, 4), "cap_usd": args.cost_cap,
+                                                      "last_sample_usd": rec.get("cloud_cost_seen_usd")}) + "\n")
                     if (rec.get("invalid_reason") or "").startswith("cost cap"):
                         stop = rec["invalid_reason"]
                     if stop:

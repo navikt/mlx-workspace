@@ -271,9 +271,14 @@ def rows():
             add(classes.get(tid), worker, "delegate", cond,
                 tid, _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
         for key, (k, n) in seen.items():
-            if key in out:
-                out[key]["dispatch"][0] += k
-                out[key]["dispatch"][1] += n
+            if key[0] is None:
+                continue
+            # A cell the worker was never dispatched on still has a dispatch rate (0/n).
+            r = out.setdefault(key, {"class": key[0], "model": key[1], "mode": key[2], "condition": key[3],
+                                     "k": 0, "n": 0, "tasks": {tid}, "runs": set(), "files": {f.name},
+                                     "seconds": [], "cost_ratios": {}, "dispatch": [0, 0], "control": [0, 0]})
+            r["dispatch"][0] += k
+            r["dispatch"][1] += n
         # Cost ratio: dispatched median over control median, same target and task.
         # A hybrid arm that never dispatched measures nothing about delegation.
         ctrl = control_for(f, d)

@@ -187,10 +187,10 @@ but a worker the orchestrator rarely uses saves little whatever its ratio.
 *What n that needs* (computed with `diff_ci`): 64-3 gives 24 control samples and at most 24
 dispatched per worker (three cells × 8). At 24 against 24 the bound is −6 points when both arms
 pass every sample and −9 at 23/24 each, so it qualifies; at 22/24 each it is −11 and does not.
-At a 90% pass rate on both arms it takes about 40 a side. A worker dispatched on 16 of its 24
+At a 90% pass rate on both arms it takes about 33 a side. A worker dispatched on 16 of its 24
 samples, all passing, against 24/24 control, has a bound of −9. So 64-3 can qualify a worker
 that is as good as the control and near-perfect; anything short of that is "not shown", not
-"worse", and goes to 64-5 at n ≥ 40.
+"worse", and goes to 64-5 at n ≥ 33 a side.
 
 ### 5.3 Night order
 
