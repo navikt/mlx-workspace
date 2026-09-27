@@ -1,7 +1,7 @@
 # 64 GB tier, night 64-3: the hybrid arm (plan.md §5.1 suite 3, §5.3). Sonnet 5 orchestrates
 # through nav-pilot and opencode; a local worker takes the dispatched subtasks.
 # Before: mise run vram-set 48 (every profile here declares 48).
-# Run (the cap covers every step, invalid samples included; the cloud probes, ~$0.05 each, are outside it):
+# Run (the cap covers every sample, invalid ones included; the cloud probes, ~$0.05 each, ~$0.70 a night, are outside it):
 #   FRONTIER_COST_CAP=35 BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6 \
 #     mise run night-run-3 -- --part hybrid --queue reports/2026-09-26-64gb-tier/night-64-3.queue
 #
@@ -20,8 +20,11 @@
 # Laguna is left out: nav-pilot's mlx-lm 0.31.3 has no `laguna`.
 #
 # Timeouts: one step is one (cell, arm, worker), 8 valid samples. Expected ~3 min a sample
-# (copilot-mixed-mode research §3.2: ~3.2 h per 64) plus a server start; 120 min covers slow
-# samples and bench-hybrid's retries of invalid ones (at most 18 attempts at a 900 s cap).
+# (copilot-mixed-mode research §3.2: ~3.2 h per 64) plus a server start. 120 min covers 8
+# samples at up to ~14 min each, or a few invalid retries; it does not cover bench-hybrid's
+# worst case (18 attempts at a 900 s cap, 270 min). A step cut at 120 min keeps what it
+# recorded and resumes to 8 valid samples on a rerun of that line.
+# The cloud probe runs before each step (~$0.05, outside the cap), not during one.
 #
 # part  kind   target                        arm     samples rung timeout expected profile
 hybrid hybrid tasks                         control 8 3 120 30 qwen3.6-35b-a3b-optiq-64g
