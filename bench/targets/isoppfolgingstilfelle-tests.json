@@ -1,0 +1,9 @@
+{
+  "_note": "create-file cells for bench-hybrid: five new JUnit test files per session, each for functions named in the prompt and scored by the frontier's own check (it passes alone and kills every mutant of what it tests). Nothing here can be scripted: each file needs its function read and its boundaries chosen. The tasks are read from tasks_from (never copied: bench-frontier hashes that file). Cell 1 is the rungs the Qwen3.6 8-bit worker was measured on (r1-r3, 11/12 with retries on night 64-2); cell 2 adds the domain-object rungs 3-4.",
+  "tasks_from": "frontier/tasks-isoppfolgingstilfelle.json",
+  "combine": {
+    "cf5-a": ["cf-r1-a", "cf-r1-b", "cf-r2-a", "cf-r2-b", "cf-r3-b"],
+    "cf5-b": ["cf-r1-a", "cf-r3-a", "cf-r3-b", "cf-r4-a", "cf-r4-b"]
+  },
+  "rungs": {"1": "cf5-a", "2": "cf5-b"}
+}

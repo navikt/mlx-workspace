@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# mise description="Dispatch probe: bench-hybrid cells under np-serve, one ledger and cap, results into a .bench-logs directory. Usage: mise run dispatch-probe -- <probe-dir>"
+# Re-runs the same cells per nav-pilot build and per config setting, so a dispatch
+# level can be compared with the baseline on identical tasks. Everything is an
+# environment variable with the probe 5 value as its default:
+#
+#   BENCH_NAV_PILOT              binary          .bench-logs/bin/nav-pilot-main-7236795f
+#   PROBE_PROFILE                worker profile  qwen3.6-35b-a3b-8bit-64g
+#   BENCH_TARGET / PROBE_RUNGS   cells           isoppfolgingstilfelle-tests / "1 2"
+#   BENCH_NP_CONFIG_LINE         one extra nav-pilot config line, e.g. local_dispatch = "aggressive"
+#   BENCH_CAPABILITIES_OVERRIDE  bench-only capabilities JSON for the worker's manifest entry
+#   PROBE_CAP  PROBE_HYBRID_N  PROBE_CONTROL_N  PROBE_TIMEOUT   3.00, 3, 1 (0 skips it), 1800
+#   BENCH_HYBRID_TAG             default probe-<binary sha>-<config value or "base">
+#
+# It takes the queue lock through np-serve (BENCH_WAIT=1 queues behind a night) and
+# holds it only while the cells run. Results and logs are moved out of bench/, so
+# no probe file feeds bench-capabilities.
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 1
+
+if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
+  dir="${1:?usage: mise run dispatch-probe -- <probe-dir under .bench-logs>}"
+  mkdir -p "$dir" || exit 1
+  dir=$(cd "$dir" && pwd)
+  export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$PWD/.bench-logs/bin/nav-pilot-main-7236795f}"
+  export BENCH_TARGET="${BENCH_TARGET:-isoppfolgingstilfelle-tests}" BENCH_CLOUD_MODEL="${BENCH_CLOUD_MODEL:-claude-sonnet-5}"
+  sha=$(basename "$BENCH_NAV_PILOT" | sed -E 's/.*-([0-9a-f]{7,})$/\1/')
+  val=$(printf '%s' "${BENCH_NP_CONFIG_LINE:-}" | sed -E 's/^[^=]*=[[:space:]]*//; s/[^A-Za-z0-9.]+/-/g; s/^-|-$//g' | tr A-Z a-z)
+  export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}}"
+  marker="$dir/.started"; : > "$marker"
+  DISPATCH_PROBE_INNER="$dir" mise run np-serve -- "${PROBE_PROFILE:-qwen3.6-35b-a3b-8bit-64g}" "$PWD/.mise/tasks/dispatch-probe"
+  rc=$?
+  mv bench/hybrid-"$BENCH_TARGET"-"$BENCH_HYBRID_TAG"-* "$dir"/ 2>/dev/null
+  find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
+  rm -f "$marker"
+  echo "=== dispatch-probe: exit $rc · tag $BENCH_HYBRID_TAG · files in $dir"
+  exit "$rc"
+fi
+
+L="$DISPATCH_PROBE_INNER/ledger.json"
+cap="${PROBE_CAP:-3.00}"
+for rung in ${PROBE_RUNGS:-1 2}; do
+  for spec in "control ${PROBE_CONTROL_N:-1}" "hybrid ${PROBE_HYBRID_N:-3}"; do
+    set -- $spec
+    [ "$2" -gt 0 ] || continue
+    echo "### target=$BENCH_TARGET rung=$rung arm=$1 tag=$BENCH_HYBRID_TAG ${BENCH_NP_CONFIG_LINE:+config: $BENCH_NP_CONFIG_LINE}"
+    python3 .mise/tasks/bench-hybrid --rung "$rung" --arm "$1" --samples "$2" --cost-cap "$cap" \
+      --cost-ledger "$L" --timeout "${PROBE_TIMEOUT:-1800}"
+    python3 -c "import json,sys; d=json.load(open('$L')); sys.exit(1 if d['spent_usd']>=d['cap_usd']-0.05 else 0)" 2>/dev/null \
+      || { [ -f "$L" ] && { echo "ledger at cap, stopping"; exit 0; }; }
+  done
+done

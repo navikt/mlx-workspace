@@ -71,9 +71,18 @@ fi
 
 # source is pinned, not copied: the user's nais/pilot pakke has no local-worker, and
 # a bench must not measure whichever pakke the user last chose.
+# BENCH_NP_CONFIG_LINE: one more top-level `key = value` for this run only, such as a
+# dispatch level, so a probe can re-run its cells per setting on the same binary.
+extra_key=""
+if [ -n "${BENCH_NP_CONFIG_LINE:-}" ]; then
+  extra_key=$(printf '%s' "$BENCH_NP_CONFIG_LINE" | sed -nE 's/^([A-Za-z0-9_]+)[[:space:]]*=[[:space:]]*[^[:space:]].*$/\1/p')
+  [[ "$BENCH_NP_CONFIG_LINE" == *$'\n'* ]] && extra_key=""
+  [ -n "$extra_key" ] || { echo "✗ BENCH_NP_CONFIG_LINE must be one 'key = value' line"; exit 2; }
+fi
 { echo 'auto_update = false'; echo 'local_enabled = true'; echo 'local_autostart = false'
   echo "local_model = \"$MODEL\""; echo 'source = "navikt/copilot"'
-  grep -vE '^(auto_update|local_enabled|local_autostart|local_model|source)[[:space:]]*=' "$HOME/.nav-pilot/config.toml"
+  [ -n "$extra_key" ] && echo "$BENCH_NP_CONFIG_LINE"
+  grep -vE "^(auto_update|local_enabled|local_autostart|local_model|source${extra_key:+|$extra_key})[[:space:]]*=" "$HOME/.nav-pilot/config.toml"
 } > "$NAV_PILOT_CONFIG"
 
 # A binary with navikt/copilot #989 reads a manifest of our own through
