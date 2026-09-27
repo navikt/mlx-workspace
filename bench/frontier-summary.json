@@ -569,6 +569,323 @@
    ]
   },
   {
+   "class": "edit-multi-mechanical",
+   "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "decompose",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 102,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.567,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 138,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.524,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 294,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 188,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 3,
+    "first_break": 4
+   },
+   "fit": {
+    "d50": 477.1,
+    "d_bar": 6.8,
+    "beyond": false,
+    "a": 3.186,
+    "b": -0.358
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-decompose-20260927-030333.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "decompose",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.646,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 1,
+     "median_seconds": 340,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 1,
+     "n": 1,
+     "lb": 0.378,
+     "ub": 1.0,
+     "lb_monotone": 0.378,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a"
+     ],
+     "runs": 1,
+     "median_seconds": 232,
+     "median_cost_usd": 0.0,
+     "d": [
+      23
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 4,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-decompose-20260927-041015.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "retry2",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 17,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 44,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 2,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 2.0,
+    "beyond": true,
+    "a": 4.97,
+    "b": 0.221
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-retry2-20260927-043036.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "retry2",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.23,
+     "bar": 0.45,
+     "p_cloud": 0.5,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 233,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 0,
+     "n": 4,
+     "lb": 0.0,
+     "ub": 0.291,
+     "lb_monotone": 0.109,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 369,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.23,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 407,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 1,
+    "first_break": 2
+   },
+   "fit": {
+    "d50": 0.2,
+    "d_bar": null,
+    "beyond": false,
+    "a": -0.501,
+    "b": -0.225
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-retry2-20260927-062942.json"
+   ]
+  },
+  {
    "class": "edit-single",
    "model": "occamy-1.0-4bit-64g",
    "variant": "base",
@@ -693,6 +1010,113 @@
    },
    "files": [
     "frontier-occamy-1.0-4bit-64g-base-20260926-162712.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "base",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 67,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.294,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 66,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 1,
+     "n": 2,
+     "lb": 0.164,
+     "ub": 0.836,
+     "lb_monotone": 0.23,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 1,
+     "median_seconds": 270,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 1,
+     "n": 2,
+     "lb": 0.164,
+     "ub": 0.836,
+     "lb_monotone": 0.164,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 1,
+     "median_seconds": 141,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": 29.5,
+    "d_bar": null,
+    "beyond": false,
+    "a": 1.929,
+    "b": -0.395
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-base-20260927-081539.json"
    ]
   },
   {
@@ -951,6 +1375,860 @@
    },
    "files": [
     "frontier-occamy-1.0-4bit-64g-retry2-20260926-162405.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "occamy-1.0-4bit-64g",
+   "variant": "retry2",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.482,
+     "bar": 0.45,
+     "p_cloud": 0.5,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 365,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.524,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 161,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 328,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 1,
+    "first_break": 2
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 0.125,
+    "b": 0.698
+   },
+   "files": [
+    "frontier-occamy-1.0-4bit-64g-retry2-20260927-052414.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 64,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.758,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 53,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.66,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 91,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 91,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 4,
+    "first_break": 5
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 317.0,
+    "beyond": true,
+    "a": 2.989,
+    "b": -0.068
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-073630.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.528,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 18,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.482,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 23,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.403,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 48,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 41,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.23,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 55,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": 133.8,
+    "d_bar": null,
+    "beyond": false,
+    "a": 0.992,
+    "b": -0.14
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-075920.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "decompose",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.661,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 80,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.66,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 131,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 165,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 176,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 317.0,
+    "beyond": true,
+    "a": 0.564,
+    "b": 0.209
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-decompose-20260927-022427.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "decompose",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.758,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 33,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 39,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 60,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 64.0,
+    "beyond": true,
+    "a": -1.325,
+    "b": 1.147
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-decompose-20260927-035940.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "retry2",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 17,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 28,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 1,
+    "first_break": 2
+   },
+   "fit": {
+    "d50": 3.5,
+    "d_bar": 1.4,
+    "beyond": false,
+    "a": 2.976,
+    "b": -1.644
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-042617.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "retry2",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.45,
+     "p_cloud": 0.5,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 272,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 164,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 236,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 2,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": 5.5,
+    "d_bar": 2.3,
+    "beyond": false,
+    "a": 4.35,
+    "b": -1.776
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-043547.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "qwen3.6-35b-a3b-optiq-64g",
+   "variant": "decompose",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 1,
+     "n": 4,
+     "lb": 0.078,
+     "ub": 0.567,
+     "lb_monotone": 0.528,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 79,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 127,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.524,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r5-a",
+      "fm-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 86,
+     "median_cost_usd": 0.0,
+     "d": [
+      22,
+      29
+     ]
+    },
+    "6": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 167,
+     "median_cost_usd": 0.0,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 317.0,
+    "beyond": true,
+    "a": -2.315,
+    "b": 0.767
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-optiq-64g-decompose-20260927-015106.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "qwen3.6-35b-a3b-optiq-64g",
+   "variant": "decompose",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.66,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 31,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 35,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 2,
+     "n": 4,
+     "lb": 0.23,
+     "ub": 0.77,
+     "lb_monotone": 0.23,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 2,
+     "median_seconds": 23,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": 144.1,
+    "d_bar": null,
+    "beyond": false,
+    "a": 2.579,
+    "b": -0.36
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-optiq-64g-decompose-20260927-035211.json"
    ]
   },
   {
@@ -1811,6 +3089,131 @@
    },
    "files": [
     "frontier-qwen3.6-35b-a3b-optiq-cap900-20260925-193958.json"
+   ]
+  },
+  {
+   "class": "read-qa",
+   "model": "qwen3.6-35b-a3b-optiq",
+   "variant": "example",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 5,
+     "n": 8,
+     "lb": 0.403,
+     "ub": 0.805,
+     "lb_monotone": 0.593,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "rq-r1-a",
+      "rq-r1-b"
+     ],
+     "runs": 4,
+     "median_seconds": 6,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 7,
+     "n": 8,
+     "lb": 0.66,
+     "ub": 0.962,
+     "lb_monotone": 0.66,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "rq-r2-a",
+      "rq-r2-b"
+     ],
+     "runs": 4,
+     "median_seconds": 8,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 3,
+     "n": 8,
+     "lb": 0.195,
+     "ub": 0.597,
+     "lb_monotone": 0.465,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "rq-r3-a",
+      "rq-r3-b"
+     ],
+     "runs": 4,
+     "median_seconds": 6,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    },
+    "4": {
+     "k": 7,
+     "n": 8,
+     "lb": 0.66,
+     "ub": 0.962,
+     "lb_monotone": 0.66,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "rq-r4-a",
+      "rq-r4-b"
+     ],
+     "runs": 4,
+     "median_seconds": 10,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "5": {
+     "k": 4,
+     "n": 8,
+     "lb": 0.294,
+     "ub": 0.706,
+     "lb_monotone": 0.294,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "rq-r5-a",
+      "rq-r5-b"
+     ],
+     "runs": 4,
+     "median_seconds": 8,
+     "median_cost_usd": 0.0,
+     "d": [
+      10,
+      12
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 0.832,
+    "b": -0.117
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-optiq-example-20260927-084548.json"
    ]
   },
   {
