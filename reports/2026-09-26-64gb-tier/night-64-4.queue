@@ -1,0 +1,27 @@
+# 64 GB tier, night 64-4: np-e2e full and the decide sets at 48 GB wired (plan.md §5.1 suites 4-5, §5.3).
+# Wired: 48 GB (iogpu.wired_limit_mb 49152), checked by the launcher before it starts.
+# Run: BENCH_NAV_PILOT=.bench-logs/bin/nav-pilot-main-7236795f \
+#      mise run night-run-3 -- --part local --queue reports/2026-09-26-64gb-tier/night-64-4.queue
+# 7236795f has navikt/copilot #989 (bench manifest override, so Occamy is served) and #995
+# (headless launch). np-e2e and decide both hand nav-pilot a per-run manifest (#71 and this PR).
+#
+# The survivors are the Qwen3.6-35B-A3B 8-bit and Occamy 4-bit; optiq-64g is the decide control.
+# Laguna is out (nav-pilot's mlx-lm has no `laguna`, and 64-2 found it weak and slow); Qwen3.8
+# 8-bit is over the 48-wired fit line. The hybrid arm (64-3) is NO-GO and not run.
+# Left out: the backlog's 64 GB fit rows (8-bit at 64k, OptiQ-4bit at 131k); a later night.
+#
+# Expected minutes: np-e2e full took 18-22 min on the dense 27B, so ~15 on the MoE models;
+# decide per model from the 48 GB runs on optiq (limits 11 min, sets 4, why 2) plus the start.
+#
+# part kind   classes variant runs rungs timeout-min expected-min profile
+local  e2e    -       full    -    -     60          15           qwen3.6-35b-a3b-8bit-64g
+local  e2e    -       full    -    -     60          15           occamy-1.0-4bit-64g
+local  decide sets    -       -    -     45          8            qwen3.6-35b-a3b-8bit-64g
+local  decide sets    -       -    -     45          8            occamy-1.0-4bit-64g
+local  decide sets    -       -    -     45          8            qwen3.6-35b-a3b-optiq-64g
+local  decide why     -       -    -     30          5            qwen3.6-35b-a3b-8bit-64g
+local  decide why     -       -    -     30          5            occamy-1.0-4bit-64g
+local  decide why     -       -    -     30          5            qwen3.6-35b-a3b-optiq-64g
+local  decide limits  -       -    -     60          17           qwen3.6-35b-a3b-8bit-64g
+local  decide limits  -       -    -     60          17           occamy-1.0-4bit-64g
+local  decide limits  -       -    -     60          17           qwen3.6-35b-a3b-optiq-64g
