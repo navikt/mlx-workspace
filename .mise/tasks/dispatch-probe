@@ -14,7 +14,8 @@
 #                                "balanced aggressive": each gets its own tag and policy anchor
 #   BENCH_CAPABILITIES_OVERRIDE  bench-only capabilities JSON for the worker's manifest entry
 #   PROBE_CAP  PROBE_HYBRID_N  PROBE_CONTROL_N  PROBE_TIMEOUT   3.00, 3, 1 (0 skips it), 1800
-#   BENCH_HYBRID_TAG             default probe-<binary sha>-<config value or "base">
+#   BENCH_CLOUD_MODEL            orchestrator    claude-sonnet-5; any other goes into the tag
+#   BENCH_HYBRID_TAG             default probe-<binary sha>[-<cloud>]-<config value or "base">
 #
 # It takes the queue lock through np-serve (BENCH_WAIT=1 queues behind a night) and
 # holds it only while the cells run. Results and logs are moved out of bench/, so
@@ -29,6 +30,8 @@ if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
   export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$PWD/.bench-logs/bin/nav-pilot-main-7236795f}"
   export BENCH_TARGET="${BENCH_TARGET:-isoppfolgingstilfelle-tests}" BENCH_CLOUD_MODEL="${BENCH_CLOUD_MODEL:-claude-sonnet-5}"
   sha=$(basename "$BENCH_NAV_PILOT" | sed -E 's/.*-([0-9a-f]{7,})$/\1/')
+  # Another orchestrator is another treatment: its name goes in the tag, Sonnet 5's tags stay as they were.
+  [ "$BENCH_CLOUD_MODEL" = claude-sonnet-5 ] || sha="$sha-$(printf '%s' "$BENCH_CLOUD_MODEL" | tr -c 'A-Za-z0-9.' - | tr A-Z a-z)"
   val=$(printf '%s' "${BENCH_NP_CONFIG_LINE:-}" | sed -E 's/^[^=]*=[[:space:]]*//; s/[^A-Za-z0-9.]+/-/g; s/^-|-$//g' | tr A-Z a-z)
   caps=""
   if [ -n "${BENCH_CAPABILITIES_OVERRIDE:-}" ]; then

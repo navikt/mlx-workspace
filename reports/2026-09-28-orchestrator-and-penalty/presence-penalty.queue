@@ -1,0 +1,24 @@
+# presence_penalty A/B on the 64 GB candidate (presence-penalty.md). Arm A is the shipped-candidate
+# profile, arm B the same profile with presence_penalty 1.5 (the Qwen3.6-35B-A3B card's
+# non-thinking value). Nothing else differs; harness_sha is unchanged (profiles are not hashed).
+# Run by followups-2-launcher after the GPT-6 Sol run, or by hand:
+#   mise run night-run-3 -- --part local --queue reports/2026-09-28-orchestrator-and-penalty/presence-penalty.queue
+# Wired: 48 GB. ABBA, so drift over the night falls on both arms.
+# 1-8. create-file retry2, rungs 1 and 3 (the 8-bit's two timeouts, cf-r1-a and cf-r3-b), ABBA twice:
+#      n = 8 a task per arm, 16 a rung. ~4 min a sample on 64-5.
+# 9-12. edit-single base, rungs 3-5 (where its base failures are), ABBA once: n = 4 a task per arm.
+# Expected ~6 h (bench-frontier estimates 54 min a create-file block; 64-5 ran ~33).
+#
+# part kind   classes     variant runs rungs timeout-min expected-min profile
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g-pp15
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g-pp15
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g-pp15
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g-pp15
+local  lever  create-file retry2  2    1,3   90          40           qwen3.6-35b-a3b-8bit-64g
+local  base   edit-single base    2    3-5   30          11           qwen3.6-35b-a3b-8bit-64g
+local  base   edit-single base    2    3-5   30          11           qwen3.6-35b-a3b-8bit-64g-pp15
+local  base   edit-single base    2    3-5   30          11           qwen3.6-35b-a3b-8bit-64g-pp15
+local  base   edit-single base    2    3-5   30          11           qwen3.6-35b-a3b-8bit-64g

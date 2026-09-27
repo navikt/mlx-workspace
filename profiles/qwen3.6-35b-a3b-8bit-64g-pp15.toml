@@ -1,0 +1,28 @@
+[meta]
+name               = "Qwen 3.6 35B A3B 8bit, 64 GB tier, presence_penalty 1.5"
+released           = "2026-04"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "Sampling lever for the presence_penalty A/B (reports/2026-09-28-orchestrator-and-penalty/presence-penalty.md): identical to qwen3.6-35b-a3b-8bit-64g except MLX_PRESENCE_PENALTY = 1.5, the value the Qwen3.6-35B-A3B card gives for non-thinking mode. mlx_lm.server applies it over the last 20 tokens (presence_context_size), not the whole sequence as vLLM does. Bench-only, not in the manifest."
+model_vram_gb      = 38
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.6-35B-A3B-8bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "6442450944"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"
+# The one difference from qwen3.6-35b-a3b-8bit-64g. Reaches mlx_lm.server in the request
+# body through the generated opencode.json (opencode-init, PENALTY_PARAMS).
+MLX_PRESENCE_PENALTY       = "1.5"
