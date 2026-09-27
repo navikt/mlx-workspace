@@ -29,6 +29,7 @@ case "$b" in
       validate) echo '{"tasks": {}}' > "$B/frontier/validated-stub.json" ;;
       e2e) echo '{}' > "$B/np-e2e-$prof-$stamp.json" ;;
       ops) echo '{}' > "$B/results-$prof-$stamp.json" ;;
+      decide) echo '{}' > "$B/decide-$classes-$prof-$stamp.json" ;;
       base|lever) python3 - "$B/frontier-$prof-$variant-$stamp.json" "$classes" "$variant" "$prof" <<'P'
 import json, sys
 path, cls, variant, prof = sys.argv[1:]
@@ -98,9 +99,9 @@ printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-s
 NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"
 
 echo
-echo "### --queue with a profile per step and the e2e and ops kinds"
-printf 'local e2e - - - - 5 4 p1\nlocal ops - - - - 5 4 p2\nlocal base edit-single base 2 1-2 5 4 p2\n' > "$T/night-64.queue"
-NIGHT_DIR="$T/night64" NIGHT_REPORT="$T/night-64.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64.queue" > /dev/null
+echo "### --queue with a profile per step and the e2e, ops and decide kinds"
+printf 'local e2e - - - - 5 4 p1\nlocal ops - - - - 5 4 p2\nlocal base edit-single base 2 1-2 5 4 p2\nlocal decide sets - - - 5 4 p1\n' > "$T/night-64.queue"
+NIGHT_DIR="$T/night64" NIGHT_REPORT="$T/night-64.md" PLAN="" SET_BATTERY="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-64.queue" > /dev/null
 
 echo
 echo "### --queue with hybrid steps: a control and two workers, one tag, the worker in the file name"
@@ -134,8 +135,8 @@ check "--queue ran its two steps" \
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"n\"] + \"=\" + r[\"status\"] + \":\" + r[\"variant\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night2/steps.jsonl")" = "1=OK:base 2=OK:retry2" ]'
 check "--queue report is titled night 2 and has the replication verdict" \
   'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2 .* on edit-single" "$T/night-2.md"'
-check "per-step profiles: e2e and ops found their result files, base ran on p2" \
-  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2" ]'
+check "per-step profiles: e2e, ops and decide found their result files, base ran on p2" \
+  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2 decide=OK:p1" ]'
 check "hybrid steps found their own files, one per worker" \
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"status\"] + \":\" + r[\"profile\"] + \":\" + r[\"result\"].split(\"/\")[-1] for r in map(json.loads, open(sys.argv[1]))))" "$T/night643/steps.jsonl")" = "OK:p1:hybrid-np-t-s5-3-control.json OK:p1:hybrid-np-t-s5-p1-3-hybrid.json OK:p2:hybrid-np-t-s5-p2-3-hybrid.json" ]'
 check "hybrid report: a row per worker against the shared control, spend from the ledger" \

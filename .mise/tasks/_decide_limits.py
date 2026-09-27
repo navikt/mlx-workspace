@@ -57,6 +57,18 @@ MODELS = {
     "qwen3-4b": {"profile": None, "model": "mlx-community/Qwen3-4B-Instruct-2507-4bit", "prefill_tok_s": 3000,
                  "name": "Qwen3 4B Instruct 2507 4bit (decide-limits only)", "weights_gb": 3},
 }
+
+
+def spec_for(key):
+    """MODELS' entry, or one built from profiles/<key>.toml, so a night can name any profile
+    (the 64 GB tier's *-64g keys) without an entry here. The prefill rate is the MoE's guess,
+    used only by the dry run's estimate."""
+    if key in MODELS:
+        return MODELS[key]
+    import _profiles as P
+    return {"profile": key, "model": P.load(key)[1]["MLX_MODEL"], "prefill_tok_s": 1800}
+
+
 CALL_OVERHEAD_S = 0.35       # per call: 0.26-0.31 s measured against the fake server (process start,
                              # server lock, `ps` check, HTTP), plus a template and one decode step
 START_S = 90                 # alpha local start plus the cold call
@@ -185,7 +197,7 @@ def server_pid():
 
 
 def serve_and_run(key, np, stamp, backup, marker):
-    spec = MODELS[key]
+    spec = spec_for(key)
     cfg = ROOT / ".bench-logs" / f"decide-limits-{stamp}.config.toml"
     env = {**os.environ, "NAV_PILOT_CONFIG": str(cfg), "BENCH_NAV_PILOT": np}
     subprocess.run(["mise", "run", "server-stop"], capture_output=True)
@@ -198,14 +210,27 @@ def serve_and_run(key, np, stamp, backup, marker):
                               f'local_model = "{spec["model"]}"', *keep]) + "\n")
     if not backup.exists():
         shutil.copy2(CACHE, backup)
+    import _np_checks as C
+    # np-serve's way (#71): a binary with navikt/copilot #989 reads a per-run manifest file and
+    # may serve an unvetted publisher named in it (Occamy); older builds get the cache rewritten.
+    target = CACHE
+    if C.knows_override(np):
+        target = ROOT / ".bench-logs" / f"decide-limits-{stamp}-{key}.models.json"
+        target.unlink(missing_ok=True)
+        env["NAV_PILOT_BENCH_MANIFEST"] = str(target)
+        org = spec["model"].split("/")[0]
+        if org not in C.VETTED_ORGS:
+            env["NAV_PILOT_BENCH_ALLOW_ORGS"] = org
+    else:
+        env.pop("NAV_PILOT_BENCH_MANIFEST", None)
+        env.pop("NAV_PILOT_BENCH_ALLOW_ORGS", None)
     rc = 1
     try:
         try:
             if spec["profile"]:
-                import _np_checks as C
-                C.manifest(spec["profile"], str(CACHE))
+                C.manifest(spec["profile"], str(target))
             else:
-                add_entry(CACHE, spec, key)
+                add_entry(target, spec, key)
         except SystemExit as e:      # _np_checks.manifest exits on an ambiguous entry; skip this model only
             print(f"✗ {key}: manifest: {e}"); return 1
         marker.touch()
@@ -229,6 +254,8 @@ def serve_and_run(key, np, stamp, backup, marker):
         marker.unlink(missing_ok=True)
         shutil.copy2(backup, CACHE)
         cfg.unlink(missing_ok=True)
+        if target != CACHE:
+            target.unlink(missing_ok=True)
 
 
 def run_all(keys, stamp):
@@ -393,7 +420,7 @@ def estimate(keys):
     rows = {n: cases(n) for n in SETS}
     lines, total = [], 0
     for key in keys:
-        rate = MODELS[key]["prefill_tok_s"]
+        rate = spec_for(key)["prefill_tok_s"]
         secs = START_S
         for rs in rows.values():
             chars = sum(len(r["evidence"]) for r in rs)
@@ -417,7 +444,7 @@ def dry_run(keys):
     print(f"{'PASS' if ok else 'FAIL'}  nav-pilot {np} (commit {commit}; needs alpha decide --eval, navikt/copilot#949)")
     bad += not ok
     for key in keys:
-        spec = MODELS[key]
+        spec = spec_for(key)
         if spec["profile"] and not (ROOT / "profiles" / f"{spec['profile']}.toml").exists():
             print(f"FAIL  {key}: profile {spec['profile']} missing"); bad += 1
         w = weights_ok(spec["model"])
@@ -503,9 +530,9 @@ def main(a):
     keys = list(MODELS)
     if "--models" in a:
         keys = a[a.index("--models") + 1].split(",")
-        unknown = [k for k in keys if k not in MODELS]
+        unknown = [k for k in keys if k not in MODELS and not (ROOT / "profiles" / f"{k}.toml").exists()]
         if unknown:
-            sys.exit(f"unknown model key(s) {unknown}; known: {list(MODELS)}")
+            sys.exit(f"unknown model key(s) {unknown}; known: {list(MODELS)} or a profile key")
     if a[:1] == ["--dry-run"]:
         return 1 if dry_run(keys) else 0
     if a[:1] == ["all"]:
