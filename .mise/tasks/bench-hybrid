@@ -415,6 +415,16 @@ _target_path = ROOT / "bench" / f"{TARGET}.json"
 if not _target_path.exists():
     _target_path = ROOT / "bench" / "targets" / f"{TARGET}.json"
 CFG = json.loads(_target_path.read_text())
+if CFG.get("tasks_from"):
+    # A view onto another task set: the frontier's thread-arg rungs, 12-60 call sites
+    # each needing its own literal, so no search-and-replace makes them. The source
+    # file is bench-frontier's (hashed into its harness_sha), so it is read, never
+    # copied or edited, and each rung keeps the frontier's own verifier.
+    _src = json.loads((ROOT / "bench" / CFG["tasks_from"]).read_text())
+    RUNGS = {int(k): v for k, v in CFG["rungs"].items()}
+    CFG = {**_src, **CFG, "tasks": [t for t in _src["tasks"] if t["id"] in RUNGS.values()]}
+    if len(CFG["tasks"]) != len(RUNGS):
+        raise SystemExit(f"✗ {_target_path.name}: rungs {CFG['rungs']} name tasks {CFG['tasks_from']} does not have")
 JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
 # A workspace of its own. bench-cheap-ops owns workspaces/<profile>/, and two
 # harnesses resetting the same checkout is the failure that made three earlier
@@ -561,6 +571,21 @@ def build(target):
               env={"JAVA_HOME": str(JDK), "PATH": f"{JDK}/bin:" + os.environ.get("PATH", "")})
 
 
+def session_env():
+    """The sample's environment: the target's JDK, and mise kept inside the workspace.
+
+    cplt scopes a session to the clone and denies reads above it. mise shims walk up
+    from the cwd and hit ~/mlx-workspace/mise.toml and mise.local.toml, so `java` and
+    `gradle` died with "Operation not permitted" in both arms (probes 2 and 3), and
+    the machine-default JDK 27 fails this Gradle build anyway. The ceiling stops the
+    walk at workspaces/hybrid-bench; JAVA_HOME and PATH put JDK 21 ahead of the shim.
+    """
+    env = {**os.environ, "MISE_CEILING_PATHS": str(WS)}
+    if CFG.get("jdk"):
+        env.update(JAVA_HOME=str(JDK), PATH=f"{JDK}/bin:{env.get('PATH', '')}")
+    return env
+
+
 def changed():
     """Files touched, and lines changed INCLUDING untracked files.
 
@@ -616,6 +641,19 @@ def verify(task, reply):
     block that swallowed them."""
     kind = task["verify"]
     files, _ = changed()
+    if isinstance(kind, dict) and kind.get("kind") == "thread-arg":
+        # bench-frontier's verifier: one definition with `origin: String` first, every
+        # call site with its file's literal, nothing outside allowed_files, then compile.
+        import _frontier
+        paths = [l[3:].strip() for l in sh(["git", "status", "--porcelain", "-uall"], cwd=REPO).stdout.splitlines()
+                 if l.strip()]
+        if not paths:
+            return False, "no changes made (model did not edit anything)"
+        ok, note = _frontier.verify_thread_arg(REPO, kind, paths)
+        if not ok:
+            return False, note
+        r = build("compile")
+        return r.returncode == 0, note + (" and compiles" if r.returncode == 0 else ", compile failed")
     if kind in ("compile", "test", "rename") and not files:
         return False, "no changes made (model did not edit anything)"
     if kind == "compile":
@@ -851,7 +889,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
         fh.write(f"# argv: {argv!r}\n# cwd: {REPO}\n")
         fh.flush()
         proc = subprocess.Popen(argv, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT,
-                                start_new_session=True)
+                                start_new_session=True, env=session_env())
 
         def over_cap():
             # opencode prices every step as it finishes, so the running cost is in the
@@ -1047,6 +1085,29 @@ def check_pin():
     print("  ✓ workspace held to the pinned ref")
 
 
+def check_large():
+    """The large target resolves to the frontier's rungs, each over the dispatch rule's
+    size, and a session gets JDK 21 and a mise ceiling. Runs this file again under
+    BENCH_TARGET, because the target is read at import."""
+    code = ("import os,json,runpy; g=runpy.run_path(os.environ['ME'])\n"
+            "t={x['id']:x for x in g['CFG']['tasks']}; e=g['session_env']()\n"
+            "print(json.dumps([g['RUNGS'],{i:[x['verify']['kind'],sum(x['verify']['sites'].values()),"
+            "len(x['verify']['allowed_files'])] for i,x in t.items()},g['CFG']['ref'],e['JAVA_HOME'],"
+            "e['PATH'].split(':')[0],e['MISE_CEILING_PATHS']]))")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                       env={**os.environ, "BENCH_TARGET": "isoppfolgingstilfelle-large", "ME": __file__})
+    assert r.returncode == 0, r.stderr[-800:]
+    rungs, tasks, ref, jhome, first, ceiling = json.loads(r.stdout.strip().splitlines()[-1])
+    assert rungs == {"4": "fm-r4-a", "5": "fm-r5-a", "6": "fm-r6-a"}, rungs
+    assert set(tasks) == set(rungs.values()), tasks
+    for tid, (kind, sites, files) in tasks.items():
+        assert kind == "thread-arg" and (sites >= 10 or files >= 5), (tid, sites, files)
+    assert ref == json.loads((ROOT / "bench" / "tasks.json").read_text())["ref"], ref
+    assert jhome.endswith("temurin-21") and first == f"{jhome}/bin", (jhome, first)
+    assert ceiling == str(WS), ceiling
+    print(f"  ✓ large target: {', '.join(f'{t} {s} sites/{f} files' for t, (_, s, f) in tasks.items())}")
+
+
 def self_check():
     """One runnable check on the parsing, so a silent schema change is loud.
     Touches no GPU, no server and no config."""
@@ -1162,6 +1223,7 @@ def self_check():
     print(f"  ✓ output stem and policy hash (tag {TAG or 'unset'}, config {NP_CONFIG})")
 
     check_pin()
+    check_large()
 
     print("✓ self-check passed")
 
@@ -1267,7 +1329,7 @@ def main():
                     print(f"→ existing results backed up to {backup.relative_to(ROOT)}")
                 doc.update({"rung": rung, "arm": arm, "task": task["id"], "tag": TAG or None,
                             "target": TARGET, "worker_profile": profile_key if arm == "hybrid" else None,
-                            "kind": task["kind"], "verify": task["verify"],
+                            "kind": task.get("kind") or task.get("class"), "verify": task["verify"],
                             "prompt": task["prompt"]})
                 # Snapshots accumulate rather than overwrite: a resumed file must
                 # still say what the machine looked like for the samples already
