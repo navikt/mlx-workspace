@@ -7,6 +7,9 @@
                aksel-kind, pr-motivation, decide-limits length.
   consistency  on the yes/no sets (commit-explains-why EN+NO, pr-motivation, decide-limits describes and goapi),
                the default layout against (a) the options swapped and (b) the question negated, expect flipped.
+  order        (DECIDE_LAYOUT_PLAN=order, `mise run bench-decide-order`) the consistency arms only, plus (c) negated
+               and swapped at once: a 2×2 of negation × option order, which separates a pull towards the last
+               option from a prior that the text is fine (#61 could not).
 
   all [--models a,b] [--stamp S]   every model in turn, np-serve's server lifecycle from _decide_limits.
                                    `mise run bench-decide-layout` holds the queue lock around it.
@@ -53,6 +56,11 @@ EARLIER = {"why-en": "decide-why-{k}-20260925-072116.json", "why-no": "decide-wh
            "issue-type": "decide-sets-{k}-20260925-225356.json", "aksel-kind": "decide-sets-{k}-20260925-225356.json",
            "pr-motivation": "decide-sets-{k}-20260925-225356.json", "length": "decide-limits-{k}-20260925-014512.json"}
 LIMIT = int(os.environ.get("DECIDE_LAYOUT_LIMIT", "0"))   # --selftest only
+PLAN = os.environ.get("DECIDE_LAYOUT_PLAN", "layout")     # layout (#61) or order (the 2×2 only)
+STEM = "decide-order" if PLAN == "order" else "decide-layout"
+# The answer that says the text or diff is fine, per set, in the original question's terms: "yes" for the four
+# explains/describes questions, "no" (no exported identifier changed) for goapi.
+FINE_IS_YES = {"why-en": True, "why-no": True, "pr-motivation": True, "describes": True, "goapi": False}
 
 
 def cases(s):
@@ -65,8 +73,10 @@ def call(np, r, arm):
         os.environ["NAV_PILOT_DECIDE_LAYOUT"] = "options-first"
     elif arm == "swap":
         r = dict(r, options=r["options"][::-1])
-    elif arm == "negate":
+    elif arm in ("negate", "negate-swap"):
         r = dict(r, question=NEGATED[r["set"]], expect=next(o for o in r["options"] if o != r["expect"]))
+        if arm == "negate-swap":
+            r["options"] = r["options"][::-1]
     try:
         rec = DL.one(np, r)
     finally:
@@ -78,6 +88,8 @@ def call(np, r, arm):
 def plan():
     """(set, arm) blocks in run order. The two layouts alternate which goes first per set, so a slow drift in
     the server (or the cloud run next to it) does not land on one layout only."""
+    if PLAN == "order":
+        return [(s, a) for s in YESNO_SETS for a in ("default", "swap", "negate", "negate-swap")]
     out = []
     for i, s in enumerate(LAYOUT_SETS):
         out += [(s, "default"), (s, "options-first")][::1 if i % 2 == 0 else -1]
@@ -166,7 +178,55 @@ def summary(docs):
         L.append(f"| {d['key']} (`{d['model']}`) | `{Path(d['nav_pilot']).name}` | {len(d['cases'])} | "
                  f"{sum(c['error'] is not None for c in d['cases'])} | {d.get('seconds', '?')} s | "
                  f"{d.get('cold', {}).get('ms')} ms |")
-    L += ["", "## Layout: evidence first (default) against options first", "",
+    if any(c["arm"] == "options-first" for d in docs for c in d["cases"]):
+        L += layout_md(docs)
+    L += consistency_md(docs)
+    if any(c["arm"] == "negate-swap" for d in docs for c in d["cases"]):
+        L += order_md(docs)
+    return "\n".join(L) + "\n"
+
+
+def fine(c):
+    """Did this answer say the text is fine? Options are always (yes, no) in the original order, reversed by swap."""
+    yes_no = c["options"][::-1] if c["arm"] in ("swap", "negate-swap") else c["options"]
+    fine_label = yes_no[0] if FINE_IS_YES[c["set"]] != c["arm"].startswith("negate") else yes_no[1]
+    return c["choice"] == fine_label
+
+
+def order_md(docs):
+    """The 2×2: negation × which position the 'fine' answer sits in. A pull to the last option moves the fine
+    rate with its position at fixed negation; a fine-prior keeps it high at both positions."""
+    # (arm, where the fine answer sits): fine is A in default and negate-swap, B in swap and negate (goapi: reversed).
+    L = ["", "## Order × negation (2×2)", "",
+         "Fine = the answer says the text or diff is fine (goapi: no exported identifier changed). Last = picked "
+         "option B. Paired p is the exact two-sided McNemar on picking fine, same cases.", "",
+         "| Model | Sets | Arm | Question | Fine answer at | Correct | Picked fine | Picked last (B) |",
+         "|---|---|---|---|---|---|---|---|"]
+    for d in docs:
+        for label, ss in (("why, pr, describes", ("why-en", "why-no", "pr-motivation", "describes")), ("goapi", ("goapi",))):
+            by = {a: {(c["set"], c["id"]): c for c in d["cases"] if c["set"] in ss and c["arm"] == a}
+                  for a in ("default", "swap", "negate", "negate-swap")}
+            for a, q in (("default", "positive"), ("swap", "positive"), ("negate", "negated"), ("negate-swap", "negated")):
+                cs = list(by[a].values())
+                if not cs:
+                    continue
+                at = "A" if (a in ("default", "negate-swap")) == FINE_IS_YES[ss[0]] else "B"
+                L.append(f"| {d['key']} | {label} | {a} | {q} | {at} | {DL.cell(cs)} | "
+                         f"{sum(fine(c) for c in cs)}/{len(cs)} | {sum(c['choice'] == c['options'][1] for c in cs)}/{len(cs)} |")
+            first, last = ("A", "B") if FINE_IS_YES[ss[0]] else ("B", "A")   # where default/negate-swap put fine
+            for x, y, what in (("default", "swap", "position, positive question"), ("negate-swap", "negate", "position, negated question"),
+                               ("default", "negate-swap", f"negation, fine answer at {first}"),
+                               ("swap", "negate", f"negation, fine answer at {last}")):
+                ks = by[x].keys() & by[y].keys()
+                b = sum(fine(by[x][k]) and not fine(by[y][k]) for k in ks)
+                c = sum(fine(by[y][k]) and not fine(by[x][k]) for k in ks)
+                if ks:
+                    L.append(f"| {d['key']} | {label} | {x} vs {y} | {what} | | | b / c = {b} / {c}, p = {sign_p(b, c):.3f} | |")
+    return L
+
+
+def layout_md(docs):
+    L = ["", "## Layout: evidence first (default) against options first", "",
           "| Model | Set | n | default | options-first | b / c | Paired p | p50 / p95 ms default | options-first |",
           "|---|---|---|---|---|---|---|---|---|"]
     for d in docs:
@@ -217,7 +277,11 @@ def summary(docs):
             ids = new.keys() & old.keys()
             L.append(f"| {d['key']} | {s} | {sum(new[i]['choice'] == old[i]['choice'] for i in ids)}/{len(ids)} | "
                      f"`{f.name}` |")
-    L += ["", "## Consistency on the yes/no sets", "",
+    return L
+
+
+def consistency_md(docs):
+    L = ["", "## Consistency on the yes/no sets", "",
           "Agree = the variant gives the same answer (for `negate`, the opposite label). |Δp| = mean over cases of "
           "|p(yes | original) − p(no | negated)| (for `swap`, |p(yes) − p(yes | swapped)|); 0 is perfectly "
           "consistent. First-listed = share of answers that picked option A.", "",
@@ -259,7 +323,7 @@ def summary(docs):
             on = [k for k in ks if k not in oy]
             L.append(f"| {d['key']} | {v} | {len([k for k in flip if k in oy])}/{len(oy)} | "
                      f"{len([k for k in flip if k in on])}/{len(on)} | {sum(o[k]['ok'] for k in flip)}/{len(flip)} |")
-    return "\n".join(L) + "\n"
+    return L
 
 
 # ── lifecycle and selftest ─────────────────────────────────────────────────
@@ -294,6 +358,10 @@ def selftest():
             print(r.stdout[-1500:], r.stderr[-1500:])
             assert r.returncode == 0
             doc = json.loads(out.read_text())
+            r = subprocess.run([sys.executable, __file__, "run", "fake", str(t / "order.json")],
+                               env={**env, "DECIDE_LAYOUT_PLAN": "order"}, capture_output=True, text=True)
+            assert r.returncode == 0, r.stderr[-1500:]
+            order = json.loads((t / "order.json").read_text())
         finally:
             srv.kill()
     cs = doc["cases"]
@@ -302,6 +370,13 @@ def selftest():
     md = summary([doc])
     # Always-A: swap disagrees on every case, negate agrees exactly when the original said no (never, here).
     assert "| fake | **all** |" in md and "0/10 = 0.00" in md, md[md.find("## Consistency"):][:1200]
+    # Always-A under the 2×2: fine sits at A in default and negate-swap (goapi: in swap and negate).
+    oc = order["cases"]
+    assert len(oc) == 2 * 4 * len(YESNO_SETS) and {c["arm"] for c in oc} == {"default", "swap", "negate", "negate-swap"}
+    for c in oc:
+        assert fine(c) == ((c["arm"] in ("default", "negate-swap")) == FINE_IS_YES[c["set"]]), c
+    md = summary([order])
+    assert "## Order × negation (2×2)" in md and "## Layout" not in md and "| 8/8 |" in md, md[md.find("## Order"):]
     print("✓ _decide_layout selftest passed")
 
 
@@ -315,7 +390,7 @@ def main(a):
         backup, marker = Path(os.environ["LIMITS_BACKUP"]), Path(os.environ["LIMITS_MARKER"])
         # ponytail: _decide_sets' reuse of _decide_limits.serve_and_run (re-exec of this file, scratch output dir).
         DL.__file__ = __file__
-        DL.BENCH = ROOT / ".bench-logs" / f"decide-layout-{stamp}"
+        DL.BENCH = ROOT / ".bench-logs" / f"{STEM}-{stamp}"
         DL.BENCH.mkdir(parents=True, exist_ok=True)
         DL.MODEL_TIMEOUT_S = 150 * 60
         rcs, docs = {}, []
@@ -323,18 +398,18 @@ def main(a):
             while on_battery():
                 print("… on battery, waiting for AC before starting the server", flush=True)
                 time.sleep(60)
-            print(f"=== decide-layout {key} · nav-pilot {Path(np).name}", flush=True)
+            print(f"=== {STEM} {key} · nav-pilot {Path(np).name}", flush=True)
             rcs[key] = DL.serve_and_run(key, np, stamp, backup, marker)
             src = DL.BENCH / f"decide-limits-{key}-{stamp}.json"
             if src.exists():
-                dst = ROOT / "bench" / f"decide-layout-{key}-{stamp}.json"
+                dst = ROOT / "bench" / f"{STEM}-{key}-{stamp}.json"
                 shutil.move(src, dst)
                 docs.append(json.loads(dst.read_text()))
         if docs:
-            md = ROOT / "bench" / f"decide-layout-{stamp}.md"
+            md = ROOT / "bench" / f"{STEM}-{stamp}.md"
             md.write_text(summary(docs))
             print(f"✓ summary: {md}")
-        print(f"=== decide-layout done: {rcs}")
+        print(f"=== {STEM} done: {rcs}")
         return 0 if all(v == 0 for v in rcs.values()) else 1
     if len(a) == 3 and a[0] == "run":
         run(a[1], a[2]); return 0

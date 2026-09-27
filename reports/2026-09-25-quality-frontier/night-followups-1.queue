@@ -1,0 +1,38 @@
+# Follow-ups 1: the GPU items from reports/UNMEASURED.md that need no decision, after the 64 GB series.
+# Run: .bench-logs/bin/followups-1-launcher (waits for 64-4/64-5, the endpoint validation and the
+#      per-level dispatch probe), or by hand:
+#      mise run night-run-3 -- --part local --queue reports/2026-09-25-quality-frontier/night-followups-1.queue
+# Wired: 48 GB (the launcher checks it). optiq's profile declares 36, so the preflight WARNs; the
+# model and params are the same, and the profile key matches nights 1 and 2 so the cells pool.
+#
+# 1. decide order × negation (2×2), bench-decide-order: the #61 consistency arms plus negated and
+#    swapped at once, on the two #61 models, so a pull to the last option and a "text is fine"
+#    prior can be told apart (bench/decide-layout-results.md). 896 calls a model; #61's yes/no
+#    calls took 0.6 s (optiq) and 1.5 s (27B) plus ~0.35 s overhead each.
+# 2. read-qa `example` against base, ABBA twice, runs 2 over rungs 1-5: n = 16 a rung per arm.
+#    Replicates 26/40 (example, 27 Sep) against 18/40 (base, night 1) inside one night.
+#    ~7 s a sample, 20 samples a block.
+# 3. create-file retry2 against base at rung 1, night 2's ABBA again: 16 more samples per arm
+#    (8 per task), so the time ratio can be read per task (cf-r1-a, cf-r1-b), not only pooled.
+#    Night 2's steps took 7-12 min (base) and 13-27 min (retry2).
+# Expected ~3 h 30 min.
+#
+# part kind   classes     variant runs rungs timeout-min expected-min profile
+local  decide order       -       -    -     40          17           qwen3.6-35b-a3b-optiq
+local  decide order       -       -    -     70          31           qwen3.8-27b-optiq-4bit
+local  base   read-qa     base    2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  lever  read-qa     example 2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  lever  read-qa     example 2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  base   read-qa     base    2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  base   read-qa     base    2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  lever  read-qa     example 2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  lever  read-qa     example 2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  base   read-qa     base    2    1-5   15          4            qwen3.6-35b-a3b-optiq
+local  base   create-file base    2    1     40          11           qwen3.6-35b-a3b-optiq
+local  lever  create-file retry2  2    1     60          18           qwen3.6-35b-a3b-optiq
+local  lever  create-file retry2  2    1     60          18           qwen3.6-35b-a3b-optiq
+local  base   create-file base    2    1     40          11           qwen3.6-35b-a3b-optiq
+local  base   create-file base    2    1     40          11           qwen3.6-35b-a3b-optiq
+local  lever  create-file retry2  2    1     60          18           qwen3.6-35b-a3b-optiq
+local  lever  create-file retry2  2    1     60          18           qwen3.6-35b-a3b-optiq
+local  base   create-file base    2    1     40          11           qwen3.6-35b-a3b-optiq

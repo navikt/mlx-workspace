@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# mise description="nav-pilot alpha decide: option order × negation (2×2) on the yes/no sets, which separates a pull towards the last option from a prior that the text is fine (bench/decide-layout-results.md). Any main build. Usage: mise run bench-decide-order [-- --models optiq]"
+#
+# bench-decide-layout's consistency arms plus negated-and-swapped, under bench-decide-why's lock and cleanup.
+# Writes bench/decide-order-<model>-<stamp>.json and bench/decide-order-<stamp>.md.
+DECIDE_LAYOUT_PLAN=order DECIDE_PY=_decide_layout.py exec "$(dirname "$0")/bench-decide-why" "$@"

@@ -22,7 +22,7 @@
 #                  outside the frontier: e2e (bench-np-e2e --latency-only, the fit and speed
 #                  probe; variant `full` drops --latency-only for the whole run) and ops (one
 #                  bench-models cheap-ops pass); their other columns are -. A decide step runs
-#                  bench-decide-<set> for the 9th-column profile, set = classes (sets, why or
+#                  bench-decide-<set> for the 9th-column profile, set = classes (sets, why, order or
 #                  limits): `local decide sets - - - timeout expected PROFILE`.
 #                  A third, part `hybrid`, runs bench-hybrid under np-serve for the 9th-column
 #                  worker: `hybrid hybrid TARGET ARM SAMPLES RUNG timeout expected PROFILE`, one

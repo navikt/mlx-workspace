@@ -12,6 +12,9 @@ A dated folder holds one piece of work; start with the file named as its entry p
 grouped by the kind of test below, newest first within each group. A new report starts from
 [TEMPLATE.md](TEMPLATE.md).
 
+**Not measured yet:** [UNMEASURED.md](UNMEASURED.md) lists every open measurement, what it decides, and when it
+runs or what it waits for.
+
 ## In nav-pilot
 
 What shipped to nav-pilot users (navikt/copilot PRs, or the manifest in this repo), and the test
