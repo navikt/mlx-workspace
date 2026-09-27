@@ -10,7 +10,7 @@ T=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/night2-selftest.XXXXXX")" && pwd -P)
 mkdir -p "$T/bench" "$T/bin" "$T/stray/ws"
 ln -s /bin/sleep "$T/bin/opencode"
 echo '{"original": true}' > "$T/local-models.json"
-TAG=np-abc12345-sonnet46
+TAG=np-abc12345-sonnet5   # night-run-2 default orchestrator: claude-sonnet-5
 
 cat > "$T/bin/pmset" <<EOF
 #!/usr/bin/env bash
