@@ -2,7 +2,7 @@
 
 Written by `mise run night-run-3` from `.bench-logs/night3-20260927-174745/steps.jsonl` and the result files. The plan and the rules are [design.md](design.md). Local model(s) `qwen3.6-35b-a3b-8bit-64g`, `occamy-1.0-4bit-64g`, cloud reference `claude-sonnet-5`.
 
-- Started 2026-09-27T17:48:06+02:00, last step ended 2026-09-27T23:42:12+02:00.
+- Started 2026-09-27T17:48:06+02:00, last step ended 2026-09-28T00:47:28+02:00.
 - Cloud spend: $0 of the $80 cap.
 
 ## Steps
@@ -14,7 +14,7 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20260927-174745/steps
 | 3 | local | lever | create-file | retry2 | OK | 117 | `bench/frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-184118.json` |
 | 4 | local | lever | create-file | retry2 | OK | 113 | `bench/frontier-occamy-1.0-4bit-64g-retry2-20260927-203842.json` |
 | 5 | local | lever | edit-multi-mechanical | decompose | OK | 70 | `bench/frontier-qwen3.6-35b-a3b-8bit-64g-decompose-20260927-223139.json` |
-| 6 | local | lever | edit-multi-mechanical | decompose | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/occamy-1.0-4bit-64g holds gradle.properties, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 6 | local | lever | edit-multi-mechanical | decompose | OK (rerun with `--from 6` after moving a stray `gradle.properties` out of the workspace; first try FAIL at preflight) | 63 | `bench/frontier-occamy-1.0-4bit-64g-decompose-20260927-234406.json` |
 
 ## Frontier
 
@@ -28,7 +28,7 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 | laguna-xs-2.1-8bit-64g | base | local |  |  | 1/2 0.51 cloud | 2/2 0.65 not-yet | 1/1 0.38 not-yet |  | 0 / 0 | 3 | – | 29.0+ |
 | laguna-xs-2.1-8bit-64g | decompose | local |  |  | 4/4 0.71 not-yet | 3/4 0.57 cloud | 3/4 0.52 cloud | 3/4 0.43 cloud | 0 / 3 | 4 | 477.1 | 6.8 |
 | occamy-1.0-4bit-64g | base | local |  |  | 3/4 0.43 cloud | 2/4 0.29 cloud | 1/2 0.23 cloud | 1/2 0.16 cloud | 0 / 0 | 3 | 29.5 | – |
-| occamy-1.0-4bit-64g | decompose | local |  |  | 2/4 0.66 cloud | 4/4 0.83 not-yet | 4/4 0.71 not-yet | 3/4 0.43 cloud | 0 / 0 | 3 | – | – |
+| occamy-1.0-4bit-64g | decompose | local |  |  | 10/12 0.76 cloud | 11/12 0.76 not-yet | 8/12 0.62 cloud | 10/12 0.66 cloud | 0 / 0 | 3 | – | – |
 | qwen3.6-35b-a3b-8bit-64g | base | local |  |  | 4/4 0.83 not-yet | 4/4 0.76 not-yet | 3/4 0.66 cloud | 4/4 0.71 not-yet | 0 / 4 | 5 | – | 317.0+ |
 | qwen3.6-35b-a3b-8bit-64g | decompose | local |  |  | 10/12 0.77 cloud | 11/12 0.76 not-yet | 10/12 0.67 cloud | 9/12 0.57 cloud | 0 / 0 | 3 | – | – |
 | qwen3.6-35b-a3b-optiq | base | local | 10/10 0.86 trusted | 9/10 0.78 not-yet | 9/10 0.72 not-yet | 7/10 0.58 cloud | 6/10 0.56 cloud | 8/10 0.60 cloud | 1 / 3 | 4 | 1099.3 | – |
@@ -109,3 +109,4 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · example: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
