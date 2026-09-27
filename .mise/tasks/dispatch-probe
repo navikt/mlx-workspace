@@ -7,7 +7,11 @@
 #   BENCH_NAV_PILOT              binary          .bench-logs/bin/nav-pilot-main-7236795f
 #   PROBE_PROFILE                worker profile  qwen3.6-35b-a3b-8bit-64g
 #   BENCH_TARGET / PROBE_RUNGS   cells           isoppfolgingstilfelle-tests / "1 2"
+#   PROBE_CELLS                  cells across targets instead, "target:rung[:controls] ...",
+#                                controls overriding PROBE_CONTROL_N for that cell
 #   BENCH_NP_CONFIG_LINE         one extra nav-pilot config line, e.g. local_dispatch = "aggressive"
+#   PROBE_LEVELS                 local_dispatch levels to run in turn under one server, e.g.
+#                                "balanced aggressive": each gets its own tag and policy anchor
 #   BENCH_CAPABILITIES_OVERRIDE  bench-only capabilities JSON for the worker's manifest entry
 #   PROBE_CAP  PROBE_HYBRID_N  PROBE_CONTROL_N  PROBE_TIMEOUT   3.00, 3, 1 (0 skips it), 1800
 #   BENCH_HYBRID_TAG             default probe-<binary sha>-<config value or "base">
@@ -34,33 +38,54 @@ if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
   fi
   # The override is part of the treatment, so it is part of the tag: otherwise a run
   # with it and one without write, and resume into, the same files.
-  export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}$caps}"
+  export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}$caps}" PROBE_CAPS="$caps"
+  export PROBE_TAG_BASE="probe-$sha"
   marker="$dir/.started"; : > "$marker"
   collect() {
-    mv bench/hybrid-"$BENCH_TARGET"-"$BENCH_HYBRID_TAG"-* "$dir"/ 2>/dev/null
+    mv bench/hybrid-*-"$BENCH_HYBRID_TAG"-* bench/hybrid-*-"$PROBE_TAG_BASE"-*"$caps"-* "$dir"/ 2>/dev/null
     find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
     rm -f "$marker"
   }
   trap collect EXIT   # a killed run still leaves nothing in bench/
   DISPATCH_PROBE_INNER="$dir" mise run np-serve -- "${PROBE_PROFILE:-qwen3.6-35b-a3b-8bit-64g}" "$PWD/.mise/tasks/dispatch-probe"
   rc=$?
-  echo "=== dispatch-probe: exit $rc · tag $BENCH_HYBRID_TAG · files in $dir (sample logs moved there too)"
+  echo "=== dispatch-probe: exit $rc · tag ${PROBE_LEVELS:+$PROBE_TAG_BASE-<level>$caps, levels $PROBE_LEVELS}${PROBE_LEVELS:-$BENCH_HYBRID_TAG} · files in $dir (sample logs moved there too)"
   exit "$rc"
 fi
 
 L="$DISPATCH_PROBE_INNER/ledger.json"
 cap="${PROBE_CAP:-3.00}"
-rc=0
-for rung in ${PROBE_RUNGS:-1 2}; do
-  for spec in "control ${PROBE_CONTROL_N:-1}" "hybrid ${PROBE_HYBRID_N:-3}"; do
-    set -- $spec
-    [ "$2" -gt 0 ] || continue
-    echo "### target=$BENCH_TARGET rung=$rung arm=$1 tag=$BENCH_HYBRID_TAG ${BENCH_NP_CONFIG_LINE:+config: $BENCH_NP_CONFIG_LINE}"
-    python3 .mise/tasks/bench-hybrid --rung "$rung" --arm "$1" --samples "$2" --cost-cap "$cap" \
-      --cost-ledger "$L" --timeout "${PROBE_TIMEOUT:-1800}" || { rc=$?; echo "✗ bench-hybrid exited $rc, stopping"; exit "$rc"; }
-    [ -f "$L" ] || continue
-    at=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('cap' if d['spent_usd']>=d['cap_usd']-0.05 else 'ok')" "$L")
-    [ "$at" = ok ] || { [ "$at" = cap ] && { echo "ledger at cap, stopping"; exit 0; }; echo "✗ ledger $L unreadable"; exit 1; }
+cells="${PROBE_CELLS:-$(for r in ${PROBE_RUNGS:-1 2}; do printf '%s:%s ' "$BENCH_TARGET" "$r"; done)}"
+
+run_cells() {
+  for cell in $cells; do
+    IFS=: read -r target rung controls <<< "$cell"
+    for spec in "control ${controls:-${PROBE_CONTROL_N:-1}}" "hybrid ${PROBE_HYBRID_N:-3}"; do
+      set -- $spec
+      [ "$2" -gt 0 ] || continue
+      [ "$1" = control ] && [ -n "${controls_done:-}" ] && continue
+      echo "### target=$target rung=$rung arm=$1 tag=$BENCH_HYBRID_TAG ${BENCH_NP_CONFIG_LINE:+config: $BENCH_NP_CONFIG_LINE}"
+      BENCH_TARGET="$target" python3 .mise/tasks/bench-hybrid --rung "$rung" --arm "$1" --samples "$2" --cost-cap "$cap" \
+        --cost-ledger "$L" --timeout "${PROBE_TIMEOUT:-1800}" || { rc=$?; echo "✗ bench-hybrid exited $rc, stopping"; exit "$rc"; }
+      [ -f "$L" ] || continue
+      at=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('cap' if d['spent_usd']>=d['cap_usd']-0.05 else 'ok')" "$L")
+      [ "$at" = ok ] || { [ "$at" = cap ] && { echo "ledger at cap, stopping"; exit 0; }; echo "✗ ledger $L unreadable"; exit 1; }
+    done
   done
+}
+
+[ -n "${PROBE_LEVELS:-}" ] || { run_cells; exit 0; }
+# One server, several levels: nav-pilot reads local_dispatch at each launch, so the level
+# is swapped in the scratch config between them. First line, so no [table] can own it.
+# Each level is its own treatment: its own tag, and its own policy anchor. A control has
+# no worker and no gate, so it runs under the first level only.
+for level in $PROBE_LEVELS; do
+  case "$level" in off|conservative|balanced|aggressive) ;; *) echo "✗ PROBE_LEVELS: unknown level $level"; exit 2;; esac
+  export BENCH_NP_CONFIG_LINE="local_dispatch = \"$level\"" BENCH_HYBRID_TAG="$PROBE_TAG_BASE-$level$PROBE_CAPS"
+  { echo "$BENCH_NP_CONFIG_LINE"; grep -vE '^local_dispatch[[:space:]]*=' "$NAV_PILOT_CONFIG"; } > "$NAV_PILOT_CONFIG.new" \
+    && mv "$NAV_PILOT_CONFIG.new" "$NAV_PILOT_CONFIG" || exit 1
+  : > "$BENCH_HYBRID_POLICY_ANCHOR"
+  run_cells
+  controls_done=1
 done
-exit "$rc"
+exit 0

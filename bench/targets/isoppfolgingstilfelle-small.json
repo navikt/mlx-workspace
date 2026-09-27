@@ -1,0 +1,5 @@
+{
+  "_note": "False-positive cell for nav-pilot's dispatch gate (navikt/copilot #999): a small change the orchestrator should make itself. The frontier's fm-r3-c, read from tasks_from (never copied: bench-frontier hashes that file): a thread-arg edit, 6 call sites in 3 files, under every dispatch size (5 files or 10 call sites at balanced and aggressive, 10 or 20 at conservative). A refusal here is a false positive; the frontier's verify_thread_arg plus compileKotlin compileTestKotlin score it.",
+  "tasks_from": "frontier/tasks-isoppfolgingstilfelle.json",
+  "rungs": {"3": "fm-r3-c"}
+}
