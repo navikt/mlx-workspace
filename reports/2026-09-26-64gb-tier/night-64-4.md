@@ -123,15 +123,15 @@ The Frontier section above is the standing summary and does not cover this night
 
 | | Qwen3.6-35B-A3B 8-bit | Occamy 4-bit |
 |---|---|---|
-| E2E sessions verified | **12/12** | 8/12 |
+| E2E sessions verified | **12/12** | 8/12 (the three ended by the loop guard are `valid: false` in the file; 8 of the 9 valid ones verified) |
 | Failures | none | Three sessions stopped by the loop guard: two R2 on a `read_bash` call repeated without its required `shellId`/`delay`, and one M1 on a repeated `bash`. One R2 answer did not verify |
-| Peak footprint (whole run) | **46.18 GB**, at the 49k latency probe; at most 44.94 GB in sessions | 29.07 GB |
+| Peak footprint (whole run) | **46.18 GB**, at the 49k latency probe; at most 45.11 GB in sessions (M1) | 29.07 GB |
 | Peak by probe: 2k / 30k / 49k | 37.8 / 41.6 / 46.2 GB | 20.5 / 25.0 / 29.1 GB |
 | Cold TTFT at 30k, decode at 30k | 10.3 s, 73.4 tok/s | 11.1 s, 70.3 tok/s |
 | Classifier probe (legitimate scenarios over P(A) 0.9) | recompile, poll-pr-checks | poll-ci, poll-pr-checks |
 | Classifier p95 | 0.32 s | 0.24 s |
 
-The 8-bit peaks 0.18 GB over the plan's fit line (wired − 2 = 46 GB) at the 49k probe. It measured 45.6 GB on night 64-1, and nothing OOMed. At the 30k probe and in every e2e session it is 1–4 GB under the line. The profile allows 64k context (`MLX_OPENCODE_CONTEXT` 65536), and nothing past 49k has been measured at 48 wired. Extrapolating the 30k→49k slope (0.24 GB per 1k tokens) gives about 50 GB at 64k, over the 48 GB limit. So at 48 wired the 8-bit needs its context capped near 48k, or 52 wired for 64k (the `-w52` profile, which is still unmeasured). The 40 GB peak criterion in np-e2e's own verdicts belongs to the 36-wired tier and does not apply here.
+The 8-bit peaks 0.18 GB over the plan's fit line (wired − 2 = 46 GB) at the 49k probe. It measured 45.6 GB on night 64-1, and nothing OOMed. At the 30k probe and in every e2e session it is 0.9–4 GB under the line. The profile allows 64k context (`MLX_OPENCODE_CONTEXT` 65536), and nothing past 49k has been measured at 48 wired. Extrapolating the 30k→49k slope (0.24 GB per 1k tokens) gives about 50 GB at 64k, over the 48 GB limit. So at 48 wired the 8-bit needs its context capped near 48k, or 52 wired for 64k (the `-w52` profile, which is still unmeasured). The 40 GB peak criterion in np-e2e's own verdicts belongs to the 36-wired tier and does not apply here.
 
 **Decide** (`nav-pilot alpha decide`, correct/n; errors count as wrong, and there were none):
 
