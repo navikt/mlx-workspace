@@ -26,27 +26,41 @@ if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
   export BENCH_TARGET="${BENCH_TARGET:-isoppfolgingstilfelle-tests}" BENCH_CLOUD_MODEL="${BENCH_CLOUD_MODEL:-claude-sonnet-5}"
   sha=$(basename "$BENCH_NAV_PILOT" | sed -E 's/.*-([0-9a-f]{7,})$/\1/')
   val=$(printf '%s' "${BENCH_NP_CONFIG_LINE:-}" | sed -E 's/^[^=]*=[[:space:]]*//; s/[^A-Za-z0-9.]+/-/g; s/^-|-$//g' | tr A-Z a-z)
-  export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}}"
+  caps=""
+  if [ -n "${BENCH_CAPABILITIES_OVERRIDE:-}" ]; then
+    [ -f "$BENCH_CAPABILITIES_OVERRIDE" ] || { echo "✗ no file $BENCH_CAPABILITIES_OVERRIDE"; exit 2; }
+    BENCH_CAPABILITIES_OVERRIDE="$(cd "$(dirname "$BENCH_CAPABILITIES_OVERRIDE")" && pwd)/$(basename "$BENCH_CAPABILITIES_OVERRIDE")"
+    export BENCH_CAPABILITIES_OVERRIDE; caps="-caps"
+  fi
+  # The override is part of the treatment, so it is part of the tag: otherwise a run
+  # with it and one without write, and resume into, the same files.
+  export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}$caps}"
   marker="$dir/.started"; : > "$marker"
+  collect() {
+    mv bench/hybrid-"$BENCH_TARGET"-"$BENCH_HYBRID_TAG"-* "$dir"/ 2>/dev/null
+    find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
+    rm -f "$marker"
+  }
+  trap collect EXIT   # a killed run still leaves nothing in bench/
   DISPATCH_PROBE_INNER="$dir" mise run np-serve -- "${PROBE_PROFILE:-qwen3.6-35b-a3b-8bit-64g}" "$PWD/.mise/tasks/dispatch-probe"
   rc=$?
-  mv bench/hybrid-"$BENCH_TARGET"-"$BENCH_HYBRID_TAG"-* "$dir"/ 2>/dev/null
-  find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
-  rm -f "$marker"
-  echo "=== dispatch-probe: exit $rc · tag $BENCH_HYBRID_TAG · files in $dir"
+  echo "=== dispatch-probe: exit $rc · tag $BENCH_HYBRID_TAG · files in $dir (sample logs moved there too)"
   exit "$rc"
 fi
 
 L="$DISPATCH_PROBE_INNER/ledger.json"
 cap="${PROBE_CAP:-3.00}"
+rc=0
 for rung in ${PROBE_RUNGS:-1 2}; do
   for spec in "control ${PROBE_CONTROL_N:-1}" "hybrid ${PROBE_HYBRID_N:-3}"; do
     set -- $spec
     [ "$2" -gt 0 ] || continue
     echo "### target=$BENCH_TARGET rung=$rung arm=$1 tag=$BENCH_HYBRID_TAG ${BENCH_NP_CONFIG_LINE:+config: $BENCH_NP_CONFIG_LINE}"
     python3 .mise/tasks/bench-hybrid --rung "$rung" --arm "$1" --samples "$2" --cost-cap "$cap" \
-      --cost-ledger "$L" --timeout "${PROBE_TIMEOUT:-1800}"
-    python3 -c "import json,sys; d=json.load(open('$L')); sys.exit(1 if d['spent_usd']>=d['cap_usd']-0.05 else 0)" 2>/dev/null \
-      || { [ -f "$L" ] && { echo "ledger at cap, stopping"; exit 0; }; }
+      --cost-ledger "$L" --timeout "${PROBE_TIMEOUT:-1800}" || { rc=$?; echo "✗ bench-hybrid exited $rc, stopping"; exit "$rc"; }
+    [ -f "$L" ] || continue
+    at=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('cap' if d['spent_usd']>=d['cap_usd']-0.05 else 'ok')" "$L")
+    [ "$at" = ok ] || { [ "$at" = cap ] && { echo "ledger at cap, stopping"; exit 0; }; echo "✗ ledger $L unreadable"; exit 1; }
   done
 done
+exit "$rc"
