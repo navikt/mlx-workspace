@@ -710,8 +710,13 @@ def verify(task, reply):
         why = new_tests_scope(kind, paths)
         if why:
             return False, why
-        # bench-frontier's own check per file: it compiles, passes alone, and every
-        # mutant of what it tests turns it red.
+        # One compile first: the test source set builds as a whole, so a broken file
+        # would otherwise show as five failing ones.
+        r = build("compile")
+        if r.returncode != 0:
+            return False, "test sources do not compile: " + ((r.stdout + r.stderr).strip().splitlines() or ["?"])[-1][:160]
+        # bench-frontier's own check per file: it passes alone, and every mutant of
+        # what it tests turns it red.
         bf = frontier_module()
         bad = []
         for v in kind["parts"]:
@@ -997,9 +1002,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     instructions_after = instruction_inventory()
     policy = policy_record() if arm == "hybrid" else None
     if policy:  # the text itself, once per sha: a hash cannot be read back
-        keep = log_dir / f"policy-{policy['sha256'][:8]}.md"
-        if not keep.exists():
-            shutil.copyfile(POLICY_FILE, keep)
+        shutil.copyfile(POLICY_FILE, log_dir / f"policy-{policy['sha256'][:8]}.md")
     local_calls = local_calls_since(offset)
     files, lines = changed()
 

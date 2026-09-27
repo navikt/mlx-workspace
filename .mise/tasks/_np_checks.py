@@ -74,10 +74,25 @@ def manifest(profile, cache):
         # which a SIGKILL would leave carrying it. bench-hybrid records the file.
         if Path(cache).resolve() == (Path.home() / ".nav-pilot" / "local-models.json").resolve():
             raise SystemExit("✗ BENCH_CAPABILITIES_OVERRIDE needs a binary with NAV_PILOT_BENCH_MANIFEST")
-        hits[0]["capabilities"] = {"classes": json.loads(Path(caps).read_text())["classes"]}
+        # Merged over the shipped block (the entry's own, else the default entry's), so
+        # the policy has the shipped shape and differs only in the classes overridden.
+        # A typo would read as "not trusted" in nav-pilot and still be recorded as the
+        # override, so class ids and verdicts are checked here.
+        over = json.loads(Path(caps).read_text())["classes"]
+        bad = [f"{c}: {v}" for c, v in over.items() if c not in TASK_CLASSES
+               or not set(v) <= {"delegate", "local"} or not set(v.values()) <= VERDICTS]
+        if bad:
+            raise SystemExit(f"✗ {caps}: unknown class or verdict: {'; '.join(bad)}")
+        base = (hits[0].get("capabilities") or m["models"][0].get("capabilities") or {}).get("classes", {})
+        hits[0]["capabilities"] = {"classes": {**base, **{c: {**base.get(c, {}), **v} for c, v in over.items()}}}
         print(f"⚠ bench-only capabilities for {hits[0]['key']} from {caps}")
     Path(cache).write_text(json.dumps(m, indent=2) + "\n")
     print(f"✓ manifest entry {hits[0]['key']} now carries {profile}'s params")
+
+
+# nav-pilot's allow-lists (internal/local/capabilities.go): anything else is ignored there.
+TASK_CLASSES = ("read-qa", "edit-single", "edit-multi-mechanical", "create-file", "debug")
+VERDICTS = {"trusted", "not-yet", "cloud"}
 
 
 def bench_entry(template, profile, meta, params):
@@ -695,8 +710,18 @@ def selftest():
         try:
             with contextlib.redirect_stdout(io.StringIO()):
                 manifest("occamy-1.0-4bit-64g", str(f))
-            assert json.loads(f.read_text())["models"][-1]["capabilities"] == \
-                {"classes": {"create-file": {"delegate": "trusted"}}}
+            got = json.loads(f.read_text())["models"][-1]["capabilities"]["classes"]
+            shipped = m[0]["capabilities"]["classes"]
+            assert got["create-file"] == {**shipped["create-file"], "delegate": "trusted"}, got
+            assert {c: v for c, v in got.items() if c != "create-file"} == \
+                {c: v for c, v in shipped.items() if c != "create-file"}, got
+            o.write_text(json.dumps({"classes": {"create_file": {"delegate": "Trusted"}}}))
+            try:
+                manifest("occamy-1.0-4bit-64g", str(f))
+                raise AssertionError("a mistyped override was accepted")
+            except SystemExit:
+                pass
+            o.write_text(json.dumps({"classes": {"create-file": {"delegate": "trusted"}}}))
             try:
                 manifest("occamy-1.0-4bit-64g", str(Path.home() / ".nav-pilot" / "local-models.json"))
                 raise AssertionError("an override was written into nav-pilot's own cache")

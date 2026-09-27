@@ -240,7 +240,12 @@ def rows():
     # opencode hybrid (delegate) and control (cloud).
     for f in sorted(BENCH.glob("hybrid-*.json")):
         d = json.loads(f.read_text())
-        valid = [s for s in d.get("samples", []) if s.get("valid")]
+        # A bench-only capabilities override is a probe's assumption about the worker:
+        # its samples never count as evidence for a verdict.
+        pre = d.get("preflight") or []
+        valid = [s for s in d.get("samples", []) if s.get("valid")
+                 and not (pre[s["preflight"]] if isinstance(s.get("preflight"), int) and s["preflight"] < len(pre)
+                          else {}).get("bench_capabilities_override")]
         tid = d.get("task")
         if d.get("arm") == "control":
             for i, s in enumerate(valid):
