@@ -20,7 +20,12 @@ back. It is not an autonomous agent. That decides what we select on and what we 
 
 ## What shipped
 
-Nothing. This is a plan.
+The plan itself shipped nothing. The nights it laid out ran from 26 to 28 September:
+[night-64-1](night-64-1.md), [night-64-2](night-64-2.md), 64-3 (NO-GO: Sonnet 5 does not
+dispatch, pending-tasks §8.8), [night-64-4](night-64-4.md) and [night-64-5](night-64-5.md).
+The Qwen3.6-35B-A3B 8-bit won the tier over Occamy 4-bit. Its manifest entry is proposed in
+#109 and waits on the user's decision. The 64-3 decision rule (§5.2) was never applied: there was
+no dispatched population, so the choice rests on the frontier, e2e and decide suites.
 
 ## 1. The memory budget on 64 GB
 
@@ -205,8 +210,8 @@ the frontier variants below reuse whatever it concludes.
 | 64-1 | 48 (52 on retry) | Fit and smoke: `--latency-only` for all five profiles (the four plus optiq at 48 wired as the control), then cheap-ops ×2 each. Stop a profile on OOM at 52 | ≈ 7.5 h / $0 |
 | 64-2 | 48 | Directed-worker frontier for the survivors plus optiq: `decompose` on edit-multi r3–r6 and edit-single r3–r5, `retry2` on create-file r1–r3 and edit-single r1–r2, 2 runs × 2 tasks a rung; base only where no night-1 base exists | ≈ 7–8 h / $0 |
 | 64-3 | 48 | Hybrid arm, Sonnet 5 orchestrator ([night-64-3.queue](night-64-3.queue)): the control once and optiq-64g as the control worker on the trusted cell (tasks:3, frontend-familie-tilbake:3, spring-ia:6, × 8), then the Qwen3.6 8-bit and Occamy on the same cells, hybrid arm only against the same control. tasks:6 (D2) is retired in `bench/tasks.json` and dropped, so edit-multi's D2 evidence rests on spring-ia:6 alone | ≈ 6.5 h / capped at $35 (`FRONTIER_COST_CAP`, one ledger; see pending-tasks §8.8 for the pilot's estimate) |
-| 64-4 | 48 | np-e2e full for survivors on nav-pilot's runtime; decide-limits and decide sets for survivors; the backlog's 64 GB fit rows (8-bit cold/warm at 64k, OptiQ-4bit at 131k) | ≈ 5 h / $0 |
-| 64-5 | 48 | Replication of whatever moved a frontier or won 64-3, at n ≥ 8 per arm (design §7 rule 2); one balloon run per survivor (§7) | ≈ 6 h / ≈ $10 |
+| 64-4 | 48 | np-e2e full for survivors on nav-pilot's runtime; decide-limits and decide sets for survivors; the backlog's 64 GB fit rows (8-bit cold/warm at 64k, OptiQ-4bit at 131k). **Ran 27 Sep** without the fit rows: 1 h 10 ([night-64-4.md](night-64-4.md)) | ≈ 5 h / $0 |
+| 64-5 | 48 | Replication of whatever moved a frontier or won 64-3, at n ≥ 8 per arm (design §7 rule 2); one balloon run per survivor (§7). **Ran 27–28 Sep**: the three cells between the 8-bit and Occamy, 8 per rung, no balloon run; 7 h 0 ([night-64-5.md](night-64-5.md)) | ≈ 6 h / ≈ $10 |
 
 **Occamy through nav-pilot needs the new binary.** nav-pilot refuses `Accio-Lab` weights, so on
 day 64-0 its np-e2e step fell back to optiq and stopped on the model mismatch. navikt/copilot
