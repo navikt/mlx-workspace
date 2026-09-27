@@ -67,6 +67,15 @@ def manifest(profile, cache):
     if len(hits) != 1:
         raise SystemExit(f"✗ {len(hits)} manifest entries serve {params['MLX_MODEL']}; need exactly 1")
     hits[0]["params"] = {k: v for k, v in params.items() if k.startswith("MLX_")}
+    caps = os.environ.get("BENCH_CAPABILITIES_OVERRIDE")
+    if caps:
+        # Bench-only: a probe's assumption about the worker, never a measured verdict,
+        # so it goes into the run's own manifest and never into nav-pilot's cache,
+        # which a SIGKILL would leave carrying it. bench-hybrid records the file.
+        if Path(cache).resolve() == (Path.home() / ".nav-pilot" / "local-models.json").resolve():
+            raise SystemExit("✗ BENCH_CAPABILITIES_OVERRIDE needs a binary with NAV_PILOT_BENCH_MANIFEST")
+        hits[0]["capabilities"] = {"classes": json.loads(Path(caps).read_text())["classes"]}
+        print(f"⚠ bench-only capabilities for {hits[0]['key']} from {caps}")
     Path(cache).write_text(json.dumps(m, indent=2) + "\n")
     print(f"✓ manifest entry {hits[0]['key']} now carries {profile}'s params")
 
@@ -680,6 +689,21 @@ def selftest():
         assert "capabilities" not in occ and "recommended_for" not in occ and occ["expect"] == "", occ
         assert occ["wired_limit_gb"] == 48 and occ["min_ram_gb"] == 64 and occ["key"] == "occamy-1.0-4bit-64g", occ
         assert m[0].get("capabilities"), "the template entry itself must not be stripped"
+        o = Path(d) / "caps.json"
+        o.write_text(json.dumps({"_label": "probe", "classes": {"create-file": {"delegate": "trusted"}}}))
+        os.environ["BENCH_CAPABILITIES_OVERRIDE"] = str(o)
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                manifest("occamy-1.0-4bit-64g", str(f))
+            assert json.loads(f.read_text())["models"][-1]["capabilities"] == \
+                {"classes": {"create-file": {"delegate": "trusted"}}}
+            try:
+                manifest("occamy-1.0-4bit-64g", str(Path.home() / ".nav-pilot" / "local-models.json"))
+                raise AssertionError("an override was written into nav-pilot's own cache")
+            except SystemExit:
+                pass
+        finally:
+            del os.environ["BENCH_CAPABILITIES_OVERRIDE"]
     print("✓ selftest passed")
 
 

@@ -407,6 +407,24 @@ def numstat_lines(numstat):
 
 # ── target repository ─────────────────────────────────────────────────────────
 
+def new_tests_task(tid, parts):
+    """The frontier's create-file tasks `parts` as one prompt and one verify block."""
+    import _frontier as F
+    vs = [p["verify"] for p in parts]
+    if any(v["kind"] != "new-test" for v in vs):
+        raise SystemExit(f"✗ {tid}: combine takes create-file (new-test) tasks only")
+    items = "\n".join(f"- {v['path']} (class {v['test_class'].rsplit('.', 1)[-1]}): test "
+                      + "; ".join(f"{f} in {F._WHERE[f]}" for f in v["functions"]) for v in vs)
+    prompt = (f"Write {len(vs)} new JUnit 5 test files, all in package no.nav.syfo.frontier, each with one "
+              f"test class named after its file:\n{items}\n"
+              "In every file, cover each function's edge and boundary cases, so that a wrong comparison or an "
+              "off-by-one in it would make a test fail. Match the style of the existing tests under "
+              "src/test/kotlin; you may use the helpers in src/test/kotlin/testhelper. Every new test class "
+              "must pass. Do not change any other file.")
+    return {"id": tid, "class": "create-file", "family": "new-test", "parts": [p["id"] for p in parts],
+            "prompt": prompt, "verify": {"kind": "new-tests", "parts": vs}}
+
+
 # The target repository and its tasks. A flag rather than a file to swap, because
 # swapping bench/tasks.json mid-run has twice produced results attributed to the
 # wrong repository, and once committed the half-swapped file.
@@ -420,11 +438,18 @@ if CFG.get("tasks_from"):
     # each needing its own literal, so no search-and-replace makes them. The source
     # file is bench-frontier's (hashed into its harness_sha), so it is read, never
     # copied or edited, and each rung keeps the frontier's own verifier.
+    # `combine` joins several of its create-file tasks into one session: N new test
+    # files, each needing the function it tests read and understood, so no script
+    # writes them. Each file keeps its own frontier verifier and mutants.
     _src = json.loads((ROOT / "bench" / CFG["tasks_from"]).read_text())
     RUNGS = {int(k): v for k, v in CFG["rungs"].items()}
-    CFG = {**_src, **CFG, "tasks": [t for t in _src["tasks"] if t["id"] in RUNGS.values()]}
-    if len(CFG["tasks"]) != len(RUNGS):
-        raise SystemExit(f"✗ {_target_path.name}: rungs {CFG['rungs']} name tasks {CFG['tasks_from']} does not have")
+    _by = {t["id"]: t for t in _src["tasks"]}
+    _combine = CFG.get("combine") or {}
+    _missing = [i for v in RUNGS.values() for i in _combine.get(v, [v]) if i not in _by]
+    if _missing:
+        raise SystemExit(f"✗ {_target_path.name}: {CFG['tasks_from']} has no task {', '.join(_missing)}")
+    CFG = {**_src, **CFG, "tasks": [new_tests_task(v, [_by[i] for i in _combine[v]]) if v in _combine else _by[v]
+                                    for v in RUNGS.values()]}
 JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
 # A workspace of its own. bench-cheap-ops owns workspaces/<profile>/, and two
 # harnesses resetting the same checkout is the failure that made three earlier
@@ -635,6 +660,31 @@ def baseline_failures():
     return failed
 
 
+def new_tests_scope(v, paths):
+    """Why the changed paths are not exactly the asked-for test files, or None."""
+    want = {p["path"] for p in v["parts"]}
+    if not paths:
+        return "no changes made (model did not edit anything)"
+    stray, missing = sorted(set(paths) - want), sorted(want - set(paths))
+    if stray:
+        return f"changed files outside the task: {', '.join(stray[:3])}"
+    if missing:
+        return f"{len(missing)} of {len(want)} test files missing: {', '.join(Path(m).stem for m in missing[:3])}"
+    return None
+
+
+def frontier_module():
+    """bench-frontier, loaded read-only for its create-file verifier. It is hashed into
+    the frontier's harness_sha, so it is imported, never copied or edited."""
+    import importlib.machinery
+    import importlib.util
+    spec = importlib.util.spec_from_loader(
+        "bench_frontier", importlib.machinery.SourceFileLoader("bench_frontier", str(Path(__file__).with_name("bench-frontier"))))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def verify(task, reply):
     """Run the target's own checks. Never the model's claim that they passed: one
     earlier submission reported 20/20 passing with eight assertions inside a catch
@@ -654,6 +704,22 @@ def verify(task, reply):
             return False, note
         r = build("compile")
         return r.returncode == 0, note + (" and compiles" if r.returncode == 0 else ", compile failed")
+    if isinstance(kind, dict) and kind.get("kind") == "new-tests":
+        paths = [l[3:].strip() for l in sh(["git", "status", "--porcelain", "-uall"], cwd=REPO).stdout.splitlines()
+                 if l.strip()]
+        why = new_tests_scope(kind, paths)
+        if why:
+            return False, why
+        # bench-frontier's own check per file: it compiles, passes alone, and every
+        # mutant of what it tests turns it red.
+        bf = frontier_module()
+        bad = []
+        for v in kind["parts"]:
+            ok, note, _ = bf.verify_new_test(REPO, CFG, v, [v["path"]])
+            if not ok:
+                bad.append(f"{Path(v['path']).stem}: {note}")
+        n = len(kind["parts"])
+        return not bad, f"{n - len(bad)}/{n} test files pass and kill their mutants" + (f"; {'; '.join(bad)}" if bad else "")
     if kind in ("compile", "test", "rename") and not files:
         return False, "no changes made (model did not edit anything)"
     if kind == "compile":
@@ -743,6 +809,12 @@ def preflight(arm, port, profile_key, meta, params):
     # reads the shared cache, or the copy built into the binary when the cache does
     # not parse for it, and one probe got both texts in one run.
     snap["bench_manifest"] = os.environ.get("NAV_PILOT_BENCH_MANIFEST")
+    # np-serve's two probe knobs, recorded so a result says which treatment it had: a
+    # capabilities block that is the probe's assumption, not a measured verdict, and
+    # one extra line in nav-pilot's scratch config (a dispatch level, say).
+    caps = os.environ.get("BENCH_CAPABILITIES_OVERRIDE")
+    snap["bench_capabilities_override"] = read_cfg(Path(caps)) if caps else None
+    snap["np_config_line"] = os.environ.get("BENCH_NP_CONFIG_LINE") or None
     import _np_checks
     if arm == "hybrid" and not snap["bench_manifest"] and _np_checks.knows_override(shutil.which(NAV_PILOT) or NAV_PILOT) \
             and not os.environ.get("BENCH_HYBRID_ALLOW_CACHED_MANIFEST"):
@@ -924,6 +996,10 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     # hybrid arm the control plus this fragment — the only way to price it.
     instructions_after = instruction_inventory()
     policy = policy_record() if arm == "hybrid" else None
+    if policy:  # the text itself, once per sha: a hash cannot be read back
+        keep = log_dir / f"policy-{policy['sha256'][:8]}.md"
+        if not keep.exists():
+            shutil.copyfile(POLICY_FILE, keep)
     local_calls = local_calls_since(offset)
     files, lines = changed()
 
@@ -1108,6 +1184,28 @@ def check_large():
     print(f"  ✓ large target: {', '.join(f'{t} {s} sites/{f} files' for t, (_, s, f) in tasks.items())}")
 
 
+def check_tests():
+    """The create-file target joins five frontier tasks per cell, names every file in
+    the prompt, and the scope check takes exactly those files. Gradle is not run here;
+    the reference and vacuous tests were run through verify() when the cells were added."""
+    code = ("import os,json,runpy; g=runpy.run_path(os.environ['ME'])\n"
+            "t=g['CFG']['tasks']; s=g['new_tests_scope']; v=t[0]['verify']; w=[x['path'] for x in v['parts']]\n"
+            "print(json.dumps([g['RUNGS'],[[x['id'],x['class'],x['parts'],all(p['path'] in x['prompt'] for p in x['verify']['parts']),"
+            "sum(len(p['mutants']) for p in x['verify']['parts'])] for x in t],"
+            "[s(v,w),s(v,[]),s(v,w[1:]),s(v,w+['src/main/kotlin/x.kt'])],callable(g['frontier_module']().verify_new_test)]))")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                       env={**os.environ, "BENCH_TARGET": "isoppfolgingstilfelle-tests", "ME": __file__})
+    assert r.returncode == 0, r.stderr[-800:]
+    rungs, tasks, scope, has_verifier = json.loads(r.stdout.strip().splitlines()[-1])
+    assert rungs == {"1": "cf5-a", "2": "cf5-b"}, rungs
+    for tid, cls, parts, named, mutants in tasks:
+        assert cls == "create-file" and len(parts) == 5 and named and mutants >= 5, (tid, cls, parts, named, mutants)
+    assert scope[0] is None and "no changes" in scope[1] and "1 of 5 test files missing" in scope[2] \
+        and "outside the task" in scope[3], scope
+    assert has_verifier
+    print(f"  ✓ create-file target: {', '.join(f'{t[0]} {len(t[2])} files/{t[4]} mutants' for t in tasks)}")
+
+
 def self_check():
     """One runnable check on the parsing, so a silent schema change is loud.
     Touches no GPU, no server and no config."""
@@ -1224,6 +1322,7 @@ def self_check():
 
     check_pin()
     check_large()
+    check_tests()
 
     print("✓ self-check passed")
 

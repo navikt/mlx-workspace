@@ -19,6 +19,8 @@
     "fm-r4-a": {"class": "edit-multi-mechanical"},
     "fm-r5-a": {"class": "edit-multi-mechanical"},
     "fm-r6-a": {"class": "edit-multi-mechanical"},
+    "cf5-a": {"class": "create-file"},
+    "cf5-b": {"class": "create-file"},
     "M1": {"class": "edit-multi-mechanical"},
     "M2": {"class": "edit-multi-mechanical"},
     "D2": {"class": "edit-multi-mechanical"},
