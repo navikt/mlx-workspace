@@ -149,3 +149,28 @@ Verdict: decompose does not replicate on edit-single at any rung run tonight.
 | 2 | 3/4 | 7/8 | 6/8 | 0.576 | 23 | 39 | 1.69 | no |
 
 Verdict: retry2 does not replicate on edit-single at any rung run tonight.
+
+## Review (2026-09-27)
+
+Counts come from the raw result files for this night (`bench/frontier-*-20260927-0[1-8]*.json`), with Occamy's cells from day 64-0b (`*-20260926-*`) and the Laguna bases from the 64-2c rerun. Each cell has 2 runs per rung, so these are first cells, not verdicts (the replication bar is n ≥ 8).
+
+| Cell | optiq (control) | Qwen3.6 8-bit | Occamy 4-bit | Laguna 8-bit |
+|---|---|---|---|---|
+| decompose, edit-multi r3–r6 | 11/16 | 13/16 | 13/16 | 13/16 |
+| decompose, edit-single r3–r5 | 9/12 | 11/12 | 12/12 | 3/3 (step timed out) |
+| retry2, edit-single r1–r2 | 16/16 (night 2) | 7/8 | 8/8 | 8/8 |
+| retry2, create-file r1–r3 | 12/16, r1 only (night 2) | **11/12** | 8/12 | 4/12 |
+| base, edit-multi r3–r6 | 14/16 r4–r5 (night 2) | 15/16 | 7/12 | 4/5 (timed out, median 270 s per sample) |
+| base, edit-single r1–r5 | 13/16 and 10/16 r1–r2 (night 2) | 13/20 | 12/17 | 8/9 (timed out) |
+| read-qa with `example` (optiq) | 26/40 against 18/40 at base (night 1) and 40/40 in the cloud | | | |
+
+**What it says so far:**
+- Qwen3.6-35B-A3B 8-bit is the most consistent worker candidate. It is the best of the four on create-file with retries, which is a cloud class today. It uses the same architecture and publisher as the shipped default, so it could ship first.
+- Occamy is the best on decomposed single-file edits, but weaker at base (autonomous).
+- Laguna is weak on create-file and slow at base: both base steps hit their timeouts. It also wrote test files at the workspace root rather than under `kotlin/` on create-file (07:02). The runner scored those samples as failures, but the stray `src/` blocked the next two steps until it was moved to `.bench-logs/night3-20260927-015045/stray/`.
+- Every candidate beats the optiq control on decomposed tasks.
+- The `example` prefix lifts optiq's read-qa from 18/40 to 26/40, which supports the analysis in `reports/2026-09-25-quality-frontier/read-qa-analysis.md`.
+
+**Harness follow-up:** the runner doesn't clean files a model writes outside the task directory between samples. The night preflight (#72) only catches them at the start of a night. A per-sample cleanup touches `_frontier.py`, which is a `harness_sha` input, so it is held until the 64 GB series is done (pending-tasks §8.8).
+
+**Next:** night 64-3, the hybrid arm with Sonnet 5 as orchestrator, runs with Qwen3.6 8-bit and Occamy as workers and optiq as the control. It will start after the fixes from the adversarial review and a pilot capped at $2.
