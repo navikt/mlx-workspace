@@ -571,6 +571,215 @@
   {
    "class": "edit-multi-mechanical",
    "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "base",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 1,
+     "n": 2,
+     "lb": 0.164,
+     "ub": 0.836,
+     "lb_monotone": 0.514,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 1,
+     "median_seconds": 273,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.646,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 1,
+     "median_seconds": 288,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "5": {
+     "k": 1,
+     "n": 1,
+     "lb": 0.378,
+     "ub": 1.0,
+     "lb_monotone": 0.378,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r5-a"
+     ],
+     "runs": 1,
+     "median_seconds": 238,
+     "median_cost_usd": 0.0,
+     "d": [
+      29
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 29.0,
+    "beyond": true,
+    "a": -3.559,
+    "b": 1.578
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-base-20260927-085841.json"
+   ]
+  },
+  {
+   "class": "edit-single",
+   "model": "laguna-xs-2.1-8bit-64g",
+   "variant": "base",
+   "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r1-a",
+      "fs-r1-b"
+     ],
+     "runs": 1,
+     "median_seconds": 24,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.785,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r2-a",
+      "fs-r2-b"
+     ],
+     "runs": 1,
+     "median_seconds": 106,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 1,
+     "median_seconds": 54,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 2,
+     "n": 2,
+     "lb": 0.549,
+     "ub": 1.0,
+     "lb_monotone": 0.549,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 1,
+     "median_seconds": 126,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 0,
+     "n": 1,
+     "lb": 0.0,
+     "ub": 0.622,
+     "lb_monotone": 0.0,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r5-a"
+     ],
+     "runs": 1,
+     "median_seconds": 420,
+     "median_cost_usd": 0.0,
+     "d": [
+      39
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 4,
+    "first_break": 5
+   },
+   "fit": {
+    "d50": 31.1,
+    "d_bar": 11.2,
+    "beyond": false,
+    "a": 7.489,
+    "b": -1.51
+   },
+   "files": [
+    "frontier-laguna-xs-2.1-8bit-64g-base-20260927-092842.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "laguna-xs-2.1-8bit-64g",
    "variant": "decompose",
    "condition": "temp=1.0 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
    "mode": "local",
