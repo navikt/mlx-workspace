@@ -1,6 +1,6 @@
 # 64 GB tier, night 64-4: np-e2e full and the decide sets at 48 GB wired (plan.md §5.1 suites 4-5, §5.3).
 # Wired: 48 GB (iogpu.wired_limit_mb 49152), checked by the launcher before it starts.
-# Run: BENCH_NAV_PILOT=.bench-logs/bin/nav-pilot-main-7236795f \
+# Run: BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-7236795f \
 #      mise run night-run-3 -- --part local --queue reports/2026-09-26-64gb-tier/night-64-4.queue
 # 7236795f has navikt/copilot #989 (bench manifest override, so Occamy is served) and #995
 # (headless launch). np-e2e and decide both hand nav-pilot a per-run manifest (#71 and this PR).

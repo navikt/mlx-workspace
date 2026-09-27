@@ -219,7 +219,7 @@ def serve_and_run(key, np, stamp, backup, marker):
         target.unlink(missing_ok=True)
         env["NAV_PILOT_BENCH_MANIFEST"] = str(target)
         org = spec["model"].split("/")[0]
-        if org not in C.VETTED_ORGS:
+        if "/" in spec["model"] and org not in C.VETTED_ORGS:
             env["NAV_PILOT_BENCH_ALLOW_ORGS"] = org
     else:
         env.pop("NAV_PILOT_BENCH_MANIFEST", None)

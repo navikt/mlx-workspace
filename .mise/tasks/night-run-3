@@ -43,6 +43,8 @@ MODEL="${FRONTIER_MODEL:-qwen3.6-35b-a3b-optiq}"
 CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-5}"
 CAP_USD="${FRONTIER_COST_CAP:-80}"
 export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t "$ROOT"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+# Absolute: bench-np-e2e starts sessions with the workspace repo as cwd.
+[ -n "$BENCH_NAV_PILOT" ] && BENCH_NAV_PILOT="$(cd "$(dirname "$BENCH_NAV_PILOT")" 2>/dev/null && pwd)/$(basename "$BENCH_NAV_PILOT")"
 HYBRID_TAG="${NIGHT_HYBRID_TAG:-np-$(basename "$BENCH_NAV_PILOT" | sed 's/.*-//')-$(echo "$CLOUD" | tr -d '.' | sed 's/^claude-//; s/-//g')}"
 
 # part kind classes variant runs rungs timeout-min expected-min, in order of what each decides.
@@ -292,15 +294,18 @@ cleanup_after() {
   s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
   if [ -n "$FAKE" ]; then echo "(fake) mise run server-stop" >> "$log"
   else mise run server-stop >> "$log" 2>&1 < /dev/null; fi
-  # A hybrid step killed at its timeout skips np-serve's and bench-hybrid's own cleanup:
-  # nav-pilot's server would outlive it and hold the next step off, and the dispatch
-  # policy would stay in ~/.config/opencode. `off` against a scratch config removes the
-  # policy and the binding without touching the user's ~/.nav-pilot/config.toml.
-  if [ "${2:-}" = hybrid ] && [ -z "$FAKE" ]; then
+  # A hybrid, e2e or decide step killed at its timeout skips its own cleanup: nav-pilot's
+  # server is not in the step's process tree, would outlive it and hold the next step off.
+  # A hybrid step also leaves the dispatch policy in ~/.config/opencode. `off` against a
+  # scratch config removes the policy and the binding without touching the user's
+  # ~/.nav-pilot/config.toml.
+  case "${2:-}" in hybrid|e2e|decide) [ -z "$FAKE" ] && {
     local st="$HOME/.nav-pilot/local/server.json" spid
     "$BENCH_NAV_PILOT" alpha local stop >> "$log" 2>&1 < /dev/null
     spid=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('pid',''))" "$st" 2>/dev/null)
     [ -n "$spid" ] && kill -0 "$spid" 2>/dev/null && { say "  nav-pilot server $spid survived stop, killing"; kill -KILL "$spid"; }
+  } ;; esac
+  if [ "${2:-}" = hybrid ] && [ -z "$FAKE" ]; then
     : > "$DIR/np-off.toml"
     NAV_PILOT_CONFIG="$DIR/np-off.toml" "$BENCH_NAV_PILOT" alpha local off >> "$log" 2>&1 < /dev/null
   fi

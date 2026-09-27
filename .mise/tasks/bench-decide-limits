@@ -41,7 +41,7 @@ export LIMITS_MARKER="$PWD/.bench-logs/decide-limits-$STAMP.started"
 cleanup() {
   [ -f "$LIMITS_MARKER" ] && "$NP" alpha local stop >/dev/null 2>&1
   [ -f "$LIMITS_BACKUP" ] && mv -f "$LIMITS_BACKUP" "$CACHE"
-  rm -f "$LIMITS_MARKER" "$PWD/.bench-logs/decide-limits-$STAMP.config.toml"
+  rm -f "$LIMITS_MARKER" "$PWD/.bench-logs/decide-limits-$STAMP.config.toml" "$PWD"/.bench-logs/decide-limits-"$STAMP"-*.models.json
   rm -rf "$LOCKDIR"
 }
 trap cleanup EXIT
