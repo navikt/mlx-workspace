@@ -38,11 +38,20 @@ if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
   fi
   # The override is part of the treatment, so it is part of the tag: otherwise a run
   # with it and one without write, and resume into, the same files.
+  [ -n "${PROBE_LEVELS:-}" ] && [ -n "${BENCH_HYBRID_TAG:-}" ] && { echo "✗ PROBE_LEVELS sets the tag per level; unset BENCH_HYBRID_TAG"; exit 2; }
   export BENCH_HYBRID_TAG="${BENCH_HYBRID_TAG:-probe-$sha-${val:-base}$caps}" PROBE_CAPS="$caps"
   export PROBE_TAG_BASE="probe-$sha"
+  lv_glob=()
+  if [ -n "${PROBE_LEVELS:-}" ]; then
+    for level in $PROBE_LEVELS; do
+      case "$level" in conservative|balanced|aggressive) lv_glob+=(bench/hybrid-*-"$PROBE_TAG_BASE-$level$caps"-*) ;;
+        *) echo "✗ PROBE_LEVELS: $level (conservative, balanced or aggressive; the control arm is off)"; exit 2;; esac
+    done
+    [ -n "$caps" ] || { echo "✗ PROBE_LEVELS needs BENCH_CAPABILITIES_OVERRIDE: the gate only runs for classes the manifest trusts"; exit 2; }
+  fi
   marker="$dir/.started"; : > "$marker"
   collect() {
-    mv bench/hybrid-*-"$BENCH_HYBRID_TAG"-* bench/hybrid-*-"$PROBE_TAG_BASE"-*"$caps"-* "$dir"/ 2>/dev/null
+    mv bench/hybrid-*-"$BENCH_HYBRID_TAG"-* ${lv_glob[@]+"${lv_glob[@]}"} "$dir"/ 2>/dev/null
     find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
     rm -f "$marker"
   }
@@ -80,7 +89,6 @@ run_cells() {
 # Each level is its own treatment: its own tag, and its own policy anchor. A control has
 # no worker and no gate, so it runs under the first level only.
 for level in $PROBE_LEVELS; do
-  case "$level" in off|conservative|balanced|aggressive) ;; *) echo "✗ PROBE_LEVELS: unknown level $level"; exit 2;; esac
   export BENCH_NP_CONFIG_LINE="local_dispatch = \"$level\"" BENCH_HYBRID_TAG="$PROBE_TAG_BASE-$level$PROBE_CAPS"
   { echo "$BENCH_NP_CONFIG_LINE"; grep -vE '^local_dispatch[[:space:]]*=' "$NAV_PILOT_CONFIG"; } > "$NAV_PILOT_CONFIG.new" \
     && mv "$NAV_PILOT_CONFIG.new" "$NAV_PILOT_CONFIG" || exit 1
