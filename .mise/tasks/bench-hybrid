@@ -1295,7 +1295,7 @@ def main():
             if stop:
                 break
             if RUNGS.get(rung) is None:
-                raise SystemExit(f"✗ rung {rung} has no verified prompt in bench/tasks.json. "
+                raise SystemExit(f"✗ rung {rung} has no verified prompt in {_target_path.name} (rungs {sorted(RUNGS)}). "
                                  f"Rung 7 (add a small endpoint with a test) was never "
                                  f"attempted locally; write the task first.")
             task = by_id[RUNGS[rung]]
