@@ -134,7 +134,7 @@ def wait_with_deadline(proc, cap, stop=None):
     So the deadline is checked here, against time.monotonic(), and the child is killed
     by process group. Returns (returncode, why): why is None for a child that exited on
     its own, "timeout", or what `stop()` returned when it asked for the kill (the cost
-    cap, checked every ten seconds).
+    cap, checked every two seconds).
     """
     deadline = time.monotonic() + cap
     why, polled = "timeout", time.monotonic()
@@ -144,7 +144,7 @@ def wait_with_deadline(proc, cap, stop=None):
             return rc, None
         if time.monotonic() >= deadline:
             break
-        if stop and time.monotonic() - polled >= 10:
+        if stop and time.monotonic() - polled >= 2:
             polled = time.monotonic()
             why = stop()
             if why:
@@ -303,7 +303,7 @@ def parse_events(text):
     # opencode prices each step itself. Worth more than the token total: 91-97%
     # of that total is cache reads, billed at a tenth of the input rate, so a
     # comparison denominated in raw tokens overstates the gap between the arms.
-    cost = 0.0
+    cost, step_max = 0.0, 0.0
     for line in text.splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -323,10 +323,11 @@ def parse_events(text):
             tok["cache_write"] += int(cache.get("write") or 0)
             tok["cache_read"] += int(cache.get("read") or 0)
             cost += float(part.get("cost") or 0)
+            step_max = max(step_max, float(part.get("cost") or 0))
         elif kind == "text" and isinstance(part.get("text"), str):
             reply.append(part["text"])
     return {"cloud_steps": steps, "cloud_tokens": tok,
-            "cloud_cost_usd": round(cost, 4),
+            "cloud_cost_usd": round(cost, 4), "step_max_usd": round(step_max, 4),
             "truncated": "length" in reasons,
             "reply": " ".join(reply).strip()}
 
@@ -484,6 +485,19 @@ def policy_record(path=None):
         return None
     send = next((l for l in b.decode("utf8", "replace").splitlines() if l.startswith("Send it")), None)
     return {"path": str(path), "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b), "send": send}
+
+
+def policy_mismatch(samples, rec):
+    """Why rec cannot join samples: its dispatch policy differs from the first
+    sample's in the file, or None. The policy is the treatment; one probe served
+    two texts to one file because a launch fell back to the manifest built into
+    the binary."""
+    first = next((x["policy"] for x in samples if x.get("policy")), None)
+    now = rec.get("policy")
+    if not first or not now or first["sha256"] == now["sha256"]:
+        return None
+    return (f"policy changed: sample {rec['n']} got dispatch policy {now['sha256'][:8]}, "
+            f"the file's first sample got {first['sha256'][:8]}")
 
 
 def pakke_record():
@@ -664,6 +678,14 @@ def preflight(arm, port, profile_key, meta, params):
     if not snap["cloud_model"]:
         raise SystemExit("✗ no cloud model. Fix: nav-pilot config set model <id>, "
                          "or set BENCH_CLOUD_MODEL")
+    # The manifest is the policy's input. Without NAV_PILOT_BENCH_MANIFEST nav-pilot
+    # reads the shared cache, or the copy built into the binary when the cache does
+    # not parse for it, and one probe got both texts in one run.
+    snap["bench_manifest"] = os.environ.get("NAV_PILOT_BENCH_MANIFEST")
+    if arm == "hybrid" and not snap["bench_manifest"] and not os.environ.get("BENCH_HYBRID_ALLOW_CACHED_MANIFEST"):
+        raise SystemExit("✗ a hybrid arm needs NAV_PILOT_BENCH_MANIFEST, so every launch reads one manifest.\n"
+                         "  Fix: run under np-serve with a nav-pilot that has navikt/copilot #989, or set\n"
+                         "  BENCH_HYBRID_ALLOW_CACHED_MANIFEST=1 for an older binary (the policy check still guards the file)")
     if np_cfg.get("auto_update"):
         # Fatal, not a warning. As a warning this cost a day: nav-pilot replaced
         # itself mid-ladder with the released build, which has no launch flags, so
@@ -808,13 +830,17 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
 
         def over_cap():
             # opencode prices every step as it finishes, so the running cost is in the
-            # log before the session ends: a runaway sample is killed at the cap
-            # rather than recorded after it.
+            # log before the session ends. Killing only once the total crossed the cap
+            # let the crossing step through ($1.01 on a $1.00 cap): the sample is now
+            # killed when the next step, priced like the dearest one so far, would
+            # cross it. ponytail: a step dearer than every earlier one still overshoots.
             if cost_cap is None:
                 return None
-            now = parse_events(log_path.read_text(errors="replace"))["cloud_cost_usd"]
-            if spent + now > cost_cap:
-                return f"cost cap ${cost_cap:.2f}: ${spent:.2f} spent before this sample, ${now:.2f} in it"
+            ev = parse_events(log_path.read_text(errors="replace"))
+            now = ev["cloud_cost_usd"]
+            if spent + now + ev["step_max_usd"] > cost_cap:
+                return (f"cost cap ${cost_cap:.2f}: ${spent:.2f} spent before this sample, ${now:.2f} in it, "
+                        f"next step ~${ev['step_max_usd']:.2f}")
             return None
 
         rc, why = wait_with_deadline(proc, cap, over_cap)
@@ -1097,6 +1123,13 @@ def self_check():
         pr = policy_record(Path(t.name))
         assert pr["bytes"] == 6 and pr["sha256"].startswith("823412d1"), pr
     assert policy_record(Path("/nonexistent/x.md")) is None
+    a, b = {"sha256": "a" * 64}, {"sha256": "b" * 64}
+    assert policy_mismatch([{"policy": None}, {"policy": a}], {"n": 2, "policy": a}) is None
+    assert "sample 2 got dispatch policy bbbbbbbb" in policy_mismatch([{"policy": a}], {"n": 2, "policy": b})
+    assert policy_mismatch([], {"n": 0, "policy": b}) is None
+    steps = "\n".join(json.dumps({"type": "step_finish", "part": {"cost": c}}) for c in (0.1, 0.3, 0.2))
+    ev = parse_events(steps)
+    assert ev["cloud_cost_usd"] == 0.6 and ev["step_max_usd"] == 0.3, ev
     print(f"  ✓ output stem and policy hash (tag {TAG or 'unset'}, config {NP_CONFIG})")
 
     check_pin()
@@ -1228,7 +1261,7 @@ def main():
                     # bench-frontier's rule: checked before a sample, against what was
                     # spent plus the median sample so far in this file, or the ledger's
                     # last sample for a file's first. run_sample kills a sample that
-                    # crosses the cap anyway, so the overshoot is at most one opencode step.
+                    # would cross the cap with its next step anyway (see over_cap).
                     costs = [x["cloud_cost_seen_usd"] for x in doc["samples"] if x.get("cloud_cost_seen_usd")]
                     nxt = sorted(costs)[len(costs) // 2] if costs else float(
                         (read_cfg(ledger).get("last_sample_usd") if ledger else 0) or 0)
@@ -1238,6 +1271,9 @@ def main():
                     attempts += 1
                     n = len(doc["samples"])
                     rec = run_sample(arm, rung, task, n, snap, snap_ix, args.timeout, args.cost_cap, spent)
+                    mixed = policy_mismatch(doc["samples"], rec)
+                    if mixed:
+                        rec.update(valid=False, invalid_reason=mixed, note=mixed)
                     doc["samples"].append(rec)
                     spent += rec.get("cloud_cost_seen_usd") or 0.0
                     if ledger:
@@ -1248,6 +1284,10 @@ def main():
                     if stop:
                         doc["stopped"] = stop
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
+                    if mixed:
+                        raise SystemExit(f"✗ {mixed}\n  {out.relative_to(ROOT)} would mix two treatments. "
+                                         f"Fix: find what changed the manifest (NAV_PILOT_BENCH_MANIFEST unset, "
+                                         f"or the cache rewritten), then start a new file or tag.")
                     # A launch that ends in one second having printed nav-pilot's
                     # help never reached the model. Every launch re-fetches the
                     # agentpakke from GitHub, and firing them back to back makes
