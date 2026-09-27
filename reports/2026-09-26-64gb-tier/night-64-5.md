@@ -110,3 +110,22 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 
 ✓ bench/frontier-summary.json
 
+
+## Review (2026-09-28)
+
+The Frontier section pools every night. This section covers 64-5 alone, taken from its six raw files, against night 64-2 (and day 64-0b for Occamy) as the first cells. All the files carry the same `harness_sha` df7deb1af416 and `tasks_sha` 17d0cf33d776, and every sample's `served_model` is the profile's model. No sample was invalid, and none looped.
+
+| Cell | 8-bit, 64-5 | Occamy, 64-5 | 8-bit, pooled with 64-2 | Occamy, pooled with 64-2 | One-sided Fisher p (8-bit > Occamy), 64-5 / pooled | Difference, 90 % one-sided lower bound (pooled) |
+|---|---|---|---|---|---|---|
+| decompose, edit-single r3–r5 | 23/24 (8, 7, 8 of 8) | 22/24 (8, 8, 6) | 34/36 | 34/36 | – / 0.57 | −8 points (tie) |
+| **retry2, create-file r1–r3** | **19/24** (6, 6, 7) | 13/24 (4, 6, 3) | **30/36** | 21/36 | **0.062 / 0.018** | **+11 points** |
+| decompose, edit-multi r3–r6 | 27/32 (7, 8, 6, 6) | 26/32 (8, 7, 4, 7) | 40/48 | 39/48 | – / 0.53 | −8 points (tie) |
+
+Median seconds per sample, 8-bit against Occamy: 47 against 49 on edit-single, 283 against 240 on create-file, and 114 against 95 on edit-multi. Timeouts were 5 of 24 against 4 of 24 on create-file and none elsewhere.
+
+**Verdict:**
+- The replication confirms night 64-2's split. On decomposed edits the two are level at n ≥ 8 per rung: 34/36 each on edit-single and 40/48 against 39/48 on edit-multi. Occamy's 12/12 on edit-single on day 64-0b regressed to 22/24.
+- On create-file under retry2 the 8-bit is better. The difference replicates on its own night (p = 0.062 < 0.10, design §7) and pools to 30/36 against 21/36 (p = 0.018, lower bound +11 points). This is the class that is `cloud` today.
+- Together with night 64-4 (Copilot e2e 12/12 against 8/12; decide level with optiq against Occamy's weaker injection result) and with the manifest's publisher rule (`Accio-Lab` is not in `ALLOWED_ORGS`), **the Qwen3.6-35B-A3B 8-bit is the 64 GB candidate**. Occamy stays a bench-only profile.
+
+**Stray file:** step 6 first failed at preflight on `workspaces/occamy-1.0-4bit-64g/gradle.properties` (`org.gradle.java.installations.auto-download=true`). An Occamy create-file sample wrote it at 21:17, during step 4, outside `kotlin/`. Gradle reads `gradle.properties` only from the project root and from `GRADLE_USER_HOME`, so the later samples' builds did not see it. It was moved to `.bench-logs/night3-20260927-174745/stray/`, and step 6 was resumed with `--from 6`. This is the runner gap already noted in night 64-2's review: nothing cleans files a model writes outside the task directory between samples (pending-tasks §8.8).
