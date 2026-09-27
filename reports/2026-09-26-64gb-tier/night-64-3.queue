@@ -1,0 +1,38 @@
+# 64 GB tier, night 64-3: the hybrid arm (plan.md §5.1 suite 3, §5.3). Sonnet 5 orchestrates
+# through nav-pilot and opencode; a local worker takes the dispatched subtasks.
+# Before: mise run vram-set 48 (every profile here declares 48).
+# Run (the cap covers every step, invalid samples included; the cloud probes, ~$0.05 each, are outside it):
+#   FRONTIER_COST_CAP=35 BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6 \
+#     mise run night-run-3 -- --part hybrid --queue reports/2026-09-26-64gb-tier/night-64-3.queue
+#
+# Files are tagged np-dd859ac6-sonnet5; bench-hybrid adds the worker profile to each hybrid
+# file's name, so the three workers are three populations. The control arm dispatches nothing
+# (`alpha local off`), runs once per cell under optiq-64g's server, and serves all three.
+#
+# The trusted cell is three (target, rung) cells, not four: tasks:6 is D2, retired in
+# bench/tasks.json, so bench-hybrid refuses it. edit-multi's D2 evidence is spring-ia:6 alone.
+# Order is by cell, so a night cut short by the cap or the clock still has complete
+# control-against-worker comparisons for the cells it reached.
+#
+# Workers: optiq-64g is the control worker (the manifest's own entry and its capabilities);
+# 8-bit and Occamy get a bench entry with no capabilities block (nav-pilot's unmeasured policy
+# text), never optiq's verdicts. policy.sha256 is recorded per sample.
+# Laguna is left out: nav-pilot's mlx-lm 0.31.3 has no `laguna`.
+#
+# Timeouts: one step is one (cell, arm, worker), 8 valid samples. Expected ~3 min a sample
+# (copilot-mixed-mode research §3.2: ~3.2 h per 64) plus a server start; 120 min covers slow
+# samples and bench-hybrid's retries of invalid ones (at most 18 attempts at a 900 s cap).
+#
+# part  kind   target                        arm     samples rung timeout expected profile
+hybrid hybrid tasks                         control 8 3 120 30 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid tasks                         hybrid  8 3 120 30 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid tasks                         hybrid  8 3 120 40 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                         hybrid  8 3 120 30 occamy-1.0-4bit-64g
+hybrid hybrid frontend-familie-tilbake      control 8 3 120 35 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid frontend-familie-tilbake      hybrid  8 3 120 35 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid frontend-familie-tilbake      hybrid  8 3 120 45 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid frontend-familie-tilbake      hybrid  8 3 120 35 occamy-1.0-4bit-64g
+hybrid hybrid spring-ia-tjenester-metrikker control 8 6 120 35 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid spring-ia-tjenester-metrikker hybrid  8 6 120 35 qwen3.6-35b-a3b-optiq-64g
+hybrid hybrid spring-ia-tjenester-metrikker hybrid  8 6 120 45 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid spring-ia-tjenester-metrikker hybrid  8 6 120 35 occamy-1.0-4bit-64g

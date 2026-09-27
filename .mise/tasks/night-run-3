@@ -21,6 +21,12 @@
 #                  FRONTIER_MODEL), so one night can run several models. Two more kinds run
 #                  outside the frontier: e2e (bench-np-e2e --latency-only, the fit and speed
 #                  probe) and ops (one bench-models cheap-ops pass); their other columns are -.
+#                  A third, part `hybrid`, runs bench-hybrid under np-serve for the 9th-column
+#                  worker: `hybrid hybrid TARGET ARM SAMPLES RUNG timeout expected PROFILE`, one
+#                  (target, rung, arm, worker) cell a step, so each worker has its own timeout.
+#                  It shares the cloud steps' cost cap and ledger (FRONTIER_COST_CAP), skips
+#                  when the cloud is unreachable, and tags its files np-<binary sha>-<cloud>
+#                  (NIGHT_HYBRID_TAG overrides); bench-hybrid adds the worker to the name.
 #
 # Test hooks, used by night-run-3-selftest: NIGHT_FAKE=1 runs $NIGHT_FAKE_STEP in place
 # of each step, and the NIGHT_* variables point every path somewhere harmless.
@@ -34,6 +40,7 @@ MODEL="${FRONTIER_MODEL:-qwen3.6-35b-a3b-optiq}"
 CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-5}"
 CAP_USD="${FRONTIER_COST_CAP:-80}"
 export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t "$ROOT"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
+HYBRID_TAG="${NIGHT_HYBRID_TAG:-np-$(basename "$BENCH_NAV_PILOT" | sed 's/.*-//')-$(echo "$CLOUD" | tr -d '.' | sed 's/^claude-//; s/-//g')}"
 
 # part kind classes variant runs rungs timeout-min expected-min, in order of what each decides.
 # Expected minutes are bench-frontier's per-sample estimates (optiq ~1.7 min a cheap-ops
@@ -66,14 +73,14 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY=1 ;;
     --from) FROM="${2:?--from needs a step number}"; shift ;;
-    --part) PART="${2:?--part needs local, cloud or all}"; shift ;;
+    --part) PART="${2:?--part needs local, cloud, hybrid or all}"; shift ;;
     --after) AFTER="${2:?--after needs a pid}"; shift ;;
     --queue) QFILE="${2:?--queue needs a file}"; shift ;;
-    *) echo "usage: mise run night-run-3 -- [--dry-run | --from N | --part local|cloud|all | --after PID | --queue FILE]"; exit 2 ;;
+    *) echo "usage: mise run night-run-3 -- [--dry-run | --from N | --part local|cloud|hybrid|all | --after PID | --queue FILE]"; exit 2 ;;
   esac
   shift
 done
-case "$PART" in local|cloud|all) ;; *) echo "--part: local, cloud or all"; exit 2 ;; esac
+case "$PART" in local|cloud|hybrid|all) ;; *) echo "--part: local, cloud, hybrid or all"; exit 2 ;; esac
 if [ -n "$QFILE" ]; then
   [ -r "$QFILE" ] || { echo "--queue: cannot read $QFILE"; exit 2; }
   QUEUE=(); while IFS= read -r l; do l=${l%%#*}; [ -n "${l// }" ] && QUEUE+=("$l"); done < "$QFILE"
@@ -99,13 +106,13 @@ profiles() {
   local i=0 q
   for q in "${QUEUE[@]}"; do
     set -- $q; i=$((i + 1))
-    [ "$i" -ge "$FROM" ] && [ "$1" = local ] && in_part local && echo "${9:-$MODEL}"
+    [ "$i" -ge "$FROM" ] && { [ "$1" = local ] || [ "$1" = hybrid ]; } && in_part "$1" && echo "${9:-$MODEL}"
   done | awk '!seen[$0]++'
 }
 
 plan() {
   local i=0 tt=0 te=0 tl=0 tc=0
-  echo "night-run-3 plan${QFILE:+ from $QFILE}: local $MODEL, cloud $CLOUD (cap \$$CAP_USD), part $PART, report $REPORT"
+  echo "night-run-3 plan${QFILE:+ from $QFILE}: local $MODEL, cloud $CLOUD (cap \$$CAP_USD), part $PART, report $REPORT, hybrid tag $HYBRID_TAG"
   for q in "${QUEUE[@]}"; do
     set -- $q; i=$((i + 1))
     { [ "$i" -lt "$FROM" ] || ! in_part "$1"; } && continue
@@ -150,7 +157,7 @@ preflight() {
   f=$(df -g "$ROOT" | awk 'NR==2 {print $4}'); [ "$f" -ge 20 ] && ok disk "$f GB free" || no disk "$f GB free, need 20"
   python3 .mise/tasks/bench-frontier selftest > /dev/null 2>&1 && ok selftest "bench-frontier selftest" \
     || no selftest "bench-frontier selftest fails"
-  if in_part local; then
+  if in_part local || in_part hybrid; then
     [ -z "$(/usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN)" ] && ok port-8080 "free" || no port-8080 "in use; mise run server-stop"
     for m in $(profiles); do
     python3 - "$m" <<'EOF' && ok model "$m: profile loads, shards present" || no model "$m: see above"
@@ -184,7 +191,7 @@ EOF
     done
     for c in opencode cplt; do command -v "$c" > /dev/null && ok client "$c" || no client "$c not on PATH"; done
   fi
-  if in_part cloud; then
+  if in_part cloud || in_part hybrid; then
     gh auth token > /dev/null 2>&1 && ok gh "token present" || no gh "no gh token for the cloud arm"
     [ -x "$BENCH_NAV_PILOT" ] && ok nav-pilot "$(basename "$BENCH_NAV_PILOT")" || no nav-pilot "no binary at '$BENCH_NAV_PILOT'"
     # A warning, not a failure: an unreachable cloud skips the cloud steps, never the local night.
@@ -197,7 +204,7 @@ EOF
   # python and java reach their hosts themselves. A WARN: the cloud gate decides the cloud steps.
   if [ -z "$FAKE" ]; then
     local kinds out
-    kinds="$(in_part local && echo frontier-local),$(in_part cloud && echo frontier-cloud)"; kinds=${kinds#,}; kinds=${kinds%,}
+    kinds=$( { in_part local && echo frontier-local; in_part cloud && echo frontier-cloud; in_part hybrid && echo hybrid; } | paste -sd, -)
     if out=$(python3 .mise/tasks/bench-netcheck --for "$kinds" 2>&1); then ok network "bench-netcheck --for $kinds"
     else
       echo "$out" | grep -A1 '^FAIL' | grep -v '^--' | sed 's/^/      /'
@@ -282,6 +289,18 @@ cleanup_after() {
   s=$(strays); [ -n "$s" ] && { say "  killing stray client sessions: $s"; kill -TERM $s 2>/dev/null; sleep 2; kill -KILL $s 2>/dev/null; }
   if [ -n "$FAKE" ]; then echo "(fake) mise run server-stop" >> "$log"
   else mise run server-stop >> "$log" 2>&1 < /dev/null; fi
+  # A hybrid step killed at its timeout skips np-serve's and bench-hybrid's own cleanup:
+  # nav-pilot's server would outlive it and hold the next step off, and the dispatch
+  # policy would stay in ~/.config/opencode. `off` against a scratch config removes the
+  # policy and the binding without touching the user's ~/.nav-pilot/config.toml.
+  if [ "${2:-}" = hybrid ] && [ -z "$FAKE" ]; then
+    local st="$HOME/.nav-pilot/local/server.json" spid
+    "$BENCH_NAV_PILOT" alpha local stop >> "$log" 2>&1 < /dev/null
+    spid=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('pid',''))" "$st" 2>/dev/null)
+    [ -n "$spid" ] && kill -0 "$spid" 2>/dev/null && { say "  nav-pilot server $spid survived stop, killing"; kill -KILL "$spid"; }
+    : > "$DIR/np-off.toml"
+    NAV_PILOT_CONFIG="$DIR/np-off.toml" "$BENCH_NAV_PILOT" alpha local off >> "$log" 2>&1 < /dev/null
+  fi
   if [ -d "$LOCKDIR" ]; then
     holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
     if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then
@@ -303,7 +322,7 @@ for q in "${QUEUE[@]}"; do
   { [ "$i" -lt "$FROM" ] || ! in_part "$part"; } && continue
   log="$DIR/$(printf %02d "$i")-$kind-$classes-$variant${9:+-$9}.log"
   base=(n "$i" part "$part" kind "$kind" classes "$classes" variant "$variant" runs "$runs" rungs "$rungs" timeout_min "$tmin" log "$log")
-  [ "$part" = local ] && base+=(profile "$prof")
+  [ "$part" != cloud ] && base+=(profile "$prof")
   say "--- step $i: $kind $classes $variant${9:+ on $9} (timeout $tmin min)"
 
   if [ "$kind" = validate ] && python3 .mise/tasks/bench-frontier run --profile "$prof" --classes edit-single \
@@ -312,12 +331,12 @@ for q in "${QUEUE[@]}"; do
     record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "already validated"
     continue
   fi
-  if [ "$kind" = cloud ] && python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)" "$(spent)" "$CAP_USD"; then
+  if { [ "$kind" = cloud ] || [ "$kind" = hybrid ]; } && python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)" "$(spent)" "$CAP_USD"; then
     say "  SKIP: cloud cost cap reached (\$$(spent) of \$$CAP_USD)"
     record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "cost cap \$$CAP_USD reached"
     continue
   fi
-  if [ "$kind" = cloud ] && [ -z "$FAKE" ] && ! cloud_up; then
+  if { [ "$kind" = cloud ] || [ "$kind" = hybrid ]; } && [ -z "$FAKE" ] && ! cloud_up; then
     say "  SKIP: the cloud arm cannot reach $CLOUD through $(basename "$BENCH_NAV_PILOT") (${CLOUD_WHY:-?}); resume later with --part cloud --from $i"
     record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status SKIP rc "" note "cloud unreachable: ${CLOUD_WHY:-probe session failed}"
     continue
@@ -349,6 +368,13 @@ for q in "${QUEUE[@]}"; do
     e2e)      cmd=(mise run bench-np-e2e -- "$prof" --latency-only); pat="np-e2e-$prof-*.json" ;;
     ops)      cmd=(mise run bench-models -- "$prof"); pat="results-$prof-*.json" ;;
     cloud)    cmd=("${run[@]}" --cloud "$CLOUD" --cost-cap "$CAP_USD" --cost-ledger "$LEDGER"); pat="frontier-cloud-*-$variant-*.json" ;;
+    # classes = target, variant = arm, runs = samples, rungs = rung. The control arm runs
+    # under a worker's server too (bench-hybrid's preflight asks it for a completion),
+    # but dispatches nothing and writes one file per tag.
+    hybrid)   cmd=(env BENCH_TARGET="$classes" BENCH_HYBRID_TAG="$HYBRID_TAG" BENCH_CLOUD_MODEL="$CLOUD"
+                   mise run np-serve -- "$prof" python3 .mise/tasks/bench-hybrid --rung "$rungs" --arm "$variant"
+                   --samples "$runs" --cost-cap "$CAP_USD" --cost-ledger "$LEDGER")
+              pat="hybrid*-$HYBRID_TAG*-$rungs-$variant.json" ;;
   esac
   [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$classes" "$variant" "$LEDGER" "$prof")
 
@@ -366,7 +392,7 @@ for q in "${QUEUE[@]}"; do
     fi
     # A cloud step also stops when the API goes down under it; the samples done so far
     # stay in the result file, and at most the one in flight ran against a dead API.
-    if [ "$kind" = cloud ] && [ -z "$FAKE" ] && [ $(( $(date +%s) - probed )) -ge "$CLOUD_PROBE_SECONDS" ]; then
+    if { [ "$kind" = cloud ] || [ "$kind" = hybrid ]; } && [ -z "$FAKE" ] && [ $(( $(date +%s) - probed )) -ge "$CLOUD_PROBE_SECONDS" ]; then
       probed=$(date +%s)
       cloud_up || { say "  cloud unreachable (${CLOUD_WHY:-?}); killing the step's process tree"; unreachable=1; kill_tree "$CUR"; break; }
     fi
@@ -374,18 +400,19 @@ for q in "${QUEUE[@]}"; do
   done
   wait "$CUR" 2>/dev/null; rc=$?
   CUR=""
-  cleanup_after "$log"
+  cleanup_after "$log" "$kind"
 
   result=$(find "$BENCH_DIR" -maxdepth 2 -path "$BENCH_DIR/$pat" -newer "$marker" 2>/dev/null | sort | tail -1)
   if [ -n "$unreachable" ]; then status=UNREACHABLE
   elif [ -n "$timed_out" ]; then status=TIMEOUT
   elif [ "$rc" -eq 0 ] && grep -q 'nothing for a lever to move' "$log"; then status=SKIP
+  elif [ "$rc" -eq 0 ] && [ -z "$result" ] && grep -q 'nothing to do' "$log"; then status=SKIP
   elif [ "$rc" -eq 0 ] && [ -n "$result" ]; then status=OK
   else status=FAIL; fi
   note=""
   case "$status" in
-    SKIP) note="no class broke within its ladder at base" ;;
-    UNREACHABLE) note="the cloud went unreachable mid-step; the last sample may be a false failure. Resume with --part cloud --from $i" ;;
+    SKIP) note="no class broke within its ladder at base"; [ "$kind" = hybrid ] && note="already at $runs valid samples" ;;
+    UNREACHABLE) note="the cloud went unreachable mid-step; the last sample may be a false failure. Resume with --part $part --from $i" ;;
     OK) grep -q 'COST CAP' "$log" && note="stopped at the cost cap: $(grep -m1 'COST CAP' "$log" | cut -c1-160)" ;;
     *) note=$(grep -m1 '✗' "$log" | cut -c1-200) ;;
   esac
@@ -422,13 +449,15 @@ r = subprocess.run([sys.executable, ".mise/tasks/bench-frontier", "summary", "--
 L += ["", "## Frontier", "", "From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar "
       "(design.md §4); frontier = highest rung with every rung up to it trusted / not ruled out.", "",
       r.stdout.strip() or f"(summary failed: {r.stderr.strip()[-300:]})"]
-L += replication_md([s["result"] for s in steps if s.get("result")])
+L += replication_md([s["result"] for s in steps if s.get("result") and s.get("kind") != "hybrid"])
+from _by_class import hybrid_md
+L += hybrid_md(sorted({s["result"] for s in steps if s.get("kind") == "hybrid" and s.get("result")}))
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text("\n".join(L) + "\n")
 print(f"report: {out}")
 EOF
 
-results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' -o -name 'np-e2e-*.json' -o -name 'results-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
+results=$(find "$BENCH_DIR" -maxdepth 2 \( -name 'frontier-*.json' -o -name 'validated-*.json' -o -name 'np-e2e-*.json' -o -name 'results-*.json' -o -name 'hybrid-*.json' \) -newer "$DIR/.run-start" 2>/dev/null | sort)
 if [ -n "$FAKE" ]; then
   say "(fake) would commit $REPORT and: $(echo $results)"
 else

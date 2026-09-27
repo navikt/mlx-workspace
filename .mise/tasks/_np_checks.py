@@ -62,14 +62,34 @@ def manifest(profile, cache):
     if not hits:
         # A build no entry serves yet, measured as a candidate for one: add a
         # non-default entry for the run. The cache is restored on exit.
-        hits = [dict(m["models"][0], key=profile, name=_meta["name"], model=params["MLX_MODEL"],
-                     default=False, weights_gb=_meta.get("model_vram_gb"))]
+        hits = [bench_entry(m["models"][0], profile, _meta, params)]
         m["models"].append(hits[0])
     if len(hits) != 1:
         raise SystemExit(f"✗ {len(hits)} manifest entries serve {params['MLX_MODEL']}; need exactly 1")
     hits[0]["params"] = {k: v for k, v in params.items() if k.startswith("MLX_")}
     Path(cache).write_text(json.dumps(m, indent=2) + "\n")
     print(f"✓ manifest entry {hits[0]['key']} now carries {profile}'s params")
+
+
+def bench_entry(template, profile, meta, params):
+    """A manifest entry for a model no entry serves, built from the first entry's shape
+    but carrying none of its measurements.
+
+    Copying models[0] whole gave every 64 GB candidate optiq's capabilities block,
+    its `expect` prose and its recommended_for. nav-pilot writes the dispatch policy
+    from those (navikt/copilot#941), so the orchestrator was told optiq's verdicts
+    about a different model. Here capabilities is left out, which nav-pilot reads as
+    "unmeasured" and answers with its pre-capabilities policy text; `expect`, the
+    measured-strength prose, is empty. An empty capabilities block would instead
+    make the policy say "send it nothing", and the hybrid arm would measure no
+    dispatch at all. Machine requirements come from the profile, not from optiq.
+    """
+    e = {k: v for k, v in template.items() if k not in ("capabilities", "recommended_for", "min_nav_pilot")}
+    wired = meta.get("gpu_wired_limit_gb") or template.get("wired_limit_gb")
+    e.update(key=profile, name=meta["name"], model=params["MLX_MODEL"], default=False,
+             weights_gb=meta.get("model_vram_gb"), expect="", wired_limit_gb=wired,
+             min_ram_gb=meta.get("machine_min_ram_gb") or (wired or 0) + 12)
+    return e
 
 
 # navikt/copilot #989's merge: NAV_PILOT_BENCH_MANIFEST makes nav-pilot read that one
@@ -655,6 +675,11 @@ def selftest():
         manifest("occamy-1.0-4bit-64g", str(f))
         m = json.loads(f.read_text())["models"]
         assert sum(bool(e.get("default")) for e in m) == 1 and m[-1]["model"].startswith("Accio-Lab/"), m[-1]
+        # optiq's verdicts stay with optiq: the candidate entry is unmeasured (#941 policy).
+        occ = m[-1]
+        assert "capabilities" not in occ and "recommended_for" not in occ and occ["expect"] == "", occ
+        assert occ["wired_limit_gb"] == 48 and occ["min_ram_gb"] == 64 and occ["key"] == "occamy-1.0-4bit-64g", occ
+        assert m[0].get("capabilities"), "the template entry itself must not be stripped"
     print("✓ selftest passed")
 
 
