@@ -1,5 +1,5 @@
 {
-  "_note": "Large edit-multi-mechanical cells for bench-hybrid: the frontier's thread-arg rungs, read from tasks_from (never copied: bench-frontier hashes that file). Each call site needs its own file-name literal, so no search-and-replace makes them, and all three are over the dispatch rule's size (>= 5 files or >= 10 call sites). Rung 4: 12 sites in 12 files; rung 5: 29 sites in 4 files; rung 6: 60 sites in 3 files.",
+  "_note": "Large edit-multi-mechanical cells for bench-hybrid: the frontier's thread-arg rungs, read from tasks_from (never copied: bench-frontier hashes that file). Each call site needs its own file-name literal, so no search-and-replace makes them, and all three are over the dispatch rule's size (>= 5 files or >= 10 call sites). Call sites, in files besides the definition's: rung 4, 12 in 12; rung 5, 29 in 4; rung 6, 60 in 3 (one of them the definition's own file).",
   "tasks_from": "frontier/tasks-isoppfolgingstilfelle.json",
   "rungs": {"4": "fm-r4-a", "5": "fm-r5-a", "6": "fm-r6-a"}
 }
