@@ -444,6 +444,51 @@ where they are, and night 64-4 runs them.
     3. **Sonnet 5's own preference for one `sed`.** It remains, as frontend sample 0 shows under the same text that made sample 1 dispatch.
   - **Decision: 64-3's hybrid arm stays NO-GO.** Under this policy the arm would still be mostly the control plus a policy file. Next, if dispatch is still wanted: have the persona's Trivial tier defer to the dispatch policy when a local worker is configured (one line in `nav-pilot.agent.md`), and drop "several" from the send line. Then re-probe (≈ $1.50). Otherwise report "Sonnet 5 does not delegate under nav-pilot's persona" as the 64-3 result and take the 64 GB workers' directed quality from 64-2's frontier.
   - **Cleanup:** the bench's `alpha local off` ran on the scratch config, and the user's `~/.nav-pilot/config.toml` (local off) and manifest cache are unchanged. `~/.config/opencode` was restored from a copy taken before the run, which removed the synced navikt/copilot pakke. It has no dispatch markers and no policy file. `~/.copilot` hooks and agents are unchanged. No queue lock remains, `bench/` is clean, and the backup copy is deleted.
+- **Dispatch probe 3, large jobs (2026-09-27): Sonnet 5 dispatched 0 of 5, and no live hybrid cell is large enough to test the new rule. NO-GO.** The user asked to point dispatch at large jobs, and navikt/copilot #997 does that.
+  - **What #997 changed.** The trusted-class text no longer says to send one-step jobs. The rule for `edit-multi-mechanical` now reads:
+    - Send a mechanical change when one search-and-replace cannot make it and it touches ≥ 5 files or ≥ 10 call sites.
+    - Keep smaller changes, and any change one search-and-replace makes.
+    - Split a large change into one task per file, with every place named and a grep check for each file, and build at the end.
+    - The persona's tiers now set only phase behaviour; the dispatch policy decides who edits.
+
+    The sizes come from the frontier. Unaided, the worker is trusted at 1–2 call sites, not yet trusted at 3–8, and below the bar from 9–16. In August, credits were saved only where the cloud would have needed about 5 steps or more.
+  - **Review.** An adversarial review (Fable) raised 14 findings. Fixed:
+    - evidence wording
+    - "large" defined twice
+    - thresholds raised from 3 files / 5 sites
+    - the search-and-replace precedence
+    - a per-file build that fails until the last file
+    - "tasks needing many rounds" vetoing the split
+    - a size gate shared by every class
+    - an unmeasured create-file example
+    - no full golden
+
+    Not changed: the shipped `models.json` has no capabilities block, so users outside the bench still get the pinned no-capabilities text.
+  - **Build.** Binary `nav-pilot-main-7236795f`, from main after #997: `vcs.modified=false`, stamped `commit: 7236795`, `NAV_PILOT_BENCH_MANIFEST` present. Every session got policy 9d713fe3 and the persona with the new paragraph. Worker optiq-64g at 48 GB wired. Spend $1.97 of a $3.00 cap. Files are in `.bench-logs/dispatch-probe3-large-20260927/`.
+
+  | Cell | Arm | n | Dispatched | Result | Cloud $ | Steps | s | Why it kept the work |
+  |---|---|---|---|---|---|---|---|---|
+  | spring-ia:6 | hybrid | 0 | no | compile error | 0.263 | 19 | 84 | "compressed-tier … implement directly" |
+  | spring-ia:6 | hybrid | 1 | no | passes | 0.445 | 32 | 184 | "trivial-tier … update all sites" |
+  | spring-ia:6 | hybrid | 2 | no | compile error | 0.221 | 17 | 72 | stopped at the sandbox denial below |
+  | spring-ia:6 | hybrid | 3 | no | 1 new failing test | 0.305 | 21 | 77 | edited by hand, then went round the sandbox |
+  | spring-ia:6 | control | 0 | – | passes | 0.506 | 31 | 215 | – |
+  | frontend-familie-tilbake:3 | hybrid | 0 | no | passes | 0.124 | 7 | 43 | "Simple search-replace across 9 files … Doing it directly" |
+  | frontend-familie-tilbake:3 | control | 0 | – | passes | 0.103 | 5 | 32 | – |
+
+  - **Orchestrator behaviour.** No sample dispatched, so none split per file. There was no worker pass to check and no rework to judge.
+  - **The frontend sample** followed the new rule to the letter: a rename that one search-and-replace makes stays with the main agent.
+  - **spring-ia:6 is below the threshold.** The field goes into 8 construction sites in 3 files: 1 mapper, 1 in `TestUtils.kt` and 6 in `DataKvalitetSjekkerKtTest.kt`. By the policy's own sizes it is small, so keeping it follows the policy. The transcripts cite the persona tier and not the size rule, though.
+  - **Every live hybrid cell is small by the new definition.** tasks:6 is retired. frontend-familie-tilbake:5 is quarantined. frontend-scale's S1–S4 are renames and are not in bench-hybrid's `RUNGS`. The August savings (hybrid-6 at 0.39×, frontend-3 at 0.53×) came from cells that are either retired or search-and-replace renames.
+  - **Cost and time against the control.** On spring-ia:6 the one passing hybrid sample cost $0.445 against the control's $0.506 and took 184 s against 215 s. None of these samples dispatched, so this is sample noise, not a saving. On frontend:3 the hybrid sample cost $0.124 against $0.103, and took 43 s against 32 s.
+  - **GO rule** (dispatch ≥ 50 % on large cells, dispatched samples pass, cost ≤ control): not met. There were 0 dispatches and no large cell to run on. **64-3 stays NO-GO.**
+  - **Harness defect.** Inside the cplt sandbox, the session is denied a read of `~/mlx-workspace/mise.local.toml` (git-ignored, rewritten by `model-use` at 11:45). That breaks the mise shims for `java` and `gradle`.
+    - Two hybrid samples ended with a compile error after the orchestrator gave up on the build ("only the user can widen it with `cplt config set allow.read …`").
+    - The others spent steps finding `JAVA_HOME` by hand.
+    - Probe 2's spring-ia transcripts show the same denial.
+    - This inflates spring-ia:6's cost and failure rate in both arms. It needs fixing before any spring-ia cell counts: allow the read in the bench's cplt policy, or keep the file out of the workspace's path.
+  - **Next step, if dispatch on large jobs is still wanted.** Give bench-hybrid a large cell: frontier-derived thread-arg tasks (r4–r6: 12–317 call sites, with a per-file literal so no search-and-replace can make them) on the isoppfolgingstilfelle clone. Then re-probe with about 6 samples and a control (≈ $3). Fix the sandbox read first.
+  - **Cleanup.** `~/.config/opencode` was restored from a copy taken before the run and checked byte for byte against it. It has no dispatch markers and no policy file, and the copy is deleted. `~/.copilot` agents and hooks are unchanged. The user's `~/.nav-pilot/config.toml` still has local off. No queue lock remains. `bench/` is clean: the result files and the `.baseline-*` cache were moved to the probe directory.
 
 ## 8.9 Decide as a service: measure first
 
