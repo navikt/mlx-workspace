@@ -15,7 +15,7 @@ caught by eye, late. The list, and what now makes each impossible to record:
     dispatch needs `alpha local off`, not an omitted            `alpha local off`
     instruction                                                 and asserts clean
   * a "hybrid" arm that never reached the local server,         -> the post-launch
-    because the binding lives in ~/.config/opencode and is      assert plus the
+    because the binding lives in opencode's config and is       assert plus the
     written at launch by nav-pilot                              local_calls rule
   * timed-out tasks recording 0 turns, which reads as "the      -> nulls, never
     model did nothing" rather than "unknown"                    zeros
@@ -24,13 +24,20 @@ caught by eye, late. The list, and what now makes each impossible to record:
 
 Samples are driven through nav-pilot, never through bare `opencode`:
 
-    nav-pilot --client opencode --model <cloud> -- --pure run --format json "<prompt>"
+    XDG_CONFIG_HOME=<bench dir> nav-pilot --client opencode --model <cloud> -- run --format json "<prompt>"
 
 nav-pilot carries the cplt sandbox a real session has, starts the in-process loop
 guard whose port the provider block points at, and writes the worker binding and
 the dispatch fragment at launch. A bare `opencode` run has none of that: it either
 bypasses the guard or cannot reach the local model at all, depending on whether a
 launch happens to be live. That is how a "hybrid" arm measured the cloud.
+
+Not `--pure`: it turns off every opencode plugin, and nav-pilot's dispatch gate
+(navikt/copilot #999) is one. The developer's own opencode config is kept out by
+XDG_CONFIG_HOME instead: a directory of this run's own, which opencode, cplt and
+nav-pilot all read (nav-pilot's Nav context since navikt/copilot #1001). Their
+plugins, instructions and MCP servers never reach a sample, and nothing a sample
+writes reaches ~/.config/opencode.
 
 So the config lifecycle is part of what we measure, not a precondition. The binding
 and fragment must be ABSENT before a hybrid launch and PRESENT after it; for the
@@ -57,7 +64,13 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 HOME = Path.home()
-OPENCODE_CFG = HOME / ".config" / "opencode" / "opencode.json"
+# This run's XDG_CONFIG_HOME (see the docstring). Emptied at the start of a run and
+# removed at its end; workspaces/hybrid-bench/*/ is gitignored.
+XDG = ROOT / "workspaces" / "hybrid-bench" / ".xdg-config"
+XDG_ENV = {"XDG_CONFIG_HOME": str(XDG)}
+OPENCODE_CFG = XDG / "opencode" / "opencode.json"
+# The developer's own, which a run must leave exactly as it found it.
+REAL_OPENCODE = HOME / ".config" / "opencode"
 # nav-pilot writes the dispatch policy here at a hybrid launch (#941) and leaves it
 # until `alpha local off`; its hash is what tells one policy text from another.
 POLICY_FILE = OPENCODE_CFG.with_name("nav-pilot-local-dispatch.md")
@@ -248,6 +261,21 @@ def instruction_inventory(cfg=None):
     return out
 
 
+def tree_stat(root):
+    """{relative path: (size, mtime_ns)} for every file under root: cheap, and enough to
+    tell that a run left the developer's own opencode config alone."""
+    out = {}
+    for dirpath, _, names in os.walk(root):
+        for n in names:
+            p = Path(dirpath) / n
+            try:
+                st = p.lstat()
+            except OSError:
+                continue
+            out[str(p.relative_to(root))] = (st.st_size, st.st_mtime_ns)
+    return out
+
+
 def port_pid(port):
     # Absolute path: lsof lives in /usr/sbin, which an interactive shell has on its
     # PATH and a detached process often does not. Looked up by name it is simply
@@ -339,6 +367,65 @@ def parse_events(text):
 _PATH = re.compile(r"(?:[\w.@-]+/)*[\w@-]+\.(?:kts?|java|tsx?|jsx?|py|go|rs|sql|json|ya?ml|toml|md|xml|gradle|properties|html|css)\b")
 
 
+def tool_parts(text):
+    """The tool calls in opencode's JSON stream, in stream order."""
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            part = json.loads(line).get("part") or {}
+        except ValueError:
+            continue
+        if part.get("tool"):
+            yield part
+
+
+GATE_MARK = "nav-pilot (local_dispatch"
+_LOOP = re.compile(r"\b(for|while|until)\b|\$")
+
+
+def gate_events(text, cwd=None):
+    """What nav-pilot's dispatch gate (navikt/copilot #999) did, and who edited what.
+
+    A refusal reaches the orchestrator as the failed tool call's error, so it is in the
+    stream. The outcome is inferred the way the gate decides it: its create-file text is
+    deny_create; a refused bash command with a loop or a computed value is deny_scripted
+    (approximate: a `$` on one literal file is a counted edit there); the rest deny_files.
+    dispatched_after_deny is the gate's own rule, a task to the worker after a refusal in
+    the turn, and `opencode run` is one turn. The stream holds the orchestrator's calls
+    only, so `orchestrator_files` are the files it edited or wrote itself (not through
+    bash), and `worker_files` the paths its tasks named. `checked_after_dispatch` is a
+    grep, build or test the orchestrator ran after its first task to the worker.
+    """
+    out = {"deny_files": 0, "deny_scripted": 0, "deny_create": 0, "dispatched_after_deny": 0,
+           "denied": [], "orchestrator_files": [], "worker_files": [], "checked_after_dispatch": False}
+    denied = dispatched = False
+    own, sent = set(), set()
+    for part in tool_parts(text):
+        tool, st = part.get("tool"), part.get("state") or {}
+        inp = st.get("input") or {}
+        err = str(st.get("error") or "")
+        if st.get("status") == "error" and GATE_MARK in err:
+            cmd = str(inp.get("command") or "")
+            kind = ("deny_create" if "new files go to" in err else
+                    "deny_scripted" if tool == "bash" and _LOOP.search(cmd) else "deny_files")
+            out[kind] += 1
+            out["denied"].append({"tool": tool, "outcome": kind, "target": inp.get("filePath") or cmd[:160]})
+            denied = True
+        elif tool == "task" and inp.get("subagent_type") == WORKER_AGENT:
+            out["dispatched_after_deny"] += denied and not dispatched
+            dispatched = True
+            sent |= set(_PATH.findall(str(inp.get("prompt") or "")))
+        elif tool in ("edit", "write") and st.get("status") == "completed" and inp.get("filePath"):
+            fp = str(inp["filePath"])
+            own.add(os.path.relpath(fp, cwd) if cwd and os.path.isabs(fp) else fp)
+        elif tool == "bash" and dispatched and re.search(r"gradle|\bgrep\b|\brg\b|test", str(inp.get("command") or "")):
+            out["checked_after_dispatch"] = True
+    out["orchestrator_files"], out["worker_files"] = sorted(own), sorted(sent)
+    return out
+
+
 def rework(text, workers=(WORKER_AGENT, "lokal-arbeider")):
     """What the orchestrator did with each worker dispatch, from the JSONL stream.
 
@@ -357,14 +444,7 @@ def rework(text, workers=(WORKER_AGENT, "lokal-arbeider")):
     so the August logs can be re-read.
     """
     events = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line.startswith("{"):
-            continue
-        try:
-            part = json.loads(line).get("part") or {}
-        except ValueError:
-            continue
+    for part in tool_parts(text):
         st = part.get("state") or {}
         inp = st.get("input") or {}
         if part.get("tool") == "task" and inp.get("subagent_type") in workers:
@@ -605,7 +685,7 @@ def session_env():
     the machine-default JDK 27 fails this Gradle build anyway. The ceiling stops the
     walk at workspaces/hybrid-bench; JAVA_HOME and PATH put JDK 21 ahead of the shim.
     """
-    env = {**os.environ, "MISE_CEILING_PATHS": str(WS)}
+    env = {**os.environ, "MISE_CEILING_PATHS": str(WS), **XDG_ENV}
     if CFG.get("jdk"):
         env.update(JAVA_HOME=str(JDK), PATH=f"{JDK}/bin:{env.get('PATH', '')}")
     return env
@@ -768,7 +848,7 @@ def verify(task, reply):
 # ── preflight ─────────────────────────────────────────────────────────────────
 
 def np(cmd, what):
-    r = sh(cmd, timeout=300)
+    r = sh(cmd, timeout=300, env=XDG_ENV)
     if r.returncode != 0:
         raise SystemExit(
             f"✗ {what} failed: {' '.join(cmd)}\n"
@@ -934,6 +1014,13 @@ def preflight(arm, port, profile_key, meta, params):
 
 # ── one sample ────────────────────────────────────────────────────────────────
 
+# A nav-pilot that materializes its Nav context under ~/.config/opencode whatever
+# XDG_CONFIG_HOME says (before navikt/copilot #1001) gives the session no persona, no
+# skills and an undescribed worker, and writes the developer's own directory. Fatal.
+NO_CONTEXT = ("nav-pilot wrote no Nav context under XDG_CONFIG_HOME, so the session had no persona "
+              "and no described worker. This nav-pilot predates navikt/copilot #1001")
+
+
 def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0):
     log_dir = ROOT / ".bench-logs"
     log_dir.mkdir(exist_ok=True)
@@ -952,11 +1039,11 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     mem_before = memory()
     offset = log_offset()
     argv = [NAV_PILOT, "--client", "opencode", "--model", snap["cloud_model"],
-            "--", "--pure", "run", "--format", "json", task["prompt"]]
+            "--", "run", "--format", "json", task["prompt"]]
     started = time.time()
     timed_out = False
     # start_new_session so a timeout kills this launch's whole tree by process
-    # group. A pkill on "opencode --pure" would also kill a bench-cheap-ops run
+    # group. A pkill on "opencode run" would also kill a bench-cheap-ops run
     # sharing the machine, and subprocess only kills nav-pilot, not the client it
     # launched: six orphaned clients accumulated over one day of killed runs.
     with log_path.open("w") as fh:
@@ -1072,7 +1159,9 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     # whether it was used; the fragment's presence in the config says neither once
     # the session has tidied up after itself.
     announced = "Local dispatch: nav-pilot ends a turn" in log_text
-    if arm == "hybrid" and not announced:
+    if not any((XDG / "opencode" / "agents").glob("*.md")):
+        invalid = NO_CONTEXT
+    elif arm == "hybrid" and not announced:
         invalid = ("hybrid arm but nav-pilot never announced local dispatch, so the "
                    "worker was not set up for this launch")
     elif arm == "control" and announced:
@@ -1097,6 +1186,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     rec["dispatches"] = rework(log_text)
     rec["rework"] = {v: sum(d["verdict"] == v for d in rec["dispatches"])
                      for v in ("accepted", "fixed", "redone")}
+    rec["gate"] = gate_events(log_text, REPO)
     return rec
 
 
@@ -1162,6 +1252,59 @@ def check_pin():
         finally:
             REPO, WS, CFG = saved
     print("  ✓ workspace held to the pinned ref")
+
+
+def target_view(target):
+    """(RUNGS, {task id: (verify kind, call sites, allowed files)}) for a target, from
+    this file run again under BENCH_TARGET: the target is read at import."""
+    code = ("import os,json,runpy; g=runpy.run_path(os.environ['ME'])\n"
+            "print(json.dumps([g['RUNGS'],{x['id']:[x['verify']['kind'],sum(x['verify']['sites'].values()),"
+            "len(x['verify']['allowed_files'])] for x in g['CFG']['tasks']}]))")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                       env={**os.environ, "BENCH_TARGET": target, "ME": __file__})
+    assert r.returncode == 0, r.stderr[-800:]
+    return json.loads(r.stdout.strip().splitlines()[-1])
+
+
+def check_small():
+    """The false-positive cell is under every dispatch size the gate enforces."""
+    rungs, tasks = target_view("isoppfolgingstilfelle-small")
+    assert rungs == {"3": "fm-r3-c"}, rungs
+    (kind, sites, files), = tasks.values()
+    assert kind == "thread-arg" and sites < 10 and files < 5, (kind, sites, files)
+    print(f"  ✓ false-positive target: fm-r3-c {sites} sites/{files} files")
+
+
+def check_gate():
+    """gate_events reads refusals, dispatches and who edited what from the stream."""
+    def t(tool, status="completed", error=None, **inp):
+        return json.dumps({"type": "tool_use", "part": {"tool": tool, "state": {
+            "status": status, "input": inp, **({"error": error} if error else {})}}})
+    deny = "Error: nav-pilot (local_dispatch): this looks like a mechanical change across several files."
+    create = "nav-pilot (local_dispatch = aggressive): new files go to `local-worker` first."
+    stream = "\n".join([
+        t("edit", filePath="/r/src/A.kt"),
+        t("edit", "error", deny, filePath="/r/src/E.kt"),
+        t("bash", "error", deny, command='for f in a b; do sed -i "s/x/y/" "$f.kt"; done'),
+        t("write", "error", create, filePath="/r/src/NewTest.kt"),
+        t("bash", "error", "The user rejected permission", command="rm -rf /"),
+        t("task", subagent_type=WORKER_AGENT, prompt="Edit src/E.kt and src/F.kt"),
+        t("task", subagent_type=WORKER_AGENT, prompt="Write src/NewTest.kt"),
+        t("task", subagent_type="explore", prompt="look at src/G.kt"),
+        t("bash", command="./gradlew compileKotlin"),
+    ])
+    g = gate_events(stream, "/r")
+    assert (g["deny_files"], g["deny_scripted"], g["deny_create"], g["dispatched_after_deny"]) == (1, 1, 1, 1), g
+    assert g["orchestrator_files"] == ["src/A.kt"], g
+    assert g["worker_files"] == ["src/E.kt", "src/F.kt", "src/NewTest.kt"], g
+    assert g["checked_after_dispatch"] is True, g
+    quiet = gate_events(t("edit", filePath="/r/src/A.kt"), "/r")
+    assert not any(quiet[k] for k in ("deny_files", "deny_scripted", "deny_create", "dispatched_after_deny")), quiet
+    # The run's opencode config is its own, never the developer's.
+    for p in (OPENCODE_CFG, POLICY_FILE):
+        assert XDG in p.parents and REAL_OPENCODE not in p.parents, p
+    assert session_env()["XDG_CONFIG_HOME"] == str(XDG)
+    print("  ✓ gate events: deny_files, deny_scripted, deny_create, dispatched_after_deny")
 
 
 def check_large():
@@ -1326,6 +1469,8 @@ def self_check():
     check_pin()
     check_large()
     check_tests()
+    check_small()
+    check_gate()
 
     print("✓ self-check passed")
 
@@ -1389,6 +1534,9 @@ def main():
     arms = ["hybrid", "control"] if args.arm == "both" else [args.arm]
     was_enabled = tomllib.loads(NP_CONFIG.read_text()).get("local_enabled") if NP_CONFIG.exists() else None
     ensure_clone()
+    shutil.rmtree(XDG, ignore_errors=True)
+    (XDG / "opencode").mkdir(parents=True)
+    real_before = tree_stat(REAL_OPENCODE)
     ledger = Path(args.cost_ledger) if args.cost_ledger else None
     spent = float(read_cfg(ledger).get("spent_usd") or 0.0) if ledger else 0.0
     stop = None
@@ -1481,6 +1629,8 @@ def main():
                     if stop:
                         doc["stopped"] = stop
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
+                    if rec.get("invalid_reason") == NO_CONTEXT:
+                        raise SystemExit(f"✗ {NO_CONTEXT}. Fix: BENCH_NAV_PILOT=<a build with it>")
                     if mixed:
                         raise SystemExit(f"✗ {mixed}\n  {out.relative_to(ROOT)} would mix two treatments. "
                                          f"Fix: find what changed the manifest (NAV_PILOT_BENCH_MANIFEST unset, "
@@ -1504,6 +1654,10 @@ def main():
                           f"${rec['cloud_cost_usd']} · "
                           f"{show(rec['local_calls'])} local calls · "
                           f"{rec['lines_changed']} lines · {rec['note']}")
+                    g = rec.get("gate") or {}
+                    if any(g.get(k) for k in ("deny_files", "deny_scripted", "deny_create")):
+                        print(f"     gate: {g['deny_files']} deny_files · {g['deny_scripted']} deny_scripted · "
+                              f"{g['deny_create']} deny_create · dispatched after: {g['dispatched_after_deny']}")
                     if rec.get("dispatches"):
                         rw = rec["rework"]
                         print(f"     rework: {rw['accepted']} accepted · {rw['fixed']} fixed · "
@@ -1521,18 +1675,21 @@ def main():
                     break
     finally:
         reset_repo()
-        # Leave the machine in the state we found it. The last hybrid launch leaves
-        # its dispatch policy and worker binding in the user's real
-        # ~/.config/opencode/opencode.json, where a plain `opencode` would still read
-        # "draws no AI credits" about a worker that is gone. `off` takes them out;
-        # `on` only writes nav-pilot's own config (local_enabled), never opencode's.
-        sh(LOCAL_OFF, timeout=300)
+        # `off` against this run's config says whether nav-pilot still cleans up after
+        # itself; then the whole directory goes. `on` only writes nav-pilot's own config
+        # (local_enabled), never opencode's.
+        sh(LOCAL_OFF, timeout=300, env=XDG_ENV)
         left = {k: v for k, v in markers().items() if v}
         if left or POLICY_FILE.exists():
-            print(f"⚠ dispatch artefacts left in {OPENCODE_CFG.parent}: {left or ''} "
+            print(f"⚠ `alpha local off` left dispatch artefacts in {OPENCODE_CFG.parent}: {left or ''} "
                   f"{POLICY_FILE.name if POLICY_FILE.exists() else ''}")
         if was_enabled:
-            sh(LOCAL_ON, timeout=300)
+            sh(LOCAL_ON, timeout=300, env=XDG_ENV)
+        shutil.rmtree(XDG, ignore_errors=True)
+        changed_real = sorted(set(real_before.items()) ^ set(tree_stat(REAL_OPENCODE).items()))
+        if changed_real:
+            print(f"⚠ {REAL_OPENCODE} changed during this run ({len(changed_real)} entries, e.g. "
+                  f"{changed_real[0][0]}). Nothing here writes it; look for another opencode or nav-pilot.")
 
 
 if __name__ == "__main__":
