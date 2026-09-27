@@ -167,18 +167,21 @@ def paired(a, b):
 # ── summary ─────────────────────────────────────────────────────────────────
 
 def summary(docs):
+    layout = any(c["arm"] == "options-first" for d in docs for c in d["cases"])
     L = ["# `nav-pilot alpha decide`: option order and consistency", "",
-         "Layout: `default` is what nav-pilot ships (evidence, then question, options, instruction); `options-first` "
-         "is question and options, then evidence, then the same instruction. Consistency: `swap` lists the options in "
-         "reverse order; `negate` asks the negated question with the expected answer flipped. Cells are correct/n = "
+         ("Layout: `default` is what nav-pilot ships (evidence, then question, options, instruction); `options-first` "
+          "is question and options, then evidence, then the same instruction. " if layout else "") +
+         "Consistency: `swap` lists the options in "
+         "reverse order; `negate` asks the negated question with the expected answer flipped" +
+         ("; `negate-swap` does both. " if not layout else ". ") + "Cells are correct/n = "
          "accuracy [95% Wilson]; an errored call counts as wrong. Paired p is the exact two-sided McNemar test on "
-         "the discordant cases (b = only default right, c = only options-first right).", "",
+         "the discordant cases" + (" (b = only default right, c = only options-first right)." if layout else "."), "",
          "| Model | nav-pilot | Calls | Errors | Wall time | Cold decide |", "|---|---|---|---|---|---|"]
     for d in docs:
         L.append(f"| {d['key']} (`{d['model']}`) | `{Path(d['nav_pilot']).name}` | {len(d['cases'])} | "
                  f"{sum(c['error'] is not None for c in d['cases'])} | {d.get('seconds', '?')} s | "
                  f"{d.get('cold', {}).get('ms')} ms |")
-    if any(c["arm"] == "options-first" for d in docs for c in d["cases"]):
+    if layout:
         L += layout_md(docs)
     L += consistency_md(docs)
     if any(c["arm"] == "negate-swap" for d in docs for c in d["cases"]):
@@ -199,7 +202,9 @@ def order_md(docs):
     # (arm, where the fine answer sits): fine is A in default and negate-swap, B in swap and negate (goapi: reversed).
     L = ["", "## Order × negation (2×2)", "",
          "Fine = the answer says the text or diff is fine (goapi: no exported identifier changed). Last = picked "
-         "option B. Paired p is the exact two-sided McNemar on picking fine, same cases.", "",
+         "option B. Paired p is the exact two-sided McNemar on picking fine, same cases; errored calls are left out. "
+         "In the pooled why/pr/describes rows fine is always `yes`, so they cannot tell a fine-prior from a yes-prior; "
+         "goapi, where fine is `no`, is the set that separates them.", "",
          "| Model | Sets | Arm | Question | Fine answer at | Correct | Picked fine | Picked last (B) |",
          "|---|---|---|---|---|---|---|---|"]
     for d in docs:
@@ -217,11 +222,22 @@ def order_md(docs):
             for x, y, what in (("default", "swap", "position, positive question"), ("negate-swap", "negate", "position, negated question"),
                                ("default", "negate-swap", f"negation, fine answer at {first}"),
                                ("swap", "negate", f"negation, fine answer at {last}")):
-                ks = by[x].keys() & by[y].keys()
+                ks = [k for k in by[x].keys() & by[y].keys() if by[x][k]["choice"] and by[y][k]["choice"]]
                 b = sum(fine(by[x][k]) and not fine(by[y][k]) for k in ks)
                 c = sum(fine(by[y][k]) and not fine(by[x][k]) for k in ks)
                 if ks:
                     L.append(f"| {d['key']} | {label} | {x} vs {y} | {what} | | | b / c = {b} / {c}, p = {sign_p(b, c):.3f} | |")
+    # The default, swap and negate arms repeat #61 (same cases, same prompt): a drift here means the build changed.
+    L += ["", "Repeat of #61's arms (same choice / cases):", ""]
+    for d in docs:
+        key = {"qwen3.6-35b-a3b-optiq": "optiq"}.get(d["key"], d["key"])
+        f = ROOT / "bench" / f"decide-layout-{key}-20260926-095338.json"
+        if not f.exists():
+            L.append(f"- {d['key']}: no #61 file to compare"); continue
+        old = {(c["set"], c["id"], c["arm"]): c["choice"] for c in json.loads(f.read_text())["cases"]}
+        new = {(c["set"], c["id"], c["arm"]): c["choice"] for c in d["cases"] if c["arm"] != "negate-swap"}
+        ks = new.keys() & old.keys()
+        L.append(f"- {d['key']}: {sum(new[k] == old[k] for k in ks)}/{len(ks)} against `{f.name}`")
     return L
 
 
