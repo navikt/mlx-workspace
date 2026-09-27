@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# Follow-ups 2 (reports/2026-09-28-orchestrator-and-penalty/plan.md), two items in this order:
+#   1. GPT-6 Sol as the cloud orchestrator on the dispatch-probe cells and a frontier slice,
+#      one ledger, hard cap $15 (SOL_CAP 14.75 on the ledger; the two gate sessions run outside it).
+#   2. The presence_penalty A/B on the 8-bit Qwen3.6-35B-A3B (presence-penalty.queue).
+# Waits until the per-level dispatch probe is done (.bench-logs/dispatch-levels.done, which the
+# dlv-waiter always touches) and the follow-ups 1 launcher (fu1-launcher, pid 4384 on 27 Sep) has
+# exited, then for .venv healthy, AC, 48 GB wired, no queue lock, no GPU job and :8080 free, all
+# stable for 5 min. Each item waits for that again. Touches .bench-logs/gpt6-sol.done after item 1,
+# whatever happened to it. Gives up at 2026-10-02 06:00. Stop it: kill <pid on the first log line>.
+# Start it from a path without "bench-", "night-run" or "np-serve" in it (other waiters pgrep for them):
+#   cp reports/2026-09-28-orchestrator-and-penalty/followups-2-launcher ~/tmp/fu2-launcher \
+#     && nohup bash ~/tmp/fu2-launcher >> .bench-logs/followups-2-launcher.log 2>&1 &
+set -u
+cd /Users/hans/mlx-workspace || exit 1
+BIN=/Users/hans/mlx-workspace/.bench-logs/bin
+R=reports/2026-09-28-orchestrator-and-penalty
+CAP="${SOL_CAP:-14.75}"
+SOL=gpt-6-sol
+HARNESS=df7deb1af416   # Sonnet 5's frontier cloud arm ran at this harness_sha (26 Sep)
+GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-02 06:00' +%s)
+log() { echo "$(date '+%F %T') followups-2: $*"; }
+healthy() {
+  env -u VIRTUAL_ENV .venv/bin/python - <<'PY' 2>/dev/null
+import importlib.util, sys
+import mlx_lm, numpy
+ok = mlx_lm.__version__ == "0.32.0" and tuple(int(x) for x in numpy.__version__.split(".")[:2]) < (2, 4) and importlib.util.find_spec("torch") is None
+sys.exit(0 if ok else 1)
+PY
+}
+why_not() {
+  [ -e .bench-logs/dispatch-levels.done ] || { echo "no dispatch-levels.done yet"; return; }
+  pgrep -f 'fu1-launcher|followups-1-launcher' >/dev/null && { echo "follow-ups 1 launcher still running"; return; }
+  healthy || { echo ".venv unhealthy"; return; }
+  pmset -g batt | grep -q "'AC Power'" || { echo "on battery"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  [ -d .bench-logs/.queue.lock ] && { echo "queue lock held by pid $(cat .bench-logs/.queue.lock/pid 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl 'night-run|night64|bench-|np-serve|dispatch-probe|dlv-waiter' | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | cut -c1-120 | tr '\n' ';')"; return; }
+  [ -n "$(/usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN)" ] && { echo "port 8080 in use"; return; }
+}
+wait_free() {
+  local free_since="" last="" why
+  while :; do
+    why=$(why_not)
+    if [ -z "$why" ]; then
+      [ -z "$free_since" ] && free_since=$(date +%s)
+      [ $(( $(date +%s) - free_since )) -ge 300 ] && return 0
+    else
+      free_since=""; [ "$why" != "$last" ] && log "waiting: $why"; last=$why
+    fi
+    [ "$(date +%s)" -ge "$GIVE_UP" ] && { log "gave up at 2026-10-02 06:00: ${why:-not free for 5 min}"; return 1; }
+    sleep 60
+  done
+}
+# sha256 of every file in the protected set (dlv-waiter's list); contents never printed.
+sums() {
+  ( cd "$HOME" && { find .config/opencode .copilot/agents .copilot/hooks -type f 2>/dev/null
+      ls .nav-pilot/config.toml .nav-pilot/local-models.json 2>/dev/null; } \
+    | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done )
+}
+
+log "pid $$: waits for dispatch-levels.done, follow-ups 1, then a free GPU (5 min); then GPT-6 Sol (cap \$$CAP), then the presence_penalty A/B"
+caffeinate -is -w $$ &
+wait_free || exit 1
+
+# Nothing runs from the checkout now: bring it to main, which has this PR.
+git switch -q main && git pull -q --ff-only || { log "git pull failed; not starting"; exit 1; }
+[ -f profiles/qwen3.6-35b-a3b-8bit-64g-pp15.toml ] && [ -f "$R/presence-penalty.queue" ] \
+  && grep -q 'BENCH_CLOUD_MODEL" = claude-sonnet-5' .mise/tasks/dispatch-probe \
+  || { log "main lacks the pp15 profile, the queue or the dispatch-probe tag change (PR not merged?); not starting"; exit 1; }
+for f in .mise/tasks/night-run-3 "$R/presence-penalty.queue"; do
+  dst="$BIN/$(basename "$f" | sed 's/^night-run-3$/night-run-3-fu2/')"
+  cp "$f" "$BIN/.$(basename "$dst").tmp" && mv -f "$BIN/.$(basename "$dst").tmp" "$dst"
+done
+log "checkout at $(git rev-parse --short HEAD)"
+
+# ── 1. GPT-6 Sol ────────────────────────────────────────────────────────────────
+D=".bench-logs/gpt6-sol-$(date +%Y%m%d-%H%M)"
+mkdir -p "$D"
+L="$D/ledger.json"
+spent() { python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['spent_usd'])" "$L" 2>/dev/null || echo 0; }
+sums > "$D/protected-before.sha256"
+# Probe 6's bench-only block, word for word, so the policy text matches Sonnet 5's per-level probe.
+cat > "$D/capabilities-bench-only.json" <<'EOF'
+{
+  "_label": "BENCH-ONLY, GPT-6 Sol orchestrator run (follow-ups 2), same block as dispatch probe 6. Not a measured delegate verdict. edit-multi-mechanical: trusted, as the shipped optiq entry measured it (delegate 35/35); the 8-bit worker inherits it from that entry, as in probe 5. create-file: trusted as a bench assumption so aggressive's create-file rule can fire (evidence is local mode only: night 64-2 retry2 r1-r3, 11/12). _by_class skips every sample recorded with this override, and dispatch-probe keeps the results out of bench/.",
+  "classes": {"edit-multi-mechanical": {"delegate": "trusted"}, "create-file": {"delegate": "trusted"}}
+}
+EOF
+LG=isoppfolgingstilfelle-large SM=isoppfolgingstilfelle-small T=isoppfolgingstilfelle-tests
+hybrid() {  # $1 worker profile, $2 levels, $3 cells
+  local s; s=$(spent)
+  python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) < float(sys.argv[2]) - 0.05 else 1)" "$s" "$CAP" \
+    || { log "  skip ($2 on $1): ledger at \$$s of \$$CAP"; return; }
+  log "  hybrid: $1, levels $2, cells $3 (spent \$$s)"
+  BENCH_NAV_PILOT=$BIN/nav-pilot-xdgctx-f5c90a3c BENCH_CLOUD_MODEL=$SOL BENCH_WAIT=1 \
+    BENCH_CAPABILITIES_OVERRIDE="$PWD/$D/capabilities-bench-only.json" PROBE_CAP=$CAP PROBE_HYBRID_N=2 \
+    PROBE_TIMEOUT=1200 PROBE_PROFILE="$1" PROBE_LEVELS="$2" PROBE_CELLS="$3" \
+    mise run dispatch-probe -- "$D" >> "$D/run.log" 2>&1
+  log "  exit $?, ledger \$$(spent)"
+}
+frontier() {  # $1 classes, $2 rungs
+  local s; s=$(spent)
+  python3 -c "import sys; sys.exit(0 if float(sys.argv[1]) < float(sys.argv[2]) - 0.05 else 1)" "$s" "$CAP" \
+    || { log "  skip frontier $1: ledger at \$$s of \$$CAP"; return; }
+  log "  frontier: $1 rungs $2 (spent \$$s)"
+  BENCH_NAV_PILOT=$BIN/nav-pilot-main-2e1e8ee1 python3 .mise/tasks/bench-frontier run --cloud $SOL --classes "$1" \
+    --rungs "$2" --runs 2 --cost-cap "$CAP" --cost-ledger "$L" >> "$D/frontier.log" 2>&1
+  log "  exit $?, ledger \$$(spent)"
+}
+
+log "1. GPT-6 Sol into $D"
+# Gate: one tiny session through each binary's real path, as night-run-3 does (~\$0.05 each, outside the ledger).
+if ! BENCH_NAV_PILOT=$BIN/nav-pilot-xdgctx-f5c90a3c python3 .mise/tasks/bench-frontier cloud-probe --cloud $SOL \
+       --log "$D/cloud-probe-xdgctx.log" > "$D/cloud-probe-xdgctx.out" 2>&1; then
+  log "  BLOCKER: $SOL did not answer through nav-pilot-xdgctx-f5c90a3c (see $D/cloud-probe-xdgctx.out); item 1 skipped"
+else
+  # Budget order: the advisory level (Sonnet 5's probes 4-6) and the enforced one first, with
+  # one GPT-6 Sol control per cell; the frontier slice; balanced last, where the cap may cut it.
+  hybrid qwen3.6-35b-a3b-optiq-64g "conservative aggressive" "$LG:4:1 $LG:6:1 $SM:3:1"
+  hybrid qwen3.6-35b-a3b-8bit-64g  "conservative aggressive" "$T:1:1 $T:2:1"
+  h=$(python3 -W ignore -c "import importlib.machinery as m; b=m.SourceFileLoader('bf','.mise/tasks/bench-frontier').load_module(); print(b.harness_sha(b.TASKS))" 2>/dev/null)
+  if [ "$h" != "$HARNESS" ]; then
+    log "  skip frontier: harness_sha $h, Sonnet 5's cloud arm is $HARNESS (harness v2 landed?)"
+  elif ! BENCH_NAV_PILOT=$BIN/nav-pilot-main-2e1e8ee1 python3 .mise/tasks/bench-frontier cloud-probe --cloud $SOL \
+         --log "$D/cloud-probe-2e1e8ee1.log" > "$D/cloud-probe-2e1e8ee1.out" 2>&1; then
+    log "  skip frontier: $SOL did not answer through nav-pilot-main-2e1e8ee1 (see $D/cloud-probe-2e1e8ee1.out)"
+  else
+    frontier edit-multi-mechanical 4,6
+    frontier create-file 1-3
+  fi
+  hybrid qwen3.6-35b-a3b-optiq-64g "balanced" "$LG:4:0 $LG:6:0 $SM:3:0"
+  hybrid qwen3.6-35b-a3b-8bit-64g  "balanced" "$T:1:0 $T:2:0"
+fi
+sums > "$D/protected-after.sha256"
+if diff -q "$D/protected-before.sha256" "$D/protected-after.sha256" >/dev/null; then log "  protected config unchanged"
+else log "  ⚠ protected config CHANGED: $(diff "$D/protected-before.sha256" "$D/protected-after.sha256" | grep -c '^[<>]') lines"; fi
+log "  ledger: $(cat "$L" 2>/dev/null)"
+touch .bench-logs/gpt6-sol.done
+log "1 done; the report is $R/gpt6-sol.md (to write)"
+
+# ── 2. presence_penalty A/B ─────────────────────────────────────────────────────
+wait_free || exit 1
+log "2. presence_penalty A/B: $R/presence-penalty.queue (since $(date +%Y%m%d-%H%M%S) for presence_ab.py)"
+BENCH_NAV_PILOT=$BIN/nav-pilot-main-7236795f NIGHT_REPORT=$R/presence-penalty-night.md \
+  "$BIN/night-run-3-fu2" --part local --queue "$BIN/presence-penalty.queue"
+log "presence_penalty A/B exited $?; done"

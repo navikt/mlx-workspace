@@ -610,3 +610,19 @@ Asked for on 26 September: a product requirements document and value proposition
 
 The PRD will cover the problem and users, the jobs `decide` does, value against local-only and against a Jev-style SaaS, the options and cost, privacy (DPIA, prompt logging, cache isolation), success metrics, and the rollout.
 - **`retry2` replication, night 2 (2026-09-26), done.** It replicates on edit-single rung 2 (10/16 → 16/16, p = 0.009, 1.1× time). Create-file rung 1 improves strongly (5/16 → 12/16, p = 0.016) but misses the 2× cost limit at 2.03×. Edit-multi-mechanical: no effect, and night 1's move was noise. Next: propose `retry2` as the default for edit-single dispatches in nav-pilot's check-and-retake policy, and re-measure create-file cost per task. See [night-2.md](../2026-09-25-quality-frontier/night-2.md).
+
+## 8.11 Follow-ups 2: GPT-6 Sol as orchestrator, then presence_penalty (decided 2026-09-27)
+
+Both are queued behind the per-level dispatch probe and follow-ups 1 by
+[followups-2-launcher](../2026-09-28-orchestrator-and-penalty/followups-2-launcher). The design
+and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/plan.md).
+
+1. **GPT-6 Sol** is available through Nav's Copilot (checked 2026-09-27). It runs on the
+   dispatch-probe cells at three levels, with its own controls and probe 6's binary, workers and
+   bench-only block, plus a cloud frontier slice at Sonnet 5's `harness_sha`. There is one ledger,
+   with a hard cap of $15. The report is `gpt6-sol.md` in that directory.
+2. **presence_penalty 1.5** (the Qwen3.6-35B-A3B card's non-thinking value) is tested on the 8-bit
+   against the same profile without it: ABBA on create-file retry2 r1/r3 and edit-single r3–5.
+   mlx_lm.server takes the parameter per request, and the bench sends it through opencode.json.
+   This was verified against a recording server. No loop has been seen on this model yet, so the
+   A/B mainly tests whether the card's value costs pass rate. Nothing ships in nav-pilot.
