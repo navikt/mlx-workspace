@@ -36,8 +36,8 @@ Not `--pure`: it turns off every opencode plugin, and nav-pilot's dispatch gate
 (navikt/copilot #999) is one. The developer's own opencode config is kept out by
 XDG_CONFIG_HOME instead: a directory of this run's own, which opencode, cplt and
 nav-pilot all read (nav-pilot's Nav context since navikt/copilot #1001). Their
-plugins, instructions and MCP servers never reach a sample, and nothing a sample
-writes reaches ~/.config/opencode.
+plugins, instructions and MCP servers never reach a sample, and a run checks that
+~/.config/opencode is unchanged at its end (tree_stat).
 
 So the config lifecycle is part of what we measure, not a precondition. The binding
 and fragment must be ABSENT before a hybrid launch and PRESENT after it; for the
@@ -382,7 +382,7 @@ def tool_parts(text):
 
 
 GATE_MARK = "nav-pilot (local_dispatch"
-_LOOP = re.compile(r"\b(for|while|until)\b|\$")
+_LOOP = re.compile(r"(^|[;&|(]\s*)(for|while|until)\b|\$|`", re.M)
 
 
 def gate_events(text, cwd=None):
@@ -420,7 +420,7 @@ def gate_events(text, cwd=None):
         elif tool in ("edit", "write") and st.get("status") == "completed" and inp.get("filePath"):
             fp = str(inp["filePath"])
             own.add(os.path.relpath(fp, cwd) if cwd and os.path.isabs(fp) else fp)
-        elif tool == "bash" and dispatched and re.search(r"gradle|\bgrep\b|\brg\b|test", str(inp.get("command") or "")):
+        elif tool == "bash" and dispatched and re.search(r"gradlew?\b|\bgrep\b|\brg\b|\btest\b", str(inp.get("command") or "")):
             out["checked_after_dispatch"] = True
     out["orchestrator_files"], out["worker_files"] = sorted(own), sorted(sent)
     return out
@@ -685,7 +685,10 @@ def session_env():
     the machine-default JDK 27 fails this Gradle build anyway. The ceiling stops the
     walk at workspaces/hybrid-bench; JAVA_HOME and PATH put JDK 21 ahead of the shim.
     """
-    env = {**os.environ, "MISE_CEILING_PATHS": str(WS), **XDG_ENV}
+    # opencode's own config overrides would bypass XDG_CONFIG_HOME: nav-pilot writes one
+    # directory and opencode reads another.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("OPENCODE_CONFIG")}
+    env.update(MISE_CEILING_PATHS=str(WS), **XDG_ENV)
     if CFG.get("jdk"):
         env.update(JAVA_HOME=str(JDK), PATH=f"{JDK}/bin:{env.get('PATH', '')}")
     return env
@@ -1125,7 +1128,9 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     # "the model did nothing" — a different claim from "we do not know". That has
     # been misread twice.
     invalid = None
-    if why and why != "timeout":
+    if not any((XDG / "opencode" / "agents").glob("*.md")):
+        invalid = NO_CONTEXT
+    elif why and why != "timeout":
         invalid = why
     elif timed_out:
         invalid = f"timed out after {cap}s"
@@ -1159,11 +1164,14 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     # whether it was used; the fragment's presence in the config says neither once
     # the session has tidied up after itself.
     announced = "Local dispatch: nav-pilot ends a turn" in log_text
-    if not any((XDG / "opencode" / "agents").glob("*.md")):
-        invalid = NO_CONTEXT
-    elif arm == "hybrid" and not announced:
+    level = re.search(r'local_dispatch\s*=\s*"?(\w+)', os.environ.get("BENCH_NP_CONFIG_LINE") or "")
+    armed = "NAV_PILOT_DISPATCH_GATE" in log_text   # cplt lists the variable nav-pilot passes it
+    if arm == "hybrid" and not announced:
         invalid = ("hybrid arm but nav-pilot never announced local dispatch, so the "
                    "worker was not set up for this launch")
+    elif arm == "hybrid" and level and level.group(1) in ("balanced", "aggressive") and not armed:
+        invalid = (f"local_dispatch = {level.group(1)} but the gate was not armed: the manifest trusts "
+                   "no class it has a rule for")
     elif arm == "control" and announced:
         invalid = "control arm but nav-pilot announced local dispatch"
     elif arm == "control" and local_calls:
@@ -1186,7 +1194,7 @@ def run_sample(arm, rung, task, n, snap, snap_ix, cap, cost_cap=None, spent=0.0)
     rec["dispatches"] = rework(log_text)
     rec["rework"] = {v: sum(d["verdict"] == v for d in rec["dispatches"])
                      for v in ("accepted", "fixed", "redone")}
-    rec["gate"] = gate_events(log_text, REPO)
+    rec["gate"] = {**gate_events(log_text, REPO), "armed": armed}
     return rec
 
 
@@ -1534,6 +1542,10 @@ def main():
     arms = ["hybrid", "control"] if args.arm == "both" else [args.arm]
     was_enabled = tomllib.loads(NP_CONFIG.read_text()).get("local_enabled") if NP_CONFIG.exists() else None
     ensure_clone()
+    # Before the reset: a second run would wipe the live run's config under it.
+    if [p for p in subprocess.run(["/usr/bin/pgrep", "-f", "bench-hybrid"], capture_output=True,
+                                  text=True).stdout.split() if int(p) != os.getpid()]:
+        raise SystemExit("✗ another bench-hybrid is running, and this run would empty its XDG_CONFIG_HOME")
     shutil.rmtree(XDG, ignore_errors=True)
     (XDG / "opencode").mkdir(parents=True)
     real_before = tree_stat(REAL_OPENCODE)
@@ -1631,6 +1643,9 @@ def main():
                     out.write_text(json.dumps(doc, indent=2) + "\n")  # write as we go
                     if rec.get("invalid_reason") == NO_CONTEXT:
                         raise SystemExit(f"✗ {NO_CONTEXT}. Fix: BENCH_NAV_PILOT=<a build with it>")
+                    if "gate was not armed" in (rec.get("invalid_reason") or ""):
+                        raise SystemExit(f"✗ {rec['invalid_reason']}. Every sample would measure the same "
+                                         f"ungated treatment. Fix: BENCH_CAPABILITIES_OVERRIDE")
                     if mixed:
                         raise SystemExit(f"✗ {mixed}\n  {out.relative_to(ROOT)} would mix two treatments. "
                                          f"Fix: find what changed the manifest (NAV_PILOT_BENCH_MANIFEST unset, "
