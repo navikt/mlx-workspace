@@ -5,7 +5,7 @@ move a row out when its result lands in a report, and add one when a report name
 
 Status is one of **queued** (a launcher or queue will run it), **waiting on X**, **needs user
 decision**, **needs hardware**, or **not built**. `PT` is
-[pending-tasks.md](2026-09-23-local-model-evaluation/pending-tasks.md). Last checked 2026-09-27.
+[pending-tasks.md](2026-09-23-local-model-evaluation/pending-tasks.md). Last checked 2026-09-28.
 
 | Item | What it decides | Status | When | Where |
 |---|---|---|---|---|
@@ -20,7 +20,8 @@ decision**, **needs hardware**, or **not built**. `PT` is
 | **decide telemetry adoption** (#961): devices, calls a day, caller split, latency, p_choice | Demand for a hosted decide (PRD gate 1) | waiting on 2–4 weeks of data since 2026-09-25 | first read 2026-10-09, full 2026-10-23 | PT §8.10 |
 | **Hosted decide:** vLLM against mlx logprob parity, a G4 load test in europe-north1, injection under FP8 | CPU encoder against 1+1 G4 GPUs (PRD gate 3) | needs user decision (GCP budget and project) | – | PT §8.9, [decide-as-a-service](2026-09-26-decide-as-a-service/research.md) |
 | **Decide volumes and owners:** commits and PRs a day at NAV, one or two runtime flows with a named team | PRD gate 4 | needs user decision (who to ask) | – | PT §8.9 item 5, §8.10 |
-| **Linux on real hardware:** an 8 GB NVIDIA laptop and a CPU-only laptop through the endpoint path | Whether the Linux guidance (llama-server, Ollama) holds | needs hardware | – | [Linux/Ollama research](2026-09-27-qwen38-linux-ollama/research.md) |
+| **Linux smoke test in Colima** (arm64 Linux on CPU, Ubuntu 24.04 container, Qwen3 1.7B Q4): official install, `alpha local setup` against Ollama and `llama-server`, `doctor`, a trivial `alpha decide`, one opencode session | Whether the documented Linux path works at all, before anyone measures speed | waiting on network: the 2026-09-28 run stopped at the install step when the Colima VM lost outbound network (report `2026-09-27-linux-smoke`, which also found navikt/copilot#1099) | next free queue slot with working network | [Linux/Ollama research](2026-09-27-qwen38-linux-ollama/research.md) |
+| **Linux on real hardware:** an 8 GB NVIDIA laptop and a CPU-only laptop through the endpoint path, x86_64 and x86_64 + NVIDIA (the Colima smoke test covers arm64 on CPU only, and no performance) | Whether the Linux guidance (llama-server, Ollama) holds, and Linux performance | needs hardware | – | [Linux/Ollama research](2026-09-27-qwen38-linux-ollama/research.md) |
 | **A real 48 GB Mac (Pro chip) and a real 64 GB Mac:** speed and memory pressure with an IDE open, `min_ram_gb` enforcement | Whether the 48 GB default and a 64 GB entry hold outside this 128 GB M5 Max | needs hardware | – | PT §5, [hardware-tier-backlog.md](2026-09-23-local-model-evaluation/hardware-tier-backlog.md) |
 | **Qwen3.8-27B 8-bit at 52 GB wired** (0.5 GB over the 48 fit line on 64-1), and the backlog's 64k and 131k fit rows | A "64 GB+" Qwen3.8 entry at full context | needs user decision: `sudo sysctl iogpu.wired_limit_mb=53248` for one night | a night after follow-ups 1 | [night-64-1.md](2026-09-26-64gb-tier/night-64-1.md), backlog §64 GB |
 | **presence_penalty 1.5 A/B** on the 8-bit Qwen3.6-35B-A3B (the card's non-thinking value, sent per request through opencode.json): create-file retry2 r1/r3 ABBA×2, edit-single r3–5 ABBA | Whether the card's value lowers loops or timeouts without costing pass rate (no loop seen on this model so far; its timeouts are the JAVA_HOME defect) | queued (follow-ups 2, item 2, after GPT-6 Sol) | ~10:45 28 Sep, ~6 h | [plan](2026-09-28-orchestrator-and-penalty/plan.md) §2, [presence-penalty.queue](2026-09-28-orchestrator-and-penalty/presence-penalty.queue) |
