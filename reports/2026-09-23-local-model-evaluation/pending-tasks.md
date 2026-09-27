@@ -542,6 +542,51 @@ where they are, and night 64-4 runs them.
     - Fix: set `MISE_CEILING_PATHS`, `JAVA_HOME` and a `PATH` prefix on JDK 21 in bench-frontier's launch (or `_sandbox.cplt_argv`). Those are `harness_sha` inputs, so the fix starts a new harness generation. Land it between series, not inside one.
   - **Cleanup.** `~/.config/opencode` was restored from a copy taken before the run and checked against checksums of it, together with `~/.copilot` agents and hooks and `~/.nav-pilot` config and manifest: all identical. There are no dispatch markers and no policy file, and the copy is deleted. The check session had synced the navikt/copilot pakke; that was restored the same way. No queue lock remains. `bench/` is clean: the result files are in the probe directory.
 
+- **Dispatch probe 5, create-file cells that cannot be scripted (2026-09-27): Sonnet 5 dispatched 0 of 6. NO-GO.** Probe 4 concluded that a cell tests delegation only if a script cannot do the work. #85 adds such cells.
+  - **The cells.** `bench/targets/isoppfolgingstilfelle-tests.json`: each session writes five new JUnit test files, one per frontier create-file task. Every file needs its function read and its boundary cases chosen, so no `sed` makes it.
+
+    | Cell | Frontier tasks | Mutants |
+    |---|---|---|
+    | 1 `cf5-a` | cf-r1-a, cf-r1-b, cf-r2-a, cf-r2-b, cf-r3-b | 7 |
+    | 2 `cf5-b` | cf-r1-a, cf-r3-a, cf-r3-b, cf-r4-a, cf-r4-b | 7 |
+
+    A cell is verified when exactly those five files are new, the test sources compile, and each file passes bench-frontier's `verify_new_test`: it passes on its own and fails on every mutant of what it tests. The check was run through Gradle at the pin. The five reference tests pass. Each known-bad variant fails: one test with no-op assertions, one file missing, a stray edit in `DateUtil.kt`, and one file that does not compile. No hashed file changed.
+  - **No candidate-2 cell.** Neither the frontier tasks file nor the bench has a per-call-site value that depends on local context. The thread-arg literal is the file name, and a script can produce it.
+  - **Bench-only capabilities, labelled as such.** The shipped manifest has create-file as `cloud` in delegate mode for optiq, 1 of 2. The policy therefore says "Do not send it: … new files, tests included". To test whether Sonnet 5 dispatches work the policy invites, np-serve took `BENCH_CAPABILITIES_OVERRIDE`. This is a block that is *not* a measured verdict (`capabilities-bench-only.json` in the probe directory). It is merged over the shipped block, so the policy keeps its shipped shape, and it moves create-file to the send line: "Send it: large mechanical changes …; a new file, tests included." followed by "Send these to `local-worker` instead of doing them yourself". That is policy 400a2780, and every hybrid sample got it. The override is recorded in every preflight snapshot, and `_by_class` skips those samples, so they can never become a verdict.
+  - **Worker: Qwen3.6-35B-A3B 8-bit (`qwen3.6-35b-a3b-8bit-64g`), not optiq-64g.** On create-file with retries it is the strongest worker: 11 of 12 at r1–r3 on night 64-2, against optiq's 12 of 16 at r1 only and 3/4 and 2/4 at r1–r2 elsewhere. It was served by nav-pilot at 48 GB wired.
+  - **Setup.** Binary `nav-pilot-main-7236795f`, Sonnet 5, under np-serve and the queue lock, with the workspace at the pin b0351ed8. It ran through the new `mise run dispatch-probe`. Spend was $2.51 of the $3.00 cap. Files are in `.bench-logs/dispatch-probe5-create-file-20260927/`.
+
+  | Cell | Arm | n | Dispatched | Local calls | Verified | Cloud $ | Steps | s | What it did |
+  |---|---|---|---|---|---|---|---|---|---|
+  | 1 | control | 0 | – | 0 | 5/5 files | 0.303 | 17 | 86 | read, 5 `write`, one Gradle run |
+  | 1 | hybrid | 0 | no | 0 | 5/5 | 0.264 | 15 | 80 | the same; never names the worker |
+  | 1 | hybrid | 1 | no | 0 | 5/5 | 0.234 | 12 | 66 | the same |
+  | 1 | hybrid | 2 | no | 0 | 5/5 | 0.235 | 14 | 71 | "a mechanical trivial test-writing task (compressed tier, known pattern). I'll write the 5 files directly." |
+  | 2 | control | 0 | – | 0 | 5/5 | 0.334 | 16 | 115 | read, 5 `write`, Gradle |
+  | 2 | hybrid | 0 | no | 0 | 5/5 | 0.334 | 13 | 111 | the same; never names the worker |
+  | 2 | hybrid | 1 | no | 0 | 5/5 | 0.442 | 17 | 155 | the same, plus a ktlint detour |
+  | 2 | hybrid | 2 | no | 0 | 5/5 | 0.362 | 15 | 127 | "a compressed-tier test-writing task … I'll write all 5 files directly." |
+
+  - **Per sample.** No sample dispatched, so there were 0 dispatches, no per-file split, no worker pass, no orchestrator check of a worker result and no rework. All 8 samples are valid, and all 8 pass: 40 of 40 test files kill their mutants. The cloud model writes these tests well, and without dispatching.
+  - **Cost and time against the control.** Cell 1: hybrid mean $0.244 against $0.303 (0.81×), 72 s against 86 s. Cell 2: $0.379 against $0.334 (1.13×), 131 s against 115 s. Nothing was dispatched, so the difference is sample noise plus the policy in the prompt, not a saving.
+  - **GO rule** (dispatch ≥ 50 %, dispatched samples pass, cost ≤ control): not met, 0 of 6.
+  - **Cleanup.** `~/.config/opencode` was restored from a copy taken before the run and checked against checksums of it, together with `~/.copilot` agents and hooks and `~/.nav-pilot` config and manifest: all identical. The sessions had synced the navikt/copilot pakke, as in probe 4. There are no dispatch markers and no policy file, and the copy is deleted. The lock is released. Nothing was left in `bench/`.
+- **Probes 1–5 together: Sonnet 5 dispatched 1 of 29 hybrid samples.**
+
+  | Probe | Work | Policy | Dispatched |
+  |---|---|---|---|
+  | pilot + 1 | renames, field threading (small) | capabilities text, two versions | 0 / 7 |
+  | 2 | the same, "even one or two steps" | c3ccca1e | 1 / 6 |
+  | 3 | large jobs, rule ≥ 5 files / ≥ 10 sites | 9d713fe3 | 0 / 5 |
+  | 4 | thread-arg, 12–60 sites, per-file literal | 9d713fe3 | 0 / 6 |
+  | 5 | five test files, not scriptable | 400a2780 (create-file sent, bench-only) | 0 / 6 |
+
+  In August, Sonnet 4.6 dispatched 23 of 24 on the same kind of cells. The policy text has been rewritten four times, and each version fixed the reason the one before gave. Scriptable or not, small or large, and even for work the policy names as "send it", Sonnet 5 does the work itself. When it gives a reason, the reason is the persona's tier ("compressed tier … directly"), not the policy. In four of the six probe 5 samples it never mentioned the worker at all. It is also good at the work it keeps: 40 of 40 test files here, at $0.23–0.44 a session.
+- **Recommendation for nav-pilot's local dispatch.**
+  1. **Advisory text does not make Sonnet 5 delegate.** Stop tuning the policy prose: five probes show it has no measurable effect on this orchestrator.
+  2. **If dispatch is wanted, enforce it rather than advise it.** Enforcement is the `local_dispatch = off|conservative|balanced|aggressive` setting with a hook at the higher levels, now being built. Measure it on these same cells: `BENCH_NAV_PILOT=<new binary> BENCH_NP_CONFIG_LINE='local_dispatch = "<level>"' mise run dispatch-probe -- <dir>`, once per level, with the same worker and a $3 cap. Add `PROBE_CONTROL_N=0` to reuse this probe's controls, and `BENCH_CAPABILITIES_OVERRIDE` only if the level still reads the capabilities block. The GO rule stays: dispatch ≥ 50 %, dispatched samples pass, cost ≤ control. On these cells an enforced dispatch also has to beat a control that already passes 10 of 10 files per cell, at $0.30–0.33.
+  3. **Until an enforced level passes, keep dispatch off by default** for cloud-orchestrated sessions, and do not claim credit savings for it. The hybrid arm today is the control plus a policy in the prompt, at 0.8–1.45× the control's cost across probes 4 and 5. The 64 GB workers' directed quality comes from 64-2's frontier. **64-3's hybrid arm stays NO-GO.**
+
 ## 8.9 Decide as a service: measure first
 
 Research: [2026-09-26-decide-as-a-service/research.md](../2026-09-26-decide-as-a-service/research.md).
