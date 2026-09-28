@@ -1,0 +1,13 @@
+# 64 GB tier, night 64-6, phase A: fit and TTFT past 49k at 52 GB wired (plan-64-6.md §1).
+# Wired: 52 GB (iogpu.wired_limit_mb 53248), set by the user with sudo; tier64-6-launcher waits for it.
+# Run (by the launcher): NP_LATENCY_TARGETS=2000,60000,64000 night-run-3 --part local --queue <this>
+#
+# e2e = bench-np-e2e --latency-only: cold and warm TTFT, decode and peak footprint per target.
+# NP_LATENCY_TARGETS replaces the profile-derived targets (2k/30k/49k on 64k/16k), so the
+# prompts reach 60k (near-64k) and 64k, inside the 65,536 window with the warm turn.
+# Pass: peak <= wired - 2 GB, i.e. 50 GB here; the 48 GB line (46 GB) is reported beside it.
+#
+# part kind classes variant runs rungs timeout-min expected-min profile
+local  e2e  -       -       -    -     40          15           qwen3.6-35b-a3b-8bit
+# Labelled extra: the plan's original 52 GB profile (12 GiB prompt cache), bench-only, not shipped.
+local  e2e  -       -       -    -     40          15           qwen3.6-35b-a3b-8bit-64g-w52
