@@ -1,0 +1,25 @@
+deb [signed-by=/usr/share/keyrings/navikt-archive-keyring.gpg] https://navikt.github.io/apt stable main
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+Get:1 https://navikt.github.io/apt stable InRelease [3236 B]
+Hit:2 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+Hit:3 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+Get:4 https://navikt.github.io/apt stable/main arm64 Packages [701 B]
+Hit:5 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+Fetched 3937 B in 11s (372 B/s)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+2 packages can be upgraded. Run 'apt list --upgradable' to see them.
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  bubblewrap
+The following NEW packages will be installed:
+  bubblewrap cplt nav-pilot
+0 upgraded, 3 newly installed, 0 to remove and 2 not upgraded.
+Need to get 7645 kB of archives.
+After this operation, 129 kB of additional disk space will be used.
+Do you want to continue? [Y/n] Abort.

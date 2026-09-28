@@ -1,0 +1,3 @@
+llama_context: n_outputs_max_per_seq = 1
+llama_context:        CPU  output buffer size =     0.58 MiB
+llama_kv_cache:        CPU KV buffer size =  4480.00 MiB

@@ -1,0 +1,6 @@
+→ Fetching latest nav-pilot release...
+→ Installing nav-pilot nav-pilot/2026.09.28-081152-6efd04e (linux/arm64)
+→ Downloading nav-pilot-linux-arm64...
+curl: (28) Failed to connect to github.com port 443 after 133861 ms: Couldn't connect to server
+Error: Failed to download https://github.com/navikt/copilot/releases/download/nav-pilot/2026.09.28-081152-6efd04e/nav-pilot-linux-arm64
+Check that version nav-pilot/2026.09.28-081152-6efd04e exists: https://github.com/navikt/copilot/releases

@@ -1,0 +1,35 @@
+nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    ✓ Ollama       127.0.0.1:11434  qwen3:1.7b
+    · llama-server 127.0.0.1:8080 not answering
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+  ⚠ Ollama has no model nav-pilot knows. Recommended: qwen3.6:35b (Qwen3.6-35B-A3B, the model nav-pilot's own MLX setup runs by default), about 23 GB:
+    ollama pull qwen3.6:35b
+  Not downloaded. Run it yourself, or pass --pull to have setup run it.
+  ⚠ Continuing with qwen3:1.7b, which nav-pilot knows nothing about.
+  Using  qwen3:1.7b on Ollama http://127.0.0.1:11434/v1
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3:1.7b (unsupported, unmeasured)
+  PASS  server     answers and lists qwen3:1.7b
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    about 30k tokens went in and 2050 were kept: the server cuts
+                   prompts to its context window, which breaks a Copilot
+                   session without saying so
+        Fix: Ollama: start it with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, or make
+             a model with a Modelfile holding FROM <model> and PARAMETER num_ctx
+             65536 (ollama create <name> -f Modelfile) and set local_endpoint_model
+             to <name>. llama-server: -c 65536. LM Studio: raise the context length
+             when you load the model
+  PASS  TTFT       9.8 s for about 30k tokens
+  ⚠ Ollama cut the prompt to its default context. nav-pilot can make qwen3-1.7b-navpilot, a copy of qwen3:1.7b with a 65536-token context. It downloads nothing and shares the weights. By hand:
+    printf 'FROM qwen3:1.7b\nPARAMETER num_ctx 65536\n' > Modelfile
+    ollama create qwen3-1.7b-navpilot -f Modelfile
+  Or restart Ollama with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, which raises it for every model.
+  Not created. Pass --fix-context to have setup create it.
+Error: nothing was saved. Fix the FAIL lines above, then run nav-pilot alpha local setup --fix-context --yes
+exit 1
+cat: /home/dev/.nav-pilot/config.toml: No such file or directory
