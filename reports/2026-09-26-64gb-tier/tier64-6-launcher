@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Night 64-6 (plan-64-6.md). Three phases, each after the GPU queue has been free for 5 min
+# (no lock, no GPU job), on AC, with a healthy .venv:
+#   A. wired 52 GB (the user runs `sudo sysctl iogpu.wired_limit_mb=53248`): night-64-6a.queue
+#   B. wired 48 GB (the user restores `sudo sysctl iogpu.wired_limit_mb=49152`): night-64-6b.queue,
+#      from step 2 when A's 64k probe on the shipped profile failed
+#   C. wired 48 GB, only if ~/tmp/tier64-6-hybrid.env names BENCH_NAV_PILOT and LEVEL (from
+#      dispatch re-probe 7): night-64-6c.queue under a $12 cloud cap
+# With V2_DONE=<file> it also waits for that file first (the v2 validation night's marker).
+# It never changes the wired limit itself. Gives up on a phase not started within 24 h.
+# Start it from ~/tmp, never from a path with "bench-", "night", "np-serve" or "dispatch-probe"
+# in it: other waiters pgrep for those. Stop it: kill <pid on the first log line>.
+set -u
+cd /Users/hans/mlx-workspace || exit 1
+BIN=/Users/hans/mlx-workspace/.bench-logs/bin
+R=reports/2026-09-26-64gb-tier
+HYB_ENV=/Users/hans/tmp/tier64-6-hybrid.env
+export BENCH_NAV_PILOT=$BIN/nav-pilot-main-7236795f   # 64-4/64-5's binary, for e2e and ops
+export NP_LATENCY_TARGETS=2000,60000,64000
+NR="$BIN/ni""ght-run-3-646"
+PAT=$(mktemp); trap 'rm -f "$PAT"' EXIT
+# Kept in a file so no command line of this script carries the patterns.
+printf '%s\n' "tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve" > "$PAT"
+log() { echo "$(date '+%F %T') tier64-6: $*"; }
+healthy() {
+  env -u VIRTUAL_ENV .venv/bin/python - <<'PY' 2>/dev/null
+import importlib.util, sys
+import mlx_lm, numpy
+ok = mlx_lm.__version__ == "0.32.0" and tuple(int(x) for x in numpy.__version__.split(".")[:2]) < (2, 4) and importlib.util.find_spec("torch") is None
+sys.exit(0 if ok else 1)
+PY
+}
+why_not() {  # $1: wanted iogpu.wired_limit_mb
+  [ -n "${V2_DONE:-}" ] && [ ! -e "$V2_DONE" ] && { echo "no $V2_DONE yet"; return; }
+  healthy || { echo ".venv unhealthy"; return; }
+  pmset -g batt | grep -q "'AC Power'" || { echo "on battery"; return; }
+  [ -d .bench-logs/.queue.lock ] && { echo "queue lock held by pid $(cat .bench-logs/.queue.lock/pid 2>/dev/null)"; return; }
+  local p; p=$(ps ax -o pid=,command= | grep -E -f "$PAT" | grep -vE "^ *($$|$PPID) " | grep -v -E "^ *[0-9]+ (grep|sleep)")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | cut -c1-120 | tr '\n' ';')"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = "$1" ] || echo "wired $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want $1"
+}
+wait_ready() {  # $1: wired MB; free and at that limit for 5 min
+  local free_since="" why n=0 give_up=$(( $(date +%s) + 86400 ))
+  while :; do
+    why=$(why_not "$1")
+    if [ -z "$why" ]; then
+      [ -z "$free_since" ] && free_since=$(date +%s)
+      [ $(( $(date +%s) - free_since )) -ge 300 ] && return 0
+    else
+      free_since=""; [ $((n % 15)) -eq 0 ] && log "waiting: $why"
+    fi
+    [ "$(date +%s)" -ge "$give_up" ] && { log "gave up: ${why:-not free for 5 min}"; return 1; }
+    n=$((n + 1)); sleep 60
+  done
+}
+# The 64k target of the newest np-e2e file for the shipped profile since $1: no error on the cold request.
+fit64k() {
+  python3 - "$1" <<'PY'
+import glob, json, os, sys
+fs = [f for f in glob.glob("bench/np-e2e-qwen3.6-35b-a3b-8bit-2*.json") if os.path.getmtime(f) >= float(sys.argv[1])]
+if not fs: sys.exit(1)
+d = json.load(open(max(fs, key=os.path.getmtime)))
+rec = [r for r in d.get("latency", []) if r.get("target") == 64000]
+sys.exit(0 if rec and "error" not in (rec[0].get("cold") or {"error": 1}) else 1)
+PY
+}
+
+log "pid $$: phase A at 52 GB wired, B at 48, C if $HYB_ENV is filled (nav-pilot $(basename "$BENCH_NAV_PILOT"))"
+caffeinate -is -w $$ &
+
+wait_ready 53248 || exit 1
+git switch -q main && git pull -q --ff-only || { log "git pull failed; not starting"; exit 1; }
+grep -q NP_LATENCY_TARGETS .mise/tasks/_np_checks.py || { log "main has no NP_LATENCY_TARGETS; not starting"; exit 1; }
+cp .mise/tasks/ni""ght-run-3 "$NR.tmp" && mv -f "$NR.tmp" "$NR"
+for q in a b c; do cp "$R/ni""ght-64-6$q.queue" "$BIN/.q.tmp" && mv -f "$BIN/.q.tmp" "$BIN/ni""ght-64-6$q.queue"; done
+T0=$(date +%s)
+log "checkout at $(git rev-parse --short HEAD); phase A (52 GB)"
+NIGHT_REPORT=$R/ni""ght-64-6a.md "$NR" --part local --queue "$BIN/ni""ght-64-6a.queue"
+log "phase A exited $?; now: sudo sysctl iogpu.wired_limit_mb=49152"
+touch .bench-logs/tier64-6a.done
+
+FROM=1
+fit64k "$T0" || { FROM=2; log "the 64k probe did not fit at 52 GB: no 48 GB control"; }
+wait_ready 49152 || exit 1
+log "phase B (48 GB) from step $FROM"
+NIGHT_REPORT=$R/ni""ght-64-6b.md "$NR" --part local --from "$FROM" --queue "$BIN/ni""ght-64-6b.queue"
+log "phase B exited $?"
+
+# shellcheck disable=SC1090
+[ -f "$HYB_ENV" ] && . "$HYB_ENV"
+if [ -n "${HYB_NAV_PILOT:-}" ] && [ -n "${LEVEL:-}" ]; then
+  wait_ready 49152 || exit 1
+  log "phase C: $(basename "$HYB_NAV_PILOT"), local_dispatch = $LEVEL, orchestrator ${CLOUD:-claude-sonnet-5}, cap \$12"
+  BENCH_NAV_PILOT=$HYB_NAV_PILOT BENCH_NP_CONFIG_LINE="local_dispatch = \"$LEVEL\"" FRONTIER_COST_CAP=12 \
+    FRONTIER_CLOUD_MODEL=${CLOUD:-claude-sonnet-5} \
+    NIGHT_HYBRID_TAG="np-$(basename "$HYB_NAV_PILOT" | sed 's/.*-//')-$(echo "${CLOUD:-claude-sonnet-5}" | tr -d '.' | sed 's/^claude-//; s/-//g')-$LEVEL" \
+    NIGHT_REPORT=$R/ni""ght-64-6c.md "$NR" --part hybrid --queue "$BIN/ni""ght-64-6c.queue"
+  log "phase C exited $?"
+else
+  log "phase C skipped: $HYB_ENV has no HYB_NAV_PILOT and LEVEL"
+fi
+touch .bench-logs/tier64-6.done
+log "done"

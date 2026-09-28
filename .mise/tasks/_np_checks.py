@@ -239,7 +239,11 @@ LATENCY_TARGETS = (2_000, 30_000, 60_000, 60_000)
 
 def latency_targets(context, output):
     """The fixed targets that fit the profile's window, prompt plus reply. When one
-    does not fit, the largest that does (rounded down to 1k) takes its place."""
+    does not fit, the largest that does (rounded down to 1k) takes its place.
+    NP_LATENCY_TARGETS="2000,60000,64000" replaces the list, for fit rows past the
+    profile's reply reserve (64 GB tier plan: prompts up to the full window)."""
+    if os.environ.get("NP_LATENCY_TARGETS"):
+        return [int(t) for t in os.environ["NP_LATENCY_TARGETS"].split(",")]
     cap = context - output
     fit = [t for t in LATENCY_TARGETS if t <= cap]
     if len(fit) < len(LATENCY_TARGETS):
@@ -654,6 +658,9 @@ def selftest():
     assert latency_targets(32768, 8192) == [2_000, 24_000]
     assert latency_targets(65536, 8192) == [2_000, 30_000, 57_000]
     assert latency_targets(131072, 8192) == list(LATENCY_TARGETS)
+    os.environ["NP_LATENCY_TARGETS"] = "2000,64000"
+    assert latency_targets(65536, 16384) == [2_000, 64_000]
+    del os.environ["NP_LATENCY_TARGETS"]
     assert failed(TimeoutError("timed out")) == {"error": "timeout"}
     # A timeout on every latency request still leaves the classifier and effort probes.
     import tempfile

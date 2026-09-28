@@ -1,0 +1,19 @@
+# 64 GB tier, night 64-6, phase B: back at 48 GB wired (plan-64-6.md §2-3).
+# Wired: 48 GB (iogpu.wired_limit_mb 49152), restored by the user; the launcher waits for it.
+# Run (by the launcher): NP_LATENCY_TARGETS=2000,60000,64000 night-run-3 --part local --queue <this>
+# Step 1 is the 48 GB control of phase A; the launcher starts at --from 2 when the shipped
+# profile's 64k target failed at 52 GB (no fit, so no control).
+#
+# Steps 2-5: cheap-ops for the 8-bit, the only local-mode input bench-capabilities reads.
+# Night 64-1 ran two passes (harness d1229ad0e89f, pooled with 492141135fe6); four more give
+# six, past the five-run floor. Same profile name as 64-1, so the condition pools.
+# Step 6: supporting evidence only (bench-capabilities does not read frontier files):
+# create-file under retry2 at rung 4, the one rung 64-2/64-5 never reached.
+#
+# part kind  classes     variant runs rungs timeout-min expected-min profile
+local  e2e   -           -       -    -     40          15           qwen3.6-35b-a3b-8bit
+local  ops   -           -       -    -     40          22           qwen3.6-35b-a3b-8bit-64g
+local  ops   -           -       -    -     40          22           qwen3.6-35b-a3b-8bit-64g
+local  ops   -           -       -    -     40          22           qwen3.6-35b-a3b-8bit-64g
+local  ops   -           -       -    -     40          22           qwen3.6-35b-a3b-8bit-64g
+local  lever create-file retry2  4    4     90          40           qwen3.6-35b-a3b-8bit-64g
