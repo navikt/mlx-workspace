@@ -586,6 +586,63 @@ where they are, and night 64-4 runs them.
   1. **Advisory text does not make Sonnet 5 delegate.** Stop tuning the policy prose: five probes show it has no measurable effect on this orchestrator.
   2. **If dispatch is wanted, enforce it rather than advise it.** Enforcement is the `local_dispatch = off|conservative|balanced|aggressive` setting with a hook at the higher levels, now being built. Measure it on these same cells: `BENCH_NAV_PILOT=<new binary> BENCH_NP_CONFIG_LINE='local_dispatch = "<level>"' mise run dispatch-probe -- <dir>`, once per level, with the same worker and a $3 cap. Add `PROBE_CONTROL_N=0` to reuse this probe's controls, and `BENCH_CAPABILITIES_OVERRIDE` only if the level still reads the capabilities block. The GO rule stays: dispatch ≥ 50 %, dispatched samples pass, cost ≤ control. On these cells an enforced dispatch also has to beat a control that already passes 10 of 10 files per cell, at $0.30–0.33.
   3. **Until an enforced level passes, keep dispatch off by default** for cloud-orchestrated sessions, and do not claim credit savings for it. The hybrid arm today is the control plus a policy in the prompt, at 0.8–1.45× the control's cost across probes 4 and 5. The 64 GB workers' directed quality comes from 64-2's frontier. **64-3's hybrid arm stays NO-GO.**
+- **Dispatch probe 6, the `local_dispatch` levels (2026-09-28): the gate makes Sonnet 5 dispatch, but quality does not hold under `aggressive`. `balanced` stays the default.** This is the first probe where Sonnet 5 dispatched on more than one sample: 8 of the 16 valid hybrid samples at the enforcing levels, against 1 of 29 in probes 1–5.
+  - **Setup.**
+    - Binary `nav-pilot-xdgctx-f5c90a3c`: navikt/copilot d24cac46 (#999, the levels and the gate) plus #1001, which puts the Nav context under `XDG_CONFIG_HOME`. Without #1001, an isolated session has no persona and an undescribed worker.
+    - bench-hybrid runs without `--pure`, in a config directory of its own (#103), so the gate plugin loads.
+    - Bench-only capabilities (`capabilities-bench-only.json` in the probe directory): `edit-multi-mechanical` trusted, as shipped for optiq (35/35), and `create-file` trusted as a bench assumption. `_by_class` skips these samples, and none are in `bench/`.
+    - Workers served by nav-pilot at 48 GB wired:
+      - optiq-64g on the large and small cells: its delegate trust is measured, and probe 4 used it;
+      - the Qwen3.6 8-bit on create-file: it is the strongest there, and probe 5 used it.
+    - Two hybrid samples per cell per level. Controls come from probes 4 and 5; the small cell got one of its own.
+    - Spend: $6.63 on samples (ledger) plus $0.47 on smoke sessions, $7.10 of the $8.00 cap.
+    - Files: `.bench-logs/dispatch-probe6-levels-20260928-0636/`.
+  - **The small cell**, `isoppfolgingstilfelle-small`: fm-r3-c, 6 call sites in 3 files, under every dispatch size. It can still trip the 10-call and scripted-loop rules. It does not test an ordinary feature of 5 or more files that needs a judgement per file.
+  - **Not measured:** `balanced` on r6 and on the small cell. Pass 1 stopped at the preflight (load average 8.4 against a ceiling of 8). The GPU then went to the follow-up queue.
+
+  | Level | Cell | Dispatched | Verified | Gate events | Cloud $ (× control) | s (× control) |
+  |---|---|---|---|---|---|---|
+  | aggressive | r4 (12 files) | 2/2 (2 and 12 tasks) | 2/2 | deny_files 2 then dispatched; the other sample dispatched with no deny | 0.187 (1.41×) | 112 (3.1×) |
+  | aggressive | r6 (60 sites, 3 files) | 0/2 | 2/2 | none: 3 files and few calls never reach a rule | 0.185 (1.56×) | 66 (2.0×) |
+  | aggressive | cf5-a (5 new tests) | 2/2 | 2/2 | deny_create 1 then dispatched; one sample dispatched with no deny | 0.364 (1.20×) | 308 (3.6×) |
+  | aggressive | cf5-b | 2/2 valid, plus 1 timeout | 1/2 | deny_create then dispatched in each; the timeout also dispatched | 0.396 (1.18×) | 264 (2.3×) |
+  | aggressive | small | 0/2 | 2/2 | none | 0.125 (1.06×) | 36 (0.9×) |
+  | balanced | r4 | 2/2 | 1/2 | one deny_scripted (a `for … sed` loop) then dispatched; one dispatched on the policy text alone | 0.137 (1.03×) | 84 (2.3×) |
+  | balanced | cf5-a / cf5-b | 0/4 | 4/4 | none (no create rule at balanced) | 0.262 (0.86×) / 0.377 (1.13×) | 90 (1.0×) / 148 (1.3×) |
+  | conservative | r4 / r6 / cf5-a / cf5-b / small | 0/10 | 10/10 | no gate | 1.21× / 1.41× / 0.87× / 1.21× / 1.38× | 52 / 47 / 85 / 134 / 56 |
+
+  Controls: r4 $0.133 and 36 s; r6 $0.119 and 33 s; cf5-a $0.303 and 86 s; cf5-b $0.334 and 115 s; small $0.119 and 40 s.
+  - **Per sample** (the JSON files have the full per-file split):
+    - The orchestrator sent every file it was refused, one task per file on the create-file cells. It took nothing back: rework was 27 accepted, 1 fixed, 4 redone.
+    - It checked after dispatching in 7 of the 8 dispatched samples: a grep, or a Gradle run of the new tests.
+    - Every refusal (6, in 5 samples) was followed by a dispatch in the same turn. There were no refusal loops and no refusal without recovery.
+  - **Where it breaks.**
+    1. **Quality, in 2 of the 7 dispatched attempts.**
+       - Balanced r4: the worker threaded the 12 call sites but broke the definition's parameter. The orchestrator's grep did not catch it. Its report reads "Definition took `origin: String`".
+       - Aggressive cf5-b: one of the worker's test files passes, but misses a bug in `calculateCurrentVarighetUker`. The orchestrator ran the tests, saw green, and redid 3 of 5 files without finding it.
+       - The cloud model's own work passed 18 of 18 samples in this probe.
+    2. **Time.** Dispatched samples took 2.3–3.6× the control's time. One aggressive cf5-b sample hit the 1200 s cap: the worker spent about 15 minutes on one test file (123 local calls). Worker slowness, not a loop.
+    3. **A blind spot in the gate: r6.** It has 60 call sites in 3 files, and a few multi-site edits never reach 5 files or 10 calls, so the gate never fires. The size rule in the policy text says to send it; the gate does not enforce that.
+    4. **The persona tier is still quoted** ("compressed tier … implement directly") in the same turns where the gate then forces a dispatch. The gate does not depend on the text, as #999 intended.
+  - **Verdicts per level.** Large and create-file cells only. "Local-first" means: dispatch ≥ 50 %, dispatched samples pass, no false positive on the small cell, cost informational only. The GO rule adds cost ≤ control.
+
+    | Level | Dispatched (valid) | Dispatched and passing | False positives (small) | Local-first | GO rule |
+    |---|---|---|---|---|---|
+    | aggressive | 6/8 (75 %), plus 1 timed-out attempt | 5/6, 5 of 7 attempts | 0/2 | **NO-GO** on quality | NO-GO (1.18–1.56×) |
+    | balanced | 2/6 (33 %), r6 unmeasured | 1/2 | unmeasured | NO-GO | NO-GO |
+    | conservative | 0/8 | – | 0/2 | NO-GO | NO-GO |
+
+    Two samples per cell make this a probe, not a measurement. One failure more or less moves aggressive's quality line.
+  - **Recommendation.**
+    1. **Keep `balanced` as the default**, including for users who turned local on. The user's pre-authorised rule was to make `aggressive` the default for them only if the local-first verdict is GO. It is not: 1 of 6 dispatched samples failed, and a second attempt timed out. On these cells the cloud model's own work never failed. `balanced` does push work out on large multi-file jobs (2/2 dispatched on r4, at 1.03× the control's cost). It keeps create-file with the cloud, where the worker is weakest.
+    2. **Offer `aggressive` as the opt-in** for users who want the most local use. It dispatches reliably (75 %), with no false positive on the small cell and no refusal loops. It costs 1.2–1.6× the cloud credits and 2–3.6× the time on these cells, and it does not save credits here.
+    3. **Capabilities to ship:** keep `edit-multi-mechanical` trusted for optiq. Do not ship `create-file` as trusted for any 64 GB worker: 1 weak test file in 20 dispatched, plus a session that timed out, is not a delegate verdict.
+    4. **Before `aggressive` could become a default,** the worker's output needs a check stronger than the orchestrator's grep or green tests. Two options: a definition check for thread-arg, and mutation or boundary checks for new tests. Or the policy should tell the orchestrator to review the worker's diff line by line. Then re-probe with ≥ 5 samples per cell, per local-dispatch.md's decision rule.
+    5. **Gate follow-up in nav-pilot:** count call sites (or `sed … /g` replacements) toward the 10-call rule, so a 3-file, 60-site job like r6 is gated.
+  - **Harness notes.**
+    - dispatch-probe expanded its level globs at start, so eight result files stayed in `bench/`. They were moved by hand, and this PR fixes it.
+    - A shell watcher whose command line contained `.bench-logs` kept the waiter's `pgrep 'bench-'` busy check true for 3.5 hours.
+    - Cleanup: `~/.config/opencode`, `~/.copilot` agents and hooks, and `~/.nav-pilot` config and manifest are unchanged by sha256. The lock is released, and the bench XDG directory is gone.
 
 - **Nights 64-4 and 64-5 (2026-09-27/28, $0): the Qwen3.6-35B-A3B 8-bit is the 64 GB candidate.** Reports: [night-64-4.md](../2026-09-26-64gb-tier/night-64-4.md) and [night-64-5.md](../2026-09-26-64gb-tier/night-64-5.md), each with a Review section written from the raw files. The binary was `nav-pilot-main-7236795f` at 48 GB wired, and Occamy was served through the bench override. The decide steps now use it as well (#86).
   - **Copilot e2e (np-e2e full):** the 8-bit verified 12/12 and Occamy 8/12. The loop guard stopped three of Occamy's sessions, two of them on a `read_bash` call missing its required arguments.
