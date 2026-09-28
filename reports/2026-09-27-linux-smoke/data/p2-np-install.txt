@@ -1,6 +1,6 @@
 Resolving source...
 ℹ agentpakke nav-pilot proposes cplt sandbox settings, which only an interactive install can approve.
-  cplt config set proxy.allow_private_domains loki.nav.cloud.nais.io,mimir.nav.cloud.nais.io,tempo.dev-gcp.nav.cloud.nais.io,tempo.prod-gcp.nav.cloud.nais.io
+  cplt config set proxy.allow_private_domains <internal hosts, redacted>
 ℹ Installing 3 hooks, which run outside the sandbox on every matching tool call: ask-first-aria, gh-poll-gate, klarsprak-gate
 Installing: all 63 items
 Source: navikt/copilot@f30c1a3

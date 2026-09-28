@@ -1,0 +1,41 @@
+2026-09-28 17:00:40 === pass 3 aarch64, cgroup max 5120 MiB
+2026-09-28 17:00:40 --- p3-apt
+2026-09-28 17:00:43     p3-apt exit 0 (3 s)
+2026-09-28 17:00:43 --- p3-np-install
+2026-09-28 17:00:47     p3-np-install exit 0 (4 s)
+2026-09-28 17:00:47 --- p3-opencode-install
+2026-09-28 17:00:52     p3-opencode-install exit 0 (5 s)
+2026-09-28 17:00:52 --- p3-llama-install
+2026-09-28 17:02:11     p3-llama-install exit 0 (79 s)
+2026-09-28 17:02:16     llama-server -c 32768 up
+2026-09-28 17:02:16     cgroup memory.current 5119 MiB, peak 5120 MiB, oom_kill 0 
+2026-09-28 17:02:16 --- p3-llama-setup
+2026-09-28 17:12:17     p3-llama-setup exit 1 (601 s)
+2026-09-28 17:12:17     cgroup memory.current 5069 MiB, peak 5120 MiB, oom_kill 0 
+2026-09-28 17:12:17 --- p3-llama-config
+2026-09-28 17:12:18     p3-llama-config exit 0 (1 s)
+2026-09-28 17:12:18 --- p3-llama-doctor
+2026-09-28 17:12:58     p3-llama-doctor exit 0 (40 s)
+2026-09-28 17:12:58     cgroup memory.current 26 MiB, peak 5120 MiB, oom_kill 1 
+2026-09-28 17:12:58 --- p3-llama-decide
+2026-09-28 17:12:58     p3-llama-decide exit 0 (0 s)
+2026-09-28 17:12:58 --- p3-llama-session
+2026-09-28 17:13:01     p3-llama-session exit 1 (3 s)
+2026-09-28 17:13:01     cgroup memory.current 150 MiB, peak 5120 MiB, oom_kill 1 
+2026-09-28 17:13:04 --- p3-ollama-install
+2026-09-28 17:15:39     p3-ollama-install exit 0 (155 s)
+2026-09-28 17:15:44 --- p3-ollama-pull
+2026-09-28 17:16:47     p3-ollama-pull exit 0 (63 s)
+2026-09-28 17:16:47 --- p3-ollama-config
+2026-09-28 17:16:50     p3-ollama-config exit 0 (3 s)
+2026-09-28 17:16:50 --- p3-ollama-doctor
+2026-09-28 17:17:38     p3-ollama-doctor exit 0 (48 s)
+2026-09-28 17:17:38     cgroup memory.current 2080 MiB, peak 5120 MiB, oom_kill 1 
+2026-09-28 17:17:38 --- p3-ollama-decide
+2026-09-28 17:17:39     p3-ollama-decide exit 0 (1 s)
+2026-09-28 17:17:39 --- p3-ollama-session
+2026-09-28 17:19:39     p3-ollama-session exit 0 (120 s)
+2026-09-28 17:19:39     cgroup memory.current 2788 MiB, peak 5120 MiB, oom_kill 1 
+2026-09-28 17:19:39 --- p3-ollama-ps
+2026-09-28 17:19:39     p3-ollama-ps exit 0 (0 s)
+2026-09-28 17:19:39 === pass 3 end

@@ -69,20 +69,37 @@ What this shows:
 - **On a 6 GB machine, doctor's context check cannot pass, as expected.** The 30k probe needs about 3.4 GB of KV. Setup then saves nothing, so a small machine has no usable config unless you run `nav-pilot config set` by hand (#1126). Setup never says so.
 - **The failures are clear except for the OOM** (#1127).
 
-**Still to run: pass 3** ([`inner3.sh`](data/inner3.sh)) in a fresh container, after the presence_penalty A/B frees the queue. It covers:
-- llama-server at `-c 32768`, which should fit 5 GiB and hold the 30k probe, then setup, doctor, decide and an opencode session;
-- Ollama with the config set by hand, then doctor (expected FAIL context at 4k), decide and a session.
+## Pass 3, 2026-09-28 19:00–19:19 (saved config)
+
+[`inner3.sh`](data/inner3.sh) ran in a fresh container with the same setup: ubuntu:24.04 arm64, 4 CPUs and a 5 GiB cgroup. It used nav-pilot b10a4ba and cplt 0014b78 from apt, and Qwen3 1.7B Q4 on both servers. `data/p3-run.txt` has the times in UTC.
+
+| Step | llama-server b11227, `-c 32768` | Ollama 0.34.4, `qwen3:1.7b` |
+|---|---|---|
+| Install (apt with `-y` and `libgomp1`, `nav-pilot install`, opencode) | PASS | PASS |
+| Server up | PASS: it started in 5 GiB | PASS |
+| `alpha local setup --yes` | FAIL context, nothing saved: PASS server, tool calls and logprobs, then "no answer within 10m0s". The average prefill rate on 4 CPUs fell from 167 to 43 tokens/s as the prompt grew, and it had reached 24,576 of about 30k tokens when setup gave up | not run: config set by hand |
+| Config saved by hand (`config set`) | PASS | PASS |
+| `alpha local doctor` | exit 1. llama-server was OOM-killed (`oom_kill 1`) on doctor's first chat request, right after setup's 24.5k-token prompt had left the cgroup at 5,069 of 5,120 MiB. Doctor's own 30k probe never reached it. Doctor reported FAIL tool calls (`EOF`, with a `--jinja` fix that does not apply, navikt/copilot#1223), WARN logprobs and FAIL context ("most likely out of memory") | exit 1, FAIL context: "about 30k tokens went in and 2050 were kept". PASS server, tool calls, logprobs, and "TTFT 30.3 s", which is for the 2,047 tokens kept, not for 30k. `ollama ps`: context 4096, 100 % CPU |
+| `alpha decide`, 3 calls | not reached: the server was dead, and each call exits 2 with "the local endpoint is not answering" | **PASS**: 3/3 answer `yes` (p = 1.0), 21–398 ms |
+| opencode session through nav-pilot | not reached: "launch failed: the local endpoint is not answering" | **launches and runs** (1 min 52 s, exit 0), but does no work. Each step's input was cut to about 2,046 tokens. The model called `write` without `content`, then wrote `/path/to/file.txt`, which was rejected as outside the project. greet.py was unchanged, and no test was written |
+
+What this shows:
+- **On Linux, with a saved config, the plumbing works on Ollama.** Doctor runs and names the right fault. Decide answers from the local model in milliseconds. `nav-pilot --client opencode` launches opencode in cplt against the local endpoint, and the model makes tool calls.
+- **A 6 GB CPU box cannot run a real session.** At Ollama's default 4k context, the session prompt (15,322 tokens by Ollama's log) is cut to about 2k tokens, and the model works blind. llama-server at 32k started without being killed, at 5,119 of 5,120 MiB, page cache included. After a 24.5k-token prompt it died on the next request. Both are the context and memory limits this report already names. Doctor caught Ollama's cut exactly. For the dead llama-server it blamed the chat template first (navikt/copilot#1223).
+- **The context probe does not suit a CPU-only machine.** At that rate a 30k prompt needs more than 10 minutes (24,576 tokens after 571 s), so setup's limit ran out first. A user on a CPU-only Linux laptop waits 10 minutes for a FAIL (navikt/copilot#1222).
+- **The llama-server column never reached decide or a session.** A run with `-c 16384`, where doctor fails the probe but the server lives, would cover it. The Ollama column already shows that the path works.
 
 ## Verdict
-Partly tested. The rerun covers:
-- the install, where apt works in a terminal and needs `-y` in CI;
-- setup against Ollama and llama-server;
-- the memory limits.
+**The Linux path works, with limits.** With a saved config on Ollama:
+- the install works (apt, with `-y` in CI);
+- doctor runs and gives the right diagnosis;
+- `alpha decide` answers;
+- an opencode session launches through nav-pilot and cplt against the local model.
 
-Doctor, decide and opencode on Linux are still unverified, because on 6 GB setup saved nothing to run them against. Pass 3 covers them.
+On a 6 GB CPU-only machine, no coding session succeeds. The context either fits in memory and is cut to 4k (Ollama), or it is large enough and gets OOM-killed (llama-server at 32k, after a long prompt). The minimum RAM for a working session on CPU is still unmeasured. The llama-server path was verified up to doctor, not beyond it.
 
 ## Limits
-- **Rerun:** done on 2026-09-28 at 11:58, with pass 3 still to come. github.com dropped out from the VM for about two minutes during it.
+- **Rerun:** done on 2026-09-28 at 11:58, and pass 3 at 19:00. github.com dropped out from the VM for about two minutes during the 11:58 rerun.
 - **Coverage:** a rerun in Colima is still arm64 on CPU. x86_64, and x86_64 with NVIDIA, stay unmeasured ([UNMEASURED.md](../UNMEASURED.md)).
 - **Memory:** the 6 GB VM fits a 1.7B Q4 model, but not doctor's ~30k-token context probe at f16. That probe needs about 3.4 GB of KV cache on top of about 1 GB of weights, and setup's `--fix-context` 65,536 needs about 7 GB. Confirmed by the rerun: `--fix-context` and llama-server's default 40,960 were both OOM-killed in 5 GiB.
 

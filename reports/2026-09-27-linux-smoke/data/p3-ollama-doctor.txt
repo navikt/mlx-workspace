@@ -1,0 +1,23 @@
+nav-pilot alpha local doctor  (alpha, unsupported, unmeasured)
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3:1.7b (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3:1.7b
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    about 30k tokens went in and 2050 were kept: the server cuts
+                   prompts to its context window, which breaks a Copilot
+                   session without saying so
+        Fix: Ollama: start it with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, or make
+             a model with a Modelfile holding FROM <model> and PARAMETER num_ctx
+             65536 (ollama create <name> -f Modelfile) and set local_endpoint_model
+             to <name>. llama-server: -c 65536. LM Studio: raise the context length
+             when you load the model. On a GPU with 8 GB or less, 65536 may not fit:
+             https://ki-utvikling.nav.no/nav-pilot/lokal/egen-server#lite-minne
+  PASS  TTFT       30.3 s for about 30k tokens
+
+exit 1
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+qwen3:1.7b    8f68893c685c    1.9 GB    100% CPU     4096       4 minutes from now    

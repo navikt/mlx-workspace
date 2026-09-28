@@ -1,0 +1,34 @@
+nav-pilot alpha local doctor  (alpha, unsupported, unmeasured)
+
+  Endpoint  http://127.0.0.1:8080/v1
+  Model     qwen3-1.7b (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3-1.7b
+  FAIL  tool calls Post "http://127.0.0.1:8080/v1/chat/completions": EOF
+        Fix: Ollama: use a library model such as qwen3.6:35b (ollama pull
+             qwen3.6:35b); a hf.co/... pull has no tool-call parser. llama-server:
+             start it with --jinja
+  WARN  logprobs   alpha decide is unavailable: Post
+                   "http://127.0.0.1:8080/v1/chat/completions": dial tcp
+                   127.0.0.1:8080: connect: connection refused
+        Fix: Ollama returns logprobs from v0.12.11 (ollama --version); llama-server
+             and vLLM return them; LM Studio's chat endpoint does not. Without them
+             alpha decide refuses this server; the local worker still works
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    the server stopped answering during the 30k-token prompt,
+                   most likely out of memory: Post
+                   "http://127.0.0.1:8080/v1/chat/completions": dial tcp
+                   127.0.0.1:8080: connect: connection refused
+        Fix: Start the server again; on Linux, dmesg or the cgroup's memory.events
+             shows whether the OOM killer stopped it. Use a context that fits in
+             memory, such as 16384 on a GPU with 8 GB or less, and keep part of the
+             model in RAM. Ollama: OLLAMA_CONTEXT_LENGTH=16384 ollama serve; Ollama
+             splits the layers between GPU and RAM on its own. llama-server: -c
+             16384, with --n-cpu-moe 999 for a MoE model such as Qwen3.6-35B-A3B, or
+             -ngl <n> to put only n layers on the GPU. Once the server runs with the
+             smaller context, nav-pilot alpha local setup offers to save it, although
+             a context under 30k tokens fails this check. More:
+             https://ki-utvikling.nav.no/nav-pilot/lokal/egen-server#lite-minne
+  SKIP  TTFT       the context probe failed
+
+exit 1

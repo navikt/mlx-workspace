@@ -1,0 +1,76 @@
+⚠ model "qwen3:1.7b" runs this session on the local model. To choose which model the local server loads, set local_model instead: nav-pilot alpha local use <key>.
+
+→ Launching opencode...
+ℹ Local dispatch: nav-pilot ends a turn after 4 identical tool calls in a row with the same result, or 8 whatever they return.
+ℹ Sandbox: /home/dev/smoke-p3-ollama
+Launching opencode via cplt sandbox with Nav context (34 skill(s), 7 command(s), 11 agent(s), AGENTS.md)...
+
+[cplt] Project:  /home/dev/smoke-p3-ollama
+[cplt] Home:     /home/dev
+[cplt] Agent:    OpenCode
+[cplt] Scratch dir: /home/dev/.cache/cplt/tmp/1e2f3d84ca9b14c51c5a4f572786ebcb
+[cplt] Starting proxy on ephemeral port...
+[cplt] Proxy running on localhost:34873 (thread)
+[cplt] allow_env_files=false is not fully enforceable on Linux: Landlock grants the project directory full read access, so .env files within it remain readable. Differs from macOS Seatbelt behavior.
+[cplt] Bubblewrap unavailable (bwrap test failed: bwrap: No permissions to create new namespace, likely because the kernel does not allow non-privileged user namespaces. See <https://deb.li/bubblewrap> or <file:///usr/share/doc/bubblewrap/README.Debian.gz>.). Using Landlock + seccomp only.
+[cplt] UNIX sockets are NOT restricted in this run: Landlock cannot gate connect(2) below ABI v9 (kernel 7.1) and Bubblewrap is not active, so nothing masks them. An agent can reach the D-Bus session bus or a container daemon socket and execute code outside the sandbox. Install bubblewrap to close the known paths.
+[cplt] Landlock sandbox ready ✓
+
+[cplt] ── Sandbox Configuration ─────────────────────────
+
+[cplt]  Filesystem:
+[cplt]    Project:       read/write  /home/dev/smoke-p3-ollama
+[cplt]    Extra read:    allowed     /home/dev/.local/share/nav-pilot/opencode-plugin
+[cplt]    Extra read:    allowed     /home/dev/.copilot/hooks
+[cplt]    Extra write:   allowed     /home/dev/.local/share/nav-pilot/opencode-hook-state
+[cplt]    .env/.pem/.key blocked     secrets protected
+[cplt]    Lifecycle:     blocked     npm/yarn postinstall hooks
+[cplt]    SSH/GPG/cloud: blocked     ~/.ssh, ~/.gnupg, ~/.aws, ...
+[cplt]    GH CLI config: read-only   ~/.config/gh/{hosts,config}.yml
+
+[cplt]  Network:
+[cplt]    Outbound:      443          HTTPS only
+[cplt]    Localhost:     :37823
+[cplt]    Proxy:         on          localhost:34873
+[cplt]    SSH agent:     blocked     use HTTPS, not SSH
+
+[cplt]  Environment:
+[cplt]    Mode:          sanitized   allowlist + 5 extra
+[cplt]    Extra:         NAV_PILOT_HOOK_STATE_DIR
+[cplt]    Extra:         NAV_PILOT_MCP_BLOCKED
+[cplt]    Extra:         NAV_PILOT_OPENCODE_HOOKS
+[cplt]    Extra:         NAV_PILOT_SKILLS_DIR
+[cplt]    Extra:         OPENCODE_CONFIG_CONTENT
+[cplt]    Stripped:      AWS_*, NPM_TOKEN, DATABASE_URL, SSH_AUTH_SOCK, ...
+
+[cplt]  Command guards:
+[cplt]    gh guard:      on          default-deny, scope_check=on
+[cplt]    git guard:     on          blocks git push to the default branch
+
+[cplt]  Home:           /home/dev
+[cplt]  Full profile:   cplt --print-profile
+[cplt]  Tip:            use --quiet, or cplt config set sandbox.quiet true
+[cplt] ──────────────────────────────────────────────────────
+[cplt] Auto-confirmed (--yes)
+[cplt] Starting OpenCode in sandbox...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{"type":"step_start","timestamp":1790615918434,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"id":"prt_0e9069758001gZh7oiiDrzTtAy","messageID":"msg_0e905e25a001YfONuw651ClRUs","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","snapshot":"","type":"step-start"}}
+{"type":"tool_use","timestamp":1790615941258,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"type":"tool","tool":"write","callID":"call_tj548u0t","state":{"status":"error","input":{"prompt":"Fix the typo in greet.py: greet should return \"Hello, \" + name. Provide the corrected code and verify it by running test_greet.py."},"error":"The write tool was called with invalid arguments: SchemaError(Missing key\n  at [\"content\"]).\nPlease rewrite the input so it satisfies the expected schema.","time":{"start":1790615941197,"end":1790615941256}},"id":"prt_0e906f040001DQ4pdA6JBTie71","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","messageID":"msg_0e905e25a001YfONuw651ClRUs"}}
+{"type":"step_finish","timestamp":1790615943707,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"id":"prt_0e906fa0f001JS9Bahmf1DEaGB","reason":"tool-calls","snapshot":"","messageID":"msg_0e905e25a001YfONuw651ClRUs","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","type":"step-finish","tokens":{"total":2636,"input":2047,"output":586,"reasoning":0,"cache":{"write":0,"read":3}},"cost":0}}
+{"type":"step_start","timestamp":1790615958677,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"id":"prt_0e9073473001eZDWGcZFogvN09","messageID":"msg_0e906fa18001dD2aakEas0QbQM","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","snapshot":"","type":"step-start"}}
+[93m[1m! [0mpermission requested: external_directory (/path/to/*); auto-rejecting
+{"type":"tool_use","timestamp":1790615979262,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"type":"tool","tool":"write","callID":"call_ox7ilddo","state":{"status":"error","input":{"filePath":"/path/to/file.txt","content":"Sample content to write to the file"},"error":"The user rejected permission to use this specific tool call.","time":{"start":1790615979196,"end":1790615979249}},"id":"prt_0e90784b6001tP7mC1XFGkZvPU","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","messageID":"msg_0e906fa18001dD2aakEas0QbQM"}}
+{"type":"step_finish","timestamp":1790615979274,"sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","part":{"id":"prt_0e9078505001qts8QTpJxX4sIU","reason":"tool-calls","snapshot":"","messageID":"msg_0e906fa18001dD2aakEas0QbQM","sessionID":"ses_f16fa1ee8ffeN9aGI2ZG45HBW2","type":"step-finish","tokens":{"total":2549,"input":2046,"output":499,"reasoning":0,"cache":{"write":0,"read":4}},"cost":0}}
+[cplt] Session ended (exit 0, 1m 52s)
+[cplt] no project file changes
+[cplt] Collection: available.
+[cplt] Classification: settled.
+[cplt] Proxy-observed CONNECT attempts recorded: 8.
+[cplt] Hosts retained: 3. Hosts with blocked activity: 0.
+[cplt] Network visibility: partial.
+[cplt] Routing: proxy enabled without forced routing; direct traffic can bypass observation.
+[cplt] Window: proxy start through snapshot cutoff at +112.677s.
+[cplt] Scope: CONNECT records only. Payloads and exclusive process attribution are unavailable.
+[cplt] Excludes application requests, kernel-denied attempts, DNS, UDP, inbound traffic, delegated services, and activity after the cutoff.
+[cplt] audit covers the repositories in scope — 1 writable path outside /home/dev/smoke-p3-ollama was NOT audited: /home/dev/.local/share/nav-pilot/opencode-hook-state
