@@ -1,5 +1,8 @@
 # Local models for nav-pilot: decision and action list, 2026-09-23
 
+**Updated 2026-09-28:** what landed on 26–28 September is in [Status on 2026-09-28](#status-on-2026-09-28),
+decision items 11–18 and actions 14–21. Every line cites the merged report it comes from.
+
 **Updated 2026-09-24:** the user changed the decision. Both Qwen3.8-27B builds stay in the
 manifest for the 48 GB tier as tuned opt-ins, pending the sweep in
 [qwen38-tuning.md](qwen38-tuning.md). Items 2–5 of §1 and action 4 are revised below; the
@@ -35,6 +38,20 @@ Still open:
 - navikt/copilot#934 (sampling override, `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P`) merged on 2026-09-24 (this line said "stays a draft" until 2026-09-26).
 - navikt/mlx-workspace#20 stays a draft and will be re-scoped (action 4): it will ship the tuned parameters for both Qwen3.8 builds instead of removing the 8-bit.
 
+## Status on 2026-09-28
+
+Checked 12:55 CEST. Merged since 2026-09-24, in navikt/mlx-workspace unless marked:
+
+- #108 (nights 64-4 and 64-5, with reviews) and #109 (the 64 GB manifest entry `qwen3.6-35b-a3b-8bit`), 2026-09-28.
+- #112 (dispatch probe 6, the `local_dispatch` levels) and navikt/copilot#1114 (the gate counts call sites and checks the worker's result), 2026-09-28.
+- #111 (own-endpoint validation) with navikt/copilot#1100 (two setup fixes), #110 (Linux smoke test) and #120 (the network reruns: Ollama `--pull`, Linux passes 1–2), 2026-09-28.
+- #115 (quality frontier, follow-ups 1) and #118 (GPT-6 Sol as the cloud orchestrator), 2026-09-28.
+- #106 (PRD for a hosted `alpha decide`, plan only), 2026-09-27.
+
+Still open or queued: dispatch re-probe 7 (#121), night 64-6 ([plan-64-6.md](../2026-09-26-64gb-tier/plan-64-6.md)),
+the presence_penalty A/B and Linux pass 3 (both queued, [UNMEASURED.md](../UNMEASURED.md)), and frontier
+harness v2 (#113, held until those have run).
+
 ## 1. Decision summary
 
 1. `qwen3.6-35b-a3b-optiq` stays the only default. Its quality is level with the best local alternative (28/40 vs 31/40, Fisher p = 0.61), and it is about 9× faster per task.
@@ -47,6 +64,17 @@ Still open:
 8. Two nav-pilot fixes go with it: #931 (a dead generation thread makes the server exit, so it no longer hangs) and #932 (Copilot static context 45.1k → 21.7k tokens).
 9. All four PRs were tested together end to end, and every scenario passed after a re-run that fixed the test design.
 10. Not measured: real 48 GB hardware or Pro-chip decode speed. The 4-bit at 60k works on 36 GB wired but is slow: 109 s to first token, 22 tok/s, peaking at 39.0 GB.
+
+**Added 2026-09-28.**
+
+11. **64 GB machines get an opt-in: `qwen3.6-35b-a3b-8bit`** (#109, shipped 2026-09-28 by the user's decision to ship as measured). It is the default's model at 8-bit: `min_ram_gb` 64, 48 GB wired, 64k context and a 16k reply, never the default. It won the tier over Occamy 4-bit: Copilot e2e 12/12 against 8/12, create-file with one retry 19/24 against 13/24 (p = 0.062, moderate evidence), decomposed edits level, and Occamy's publisher is not allowed ([night-64-4.md](../2026-09-26-64gb-tier/night-64-4.md) and [night-64-5.md](../2026-09-26-64gb-tier/night-64-5.md), Reviews; #108). Its peak was 46.18 GB at the 49k probe, 0.18 GB over the 46 GB line. Prompts past 49k are unmeasured and extrapolate to about 50 GB; night 64-6 measures them ([plan-64-6.md](../2026-09-26-64gb-tier/plan-64-6.md)). Its capabilities block is all `cloud`, so the orchestrator is told to send it nothing: for now it is a selectable local model, not a worker ([pending-tasks.md §8.8](pending-tasks.md#88-the-64-gb-tier-a-worker-directed-by-a-cloud-orchestrator-downloaded-profiles-in-place)).
+12. **`local_dispatch = balanced` stays the default; `aggressive` is the opt-in** (dispatch probe 6, pending-tasks §8.8, #112). The gate (navikt/copilot#999) is the first thing that made Sonnet 5 dispatch: 8 of 16 valid hybrid samples at the enforcing levels, against 1 of 29 on advisory text in probes 1–5. `aggressive` dispatched in 6 of 8 valid samples, but 1 of the 6 failed and another attempt timed out, and it cost 1.18–1.56× the control. The cloud model's own work passed 18 of 18. `create-file` is not shipped as trusted for any 64 GB worker.
+13. **The gate and verification fixes are in nav-pilot; the re-probe is pending.** navikt/copilot#1114 (merged 2026-09-28) counts call sites toward the multi-file rule, so probe 6's 60-site, 3-file r6 is now gated. It also appends build, test and break-the-code checks to a worker's result, for the two quality failures probe 6 found. Whether that is enough for `aggressive` to become a default is dispatch re-probe 7 (#121); until then item 12 stands.
+14. **GPT-6 Sol delegates without being forced, but does not save credits** ([gpt6-sol.md](../2026-09-28-orchestrator-and-penalty/gpt6-sol.md), #118). Under `aggressive` it dispatched in 7 of 7 valid samples with no gate refusal, r6 included, and all 16 valid samples verified. It cost 0.71–2.33× its own control, so it fails the GO rule on cost. `balanced` was not run. 9 of 25 sessions were lost to an auto-rejected read of nav-pilot's own instructions (navikt/copilot#1120, #116). Nothing ships.
+15. **The own-endpoint path works** on `mlx_lm.server`, Ollama 0.34.4 and llama-server 0.5.0 ([endpoint report](../2026-09-28-local-endpoint-validation/report.md), #111, #120). Doctor passes all five checks on all three. Decide through an endpoint to `mlx_lm.server` gives exactly the managed answers (89/96, 95/105, 323/364). The unsloth GGUF on Ollama or llama-server is level within the intervals (87/96, 94/105, 321/364), with half the prefill (TTFT 17–19 s against 9–10 s at 30k). Ollama's library `qwen3.6:35b` pulled through `setup --pull` (21.1 GiB, 711 s) and passed setup and doctor. navikt/copilot#1100 fixed two first-run setup bugs. macOS only.
+16. **Linux is partly tested** ([linux-smoke report](../2026-09-27-linux-smoke/report.md), #110, #120), in Colima: arm64, CPU, a 5 GiB container, Qwen3 1.7B. The apt install works in a terminal and needs `-y` without one (navikt/copilot#1128). Setup ran against Ollama and llama-server, but in 5 GiB the 30k context check cannot pass, so setup saved nothing (navikt/copilot#1126). An OOM shows as "connection refused" (navikt/copilot#1127), and llama.cpp's ubuntu-arm64 build needs libgomp1 (navikt/copilot#1129). Doctor, decide and an opencode session on Linux are still unverified; pass 3 is queued. x86_64 and NVIDIA are unmeasured (#124).
+17. **Follow-ups 1 changes nothing in nav-pilot** ([night-followups-1.md](../2026-09-25-quality-frontier/night-followups-1.md), Review, #115). decide's yes/no inconsistency is a pull to the last-listed option, not a "text is fine" prior. read-qa's `example` prefix replicates (57/80 against 32/80), but every rung stays `cloud` (next lever: #114). create-file `retry2` pooled with night 2 is 15/20 against 5/20 at 2.02× the median time per sample, over design §7's 2× limit, and cheaper per verified result (322 s against 618 s); which rule applies is the user's call (#126).
+18. **Hosted `alpha decide`: a plan, no-go today** ([PRD](../2026-09-27-hosted-decide-prd/prd.md), #106). None of the four data gates in [pending-tasks §8.10](pending-tasks.md#810-a-prd-for-a-hosted-alpha-decide-once-the-data-is-in) is met, and the user has ruled out running GCP infrastructure for now. If the gates pass and the user says go, the PRD recommends a G4 in `europe-north1` behind the nav-pilot CLI gateway: about $1.0k a month for an office-hours pilot, $3.2–7.2k for 1+1.
 
 ## 2. Action list
 
@@ -65,8 +93,16 @@ All actions are for the user (Hans). Suggested order follows the table.
 | 9 | Remove stale branches and worktrees after the merges (details below) | | | Disk use, and the main copilot checkout stays on a superseded branch |
 | 10 | Your call: remove the `~/.copilot/session-state` worktrees | 5 directories, listed below | They caused the 45.1k static context | After #932 they no longer reach nav-pilot sessions. Before #932 they do |
 | 11 | **Done** (#936, baf72f2c; values 1–16,384 accepted). Add `MLX_PREFILL_STEP_SIZE` → `--prefill-step-size` to nav-pilot's `serverFlags` whitelist | navikt/copilot `cli/nav-pilot/internal/local/runtime.go:1002-1011` | The score-matrix transient (~5 GB per 2048-token chunk at 51k, §3.3) is the term that puts the 8-bit at 40–48k over the limit ([qwen38-tuning.md §3–4](qwen38-tuning.md#3-knobs)). `--decode-concurrency` and `--prompt-concurrency` are still missing | The 8-bit stays capped at 32k on this tier. Next: the prefill-step variants in [qwen38-tuning.md §8](qwen38-tuning.md#8-what-would-change-these) |
-| 12 | Decide the default temperature. The mechanism is navikt/copilot#934 (draft); the values come from the sampling sweep | manifest `MLX_TEMP`, or `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P` once #934 merges; https://github.com/navikt/copilot/pull/934 | Whitelisted but set in no profile; mlx-lm's `--temp` defaults to 0.0, so requests without a client temperature are greedy, the default optiq model included ([qwen38-tuning.md §3](qwen38-tuning.md#3-knobs)) | Every quality number, including optiq's, reflects greedy decoding that may not be what Qwen recommends |
+| 12 | **Done** (navikt/copilot#934 merged 2026-09-24; manifest #31, #32): temp 0.6 / top_p 0.95 for every entry, as benchmarked ([qwen38-tuning.md §9](qwen38-tuning.md#9-sampling-temperature)). Was: decide the default temperature. The mechanism is navikt/copilot#934 (draft); the values come from the sampling sweep | manifest `MLX_TEMP`, or `MLX_NAV_PILOT_TEMPERATURE` / `MLX_NAV_PILOT_TOP_P` once #934 merges; https://github.com/navikt/copilot/pull/934 | Whitelisted but set in no profile; mlx-lm's `--temp` defaults to 0.0, so requests without a client temperature are greedy, the default optiq model included ([qwen38-tuning.md §3](qwen38-tuning.md#3-knobs)) | Every quality number, including optiq's, reflects greedy decoding that may not be what Qwen recommends |
 | 13 | Exit codes: nav-pilot's half is **done** (action 5); fixing the tuning queue's `run()` is still open | action 5; `.bench-logs/qwen38-tuning-queue.sh` | The queue logs `exit $?` after a `$(date)` substitution, so a failed run logs `exit 0` ([qwen38-tuning.md §6](qwen38-tuning.md#6-resume)) | Failed runs, from nav-pilot or the queue, look like successes to anything reading the status |
+| 14 | **Done** (#109, 2026-09-28). Ship `qwen3.6-35b-a3b-8bit` as a 64 GB opt-in. Next: start night 64-6, which needs `sudo sysctl iogpu.wired_limit_mb=53248` for phase A and 49152 after it | [plan-64-6.md](../2026-09-26-64gb-tier/plan-64-6.md) | Decision item 11 | Prompts past 49k stay unmeasured on the shipped 64k entry, and its capabilities block stays all `cloud` |
+| 15 | **Done** (#112, navikt/copilot#1114). Keep `balanced` as the default and offer `aggressive` as an opt-in; the gate counts call sites and checks the worker's result. Next: dispatch re-probe 7 | #121 | Decision items 12–13 | `aggressive` stays opt-in on two samples per cell, and night 64-6's delegate cells have no binary or level |
+| 16 | After re-probe 7: decide whether measured capabilities ship in the manifest, and whether any level changes its default | navikt/copilot#1010, #1014 | pending-tasks §8.8, probe 6 recommendation | Routing keeps its all-`cloud` block for the 64 GB entry |
+| 17 | GPT-6 Sol: fix the rejected read of nav-pilot's instructions and mark such sessions invalid, then re-probe at n ≥ 5 per cell, `balanced` included | navikt/copilot#1120, #116 | Decision item 14 | A third of GPT-6 Sol sessions end on a permission prompt, and its `balanced` result stays unknown |
+| 18 | Linux: fix the setup and install findings; pass 3 (saved config, doctor, decide, a session) is queued; real hardware needs machines | navikt/copilot#1126–#1129, #124 | Decision item 16 | A small Linux machine gets no usable config and no message saying so |
+| 19 | Own endpoint: **done** (navikt/copilot#1100). Two smaller findings are open | navikt/copilot#1101, #1102 | Decision item 15 | decide waits about 2.5 s at exit when the telemetry host is unreachable |
+| 20 | Decide which time rule applies to create-file `retry2`: per sample (fails, 2.02×) or per verified result (passes) | #126 | Decision item 17 | retry2 stays unreplicated on create-file |
+| 21 | Hosted decide: no action until the §8.10 gates are met. Kev 4B and Laya install from 2026-09-29 (gate 2) | #95, #96, navikt/copilot#1015 | Decision item 18 | – |
 
 **Merge order and dependencies.** #932, #931 and #933 merged on 2026-09-24, followed by #935,
 #937 and #936. Before that they had been merged together without conflicts into
