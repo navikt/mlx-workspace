@@ -116,9 +116,9 @@
      "lb": 0.859,
      "ub": 1.0,
      "lb_monotone": 0.859,
-     "bar": 0.9,
-     "p_cloud": 1.0,
-     "verdict": "not-yet",
+     "bar": 0.836,
+     "p_cloud": 0.929,
+     "verdict": "trusted",
      "tasks": [
       "fm-r6-a",
       "fm-r6-b"
@@ -133,7 +133,7 @@
     }
    },
    "frontier": {
-    "trusted": 5,
+    "trusted": 6,
     "open": 6,
     "first_break": null
    },
@@ -413,9 +413,9 @@
      "lb": 0.23,
      "ub": 0.77,
      "lb_monotone": 0.661,
-     "bar": 0.45,
-     "p_cloud": 0.5,
-     "verdict": "not-yet",
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
@@ -490,8 +490,8 @@
    },
    "frontier": {
     "trusted": 0,
-    "open": 4,
-    "first_break": null
+    "open": 0,
+    "first_break": 1
    },
    "fit": {
     "d50": null,
@@ -566,6 +566,156 @@
    },
    "files": [
     "frontier-cloud-claude-sonnet-5-base-20260926-093254.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "cloud-gpt-6-sol",
+   "variant": "base",
+   "condition": "cloud harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "cloud",
+   "rungs": {
+    "4": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 2,
+     "median_seconds": 52,
+     "median_cost_usd": 0.0968,
+     "d": [
+      12,
+      13
+     ]
+    },
+    "6": {
+     "k": 3,
+     "n": 4,
+     "lb": 0.433,
+     "ub": 0.922,
+     "lb_monotone": 0.433,
+     "bar": 0.836,
+     "p_cloud": 0.929,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r6-a",
+      "fm-r6-b"
+     ],
+     "runs": 2,
+     "median_seconds": 218,
+     "median_cost_usd": 0.1499,
+     "d": [
+      60,
+      317
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 4,
+    "first_break": 6
+   },
+   "fit": {
+    "d50": 414.2,
+    "d_bar": 66.9,
+    "beyond": false,
+    "a": 7.29,
+    "b": -0.838
+   },
+   "files": [
+    "frontier-cloud-gpt-6-sol-base-20260928-111135.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "cloud-gpt-6-sol",
+   "variant": "base",
+   "condition": "cloud harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "cloud",
+   "rungs": {
+    "1": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.88,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 2,
+     "median_seconds": 51,
+     "median_cost_usd": 0.1553,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 2,
+     "median_seconds": 50,
+     "median_cost_usd": 0.0979,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 4,
+     "n": 4,
+     "lb": 0.709,
+     "ub": 1.0,
+     "lb_monotone": 0.709,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 2,
+     "median_seconds": 58,
+     "median_cost_usd": 0.1228,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 3,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 3.0,
+    "beyond": true,
+    "a": 5.16,
+    "b": 0.363
+   },
+   "files": [
+    "frontier-cloud-gpt-6-sol-base-20260928-113122.json"
    ]
   },
   {
@@ -852,8 +1002,8 @@
      "lb": 0.433,
      "ub": 0.922,
      "lb_monotone": 0.433,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "cloud",
      "tasks": [
       "fm-r6-a",
@@ -1023,9 +1173,9 @@
      "lb": 0.23,
      "ub": 0.77,
      "lb_monotone": 0.23,
-     "bar": 0.45,
-     "p_cloud": 0.5,
-     "verdict": "not-yet",
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
@@ -1080,8 +1230,8 @@
    },
    "frontier": {
     "trusted": 0,
-    "open": 1,
-    "first_break": 2
+    "open": 0,
+    "first_break": 1
    },
    "fit": {
     "d50": 0.2,
@@ -1296,8 +1446,8 @@
      "lb": 0.164,
      "ub": 0.836,
      "lb_monotone": 0.164,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "cloud",
      "tasks": [
       "fm-r6-a",
@@ -1403,8 +1553,8 @@
      "lb": 0.658,
      "ub": 0.929,
      "lb_monotone": 0.658,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "cloud",
      "tasks": [
       "fm-r6-a",
@@ -1601,9 +1751,9 @@
      "lb": 0.327,
      "ub": 0.673,
      "lb_monotone": 0.494,
-     "bar": 0.45,
-     "p_cloud": 0.5,
-     "verdict": "trusted",
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
@@ -1657,9 +1807,9 @@
     }
    },
    "frontier": {
-    "trusted": 1,
-    "open": 1,
-    "first_break": 2
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
    },
    "fit": {
     "d50": null,
@@ -1748,8 +1898,8 @@
      "lb": 0.709,
      "ub": 1.0,
      "lb_monotone": 0.709,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "not-yet",
      "tasks": [
       "fm-r6-a",
@@ -1792,7 +1942,7 @@
      "n": 4,
      "lb": 0.433,
      "ub": 0.922,
-     "lb_monotone": 0.528,
+     "lb_monotone": 0.61,
      "bar": 0.9,
      "p_cloud": 1.0,
      "verdict": "cloud",
@@ -1812,7 +1962,7 @@
      "n": 4,
      "lb": 0.433,
      "ub": 0.922,
-     "lb_monotone": 0.482,
+     "lb_monotone": 0.601,
      "bar": 0.9,
      "p_cloud": 1.0,
      "verdict": "cloud",
@@ -1828,11 +1978,11 @@
      ]
     },
     "3": {
-     "k": 2,
-     "n": 4,
-     "lb": 0.23,
-     "ub": 0.77,
-     "lb_monotone": 0.403,
+     "k": 8,
+     "n": 12,
+     "lb": 0.482,
+     "ub": 0.811,
+     "lb_monotone": 0.589,
      "bar": 0.9,
      "p_cloud": 1.0,
      "verdict": "cloud",
@@ -1840,7 +1990,7 @@
       "fs-r3-a",
       "fs-r3-b"
      ],
-     "runs": 2,
+     "runs": 6,
      "median_seconds": 48,
      "median_cost_usd": 0.0,
      "d": [
@@ -1849,11 +1999,11 @@
      ]
     },
     "4": {
-     "k": 3,
-     "n": 4,
-     "lb": 0.433,
-     "ub": 0.922,
-     "lb_monotone": 0.433,
+     "k": 9,
+     "n": 12,
+     "lb": 0.567,
+     "ub": 0.873,
+     "lb_monotone": 0.579,
      "bar": 0.787,
      "p_cloud": 0.875,
      "verdict": "cloud",
@@ -1861,8 +2011,8 @@
       "fs-r4-a",
       "fs-r4-b"
      ],
-     "runs": 2,
-     "median_seconds": 41,
+     "runs": 6,
+     "median_seconds": 33,
      "median_cost_usd": 0.0,
      "d": [
       9,
@@ -1870,11 +2020,11 @@
      ]
     },
     "5": {
-     "k": 2,
-     "n": 4,
-     "lb": 0.23,
-     "ub": 0.77,
-     "lb_monotone": 0.23,
+     "k": 8,
+     "n": 12,
+     "lb": 0.482,
+     "ub": 0.811,
+     "lb_monotone": 0.482,
      "bar": 0.675,
      "p_cloud": 0.75,
      "verdict": "cloud",
@@ -1882,8 +2032,8 @@
       "fs-r5-a",
       "fs-r5-b"
      ],
-     "runs": 2,
-     "median_seconds": 55,
+     "runs": 6,
+     "median_seconds": 64,
      "median_cost_usd": 0.0,
      "d": [
       39,
@@ -1897,14 +2047,16 @@
     "first_break": 1
    },
    "fit": {
-    "d50": 133.8,
+    "d50": null,
     "d_bar": null,
     "beyond": false,
-    "a": 0.992,
-    "b": -0.14
+    "a": 0.894,
+    "b": -0.008
    },
    "files": [
-    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-075920.json"
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-075920.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260928-175341.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20260928-184553.json"
    ]
   },
   {
@@ -1982,8 +2134,8 @@
      "lb": 0.567,
      "ub": 0.873,
      "lb_monotone": 0.567,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "cloud",
      "tasks": [
       "fm-r6-a",
@@ -2105,6 +2257,161 @@
   },
   {
    "class": "edit-single",
+   "model": "qwen3.6-35b-a3b-8bit-64g-pp15",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 3,
+     "n": 8,
+     "lb": 0.195,
+     "ub": 0.597,
+     "lb_monotone": 0.536,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r3-a",
+      "fs-r3-b"
+     ],
+     "runs": 4,
+     "median_seconds": 56,
+     "median_cost_usd": 0.0,
+     "d": [
+      5,
+      6
+     ]
+    },
+    "4": {
+     "k": 8,
+     "n": 8,
+     "lb": 0.83,
+     "ub": 1.0,
+     "lb_monotone": 0.83,
+     "bar": 0.787,
+     "p_cloud": 0.875,
+     "verdict": "not-yet",
+     "tasks": [
+      "fs-r4-a",
+      "fs-r4-b"
+     ],
+     "runs": 4,
+     "median_seconds": 66,
+     "median_cost_usd": 0.0,
+     "d": [
+      9,
+      23
+     ]
+    },
+    "5": {
+     "k": 5,
+     "n": 8,
+     "lb": 0.403,
+     "ub": 0.805,
+     "lb_monotone": 0.403,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "fs-r5-a",
+      "fs-r5-b"
+     ],
+     "runs": 4,
+     "median_seconds": 91,
+     "median_cost_usd": 0.0,
+     "d": [
+      39,
+      64
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 0.028,
+    "b": 0.169
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-base-20260928-180739.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-base-20260928-182644.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "qwen3.6-35b-a3b-8bit-64g-pp15",
+   "variant": "retry2",
+   "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 11,
+     "n": 16,
+     "lb": 0.528,
+     "ub": 0.813,
+     "lb_monotone": 0.675,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "trusted",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 8,
+     "median_seconds": 366,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "3": {
+     "k": 14,
+     "n": 16,
+     "lb": 0.733,
+     "ub": 0.947,
+     "lb_monotone": 0.733,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 8,
+     "median_seconds": 279,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 1,
+    "open": 1,
+    "first_break": 3
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false,
+    "a": 0.799,
+    "b": 0.708
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-retry2-20260928-125847.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-retry2-20260928-134112.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-retry2-20260928-154533.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-pp15-retry2-20260928-162218.json"
+   ]
+  },
+  {
+   "class": "edit-single",
    "model": "qwen3.6-35b-a3b-8bit-64g",
    "variant": "retry2",
    "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
@@ -2175,20 +2482,20 @@
    "mode": "local",
    "rungs": {
     "1": {
-     "k": 10,
-     "n": 12,
-     "lb": 0.658,
-     "ub": 0.929,
-     "lb_monotone": 0.74,
-     "bar": 0.45,
-     "p_cloud": 0.5,
+     "k": 21,
+     "n": 28,
+     "lb": 0.633,
+     "ub": 0.839,
+     "lb_monotone": 0.773,
+     "bar": 0.675,
+     "p_cloud": 0.75,
      "verdict": "trusted",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
      ],
-     "runs": 6,
-     "median_seconds": 260,
+     "runs": 14,
+     "median_seconds": 282,
      "median_cost_usd": 0.0,
      "d": [
       1
@@ -2199,7 +2506,7 @@
      "n": 12,
      "lb": 0.658,
      "ub": 0.929,
-     "lb_monotone": 0.715,
+     "lb_monotone": 0.823,
      "bar": 0.9,
      "p_cloud": 1.0,
      "verdict": "cloud",
@@ -2215,20 +2522,20 @@
      ]
     },
     "3": {
-     "k": 10,
-     "n": 12,
-     "lb": 0.658,
-     "ub": 0.929,
-     "lb_monotone": 0.658,
+     "k": 26,
+     "n": 28,
+     "lb": 0.84,
+     "ub": 0.97,
+     "lb_monotone": 0.84,
      "bar": 0.9,
      "p_cloud": 1.0,
-     "verdict": "cloud",
+     "verdict": "not-yet",
      "tasks": [
       "cf-r3-a",
       "cf-r3-b"
      ],
-     "runs": 6,
-     "median_seconds": 269,
+     "runs": 14,
+     "median_seconds": 254,
      "median_cost_usd": 0.0,
      "d": [
       3
@@ -2242,14 +2549,18 @@
    },
    "fit": {
     "d50": null,
-    "d_bar": null,
-    "beyond": false,
-    "a": 1.601,
-    "b": 0.006
+    "d_bar": 3.0,
+    "beyond": true,
+    "a": 1.075,
+    "b": 0.834
    },
    "files": [
     "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-043547.json",
-    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-184118.json"
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260927-184118.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260928-122050.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260928-142356.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260928-150703.json",
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260928-171241.json"
    ]
   },
   {
@@ -2327,8 +2638,8 @@
      "lb": 0.709,
      "ub": 1.0,
      "lb_monotone": 0.709,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "not-yet",
      "tasks": [
       "fm-r6-a",
@@ -2561,8 +2872,8 @@
      "lb": 0.602,
      "ub": 0.914,
      "lb_monotone": 0.602,
-     "bar": 0.9,
-     "p_cloud": 1.0,
+     "bar": 0.836,
+     "p_cloud": 0.929,
      "verdict": "cloud",
      "tasks": [
       "fm-r6-a",
@@ -2858,8 +3169,8 @@
      "lb": 0.078,
      "ub": 0.567,
      "lb_monotone": 0.127,
-     "bar": 0.45,
-     "p_cloud": 0.5,
+     "bar": 0.675,
+     "p_cloud": 0.75,
      "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
@@ -3142,8 +3453,8 @@
      "lb": 0.148,
      "ub": 0.39,
      "lb_monotone": 0.148,
-     "bar": 0.45,
-     "p_cloud": 0.5,
+     "bar": 0.675,
+     "p_cloud": 0.75,
      "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
@@ -3707,8 +4018,8 @@
      "lb": 0.433,
      "ub": 0.922,
      "lb_monotone": 0.433,
-     "bar": 0.45,
-     "p_cloud": 0.5,
+     "bar": 0.675,
+     "p_cloud": 0.75,
      "verdict": "not-yet",
      "tasks": [
       "cf-r1-a",
@@ -3907,9 +4218,9 @@
      "lb": 0.61,
      "ub": 0.852,
      "lb_monotone": 0.61,
-     "bar": 0.45,
-     "p_cloud": 0.5,
-     "verdict": "trusted",
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "not-yet",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
@@ -3923,7 +4234,7 @@
     }
    },
    "frontier": {
-    "trusted": 1,
+    "trusted": 0,
     "open": 1,
     "first_break": null
    },
