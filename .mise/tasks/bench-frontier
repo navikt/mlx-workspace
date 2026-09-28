@@ -177,6 +177,79 @@ def harness_sha(tasks_file):
     return h.hexdigest()[:12]
 
 
+def session_env(H):
+    """The session's environment: mise kept inside the workspace, and the target's JDK.
+
+    Harness v2 (#89), the frontier's half of bench-hybrid's #83 fix. cplt scopes a
+    session to the workspace, and mise's shims walk up into ~/mlx-workspace, so inside
+    the sandbox `java` and `./gradlew` resolved the machine default, JDK 27, which this
+    Gradle build rejects: models had no working compiler in the session (probes 3 and
+    4). The ceiling stops the walk at the workspace, and JAVA_HOME puts JDK 21 under
+    both gradlew and the shim. The local arm starts through `mise run`, which drops a
+    PATH entry under mise's installs, so there the PATH prefix is lost and JAVA_HOME
+    carries it; checked under cplt: gradlew's launcher JVM and `java` are 21 either way.
+    """
+    env = {"MISE_CEILING_PATHS": str(H["ws"])}
+    if H.get("JDK"):
+        env.update(JAVA_HOME=str(H["JDK"]), PATH=f"{H['JDK']}/bin:{os.environ.get('PATH', '')}")
+    return env
+
+
+def ps_daemons():
+    r = subprocess.run(["ps", "-Ao", "pid=,ppid=,command="], capture_output=True, text=True)
+    return F.session_daemons(r.stdout)
+
+
+def stop_daemons(before):
+    """Stop the sandboxed Gradle and Kotlin daemons that appeared during a sample (#107).
+
+    Teardown, not org.gradle.daemon=false: a session's daemon serves that session's
+    later gradlew calls, so turning it off would make every in-session build start a
+    cold JVM and move the timing. No later session can reuse it (see
+    F.session_daemons), so stopping it after the sample changes nothing a model sees.
+    Runs after the sample's clock stops. Only daemons new since the sample began: a
+    sandboxed session outside the benchmark that starts one in the same minutes would
+    lose it too, which the queue lock makes unlikely.
+    """
+    new = sorted(ps_daemons() - before)
+    for pid in new:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+    return len(new)
+
+
+def sweep_stray(H, cloud, tag):
+    """Move what a sample left where the next sample would see it into .bench-logs.
+
+    reset_repo cleans the checkout's tracked and untracked files, but not what sits
+    beside kotlin/ (a gradle.properties on 64-5, a src/ tree on night 3, both of which
+    then stopped the next step at assert_workspace_is_clean) nor git-ignored files in
+    it (.idea/, out/, src/generated). Moved, not deleted, so the evidence stays.
+    Returns the paths moved, relative to the workspace.
+    """
+    stray = []
+    try:
+        H["assert_workspace_is_clean"]()
+    except SystemExit as e:
+        m = re.search(r"holds (.+?), which the agent can read", str(e))
+        stray = [n for n in (m.group(1).split(", ") if m else []) if not (cloud and n == ".git")]
+    r = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=str(H["repo"]),
+                       capture_output=True, text=True)
+    stray += ["kotlin/" + line[3:].rstrip("/") for line in r.stdout.splitlines()
+              if line.startswith("!! ") and Path(line[3:].rstrip("/")).name not in ("build", ".gradle")]
+    moved = []
+    dest = ROOT / ".bench-logs" / "stray" / tag
+    for rel in stray:
+        src = H["ws"] / rel
+        if src.exists() or src.is_symlink():
+            (dest / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dest / rel))
+            moved.append(rel)
+    return moved
+
+
 def build(repo, cfg, which, only=None):
     """(ok, tail of the output) for the task set's compile or test command.
     only: a test class filter, so a create-file check runs one class, not the suite."""
@@ -260,7 +333,7 @@ def agent_local(H, prompt, cont, cap):
     timed_out = False
     try:
         r = H["sh"](["mise", "run", "opencode-headless", *(["--continue"] if cont else []), prompt],
-                    cwd=ROOT, timeout=cap)
+                    cwd=ROOT, timeout=cap, env=session_env(H))
         out = r.stdout + r.stderr
     except subprocess.TimeoutExpired as e:
         timed_out = True
@@ -293,7 +366,8 @@ def agent_cloud(H, prompt, cont, cap, model):
             fh.write(f"# argv: {argv!r}\n")
             fh.flush()
             p = subprocess.Popen(argv, cwd=str(H["ws"]), stdin=subprocess.DEVNULL, stdout=fh,
-                                 stderr=subprocess.STDOUT, start_new_session=True)
+                                 stderr=subprocess.STDOUT, start_new_session=True,
+                                 env={**os.environ, **session_env(H)})
             try:
                 p.wait(timeout=cap)
             except subprocess.TimeoutExpired:
@@ -385,6 +459,7 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
     if task.get("break"):
         H["apply_break"](task)
     cap = var["cap"] or BASE_CAP[task["class"]]
+    daemons = set() if FAKE else ps_daemons()
     started = time.time()
     agg = {"turns": 0, "tool_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
     reply, loops, timed_out, dispatched, misscoped = "", [], False, False, None
@@ -417,7 +492,7 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
         attempts += 1
         call(f"The change is not done yet: {note}.\n{tail}\nFix it. Change nothing else.", True)
         ok, note, tail = (False, "timed out", "") if timed_out else verify(H, cfg, task, reply)
-    return {
+    rec = {
         "task": task["id"], "class": task["class"], "family": task["family"], "rung": task["rung"],
         "d": task["difficulty"]["d"], "difficulty": task["difficulty"], "run": run_i,
         "seconds": round(time.time() - started, 1), "cap_per_attempt": cap,
@@ -431,6 +506,10 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
         **({"invalid_reason": "cloud arm dispatched to a local worker"} if dispatched else {}),
         **({"invalid_reason": f"cplt scoped the session to {misscoped}, not the workspace"} if misscoped else {}),
     }
+    # v2 teardown, after the clock: nothing here is in "seconds".
+    rec["daemons_stopped"] = 0 if FAKE else stop_daemons(daemons)
+    rec["stray"] = sweep_stray(H, cloud, f"{H['key']}/{task['id']}-r{run_i}-{time.strftime('%Y%m%d-%H%M%S')}")
+    return rec
 
 
 # ── selection ────────────────────────────────────────────────────────────────
@@ -907,6 +986,11 @@ import _frontier as F
 task, repo, mode = json.loads(os.environ["FAKE_TASK"]), os.environ["FAKE_REPO"], os.environ["FAKE_MODE"]
 prompt = sys.stdin.read()
 v = task["verify"]
+if mode == "stray":  # good, plus what 64-5's Occamy and a night-3 model left behind
+    open(os.path.join(repo, "..", "gradle.properties"), "w").write("org.gradle.jvmargs=-Xmx1g\n")
+    os.makedirs(os.path.join(repo, ".idea"), exist_ok=True)
+    open(os.path.join(repo, ".idea", "workspace.xml"), "w").write("<x/>\n")
+    mode = "good"
 if v["kind"] == "answer-set" and mode != "lazy":
     exp = v["expected"] if mode != "wrong" else v["expected"][1:]
     print("Found them.\nANSWER: " + ", ".join(exp))
@@ -1008,6 +1092,7 @@ def cmd_selftest(_args):
         shutil.copytree(repo, ws / "kotlin")
         (ws / "kotlin" / "src/main/kotlin/a/Calc.kt").write_text(
             "package a\n\nfun half(x: Int): Int = x / 2\n")
+        (ws / "kotlin" / ".gitignore").write_text("build/\n.gradle/\n.idea/\n")
         g = lambda *a: subprocess.run(["git", *a], cwd=ws / "kotlin", capture_output=True, check=True)  # noqa: E731
         g("init", "-q")
         g("-c", "user.email=t@t", "-c", "user.name=t", "add", "-A")
@@ -1105,6 +1190,15 @@ def cmd_selftest(_args):
         assert json.loads(ledger.read_text())["spent_usd"] <= 0.25
         capped = json.loads(max((root / "bench").glob("frontier-fake-base-*.json")).read_text())
         assert capped["meta"]["stopped"].startswith("cost cap") and len(capped["samples"]) == 2, capped["meta"]
+        # v2: what a sample leaves beside kotlin/ or git-ignored in it is moved out after
+        # the sample, so the next step's clean-workspace check passes (64-5, night 3)
+        out = bf("run", "--profile", "fake", "--classes", "read-qa", "--runs", "2", mode="stray")
+        st_ = json.loads(max((root / "bench").glob("frontier-fake-base-*.json")).read_text())["samples"]
+        assert all(sorted(x["stray"]) == ["gradle.properties", "kotlin/.idea"] for x in st_), [x["stray"] for x in st_]
+        assert sorted(p.name for p in ws.iterdir()) == ["kotlin"] and not (ws / "kotlin" / ".idea").exists()
+        assert len(list((root / ".bench-logs" / "stray" / "fake").glob("*/gradle.properties"))) == len(st_)
+        assert session_env({"ws": ws, "JDK": Path("/j")})["JAVA_HOME"] == "/j"
+        assert session_env({"ws": ws})["MISE_CEILING_PATHS"] == str(ws)
         print("✓ runner, variants, validation and summary with fake models")
     print("selftest: PASS")
     return 0

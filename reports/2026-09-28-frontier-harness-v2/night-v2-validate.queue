@@ -1,0 +1,26 @@
+# Frontier harness v2 validation night: the first cells at the new harness_sha, on optiq.
+# Planned, not queued. Run it only after v2 is merged (harness_sha no longer df7deb1af416):
+#   mise run night-run-3 -- --dry-run --part local --queue reports/2026-09-28-frontier-harness-v2/night-v2-validate.queue
+#   mise run night-run-3 -- --part local --queue reports/2026-09-28-frontier-harness-v2/night-v2-validate.queue
+# Wired: 48 GB, as follow-ups 1. optiq's profile key matches nights 1 and 2, but a new harness_sha
+# keeps these cells out of the v1 pools; they start v2's base ladders.
+#
+# What it checks (#89 done criteria, #107):
+#  - in-session builds work: transcripts show `./gradlew compileKotlin`/`test` exiting 0 on
+#    temurin-21, and no "Operation not permitted" from mise and no JDK 27;
+#  - no daemon pile-up: every sample records daemons_stopped, and after the night
+#    `ps -Ao command | grep -c 'cplt/tmp/.*GradleDaemon'` is 0;
+#  - stray files: any sample's `stray` list is moved to .bench-logs/stray/, and no step stops
+#    at assert_workspace_is_clean.
+# Compare against v1's base on the same rungs (night 1, nights 64-x): create-file and debug use the
+# in-session compiler most, so that is where v2 can move pass rate and time; read-qa builds nothing
+# and should not move.
+# Expected ~2 h 45 min (bench-frontier's estimates: create-file 3.5, debug 12, edit 1.9-2.3,
+# read-qa 1 min a sample).
+#
+# part kind   classes               variant runs rungs timeout-min expected-min profile
+local  base   create-file           base    2    1-3   90          42           qwen3.6-35b-a3b-optiq
+local  base   edit-single           base    2    3-5   45          23           qwen3.6-35b-a3b-optiq
+local  base   edit-multi-mechanical base    2    2-4   45          28           qwen3.6-35b-a3b-optiq
+local  base   debug                 base    2    1     90          48           qwen3.6-35b-a3b-optiq
+local  base   read-qa               base    2    1-5   15          20           qwen3.6-35b-a3b-optiq
