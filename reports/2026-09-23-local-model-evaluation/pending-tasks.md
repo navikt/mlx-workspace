@@ -688,6 +688,13 @@ and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/
    dispatch-probe cells at three levels, with its own controls and probe 6's binary, workers and
    bench-only block, plus a cloud frontier slice at Sonnet 5's `harness_sha`. There is one ledger,
    with a hard cap of $15. The report is `gpt6-sol.md` in that directory.
+   **Done 2026-09-28, $6.14** ([gpt6-sol.md](../2026-09-28-orchestrator-and-penalty/gpt6-sol.md)).
+   Under `aggressive` GPT-6 Sol dispatched in 7 of 7 valid samples with no gate refusal, r6
+   included. All 7 passed, and so did all 16 valid samples. Cost was 0.71–2.33× its own control,
+   so it is local-first GO and NO-GO on the cost rule. `conservative` dispatched 0 of 3.
+   `balanced` did not run (preflight load average 21). The frontier slice was 19/20. 9 of 25
+   hybrid sessions ended on an auto-rejected read of nav-pilot's own instructions directory. They
+   are invalid (navikt/copilot#1120, #116).
 2. **presence_penalty 1.5** (the Qwen3.6-35B-A3B card's non-thinking value) is tested on the 8-bit
    against the same profile without it: ABBA on create-file retry2 r1/r3 and edit-single r3–5.
    mlx_lm.server takes the parameter per request, and the bench sends it through opencode.json.
