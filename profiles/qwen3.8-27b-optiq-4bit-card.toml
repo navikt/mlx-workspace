@@ -1,0 +1,27 @@
+[meta]
+name               = "Qwen 3.8 27B OptiQ 4bit, the card's non-thinking sampling"
+released           = "2026-09"
+status             = "testing"
+spec_source        = "model card"
+notes              = "Sampling lever for #122 (reports/2026-09-28-after-64-6/plan.md §2): identical to qwen3.8-27b-optiq-4bit except the Qwen3.8 card's non-thinking values, temperature 0.7, top_p 0.8 and presence_penalty 1.5 (top_k 20 is already set). mlx_lm.server applies presence_penalty over the last 20 tokens. The penalty reaches the server through opencode.json, so this answers the question for the bench, not for Copilot CLI through nav-pilot. Bench-only, not in the manifest."
+model_vram_gb      = 19
+gpu_wired_limit_gb = 36
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "8589934592"
+MLX_CACHE_SIZE             = "3"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_MIN_P                  = "0.0"
+# The differences from qwen3.8-27b-optiq-4bit, which runs at the server default 0.6 / 0.95, no penalty.
+MLX_TEMP                   = "0.7"
+MLX_TOP_P                  = "0.8"
+MLX_PRESENCE_PENALTY       = "1.5"
+MLX_NAV_PILOT_TEMPERATURE  = "0.7"
+MLX_NAV_PILOT_TOP_P        = "0.8"
