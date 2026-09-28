@@ -264,7 +264,7 @@ these hold:
 
 1. On the same model and condition, it moves the open frontier at least one rung over base.
 2. It replicates on a second night at the rung it moved, with n ≥ 8 per arm and a one-sided Fisher p < 0.1 against base.
-3. It costs no more than 2× base median wall time at that rung, and cloud credits do not rise (retries and decomposition run locally).
+3. It costs no more than 2× base's wall time per verified result at that rung (total seconds over the arm's samples, divided by the samples that verified), and cloud credits do not rise (retries and decomposition run locally). Decided 2026-09-28 in #126, replacing the median time per sample: a variant that passes more often should not be charged for its slower samples when each pass costs less. create-file retry2 passes under this rule (322 s against 618 s per verified result, 15/20 against 5/20) and shipped in navikt/copilot#1156.
 4. The product can express it. Retries are nav-pilot's check-and-retake. Time is its dispatch timeout. Decomposition is a sentence in the generated dispatch policy (navikt/copilot#941). Example and trim go in the worker's agent prompt. Sampling goes in the manifest.
 
 Adopting it changes the harness sha. The base ladders then run again under the new default,
