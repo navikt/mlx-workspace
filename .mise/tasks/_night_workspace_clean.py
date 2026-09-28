@@ -15,6 +15,7 @@ never deletes anything.
 import ast
 import os
 import re
+import subprocess
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -52,6 +53,18 @@ def check(key):
         names = [n.strip() for n in stray.group(1).split(",")] if stray else []
         paths = [str(ws / n) for n in names] or [str(ws)]
         return False, f"{msg}  ->  rm -rf {' '.join(paths)}"
+    # git clean -fd in reset_repo leaves git-ignored files (.idea/, out/), so a model's
+    # one stays for every later sample. bench-frontier moves them out after each
+    # sample (harness v2); this catches one left from before that, or by another suite.
+    repo = ws / "kotlin"
+    if (repo / ".git").is_dir():
+        r = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=repo,
+                           capture_output=True, text=True)
+        names = [ln[3:].rstrip("/") for ln in r.stdout.splitlines() if ln.startswith("!! ")]
+        names = [n for n in names if Path(n).name not in ("build", ".gradle")]
+        if names:
+            return False, (f"{repo} holds git-ignored {', '.join(names)}, which reset_repo does not "
+                           f"remove  ->  rm -rf {' '.join(str(repo / n) for n in names)}")
     return True, f"{ws} clean"
 
 

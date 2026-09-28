@@ -649,6 +649,25 @@ def fit_summary(fit, bar, ds):
             "beyond": bool(above) and p(hi) >= bar, "a": round(a, 3), "b": round(b, 3)}
 
 
+def session_daemons(ps_text):
+    """PIDs of the Gradle and Kotlin daemons sandboxed sessions started, from
+    `ps -Ao pid=,ppid=,command=`.
+
+    cplt gives every session its own java.io.tmpdir (through JAVA_TOOL_OPTIONS), and
+    Gradle reuses a daemon only when that property matches, so no later session and no
+    verifier build can ever use one of these: each is dead weight once its session
+    ends. On night 64-5 there were 39 of them, about 21 GB (#107). A Kotlin daemon has
+    no tmpdir in its argv; it is a child of the Gradle daemon that started it.
+    """
+    rows = []
+    for line in ps_text.splitlines():
+        parts = line.split(None, 2)
+        if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
+            rows.append((int(parts[0]), int(parts[1]), parts[2]))
+    gradle = {p for p, _, c in rows if "GradleDaemon" in c and "/cplt/tmp/" in c}
+    return gradle | {p for p, pp, c in rows if "KotlinCompileDaemon" in c and (pp in gradle or "/cplt/tmp/" in c)}
+
+
 def self_check():
     """Pure-function checks; the fixture-repo checks live in bench-frontier selftest."""
     lo, hi = wilson(15, 15)
@@ -681,6 +700,12 @@ def self_check():
     assert not verify_answer_set("ANSWER: Foo.kt", {"expected": ["Bar.kt", "Foo.kt"]})[0]
     assert not verify_answer_set("ANSWER: Foo.kt, Bar.kt, Baz.kt", {"expected": ["Bar.kt", "Foo.kt"]})[0]
     assert not verify_answer_set("Foo.kt, Bar.kt", {"expected": ["Bar.kt", "Foo.kt"]})[0]
+    ps = ("  10     1 java -Djava.io.tmpdir=/U/Library/Caches/cplt/tmp/ab org.gradle.launcher.daemon.bootstrap.GradleDaemon 9\n"
+          "  11    10 java -cp k.jar org.jetbrains.kotlin.daemon.KotlinCompileDaemon --x\n"
+          "  20     1 java -Xmx512m org.gradle.launcher.daemon.bootstrap.GradleDaemon 9\n"
+          "  21    20 java -cp k.jar org.jetbrains.kotlin.daemon.KotlinCompileDaemon --x\n"
+          "  30     1 opencode run /cplt/tmp/ab\n")
+    assert session_daemons(ps) == {10, 11}, session_daemons(ps)  # the verifier's own daemons (20, 21) stay
     print("✓ _frontier self-check passed")
 
 

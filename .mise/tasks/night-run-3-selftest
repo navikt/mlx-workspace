@@ -112,7 +112,10 @@ NIGHT_DIR="$T/night643" NIGHT_REPORT="$T/night-64-3.md" NIGHT_HYBRID_TAG=np-t-s5
 echo
 echo "### workspace-clean preflight check (25 Sep: stray .git/.git2 passed preflight, failed every step)"
 mkdir -p "$T/workspaces/dirty/kotlin" "$T/workspaces/dirty/.git" "$T/workspaces/dirty/.git2" "$T/workspaces/clean/kotlin"
-wsout=$(FRONTIER_ROOT="$T" python3 "$ROOT/.mise/tasks/_night_workspace_clean.py" dirty clean missing)
+mkdir -p "$T/workspaces/ignored/kotlin/.idea" "$T/workspaces/ignored/kotlin/build"
+git -C "$T/workspaces/ignored/kotlin" init -q && printf '.idea/\nbuild/\n' > "$T/workspaces/ignored/kotlin/.gitignore"
+touch "$T/workspaces/ignored/kotlin/.idea/x" "$T/workspaces/ignored/kotlin/build/y"
+wsout=$(FRONTIER_ROOT="$T" python3 "$ROOT/.mise/tasks/_night_workspace_clean.py" dirty clean missing ignored)
 echo "$wsout"
 
 echo
@@ -147,6 +150,8 @@ check "workspace-clean: dirty workspace fails, names both stray dirs and the rm 
   '[ "$(grep -c "^FAIL  dirty:.*\.git.*\.git2.*rm -rf .*/dirty/\.git .*/dirty/\.git2" <<<"$wsout")" -eq 1 ]'
 check "workspace-clean: clean and missing workspaces pass" \
   '[ "$(grep -c "^PASS  clean:" <<<"$wsout")" -eq 1 ] && [ "$(grep -c "^PASS  missing:" <<<"$wsout")" -eq 1 ]'
+check "preflight names a git-ignored stray in kotlin/, not build/ (harness v2)" \
+  '[ "$(grep -c "^FAIL  ignored:.*git-ignored \.idea, which" <<<"$wsout")" -eq 1 ]'
 check "workspace-clean is wired into night-preflight and night-run-3's own preflight" \
   'grep -q _night_workspace_clean "$ROOT/.mise/tasks/night-preflight" && grep -q _night_workspace_clean "$ROOT/.mise/tasks/night-run-3"'
 echo
