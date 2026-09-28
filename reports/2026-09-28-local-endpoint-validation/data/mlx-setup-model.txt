@@ -1,0 +1,34 @@
+nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+
+  This Mac can also run a measured MLX model that nav-pilot manages itself: nav-pilot alpha local init
+  Below: a server you run yourself (Ollama, llama-server, LM Studio) instead.
+
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    · Ollama       127.0.0.1:11434 not answering
+    ✓ llama-server 127.0.0.1:8080  mlx-community/Qwen3.8-27B-4bit, mlx-community/Qwen3.6-35B-A3B-4bit, mlx-community/Laguna-XS-2.1-8bit, mlx-community/Qwen3.6-35B-A3B-8bit, mvid/Huihui-Qwen3.8-27B-abliterated-MTPLX-Q8, mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit, Accio-Lab/occamy-1.0-MLX-4bit, mlx-community/Qwen3.5-9B-MLX-4bit, mlx-community/Qwen3-4B-Instruct-2507-4bit, mlx-community/DeepSeek-V4-Flash-0731-2.4bit-mixed, mlx-community/Qwen3.6-27B-4bit, mlx-community/KAT-Coder-V2.5-Dev-OptiQ-4bit, mlx-community/Qwen3.8-27B-OptiQ-4bit, mlx-community/Qwen3.8-27B-8bit, lmstudio-community/Qwen3.8-27B-MLX-6bit, mlx-community/granite-4.1-8b-4bit
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+
+  Using  mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit on llama-server http://127.0.0.1:8080/v1
+
+  Endpoint  http://127.0.0.1:8080/v1
+  Model     mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit (unsupported, unmeasured)
+
+  PASS  server     answers and lists mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  PASS  context    30042 prompt tokens kept, nothing cut
+  PASS  TTFT       8.8 s for about 30k tokens
+
+  Save to $S/np-home/.nav-pilot/config.toml:
+    local_endpoint       = http://127.0.0.1:8080/v1
+    local_endpoint_model = mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit
+    local_enabled        = true
+
+✓ Saved. Local dispatch is on, to mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit on llama-server.
+  → Launch with a local worker: nav-pilot --client opencode
+  ✓ nav-pilot alpha decide answers from it
+  nav-pilot starts nothing: after a reboot, start it again with the command you started llama-server with. Check it: nav-pilot alpha local doctor
+

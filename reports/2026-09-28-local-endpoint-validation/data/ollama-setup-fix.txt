@@ -1,0 +1,34 @@
+nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+
+  This Mac can also run a measured MLX model that nav-pilot manages itself: nav-pilot alpha local init
+  Below: a server you run yourself (Ollama, llama-server, LM Studio) instead.
+
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    ✓ Ollama       127.0.0.1:11434  qwen3.6:35b-gguf
+    · llama-server 127.0.0.1:8080 not answering
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+
+  Using  qwen3.6:35b-gguf on Ollama http://127.0.0.1:11434/v1
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3.6:35b-gguf (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3.6:35b-gguf
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  PASS  context    30042 prompt tokens kept, nothing cut
+  PASS  TTFT       17.4 s for about 30k tokens
+
+  Save to $S/np-home/.nav-pilot/config.toml:
+    local_endpoint       = http://127.0.0.1:11434/v1
+    local_endpoint_model = qwen3.6:35b-gguf
+    local_enabled        = true
+
+✓ Saved. Local dispatch is on, to qwen3.6:35b-gguf on Ollama.
+  → Launch with a local worker: nav-pilot --client opencode
+  ✓ nav-pilot alpha decide answers from it
+  nav-pilot starts nothing: after a reboot, start it again with ollama serve. Check it: nav-pilot alpha local doctor
+

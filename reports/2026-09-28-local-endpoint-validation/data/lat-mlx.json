@@ -1,0 +1,58 @@
+{
+  "key": "mlx",
+  "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+  "started": "2026-09-28T01:27:27+0200",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2286,
+        "completion_tokens": 256,
+        "ttft_s": 2.23,
+        "decode_tok_s": 92.9,
+        "total_s": 4.98,
+        "usage": {
+          "prompt_tokens": 2286,
+          "completion_tokens": 256,
+          "total_tokens": 2542,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 29213,
+        "completion_tokens": 256,
+        "ttft_s": 9.38,
+        "decode_tok_s": 80.9,
+        "total_s": 12.53,
+        "usage": {
+          "prompt_tokens": 29213,
+          "completion_tokens": 256,
+          "total_tokens": 29469,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 29492,
+        "completion_tokens": 160,
+        "ttft_s": 0.26,
+        "decode_tok_s": 84.2,
+        "total_s": 2.16,
+        "usage": {
+          "prompt_tokens": 29492,
+          "completion_tokens": 160,
+          "total_tokens": 29652,
+          "prompt_tokens_details": {
+            "cached_tokens": 29209
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+
+  This Mac can also run a measured MLX model that nav-pilot manages itself: nav-pilot alpha local init
+  Below: a server you run yourself (Ollama, llama-server, LM Studio) instead.
+
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    ✓ Ollama       127.0.0.1:11434  qwen3.6:35b-gguf
+    · llama-server 127.0.0.1:8080 not answering
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+
+  Using  qwen3.6:35b-gguf on Ollama http://127.0.0.1:11434/v1
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3.6:35b-gguf (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3.6:35b-gguf
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    a 30k-token prompt failed: the server answered 400 Bad
+                   Request:
+                   {"error":{"message":"{\"error\":{\"code\":400,\"message\":\"request
+                   (30042 tokens) exceeds the available context size (4096
+                   tokens), try increasing
+                   it\",\"type\":\"exceed_context_size_error\",\"n_prom…
+        Fix: Ollama: start it with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, or make
+             a model with a Modelfile holding FROM <model> and PARAMETER num_ctx
+             65536 (ollama create <name> -f Modelfile) and set local_endpoint_model
+             to <name>. llama-server: -c 65536. LM Studio: raise the context length
+             when you load the model
+  SKIP  TTFT       the context probe failed
+
+
+  ⚠ Ollama cut the prompt to its default context. nav-pilot can make qwen3.6-35b-gguf-navpilot, a copy of qwen3.6:35b-gguf with a 65536-token context. It downloads nothing and shares the weights. By hand:
+    printf 'FROM qwen3.6:35b-gguf\nPARAMETER num_ctx 65536\n' > Modelfile
+    ollama create qwen3.6-35b-gguf-navpilot -f Modelfile
+  Or restart Ollama with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, which raises it for every model.
+✓ Created qwen3.6-35b-gguf-navpilot.
+
+  Checking qwen3.6-35b-gguf-navpilot again:
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3.6-35b-gguf-navpilot (unsupported, unmeasured)
+
+  WARN  server     answers, but does not list qwen3.6-35b-gguf-navpilot (it
+                   lists: qwen3.6-35b-gguf-navpilot:latest, qwen3.6:35b-gguf)
+        Fix: Set one it lists: nav-pilot config set local_endpoint_model <id>. On
+             Ollama you can also pull it: ollama pull qwen3.6-35b-gguf-navpilot.
+             llama-server answers with the model it loaded whatever the name, so
+             there this is harmless
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  PASS  context    30042 prompt tokens kept, nothing cut
+  PASS  TTFT       15.5 s for about 30k tokens
+
+  Save to $S/np-home/.nav-pilot/config.toml:
+    local_endpoint       = http://127.0.0.1:11434/v1
+    local_endpoint_model = qwen3.6-35b-gguf-navpilot
+    local_enabled        = true
+
+✓ Saved. Local dispatch is on, to qwen3.6-35b-gguf-navpilot on Ollama.
+  → Launch with a local worker: nav-pilot --client opencode
+  ✓ nav-pilot alpha decide answers from it
+  nav-pilot starts nothing: after a reboot, start it again with ollama serve. Check it: nav-pilot alpha local doctor
+
+exit 0
