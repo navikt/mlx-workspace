@@ -9,7 +9,8 @@
 #  - in-session builds work: transcripts show `./gradlew compileKotlin`/`test` exiting 0 on
 #    temurin-21, and no "Operation not permitted" from mise and no JDK 27;
 #  - no daemon pile-up: every sample records daemons_stopped, and after the night
-#    `ps -Ao command | grep -c 'cplt/tmp/.*GradleDaemon'` is 0;
+#    `ps -Ao command | grep -c 'cplt/tmp/.*GradleDaemon'` is 0 (each run also stops v1's leftovers at
+#    its start);
 #  - stray files: any sample's `stray` list is moved to .bench-logs/stray/, and no step stops
 #    at assert_workspace_is_clean.
 # Compare against v1's base on the same rungs (night 1, nights 64-x): create-file and debug use the

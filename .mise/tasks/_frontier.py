@@ -649,6 +649,11 @@ def fit_summary(fit, bar, ds):
             "beyond": bool(above) and p(hi) >= bar, "a": round(a, 3), "b": round(b, 3)}
 
 
+# Git-ignored directories the toolchain writes, not a model: Gradle's, and the Kotlin
+# daemon's .kotlin/errors logs from any failed compile, the verifier's included.
+TOOL_OUTPUT = ("build", ".gradle", ".kotlin")
+
+
 def session_daemons(ps_text):
     """PIDs of the Gradle and Kotlin daemons sandboxed sessions started, from
     `ps -Ao pid=,ppid=,command=`.

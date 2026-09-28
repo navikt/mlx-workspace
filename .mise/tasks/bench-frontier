@@ -190,7 +190,7 @@ def session_env(H):
     carries it; checked under cplt: gradlew's launcher JVM and `java` are 21 either way.
     """
     env = {"MISE_CEILING_PATHS": str(H["ws"])}
-    if H.get("JDK"):
+    if H.get("CFG", {}).get("jdk"):
         env.update(JAVA_HOME=str(H["JDK"]), PATH=f"{H['JDK']}/bin:{os.environ.get('PATH', '')}")
     return env
 
@@ -200,18 +200,19 @@ def ps_daemons():
     return F.session_daemons(r.stdout)
 
 
-def stop_daemons(before):
-    """Stop the sandboxed Gradle and Kotlin daemons that appeared during a sample (#107).
+def stop_daemons():
+    """Stop every sandboxed Gradle and Kotlin daemon (#107): at the start of a run, and
+    after each sample.
 
     Teardown, not org.gradle.daemon=false: a session's daemon serves that session's
     later gradlew calls, so turning it off would make every in-session build start a
     cold JVM and move the timing. No later session can reuse it (see
     F.session_daemons), so stopping it after the sample changes nothing a model sees.
-    Runs after the sample's clock stops. Only daemons new since the sample began: a
-    sandboxed session outside the benchmark that starts one in the same minutes would
-    lose it too, which the queue lock makes unlikely.
+    Runs after the sample's clock stops, when no session of ours is alive. A sandboxed
+    session outside the benchmark running Gradle at that moment would lose its daemon
+    too, which the queue lock makes unlikely.
     """
-    new = sorted(ps_daemons() - before)
+    new = sorted(ps_daemons())
     for pid in new:
         try:
             os.kill(pid, signal.SIGTERM)
@@ -229,16 +230,17 @@ def sweep_stray(H, cloud, tag):
     it (.idea/, out/, src/generated). Moved, not deleted, so the evidence stays.
     Returns the paths moved, relative to the workspace.
     """
+    H["assert_repo_is_the_workspace"]()
     stray = []
     try:
         H["assert_workspace_is_clean"]()
     except SystemExit as e:
         m = re.search(r"holds (.+?), which the agent can read", str(e))
         stray = [n for n in (m.group(1).split(", ") if m else []) if not (cloud and n == ".git")]
-    r = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=str(H["repo"]),
-                       capture_output=True, text=True)
-    stray += ["kotlin/" + line[3:].rstrip("/") for line in r.stdout.splitlines()
-              if line.startswith("!! ") and Path(line[3:].rstrip("/")).name not in ("build", ".gradle")]
+    r = subprocess.run(["git", "--no-optional-locks", "status", "--porcelain", "--ignored", "-z"],
+                       cwd=str(H["repo"]), capture_output=True, text=True)
+    stray += ["kotlin/" + e[3:].rstrip("/") for e in r.stdout.split("\0")
+              if e.startswith("!! ") and Path(e[3:].rstrip("/")).name not in F.TOOL_OUTPUT]
     moved = []
     dest = ROOT / ".bench-logs" / "stray" / tag
     for rel in stray:
@@ -459,7 +461,6 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
     if task.get("break"):
         H["apply_break"](task)
     cap = var["cap"] or BASE_CAP[task["class"]]
-    daemons = set() if FAKE else ps_daemons()
     started = time.time()
     agg = {"turns": 0, "tool_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
     reply, loops, timed_out, dispatched, misscoped = "", [], False, False, None
@@ -507,7 +508,7 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
         **({"invalid_reason": f"cplt scoped the session to {misscoped}, not the workspace"} if misscoped else {}),
     }
     # v2 teardown, after the clock: nothing here is in "seconds".
-    rec["daemons_stopped"] = 0 if FAKE else stop_daemons(daemons)
+    rec["daemons_stopped"] = 0 if FAKE else stop_daemons()
     rec["stray"] = sweep_stray(H, cloud, f"{H['key']}/{task['id']}-r{run_i}-{time.strftime('%Y%m%d-%H%M%S')}")
     return rec
 
@@ -810,6 +811,7 @@ def cmd_run(args):
         if not FAKE:
             H["assert_workspace_is_clean"]()
             H["ensure_clone"]()
+            stop_daemons()  # v1's pile, or a killed run's
         if args.cloud and not FAKE:
             cloud_ws(H["ws"])
         import _profiles as P
@@ -1197,7 +1199,8 @@ def cmd_selftest(_args):
         assert all(sorted(x["stray"]) == ["gradle.properties", "kotlin/.idea"] for x in st_), [x["stray"] for x in st_]
         assert sorted(p.name for p in ws.iterdir()) == ["kotlin"] and not (ws / "kotlin" / ".idea").exists()
         assert len(list((root / ".bench-logs" / "stray" / "fake").glob("*/gradle.properties"))) == len(st_)
-        assert session_env({"ws": ws, "JDK": Path("/j")})["JAVA_HOME"] == "/j"
+        assert session_env({"ws": ws, "JDK": Path("/j"), "CFG": {"jdk": "/j"}})["JAVA_HOME"] == "/j"
+        assert "JAVA_HOME" not in session_env({"ws": ws, "JDK": Path.home(), "CFG": {}})
         assert session_env({"ws": ws})["MISE_CEILING_PATHS"] == str(ws)
         print("✓ runner, variants, validation and summary with fake models")
     print("selftest: PASS")
