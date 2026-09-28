@@ -69,9 +69,10 @@ Expected results, written before the run:
 | limits | the nine `bench/decide-limits/` sets | 974 |
 | Total | | 1,295 |
 
-3 models × 1,295 = 3,885 calls, plus 3 × 70 dry-run calls (the loop group's 7 cases are under the dry
-run's 5-per-set cap, so it runs whole in the dry run too). All three models are deterministic, so there
-are no repeats. The comparison is paired per case with the chat models' existing runs (same case files);
+3 models × 1,295 = 3,885 calls, plus 3 × 70 dry-run calls (the dry run's 5-per-set cap takes 5 of the
+loop group's 7 cases too, all legitimate scenarios; the 2 loop scenarios only run in the full pass).
+All three models are deterministic, so there are no repeats. The comparison is paired per case with the
+chat models' existing runs (same case files);
 `loop` has no paired chat-model run in this shape (see Method).
 
 ## Time and cost
