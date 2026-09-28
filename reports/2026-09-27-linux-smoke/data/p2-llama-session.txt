@@ -1,0 +1,60 @@
+⚠ model "qwen3-1.7b" is not a Nav-curated opencode model id; it will be passed as-is (known ids: github-copilot/claude-fable-5, github-copilot/claude-fable-5.1, github-copilot/claude-haiku-4.5, github-copilot/claude-opus-4.6, github-copilot/claude-opus-4.7, github-copilot/claude-opus-4.8, github-copilot/claude-opus-5, github-copilot/claude-opus-5.5, github-copilot/claude-sonnet-4.6, github-copilot/claude-sonnet-5, github-copilot/gemini-3.5-flash, github-copilot/gemini-3.6-flash, github-copilot/gemini-3.7-flash, github-copilot/gemini-3.8-flash, github-copilot/gpt-5-mini, github-copilot/gpt-5.3-codex, github-copilot/gpt-5.4, github-copilot/gpt-5.4-mini, github-copilot/gpt-5.4-nano, github-copilot/gpt-5.5, github-copilot/gpt-5.6-luna, github-copilot/gpt-5.6-sol, github-copilot/gpt-5.6-terra, github-copilot/gpt-6-astra, github-copilot/gpt-6-luna, github-copilot/gpt-6-sol, github-copilot/grok-4.5, github-copilot/grok-4.6, github-copilot/grok-4.7, github-copilot/kimi-k2.7-code, github-copilot/kimi-k3, github-copilot/mai-code-1-flash-picker, github-copilot/mai-code-1.1-flash)
+→ Launching opencode...
+ℹ Sandbox: /home/dev/smoke-p2-llama
+Launching opencode via cplt sandbox with Nav context (34 skill(s), 7 command(s), 10 agent(s), AGENTS.md)...
+[cplt] Project:  /home/dev/smoke-p2-llama
+[cplt] Home:     /home/dev
+[cplt] Agent:    OpenCode
+[cplt] Scratch dir: /home/dev/.cache/cplt/tmp/2b82351004d84bd35e71c9c197fd67a2
+[cplt] Starting proxy on ephemeral port...
+[cplt] Proxy running on localhost:37751 (thread)
+[cplt] allow_env_files=false is not fully enforceable on Linux: Landlock grants the project directory full read access, so .env files within it remain readable. Differs from macOS Seatbelt behavior.
+[cplt] Bubblewrap unavailable (bwrap test failed: bwrap: No permissions to create new namespace, likely because the kernel does not allow non-privileged user namespaces. See <https://deb.li/bubblewrap> or <file:///usr/share/doc/bubblewrap/README.Debian.gz>.). Using Landlock + seccomp only.
+[cplt] UNIX sockets are NOT restricted in this run: Landlock cannot gate connect(2) below ABI v9 (kernel 7.1) and Bubblewrap is not active, so nothing masks them. An agent can reach the D-Bus session bus or a container daemon socket and execute code outside the sandbox. Install bubblewrap to close the known paths.
+[cplt] Landlock sandbox ready ✓
+[cplt] ── Sandbox Configuration ─────────────────────────
+[cplt]  Filesystem:
+[cplt]    Project:       read/write  /home/dev/smoke-p2-llama
+[cplt]    Extra read:    allowed     /home/dev/.local/share/nav-pilot/opencode-plugin
+[cplt]    Extra read:    allowed     /home/dev/.copilot/hooks
+[cplt]    Extra write:   allowed     /home/dev/.local/share/nav-pilot/opencode-hook-state
+[cplt]    .env/.pem/.key blocked     secrets protected
+[cplt]    Lifecycle:     blocked     npm/yarn postinstall hooks
+[cplt]    SSH/GPG/cloud: blocked     ~/.ssh, ~/.gnupg, ~/.aws, ...
+[cplt]    GH CLI config: read-only   ~/.config/gh/{hosts,config}.yml
+[cplt]  Network:
+[cplt]    Outbound:      443          HTTPS only
+[cplt]    Localhost:     blocked     use --allow-localhost <PORT>
+[cplt]    Proxy:         on          localhost:37751
+[cplt]    SSH agent:     blocked     use HTTPS, not SSH
+[cplt]  Environment:
+[cplt]    Mode:          sanitized   allowlist + 5 extra
+[cplt]    Extra:         NAV_PILOT_HOOK_STATE_DIR
+[cplt]    Extra:         NAV_PILOT_MCP_BLOCKED
+[cplt]    Extra:         NAV_PILOT_OPENCODE_HOOKS
+[cplt]    Extra:         NAV_PILOT_SKILLS_DIR
+[cplt]    Extra:         OPENCODE_CONFIG_CONTENT
+[cplt]    Stripped:      AWS_*, NPM_TOKEN, DATABASE_URL, SSH_AUTH_SOCK, ...
+[cplt]  Command guards:
+[cplt]    gh guard:      on          default-deny, scope_check=on
+[cplt]    git guard:     on          blocks git push to the default branch
+[cplt]  Home:           /home/dev
+[cplt]  Full profile:   cplt --print-profile
+[cplt]  Tip:            use --quiet, or cplt config set sandbox.quiet true
+[cplt] ──────────────────────────────────────────────────────
+[cplt] Auto-confirmed (--yes)
+[cplt] Starting OpenCode in sandbox...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{"type":"error","timestamp":1790590442789,"sessionID":"ses_f187e23c2ffeRtKdGaPnzQH2e4","error":{"name":"UnknownError","data":{"message":"Unexpected server error. Check server logs for details.","ref":"err_dc6191f0"}}}
+[cplt] Session ended (exit 1, 12s)
+[cplt] no project file changes
+[cplt] Collection: available.
+[cplt] Classification: settled.
+[cplt] Proxy-observed CONNECT attempts recorded: 8.
+[cplt] Hosts retained: 3. Hosts with blocked activity: 0.
+[cplt] Network visibility: partial.
+[cplt] Routing: proxy enabled without forced routing; direct traffic can bypass observation.
+[cplt] Window: proxy start through snapshot cutoff at +13.037s.
+[cplt] Scope: CONNECT records only. Payloads and exclusive process attribution are unavailable.
+[cplt] Excludes application requests, kernel-denied attempts, DNS, UDP, inbound traffic, delegated services, and activity after the cutoff.
+[cplt] audit covers the repositories in scope — 1 writable path outside /home/dev/smoke-p2-llama was NOT audited: /home/dev/.local/share/nav-pilot/opencode-hook-state

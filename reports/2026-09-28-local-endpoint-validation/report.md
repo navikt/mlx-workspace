@@ -68,6 +68,22 @@ Accuracy is k/n with a 95 % Wilson interval. Where no interval is given, it equa
   - Enter takes the recommended choice;
   - Save defaults to yes.
 
+### `--pull` against the real registry, 2026-09-28 11:44
+
+This rerun came after the firewall was opened. It pulled the library model with `setup --pull`.
+- **Setup:** Ollama 0.34.4 with an empty `OLLAMA_MODELS` directory, a scratch HOME and nav-pilot 6efd04e (a release after #1100). It ran `nav-pilot alpha local setup --pull --yes` and held the queue lock.
+- **What setup did:**
+  - saw "Ollama 127.0.0.1:11434 no models";
+  - recommended `qwen3.6:35b` at "about 23 GB";
+  - pulled it, ran its checks and saved the config.
+  - It exited 0 after 711 s.
+- **Pull:** 21.1 GiB (22.6 GB) on disk in about 690 s, about 33 MB/s on this line. The library build is Q4_K_M `qwen35moe` with a CLIP vision projector and a 262,144-token context. `ollama ps` showed 23 GB, 100 % GPU, and the full 262k context chosen by Ollama itself.
+- **Checks:** setup and a separate `doctor` both passed all five: server, tool calls, logprobs 11/11, context (30,042 tokens kept) and TTFT. TTFT at about 30k was 19.2 s in setup and 20.9 s in doctor, in line with the imported unsloth GGUF (17.5 s).
+- **decide:** three calls answered "yes" at p = 0.9987. Model time was 153, 24 and 41 ms; wall time was 375, 274 and 317 ms. #1101's ~2.5 s exit wait did not show, because the telemetry host was reachable this time.
+- **Cleanup:** the model was removed with `ollama rm`, and the models directory and scratch HOME were deleted.
+
+Files are in `data/`: `ollama-lib-setup-pull.txt`, `ollama-lib-doctor.txt`, `ollama-lib-decide.txt`, `ollama-lib-show.txt` and `ollama-lib-pull-du.txt`. The last one holds the models directory's size in KB every 15 s.
+
 ## Verdict
 The own-endpoint path works on all three servers.
 - **mlx_lm.server:** decide through an endpoint gives exactly the managed decide answers.
@@ -77,7 +93,7 @@ The own-endpoint path works on all three servers.
 ## Limits
 - n is 32–180 per set. There was one session and one latency sample per server.
 - It ran on one 128 GB Mac, so small-VRAM behaviour (4k default context, `--n-cpu-moe`) was not reachable.
-- The `--pull` flow against a real registry and Ollama's own library build are untested, because the registry was blocked.
+- The `--pull` flow and Ollama's library build were measured later the same day, but only for setup, doctor and decide: see the section on the library model. They have no decide sets and no session.
 - `mlx_lm.server` ran without nav-pilot's server flags.
 - This was macOS only. Linux is still unmeasured (see [UNMEASURED.md](../UNMEASURED.md)).
 

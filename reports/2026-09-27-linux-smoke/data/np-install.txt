@@ -1,0 +1,3 @@
+Resolving source...
+Error: could not clone navikt/copilot — check your network connection
+  fatal: unable to access 'https://github.com/navikt/copilot.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.

@@ -1,0 +1,6 @@
+{"choice":"yes","p":{"no":0.0013,"yes":0.9987},"model":"qwen3.6:35b","ms":153,"evidence":true}
+ rc 0 wall_ms 375
+{"choice":"yes","p":{"no":0.0013,"yes":0.9987},"model":"qwen3.6:35b","ms":24,"evidence":true}
+ rc 0 wall_ms 274
+{"choice":"yes","p":{"no":0.0013,"yes":0.9987},"model":"qwen3.6:35b","ms":41,"evidence":true}
+ rc 0 wall_ms 317

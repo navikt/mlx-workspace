@@ -1,0 +1,39 @@
+NAME           ID              SIZE     MODIFIED       
+qwen3.6:35b    096fdbd02fe6    22 GB    23 seconds ago    
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:35b    096fdbd02fe6    23 GB    100% GPU     262144     4 minutes from now    
+  Model
+    architecture        qwen35moe    
+    parameters          35.5B        
+    context length      262144       
+    embedding length    2048         
+    quantization        Q4_K_M       
+    requires            0.30.0       
+  Capabilities
+    completion     
+    vision         
+    tools          
+    thinking       
+        levels     false, true    
+        default    true           
+  Projector
+    architecture        clip       
+    parameters          446.57M    
+    embedding length    1152       
+    dimensions          2048       
+  Parameters
+    draft_num_predict    2       
+    min_p                0       
+    presence_penalty     1.5     
+    repeat_penalty       1       
+    temperature          1       
+    top_k                20      
+    top_p                0.95    
+  License
+    Apache License               
+    Version 2.0, January 2004    
+    ...                          
+version = 1
+local_endpoint = "http://127.0.0.1:11434/v1"
+local_endpoint_model = "qwen3.6:35b"
+local_enabled = true

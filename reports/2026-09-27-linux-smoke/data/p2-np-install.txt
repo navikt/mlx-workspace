@@ -1,0 +1,80 @@
+Resolving source...
+ℹ agentpakke nav-pilot proposes cplt sandbox settings, which only an interactive install can approve.
+  cplt config set proxy.allow_private_domains loki.nav.cloud.nais.io,mimir.nav.cloud.nais.io,tempo.dev-gcp.nav.cloud.nais.io,tempo.prod-gcp.nav.cloud.nais.io
+ℹ Installing 3 hooks, which run outside the sandbox on every matching tool call: ask-first-aria, gh-poll-gate, klarsprak-gate
+Installing: all 63 items
+Source: navikt/copilot@f30c1a3
+Target: ~/.copilot (user-wide)
+Agents (10):
+  ✓ accessibility
+  ✓ aksel
+  ✓ code-review
+  ✓ forfatter
+  ✓ kafka
+  ✓ nav-pilot
+  ✓ nav-pilot-opus
+  ✓ research
+  ✓ rust
+  ✓ security-champion
+Skills (34):
+  ✓ ai-news-research
+  ✓ aksel-builder
+  ✓ aksel-spacing
+  ✓ api-design
+  ✓ conventional-commit
+  ✓ deliberate-ai-use
+  ✓ flyway-migration
+  ✓ jackson-3-migration
+  ✓ java-to-kotlin
+  ✓ kafka
+  ✓ klarsprak
+  ✓ kotlin-app-config
+  ✓ ktor-scaffold
+  ✓ nais
+  ✓ nav-architecture-review
+  ✓ nav-auth
+  ✓ nav-deep-interview
+  ✓ nav-dekoratoren
+  ✓ nav-plan
+  ✓ nav-troubleshoot
+  ✓ observability-debugging
+  ✓ observability-setup
+  ✓ playwright-testing
+  ✓ postgresql-review
+  ✓ readme-review
+  ✓ rust-development
+  ✓ security-owasp
+  ✓ security-review
+  ✓ spring-boot-scaffold
+  ✓ terse-mode
+  ✓ threat-model
+  ✓ tokenx-auth
+  ✓ web-design-reviewer
+  ✓ workstation-security
+Instructions (16):
+  ✓ accessibility
+  ✓ database
+  ✓ deliberate-ai-use
+  ✓ docker
+  ✓ github-actions
+  ✓ golang
+  ✓ kotlin
+  ✓ nextjs-aksel
+  ✓ norwegian-text
+  ✓ output-style
+  ✓ performance
+  ✓ security-core
+  ✓ security-owasp
+  ✓ testing
+  ✓ testing-kotlin
+  ✓ testing-typescript
+Hooks (3):
+  ✓ ask-first-aria
+  ✓ gh-poll-gate
+  ✓ klarsprak-gate
+✓ Installed 63 items to ~/.copilot (user-wide) (v2026.09.28-081152-6efd04e, f30c1a3).
+Agents and skills are now available across all your repos.
+Use @nav-pilot in Copilot Chat, or start it in the sandbox with nav-pilot (or cplt -- --agent nav-pilot)
+Instructions are available when launching cplt via nav-pilot.
+For direct cplt usage, add to your shell profile:
+  eval "$(nav-pilot env)"
