@@ -12,8 +12,8 @@ Nothing here ships in nav-pilot.
 | – | `local_endpoint` validation (agent) | after 64-5 | ~01:00 28 Sep | ~1 h (guess) |
 | – | per-level dispatch probe (dlv-waiter, touches `dispatch-levels.done`) | after the validation | ~02:00 | ~2 h |
 | – | follow-ups 1 (fu1-launcher, pid 4384) | after the probe | ~04:00 | ~3 h 30 min |
-| 1 | **GPT-6 Sol**, cap $15 | `dispatch-levels.done`, fu1-launcher gone, GPU free 5 min | **~07:45 28 Sep** | ~2 h 30 min–3 h |
-| 2 | **presence_penalty A/B** | after item 1 (`gpt6-sol.done`), GPU free 5 min | **~10:45 28 Sep** | ~6 h, ends ~17:00 |
+| 1 | **GPT-6 Sol**, cap $15 | `dispatch-levels.done`, fu1-launcher gone, GPU free 5 min | **~07:45 28 Sep** | done, $6.14 (#118) |
+| 2 | **presence_penalty A/B** | after item 1 (`gpt6-sol.done`), GPU free 5 min | **~10:45 28 Sep** | running; step 8 at 17:12, ends ~19:00 |
 
 The times assume each step starts as soon as the one before it ends. The validation is an agent
 task, so if it starts late everything after it moves by the same amount. The launcher gives up at

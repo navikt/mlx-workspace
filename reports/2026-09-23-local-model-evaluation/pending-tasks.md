@@ -703,5 +703,31 @@ and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/
    mlx_lm.server takes the parameter per request, and the bench sends it through opencode.json.
    This was verified against a recording server. No loop has been seen on this model yet, so the
    A/B mainly tests whether the card's value costs pass rate. Nothing ships in nav-pilot.
-   **Queued** by followups-2-launcher after item 1; the queue file is
+   **Running** since 12:20 on 28 September (step 8 at 17:12, ends about 19:00), started by
+   followups-2-launcher after item 1; the queue file is
    [presence-penalty.queue](../2026-09-28-orchestrator-and-penalty/presence-penalty.queue).
+
+## 8.12 The GPU queue and open benchmark work (28 September, 17:45)
+
+One list, in run order, so nothing waits without a queue position or an issue. Each step starts when
+the one before it is done and the GPU has been free for 5 minutes. The register of what each result
+decides is [UNMEASURED.md](../UNMEASURED.md). The nav-pilot side is tracked in navikt/copilot#1177.
+
+| # | Step | Started by | Issue | Waits on |
+|---|---|---|---|---|
+| 1 | presence_penalty A/B on the 8-bit (§8.11 item 2) | followups-2-launcher, running | – (report in [plan](../2026-09-28-orchestrator-and-penalty/plan.md) §2) | – |
+| 2 | Linux smoke pass 3 (saved config: doctor, decide, one opencode session), in a free gap | `linux3.sh` waiter | [report](../2026-09-27-linux-smoke/report.md), navikt/copilot#521 | step 1 |
+| 3 | Dispatch re-probe 7 (cap $12.75) | `reprobe7-waiter` | #121 | step 1 |
+| 4 | Frontier harness v2 merges | `v2-merge-waiter` | #113, #89, #90, #107 | steps 1 and 3 |
+| 5 | The v2 validation night | results agent, after step 4 | #89 | step 4 |
+| 6 | Night 64-6: the 8-bit past 49k, and its capabilities | `tier64-6-launcher` (`V2_DONE`) | #134, navikt/copilot#1010 | step 5, re-probe 7's level, the user's sudo twice |
+| 7 | The after-64-6 queue: the action check's case set, then #122 | `after-64-6-launcher` | navikt/copilot#1161, #122 ([plan](../2026-09-28-after-64-6/plan.md)) | step 6 |
+
+Not in a queue yet, each with its issue:
+- GPT-6 Sol at `balanced` and n ≥ 5 per cell: #135, after #116.
+- Kev 4B and Laya: #95, the download opens after 29 September 08:02.
+- read-qa with an ANSWER-line reminder: #114, after step 5 (a new `harness_sha`).
+- Qwen3.8 8-bit at 52 GB wired: #93, needs the user's sudo decision.
+- Real Linux hardware (x86_64, NVIDIA, CPU-only): #124, needs a volunteer.
+- Selective rule loading and rule recall: #127, from about 4 October.
+- Hosted decide serving parity: #96, needs GCP, ruled out for now.

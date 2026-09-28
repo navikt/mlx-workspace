@@ -88,7 +88,7 @@ fewer loops is not a reachable outcome; the expected result is no effect.
 
 ## ETA
 
-Upstream: the presence_penalty A/B (ends about 19:00 on 28 September), re-probe 7, the v2 merge,
-the v2 validation night, then 64-6, which waits for the user's sudo twice. If 64-6 starts on the
+Upstream: the presence_penalty A/B (ends about 19:00 on 28 September), re-probe 7 (#121), the v2 merge (#113),
+the v2 validation night (#89), then 64-6 (#134), which waits for the user's sudo twice. If 64-6 starts on the
 morning of 29 September, it ends about 13:00. This queue then ends about 18:00 the same day, and
 by the next morning at the latest if every step runs to its cap.
