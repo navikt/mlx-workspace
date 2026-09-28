@@ -1,0 +1,7 @@
+⚠ model "qwen3-1.7b" runs this session on the local model. To choose which model the local server loads, set local_model instead: nav-pilot alpha local use <key>.
+
+→ Launching opencode...
+
+Error: launch failed: the local endpoint is not answering at http://127.0.0.1:8080 (Get "http://127.0.0.1:8080/v1/models": dial tcp 127.0.0.1:8080: connect: connection refused).
+
+  Start your server (for example ollama serve or llama-server --jinja -c 65536 -m <model.gguf>), then check it: nav-pilot alpha local doctor

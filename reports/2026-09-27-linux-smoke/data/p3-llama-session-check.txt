@@ -1,0 +1,11 @@
+greet.py:
+def greet(name):
+    return "Helo, " + name
+
+
+if __name__ == "__main__":
+    print(greet("world"))
+test_greet.py:
+cat: /home/dev/smoke-p3-llama/test_greet.py: No such file or directory
+run: fail
+tool calls:

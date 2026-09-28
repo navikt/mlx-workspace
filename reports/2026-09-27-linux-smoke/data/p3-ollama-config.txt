@@ -1,0 +1,5 @@
+✓ local_endpoint: (unset) → http://127.0.0.1:11434/v1
+✓ local_endpoint_model: (unset) → qwen3:1.7b
+  Previous file kept as /home/dev/.nav-pilot/config.toml.bak
+✓ local_enabled: false (default) → true
+  Previous file kept as /home/dev/.nav-pilot/config.toml.bak

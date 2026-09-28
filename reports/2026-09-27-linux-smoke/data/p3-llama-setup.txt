@@ -1,0 +1,37 @@
+nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    · Ollama       127.0.0.1:11434 not answering
+    ✓ llama-server 127.0.0.1:8080  qwen3-1.7b
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+
+  ⚠ None of these is a model nav-pilot knows. The closest to its own is:
+    llama-server --jinja -c 65536 --port 8080 -hf unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL --alias qwen3.6-35b
+  ⚠ Continuing with qwen3-1.7b, which nav-pilot knows nothing about.
+
+  Using  qwen3-1.7b on llama-server http://127.0.0.1:8080/v1
+
+  Endpoint  http://127.0.0.1:8080/v1
+  Model     qwen3-1.7b (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3-1.7b
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    a 30k-token prompt failed: no answer within 10m0s
+        Fix: Ollama: start it with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, or make
+             a model with a Modelfile holding FROM <model> and PARAMETER num_ctx
+             65536 (ollama create <name> -f Modelfile) and set local_endpoint_model
+             to <name>. llama-server: -c 65536. LM Studio: raise the context length
+             when you load the model. On a GPU with 8 GB or less, 65536 may not fit:
+             https://ki-utvikling.nav.no/nav-pilot/lokal/egen-server#lite-minne
+  SKIP  TTFT       the context probe failed
+
+  ⚠ Only the context check failed. Short prompts work with this context. A Copilot or opencode session starts at about 22k tokens, and the server cuts or refuses what does not fit.
+
+
+Error: nothing was saved. Fix the FAIL lines above, then run nav-pilot alpha local setup. Or save with this context anyway: nav-pilot config set local_endpoint http://127.0.0.1:8080/v1 && nav-pilot config set local_endpoint_model qwen3-1.7b && nav-pilot config set local_enabled true
+exit 1
+cat: /home/dev/.nav-pilot/config.toml: No such file or directory
