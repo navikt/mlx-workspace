@@ -6,13 +6,21 @@ returns a probability per option from its own head. This adapter runs one in-pro
 (.bench-logs/venv-kev, .bench-logs/venv-laya), and writes the same per-case records as _decide_limits,
 _decide_sets and _decide_why, so their summaries compare it with optiq and Qwen3.8 unchanged.
 
-  run <model> [--limit N] [--out DIR] [--stamp S]   every case of every set, three JSON files:
-        DIR/decide-{limits,sets,why}-<model>-<S>.json (DIR defaults to bench/). --limit N takes the
+  run <model> [--limit N] [--out DIR] [--stamp S]   every case of every set, four JSON files:
+        DIR/decide-{limits,sets,why,loop}-<model>-<S>.json (DIR defaults to bench/). --limit N takes the
         first N cases per set and exits 1 when more than 20 % of them errored (the dry run).
         Run it with the model's venv python; it only reads the HF cache (HF_HUB_OFFLINE=1).
-  summary <stamp> [model ...]                      bench/decide-{limits,sets,why}-s1-<stamp>.md: the
-        new models next to the optiq and Qwen3.8 runs in COMPARE. Any python.
+  summary <stamp> [model ...]                      bench/decide-{limits,sets,why,loop}-s1-<stamp>.md: the
+        new models next to the optiq and Qwen3.8 runs in COMPARE (loop has none: optiq and Qwen3.8 were
+        measured through nav-pilot's guard prompt directly, System One report §3.1, not this adapter).
+        Any python.
   --selftest                                       a fake backend through run and summary. Any python.
+
+`loop` is the System One report's loop classifier (§1-3): the 7 hand-written stuck-loop-vs-legitimate
+scenarios from nav-pilot's guard prompt (`_np_checks.py` SCENARIOS, e72319e0), copied once into
+bench/decide-cases/loop-classifier.jsonl in this adapter's one-question, fixed-options shape (no
+tool results, unlike decide-limits' loop-near set). One case per scenario; the models are deterministic,
+so no repeats, as for the other groups.
 
 Each case becomes one `choice` question: state = evidence, instructions = question, criteria =
 options. The chosen option and its distribution come from the model's own answer. Extra per-case
@@ -42,18 +50,42 @@ MODELS = {
     "laya-421m": ("aac6fef/laya-mlx", "20aed815fc6acde75733882e7ec0e3f28aeb9717", "laya"),
     "laya-m-322m": ("aac6fef/laya-multilingual-mlx", "f2b4faf51023039425946074e2cf1361d2db11d5", "laya"),
 }
+LOOP_CASES = ROOT / "bench" / "decide-cases"
+
+
+def loop_cases(s):
+    return [json.loads(l) for l in (LOOP_CASES / f"{s}.jsonl").read_text().splitlines() if l.strip()]
+
+
+def loop_summary(docs):
+    L = ["# Loop classifier: stuck loop vs legitimate repeat", "",
+         "The 7 hand-written scenarios from nav-pilot's guard prompt (System One report §3.1), one call "
+         "per scenario, no repeats (the models are deterministic). optiq and Qwen3.8 were measured "
+         "directly through the guard prompt, not through this adapter, so there is no comparable file "
+         "to merge here. Cells are correct/n [95% Wilson]. An errored call counts as wrong.", "",
+         "| | " + " | ".join(d["key"] for d in docs) + " |", "|---|" + "---|" * len(docs),
+         "| All | " + " | ".join(DL.cell(d["cases"]) for d in docs) + " |",
+         "| Loops (expect stuck loop) | " + " | ".join(
+             DL.cell([c for c in d["cases"] if not c["legitimate"]]) for d in docs) + " |",
+         "| Polls (expect legitimate) | " + " | ".join(
+             DL.cell([c for c in d["cases"] if c["legitimate"]]) for d in docs) + " |"]
+    return "\n".join(L) + "\n"
+
+
 GROUPS = {  # group -> (sets, case loader, extra fields per case, as the group's own run() adds them)
+    "loop": (("loop-classifier",), loop_cases, ("legitimate", "n", "scenario")),
     "limits": (DL.SETS, DL.cases, ()),
     "sets": (DS.SETS, DS.cases, ("lang", "repo", "number", "construction")),
     "why": (tuple(DW.FILES), DW.cases, ("lang", "construction", "sha")),
 }
 # The runs the summaries set the new models against (the manifest's two default decide models).
 COMPARE = {
+    "loop": [],   # optiq/Qwen3.8 were measured through the guard prompt directly; see loop_summary
     "limits": ["decide-limits-optiq-20260925-014512.json", "decide-limits-qwen3.8-27b-optiq-4bit-20260925-014512.json"],
     "sets": ["decide-sets-optiq-20260925-225356.json", "decide-sets-qwen3.8-27b-optiq-4bit-20260925-225356.json"],
     "why": ["decide-why-optiq-20260925-072116.json", "decide-why-qwen3.8-27b-optiq-4bit-20260925-072116.json"],
 }
-SUMMARY = {"limits": DL.summary, "sets": DS.summary, "why": DW.summary}
+SUMMARY = {"loop": loop_summary, "limits": DL.summary, "sets": DS.summary, "why": DW.summary}
 EXTRA = {}   # the last call's state_tokens / truncated / over_train, read after DL.one
 
 
@@ -216,7 +248,7 @@ def selftest():
     with tempfile.TemporaryDirectory() as t:
         assert run("fake", out=Path(t), stamp="T") == 0
         n = {g: len(json.loads((Path(t) / f"decide-{g}-fake-T.json").read_text())["cases"]) for g in GROUPS}
-        assert n == {"limits": 974, "sets": 218, "why": 96}, n
+        assert n == {"loop": 7, "limits": 974, "sets": 218, "why": 96}, n
         doc = json.loads((Path(t) / "decide-why-fake-T.json").read_text())
         c = doc["cases"][0]
         assert c["choice"] == c["options"][0] and c["error"] is None and "sha" in c, c

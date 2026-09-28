@@ -7,6 +7,7 @@ Extra fields (`id`, `set`, `meta`) are ignored by nav-pilot.
 |---|---|---|---|
 | `commit-conventional.jsonl` | 20 | Does this subject follow Conventional Commits? | the regex in `_decide.py`, re-checked by `--check-cases` |
 | `loop-vs-progress.jsonl` | 12 | Is this agent stuck in a loop or making progress? | construction |
+| `loop-classifier.jsonl` | 7 | Is a repeated tool call a stuck loop or legitimate? | the 7 hand-written scenarios behind the guard's classifier prompt (System One report §3.1, `_np_checks.py` SCENARIOS), no tool results — unlike `loop-vs-progress.jsonl` and decide-limits' `loop-near.jsonl`. Run by `_decide_s1.py`'s `loop` group only; no chat-model comparison exists in this shape. |
 | `commit-explains-why.jsonl` | 48 (24 yes, 24 no) | Does the commit message explain why the change was made, beyond describing what the diff already shows? | hand labels plus construction, below |
 | `commit-explains-why-no.jsonl` | 48 (24 ja, 24 nei) | The same in Norwegian: *Forklarer commit-meldingen hvorfor endringen ble gjort, utover å beskrive det diffen allerede viser?* | twin of the English file: same evidence, same order, `yes`→`ja` |
 | `issue-type.jsonl` | 105 (35 per class) | Is this GitHub issue a bug report, a feature request, or a question? | the label a person put on the issue, below |
