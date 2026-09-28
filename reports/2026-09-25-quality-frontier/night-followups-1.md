@@ -151,7 +151,7 @@ Verdict: example replicates on read-qa at rung(s) 1, 3, 4.
 
 The Frontier section pools every night. This section covers follow-ups 1 alone, taken from `steps.jsonl` and the twelve result files. All ten frontier files carry `harness_sha` df7deb1af416 and `tasks_sha` 17d0cf33d776, the same as night 2 and the 64 GB nights, and every sample's `served_model` is `mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit`. No sample was invalid, none looped (longest identical run 2), and none timed out. Both decide runs made 896 calls with no errors, on `nav-pilot-main-7236795f`. Intervals are 95 % Wilson.
 
-**Steps 13–18 did not run.** Twelve of 18 steps ran, and the last six (12 create-file samples per arm) stopped in 2–3 s each at `assert_workspace_is_clean`. The cause is one retry2 sample in step 12 (run 2, `cf-r1-a`). Its first attempt could not find the source tree: its `find` calls, under the workspace and under `/`, returned nothing. It then wrote `DateUtil.kt` and a test under a guessed `src/main/kotlin/no/nav/syfo/…` and `src/test/…` at the workspace root, beside `kotlin/`. Its second attempt deleted both files but left the empty directories, and the third attempt made no changes. The sample counts as failed ("no changes made"), which is right. The next sample (run 2, `cf-r1-b`) tried to read the stray `DateUtil.kt` and got "File not found", so nothing reached a scored sample. The empty tree was moved to `.bench-logs/night3-20260928-080235/stray/`. The steps were not resumed. After harness v2 (#113) they would carry a new `harness_sha` and could not pool with night 2, and v2's per-sample sweep moves exactly this kind of stray (its docstring names this night).
+**Steps 13–18 did not run.** Twelve of 18 steps ran, and the last six (12 create-file samples per arm) stopped in 2–3 s each at `assert_workspace_is_clean`. The cause is one retry2 sample in step 12 (run 2, `cf-r1-a`). Its first attempt listed the workspace and saw `kotlin/`, but its `find` calls for the source files, under the repo and under `/`, returned nothing. It then wrote `DateUtil.kt` and a test under a guessed `src/main/kotlin/no/nav/syfo/…` and `src/test/…` at the workspace root, beside `kotlin/`. Its second attempt deleted both files but left the empty directories, and the third attempt made no changes. The sample counts as failed ("no changes made"), which is right. The next sample (run 2, `cf-r1-b`) tried to read the stray `DateUtil.kt` and got "File not found", so nothing reached a scored sample. The empty tree was moved to `.bench-logs/night3-20260928-080235/stray/`. The steps were not resumed. After harness v2 (#113) they would carry a new `harness_sha` and could not pool with night 2, and v2's per-sample sweep moves exactly this kind of stray (its docstring names this night).
 
 ### 1. decide order × negation (steps 1–2)
 
@@ -165,11 +165,11 @@ The question: is the yes/no inconsistency a pull to the last option, or a prior 
 | negate-swap | negated | A | 113/184 | 111 | 112/184 | 66 | 40 / 33 (fine at B) |
 
 - **Both models pull to the last option.** With the question held fixed, moving the fine answer from A to B raises how often it is picked, in all eight comparisons (two models × two sets × two question forms), each at McNemar p ≤ 0.031.
-- **It is not a "text is fine" prior.** Such a prior would move both negation comparisons the same way. For optiq they move in opposite directions: with fine at A, negating lowers picking fine (104 → 73 of 184), and with fine at B it raises it (137 → 161). What stays the same is that negation strengthens the pull to B: optiq picks B in 217/368 [0.54–0.64] positive answers and in 272/368 [0.69–0.78] negated ones. On goapi, where fine is `no`, optiq's negate-swap arm picks B 40 of 40.
+- **A "text is fine" prior does not explain it.** On goapi, where fine is `no`, the arms with fine at A pick it in fewer than half the cases: optiq 16/40 and 18/40, the 27B 19/40 and 13/40. On the pooled sets, negation moves optiq's picks of fine in opposite directions: with fine at A, negating lowers them (104 → 73 of 184), and with fine at B it raises them (137 → 161). A prior as the only cause would move both the same way. A small prior on top of the position pull is not ruled out. What stays the same is that negation strengthens the pull to B: optiq picks B in 217/368 [0.54–0.64] positive answers and in 272/368 [0.69–0.78] negated ones.
 - **The 27B is mostly position.** With the position held fixed, negation changes little on the pooled sets (b/c 24/39, p = 0.077, and 23/20, p = 0.761), and its B share does not rise under negation (221/368 positive, 203/368 negated).
 - Both models repeat #61's arms answer for answer (672/672 each), so the decide path is deterministic across days.
 
-**What changes:** nothing in nav-pilot, as [decide-layout-results.md](../../bench/decide-layout-results.md) already recommended. The recipes keep the shipped `yes,no` order and positive wording. The cause they can now name is a pull to the last-listed option, stronger in optiq when the question is negated. A negated wording is a different question: 0.55–0.61 correct against 0.88–0.94.
+**What changes:** nothing in nav-pilot, as [decide-layout-results.md](../../bench/decide-layout-results.md) already recommended. The recipes keep the shipped `yes,no` order and positive wording. The cause they can now name is a pull to the last-listed option, stronger in optiq when the question is negated. A negated wording is a different question: 0.55–0.61 correct, against 0.88–0.94 in the shipped order.
 
 ### 2. read-qa `example` against base (steps 3–10)
 
@@ -184,7 +184,7 @@ The question: is `example`'s gain (26/40 [0.50–0.78] on 27 September against 1
 | 5 | 8/16 [0.28–0.72] | 9/16 [0.33–0.77] | 0.50 |
 | **all** | **32/80** [0.30–0.51] | **57/80** [0.61–0.80] | < 0.001 |
 
-Median seconds per sample are 0.95–1.42× base's. By design §7, `example` replicates at rungs 1, 3 and 4. Both arms land close to their earlier rates (base 0.40 against 0.45, example 0.71 against 0.65).
+Median seconds per sample are 0.95–1.42× base's. By design §7's replication rule, `example` replicates at rungs 1, 3 and 4. It does not move the open frontier (0 → 0), so the rule that it moves a rung is not met. Both arms land close to their earlier rates (base 0.40 against 0.45, example 0.71 against 0.65).
 
 The failures show what the prefix does. Base fails 48 times: 40 answers list a file too many (35 of them only extras, the pattern read-qa-analysis.md traced to the defining file), and 8 have no ANSWER line. Example fails 23 times: 5 with extra or missing files, and 18 with no ANSWER line, spread over 8 of the 10 tasks. So the prefix fixes the defining-file error that [read-qa-analysis.md](read-qa-analysis.md) found, and more sessions now end without the answer line.
 
@@ -200,7 +200,7 @@ The question: does retry2 pass design §7's 2× time rule per task? Only one of 
 | cf-r1-b | 5/10 [0.24–0.76] | 8/10 [0.49–0.94] | 0.18 | 125 / 156 | 1.25× | 340 / 265 |
 | **both** | **5/20** [0.11–0.47] | **15/20** [0.53–0.89] | 0.002 | 110 / 223 | 2.02× | 618 / 322 |
 
-- retry2 fails the 2× rule on cf-r1-a alone, the task base never solves. There, base's samples are short because they give up, and retry2 spends its time on the retries that pass.
+- retry2 fails the 2× rule on cf-r1-a alone, the task base never solves (0/10, 9 of them "the new test does not pass"). 4 of retry2's 7 passes there came on a second attempt, and the pooled ratio of 2.016 is one sample from the line.
 - Per verified result, retry2 is cheaper on both tasks: 322 s against 618 s pooled.
 - Design §7 measures time per sample, so by the rule as written retry2 does not replicate on create-file. Counting cost per verified result instead would be a change to the rule after seeing the data, and that is the user's call, not the report's. It is listed in [UNMEASURED.md](../UNMEASURED.md).
 
