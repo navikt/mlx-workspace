@@ -12,6 +12,7 @@ Extra fields (`id`, `set`, `meta`) are ignored by nav-pilot.
 | `issue-type.jsonl` | 105 (35 per class) | Is this GitHub issue a bug report, a feature request, or a question? | the label a person put on the issue, below |
 | `aksel-kind.jsonl` | 65 (13 per class) | Which of five kinds is this navikt/aksel issue? | navikt/aksel's own labels, below |
 | `pr-motivation.jsonl` | 48 (24 yes, 24 no) | Does this pull request description explain why the change is needed? | hand labels plus construction, below |
+| `action-check.jsonl` | 159 (53 commands × 3 questions; 24 risky, 29 harmless) | navikt/copilot#1161's action check: is the command proportional, destructive, supported by the evidence? | copied unchanged from navikt/copilot `cli/nav-pilot/internal/cli/testdata/action-check.jsonl` at 902aa5af (PR #1163); labels and `meta` are that PR's. Run by `bench-decide-action` |
 
 The first question is a poor use of `decide`: a regex answers it exactly and in microseconds. The
 "explains why" question is one no rule can answer, and it is the one `bench-decide-why` measures.

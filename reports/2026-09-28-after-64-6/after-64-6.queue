@@ -1,0 +1,18 @@
+# The GPU queue after night 64-6 (plan.md). Run by after-64-6-launcher once 64-6 is done, or by hand:
+#   mise run night-run-3 -- --part local --queue reports/2026-09-28-after-64-6/after-64-6.queue
+# Wired: 48 GB. Ordered by value per GPU hour.
+# 1-2. The action check (navikt/copilot#1161) on its 159-line set, optiq then Qwen3.8 OptiQ-4bit (§1).
+# 3-10. #122: Qwen3.8 OptiQ-4bit at the card's non-thinking sampling against ours, cheap-ops, ABBA twice:
+#       4 passes an arm. ~35 min a pass (24 Sep: 21:58, 22:31, 23:08).
+#
+# part kind   classes variant runs rungs timeout-min expected-min profile
+local  decide action  -       -    -     45          8            qwen3.6-35b-a3b-optiq
+local  decide action  -       -    -     60          15           qwen3.8-27b-optiq-4bit
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit-card
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit-card
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit-card
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit-card
+local  ops    -       -       -    -     70          35           qwen3.8-27b-optiq-4bit
