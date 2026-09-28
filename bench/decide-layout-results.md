@@ -133,7 +133,9 @@ for the 27B, which keeps 0.88 agreement under negation.
   first and 20/30 (0.67) with `no` first, and it chose A only 9/30 and 5/30 times. That is a pull
   towards the last option. Here, "yes" first (as shipped) is again the better order. The same pull
   towards B, together with a prior that the text is fine, explains the negated drop. This run does not
-  separate the two causes. That would take a 2×2 (negated × swapped).
+  separate the two causes. That would take a 2×2 (negated × swapped). The 2×2 ran on 2026-09-28
+  ([follow-ups 1](../reports/2026-09-25-quality-frontier/night-followups-1.md), Review §1): it is the
+  pull to the last option, stronger in optiq under negation, and not a prior that the text is fine.
 
 ## Verdict
 
