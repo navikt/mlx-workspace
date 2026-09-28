@@ -1,0 +1,8 @@
+# Kev 4B and Laya on the decide sets (plan.md). Run by kev-laya-launcher, in this order, each with
+# `_decide_s1.py run <model>` in its own venv under .bench-logs/. A model's pass stops at cap-min
+# (S1_MAX_S) and keeps what it measured. Each model first runs a dry run of 5 cases per set.
+#
+# model        venv  cap-min  expected-min
+kev-4b-8bit    kev   90       25
+laya-421m      laya  20       3
+laya-m-322m    laya  20       3

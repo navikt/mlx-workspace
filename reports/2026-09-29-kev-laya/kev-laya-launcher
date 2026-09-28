@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# Kev 4B and Laya on the decide sets (plan.md, pending-tasks §8.6, #95). Waits until all of these
+# hold for 5 min straight:
+#   1. the date is 2026-09-29 or later;
+#   2. the GPU queue is done with the 64 GB series: .bench-logs/after-64-6.done exists, or no
+#      after-64-6 / tier64-6 launcher has run for 30 min and tier64-6.done or $V2_DONE (default
+#      .bench-logs/v2-validate.done) exists (after-64-6 was never armed);
+#   3. on AC power, and the default route is Wi-Fi or Ethernet, not an iPhone (USB, Bluetooth or
+#      a 172.20.10.x hotspot gateway);
+#   4. no queue lock, and no benchmark, night, server, probe or Linux smoke process;
+#   5. the uv cooldown is over for both installs: a dry-run resolve (`uv pip compile`, no install)
+#      of laya-mlx==0.2.0 and of Kev's git commit each succeeds under ~/.config/uv/uv.toml, and 7
+#      days have passed since Kev's commit (2026-09-22T19:21:20Z), because uv checks no dates on a
+#      git source. Checked at most every 30 min, once 1-4 hold.
+# Then it takes the queue lock, pulls main, installs each model into its own venv under
+# .bench-logs/ (env -u VIRTUAL_ENV, the §8.6 lesson; the cooldown stays in force), checks the main
+# .venv is untouched, and runs kev-laya.queue: per model a 5-case-per-set dry run, then the full
+# pass. It writes bench/decide-{limits,sets,why}-<model>-<stamp>.json and the three
+# bench/decide-*-s1-<stamp>.md summaries, then touches .bench-logs/kev-laya.done.
+# Logs to .bench-logs/kev-laya.log. Gives up at 2026-10-08 06:00.
+# Start it from ~/tmp: no command line of this script may carry "bench-", "night", "np-serve" or
+# "dispatch-probe", because other waiters pgrep for them; such strings are built from pieces, and
+# after the wait everything runs from inside the logs directory with relative paths.
+# Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L=".b""ench-logs"
+exec >> "$MAIN/$L/kev-laya.log" 2>&1
+R=reports/2026-09-29-kev-laya
+V2_DONE=${V2_DONE:-$L/v2-validate.done}
+KEV_REQ="kev[mlx] @ git+https://github.com/jaredpalmer/kev@08ab0b87d27cb5577a3b371ad7ed4e4686b0502b"
+LAYA_REQ="laya-mlx==0.2.0"
+START=$(date -j -f '%Y-%m-%d %H:%M:%S' '2026-09-29 00:00:00' +%s)
+KEV_OPEN=$(TZ=UTC date -j -f '%Y-%m-%d %H:%M:%S' '2026-09-29 19:21:20' +%s)
+GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-08 06:00' +%s)
+PAT=$(mktemp); GONE=$(mktemp); CD=$(mktemp)
+trap 'rm -f "$PAT" "$GONE" "$CD"' EXIT
+printf '%s\n' "tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|lsmoke/linux3" > "$PAT"
+log() { echo "$(date '+%F %T') kev-laya: $*"; }
+running() { ps ax -o pid=,command= | grep -E -f "$PAT" | grep -vE "^ *($$|$PPID) " | grep -v -E "^ *[0-9]+ (grep|sleep)"; }
+healthy() {  # the main .venv as every launcher expects it (fu2, tier64-6)
+  env -u VIRTUAL_ENV "$MAIN/.venv/bin/python" - <<'PY' 2>/dev/null
+import importlib.util, sys
+import mlx_lm, numpy
+ok = mlx_lm.__version__ == "0.32.0" and tuple(int(x) for x in numpy.__version__.split(".")[:2]) < (2, 4) and importlib.util.find_spec("torch") is None
+sys.exit(0 if ok else 1)
+PY
+}
+series_over() {
+  [ -e "$L/after-64-6.done" ] && return 0
+  if pgrep -f "(after-?64-?[6]|tier64-?[6])-launcher" >/dev/null; then : > "$GONE"; echo "after-64-6 or tier64-6 launcher still running"; return 1; fi
+  [ -e "$L/tier64-6.done" ] || [ -e "$V2_DONE" ] || { echo "no after-64-6.done, tier64-6.done or $V2_DONE yet"; return 1; }
+  [ -s "$GONE" ] || date +%s > "$GONE"
+  local m=$(( ($(date +%s) - $(<"$GONE")) / 60 ))
+  [ "$m" -ge 30 ] && return 0
+  echo "no after-64-6.done, and no after-64-6 launcher for $m min"; return 1
+}
+tethered() {
+  local rt ifc gw port
+  rt=$(/sbin/route -n get default 2>/dev/null)
+  ifc=$(echo "$rt" | awk '/interface:/{print $2}'); gw=$(echo "$rt" | awk '/gateway:/{print $2}')
+  [ -n "$ifc" ] || { echo "no default route"; return; }
+  case "$gw" in 172.20.10.*) echo "gateway $gw is an iPhone hotspot"; return;; esac
+  port=$(/usr/sbin/networksetup -listallhardwareports | awk -v d="$ifc" '/^Hardware Port:/{p=substr($0,16)} $0=="Device: "d{print p}')
+  case "$port" in Wi-Fi|Ethernet*|*LAN*|Thunderbolt*) ;; *) echo "default route via $ifc (${port:-unknown port})";; esac
+}
+resolve() {  # $1 requirement: a dry-run resolve under the uv cooldown, nothing installed
+  local out
+  out=$(echo "$1" | env -u VIRTUAL_ENV uv pip compile - --python-version 3.12 --no-header -q 2>&1) && return 0
+  echo "uv resolve of '$1' fails: $(echo "$out" | grep -E 'hint:|Caused by|error' | tail -1 | cut -c1-200)"; return 1
+}
+cooldown() {  # "" when open; a fresh verdict at most every 30 min, the last one kept in $CD
+  [ "$(head -1 "$CD")" = open ] && return
+  [ -s "$CD" ] && [ $(( $(date +%s) - $(stat -f %m "$CD") )) -lt 1800 ] && { tail -1 "$CD"; return; }
+  local why=""
+  [ "$(date +%s)" -ge "$KEV_OPEN" ] || why="Kev's commit is inside the 7-day cooldown until $(date -r "$KEV_OPEN" '+%F %H:%M')"
+  [ -z "$why" ] && why=$(resolve "$LAYA_REQ")
+  [ -z "$why" ] && why=$(resolve "$KEV_REQ")
+  if [ -z "$why" ]; then echo open > "$CD"; else echo "$why" > "$CD"; echo "$why"; fi
+}
+why_not() {
+  [ "$(date +%s)" -ge "$START" ] || { echo "before 2026-09-29"; return; }
+  series_over || return
+  pmset -g batt | grep -q "'AC Power'" || { echo "on battery"; return; }
+  local t; t=$(tethered); [ -n "$t" ] && { echo "tethered? $t"; return; }
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(<"$L/.queue.lock/pid")"; return; }
+  local p; p=$(running)
+  [ -n "$p" ] && { echo "running: $(echo "$p" | cut -c1-120 | tr '\n' ';')"; return; }
+  cooldown
+}
+wait_free() {
+  local free_since="" last="" n=0 why
+  while :; do
+    why=$(why_not)
+    if [ -z "$why" ]; then
+      [ -z "$free_since" ] && free_since=$(date +%s) && log "free; starting after 5 min of it"
+      [ $(( $(date +%s) - free_since )) -ge 300 ] && return 0
+    else
+      free_since=""
+      { [ "$why" != "$last" ] || [ $((n % 60)) -eq 0 ]; } && log "waiting: $why"; last=$why
+    fi
+    [ "$(date +%s)" -ge "$GIVE_UP" ] && { log "gave up: ${why:-never free for 5 min}"; return 1; }
+    n=$((n + 1)); sleep 60
+  done
+}
+
+log "pid $$: installs Kev and Laya and runs $R/kev-laya.queue once it is 2026-09-29, 64-6 and after-64-6 are over, the uv cooldown resolves, on AC and not tethered"
+caffeinate -is -w $$ &
+while :; do
+  wait_free || exit 1
+  cd "$MAIN/$L" || exit 1          # from here on, relative paths: no command line names the logs dir
+  mkdir .queue.lock 2>/dev/null && break
+  cd "$MAIN" || exit 1; log "queue lock taken just now; waiting again"
+done
+echo $$ > .queue.lock/pid
+trap 'rm -f "$PAT" "$GONE" "$CD"; rm -rf .queue.lock' EXIT
+child=
+trap '[ -n "$child" ] && kill "$child" 2>/dev/null; exit 130' INT TERM
+
+git -C "$MAIN" switch -q main && git -C "$MAIN" pull -q --ff-only || { log "git pull failed; not starting"; exit 1; }
+T="$MAIN/.mise/tasks/_decide_s1.py"; Q="$MAIN/$R/kev-laya.queue"
+[ -f "$T" ] && [ -f "$Q" ] || { log "main has no _decide_s1.py or $R/kev-laya.queue; not starting"; exit 1; }
+healthy || { log "the main .venv is unhealthy before installing anything; not starting"; exit 1; }
+RUN="kev-laya-$(date +%Y%m%d-%H%M)"; STAMP=$(date +%Y%m%d-%H%M%S)
+mkdir -p "$RUN"
+log "checkout at $(git -C "$MAIN" rev-parse --short HEAD); run dir $L/$RUN, stamp $STAMP"
+
+install() {  # $1 venv name, $2 requirement
+  [ -x "venv-$1/bin/python" ] || env -u VIRTUAL_ENV uv venv -q --python 3.12 "venv-$1" || return 1
+  env -u VIRTUAL_ENV uv pip install --python "venv-$1/bin/python" "$2" > "$RUN/install-$1.log" 2>&1 || return 1
+  grep -q "environment at: venv-$1" "$RUN/install-$1.log" || { log "  uv did not name venv-$1 as the target"; return 1; }
+  env -u VIRTUAL_ENV uv pip freeze --python "venv-$1/bin/python" > "$RUN/freeze-$1.txt"
+}
+ok_kev=0 ok_laya=0
+install kev "$KEV_REQ" && ok_kev=1 || log "BLOCKER: Kev install failed (see $L/$RUN/install-kev.log)"
+install laya "$LAYA_REQ" && ok_laya=1 || log "BLOCKER: Laya install failed (see $L/$RUN/install-laya.log)"
+healthy || { log "BLOCKER: the main .venv changed during the installs; stopping before any run"; exit 1; }
+log "installed: kev $ok_kev, laya $ok_laya; $(grep -hE '^(kev|laya-mlx|mlx|mlx-lm|torch|transformers)==' "$RUN"/freeze-*.txt 2>/dev/null | tr '\n' ' ')"
+
+while read -r model venv cap _; do
+  [ "$venv" = kev ] && [ "$ok_kev" = 0 ] && { log "$model: skipped, no Kev venv"; continue; }
+  [ "$venv" = laya ] && [ "$ok_laya" = 0 ] && { log "$model: skipped, no Laya venv"; continue; }
+  until pmset -g batt | grep -q "'AC Power'"; do log "$model: on battery, waiting for AC"; sleep 60; done
+  py="venv-$venv/bin/python"
+  log "$model: dry run, 5 cases per set"
+  if ! HF_HUB_OFFLINE=1 "$py" "$T" run "$model" --limit 5 --out "$RUN/dry" --stamp "$STAMP" >> "$RUN/$model.log" 2>&1; then
+    log "$model: dry run failed (see $L/$RUN/$model.log); skipped"; continue
+  fi
+  log "$model: full pass, cap $cap min"
+  # In the background with wait, so `kill <launcher pid>` reaches the trap and the child at once.
+  HF_HUB_OFFLINE=1 S1_MAX_S=$((cap * 60)) "$py" "$T" run "$model" --stamp "$STAMP" >> "$RUN/$model.log" 2>&1 &
+  child=$!; wait "$child"; rc=$?; child=
+  log "$model: exit $rc"
+done < <(grep -vE '^\s*(#|$)' "$Q")
+
+"$MAIN/.venv/bin/python" "$T" summary "$STAMP" >> "$RUN/summary.log" 2>&1 && log "summaries: bench/decide-{limits,sets,why}-s1-$STAMP.md" \
+  || log "summary failed (see $L/$RUN/summary.log)"
+touch kev-laya.done
+log "done; the report is $R/report.md (to write)"
