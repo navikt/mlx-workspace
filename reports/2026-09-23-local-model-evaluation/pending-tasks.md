@@ -587,6 +587,47 @@ where they are, and night 64-4 runs them.
   1. **Advisory text does not make Sonnet 5 delegate.** Stop tuning the policy prose: five probes show it has no measurable effect on this orchestrator.
   2. **If dispatch is wanted, enforce it rather than advise it.** Enforcement is the `local_dispatch = off|conservative|balanced|aggressive` setting with a hook at the higher levels, now being built. Measure it on these same cells: `BENCH_NAV_PILOT=<new binary> BENCH_NP_CONFIG_LINE='local_dispatch = "<level>"' mise run dispatch-probe -- <dir>`, once per level, with the same worker and a $3 cap. Add `PROBE_CONTROL_N=0` to reuse this probe's controls, and `BENCH_CAPABILITIES_OVERRIDE` only if the level still reads the capabilities block. The GO rule stays: dispatch ≥ 50 %, dispatched samples pass, cost ≤ control. On these cells an enforced dispatch also has to beat a control that already passes 10 of 10 files per cell, at $0.30–0.33.
   3. **Until an enforced level passes, keep dispatch off by default** for cloud-orchestrated sessions, and do not claim credit savings for it. The hybrid arm today is the control plus a policy in the prompt, at 0.8–1.45× the control's cost across probes 4 and 5. The 64 GB workers' directed quality comes from 64-2's frontier. **64-3's hybrid arm stays NO-GO.**
+- **Dispatch re-probe 7 (2026-09-28): under `aggressive` every valid dispatch passed, 17 of 17, with no false positive. 3 create-file samples were lost to a rejected `/tmp` backup, which can leave code broken. `balanced` stays the default.** It ran on probe 6's cells with navikt/copilot#1114 (binary `nav-pilot-main-2bcca023`) at n = 5 per cell and level: 50 samples, $11.50 of the $12.75 cap. The cap cut nothing.
+  - **Setup.**
+    - Workers, bench-only capabilities block and cells as in probe 6: optiq-64g on r4, r6 and small, and the Qwen3.6 8-bit on cf5-a and cf5-b. Sonnet 5 orchestrated.
+    - `PROBE_CONTROL_N=0`: the controls are probe 4–6's (r4 $0.133 and 36 s, r6 $0.119 and 33 s, cf5-a $0.303 and 86 s, cf5-b $0.334 and 115 s, small $0.119 and 40 s). They were not re-run, so the cost ratios compare with another day's runs.
+    - Files: `.bench-logs/dispatch-reprobe7-20260928-1926/`. Protected config unchanged.
+  - **Invalid samples (3, all `aggressive` create-file).** #1114's verify text tells the orchestrator to break the code a worker's test covers, see the test fail, and undo the break. Sonnet 5 first copies the source to `/tmp`. That is outside the project, so opencode's `external_directory` permission is auto-rejected under `opencode run`, and the session ends on that step. This happened in 11 of the 50 sessions. In 8 the work was already done, and they passed.
+    - cf5-a sample 3 ended with 4 of 5 test files missing.
+    - cf5-b sample 4 ended before any change.
+    - cf5-b sample 2 went on after the rejected backup. It applied its break to `DateUtil.kt` and `OppfolgingstilfellePerson.kt`, and ended before undoing it, so the verifier found changed production files.
+    - These are counted as invalid below: the session was ended by the harness's permission handling, not by the model or the worker. In a user's interactive session the same step asks for permission, so it is a product defect all the same (navikt/copilot#1237, the same mechanism as #1120 and mlx #116).
+
+  | Level | Cell | Valid | Dispatched | Verified | Gate refusals | Cloud $ (× control) | median s (× control) |
+  |---|---|---|---|---|---|---|---|
+  | aggressive | r4 (12 files) | 5 | 5 | 5 | 2 | 0.195 (1.47×) | 98 (2.7×) |
+  | aggressive | r6 (60 sites, 3 files) | 5 | **5** | 5 | 6 | 0.250 (2.10×) | 114 (3.4×) |
+  | aggressive | cf5-a (5 new tests) | 4 of 5 | 4 | 4 | 1 | 0.253 (0.83×) | 233 (2.7×) |
+  | aggressive | cf5-b | 3 of 5 | 3 | 3 | 0 | 0.375 (1.12×) | 411 (3.6×) |
+  | aggressive | small (false positive) | 5 | **0** | 5 | 1 | 0.163 (1.37×) | 48 (1.2×) |
+  | balanced | r4 | 5 | 1 | 5 | 5 | 0.210 (1.58×) | 86 (2.4×) |
+  | balanced | r6 | 5 | 0 | 5 | 4 | 0.192 (1.61×) | 57 (1.7×) |
+  | balanced | cf5-a / cf5-b | 5 / 5 | 1 / 0 | 5 / 5 | 0 | 0.261 (0.86×) / 0.278 (0.83×) | 84 (1.0×) / 94 (0.8×) |
+  | balanced | small | 5 | 0 | 5 | 0 | 0.152 (1.28×) | 44 (1.1×) |
+
+  - **What changed since probe 6.**
+    - **r6 now dispatches at `aggressive`: 5 of 5, against 0 of 2.** The call-site count reaches the gate. Each sample sent the test file's call sites to the worker in one task and kept the rest itself.
+    - **The worker's output held.** All 17 valid dispatched samples verified, against 5 of 6 in probe 6. The orchestrator checked after every dispatch (17/17). On cf5 it redid 15 of the 27 worker tasks and fixed 1. r4 and r6 needed no rework. In 4 of 5 r4 samples the orchestrator sent all 12 files as one task, and the worker did them in 2–5 local calls.
+    - **`balanced` is a checkpoint by design** (navikt/copilot `docs/local-dispatch.md`): one refusal per turn, and the same edit again goes through. 9 of the 10 large-cell samples were refused. In 8 of them Sonnet 5 took that path: it re-ran the refused `sed` or rewrote the loop. It dispatched in 1 of 10 large-cell samples, and in 1 of 10 on cf5, where `balanced` has no create rule.
+    - `deny_sites` and `verify_nudge` are not in bench-hybrid's gate record, so this probe cannot count them separately. The call-site refusals show up as `deny_files`.
+  - **Verdicts per level.** Large and create-file cells only. "Local-first" means dispatch ≥ 50 %, dispatched samples pass, and no false positive on the small cell. The GO rule adds cost ≤ control.
+
+    | Level | Dispatched (valid) | Dispatched and passing | False positives (small) | Local-first | GO rule |
+    |---|---|---|---|---|---|
+    | aggressive | 17/17 (100 %) | 17/17 | 0/5 | **GO**, with cf5-a at 4 and cf5-b at 3 valid samples, under local-dispatch.md's 5 per cell | NO-GO: cost 0.83–2.10×, below control only on cf5-a |
+    | balanced | 2/20 (10 %) | 2/2 | 0/5 | NO-GO: the checkpoint lets the orchestrator decline | see below |
+
+    - **local-dispatch.md's rule for keeping `balanced`:** pass rate no lower than control on the large rungs and the false-positive cell (10/10 and 5/5: met), and cloud cost at or below control on at least two of three large rungs. Cost was 1.58× on r4 and 1.61× on r6 against the probe 4–6 controls, and r5 is not in the cells. By the rule as written, `balanced` falls back to prose. The controls are from other days, and at 2 dispatches in 10 the extra cost is the policy and the refusals, not delegation. **Re-run the controls before acting on it.** Needs a user decision.
+  - **Recommendation.**
+    1. **`aggressive` now passes on quality.** 17/17 dispatched samples verified, with no false positive, and every failure was the `/tmp` permission. It costs more than doing the work in the cloud (1.1–2.1× on three of four cells) and takes 2.7–3.6× the time. A PR in navikt/copilot proposes it as the default for local-enabled users, for new setups only. **Held for the user, not merged.** Fixing navikt/copilot#1237 comes first: without it, a headless create-file dispatch can end with the code left broken.
+    2. **Night 64-6 phase C** runs at `aggressive` with this binary and Sonnet 5 (`~/tmp/tier64-6-hybrid.env`). Its create-file cells can hit the same `/tmp` abort. bench-hybrid would then score those samples as failures until mlx #116 lands.
+    3. **Capabilities:** probe 6's rule still holds. Do not ship `create-file` as trusted from a bench-only block, although the worker's output passed here. 64-6 phase C collects the delegate evidence under the shipped all-`cloud` block.
+
 - **Dispatch probe 6, the `local_dispatch` levels (2026-09-28): the gate makes Sonnet 5 dispatch, but quality does not hold under `aggressive`. `balanced` stays the default.** This is the first probe where Sonnet 5 dispatched on more than one sample: 8 of the 16 valid hybrid samples at the enforcing levels, against 1 of 29 in probes 1–5.
   - **Setup.**
     - Binary `nav-pilot-xdgctx-f5c90a3c`: navikt/copilot d24cac46 (#999, the levels and the gate) plus #1001, which puts the Nav context under `XDG_CONFIG_HOME`. Without #1001, an isolated session has no persona and an undescribed worker.
