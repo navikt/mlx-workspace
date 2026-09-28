@@ -15,6 +15,11 @@ the chat model behind `nav-pilot alpha decide` on our questions? Specifically:
    truncation), position bias, injection?
 3. Is its p calibrated well enough for the hooks' abstain-at-t rule (t = 0.9)?
 4. How fast is one call in-process on this Mac?
+5. As a System One replacement for the loop classifier that never shipped (the [System One
+   report](../2026-09-25-system-one/report.md) §1–3): given a repeated tool call and its count, with no
+   tool results, does it call the 5 legitimate scenarios legitimate and the 2 loops a stuck loop, the
+   same 7 hand-written scenarios optiq and Qwen3.8 saw (§3.1)? The classifier itself never shipped
+   (the result-aware guard replaced it), so this is a floor check, not a recipe.
 
 ## Method
 
@@ -30,6 +35,13 @@ the chat model behind `nav-pilot alpha decide` on our questions? Specifically:
 - **Compare** against optiq and Qwen3.8 OptiQ-4bit with the existing summaries (`_decide_limits`,
   `_decide_sets`, `_decide_why`) plus a table of truncated states:
   `bench/decide-{limits,sets,why}-s1-<stamp>.md`.
+- **Loop classifier** (question 5): the same adapter's `loop` group, one `choice` question per scenario
+  (`bench/decide-cases/loop-classifier.jsonl`, 7 cases copied from the guard's `_np_checks.py` SCENARIOS,
+  System One report §3.1). No tool results in the evidence, unlike decide-limits' `loop-near` set, which
+  stays in the `limits` group unchanged. optiq and Qwen3.8 were measured through the guard prompt
+  directly, not through `alpha decide`, so `decide-loop-s1-<stamp>.md` has no chat-model column to
+  compare against — only the two verdicts from §3.1 (0/2 loops caught, 0/5 polls wrongly blocked) as
+  context.
 - **Order:** Kev first (the largest and slowest), then Laya English, then Laya multilingual.
 
 Expected results, written before the run:
@@ -51,13 +63,16 @@ Expected results, written before the run:
 
 | Group | Sets | Cases per model |
 |---|---|---|
+| loop | loop-classifier 7 | 7 |
 | why | why-en 48, why-no 48 | 96 |
 | sets | issue-type 105, aksel-kind 65, pr-motivation 48 | 218 |
 | limits | the nine `bench/decide-limits/` sets | 974 |
-| Total | | 1,288 |
+| Total | | 1,295 |
 
-3 models × 1,288 = 3,864 calls, plus 3 × 70 dry-run calls. All three models are deterministic, so there are
-no repeats. The comparison is paired per case with the chat models' existing runs (same case files).
+3 models × 1,295 = 3,885 calls, plus 3 × 70 dry-run calls (the loop group's 7 cases are under the dry
+run's 5-per-set cap, so it runs whole in the dry run too). All three models are deterministic, so there
+are no repeats. The comparison is paired per case with the chat models' existing runs (same case files);
+`loop` has no paired chat-model run in this shape (see Method).
 
 ## Time and cost
 
@@ -67,6 +82,7 @@ no repeats. The comparison is paired per case with the chat models' existing run
 | Kev 4B 8-bit: load about 11 s, ~1 s a call on long states | 25 min | 90 min |
 | Laya 421M | 3 min | 20 min |
 | Laya multilingual 322M | 3 min | 20 min |
+| Loop classifier, 7 cases, all three models (folded into the rows above; no cap change) | under 1 min total | – |
 | Dry runs and summaries | 5 min | |
 | **Total GPU time** | **about 45 min** | **about 2.5 h** |
 
@@ -91,5 +107,6 @@ The launcher does not work around it.
 ## Done means
 
 A `report.md` here, with Kev and Laya next to optiq and Qwen3.8 on every set, a truncation-adjusted reading
-of the long-evidence sets, and a verdict for PRD gate 2: whether a CPU-servable model is good enough for
-which callers, at which threshold.
+of the long-evidence sets, a verdict for PRD gate 2: whether a CPU-servable model is good enough for
+which callers, at which threshold, and a verdict for question 5: whether either model separates the 2
+loop scenarios from the 5 legitimate ones the never-shipped classifier could not.
