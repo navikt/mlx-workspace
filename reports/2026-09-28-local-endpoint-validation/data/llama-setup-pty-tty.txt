@@ -1,0 +1,32 @@
+]11;?\nav-pilot alpha local setup  (alpha, unsupported, unmeasured)
+  This Mac can also run a measured MLX model that nav-pilot manages itself: nav-pilot alpha local init
+  Below: a server you run yourself (Ollama, llama-server, LM Studio) instead.
+  Looking for servers on this machine (a model list request to each usual port, nothing else)…
+    · Ollama       127.0.0.1:11434 not answering
+    ✓ llama-server 127.0.0.1:8080  unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL
+    · llama-server 127.0.0.1:8081 not answering
+    · LM Studio    127.0.0.1:1234 not answering
+    · vLLM         127.0.0.1:8000 not answering
+  Recommended  unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL on llama-server: Qwen3.6-35B-A3B, the model nav-pilot's own MLX setup runs by default
+  Using  unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL on llama-server http://127.0.0.1:8080/v1
+  Endpoint  http://127.0.0.1:8080/v1
+  Model     unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL (unsupported, unmeasured)
+  PASS  server     answers and lists unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  PASS  context    30042 prompt tokens kept, nothing cut
+  PASS  TTFT       18.8 s for about 30k tokens
+  Save to $S/np-home/.nav-pilot/config.toml:
+    local_endpoint       = http://127.0.0.1:8080/v1
+    local_endpoint_model = unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL
+    local_enabled        = true
+┃ Save and turn local dispatch on?                                                                                      
+┃                                                                                                                       
+┃           Yes     No                                                                                                 
+[pty_drive: saw /Save and turn/, sent y]
+✓ Saved. Local dispatch is on, to unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL on llama-server.
+  → Launch with a local worker: nav-pilot --client opencode
+  ✓ nav-pilot alpha decide answers from it
+  nav-pilot starts nothing: after a reboot, start it again with the command you started llama-server with. Check it: nav-pilot alpha local doctor
+[pty_drive: exit 0, 25 s]

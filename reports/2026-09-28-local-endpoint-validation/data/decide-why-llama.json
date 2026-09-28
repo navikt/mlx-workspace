@@ -1,0 +1,2217 @@
+{
+  "key": "llama",
+  "model": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL",
+  "nav_pilot": "$S/nps",
+  "nav_pilot_commit": null,
+  "started": "2026-09-28T02:31:32+0200",
+  "cases": [
+    {
+      "id": "why-en-real-why-82fd300057",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1508,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2393,
+        "yes": 0.7607
+      },
+      "ms": 28,
+      "wall_s": 2.564,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "82fd300057bc8cd1c644d36ededaa78abff77d5d"
+    },
+    {
+      "id": "why-en-real-why-1bb4555676",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2391,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.5165,
+        "yes": 0.4835
+      },
+      "ms": 310,
+      "wall_s": 2.857,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "1bb4555676aab70b01dbfed64977d3456ebbe086"
+    },
+    {
+      "id": "why-en-real-why-85d91cdbea",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1847,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1558,
+        "yes": 0.8442
+      },
+      "ms": 268,
+      "wall_s": 2.812,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "85d91cdbea5b33bbcbe012bf7152be985b7c3134"
+    },
+    {
+      "id": "why-en-real-why-16a967d9dc",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1096,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.4232,
+        "yes": 0.5768
+      },
+      "ms": 189,
+      "wall_s": 2.733,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "16a967d9dce43eff662ef01cc0164453b5f92d87"
+    },
+    {
+      "id": "why-en-real-why-2460e89835",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1012,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1754,
+        "yes": 0.8246
+      },
+      "ms": 175,
+      "wall_s": 2.72,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "2460e8983556eb1f8fc951cd67b754fdd4ef00b7"
+    },
+    {
+      "id": "why-en-real-why-5e3d3eb437",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3427,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.4444,
+        "yes": 0.5556
+      },
+      "ms": 453,
+      "wall_s": 2.997,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "5e3d3eb4370125c6e16e351db29f8c756fbb5d27"
+    },
+    {
+      "id": "why-en-real-why-5645c3e64f",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1305,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3535,
+        "yes": 0.6465
+      },
+      "ms": 185,
+      "wall_s": 2.73,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "5645c3e64f544fe2ee9a8cc145f9662b8c0dd8ba"
+    },
+    {
+      "id": "why-en-real-why-06f6c00d33",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 867,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1471,
+        "yes": 0.8529
+      },
+      "ms": 167,
+      "wall_s": 2.71,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "06f6c00d33a72375b4468067cfa6d9c3e5f74cda"
+    },
+    {
+      "id": "why-en-real-why-d0c0363a9c",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2377,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.0735,
+        "yes": 0.9265
+      },
+      "ms": 342,
+      "wall_s": 2.885,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "d0c0363a9c9fd8cb1f9ecf75f73f4aee4c7680ff"
+    },
+    {
+      "id": "why-en-real-why-5dcfba0094",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3059,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1306,
+        "yes": 0.8694
+      },
+      "ms": 452,
+      "wall_s": 2.995,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "5dcfba0094e6ed73832408dc1664891ee9330ef7"
+    },
+    {
+      "id": "why-en-real-why-ec18952591",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 820,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2913,
+        "yes": 0.7087
+      },
+      "ms": 175,
+      "wall_s": 2.719,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ec18952591c2aa2a15fd8c2f6593dd153aa3a901"
+    },
+    {
+      "id": "why-en-real-why-0bbf58217b",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1660,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2995,
+        "yes": 0.7005
+      },
+      "ms": 262,
+      "wall_s": 2.805,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "0bbf58217b2611a170286625907e96e275f6fb23"
+    },
+    {
+      "id": "why-en-real-why-385e6f8a71",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 646,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2856,
+        "yes": 0.7144
+      },
+      "ms": 168,
+      "wall_s": 2.709,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "385e6f8a711f8309092cf9791d860d4537281681"
+    },
+    {
+      "id": "why-en-real-why-ddb92f3499",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3513,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2037,
+        "yes": 0.7963
+      },
+      "ms": 521,
+      "wall_s": 3.063,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ddb92f349950974aa84464defb03b49b3bd7c506"
+    },
+    {
+      "id": "why-en-real-why-e010946182",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3026,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1349,
+        "yes": 0.8651
+      },
+      "ms": 468,
+      "wall_s": 3.01,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "e010946182c978ae7dde6ec618b6096037ff3152"
+    },
+    {
+      "id": "why-en-real-why-ba5bb16f78",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1481,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3433,
+        "yes": 0.6567
+      },
+      "ms": 198,
+      "wall_s": 2.731,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ba5bb16f78db902a0793968ddf9754da3e2a18cf"
+    },
+    {
+      "id": "why-en-real-why-6f0374be0a",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 733,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.201,
+        "yes": 0.799
+      },
+      "ms": 159,
+      "wall_s": 2.7,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "6f0374be0a54966aedfd4d0d3892f49443557e19"
+    },
+    {
+      "id": "why-en-real-why-3108eb84cc",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2906,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3332,
+        "yes": 0.6668
+      },
+      "ms": 409,
+      "wall_s": 2.951,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "3108eb84cc3047ccc59724f803babace416b5828"
+    },
+    {
+      "id": "why-en-real-why-b5fbec9ca8",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 5270,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.1876,
+        "yes": 0.8124
+      },
+      "ms": 1099,
+      "wall_s": 3.641,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "b5fbec9ca8385d8fd6351a9c49f84bd7fb9983a1"
+    },
+    {
+      "id": "why-en-real-why-f0c8c7739a",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 965,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3211,
+        "yes": 0.6789
+      },
+      "ms": 182,
+      "wall_s": 2.726,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "f0c8c7739a7e35af8762ea2342b5e8c21d83fae3"
+    },
+    {
+      "id": "why-en-real-why-cae99c1155",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1000,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3316,
+        "yes": 0.6684
+      },
+      "ms": 194,
+      "wall_s": 2.74,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "cae99c1155080d2f44efa881374acc1f9458b7bd"
+    },
+    {
+      "id": "why-en-real-why-4bbe71689e",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 641,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.6311,
+        "yes": 0.3689
+      },
+      "ms": 161,
+      "wall_s": 2.706,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "4bbe71689ef81b4ad43949a9af7387eb8a2e0e6a"
+    },
+    {
+      "id": "why-en-real-why-2a16a87f3e",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 5394,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.2612,
+        "yes": 0.7388
+      },
+      "ms": 728,
+      "wall_s": 3.262,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "2a16a87f3e557bea17448838ee51933068cc2eb9"
+    },
+    {
+      "id": "why-en-real-why-a387e4b6ce",
+      "set": "why-en",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3201,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.3092,
+        "yes": 0.6908
+      },
+      "ms": 427,
+      "wall_s": 2.969,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "a387e4b6ce3605089662e38d7e9df415227ab5e4"
+    },
+    {
+      "id": "why-en-real-what-068ede3967",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 817,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9761,
+        "yes": 0.0239
+      },
+      "ms": 180,
+      "wall_s": 2.721,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "068ede396772969352182610b0b9bfd4e19611cb"
+    },
+    {
+      "id": "why-en-real-what-a7fddfee02",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1312,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9405,
+        "yes": 0.0595
+      },
+      "ms": 254,
+      "wall_s": 2.795,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "a7fddfee02d7bef865ad8229a5bacfd372185930"
+    },
+    {
+      "id": "why-en-real-what-a0646cb384",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 5886,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9178,
+        "yes": 0.0822
+      },
+      "ms": 639,
+      "wall_s": 3.186,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "a0646cb38498e5804ef161ced8e1d0ac433bb187"
+    },
+    {
+      "id": "why-en-real-what-8c953a9295",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1538,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9531,
+        "yes": 0.0469
+      },
+      "ms": 274,
+      "wall_s": 2.817,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "8c953a92958dd5fa61ba6f6776b6e6c880624131"
+    },
+    {
+      "id": "why-en-real-what-d16f5b6dd1",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 5486,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9621,
+        "yes": 0.0379
+      },
+      "ms": 668,
+      "wall_s": 3.21,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "d16f5b6dd16545607f3974bb2cbe0b90ee14e9c1"
+    },
+    {
+      "id": "why-en-real-what-ced9a1b779",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2929,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9156,
+        "yes": 0.0844
+      },
+      "ms": 359,
+      "wall_s": 2.902,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "ced9a1b7792369183bedaac65343136a4d6ae522"
+    },
+    {
+      "id": "why-en-real-what-684b88bec4",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 4787,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8561,
+        "yes": 0.1439
+      },
+      "ms": 623,
+      "wall_s": 3.166,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "684b88bec4a3219af0971e7a04ef6336ebb1d69e"
+    },
+    {
+      "id": "why-en-real-what-b8eba998ff",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 6108,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9448,
+        "yes": 0.0552
+      },
+      "ms": 773,
+      "wall_s": 3.314,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "b8eba998ff0253a8c540fc8c1b717f9ee9187a05"
+    },
+    {
+      "id": "why-en-real-what-0aa94be68f",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2793,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8972,
+        "yes": 0.1028
+      },
+      "ms": 421,
+      "wall_s": 2.964,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "0aa94be68f77760f6d60552d6b2bf58bfae1b1e4"
+    },
+    {
+      "id": "why-en-real-what-5f4c4cd94c",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3665,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9323,
+        "yes": 0.0677
+      },
+      "ms": 526,
+      "wall_s": 3.067,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "5f4c4cd94c50c5c25e714ac1d3021372664fa502"
+    },
+    {
+      "id": "why-en-real-what-d9ef6889db",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 517,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9982,
+        "yes": 0.0018
+      },
+      "ms": 166,
+      "wall_s": 2.71,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "d9ef6889dbd8708470fac642816c0c2cb537a5b4"
+    },
+    {
+      "id": "why-en-real-what-17c6009766",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1376,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9138,
+        "yes": 0.0862
+      },
+      "ms": 275,
+      "wall_s": 2.818,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "17c60097668de51fc4b55b5bb71d502812a4c43a"
+    },
+    {
+      "id": "why-en-controlled-16a967d9dc",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1088,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.789,
+        "yes": 0.211
+      },
+      "ms": 191,
+      "wall_s": 2.736,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "16a967d9dce43eff662ef01cc0164453b5f92d87"
+    },
+    {
+      "id": "why-en-controlled-06f6c00d33",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 819,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "no": 0.336,
+        "yes": 0.664
+      },
+      "ms": 167,
+      "wall_s": 2.709,
+      "error": null,
+      "ok": false,
+      "construction": "controlled",
+      "sha": "06f6c00d33a72375b4468067cfa6d9c3e5f74cda"
+    },
+    {
+      "id": "why-en-controlled-d0c0363a9c",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2386,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8774,
+        "yes": 0.1226
+      },
+      "ms": 337,
+      "wall_s": 2.879,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "d0c0363a9c9fd8cb1f9ecf75f73f4aee4c7680ff"
+    },
+    {
+      "id": "why-en-controlled-ec18952591",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 812,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9039,
+        "yes": 0.0961
+      },
+      "ms": 163,
+      "wall_s": 2.702,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "ec18952591c2aa2a15fd8c2f6593dd153aa3a901"
+    },
+    {
+      "id": "why-en-controlled-385e6f8a71",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 592,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9448,
+        "yes": 0.0552
+      },
+      "ms": 161,
+      "wall_s": 2.705,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "385e6f8a711f8309092cf9791d860d4537281681"
+    },
+    {
+      "id": "why-en-controlled-e010946182",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 2993,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8803,
+        "yes": 0.1197
+      },
+      "ms": 473,
+      "wall_s": 3.017,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "e010946182c978ae7dde6ec618b6096037ff3152"
+    },
+    {
+      "id": "why-en-controlled-5645c3e64f",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1314,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.6325,
+        "yes": 0.3675
+      },
+      "ms": 189,
+      "wall_s": 2.73,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "5645c3e64f544fe2ee9a8cc145f9662b8c0dd8ba"
+    },
+    {
+      "id": "why-en-controlled-5dcfba0094",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3045,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.7017,
+        "yes": 0.2983
+      },
+      "ms": 433,
+      "wall_s": 2.973,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "5dcfba0094e6ed73832408dc1664891ee9330ef7"
+    },
+    {
+      "id": "why-en-controlled-6f0374be0a",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 720,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.9293,
+        "yes": 0.0707
+      },
+      "ms": 162,
+      "wall_s": 2.704,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "6f0374be0a54966aedfd4d0d3892f49443557e19"
+    },
+    {
+      "id": "why-en-controlled-ddb92f3499",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 3517,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.8192,
+        "yes": 0.1808
+      },
+      "ms": 489,
+      "wall_s": 3.034,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "ddb92f349950974aa84464defb03b49b3bd7c506"
+    },
+    {
+      "id": "why-en-controlled-cae99c1155",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1016,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.742,
+        "yes": 0.258
+      },
+      "ms": 196,
+      "wall_s": 2.739,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "cae99c1155080d2f44efa881374acc1f9458b7bd"
+    },
+    {
+      "id": "why-en-controlled-4bbe71689e",
+      "set": "why-en",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 669,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "no": 0.7574,
+        "yes": 0.2426
+      },
+      "ms": 174,
+      "wall_s": 2.718,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "4bbe71689ef81b4ad43949a9af7387eb8a2e0e6a"
+    },
+    {
+      "id": "why-no-real-why-82fd300057",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1508,
+      "lang": "no",
+      "twin": "why-en-real-why-82fd300057",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7134,
+        "nei": 0.2866
+      },
+      "ms": 261,
+      "wall_s": 2.8,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "82fd300057bc8cd1c644d36ededaa78abff77d5d"
+    },
+    {
+      "id": "why-no-real-why-1bb4555676",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2391,
+      "lang": "no",
+      "twin": "why-en-real-why-1bb4555676",
+      "choice": "ja",
+      "p": {
+        "ja": 0.6022,
+        "nei": 0.3978
+      },
+      "ms": 308,
+      "wall_s": 2.85,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "1bb4555676aab70b01dbfed64977d3456ebbe086"
+    },
+    {
+      "id": "why-no-real-why-85d91cdbea",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1847,
+      "lang": "no",
+      "twin": "why-en-real-why-85d91cdbea",
+      "choice": "ja",
+      "p": {
+        "ja": 0.5794,
+        "nei": 0.4206
+      },
+      "ms": 268,
+      "wall_s": 2.811,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "85d91cdbea5b33bbcbe012bf7152be985b7c3134"
+    },
+    {
+      "id": "why-no-real-why-16a967d9dc",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1096,
+      "lang": "no",
+      "twin": "why-en-real-why-16a967d9dc",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7524,
+        "nei": 0.2476
+      },
+      "ms": 185,
+      "wall_s": 2.729,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "16a967d9dce43eff662ef01cc0164453b5f92d87"
+    },
+    {
+      "id": "why-no-real-why-2460e89835",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1012,
+      "lang": "no",
+      "twin": "why-en-real-why-2460e89835",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7917,
+        "nei": 0.2083
+      },
+      "ms": 175,
+      "wall_s": 2.72,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "2460e8983556eb1f8fc951cd67b754fdd4ef00b7"
+    },
+    {
+      "id": "why-no-real-why-5e3d3eb437",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3427,
+      "lang": "no",
+      "twin": "why-en-real-why-5e3d3eb437",
+      "choice": "ja",
+      "p": {
+        "ja": 0.6667,
+        "nei": 0.3333
+      },
+      "ms": 442,
+      "wall_s": 2.985,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "5e3d3eb4370125c6e16e351db29f8c756fbb5d27"
+    },
+    {
+      "id": "why-no-real-why-5645c3e64f",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1305,
+      "lang": "no",
+      "twin": "why-en-real-why-5645c3e64f",
+      "choice": "nei",
+      "p": {
+        "ja": 0.3484,
+        "nei": 0.6516
+      },
+      "ms": 185,
+      "wall_s": 2.728,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "5645c3e64f544fe2ee9a8cc145f9662b8c0dd8ba"
+    },
+    {
+      "id": "why-no-real-why-06f6c00d33",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 867,
+      "lang": "no",
+      "twin": "why-en-real-why-06f6c00d33",
+      "choice": "nei",
+      "p": {
+        "ja": 0.4327,
+        "nei": 0.5673
+      },
+      "ms": 169,
+      "wall_s": 2.712,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "06f6c00d33a72375b4468067cfa6d9c3e5f74cda"
+    },
+    {
+      "id": "why-no-real-why-d0c0363a9c",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2377,
+      "lang": "no",
+      "twin": "why-en-real-why-d0c0363a9c",
+      "choice": "ja",
+      "p": {
+        "ja": 0.9044,
+        "nei": 0.0956
+      },
+      "ms": 333,
+      "wall_s": 2.878,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "d0c0363a9c9fd8cb1f9ecf75f73f4aee4c7680ff"
+    },
+    {
+      "id": "why-no-real-why-5dcfba0094",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3059,
+      "lang": "no",
+      "twin": "why-en-real-why-5dcfba0094",
+      "choice": "ja",
+      "p": {
+        "ja": 0.725,
+        "nei": 0.275
+      },
+      "ms": 436,
+      "wall_s": 2.98,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "5dcfba0094e6ed73832408dc1664891ee9330ef7"
+    },
+    {
+      "id": "why-no-real-why-ec18952591",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 820,
+      "lang": "no",
+      "twin": "why-en-real-why-ec18952591",
+      "choice": "ja",
+      "p": {
+        "ja": 0.5624,
+        "nei": 0.4376
+      },
+      "ms": 172,
+      "wall_s": 2.716,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ec18952591c2aa2a15fd8c2f6593dd153aa3a901"
+    },
+    {
+      "id": "why-no-real-why-0bbf58217b",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1660,
+      "lang": "no",
+      "twin": "why-en-real-why-0bbf58217b",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7707,
+        "nei": 0.2293
+      },
+      "ms": 256,
+      "wall_s": 2.796,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "0bbf58217b2611a170286625907e96e275f6fb23"
+    },
+    {
+      "id": "why-no-real-why-385e6f8a71",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 646,
+      "lang": "no",
+      "twin": "why-en-real-why-385e6f8a71",
+      "choice": "nei",
+      "p": {
+        "ja": 0.423,
+        "nei": 0.577
+      },
+      "ms": 162,
+      "wall_s": 2.704,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "385e6f8a711f8309092cf9791d860d4537281681"
+    },
+    {
+      "id": "why-no-real-why-ddb92f3499",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3513,
+      "lang": "no",
+      "twin": "why-en-real-why-ddb92f3499",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7682,
+        "nei": 0.2318
+      },
+      "ms": 487,
+      "wall_s": 3.026,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ddb92f349950974aa84464defb03b49b3bd7c506"
+    },
+    {
+      "id": "why-no-real-why-e010946182",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3026,
+      "lang": "no",
+      "twin": "why-en-real-why-e010946182",
+      "choice": "ja",
+      "p": {
+        "ja": 0.7296,
+        "nei": 0.2704
+      },
+      "ms": 466,
+      "wall_s": 3.008,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "e010946182c978ae7dde6ec618b6096037ff3152"
+    },
+    {
+      "id": "why-no-real-why-ba5bb16f78",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1481,
+      "lang": "no",
+      "twin": "why-en-real-why-ba5bb16f78",
+      "choice": "ja",
+      "p": {
+        "ja": 0.6787,
+        "nei": 0.3213
+      },
+      "ms": 198,
+      "wall_s": 2.741,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "ba5bb16f78db902a0793968ddf9754da3e2a18cf"
+    },
+    {
+      "id": "why-no-real-why-6f0374be0a",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 733,
+      "lang": "no",
+      "twin": "why-en-real-why-6f0374be0a",
+      "choice": "ja",
+      "p": {
+        "ja": 0.5365,
+        "nei": 0.4635
+      },
+      "ms": 152,
+      "wall_s": 2.691,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "6f0374be0a54966aedfd4d0d3892f49443557e19"
+    },
+    {
+      "id": "why-no-real-why-3108eb84cc",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2906,
+      "lang": "no",
+      "twin": "why-en-real-why-3108eb84cc",
+      "choice": "nei",
+      "p": {
+        "ja": 0.3653,
+        "nei": 0.6347
+      },
+      "ms": 412,
+      "wall_s": 2.955,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "3108eb84cc3047ccc59724f803babace416b5828"
+    },
+    {
+      "id": "why-no-real-why-b5fbec9ca8",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 5270,
+      "lang": "no",
+      "twin": "why-en-real-why-b5fbec9ca8",
+      "choice": "ja",
+      "p": {
+        "ja": 0.6135,
+        "nei": 0.3865
+      },
+      "ms": 800,
+      "wall_s": 3.339,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "b5fbec9ca8385d8fd6351a9c49f84bd7fb9983a1"
+    },
+    {
+      "id": "why-no-real-why-f0c8c7739a",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 965,
+      "lang": "no",
+      "twin": "why-en-real-why-f0c8c7739a",
+      "choice": "ja",
+      "p": {
+        "ja": 0.6751,
+        "nei": 0.3249
+      },
+      "ms": 189,
+      "wall_s": 2.731,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "f0c8c7739a7e35af8762ea2342b5e8c21d83fae3"
+    },
+    {
+      "id": "why-no-real-why-cae99c1155",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1000,
+      "lang": "no",
+      "twin": "why-en-real-why-cae99c1155",
+      "choice": "nei",
+      "p": {
+        "ja": 0.4326,
+        "nei": 0.5674
+      },
+      "ms": 186,
+      "wall_s": 2.725,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "cae99c1155080d2f44efa881374acc1f9458b7bd"
+    },
+    {
+      "id": "why-no-real-why-4bbe71689e",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 641,
+      "lang": "no",
+      "twin": "why-en-real-why-4bbe71689e",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2953,
+        "nei": 0.7047
+      },
+      "ms": 154,
+      "wall_s": 2.694,
+      "error": null,
+      "ok": false,
+      "construction": "real-why",
+      "sha": "4bbe71689ef81b4ad43949a9af7387eb8a2e0e6a"
+    },
+    {
+      "id": "why-no-real-why-2a16a87f3e",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 5394,
+      "lang": "no",
+      "twin": "why-en-real-why-2a16a87f3e",
+      "choice": "ja",
+      "p": {
+        "ja": 0.8898,
+        "nei": 0.1102
+      },
+      "ms": 571,
+      "wall_s": 3.109,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "2a16a87f3e557bea17448838ee51933068cc2eb9"
+    },
+    {
+      "id": "why-no-real-why-a387e4b6ce",
+      "set": "why-no",
+      "expect": "ja",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3201,
+      "lang": "no",
+      "twin": "why-en-real-why-a387e4b6ce",
+      "choice": "ja",
+      "p": {
+        "ja": 0.742,
+        "nei": 0.258
+      },
+      "ms": 420,
+      "wall_s": 2.962,
+      "error": null,
+      "ok": true,
+      "construction": "real-why",
+      "sha": "a387e4b6ce3605089662e38d7e9df415227ab5e4"
+    },
+    {
+      "id": "why-no-real-what-068ede3967",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 817,
+      "lang": "no",
+      "twin": "why-en-real-what-068ede3967",
+      "choice": "nei",
+      "p": {
+        "ja": 0.0782,
+        "nei": 0.9218
+      },
+      "ms": 169,
+      "wall_s": 2.713,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "068ede396772969352182610b0b9bfd4e19611cb"
+    },
+    {
+      "id": "why-no-real-what-a7fddfee02",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1312,
+      "lang": "no",
+      "twin": "why-en-real-what-a7fddfee02",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1586,
+        "nei": 0.8414
+      },
+      "ms": 255,
+      "wall_s": 2.801,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "a7fddfee02d7bef865ad8229a5bacfd372185930"
+    },
+    {
+      "id": "why-no-real-what-a0646cb384",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 5886,
+      "lang": "no",
+      "twin": "why-en-real-what-a0646cb384",
+      "choice": "nei",
+      "p": {
+        "ja": 0.3201,
+        "nei": 0.6799
+      },
+      "ms": 635,
+      "wall_s": 3.179,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "a0646cb38498e5804ef161ced8e1d0ac433bb187"
+    },
+    {
+      "id": "why-no-real-what-8c953a9295",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1538,
+      "lang": "no",
+      "twin": "why-en-real-what-8c953a9295",
+      "choice": "nei",
+      "p": {
+        "ja": 0.157,
+        "nei": 0.843
+      },
+      "ms": 264,
+      "wall_s": 2.804,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "8c953a92958dd5fa61ba6f6776b6e6c880624131"
+    },
+    {
+      "id": "why-no-real-what-d16f5b6dd1",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 5486,
+      "lang": "no",
+      "twin": "why-en-real-what-d16f5b6dd1",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1803,
+        "nei": 0.8197
+      },
+      "ms": 615,
+      "wall_s": 3.158,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "d16f5b6dd16545607f3974bb2cbe0b90ee14e9c1"
+    },
+    {
+      "id": "why-no-real-what-ced9a1b779",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2929,
+      "lang": "no",
+      "twin": "why-en-real-what-ced9a1b779",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1857,
+        "nei": 0.8143
+      },
+      "ms": 348,
+      "wall_s": 2.889,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "ced9a1b7792369183bedaac65343136a4d6ae522"
+    },
+    {
+      "id": "why-no-real-what-684b88bec4",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 4787,
+      "lang": "no",
+      "twin": "why-en-real-what-684b88bec4",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1983,
+        "nei": 0.8017
+      },
+      "ms": 614,
+      "wall_s": 3.154,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "684b88bec4a3219af0971e7a04ef6336ebb1d69e"
+    },
+    {
+      "id": "why-no-real-what-b8eba998ff",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 6108,
+      "lang": "no",
+      "twin": "why-en-real-what-b8eba998ff",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2211,
+        "nei": 0.7789
+      },
+      "ms": 760,
+      "wall_s": 3.301,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "b8eba998ff0253a8c540fc8c1b717f9ee9187a05"
+    },
+    {
+      "id": "why-no-real-what-0aa94be68f",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2793,
+      "lang": "no",
+      "twin": "why-en-real-what-0aa94be68f",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1566,
+        "nei": 0.8434
+      },
+      "ms": 424,
+      "wall_s": 2.972,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "0aa94be68f77760f6d60552d6b2bf58bfae1b1e4"
+    },
+    {
+      "id": "why-no-real-what-5f4c4cd94c",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3665,
+      "lang": "no",
+      "twin": "why-en-real-what-5f4c4cd94c",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1076,
+        "nei": 0.8924
+      },
+      "ms": 578,
+      "wall_s": 3.122,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "5f4c4cd94c50c5c25e714ac1d3021372664fa502"
+    },
+    {
+      "id": "why-no-real-what-d9ef6889db",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 517,
+      "lang": "no",
+      "twin": "why-en-real-what-d9ef6889db",
+      "choice": "nei",
+      "p": {
+        "ja": 0.0036,
+        "nei": 0.9964
+      },
+      "ms": 157,
+      "wall_s": 2.699,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "d9ef6889dbd8708470fac642816c0c2cb537a5b4"
+    },
+    {
+      "id": "why-no-real-what-17c6009766",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1376,
+      "lang": "no",
+      "twin": "why-en-real-what-17c6009766",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1532,
+        "nei": 0.8468
+      },
+      "ms": 271,
+      "wall_s": 2.814,
+      "error": null,
+      "ok": true,
+      "construction": "real-what",
+      "sha": "17c60097668de51fc4b55b5bb71d502812a4c43a"
+    },
+    {
+      "id": "why-no-controlled-16a967d9dc",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1088,
+      "lang": "no",
+      "twin": "why-en-controlled-16a967d9dc",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2261,
+        "nei": 0.7739
+      },
+      "ms": 182,
+      "wall_s": 2.723,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "16a967d9dce43eff662ef01cc0164453b5f92d87"
+    },
+    {
+      "id": "why-no-controlled-06f6c00d33",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 819,
+      "lang": "no",
+      "twin": "why-en-controlled-06f6c00d33",
+      "choice": "nei",
+      "p": {
+        "ja": 0.3164,
+        "nei": 0.6836
+      },
+      "ms": 169,
+      "wall_s": 2.714,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "06f6c00d33a72375b4468067cfa6d9c3e5f74cda"
+    },
+    {
+      "id": "why-no-controlled-d0c0363a9c",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2386,
+      "lang": "no",
+      "twin": "why-en-controlled-d0c0363a9c",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1583,
+        "nei": 0.8417
+      },
+      "ms": 336,
+      "wall_s": 2.882,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "d0c0363a9c9fd8cb1f9ecf75f73f4aee4c7680ff"
+    },
+    {
+      "id": "why-no-controlled-ec18952591",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 812,
+      "lang": "no",
+      "twin": "why-en-controlled-ec18952591",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1721,
+        "nei": 0.8279
+      },
+      "ms": 167,
+      "wall_s": 2.712,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "ec18952591c2aa2a15fd8c2f6593dd153aa3a901"
+    },
+    {
+      "id": "why-no-controlled-385e6f8a71",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 592,
+      "lang": "no",
+      "twin": "why-en-controlled-385e6f8a71",
+      "choice": "nei",
+      "p": {
+        "ja": 0.0956,
+        "nei": 0.9044
+      },
+      "ms": 157,
+      "wall_s": 2.701,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "385e6f8a711f8309092cf9791d860d4537281681"
+    },
+    {
+      "id": "why-no-controlled-e010946182",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 2993,
+      "lang": "no",
+      "twin": "why-en-controlled-e010946182",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2128,
+        "nei": 0.7872
+      },
+      "ms": 458,
+      "wall_s": 3.003,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "e010946182c978ae7dde6ec618b6096037ff3152"
+    },
+    {
+      "id": "why-no-controlled-5645c3e64f",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1314,
+      "lang": "no",
+      "twin": "why-en-controlled-5645c3e64f",
+      "choice": "nei",
+      "p": {
+        "ja": 0.385,
+        "nei": 0.615
+      },
+      "ms": 186,
+      "wall_s": 2.73,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "5645c3e64f544fe2ee9a8cc145f9662b8c0dd8ba"
+    },
+    {
+      "id": "why-no-controlled-5dcfba0094",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3045,
+      "lang": "no",
+      "twin": "why-en-controlled-5dcfba0094",
+      "choice": "nei",
+      "p": {
+        "ja": 0.3279,
+        "nei": 0.6721
+      },
+      "ms": 433,
+      "wall_s": 2.979,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "5dcfba0094e6ed73832408dc1664891ee9330ef7"
+    },
+    {
+      "id": "why-no-controlled-6f0374be0a",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 720,
+      "lang": "no",
+      "twin": "why-en-controlled-6f0374be0a",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1812,
+        "nei": 0.8188
+      },
+      "ms": 164,
+      "wall_s": 2.706,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "6f0374be0a54966aedfd4d0d3892f49443557e19"
+    },
+    {
+      "id": "why-no-controlled-ddb92f3499",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 3517,
+      "lang": "no",
+      "twin": "why-en-controlled-ddb92f3499",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2384,
+        "nei": 0.7616
+      },
+      "ms": 483,
+      "wall_s": 3.025,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "ddb92f349950974aa84464defb03b49b3bd7c506"
+    },
+    {
+      "id": "why-no-controlled-cae99c1155",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 1016,
+      "lang": "no",
+      "twin": "why-en-controlled-cae99c1155",
+      "choice": "nei",
+      "p": {
+        "ja": 0.2399,
+        "nei": 0.7601
+      },
+      "ms": 199,
+      "wall_s": 2.741,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "cae99c1155080d2f44efa881374acc1f9458b7bd"
+    },
+    {
+      "id": "why-no-controlled-4bbe71689e",
+      "set": "why-no",
+      "expect": "nei",
+      "options": [
+        "ja",
+        "nei"
+      ],
+      "chars": 669,
+      "lang": "no",
+      "twin": "why-en-controlled-4bbe71689e",
+      "choice": "nei",
+      "p": {
+        "ja": 0.1576,
+        "nei": 0.8424
+      },
+      "ms": 158,
+      "wall_s": 2.702,
+      "error": null,
+      "ok": true,
+      "construction": "controlled",
+      "sha": "4bbe71689ef81b4ad43949a9af7387eb8a2e0e6a"
+    }
+  ],
+  "eval": {
+    "why-en": {
+      "cases": 48,
+      "correct": 45,
+      "accuracy": 0.9375,
+      "confusion": {
+        "no": {
+          "no": 23,
+          "yes": 1
+        },
+        "yes": {
+          "no": 2,
+          "yes": 22
+        }
+      },
+      "mean_p_correct": 0.812,
+      "mean_p_wrong": 0.6039,
+      "p50_ms": 250,
+      "p95_ms": 668,
+      "cases_without_evidence": 0
+    },
+    "why-no": {
+      "cases": 48,
+      "correct": 42,
+      "accuracy": 0.875,
+      "confusion": {
+        "ja": {
+          "ja": 18,
+          "nei": 6
+        },
+        "nei": {
+          "nei": 24
+        }
+      },
+      "mean_p_correct": 0.7636,
+      "mean_p_wrong": 0.6171,
+      "p50_ms": 243,
+      "p95_ms": 688,
+      "cases_without_evidence": 0
+    }
+  },
+  "cold": {
+    "ms": 357,
+    "wall_s": 2.887
+  },
+  "sanity": "OK",
+  "finished": "2026-09-28T02:36:50+0200",
+  "seconds": 318
+}

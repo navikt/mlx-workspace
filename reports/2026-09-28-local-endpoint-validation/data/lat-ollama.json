@@ -1,0 +1,58 @@
+{
+  "key": "ollama",
+  "model": "qwen3.6:35b-gguf",
+  "started": "2026-09-28T02:00:49+0200",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2286,
+        "completion_tokens": 256,
+        "ttft_s": 0.82,
+        "decode_tok_s": 98.8,
+        "total_s": 3.4,
+        "usage": {
+          "prompt_tokens": 2286,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens": 256,
+          "total_tokens": 2542
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 29213,
+        "completion_tokens": 256,
+        "ttft_s": 17.52,
+        "decode_tok_s": 75.4,
+        "total_s": 20.9,
+        "usage": {
+          "prompt_tokens": 29213,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens": 256,
+          "total_tokens": 29469
+        }
+      },
+      "warm": {
+        "prompt_tokens": 29496,
+        "completion_tokens": 71,
+        "ttft_s": 0.22,
+        "decode_tok_s": 75.2,
+        "total_s": 1.16,
+        "usage": {
+          "prompt_tokens": 29496,
+          "prompt_tokens_details": {
+            "cached_tokens": 29468
+          },
+          "completion_tokens": 71,
+          "total_tokens": 29567
+        }
+      }
+    }
+  ]
+}

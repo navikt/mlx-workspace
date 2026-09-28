@@ -1,0 +1,23 @@
+nav-pilot alpha local doctor  (alpha, unsupported, unmeasured)
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3.6:35b-gguf (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3.6:35b-gguf
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  FAIL  context    a 30k-token prompt failed: the server answered 400 Bad
+                   Request:
+                   {"error":{"message":"{\"error\":{\"code\":400,\"message\":\"request
+                   (30042 tokens) exceeds the available context size (4096
+                   tokens), try increasing
+                   it\",\"type\":\"exceed_context_size_error\",\"n_prom…
+        Fix: Ollama: start it with OLLAMA_CONTEXT_LENGTH=65536 ollama serve, or make
+             a model with a Modelfile holding FROM <model> and PARAMETER num_ctx
+             65536 (ollama create <name> -f Modelfile) and set local_endpoint_model
+             to <name>. llama-server: -c 65536. LM Studio: raise the context length
+             when you load the model
+  SKIP  TTFT       the context probe failed
+
+doctor exit 1

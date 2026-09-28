@@ -1,0 +1,58 @@
+{
+  "key": "llama",
+  "model": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL",
+  "started": "2026-09-28T02:31:03+0200",
+  "latency": [
+    {
+      "target": 2000,
+      "cold": {
+        "prompt_tokens": 2286,
+        "completion_tokens": 256,
+        "ttft_s": 0.87,
+        "decode_tok_s": 102.8,
+        "total_s": 3.35,
+        "usage": {
+          "completion_tokens": 256,
+          "prompt_tokens": 2286,
+          "total_tokens": 2542,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    },
+    {
+      "target": 30000,
+      "cold": {
+        "prompt_tokens": 29213,
+        "completion_tokens": 256,
+        "ttft_s": 19.11,
+        "decode_tok_s": 78.5,
+        "total_s": 22.36,
+        "usage": {
+          "completion_tokens": 256,
+          "prompt_tokens": 29213,
+          "total_tokens": 29469,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "warm": {
+        "prompt_tokens": 29496,
+        "completion_tokens": 208,
+        "ttft_s": 0.16,
+        "decode_tok_s": 76.1,
+        "total_s": 2.9,
+        "usage": {
+          "completion_tokens": 208,
+          "prompt_tokens": 29496,
+          "total_tokens": 29704,
+          "prompt_tokens_details": {
+            "cached_tokens": 29468
+          }
+        }
+      }
+    }
+  ]
+}

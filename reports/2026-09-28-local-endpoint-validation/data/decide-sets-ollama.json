@@ -1,0 +1,2672 @@
+{
+  "key": "ollama",
+  "model": "qwen3.6:35b-gguf",
+  "nav_pilot": "$S/nps",
+  "sets": [
+    "issue-type"
+  ],
+  "nav_pilot_commit": null,
+  "started": "2026-09-28T02:06:26+0200",
+  "cases": [
+    {
+      "id": "issue-type-mock-oauth2-server-33",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 736,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9672,
+        "feature": 0.031,
+        "question": 0.0019
+      },
+      "ms": 29,
+      "wall_s": 2.565,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 33,
+      "construction": null
+    },
+    {
+      "id": "issue-type-stub-oidc-provider-5",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 332,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9693,
+        "feature": 0.0298,
+        "question": 0.0009
+      },
+      "ms": 135,
+      "wall_s": 2.682,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/stub-oidc-provider",
+      "number": 5,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-383",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.3574,
+        "feature": 0.4899,
+        "question": 0.1527
+      },
+      "ms": 144,
+      "wall_s": 2.689,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 383,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-889",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 607,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9991,
+        "feature": 0.0008,
+        "question": 0.0001
+      },
+      "ms": 152,
+      "wall_s": 2.698,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 889,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-659",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 452,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 161,
+      "wall_s": 2.708,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 659,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-419",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1923,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9895,
+        "feature": 0.01,
+        "question": 0.0005
+      },
+      "ms": 240,
+      "wall_s": 2.787,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 419,
+      "construction": null
+    },
+    {
+      "id": "issue-type-circleci-nais-orb-14",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 183,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9976,
+        "feature": 0.0023,
+        "question": 0
+      },
+      "ms": 121,
+      "wall_s": 2.665,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/circleci-nais-orb",
+      "number": 14,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-190",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3044,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.999,
+        "feature": 0.001,
+        "question": 0
+      },
+      "ms": 304,
+      "wall_s": 2.844,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 190,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-242",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2262,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6247,
+        "feature": 0.3361,
+        "question": 0.0392
+      },
+      "ms": 222,
+      "wall_s": 2.766,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 242,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-517",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1984,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.923,
+        "feature": 0.0143,
+        "question": 0.0626
+      },
+      "ms": 257,
+      "wall_s": 2.801,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 517,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-825",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1866,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9991,
+        "feature": 0.0009,
+        "question": 0
+      },
+      "ms": 227,
+      "wall_s": 2.772,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 825,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1584",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 312,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9996,
+        "feature": 0.0004,
+        "question": 0
+      },
+      "ms": 140,
+      "wall_s": 2.686,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1584,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mangfold-i-mai-45",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 277,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0895,
+        "feature": 0.8407,
+        "question": 0.0698
+      },
+      "ms": 141,
+      "wall_s": 2.685,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mangfold-i-mai",
+      "number": 45,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-417",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2348,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.2606,
+        "feature": 0.1528,
+        "question": 0.5866
+      },
+      "ms": 233,
+      "wall_s": 2.779,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/cplt",
+      "number": 417,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-443",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 545,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6381,
+        "feature": 0.3399,
+        "question": 0.0221
+      },
+      "ms": 162,
+      "wall_s": 2.707,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 443,
+      "construction": null
+    },
+    {
+      "id": "issue-type-melosys-eessi-29",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1266,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.995,
+        "feature": 0.0047,
+        "question": 0.0002
+      },
+      "ms": 191,
+      "wall_s": 2.738,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/melosys-eessi",
+      "number": 29,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dagpenger-226",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 647,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9997,
+        "feature": 0.0001,
+        "question": 0.0002
+      },
+      "ms": 143,
+      "wall_s": 2.688,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 226,
+      "construction": null
+    },
+    {
+      "id": "issue-type-forenklet-deploy-15",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8721,
+        "feature": 0.1273,
+        "question": 0.0006
+      },
+      "ms": 135,
+      "wall_s": 2.676,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/forenklet-deploy",
+      "number": 15,
+      "construction": null
+    },
+    {
+      "id": "issue-type-Designsystemet-old-28",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 385,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9986,
+        "feature": 0.0013,
+        "question": 0.0002
+      },
+      "ms": 148,
+      "wall_s": 2.694,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/Designsystemet-old",
+      "number": 28,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-860",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 824,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.871,
+        "feature": 0.0774,
+        "question": 0.0516
+      },
+      "ms": 164,
+      "wall_s": 2.711,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 860,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-350",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 309,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9986,
+        "feature": 0.0013,
+        "question": 0.0001
+      },
+      "ms": 141,
+      "wall_s": 2.682,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 350,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-412",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 617,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9995,
+        "feature": 0.0005,
+        "question": 0
+      },
+      "ms": 161,
+      "wall_s": 2.701,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 412,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ebxml-processor-274",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 691,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9872,
+        "feature": 0.0014,
+        "question": 0.0114
+      },
+      "ms": 162,
+      "wall_s": 2.709,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ebxml-processor",
+      "number": 274,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nks-bob-frontend-235",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 598,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9963,
+        "feature": 0.0033,
+        "question": 0.0004
+      },
+      "ms": 168,
+      "wall_s": 2.71,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nks-bob-frontend",
+      "number": 235,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-514",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1753,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9922,
+        "feature": 0.0049,
+        "question": 0.0029
+      },
+      "ms": 242,
+      "wall_s": 2.789,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 514,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dagpenger-1010",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 323,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9996,
+        "feature": 0.0004,
+        "question": 0
+      },
+      "ms": 136,
+      "wall_s": 2.681,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 1010,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-160",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 191,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9419,
+        "feature": 0.0548,
+        "question": 0.0033
+      },
+      "ms": 126,
+      "wall_s": 2.671,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 160,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-794",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 719,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 168,
+      "wall_s": 2.715,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 794,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nytt-sykefravaer-38",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 335,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0695,
+        "feature": 0.4031,
+        "question": 0.5274
+      },
+      "ms": 134,
+      "wall_s": 2.679,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nytt-sykefravaer",
+      "number": 38,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ghep-119",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 181,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8402,
+        "feature": 0.1578,
+        "question": 0.002
+      },
+      "ms": 120,
+      "wall_s": 2.657,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 119,
+      "construction": null
+    },
+    {
+      "id": "issue-type-tiltakspenger-meldekort-128",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 460,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9804,
+        "feature": 0.0195,
+        "question": 0.0001
+      },
+      "ms": 142,
+      "wall_s": 2.687,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tiltakspenger-meldekort",
+      "number": 128,
+      "construction": null
+    },
+    {
+      "id": "issue-type-Designsystemet-old-148",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 243,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1851,
+        "feature": 0.093,
+        "question": 0.7219
+      },
+      "ms": 129,
+      "wall_s": 2.674,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/Designsystemet-old",
+      "number": 148,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helved-peisen-7",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 289,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.998,
+        "feature": 0.002,
+        "question": 0
+      },
+      "ms": 125,
+      "wall_s": 2.662,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helved-peisen",
+      "number": 7,
+      "construction": null
+    },
+    {
+      "id": "issue-type-remove-package-versions-3",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 770,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9164,
+        "feature": 0.0826,
+        "question": 0.001
+      },
+      "ms": 148,
+      "wall_s": 2.696,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/remove-package-versions",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2134",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 486,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0001,
+        "question": 0.0001
+      },
+      "ms": 150,
+      "wall_s": 2.698,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2134,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-168",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1039,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.9992,
+        "question": 0.0005
+      },
+      "ms": 161,
+      "wall_s": 2.702,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 168,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-171",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1657,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0006,
+        "feature": 0.9975,
+        "question": 0.0019
+      },
+      "ms": 198,
+      "wall_s": 2.741,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 171,
+      "construction": null
+    },
+    {
+      "id": "issue-type-aksel-arcade-31",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1400,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.9997,
+        "question": 0.0001
+      },
+      "ms": 178,
+      "wall_s": 2.726,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 31,
+      "construction": null
+    },
+    {
+      "id": "issue-type-tilbakemeldingsmottak-api-361",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1316,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0018,
+        "feature": 0.9971,
+        "question": 0.0011
+      },
+      "ms": 201,
+      "wall_s": 2.744,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tilbakemeldingsmottak-api",
+      "number": 361,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-314",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3121,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.9994,
+        "question": 0.0004
+      },
+      "ms": 290,
+      "wall_s": 2.836,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 314,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-message-generator-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 301,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0682,
+        "feature": 0.3287,
+        "question": 0.6031
+      },
+      "ms": 134,
+      "wall_s": 2.679,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-message-generator",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-645",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 112,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0067,
+        "feature": 0.1232,
+        "question": 0.8701
+      },
+      "ms": 122,
+      "wall_s": 2.665,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 645,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1176",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0116,
+        "feature": 0.7646,
+        "question": 0.2238
+      },
+      "ms": 136,
+      "wall_s": 2.681,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1176,
+      "construction": null
+    },
+    {
+      "id": "issue-type-innbyggerpanelet-3",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 416,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0028,
+        "feature": 0.9196,
+        "question": 0.0776
+      },
+      "ms": 133,
+      "wall_s": 2.679,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/innbyggerpanelet",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-attachment-service-22",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 705,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0885,
+        "feature": 0.8409,
+        "question": 0.0706
+      },
+      "ms": 159,
+      "wall_s": 2.702,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-attachment-service",
+      "number": 22,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-169",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0276,
+        "feature": 0.4545,
+        "question": 0.5179
+      },
+      "ms": 129,
+      "wall_s": 2.668,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 169,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-83",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1431,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0034,
+        "feature": 0.9756,
+        "question": 0.021
+      },
+      "ms": 285,
+      "wall_s": 2.83,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 83,
+      "construction": null
+    },
+    {
+      "id": "issue-type-ghep-104",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 686,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0018,
+        "feature": 0.9978,
+        "question": 0.0004
+      },
+      "ms": 168,
+      "wall_s": 2.713,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 104,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-payload-signing-service-32",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1195,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0382,
+        "feature": 0.4458,
+        "question": 0.5159
+      },
+      "ms": 200,
+      "wall_s": 2.748,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-payload-signing-service",
+      "number": 32,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dinesykmeldte-696",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1397,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.9998,
+        "question": 0
+      },
+      "ms": 192,
+      "wall_s": 2.734,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dinesykmeldte",
+      "number": 696,
+      "construction": null
+    },
+    {
+      "id": "issue-type-skjemabygging-formio-2215",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3756,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.9998,
+        "question": 0
+      },
+      "ms": 314,
+      "wall_s": 2.857,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/skjemabygging-formio",
+      "number": 2215,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-9",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1820,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0002,
+        "feature": 0.9998,
+        "question": 0
+      },
+      "ms": 218,
+      "wall_s": 2.762,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 9,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-133",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 554,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0009,
+        "feature": 0.9957,
+        "question": 0.0033
+      },
+      "ms": 168,
+      "wall_s": 2.711,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 133,
+      "construction": null
+    },
+    {
+      "id": "issue-type-gandalf-30",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 875,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9733,
+        "feature": 0.0263,
+        "question": 0.0004
+      },
+      "ms": 171,
+      "wall_s": 2.713,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/gandalf",
+      "number": 30,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-918",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 223,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.2172,
+        "feature": 0.673,
+        "question": 0.1097
+      },
+      "ms": 125,
+      "wall_s": 2.669,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 918,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2501",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 664,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.259,
+        "feature": 0.735,
+        "question": 0.006
+      },
+      "ms": 167,
+      "wall_s": 2.712,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2501,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2058",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0013,
+        "feature": 0.9983,
+        "question": 0.0005
+      },
+      "ms": 142,
+      "wall_s": 2.688,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2058,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-1060",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 741,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0005,
+        "feature": 0.7936,
+        "question": 0.2059
+      },
+      "ms": 184,
+      "wall_s": 2.727,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 1060,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-252",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 293,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0024,
+        "feature": 0.9304,
+        "question": 0.0672
+      },
+      "ms": 139,
+      "wall_s": 2.683,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 252,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2240",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 283,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0228,
+        "feature": 0.935,
+        "question": 0.0422
+      },
+      "ms": 134,
+      "wall_s": 2.679,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2240,
+      "construction": null
+    },
+    {
+      "id": "issue-type-farskapsportal-ui-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 238,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0458,
+        "feature": 0.6334,
+        "question": 0.3208
+      },
+      "ms": 128,
+      "wall_s": 2.671,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/farskapsportal-ui",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nais-env-15",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 204,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0014,
+        "feature": 0.9786,
+        "question": 0.0199
+      },
+      "ms": 132,
+      "wall_s": 2.675,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nais-env",
+      "number": 15,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-144",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 7942,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.9999,
+        "question": 0.0001
+      },
+      "ms": 594,
+      "wall_s": 3.137,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 144,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-456",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.9583,
+        "question": 0.041
+      },
+      "ms": 146,
+      "wall_s": 2.691,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 456,
+      "construction": null
+    },
+    {
+      "id": "issue-type-lumi-255",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1971,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0008,
+        "feature": 0.9976,
+        "question": 0.0016
+      },
+      "ms": 242,
+      "wall_s": 2.789,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 255,
+      "construction": null
+    },
+    {
+      "id": "issue-type-data-catalog-policies-34",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 149,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.9993,
+        "question": 0.0003
+      },
+      "ms": 124,
+      "wall_s": 2.669,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/data-catalog-policies",
+      "number": 34,
+      "construction": null
+    },
+    {
+      "id": "issue-type-aksel-arcade-37",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1341,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.9999,
+        "question": 0
+      },
+      "ms": 177,
+      "wall_s": 2.722,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 37,
+      "construction": null
+    },
+    {
+      "id": "issue-type-token-support-179",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 210,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0049,
+        "feature": 0.7482,
+        "question": 0.2468
+      },
+      "ms": 126,
+      "wall_s": 2.674,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 179,
+      "construction": null
+    },
+    {
+      "id": "issue-type-lumi-262",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1186,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.001,
+        "feature": 0.9825,
+        "question": 0.0165
+      },
+      "ms": 197,
+      "wall_s": 2.742,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 262,
+      "construction": null
+    },
+    {
+      "id": "issue-type-dbt-dvh-macros-12",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 477,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0382,
+        "feature": 0.771,
+        "question": 0.1908
+      },
+      "ms": 141,
+      "wall_s": 2.685,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dbt-dvh-macros",
+      "number": 12,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-471",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2618,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0006,
+        "feature": 0.0014,
+        "question": 0.9981
+      },
+      "ms": 287,
+      "wall_s": 2.833,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 471,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-500",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3158,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0061,
+        "feature": 0.198,
+        "question": 0.7959
+      },
+      "ms": 310,
+      "wall_s": 2.847,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 500,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-604",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3355,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.0005,
+        "question": 0.9992
+      },
+      "ms": 378,
+      "wall_s": 2.923,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 604,
+      "construction": null
+    },
+    {
+      "id": "issue-type-copilot-740",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1870,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0535,
+        "feature": 0.0945,
+        "question": 0.8521
+      },
+      "ms": 239,
+      "wall_s": 2.784,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 740,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3519,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0027,
+        "feature": 0.0047,
+        "question": 0.9926
+      },
+      "ms": 306,
+      "wall_s": 2.85,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-206",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3551,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.0014,
+        "question": 0.9979
+      },
+      "ms": 299,
+      "wall_s": 2.845,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 206,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-424",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2754,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0013,
+        "feature": 0.0014,
+        "question": 0.9973
+      },
+      "ms": 235,
+      "wall_s": 2.769,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 424,
+      "construction": null
+    },
+    {
+      "id": "issue-type-cplt-472",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2341,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0277,
+        "feature": 0.0654,
+        "question": 0.9069
+      },
+      "ms": 228,
+      "wall_s": 2.775,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 472,
+      "construction": null
+    },
+    {
+      "id": "issue-type-esyfo-narmesteleder-516",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2679,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0548,
+        "feature": 0.2045,
+        "question": 0.7407
+      },
+      "ms": 279,
+      "wall_s": 2.825,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/esyfo-narmesteleder",
+      "number": 516,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 147,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0021,
+        "feature": 0.2261,
+        "question": 0.7717
+      },
+      "ms": 128,
+      "wall_s": 2.67,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-g-4",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 104,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0021,
+        "feature": 0.05,
+        "question": 0.948
+      },
+      "ms": 118,
+      "wall_s": 2.662,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 4,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-7",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 405,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.0004,
+        "question": 0.9993
+      },
+      "ms": 138,
+      "wall_s": 2.684,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 7,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 430,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.0003,
+        "question": 0.9994
+      },
+      "ms": 157,
+      "wall_s": 2.701,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 8,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-10",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 750,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0026,
+        "feature": 0.195,
+        "question": 0.8025
+      },
+      "ms": 163,
+      "wall_s": 2.709,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 10,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-11",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 576,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0027,
+        "feature": 0.2401,
+        "question": 0.7572
+      },
+      "ms": 145,
+      "wall_s": 2.69,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 11,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-16",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 454,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0005,
+        "feature": 0.0004,
+        "question": 0.9991
+      },
+      "ms": 144,
+      "wall_s": 2.691,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 16,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 638,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0002,
+        "feature": 0.0001,
+        "question": 0.9997
+      },
+      "ms": 156,
+      "wall_s": 2.699,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 17,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-issues-30",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 694,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.0037,
+        "question": 0.9956
+      },
+      "ms": 159,
+      "wall_s": 2.702,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 30,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-message-converter-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 732,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8905,
+        "feature": 0.016,
+        "question": 0.0935
+      },
+      "ms": 163,
+      "wall_s": 2.708,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-message-converter",
+      "number": 17,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helsemelding-outbound-message-service-76",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1059,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0005,
+        "feature": 0.0011,
+        "question": 0.9984
+      },
+      "ms": 177,
+      "wall_s": 2.724,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-outbound-message-service",
+      "number": 76,
+      "construction": null
+    },
+    {
+      "id": "issue-type-helseopplysninger-21",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 135,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0.0001,
+        "question": 0.9998
+      },
+      "ms": 122,
+      "wall_s": 2.662,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helseopplysninger",
+      "number": 21,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-306",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 562,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.005,
+        "feature": 0.0141,
+        "question": 0.9809
+      },
+      "ms": 138,
+      "wall_s": 2.684,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 306,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-435",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 575,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0006,
+        "feature": 0.0004,
+        "question": 0.999
+      },
+      "ms": 137,
+      "wall_s": 2.681,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 435,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-460",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 365,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.0001,
+        "question": 0.9996
+      },
+      "ms": 131,
+      "wall_s": 2.672,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 460,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-513",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 356,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0268,
+        "feature": 0.1542,
+        "question": 0.819
+      },
+      "ms": 123,
+      "wall_s": 2.661,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 513,
+      "construction": null
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-573",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1676,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.0001,
+        "question": 0.9995
+      },
+      "ms": 201,
+      "wall_s": 2.747,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 573,
+      "construction": null
+    },
+    {
+      "id": "issue-type-modiapersonoversikt-126",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 272,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0303,
+        "feature": 0.1384,
+        "question": 0.8313
+      },
+      "ms": 128,
+      "wall_s": 2.673,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/modiapersonoversikt",
+      "number": 126,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-387",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 359,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0314,
+        "feature": 0.0847,
+        "question": 0.8839
+      },
+      "ms": 136,
+      "wall_s": 2.684,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 387,
+      "construction": null
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-397",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 502,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0027,
+        "feature": 0.0394,
+        "question": 0.9579
+      },
+      "ms": 143,
+      "wall_s": 2.689,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 397,
+      "construction": null
+    },
+    {
+      "id": "issue-type-react-intl-bundler-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 132,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0009,
+        "feature": 0.002,
+        "question": 0.997
+      },
+      "ms": 121,
+      "wall_s": 2.664,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/react-intl-bundler",
+      "number": 3,
+      "construction": null
+    },
+    {
+      "id": "issue-type-standbot-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 220,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.0005,
+        "question": 0.9992
+      },
+      "ms": 129,
+      "wall_s": 2.676,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/standbot",
+      "number": 8,
+      "construction": null
+    },
+    {
+      "id": "issue-type-syfo-budstikka-166",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1574,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0019,
+        "feature": 0.0152,
+        "question": 0.9829
+      },
+      "ms": 201,
+      "wall_s": 2.749,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 166,
+      "construction": null
+    },
+    {
+      "id": "issue-type-syfo-budstikka-167",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1534,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.0006,
+        "question": 0.999
+      },
+      "ms": 210,
+      "wall_s": 2.754,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 167,
+      "construction": null
+    },
+    {
+      "id": "issue-type-sykmeldinger-38",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 86,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0039,
+        "feature": 0.0643,
+        "question": 0.9318
+      },
+      "ms": 109,
+      "wall_s": 2.65,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/sykmeldinger",
+      "number": 38,
+      "construction": null
+    },
+    {
+      "id": "issue-type-token-support-83",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 119,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0005,
+        "feature": 0.0005,
+        "question": 0.999
+      },
+      "ms": 121,
+      "wall_s": 2.666,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 83,
+      "construction": null
+    }
+  ],
+  "eval": {
+    "issue-type": {
+      "cases": 105,
+      "correct": 94,
+      "accuracy": 0.8952,
+      "confusion": {
+        "bug": {
+          "bug": 30,
+          "feature": 2,
+          "question": 3
+        },
+        "feature": {
+          "bug": 1,
+          "feature": 30,
+          "question": 4
+        },
+        "question": {
+          "bug": 1,
+          "question": 34
+        }
+      },
+      "mean_p_correct": 0.9366,
+      "mean_p_wrong": 0.6852,
+      "p50_ms": 138,
+      "p95_ms": 310,
+      "cases_without_evidence": 0
+    }
+  },
+  "cold": {
+    "ms": 151,
+    "wall_s": 2.68
+  },
+  "sanity": "OK",
+  "finished": "2026-09-28T02:11:36+0200",
+  "seconds": 310
+}

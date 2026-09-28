@@ -1,0 +1,17 @@
+greet.py:
+def greet(name):
+    return "Hello, " + name
+
+
+if __name__ == "__main__":
+    print(greet("world"))
+test_greet.py:
+from greet import greet
+
+assert greet("Ada") == "Hello, Ada"
+run: pass
+tool calls:
+   1 "tool":"edit"
+   1 "tool":"glob"
+   1 "tool":"read"
+   1 "tool":"write"

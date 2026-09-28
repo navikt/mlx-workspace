@@ -1,0 +1,12 @@
+nav-pilot alpha local doctor  (alpha, unsupported, unmeasured)
+
+  Endpoint  http://127.0.0.1:11434/v1
+  Model     qwen3.6:35b-gguf (unsupported, unmeasured)
+
+  PASS  server     answers and lists qwen3.6:35b-gguf
+  PASS  tool calls a parsed tool_calls entry came back
+  PASS  logprobs   11 top_logprobs came back, enough for alpha decide
+  → Sending about 30k tokens to measure the context window and the time to first token. On a CPU this takes minutes.
+  PASS  context    30042 prompt tokens kept, nothing cut
+  PASS  TTFT       16.0 s for about 30k tokens
+
