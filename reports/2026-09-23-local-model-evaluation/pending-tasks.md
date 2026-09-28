@@ -708,8 +708,7 @@ and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/
    Without the penalty 45/56 passed, and with 1.5 41/56 (p = 0.50). Loops or timeouts were 5/56
    against 6/56, with no tool-call loop in either arm and one output-limit stop, under 1.5. By the
    plan's rule, the penalty stays off.
-   **Running** since 12:20 on 28 September (step 8 at 17:12, ends about 19:00), started by
-   followups-2-launcher after item 1; the queue file is
+   It ran 12:20–18:58 on 28 September from followups-2-launcher; the queue file is
    [presence-penalty.queue](../2026-09-28-orchestrator-and-penalty/presence-penalty.queue).
 
 ## 8.12 The GPU queue and open benchmark work (28 September, 17:45)
