@@ -58,10 +58,10 @@ def check(key):
     # sample (harness v2); this catches one left from before that, or by another suite.
     repo = ws / "kotlin"
     if (repo / ".git").is_dir():
-        r = subprocess.run(["git", "status", "--porcelain", "--ignored"], cwd=repo,
-                           capture_output=True, text=True)
-        names = [ln[3:].rstrip("/") for ln in r.stdout.splitlines() if ln.startswith("!! ")]
-        names = [n for n in names if Path(n).name not in ("build", ".gradle")]
+        r = subprocess.run(["git", "--no-optional-locks", "status", "--porcelain", "--ignored", "-z"],
+                           cwd=repo, capture_output=True, text=True)
+        names = [e[3:].rstrip("/") for e in r.stdout.split("\0") if e.startswith("!! ")]
+        names = [n for n in names if Path(n).name not in ("build", ".gradle", ".kotlin")]  # _frontier.TOOL_OUTPUT
         if names:
             return False, (f"{repo} holds git-ignored {', '.join(names)}, which reset_repo does not "
                            f"remove  ->  rm -rf {' '.join(str(repo / n) for n in names)}")
