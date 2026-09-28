@@ -47,14 +47,17 @@ if [ -z "${DISPATCH_PROBE_INNER:-}" ]; then
   lv_glob=()
   if [ -n "${PROBE_LEVELS:-}" ]; then
     for level in $PROBE_LEVELS; do
-      case "$level" in conservative|balanced|aggressive) lv_glob+=(bench/hybrid-*-"$PROBE_TAG_BASE-$level$caps"-*) ;;
+      case "$level" in conservative|balanced|aggressive) lv_glob+=("bench/hybrid-*-$PROBE_TAG_BASE-$level$caps-*") ;;
         *) echo "✗ PROBE_LEVELS: $level (conservative, balanced or aggressive; the control arm is off)"; exit 2;; esac
     done
     [ -n "$caps" ] || { echo "✗ PROBE_LEVELS needs BENCH_CAPABILITIES_OVERRIDE: the gate only runs for classes the manifest trusts"; exit 2; }
   fi
   marker="$dir/.started"; : > "$marker"
   collect() {
-    mv bench/hybrid-*-"$BENCH_HYBRID_TAG"-* ${lv_glob[@]+"${lv_glob[@]}"} "$dir"/ 2>/dev/null
+    # Patterns, globbed here: expanded at start they matched only what was already there,
+    # and probe 6 left eight result files in bench/.
+    local g; mv bench/hybrid-*-"$BENCH_HYBRID_TAG"-* "$dir"/ 2>/dev/null
+    for g in ${lv_glob[@]+"${lv_glob[@]}"}; do mv $g "$dir"/ 2>/dev/null; done
     find .bench-logs -maxdepth 1 -newer "$marker" \( -name 'hybrid-*.jsonl' -o -name 'policy-*.md' \) -exec mv {} "$dir"/ \;
     rm -f "$marker"
   }
