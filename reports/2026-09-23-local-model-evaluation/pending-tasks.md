@@ -150,7 +150,7 @@ The 8-bit entry moved to 48k / 4k / 3.25 GiB with a 512-token prefill step, and 
   rule (cheap-ops 18/30 against the plain 4-bit's 11/20, 0 timeouts against 4, 12 of 12 Copilot
   sessions), so the manifest's 4-bit slot serves `mlx-community/Qwen3.8-27B-OptiQ-4bit` under the
   key `qwen3.8-27b-optiq-4bit` ([qwen38-tuning.md §10](qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit)).
-  The 0.7 / top_p 0.8 cell of task 3 is still unrun.
+  The 0.7 / top_p 0.8 cell of task 3 is still unrun (#122: blocked on presence_penalty in nav-pilot).
 - **Refresh capabilities after tonight.** `mise run bench-capabilities && mise run model-manifest`
   once both nights' JSON is on `main` (`bench/night-results-*` and `bench/night2-results-*` merged),
   and a PR if the verdicts move. Until then the OptiQ-4bit entry carries the unmeasured block
@@ -271,7 +271,7 @@ Found by the two night batches and decide-limits, and not yet acted on. Each lin
 - **Silent model fallback on autostart:** a user whose `local_model` is no longer offered gets a warning from `alpha local init/start` but not from a launch that autostarts the server.
 - ~~**Narrow `harness_sha` to scoring inputs and add a `profile_sha`**~~ Steps 1 and 2 done with the two fixes above: `_profiles.py` left the hash, and records carry `profile_sha`. The new generation d1229ad0e89f pools with 492141135fe6 in `EQUIVALENT_HARNESS` (the diff is in the entry's comment). Step 3, `profile_sha` in the `_by_class` condition, is not done: every stored run lacks the field, so the first stamped run would split from its own profile's history. Add it once each profile has stamped runs to pool.
 - **Network preflight: `mise run bench-netcheck -- --for <kinds>`.** The firewall (Little Snitch) rules are per program, so it makes each program reach its hosts itself: curl (L1), then git, gh, opencode, curl inside `cplt` (the proxy connects as cplt), hf's python and java (L2), and with `--l3` one real session per cloud client path through nav-pilot and cplt (about $0.04). A failure names the likely cause, for example a per-app rule. Kinds: e2e, decide, hybrid, ops, frontier-local, frontier-cloud, download. `--json` for drivers, `--inventory` for the endpoint table. night-run-3 runs it in its preflight as a WARN. For night-run use `--for ops,e2e`, and for night-run-2 `--for ops,e2e,hybrid`. On 25 September at 07:10, after the firewall fix, the frontier-cloud, e2e and hybrid paths passed at L2 and L3. curl is still blocked from api.githubcopilot.com (on and off), models.dev and most Copilot, xet and Maven hosts, which is harmless because cplt, opencode and java get through. Still blocked for the program that needs them: `cas-server.xethub.hf.co` for hf's python (model downloads over xet fail), `telemetry.business.githubcopilot.com` and `mcp-registry.ekstern.dev.nav.no` for cplt (soft: a gpt-5-mini session still answered), and `opencode.ai` for cplt (soft).
-- **Capabilities proposal for the maintainer:** refreshing `manifest/capabilities.json` with both nights adds a measured OptiQ-4bit block (local read-qa and edit-single move to not-yet; nothing becomes trusted; no existing verdict changes). Not published pending a decision.
+- **Capabilities proposal for the maintainer** (navikt/copilot#1010, held until dispatch re-probe 7, #121): refreshing `manifest/capabilities.json` with both nights adds a measured OptiQ-4bit block (local read-qa and edit-single move to not-yet; nothing becomes trusted; no existing verdict changes). Not published pending a decision.
 
 ## 8.4 Night 3: the quality frontier, scheduled for the night of 25–26 September
 
@@ -340,7 +340,7 @@ At the published latencies, a whole pass takes minutes: Laya well under 1 min of
 
 NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
 
-**Status 2026-09-26: downloaded, waiting for the uv cooldown until about 2026-09-29.**
+**Status 2026-09-26: downloaded, waiting for the uv cooldown until about 2026-09-29** (#95).
 
 - Downloaded 16:47–16:52 on AC over Wi-Fi (en0, 192.168.x), after `bench-netcheck --for download` passed, through `fnox exec -- env HF_HUB_DISABLE_XET=1 hf download`. Every LFS blob's sha256 matches its name, 5.8 GB in total: `RoderickQiu/kev-4b-mlx-8bit`@e1c35947 (4.2 GB), `jaredpalmer/kev-4b`@139fdd94 (0.16 GB), `aac6fef/laya-mlx`@20aed815 (0.81 GB) and `aac6fef/laya-multilingual-mlx`@f2b4faf5 (0.66 GB). The 8-bit `model.safetensors` also matches its `provenance.json` (sha256 59f136a6…, 4,469,640,165 bytes).
 - **The 8-bit Kev is not today's Kev.** It was merged from `jaredpalmer/kev-4b`@485ace87 with Kev's code at 08ab0b87, not from the current main 139fdd94, and its `head.pt` differs (sha256 d8f796da… against dd633435…). Run it with the 8-bit repo's own `head.pt` and tokenizer, and record 485ace87 as the Kev revision. The current main's head does not match the merged weights.
@@ -351,10 +351,10 @@ NO-GO if any of steps 1–4 fails. Steps 5 and 6 only delay the run.
 ## 8.7 After night 3 (quality frontier, night 1), 2026-09-26
 
 - **Done:** the local part ran 16:53–20:12 on 25 September. The first cloud arm was invalid because cplt scoped every session to the repo root (fixed in #57; results kept under `.bench-logs/night3-20260925-165202/invalid-cloud/`, not in `bench/`). The cloud arm was rerun 08:08–09:53 on 26 September. Total cloud spend: $34.71 of $80. Report: [night-1.md](../2026-09-25-quality-frontier/night-1.md).
-- **Replicate `retry2`:** it moved the open frontier on three classes (edit-multi-mechanical 3 → 5, edit-single 0 → 2, create-file 0 → 1), but only with n = 4 per rung. Design §7 needs a second night with n ≥ 8 per arm and a one-sided Fisher p < 0.1 before it becomes a default.
+- **Replicate `retry2` (done 2026-09-26, [night-2.md](../2026-09-25-quality-frontier/night-2.md); see §8.10):** it moved the open frontier on three classes (edit-multi-mechanical 3 → 5, edit-single 0 → 2, create-file 0 → 1), but only with n = 4 per rung. Design §7 needs a second night with n ≥ 8 per arm and a one-sided Fisher p < 0.1 before it becomes a default.
 - **Explain read-qa (done):** [read-qa-analysis.md](../2026-09-25-quality-frontier/read-qa-analysis.md). The verifier is right and the gap is a model limit on a stricter task. 16 of optiq's 22 failures list only one extra file, the one that defines the function, against the prompt's "count the defining file only if it also calls the function". 3 more add a misspelt name, and 3 end without an ANSWER line. Cheap-ops R3 only checks that one file name appears, and that file is the defining one. Next: run read-qa under the existing `example` variant, which says "drop the line that defines it" (one queue line, no harness change). Tagging defining-file extras in `verify_answer_set` touches `_frontier.py` and the tasks file (`harness_sha`), so it is held until after the 64 GB nights.
 - **"classifier on/off" label (done):** only the System One build `nav-pilot-e72319e0` reads `NAV_PILOT_LOOP_CLASSIFIER`. Every main build since 24 September ignores it, so under those builds the two halves were two passes of one condition. `bench-np-e2e` now runs `classifier-on`/`classifier-off` only when the binary reads the switch and `pass-1`/`pass-2` otherwise, and stores that as `np_pass` on each row (not `arm`: bench-copilot already writes `arm = "local"`). `_night_report` reads old rows too: `classifier on/off` under e72319e0, `pass 1/2` under anything else. The classifier false-positive verdict is only computed for classifier passes. `bench-np-e2e` is not a `harness_sha` input.
-- **`/usr/sbin` tools by absolute path (done):** `night-run`, `night-run-2`, `night-preflight`, `bench-np-e2e`, `bench-navpilot-e2e` and `vram-reset` called `lsof` or `sysctl` by name. `pmset` lives in `/usr/bin` and needs no change, and `bench-night` puts `/usr/sbin` on its own PATH. None of the running copies in `.bench-logs/bin` calls a `/usr/sbin` tool by name. But night 64-1's `e2e` steps run `mise run bench-np-e2e` from the main checkout, which still has the bare `sysctl`, and the chain's PATH has no `/usr/sbin`.
+- **`/usr/sbin` tools by absolute path (done; the main-checkout gap below is closed too, #98):** `night-run`, `night-run-2`, `night-preflight`, `bench-np-e2e`, `bench-navpilot-e2e` and `vram-reset` called `lsof` or `sysctl` by name. `pmset` lives in `/usr/bin` and needs no change, and `bench-night` puts `/usr/sbin` on its own PATH. None of the running copies in `.bench-logs/bin` calls a `/usr/sbin` tool by name. But night 64-1's `e2e` steps run `mise run bench-np-e2e` from the main checkout, which still has the bare `sysctl`, and the chain's PATH has no `/usr/sbin`.
 - **Preflight now catches a stray `.git`/`.git2` in a workspace (done):** on the night of 25 September, `workspaces/qwen3.6-35b-a3b-optiq/` held empty `.git` and `.git2` directories a model created during a benchmark; `bench-frontier`'s per-step `assert_workspace_is_clean` (borrowed from `bench-cheap-ops`) refused every step in 2 seconds, but neither `night-preflight` nor `night-run-3`'s own `preflight()` checked for it, so the night "passed" preflight and then failed at step 1. Both now call the shared `_night_workspace_clean.check(key)` (new, `.mise/tasks/_night_workspace_clean.py`), which execs the real `assert_workspace_is_clean` out of `bench-cheap-ops` via the same AST-extraction `bench-frontier`'s `harness()` uses, so the rule can't drift out of sync; FAIL names the stray paths and an `rm -rf`, nothing is deleted automatically. Covered by a new case in `night-run-3-selftest`.
 
 ## 8.8 The 64 GB tier: a worker directed by a cloud orchestrator (downloaded, profiles in place)
@@ -535,7 +535,7 @@ where they are, and night 64-4 runs them.
     2. **It ignores the size threshold when it does cite size.** r4 (12 files) and r5 (5 files counting the definition) are over "≥ 5 files or ≥ 10 call sites", and both samples called them small.
     3. **The persona tier still appears** ("compressed-tier … Proceeding directly"), as in probes 2 and 3.
   - **GO rule** (dispatch ≥ 50 % on large cells, the dispatched samples pass, cost ≤ control): not met. The result is 0 of 6, and the hybrid arm costs 1.07–1.45× the control. **A real 64-3 on large cells is NO-GO.** Across four probes Sonnet 5 has dispatched 1 of 23 hybrid samples. Under nav-pilot's current policy, the 64-3 hybrid arm would measure the control plus a prompt. Recommendation: report "Sonnet 5 does not delegate mechanical edits it can script" as the 64-3 hybrid result, and take the 64 GB workers' directed quality from 64-2's frontier. A cell would test delegation only if the call sites differ in ways a script cannot capture, such as a value that depends on local context at each site. No such task exists in the bench yet.
-  - **Follow-up for after the 64 GB series: the frontier harness has the same sandbox defect.**
+  - **Follow-up for after the 64 GB series: the frontier harness has the same sandbox defect.** (#89; built in #113, which merges after the presence_penalty A/B and re-probe 7, then the v2 validation night runs.)
     - The local arm's workspaces sit under `~/mlx-workspace/workspaces/<profile>`. `_sandbox.toolchain_grants` does not cover the mise walk-up into `~/mlx-workspace/mise*.toml`: it was reproduced under cplt, and Laguna and Occamy transcripts on 27 September show mise errors and failing in-session builds.
     - The cloud arm, under `~/.cache`, reads mise but resolves JDK 27. A transcript from 26 September shows the model hunting for JDK 21.
     - Scores stay valid, because the verifier builds outside the sandbox with an explicit `JAVA_HOME`. But the models had no working compiler inside the session.
@@ -598,7 +598,7 @@ where they are, and night 64-4 runs them.
     - Spend: $6.63 on samples (ledger) plus $0.47 on smoke sessions, $7.10 of the $8.00 cap.
     - Files: `.bench-logs/dispatch-probe6-levels-20260928-0636/`.
   - **The small cell**, `isoppfolgingstilfelle-small`: fm-r3-c, 6 call sites in 3 files, under every dispatch size. It can still trip the 10-call and scripted-loop rules. It does not test an ordinary feature of 5 or more files that needs a judgement per file.
-  - **Not measured:** `balanced` on r6 and on the small cell. Pass 1 stopped at the preflight (load average 8.4 against a ceiling of 8). The GPU then went to the follow-up queue.
+  - **Not measured:** `balanced` on r6 and on the small cell (re-probe 7, #121). Pass 1 stopped at the preflight (load average 8.4 against a ceiling of 8). The GPU then went to the follow-up queue.
 
   | Level | Cell | Dispatched | Verified | Gate events | Cloud $ (× control) | s (× control) |
   |---|---|---|---|---|---|---|
@@ -638,7 +638,7 @@ where they are, and night 64-4 runs them.
     2. **Offer `aggressive` as the opt-in** for users who want the most local use. It dispatches reliably (75 %), with no false positive on the small cell and no refusal loops. It costs 1.2–1.6× the cloud credits and 2–3.6× the time on these cells, and it does not save credits here.
     3. **Capabilities to ship:** keep `edit-multi-mechanical` trusted for optiq. Do not ship `create-file` as trusted for any 64 GB worker: 1 weak test file in 20 dispatched, plus a session that timed out, is not a delegate verdict.
     4. **Before `aggressive` could become a default,** the worker's output needs a check stronger than the orchestrator's grep or green tests. Two options: a definition check for thread-arg, and mutation or boundary checks for new tests. Or the policy should tell the orchestrator to review the worker's diff line by line. Then re-probe with ≥ 5 samples per cell, per local-dispatch.md's decision rule.
-    5. **Gate follow-up in nav-pilot:** count call sites (or `sed … /g` replacements) toward the 10-call rule, so a 3-file, 60-site job like r6 is gated.
+    5. **Gate follow-up in nav-pilot (done with item 4 in navikt/copilot#1114, merged 2026-09-28: call sites count toward the multi-file rule, and build, test and break-the-code checks are appended to a worker's result; re-probe 7 is #121):** count call sites (or `sed … /g` replacements) toward the 10-call rule, so a 3-file, 60-site job like r6 is gated.
   - **Harness notes.**
     - dispatch-probe expanded its level globs at start, so eight result files stayed in `bench/`. They were moved by hand, and this PR fixes it.
     - A shell watcher whose command line contained `.bench-logs` kept the waiter's `pgrep 'bench-'` busy check true for 3.5 hours.
@@ -649,9 +649,9 @@ where they are, and night 64-4 runs them.
   - **Fit:** the 8-bit peaked at 46.18 GB at the 49k probe, 0.18 GB over the 48 − 2 line. Sessions stayed at or under 45.1 GB. 64k is unmeasured, and extrapolates to about 50 GB.
   - **Decide:** the 8-bit is level with optiq-64g (sets 184 against 182/218, why 91 against 89/96, limits 806 against 827/974). Occamy is lowest, at 173, 90 and 763, and 94/160 on claim injection.
   - **Replication (n = 8 per rung):** decomposed edits are level. On edit-single the two score 34/36 each, pooled with 64-2; on edit-multi 40/48 against 39/48. On create-file under retry2 the 8-bit scores 19/24 against 13/24 (p = 0.062, which misses a three-cell Bonferroni threshold), after 11/12 against 8/12 on 64-2. The direction is consistent, and the evidence is moderate.
-  - **Proposal:** #109 adds the 8-bit as an opt-in entry, `min_ram_gb` 64, 48 wired, 64k/16k context and sampling as measured, no `recommended_for`, and the unmeasured capabilities block. **The user decides whether to ship it; not merged.** As shipped, its all-`cloud` block means the orchestrator is told to send it nothing, so it would serve as a selectable local model, not a worker, until an enforced `local_dispatch` level or a capabilities rule that counts frontier evidence exists.
-  - **Stray file:** an Occamy create-file sample wrote `gradle.properties` at the workspace root. It stopped 64-5's last step at preflight; the file was moved and the step resumed. This is the per-sample cleanup gap above, still held until the series is done.
-  - **Still open:** the backlog's 64 GB fit rows (8-bit at 64k, OptiQ-4bit at 131k) and one balloon run. The `-w52` profile (64k context) is unmeasured.
+  - **Proposal:** #109 adds the 8-bit as an opt-in entry, `min_ram_gb` 64, 48 wired, 64k/16k context and sampling as measured, no `recommended_for`, and the unmeasured capabilities block. **Shipped 2026-09-28:** the user decided to ship it as measured, at 64k. As shipped, its all-`cloud` block means the orchestrator is told to send it nothing, so it would serve as a selectable local model, not a worker, until an enforced `local_dispatch` level or a capabilities rule that counts frontier evidence exists.
+  - **Stray file** (#90; the sweep is in #113): an Occamy create-file sample wrote `gradle.properties` at the workspace root. It stopped 64-5's last step at preflight; the file was moved and the step resumed. This is the per-sample cleanup gap above, still held until the series is done.
+  - **Still open:** the backlog's 64 GB fit rows (8-bit at 64k, OptiQ-4bit at 131k) and one balloon run. Night 64-6 measures the shipped 8-bit at 60k and 64k ([plan-64-6.md](../2026-09-26-64gb-tier/plan-64-6.md), queued, needs the user's sudo); Qwen3.8 at 52 GB wired is #93. The `-w52` profile (64k context) is unmeasured.
 
 ## 8.9 Decide as a service: measure first
 
@@ -659,11 +659,13 @@ Research: [2026-09-26-decide-as-a-service/research.md](../2026-09-26-decide-as-a
 Nothing is decided; these are the measurements to take before choosing between a CPU encoder and
 1+1 G4 GPUs with vLLM.
 
-1. Kev 4B and Laya accuracy on our sets, Norwegian and injection included (§8.6).
-2. vLLM against mlx-lm logprob parity on the same model: argmax agreement, calibration bands, top-11 coverage.
-3. A G4 load test: p50/p95 at 2k and 8k tokens, 5–20 req/s, prefix caching on the hybrid DeltaNet model.
-4. Injection robustness under the served quantization (FP8), not MLX 4-bit.
-5. Real volumes: commits and PRs per day across navikt, and candidate runtime flows.
+1. Kev 4B and Laya accuracy on our sets, Norwegian and injection included (§8.6, #95).
+2. vLLM against mlx-lm logprob parity on the same model: argmax agreement, calibration bands, top-11 coverage (#96).
+3. A G4 load test: p50/p95 at 2k and 8k tokens, 5–20 req/s, prefix caching on the hybrid DeltaNet model (#96).
+4. Injection robustness under the served quantization (FP8), not MLX 4-bit (#96).
+5. Real volumes: commits and PRs per day across navikt, and candidate runtime flows (navikt/copilot#1015).
+
+Items 2–4 need GCP, which the user has ruled out for now (2026-09-27, [PRD](../2026-09-27-hosted-decide-prd/prd.md) status).
 
 ## 8.10 A PRD for a hosted `alpha decide`, once the data is in
 
@@ -675,8 +677,9 @@ Asked for on 26 September: a product requirements document and value proposition
 4. **Volume and owners:** commits and PRs per day at NAV, and one or two runtime flows with a named owning team.
 
 The PRD will cover the problem and users, the jobs `decide` does, value against local-only and against a Jev-style SaaS, the options and cost, privacy (DPIA, prompt logging, cache isolation), success metrics, and the rollout.
-- **`retry2` replication, night 2 (2026-09-26), done.** It replicates on edit-single rung 2 (10/16 → 16/16, p = 0.009, 1.1× time). Create-file rung 1 improves strongly (5/16 → 12/16, p = 0.016) but misses the 2× cost limit at 2.03×. Edit-multi-mechanical: no effect, and night 1's move was noise. Next: propose `retry2` as the default for edit-single dispatches in nav-pilot's check-and-retake policy, and re-measure create-file cost per task. See [night-2.md](../2026-09-25-quality-frontier/night-2.md).
-- **Follow-ups 1 (2026-09-28), done** ([night-followups-1.md](../2026-09-25-quality-frontier/night-followups-1.md), Review). The decide 2×2 shows a pull to the last-listed option in both models, stronger in optiq under a negated question, and no "text is fine" prior: nothing changes in nav-pilot. read-qa `example` replicates (57/80 against 32/80, rungs 1, 3 and 4) but no rung leaves `cloud`; its failures move from extra files to missing ANSWER lines (#114). Only one create-file block ran before a stray `src/` tree stopped steps 13–18. Pooled with night 2, retry2 is 15/20 against 5/20 and 2.02× the median time, 2.7× on cf-r1-a where base never passes, and cheaper per verified result (322 s against 618 s). Whether that counts under design §7 is a user decision (UNMEASURED).
+- **PRD written as a plan only (2026-09-27, #106):** [prd.md](../2026-09-27-hosted-decide-prd/prd.md). No-go today: none of the four gates is met. The gates stay open: 1 and 4 in navikt/copilot#1015, 2 in #95, 3 in #96.
+- **`retry2` replication, night 2 (2026-09-26), done.** It replicates on edit-single rung 2 (10/16 → 16/16, p = 0.009, 1.1× time). Create-file rung 1 improves strongly (5/16 → 12/16, p = 0.016) but misses the 2× cost limit at 2.03×. Edit-multi-mechanical: no effect, and night 1's move was noise. Next: propose `retry2` as the default for edit-single dispatches in nav-pilot's check-and-retake policy (navikt/copilot#1011), and re-measure create-file cost per task (done in follow-ups 1, below; the rule question is #126). See [night-2.md](../2026-09-25-quality-frontier/night-2.md).
+- **Follow-ups 1 (2026-09-28), done** ([night-followups-1.md](../2026-09-25-quality-frontier/night-followups-1.md), Review). The decide 2×2 shows a pull to the last-listed option in both models, stronger in optiq under a negated question, and no "text is fine" prior: nothing changes in nav-pilot. read-qa `example` replicates (57/80 against 32/80, rungs 1, 3 and 4) but no rung leaves `cloud`; its failures move from extra files to missing ANSWER lines (#114). Only one create-file block ran before a stray `src/` tree stopped steps 13–18. Pooled with night 2, retry2 is 15/20 against 5/20 and 2.02× the median time, 2.7× on cf-r1-a where base never passes, and cheaper per verified result (322 s against 618 s). Whether that counts under design §7 is a user decision (#126).
 
 ## 8.11 Follow-ups 2: GPT-6 Sol as orchestrator, then presence_penalty (decided 2026-09-27)
 
@@ -688,7 +691,7 @@ and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/
    dispatch-probe cells at three levels, with its own controls and probe 6's binary, workers and
    bench-only block, plus a cloud frontier slice at Sonnet 5's `harness_sha`. There is one ledger,
    with a hard cap of $15. The report is `gpt6-sol.md` in that directory.
-   **Done 2026-09-28, $6.14** ([gpt6-sol.md](../2026-09-28-orchestrator-and-penalty/gpt6-sol.md)).
+   **Done 2026-09-28, $6.14** ([gpt6-sol.md](../2026-09-28-orchestrator-and-penalty/gpt6-sol.md), #118).
    Under `aggressive` GPT-6 Sol dispatched in 7 of 7 valid samples with no gate refusal, r6
    included. All 7 passed, and so did all 16 valid samples. Cost was 0.71–2.33× its own control,
    so it is local-first GO and NO-GO on the cost rule. `conservative` dispatched 0 of 3.
@@ -700,3 +703,5 @@ and the expected times are in the [plan](../2026-09-28-orchestrator-and-penalty/
    mlx_lm.server takes the parameter per request, and the bench sends it through opencode.json.
    This was verified against a recording server. No loop has been seen on this model yet, so the
    A/B mainly tests whether the card's value costs pass rate. Nothing ships in nav-pilot.
+   **Queued** by followups-2-launcher after item 1; the queue file is
+   [presence-penalty.queue](../2026-09-28-orchestrator-and-penalty/presence-penalty.queue).

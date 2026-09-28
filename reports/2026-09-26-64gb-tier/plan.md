@@ -23,8 +23,9 @@ back. It is not an autonomous agent. That decides what we select on and what we 
 The plan itself shipped nothing. The nights it laid out ran from 26 to 28 September:
 [night-64-1](night-64-1.md), [night-64-2](night-64-2.md), 64-3 (NO-GO: Sonnet 5 does not
 dispatch, pending-tasks §8.8), [night-64-4](night-64-4.md) and [night-64-5](night-64-5.md).
-The Qwen3.6-35B-A3B 8-bit won the tier over Occamy 4-bit. Its manifest entry is proposed in
-#109 and waits on the user's decision. The 64-3 decision rule (§5.2) was never applied: there was
+The Qwen3.6-35B-A3B 8-bit won the tier over Occamy 4-bit. Its manifest entry,
+`qwen3.6-35b-a3b-8bit`, shipped on 2026-09-28 as an opt-in (#109); prompts past 49k and its
+capabilities are measured by [night 64-6](plan-64-6.md). The 64-3 decision rule (§5.2) was never applied: there was
 no dispatched population, so the choice rests on the frontier, e2e and decide suites.
 
 ## 1. The memory budget on 64 GB
