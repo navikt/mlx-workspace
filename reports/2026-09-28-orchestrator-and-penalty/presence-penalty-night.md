@@ -120,3 +120,23 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · example: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
+## Review (2026-09-28)
+
+The Frontier section pools every night. This section covers the A/B alone, from the 12 result files and `presence_ab.py 20260928-122006` ([plan](plan.md) §2). Arm A is `qwen3.6-35b-a3b-8bit-64g`, and arm B is `-pp15`, the same profile with `MLX_PRESENCE_PENALTY` 1.5. Every file carries `harness_sha` df7deb1af416, and every sample's `served_model` is `mlx-community/Qwen3.6-35B-A3B-8bit`. The meta confirms 0.0 for arm A and 1.5 for arm B. No sample was invalid. Intervals are 95 % Wilson, and p is the two-sided Fisher exact test that `presence_ab.py` uses.
+
+| Cell | A (no penalty) | B (1.5) | p | timeouts A / B | median s A / B |
+|---|---|---|---|---|---|
+| create-file retry2 r1 | 11/16 | 11/16 | 1.00 | 5 / 3 | 298 / 366 |
+| create-file retry2 r3 | 16/16 | 14/16 | 0.48 | 0 / 2 | 243 / 279 |
+| edit-single r3 | 6/8 | 3/8 | 0.32 | 0 / 0 | 50 / 56 |
+| edit-single r4 | 6/8 | 8/8 | 0.47 | 0 / 0 | 32 / 66 |
+| edit-single r5 | 6/8 | 5/8 | 1.00 | 0 / 0 | 69 / 91 |
+| **all** | **45/56** [0.68–0.89] | **41/56** [0.60–0.83] | 0.50 | 5 / 5 | |
+
+- **Loops:** no sample in either arm looped on tool calls (`looped_on` empty). The longest identical run was 1 in A. In B one sample reached 3 (cf-r3-b, run 2), and it passed. `presence_ab.py` counts loops and timeouts together: 5/56 for A and 6/56 for B.
+- **Text loops:** 0 of A's 72 transcripts and 1 of B's 76. The one in B is a create-file attempt at 13:25 whose step stopped on the output limit (16,384 tokens) right after "I'll write the test file". Its transcript has no further part. No text part in either arm repeated half its 8-grams.
+- **Timeouts:** all 10 are create-file samples at the 420 s cap, 5 per arm. This review did not examine their causes.
+- **Time:** B's median is longer in every cell, by 1.1–2.1×.
+
+**Verdict:** by the plan's rule, recommend 1.5 only if B's loop or timeout rate is lower and its pass rate is not lower. Neither holds: loops and timeouts are 6/56 against 5/56, and the pass rate is 41/56 against 45/56 (p = 0.50). **presence_penalty stays off**, and the manifest does not change. The data shows no loop problem on this model for the penalty to fix. The one step in the whole A/B that ran to the output limit came under the penalty. This is consistent with the card's warning about a "slight decrease in model performance", but at this n it does not show it.
