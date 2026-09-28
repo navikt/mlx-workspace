@@ -50,13 +50,6 @@ MODELS = {
     "laya-421m": ("aac6fef/laya-mlx", "20aed815fc6acde75733882e7ec0e3f28aeb9717", "laya"),
     "laya-m-322m": ("aac6fef/laya-multilingual-mlx", "f2b4faf51023039425946074e2cf1361d2db11d5", "laya"),
 }
-LOOP_CASES = ROOT / "bench" / "decide-cases"
-
-
-def loop_cases(s):
-    return [json.loads(l) for l in (LOOP_CASES / f"{s}.jsonl").read_text().splitlines() if l.strip()]
-
-
 def loop_summary(docs):
     L = ["# Loop classifier: stuck loop vs legitimate repeat", "",
          "The 7 hand-written scenarios from nav-pilot's guard prompt (System One report §3.1), one call "
@@ -73,7 +66,7 @@ def loop_summary(docs):
 
 
 GROUPS = {  # group -> (sets, case loader, extra fields per case, as the group's own run() adds them)
-    "loop": (("loop-classifier",), loop_cases, ("legitimate", "n", "scenario")),
+    "loop": (("loop-classifier",), DS.cases, ("legitimate", "n", "scenario")),   # same bench/decide-cases/*.jsonl reader as sets
     "limits": (DL.SETS, DL.cases, ()),
     "sets": (DS.SETS, DS.cases, ("lang", "repo", "number", "construction")),
     "why": (tuple(DW.FILES), DW.cases, ("lang", "construction", "sha")),
