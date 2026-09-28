@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Balanced against same-day cloud-only controls (user decision 2026-09-28): local-dispatch.md's
+# rule for keeping balanced enforcing needs cost <= control on 2 of 3 large rungs, and re-probe 7
+# only had other-day controls. Sonnet 5, nav-pilot 2bcca023, optiq-64g worker, re-probe 7's
+# bench-only block. Per cell 5 controls then 5 balanced; cells r4, r6, small, then r5 (the cap
+# cuts the tail). One ledger, hard cap $6 (PROBE_CAP 5.75: the cap stops after the crossing step).
+# Runs after night 64-6 (tier64-6.done), then a free GPU for 5 min (no lock, no GPU job,
+# nothing on :8080, AC, 48 GB wired). Touches balctl.done on exit.
+# No command line here carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Start: nohup bash ~/tmp/balctl-launcher >> <logs dir>/balctl.log 2>&1 &   Gives up 2026-10-03 06:00.
+set -u
+cd /Users/hans/mlx-workspace || exit 1
+BL=".bench""-logs"
+NP="/Users/hans/mlx-workspace/$BL/bin/nav-pilot-main-2bcca023"
+BUSY="night""-run|night""64|bench""-|np""-serve|dispatch""-probe|dlv-waiter|fu1-launcher|fu2-launcher|followups-[12]-launcher|mlx_lm[._]server"
+GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-03 06:00' +%s)
+say() { echo "[$(date '+%F %T')] balctl: $*"; }
+say "pid $$: waits for tier64-6.done, then a free GPU for 5 min"
+caffeinate -is -w $$ &
+blocker() {
+  [ -e "$BL/tier64-6.done" ] || { echo "no tier64-6.done yet"; return; }
+  [ -d "$BL/.queue.lock" ] && { echo "queue lock held"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+}
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+say "GPU free for 5 min, starting"
+trap 'git switch -q main 2>/dev/null; say "done marker"; touch "$BL/balctl.done"' EXIT
+[ -x "$NP" ] || { say "no binary $NP; not running"; exit 1; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-only failed; not running"; exit 1; }
+sums() {
+  ( cd "$HOME" && { find .config/opencode .copilot/agents .copilot/hooks -type f 2>/dev/null
+      ls .nav-pilot/config.toml .nav-pilot/local-models.json 2>/dev/null; } \
+    | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done )
+}
+D="$BL/balanced-controls-$(date +%Y%m%d-%H%M)"
+mkdir -p "$D"
+sums > "$D/protected-before.sha256"
+cp "$BL/dispatch-reprobe7-20260928-1926/capabilities-bench-only.json" "$D/" || { say "no capabilities block to copy"; exit 1; }
+export BENCH_NAV_PILOT="$NP" BENCH_CAPABILITIES_OVERRIDE="$PWD/$D/capabilities-bench-only.json" BENCH_WAIT=1 \
+  PROBE_CAP=5.75 PROBE_HYBRID_N=5 PROBE_CONTROL_N=5 PROBE_TIMEOUT=1200
+L=isoppfolgingstilfelle-large S=isoppfolgingstilfelle-small
+TASK="dispatch""-probe"
+say "optiq-64g, balanced with same-day controls: r4, r6, small, r5 (5 + 5 each, cap \$5.75)"
+PROBE_PROFILE=qwen3.6-35b-a3b-optiq-64g PROBE_LEVELS="balanced" PROBE_CELLS="$L:4 $L:6 $S:3 $L:5" \
+  mise run "$TASK" -- "$D"; say "exit $?"
+sums > "$D/protected-after.sha256"
+if diff -q "$D/protected-before.sha256" "$D/protected-after.sha256" >/dev/null; then say "protected config unchanged"
+else say "protected config CHANGED: $(diff "$D/protected-before.sha256" "$D/protected-after.sha256" | grep -c '^[<>]') lines"; fi
+say "ledger: $(cat "$D/ledger.json" 2>/dev/null)"
+say "done; files in $D"
