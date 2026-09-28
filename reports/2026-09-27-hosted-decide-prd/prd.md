@@ -327,19 +327,19 @@ If gate 2 passes and gate 3 fails, option C is the fallback. If both fail, or ga
 measured (today's state), hosted decide stays no-go: stay local-only and ship the Linux
 bring-your-own-endpoint route (Linux report §4.5) instead.
 
-### 9.1 Nav DevOps use cases, as input to gates 1 and 4
+### 9.1 NAV DevOps use cases, as input to gate 4
 
 Gate 4 needs real volumes and an owner. These are the concrete uses that would bring both, so
 the next step is to ask the teams behind them, not to build anything. None has a named owner or a
-measured volume today [fact: none in any report]. Every volume below is [assumption] and says how
-to measure it without GCP. Owners are candidates to ask, not commitments.
+measured volume today [fact: none in any report]. Volumes, latency needs and failure modes are
+all [assumption]; each volume comes with a way to count it that needs no GCP. Owners are candidates to ask, not commitments.
 
 | Use | What decide answers | Likely volume [assumption] | Candidate owner | Latency need | Failure mode |
 |---|---|---|---|---|---|
-| CI job selection per change | Which test suites or jobs a diff needs (the jev-ci-pathfinder pattern named in navikt/mlx-workspace#130; no report here describes it) | 3,000 PR events a day × 1–3 questions (research §1 (b)); measure with PR and push counts from the GitHub API | Each repo's team; the platform team if it ships as a shared Action | Seconds; the job waits on it | A wrong "skip" lets a broken change through. Fail open: run everything |
+| CI job selection per change | Which test suites or jobs a diff needs (the jev-ci-pathfinder pattern named in navikt/mlx-workspace#130; no report here describes it) | 3,000 PR events a day × 5 questions (research §1 (b), S2b); job selection alone is 1–3 of those; measure with PR and push counts from the GitHub API | Each repo's team; the platform team if it ships as a shared Action | Seconds; the job waits on it | A wrong "skip" lets a broken change through. Fail open: run everything |
 | NAIS log and alert triage | Whether an alert should page, and which team owns an alert when ownership is unclear | Alerts a day across NAIS, unknown; count from Alertmanager and the alert channels | NAIS (platform) with the on-call teams | Under a minute; a page cannot wait | A missed page is worse than a false one. Advisory only; never suppress an alert |
 | Canary and rollout gates | Hold, promote or roll back, between deterministic stages, from metrics and logs as evidence | Deploys a day × stages, unknown; count from the deploy history | NAIS (deploy) and the application team | Seconds to minutes | A wrong "promote" ships a bad release. The deterministic checks keep the final say |
-| Agent-trace evaluation | Typed checks on nav-pilot session telemetry, for example "did the worker's change get verified?" (Datadog-style LLM evaluation) | Sessions a day from nav-pilot telemetry (#961); batch, not interactive | This project, with the Copilot/nav-pilot team | Minutes to hours; batch | A wrong verdict skews a dashboard, nothing more |
+| Agent-trace evaluation | Typed checks on Copilot session logs on the developer's machine (`~/.copilot/session-state`), for example "did the worker's change get verified?" (the Datadog-style evaluation named in #130; no report here describes it). The #961 telemetry carries enums and buckets only, no traces [fact, §5.1] | Sessions a day, unknown; count session directories on a few laptops. Batch, not interactive | This project, with the Copilot/nav-pilot team | Minutes to hours; batch | A wrong verdict skews a dashboard, nothing more |
 
 What each would mean for hosting:
 
@@ -348,9 +348,10 @@ What each would mean for hosting:
   and it depends on Q5 (a CI route and sign-in).
 - **Alert triage** and **canary gates** run inside the platform, next to the evidence. Both are
   closer to the runtime-triage non-goal (§5.2) than to developer hooks: they need their own ROS,
-  and a wrong answer has an operational cost. Only as advisory input, never as the deciding step.
-- **Agent-trace evaluation** is batch work on data nav-pilot already collects. It needs no low
-  latency, so it could run on a developer's Mac or a scheduled local job before it needs hosting.
+  and a wrong answer has an operational cost [inference, §5.2]. Only as advisory input, never as the deciding step.
+- **Agent-trace evaluation** is batch work on session logs that only exist on the developer's
+  machine. It needs no low latency, so it runs on that Mac or as a scheduled local job; it is the
+  use that least needs hosting.
 
 Questions for gate 4, to put to the teams: how many of these decisions a day, who would own the
 service that answers them, and what latency and failure behaviour they would accept. A use with
