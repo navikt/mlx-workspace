@@ -303,7 +303,9 @@ def rows(probe=False):
         # A hybrid arm that never dispatched measures nothing about delegation.
         ctrl = control_for(f, d)
         if delegated and ctrl.exists():
-            cv = [s for s in json.loads(ctrl.read_text()).get("samples", []) if s.get("valid")]
+            cd = json.loads(ctrl.read_text())
+            # A control run under an overlay never prices a verdict row; a probe row may use either.
+            cv = [s for s in cd.get("samples", []) if s.get("valid") and (probe or not overlay(cd, s))]
             hc = st.median([s.get("cloud_cost_usd") or 0 for s in delegated])
             cc = st.median([s.get("cloud_cost_usd") or 0 for s in cv]) if cv else 0
             judged = [o for o in map(_outcome, cv) if o is not None]
