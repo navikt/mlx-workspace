@@ -79,6 +79,7 @@ This phase takes the shape of optiq's `edit-multi-mechanical` delegate entry: 35
 
 - **Dispatch:** Sonnet 5 dispatched 1 of 29 samples on advisory text alone, so this phase needs an enforcing `local_dispatch` level. Its binary and level come from dispatch re-probe 7. If re-probe 7 recommends no enforcing level, phase C stays skipped.
 - **What counts:** these samples count toward `bench-capabilities` because they run without `BENCH_CAPABILITIES_OVERRIDE`. The worker's own all-`cloud` block is in the policy the orchestrator sees.
+  - **Superseded (#147):** with nothing trusted, the gate never arms (steps 2 and 4). The requeue runs under a bench-only trust overlay, and its samples are tallied apart and never shipped: [night-64-6c-requeue.md](night-64-6c-requeue.md).
 - **Cost:** about $7 at probe 6's per-sample costs, with a hard cap of $12 on one ledger.
 - **Trusted needs** ≥ 5 dispatched samples over 2 tasks and a lower bound of ≥ 0.90 × p_cloud. It also needs a cost ratio below 1 on one cell, which probe 6 never saw (1.03–1.56×). So the likely outcome is not-yet or cloud, with measured counts instead of "no data".
 

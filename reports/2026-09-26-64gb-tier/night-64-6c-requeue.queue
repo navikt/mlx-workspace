@@ -1,0 +1,30 @@
+# 64 GB tier, night 64-6, phase C requeue (#147): the steps lost on 29 Sep, under a bench-only trust overlay.
+# Wired: 48 GB. Cloud: one new ledger, hard cap $8 (FRONTIER_COST_CAP=8); ~$5.70 expected.
+# Run by requeue-646c-launcher (not armed): BENCH_NAV_PILOT=nav-pilot-main-2bcca023,
+#   local_dispatch = "aggressive", BENCH_CAPABILITIES_OVERRIDE=capabilities-bench-only-64-6c.json,
+#   NIGHT_HYBRID_TAG=np-2bcca023-sonnet5-aggressive (the original tag), night-run-3 --part hybrid.
+#
+# Shape of optiq's delegate entry (edit-multi-mechanical 35/35 over 2 tasks, cost ratio < 1 on a
+# codebase): per class two tasks, two controls and four hybrid samples per cell. The floor is
+# >= 5 dispatched runs over >= 2 tasks, so each class needs >= 5 of its 8 hybrid samples dispatched.
+# edit-single has one hybrid task (E1), so it can reach not-yet at best; it is here for its
+# dispatch rate and pass rate. Ordered by what the cap should buy first.
+# Cost from probe 6 (Sonnet 5): cf5 ~$0.30-0.40 a sample, r4 ~$0.13-0.19, E1 ~$0.06; ~$7 expected.
+#
+# part  kind   target                      arm     samples rung timeout expected profile
+#
+# Requeue (#147). Steps 3 and 5 of the original queue finished and are reused (same tag), so they
+# are not here. Every step runs under capabilities-bench-only-64-6c.json: the hybrid samples go to
+# bench-capabilities' delegate_probe tally (not shipped), and the controls leave p_cloud alone.
+# Steps 2 and 4 resume their files; the one invalid sample in each stays invalid.
+# orig step: 1, 2, 4, 6, 7, 8, 9, 10, 11, 12
+hybrid hybrid isoppfolgingstilfelle-large control 2       4    30      5        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-large hybrid  4       4    60      10       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-large hybrid  4       5    60      12       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-tests hybrid  4       1    100     25       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-tests control 2       2    30      5        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-tests hybrid  4       2    100     25       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       control 2       2    20      3        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       hybrid  4       2    40      6        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid frontend-familie-tilbake    control 2       2    20      3        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid frontend-familie-tilbake    hybrid  4       2    40      6        qwen3.6-35b-a3b-8bit-64g
