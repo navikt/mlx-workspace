@@ -233,6 +233,11 @@ def overlay_check():
             ctrl["preflight"][0] = {**snap, "bench_capabilities_override": {"classes": {}}}
             (B.BENCH / "hybrid-t-4-control.json").write_text(json.dumps(ctrl))
             assert not any(r["mode"] == "cloud" for r in B.rows().values())
+            # ...nor a verdict row's control or cost ratio.
+            write(None)
+            row = next(r for r in B.rows().values() if r["mode"] == "delegate")
+            assert row["control"] == [0, 0] and row["cost_ratios"] == {}, row
+            assert next(iter(B.rows(probe=True).values()), None) is None
             try:
                 probe_tally([{"mode": "delegate"}], [])
                 raise AssertionError("a verdict row entered the probe tally")
