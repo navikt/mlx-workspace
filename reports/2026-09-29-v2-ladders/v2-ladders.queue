@@ -1,0 +1,37 @@
+# v2 base ladders (plan.md; mlx #144, UNMEASURED "v2 base ladders for every local model"):
+# the validation night (night-v2-validate.md) showed optiq's create-file r1-r3 at 12/12 under
+# harness v2 against 3/12 under v1, so v1 understated local models on the classes that build
+# (create-file, the edit classes). This queue re-runs those three classes' full rung ranges
+# under v2 for optiq (the default) and the 64 GB 8-bit, at runs = 5 (the MIN_RUNS floor,
+# USE_PER_RUNG = 2 tasks a rung: bench/_frontier.py), so every rung's k/n can clear a trusted,
+# not-yet or cloud verdict from this one pass instead of needing to pool across nights.
+#
+# Qwen3.8 left out: no bench/frontier-qwen3.8-27b-optiq-4bit-*.json exists at any harness_sha,
+# so it has no v1 base ladder for these classes to correct. It was tuned and passed cheap-ops
+# (pending-tasks.md #2) but never had a frontier run; giving it one is a new-coverage task, not
+# this correction, so it stays out of this queue.
+#
+# The first line runs bench-frontier's validation step, matching night-run-3's own default
+# queue; it SKIPs in about a second on a checkout that still has
+# bench/frontier/validated-17d0cf33d776.json (untracked, generated 2026-09-25, valid for any
+# harness_sha since it checks the reference solutions, not the harness), and rebuilds it
+# otherwise so the queue works from a clean checkout too.
+#
+# Run: mise run night-run-3 -- --part local --queue reports/2026-09-29-v2-ladders/v2-ladders.queue
+# Wired: 48 GB (iogpu.wired_limit_mb 49152). Class order: create-file first for both models (the
+# class the validation night showed broken under v1), then edit-single, then
+# edit-multi-mechanical, per UNMEASURED's "create-file first".
+# The 8-bit lines cost 2x optiq's expected/timeout minutes: bench-frontier's MODEL_FACTOR has no
+# entry for qwen3.6-35b-a3b-8bit-64g, so plan_minutes falls back to its default 2.0 (_frontier.py
+# has EST_MIN; MODEL_FACTOR and plan_minutes are in bench-frontier itself). This is a generic
+# ceiling, not a measurement: 8-bit edit-single/edit-multi medians ran faster than optiq's own
+# EST_MIN in earlier nights, so the real run should finish well inside these numbers.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  validate -                     -       -    -     60          40           qwen3.6-35b-a3b-optiq
+local  base     create-file           base    5    1-4   280         140          qwen3.6-35b-a3b-optiq
+local  base     create-file           base    5    1-4   560         280          qwen3.6-35b-a3b-8bit-64g
+local  base     edit-single           base    5    1-5   190         95           qwen3.6-35b-a3b-optiq
+local  base     edit-single           base    5    1-5   380         190          qwen3.6-35b-a3b-8bit-64g
+local  base     edit-multi-mechanical base    5    1-6   276         138          qwen3.6-35b-a3b-optiq
+local  base     edit-multi-mechanical base    5    1-6   552         276          qwen3.6-35b-a3b-8bit-64g
