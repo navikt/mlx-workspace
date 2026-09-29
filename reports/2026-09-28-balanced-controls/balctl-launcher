@@ -4,7 +4,7 @@
 # only had other-day controls. Sonnet 5, nav-pilot 2bcca023, optiq-64g worker, re-probe 7's
 # bench-only block. Per cell 5 controls then 5 balanced; cells r4, r6, small, then r5 (the cap
 # cuts the tail). One ledger, hard cap $6 (PROBE_CAP 5.75: the cap stops after the crossing step).
-# Runs after after-64-6 (after-64-6.done), which runs after night 64-6, then a free GPU for 5 min (no lock, no GPU job,
+# Runs after night 64-6 (tier64-6.done), then a free GPU for 5 min (no lock, no GPU job,
 # nothing on :8080, AC, 48 GB wired). Touches balctl.done on exit.
 # No command line here carries "bench-", "night", "np-serve" or "dispatch-probe".
 # Start: nohup bash ~/tmp/balctl-launcher >> <logs dir>/balctl.log 2>&1 &   Gives up 2026-10-03 06:00.
@@ -15,10 +15,10 @@ NP="/Users/hans/mlx-workspace/$BL/bin/nav-pilot-main-2bcca023"
 BUSY="night""-run|night""64|bench""-|np""-serve|dispatch""-probe|dlv-waiter|fu1-launcher|fu2-launcher|followups-[12]-launcher|mlx_lm[._]server"
 GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-03 06:00' +%s)
 say() { echo "[$(date '+%F %T')] balctl: $*"; }
-say "pid $$: waits for after-64-6.done, then a free GPU for 5 min"
+say "pid $$: waits for tier64-6.done, then a free GPU for 5 min"
 caffeinate -is -w $$ &
 blocker() {
-  [ -e "$BL/after-64-6.done" ] || { echo "no after-64-6.done yet"; return; }
+  [ -e "$BL/tier64-6.done" ] || { echo "no tier64-6.done yet"; return; }
   [ -d "$BL/.queue.lock" ] && { echo "queue lock held"; return; }
   local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
   [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }

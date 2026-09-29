@@ -2,17 +2,18 @@
 # Kev 4B and Laya on the decide sets (plan.md, pending-tasks §8.6, #95). Waits until all of these
 # hold for 5 min straight:
 #   1. the date is 2026-09-29 or later;
-#   2. the 64 GB series is over: .bench-logs/tier64-6.done exists (owner decision 2026-09-29:
-#      Kev/Laya run right after 64-6, before after-64-6, balctl and v2-ladders);
+#   2. the GPU queue is done with the 64 GB series: .bench-logs/after-64-6.done exists, or no
+#      after-64-6 / tier64-6 launcher has run for 30 min and tier64-6.done or $V2_DONE (default
+#      .bench-logs/v2-validate.done) exists (after-64-6 was never armed);
 #   3. on AC power, and the default route is Wi-Fi or Ethernet, not an iPhone (USB, Bluetooth or
 #      a 172.20.10.x hotspot gateway);
 #   4. no queue lock, and no benchmark, night, server, probe or Linux smoke process;
-#   5. a dry-run resolve (`uv pip compile`, no install) of laya-mlx==0.2.0 and of Kev's git commit
-#      each succeeds. The owner waived the 7-day uv cooldown for these two packages only
-#      (2026-09-29): $WAIVE exempts laya-mlx and kev; ~/.config/uv/uv.toml stays as it is, so
-#      their dependencies keep the cooldown. Checked at most every 30 min, once 1-4 hold.
+#   5. the uv cooldown is over for both installs: a dry-run resolve (`uv pip compile`, no install)
+#      of laya-mlx==0.2.0 and of Kev's git commit each succeeds under ~/.config/uv/uv.toml, and 7
+#      days have passed since Kev's commit (2026-09-22T19:21:20Z), because uv checks no dates on a
+#      git source. Checked at most every 30 min, once 1-4 hold.
 # Then it takes the queue lock, pulls main, installs each model into its own venv under
-# .bench-logs/ (env -u VIRTUAL_ENV, the §8.6 lesson; same $WAIVE), checks the main
+# .bench-logs/ (env -u VIRTUAL_ENV, the §8.6 lesson; the cooldown stays in force), checks the main
 # .venv is untouched, and runs kev-laya.queue: per model a 5-case-per-set dry run, then the full
 # pass. It writes bench/decide-{limits,sets,why}-<model>-<stamp>.json and the three
 # bench/decide-*-s1-<stamp>.md summaries, then touches .bench-logs/kev-laya.done.
@@ -27,13 +28,14 @@ cd "$MAIN" || exit 1
 L=".b""ench-logs"
 exec >> "$MAIN/$L/kev-laya.log" 2>&1
 R=reports/2026-09-29-kev-laya
+V2_DONE=${V2_DONE:-$L/v2-validate.done}
 KEV_REQ="kev[mlx] @ git+https://github.com/jaredpalmer/kev@08ab0b87d27cb5577a3b371ad7ed4e4686b0502b"
 LAYA_REQ="laya-mlx==0.2.0"
 START=$(date -j -f '%Y-%m-%d %H:%M:%S' '2026-09-29 00:00:00' +%s)
-WAIVE=(--exclude-newer-package laya-mlx=false --exclude-newer-package kev=false)
+KEV_OPEN=$(TZ=UTC date -j -f '%Y-%m-%d %H:%M:%S' '2026-09-29 19:21:20' +%s)
 GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-08 06:00' +%s)
-PAT=$(mktemp); CD=$(mktemp)
-trap 'rm -f "$PAT" "$CD"' EXIT
+PAT=$(mktemp); GONE=$(mktemp); CD=$(mktemp)
+trap 'rm -f "$PAT" "$GONE" "$CD"' EXIT
 printf '%s\n' "tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|lsmoke/linux3" > "$PAT"
 log() { echo "$(date '+%F %T') kev-laya: $*"; }
 running() { ps ax -o pid=,command= | grep -E -f "$PAT" | grep -vE "^ *($$|$PPID) " | grep -v -E "^ *[0-9]+ (grep|sleep)"; }
@@ -46,7 +48,13 @@ sys.exit(0 if ok else 1)
 PY
 }
 series_over() {
-  [ -e "$L/tier64-6.done" ] || { echo "no tier64-6.done yet"; return 1; }
+  [ -e "$L/after-64-6.done" ] && return 0
+  if pgrep -f "(after-?64-?[6]|tier64-?[6])-launcher" >/dev/null; then : > "$GONE"; echo "after-64-6 or tier64-6 launcher still running"; return 1; fi
+  [ -e "$L/tier64-6.done" ] || [ -e "$V2_DONE" ] || { echo "no after-64-6.done, tier64-6.done or $V2_DONE yet"; return 1; }
+  [ -s "$GONE" ] || date +%s > "$GONE"
+  local m=$(( ($(date +%s) - $(<"$GONE")) / 60 ))
+  [ "$m" -ge 30 ] && return 0
+  echo "no after-64-6.done, and no after-64-6 launcher for $m min"; return 1
 }
 tethered() {
   local rt ifc gw port
@@ -57,16 +65,17 @@ tethered() {
   port=$(/usr/sbin/networksetup -listallhardwareports | awk -v d="$ifc" '/^Hardware Port:/{p=substr($0,16)} $0=="Device: "d{print p}')
   case "$port" in Wi-Fi|Ethernet*|*LAN*|Thunderbolt*) ;; *) echo "default route via $ifc (${port:-unknown port})";; esac
 }
-resolve() {  # $1 requirement: a dry-run resolve with the owner's waiver, nothing installed
+resolve() {  # $1 requirement: a dry-run resolve under the uv cooldown, nothing installed
   local out
-  out=$(echo "$1" | env -u VIRTUAL_ENV uv pip compile - --python-version 3.12 --no-header -q "${WAIVE[@]}" 2>&1) && return 0
+  out=$(echo "$1" | env -u VIRTUAL_ENV uv pip compile - --python-version 3.12 --no-header -q 2>&1) && return 0
   echo "uv resolve of '$1' fails: $(echo "$out" | grep -E 'hint:|Caused by|error' | tail -1 | cut -c1-200)"; return 1
 }
 cooldown() {  # "" when open; a fresh verdict at most every 30 min, the last one kept in $CD
   [ "$(head -1 "$CD")" = open ] && return
   [ -s "$CD" ] && [ $(( $(date +%s) - $(stat -f %m "$CD") )) -lt 1800 ] && { tail -1 "$CD"; return; }
   local why=""
-  why=$(resolve "$LAYA_REQ")
+  [ "$(date +%s)" -ge "$KEV_OPEN" ] || why="Kev's commit is inside the 7-day cooldown until $(date -r "$KEV_OPEN" '+%F %H:%M')"
+  [ -z "$why" ] && why=$(resolve "$LAYA_REQ")
   [ -z "$why" ] && why=$(resolve "$KEV_REQ")
   if [ -z "$why" ]; then echo open > "$CD"; else echo "$why" > "$CD"; echo "$why"; fi
 }
@@ -96,7 +105,7 @@ wait_free() {
   done
 }
 
-log "pid $$: installs Kev and Laya and runs $R/kev-laya.queue once tier64-6.done exists, the GPU is free, both resolve under the waiver, on AC and not tethered"
+log "pid $$: installs Kev and Laya and runs $R/kev-laya.queue once it is 2026-09-29, 64-6 and after-64-6 are over, the uv cooldown resolves, on AC and not tethered"
 caffeinate -is -w $$ &
 while :; do
   wait_free || exit 1
@@ -105,7 +114,7 @@ while :; do
   cd "$MAIN" || exit 1; log "queue lock taken just now; waiting again"
 done
 echo $$ > .queue.lock/pid
-trap 'rm -f "$PAT" "$CD"; rm -rf .queue.lock' EXIT
+trap 'rm -f "$PAT" "$GONE" "$CD"; rm -rf .queue.lock' EXIT
 child=
 trap '[ -n "$child" ] && kill "$child" 2>/dev/null; exit 130' INT TERM
 
@@ -119,7 +128,7 @@ log "checkout at $(git -C "$MAIN" rev-parse --short HEAD); run dir $L/$RUN, stam
 
 install() {  # $1 venv name, $2 requirement
   [ -x "venv-$1/bin/python" ] || env -u VIRTUAL_ENV uv venv -q --python 3.12 "venv-$1" || return 1
-  env -u VIRTUAL_ENV uv pip install --python "venv-$1/bin/python" "${WAIVE[@]}" "$2" > "$RUN/install-$1.log" 2>&1 || return 1
+  env -u VIRTUAL_ENV uv pip install --python "venv-$1/bin/python" "$2" > "$RUN/install-$1.log" 2>&1 || return 1
   grep -q "environment at: venv-$1" "$RUN/install-$1.log" || { log "  uv did not name venv-$1 as the target"; return 1; }
   env -u VIRTUAL_ENV uv pip freeze --python "venv-$1/bin/python" > "$RUN/freeze-$1.txt"
 }

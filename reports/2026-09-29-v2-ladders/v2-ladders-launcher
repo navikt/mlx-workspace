@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Runs v2-ladders.queue (plan.md) last in the queue (owner decision 2026-09-29: 64-6, Kev/Laya,
-# after-64-6, balctl, v2-ladders), once balctl is done or has given up, and the GPU has been
-# free for 5 min:
-#   1. .bench-logs/balctl.done exists, or for 30 min no balctl launcher has run and no earlier
-#      waiter either (kl, after646), so a balctl give-up cannot let this jump ahead of them;
+# Runs v2-ladders.queue (plan.md) once Kev/Laya are done or have given up, and the GPU has
+# been free for 5 min:
+#   1. .bench-logs/kev-laya.done exists, or no kev-laya-launcher process has run for 30 min
+#      (it gave up waiting on the uv cooldown, or was never started);
 #   2. no queue lock, no benchmark, night, server, probe or Linux smoke process, on AC, and
 #      iogpu.wired_limit_mb = 49152 (48 GB), for 5 min straight.
 # Then it pulls main, runs the queue with a copy of night-run-3, and touches v2-ladders.done.
@@ -25,15 +24,15 @@ printf '%s\n' "tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-c
 log() { echo "$(date '+%F %T') v2-ladders: $*"; }
 running() { ps ax -o pid=,command= | grep -E -f "$PAT" | grep -vE "^ *($$|$PPID) " | grep -v -E "^ *[0-9]+ (grep|sleep)"; }
 
-GONE=$(mktemp); trap 'rm -f "$PAT" "$GONE"' EXIT   # when the last upstream launcher was first seen gone
+GONE=$(mktemp); trap 'rm -f "$PAT" "$GONE"' EXIT   # when the kev-laya launcher was first seen gone
 series_over() {
-  [ -e "$L/balctl.done" ] && return 0
-  # Report names kev-laya-launcher / after-64-6-launcher; the ~/tmp copies are kl-, after646-launcher.
-  if pgrep -f "bash .*(balctl|after646|after-64-6|kev-laya|kl)-launcher" >/dev/null; then : > "$GONE"; echo "balctl or an earlier launcher still running"; return 1; fi
+  [ -e "$L/kev-laya.done" ] && return 0
+  # Its report name is kev-laya-launcher; the copy actually running is ~/tmp/kl-launcher.
+  if pgrep -f "bash .*(kev-laya|kl)-launcher" >/dev/null; then : > "$GONE"; echo "kev-laya launcher still running"; return 1; fi
   [ -s "$GONE" ] || date +%s > "$GONE"
   local m=$(( ($(date +%s) - $(<"$GONE")) / 60 ))
   [ "$m" -ge 30 ] && return 0
-  echo "no balctl.done, upstream launchers gone for $m min"; return 1
+  echo "no kev-laya.done, its launcher gone for $m min"; return 1
 }
 why_not() {
   series_over || return
@@ -45,7 +44,7 @@ why_not() {
   [ "$w" = 49152 ] || echo "wired $w MB, want 49152"
 }
 
-log "pid $$: waits for balctl.done (or balctl and earlier launchers giving up), then a free GPU for 5 min, then runs $R/v2-ladders.queue"
+log "pid $$: waits for kev-laya.done (or its launcher giving up), then a free GPU for 5 min, then runs $R/v2-ladders.queue"
 caffeinate -is -w $$ &
 free_since="" last="" n=0
 while :; do
