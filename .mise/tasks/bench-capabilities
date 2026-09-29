@@ -28,6 +28,13 @@ Output: manifest/capabilities.json, keyed by the Hugging Face model id so
 `model-manifest` can attach a block to each offered entry by its MLX_MODEL.
 The file carries the evidence (k/n, LB, runs, source files); the block that
 reaches nav-pilot carries enums and counts only (design §3a, trust boundary).
+
+Bench-only trust (#147): a worker whose shipped block trusts nothing never arms
+the dispatch gate, so its delegation can only be measured under a trust overlay
+(BENCH_CAPABILITIES_OVERRIDE). Those samples go to `delegate_probe`, a separate
+tally marked shipped: false. They never reach `models` or `manifest_blocks`, and
+model-manifest reads neither this key nor the frontier's feed. A person promotes a
+class by hand when its tally clears the delegate bar.
 """
 import argparse
 import json
@@ -60,20 +67,25 @@ def verdict(cls, mode, k, n, tasks, runs, p_cloud, ratios):
     return "trusted", bar
 
 
-def score(rows):
-    """rows: list of B.as_json rows. Returns {model: {class: {mode: evidence}}}."""
+def p_clouds(rows):
+    """{class: pooled cloud pass rate}, 1.0 for a class with no cloud arm."""
     cloud = {}
     for r in rows:
         if r["mode"] == "cloud":
             k, n = cloud.get(r["class"], (0, 0))
             cloud[r["class"]] = (k + r["k"], n + r["n"])
+    return {c: (cloud[c][0] / cloud[c][1] if cloud.get(c, (0, 0))[1] else 1.0) for c in CLASSES}
+
+
+def score(rows):
+    """rows: list of B.as_json rows. Returns {model: {class: {mode: evidence}}}."""
+    pc = p_clouds(rows)
     models = sorted({r["model"] for r in rows if r["mode"] != "cloud"})
     out = {}
     for m in models:
         out[m] = {}
         for cls in CLASSES:
-            ck, cn = cloud.get(cls, (0, 0))
-            p_cloud = ck / cn if cn else 1.0
+            p_cloud = pc[cls]
             out[m][cls] = {}
             for mode in ("delegate", "local"):
                 best = {"verdict": "cloud", "k": 0, "n": 0, "note": "no data"}
@@ -92,6 +104,23 @@ def score(rows):
     return out
 
 
+def probe_tally(probe_rows, rows):
+    """Overlay rows (mode delegate-probe) per model and class, each with the verdict the
+    delegate bar would give it. Not shipped: nothing here reaches a manifest block."""
+    if any(r["mode"] != "delegate-probe" for r in probe_rows):
+        raise SystemExit("✗ probe_tally got a row that is not a bench-only overlay row")
+    pc = p_clouds(rows)
+    out = {}
+    for r in sorted(probe_rows, key=lambda r: (r["model"], r["class"], r["condition"])):
+        v, bar = verdict(r["class"], "delegate", r["k"], r["n"], len(r["tasks"]), r["runs"],
+                         pc[r["class"]], list(r["cost_ratios"].values()))
+        out.setdefault(r["model"], {}).setdefault(r["class"], []).append(
+            {**r, "shipped": False, "bar_verdict": v, "bar": bar and round(bar, 3)})
+    return {"note": "Bench-only trust overlay samples (BENCH_CAPABILITIES_OVERRIDE, #147). NOT SHIPPED: "
+                    "never in models or manifest_blocks. Promote a class by hand when bar_verdict is trusted.",
+            "models": out}
+
+
 def manifest_block(per_class):
     """What nav-pilot reads: enums and integers, nothing else."""
     return {
@@ -105,6 +134,7 @@ def manifest_block(per_class):
 
 def build():
     rows = [B.as_json(r) for r in B.rows().values()]
+    probe = [B.as_json(r) for r in B.rows(probe=True).values()]
     models = score(rows)
     none = {"verdict": "cloud", "k": 0, "n": 0}
     return {
@@ -112,13 +142,14 @@ def build():
                 "Rules: reports/2026-09-24-local-vs-cloud-routing/design.md §2.",
         "bar": BAR,
         "excluded_tasks": {t: v["reason"] for t, v in json.loads(
-            (ROOT / "bench" / "task-classes.json").read_text())["tasks"].items()
+            (B.BENCH / "task-classes.json").read_text())["tasks"].items()
             if v.get("exclude_from_bar")},
         # What model-manifest copies into each entry, by MLX_MODEL. A model with
         # no runs gets the unmeasured block: cloud everywhere, never no block.
         "manifest_blocks": {m: manifest_block(v) for m, v in models.items()},
         "unmeasured_block": manifest_block({c: {"delegate": none, "local": none} for c in CLASSES}),
         "models": models,
+        "delegate_probe": probe_tally(probe, rows),
     }
 
 
@@ -155,7 +186,60 @@ def self_check():
     assert blk["classes"]["edit-single"] == {"delegate": "cloud", "local": "not-yet", "delegate_k": 0,
                                               "delegate_n": 0, "local_k": 3, "local_n": 3}
     assert all(isinstance(x, (str, int)) for c in blk["classes"].values() for x in c.values())
+    overlay_check()
     print("✓ bench-capabilities self-check passed")
+
+
+def overlay_check():
+    """#147: samples under a bench-only trust overlay are tallied apart and change no
+    verdict, no manifest block and nothing model-manifest copies."""
+    import tempfile
+    real = B.BENCH
+    with tempfile.TemporaryDirectory() as t:
+        B.BENCH = Path(t)
+        try:
+            for f in ("task-classes.json", "tasks.json"):
+                (B.BENCH / f).write_text((real / f).read_text())
+            tid = next(k for k, v in json.loads((real / "task-classes.json").read_text())["tasks"].items()
+                       if v["class"] == "edit-multi-mechanical" and not v.get("exclude_from_bar"))
+            snap = {"cloud_model": "c", "local_model": "w"}
+            smp = lambda cost, **kw: {"valid": True, "verified": True, "preflight": 0, "cloud_cost_usd": cost,
+                                      "policy": {"sha256": "ab" * 32}, **kw}
+            ctrl = {"arm": "control", "tag": "t", "rung": 4, "task": tid, "preflight": [snap],
+                    "samples": [smp(1.0), smp(1.0)]}
+            (B.BENCH / "hybrid-t-4-control.json").write_text(json.dumps(ctrl))
+            hyb = {"arm": "hybrid", "tag": "t", "rung": 4, "task": tid, "worker_profile": "w", "preflight": [snap],
+                   "samples": [smp(0.5, local_calls=2) for _ in range(6)]}
+
+            def write(over):
+                hyb["preflight"][0] = {**snap, "bench_capabilities_override": over}
+                (B.BENCH / "hybrid-t-w-4-hybrid.json").write_text(json.dumps(hyb))
+                return build()
+
+            shipped = write(None)       # the same samples without an overlay: they count
+            assert shipped["models"]["w"]["edit-multi-mechanical"]["delegate"]["n"] == 6, shipped["models"]
+            assert shipped["delegate_probe"]["models"] == {}
+            probed = write({"classes": {"edit-multi-mechanical": {"delegate": "trusted"}}})
+            # Nothing of the overlay reaches a verdict, a block or the unmeasured block.
+            assert "w" not in probed["models"] and "w" not in probed["manifest_blocks"], probed["models"]
+            assert probed["unmeasured_block"] == shipped["unmeasured_block"]
+            assert not any(r["mode"] == "delegate-probe" for r in B.rows().values())
+            tally = probed["delegate_probe"]["models"]["w"]["edit-multi-mechanical"]
+            assert len(tally) == 1 and tally[0]["shipped"] is False and tally[0]["k"] == tally[0]["n"] == 6, tally
+            assert tally[0]["mode"] == "delegate-probe" and tally[0]["dispatch"]["k"] == 6, tally
+            # Over one task the floor is not met, so even a clean tally reads not-yet.
+            assert tally[0]["bar_verdict"] == "not-yet", tally
+            # The overlay's control samples do not feed p_cloud either.
+            ctrl["preflight"][0] = {**snap, "bench_capabilities_override": {"classes": {}}}
+            (B.BENCH / "hybrid-t-4-control.json").write_text(json.dumps(ctrl))
+            assert not any(r["mode"] == "cloud" for r in B.rows().values())
+            try:
+                probe_tally([{"mode": "delegate"}], [])
+                raise AssertionError("a verdict row entered the probe tally")
+            except SystemExit:
+                pass
+        finally:
+            B.BENCH = real
 
 
 def main():
@@ -186,6 +270,11 @@ def main():
             d, lo = v["delegate"], v["local"]
             print(f"  {m.split('/')[-1][:28]:28} {cls:22} "
                   f"{d['verdict']:>8} {d['k']:>3}/{d['n']:<3}   {lo['verdict']:>8} {lo['k']:>3}/{lo['n']:<3}")
+    for m, per in doc["delegate_probe"]["models"].items():
+        for cls, rs in per.items():
+            for r in rs:
+                print(f"  NOT SHIPPED overlay {m.split('/')[-1][:28]:28} {cls:22} "
+                      f"{r['k']:>3}/{r['n']:<3} {r['bar_verdict']} ({r['condition']})")
     return 0
 
 

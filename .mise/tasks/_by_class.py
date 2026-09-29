@@ -12,6 +12,11 @@ bar). The rules are reports/2026-09-24-local-vs-cloud-routing/design.md §2 and
   mode "delegate" delegated hybrid samples that verified end to end. A hybrid
                   sample that never reached the worker is not a delegate sample.
   mode "cloud"    the reference arms (Copilot cloud, opencode control).
+  mode "delegate-probe"
+                  delegated hybrid samples run under a bench-only trust overlay
+                  (BENCH_CAPABILITIES_OVERRIDE). rows(probe=True) returns these and
+                  nothing else; rows() never does. They are a tally for a person to
+                  promote a class by hand, never a verdict (#147).
 
   Timeouts count as failures: to the user a timeout is a failure. A sample with
   no verdict that did not time out is unjudged and left out. Discarded samples
@@ -191,14 +196,27 @@ def hybrid_condition(d, s, fname):
             f"policy={policy[:8] if policy else 'none'}")
 
 
-def rows():
-    """{(cls, model, mode, condition): row} over every result file in bench/."""
+def overlay(d, s):
+    """The bench-only trust overlay hybrid sample s of file d ran under, or None. It is
+    recorded in the preflight snapshot the sample points at (bench-hybrid)."""
+    pre = d.get("preflight") or []
+    ix = s.get("preflight")
+    return (pre[ix] if isinstance(ix, int) and 0 <= ix < len(pre) else {}).get("bench_capabilities_override")
+
+
+def rows(probe=False):
+    """{(cls, model, mode, condition): row} over every result file in bench/.
+
+    probe=False: the evidence for the verdicts. A sample run under a bench-only
+    trust overlay is a probe's assumption about the worker and is never in it.
+    probe=True: only those overlay samples, as mode "delegate-probe" rows."""
     classes = task_classes()
     retired = _retired()
     out = {}
+    dmode = "delegate-probe" if probe else "delegate"
 
     def add(cls, model, mode, cond, tid, ok, run, fname, seconds=None):
-        if cls is None or ok is None:
+        if cls is None or ok is None or (mode == "delegate-probe") != probe:
             return
         r = out.setdefault((cls, model, mode, cond), {
             "class": cls, "model": model, "mode": mode, "condition": cond,
@@ -241,11 +259,8 @@ def rows():
     for f in sorted(BENCH.glob("hybrid-*.json")):
         d = json.loads(f.read_text())
         # A bench-only capabilities override is a probe's assumption about the worker:
-        # its samples never count as evidence for a verdict.
-        pre = d.get("preflight") or []
-        valid = [s for s in d.get("samples", []) if s.get("valid")
-                 and not (pre[s["preflight"]] if isinstance(s.get("preflight"), int) and s["preflight"] < len(pre)
-                          else {}).get("bench_capabilities_override")]
+        # its samples never count as evidence for a verdict, only for the probe tally.
+        valid = [s for s in d.get("samples", []) if s.get("valid") and bool(overlay(d, s)) == probe]
         tid = d.get("task")
         if d.get("arm") == "control":
             for i, s in enumerate(valid):
@@ -265,15 +280,15 @@ def rows():
         keys, seen = set(), {}
         for s in valid:
             orch, worker, extra = hybrid_condition(d, s, f.name)
-            key = (classes.get(tid), worker, "delegate", f"opencode delegate orchestrator={orch} {extra}")
+            key = (classes.get(tid), worker, dmode, f"opencode {dmode} orchestrator={orch} {extra}")
             seen.setdefault(key, [0, 0])
             seen[key][0] += bool(s.get("local_calls"))
             seen[key][1] += 1
         for i, s in enumerate(delegated):
             orch, worker, extra = hybrid_condition(d, s, f.name)
-            cond = f"opencode delegate orchestrator={orch} {extra}"
-            keys.add((classes.get(tid), worker, "delegate", cond))
-            add(classes.get(tid), worker, "delegate", cond,
+            cond = f"opencode {dmode} orchestrator={orch} {extra}"
+            keys.add((classes.get(tid), worker, dmode, cond))
+            add(classes.get(tid), worker, dmode, cond,
                 tid, _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
         for key, (k, n) in seen.items():
             if key[0] is None:
@@ -298,6 +313,9 @@ def rows():
                     out[key]["control"][1] += len(judged)
                     if cc:
                         out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
+    # Overlay rows and verdict rows never share a result (#147).
+    if any((r["mode"] == "delegate-probe") != probe for r in out.values()):
+        raise SystemExit("✗ _by_class.rows mixed bench-only overlay rows with verdict rows")
     return out
 
 
@@ -317,7 +335,7 @@ def as_json(r):
 def hybrid_figures(r):
     """Delegate rows only: dispatch rate, the paired control's k/n, and the
     difference in pass rate (dispatched minus control) with its interval."""
-    if r["mode"] != "delegate":
+    if r["mode"] not in ("delegate", "delegate-probe"):
         return {}
     (dk, dn), (ck, cn) = r["dispatch"], r["control"]
     ci = diff_ci(r["k"], r["n"], ck, cn)
@@ -367,7 +385,9 @@ def hybrid_md(files):
         pol = sorted({(s.get("policy") or {}).get("sha256", "")[:8] for s in valid} - {""})
         heads = sorted({(s.get("workspace_head") or "?")[:8] for s in valid})
         cells = ", ".join(sorted(f"{d.get('target', 'tasks')}:{d.get('rung')}" for _, d in fl))
-        L.append(f"| `{worker}` | {cells} | {len(disp)}/{len(valid)} | {sum(hk)}/{len(hk)} | {sum(ck)}/{len(ck)} | "
+        ovl = " (bench-only overlay, not shipped)" if any(overlay(d, s) for _, d in fl for s in d.get("samples", [])
+                                                           if s.get("valid")) else ""
+        L.append(f"| `{worker}`{ovl} | {cells} | {len(disp)}/{len(valid)} | {sum(hk)}/{len(hk)} | {sum(ck)}/{len(ck)} | "
                  + (f"{ci[0]:+.2f} [{ci[1]:+.2f}, {ci[2]:+.2f}]" if ci else "–") + " | "
                  + (f"{hc:.3f} / {cc:.3f} = {hc / cc:.2f}×" if hc is not None and cc else "–")
                  + f" | {', '.join(pol) or '–'} | {', '.join(heads) or '–'} |")

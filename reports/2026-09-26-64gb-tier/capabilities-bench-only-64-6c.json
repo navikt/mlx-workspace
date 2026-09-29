@@ -1,0 +1,8 @@
+{
+  "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+  "classes": {
+    "edit-multi-mechanical": {"delegate": "trusted"},
+    "create-file": {"delegate": "trusted"},
+    "edit-single": {"delegate": "trusted"}
+  }
+}
