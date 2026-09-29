@@ -2564,6 +2564,50 @@
    ]
   },
   {
+   "class": "create-file",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "retry2",
+   "condition": "temp=0.6 ctx=65536 harness=f7507f42e5f4 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "4": {
+     "k": 3,
+     "n": 8,
+     "lb": 0.195,
+     "ub": 0.597,
+     "lb_monotone": 0.195,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r4-a",
+      "cf-r4-b"
+     ],
+     "runs": 4,
+     "median_seconds": 420,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 4
+   },
+   "fit": {
+    "d50": 0.0,
+    "d_bar": null,
+    "beyond": false,
+    "a": -0.363,
+    "b": -0.073
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-retry2-20260929-102241.json"
+   ]
+  },
+  {
    "class": "edit-multi-mechanical",
    "model": "qwen3.6-35b-a3b-optiq-64g",
    "variant": "decompose",

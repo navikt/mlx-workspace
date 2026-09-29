@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Runs after-64-6.queue (plan.md) when Kev/Laya are over and the GPU has been free for 5 min
-# (owner decision 2026-09-29: order 64-6, Kev/Laya, after-64-6, balctl, v2-ladders):
-#   1. .bench-logs/kev-laya.done exists, or no kev-laya launcher (~/tmp/kl-launcher) has run for
-#      30 min (it gave up, or was never started);
+# Runs after-64-6.queue (plan.md) when night 64-6 is over and the GPU has been free for 5 min:
+#   1. .bench-logs/tier64-6.done exists, or $V2_DONE (default .bench-logs/v2-validate.done, the
+#      marker the results agent's v2 wrapper touches; pass the same value tier64-6 got) exists and no tier64-6 launcher has
+#      run for 30 min (it gave up waiting for sudo, or was never started). Either way harness v2
+#      is on main, since the v2 validation night only starts after v2 merges;
 #   2. no queue lock, no benchmark, night, server, probe or Linux smoke process, on AC, and
 #      iogpu.wired_limit_mb = 49152 (48 GB), for 5 min straight.
 # Then it pulls main, runs the queue with a copy of night-run-3, and touches after-64-6.done.
-# Logs to .bench-logs/after-64-6.log. It never changes the wired limit. Gives up 2026-10-10 06:00,
-# after the Kev/Laya launcher's own give-up (2026-10-08 06:00).
+# Logs to .bench-logs/after-64-6.log. It never changes the wired limit. Gives up 2026-10-06 06:00.
 # Start it from ~/tmp: no command line of this script may carry "bench-", "night", "np-serve" or
 # "dispatch-probe", because other waiters pgrep for them; such strings are built from pieces.
 # Stop it: kill <pid on the first log line>.
@@ -17,22 +17,24 @@ cd "$MAIN" || exit 1
 L=".b""ench-logs"
 exec >> "$L/after-64-6.log" 2>&1
 R=reports/2026-09-28-after-64-6
+V2_DONE=${V2_DONE:-$L/v2-validate.done}
 BIN=$MAIN/$L/bin
 NR="$BIN/ni""ght-run-3-a646"
-GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-10 06:00' +%s)
+GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-06 06:00' +%s)
 PAT=$(mktemp)
 printf '%s\n' "tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|lsmoke/linux3" > "$PAT"
 log() { echo "$(date '+%F %T') after-64-6: $*"; }
 running() { ps ax -o pid=,command= | grep -E -f "$PAT" | grep -vE "^ *($$|$PPID) " | grep -v -E "^ *[0-9]+ (grep|sleep)"; }
 
-GONE=$(mktemp); trap 'rm -f "$PAT" "$GONE"' EXIT   # when the kev-laya launcher was first seen gone (why_not runs in a subshell)
+GONE=$(mktemp); trap 'rm -f "$PAT" "$GONE"' EXIT   # when the tier64-6 launcher was first seen gone (why_not runs in a subshell)
 series_over() {
-  [ -e "$L/kev-laya.done" ] && return 0
-  if pgrep -f "bash .*(kev-laya|kl)-launcher" >/dev/null; then : > "$GONE"; echo "kev-laya launcher still running"; return 1; fi
+  [ -e "$L/tier64-6.done" ] && return 0
+  [ -e "$V2_DONE" ] || { echo "no tier64-6.done or $V2_DONE yet"; return 1; }
+  if pgrep -f "bash .*tier64-[6]-launcher" >/dev/null; then : > "$GONE"; echo "tier64-6 launcher still running"; return 1; fi
   [ -s "$GONE" ] || date +%s > "$GONE"
   local m=$(( ($(date +%s) - $(<"$GONE")) / 60 ))
   [ "$m" -ge 30 ] && return 0
-  echo "no kev-laya.done, its launcher gone for $m min"; return 1
+  echo "no tier64-6.done, its launcher gone for $m min"; return 1
 }
 why_not() {
   series_over || return
@@ -44,7 +46,7 @@ why_not() {
   [ "$w" = 49152 ] || echo "wired $w MB, want 49152"
 }
 
-log "pid $$: waits for kev-laya.done (or its launcher giving up), then runs $R/after-64-6.queue at 48 GB wired"
+log "pid $$: runs $R/after-64-6.queue after 64-6, at 48 GB wired"
 caffeinate -is -w $$ &
 free_since="" last="" n=0
 while :; do
