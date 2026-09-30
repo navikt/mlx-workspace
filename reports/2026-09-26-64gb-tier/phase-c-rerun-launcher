@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# 8-bit emm follow-up (plan.md, emm8-delegate.queue).
-# NOT ARMED by the repo. Arm it: cp reports/2026-09-30-emm8-delegate/emm8-delegate-launcher ~/tmp/ && nohup bash ~/tmp/emm8-delegate-launcher >/dev/null 2>&1 &
-# Logs to .bench-logs/emm8-delegate.log. Follows BENCHMARKING.md, "Waiting launchers":
-#   - waits for phase-c-rerun.done (full phase C re-run), then for a free GPU for 5 min straight: no queue lock, no benchmark,
+# Full phase C re-run (night-64-6c.queue, all 12 steps) under a fresh tag, since large:4 ran with cplt blocking the Gradle daemon and a resume under the old tag would keep those samples.
+# NOT ARMED by the repo. Arm it: cp reports/2026-09-26-64gb-tier/phase-c-rerun-launcher ~/tmp/ && nohup bash ~/tmp/phase-c-rerun-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/phase-c-rerun.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for cf-rerun.done (create-file re-run), then for a free GPU for 5 min straight: no queue lock, no benchmark,
 #     night-run or model-server process, nothing on :8080, AC, 48 GB wired, 1-min load below 6;
-#   - one instance (emm8-delegate.pid), never twice (exits at start and after the wait if emm8-delegate.done exists);
-#     touches emm8-delegate.done only once the queue has run;
+#   - one instance (phase-c-rerun.pid), never twice (exits at start and after the wait if phase-c-rerun.done exists);
+#     touches phase-c-rerun.done only once the queue has run;
 #   - runs .mise/tasks/night-run-3 in place. It writes the bench-only cplt config (CPLT_CONFIG,
 #     sandbox.allow_localhost_any) and fails a step whose gradle preflight cannot reach the daemon.
 # No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
@@ -14,10 +14,10 @@ set -u
 MAIN=/Users/hans/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
-N=emm8-delegate
+N=phase-c-rerun
 exec >> "$L/$N.log" 2>&1
-R=reports/2026-09-30-emm8-delegate Q=emm8-delegate.queue
-AFTER="$L/phase-c-rerun.done"
+R=reports/2026-09-26-64gb-tier Q=ni""ght-64-6c.queue
+AFTER="$L/cf-rerun.done"
 DONE="$L/$N.done" PIDF="$L/$N.pid"
 BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
 GIVE_UP=$(( $(date +%s) + 259200 ))
@@ -52,14 +52,14 @@ done
 compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
 NP="$L/bin/nav-pilot-main-2bcca023"
 [ -x "$NP" ] || { say "no binary $NP; not running"; exit 1; }
-[ -f reports/2026-09-26-64gb-tier/capabilities-bench-only-64-6c.json ] || { say "no overlay on main; not running"; exit 1; }
+[ -f "$R/capabilities-bench-only-64-6c.json" ] || { say "no overlay $R/capabilities-bench-only-64-6c.json; not running"; exit 1; }
 # From here the queue runs: any exit marks it done, before anything slow.
 trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
 trap 'exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD); overlay capabilities-bench-only-64-6c.json, cap \$8"
 BENCH_NAV_PILOT="$NP" BENCH_NP_CONFIG_LINE='local_dispatch = "aggressive"' \
-  BENCH_CAPABILITIES_OVERRIDE="$MAIN/reports/2026-09-26-64gb-tier/capabilities-bench-only-64-6c.json" \
+  BENCH_CAPABILITIES_OVERRIDE="$MAIN/$R/capabilities-bench-only-64-6c.json" \
   FRONTIER_COST_CAP=8 FRONTIER_CLOUD_MODEL=claude-sonnet-5 FRONTIER_MODEL=qwen3.6-35b-a3b-8bit-64g \
-  NIGHT_HYBRID_TAG=np-2bcca023-sonnet5-aggressive-emm8 NIGHT_REPORT="$R/emm8-delegate-results.md" \
-  .mise/tasks/ni""ght-run-3 --part all --queue "$R/$Q"
+  NIGHT_HYBRID_TAG=np-2bcca023-sonnet5-aggressive-c2 NIGHT_REPORT="$R/phase-c-rerun-results.md" \
+  .mise/tasks/ni""ght-run-3 --part hybrid --queue "$R/$Q"
 say "queue exited $?"

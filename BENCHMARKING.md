@@ -167,8 +167,8 @@ Unattended runs start from a launcher script (`reports/*/*-launcher`, copied to 
 waits for a free GPU and then runs a queue. The rules for a new launcher:
 
 - **Gate on the GPU, not on a sibling's marker.** Wait for no `.bench-logs/.queue.lock`, no
-  benchmark, night-run or model-server process, AC power and the right wired limit, for 5 minutes
-  straight. A queue's bench tasks take the lock one step at a time, so the lock alone is free for
+  benchmark, night-run or model-server process, AC power, the right wired limit and a 1-minute load
+  average below 6, for 5 minutes straight. Phase C's steps 1 and 6-12 were lost to a load above 8. A queue's bench tasks take the lock one step at a time, so the lock alone is free for
   a moment between steps; the night-run process check covers those moments. A `.done` marker from
   another launcher may order the runs, but must not be the only gate.
 - **One instance per launcher.** Keep a pidfile in `.bench-logs/` and exit when it names a live
@@ -189,8 +189,7 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   it, and steps 4-7 failed in a second each at 08:35. A launcher's preflight checks the files its
   queue needs, so a missing file stops the launcher with one log line instead of failing every step.
 
-`reports/2026-09-26-64gb-tier/requeue-646c-launcher` and `reports/2026-09-29-v2-ladders/v2-edit-launcher`
-follow these rules.
+`reports/2026-09-30-emm8-delegate/emm8-delegate-launcher` follows these rules.
 
 ## Queued runs
 

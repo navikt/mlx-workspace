@@ -60,7 +60,7 @@ The transcripts show where the break falls:
 
 It also skewed the requeue's large:4 hybrid samples. Each one tried gradle 2–3 times and failed, while the controls did not call it, so that 1.8 ratio is biased against delegation.
 
-The launcher waits until `cplt config get sandbox.allow_localhost_any` prints `true`. The owner decides: `cplt config set sandbox.allow_localhost_any true`. A bench-only flag in `_sandbox.py` would also work, but it changes harness_sha.
+Fixed bench-only in #165: night-run-3 writes a copy of the user's cplt config with `sandbox.allow_localhost_any` and exports `CPLT_CONFIG`, and fails a step whose `./gradlew -q help` inside `cplt exec` cannot reach the daemon. The global config stays untouched. `_sandbox.py` changed, so harness_sha changed.
 
 ## Arming it
 
@@ -72,11 +72,9 @@ cp reports/2026-09-30-emm8-delegate/emm8-delegate-launcher ~/tmp/ && nohup bash 
 
 The launcher logs to `.bench-logs/emm8-delegate.log`. Before it starts, it waits for all of these:
 
-- `requeue-64-6c.done`;
-- PRs #161 and #162 merged;
-- cplt allowing localhost;
+- `phase-c-rerun.done` (the full phase C re-run, after the create-file re-run);
 - 5 min of free GPU: no lock, no GPU job, nothing on :8080, AC, 48 GB wired and a 1-minute load below 6. The requeue lost 8 of its 10 steps to load 9–14.
 
-Then it pulls main, checks the overlay and `bench/frontier/validated-*.json`, and runs night-run-3 `--part all`. When the queue has run, it touches `.bench-logs/emm8-delegate.done`.
+Then it checks the overlay and `bench/frontier/validated-*.json`, and runs night-run-3 `--part all`. When the queue has run, it touches `.bench-logs/emm8-delegate.done`.
 
 Afterwards, `mise run bench-capabilities` prints the emm row for the 8-bit under "NOT SHIPPED overlay", and `emm8-delegate-results.md` holds the r4 cell.
