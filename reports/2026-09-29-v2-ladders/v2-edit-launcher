@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# v2 base ladders, steps 4-7 (v2-edit.queue): the edit classes on optiq and the 64 GB 8-bit, after
+# the 30 September night lost them to a deleted validation file. NOT ARMED by the repo. Arm it:
+#   cp reports/2026-09-29-v2-ladders/v2-edit-launcher ~/tmp/ && cd ~/tmp && nohup bash ~/tmp/v2-edit-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/v2-edit.log. Order: kev-english, this, then the phase C requeue (whose ~/tmp copy
+# waits for v2-edit.done). Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for .bench-logs/kev-english.done, and then for a free GPU for 5 min straight (no queue lock,
+#     no benchmark, night-run or model-server process, nothing on :8080, AC, 48 GB wired, load below 6);
+#   - one instance (v2-edit.pid), never twice (exits at start and after the wait if v2-edit.done exists);
+#   - touches v2-edit.done only once the queue has run.
+# Before the run it checks that bench/frontier/validated-*.json exists, and seeds a fresh night dir
+# with the 04:31 night's two create-file rows and restores their result files from that night's local
+# results commit, so night-run-3 writes one v2-ladders.md with create-file and the edit classes.
+# No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L=".b""ench-logs"
+exec >> "$L/v2-edit.log" 2>&1
+R=reports/2026-09-29-v2-ladders
+AFTER="$L/kev-english.done"
+DONE="$L/v2-edit.done" PIDF="$L/v2-edit.pid"
+OLD="$L/ni""ght3-20260930-043109"          # the 04:31 night: steps 2-3 OK, 4-7 FAIL
+OLDC=7cb76a8e9d4428608ee771394238fe67a881bd10   # its local results commit (create-file result files)
+CF="bench/frontier-qwen3.6-35b-a3b-optiq-base-20260930-043133.json bench/frontier-qwen3.6-35b-a3b-8bit-64g-base-20260930-064411.json"
+NR="$L/bin/ni""ght-run-3-v2edit"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+say() { echo "[$(date '+%F %T')] v2-edit: $*"; }
+blocker() {
+  [ -e "$AFTER" ] || { echo "no $AFTER yet (Kev English)"; return; }
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($2 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/v2-edit.queue after $AFTER and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-only failed; not running"; exit 1; }
+[ -f "$R/v2-edit.queue" ] || { say "main has no $R/v2-edit.queue; not running"; exit 1; }
+compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
+[ -s "$OLD/steps.jsonl" ] || { say "no $OLD/steps.jsonl; not running"; exit 1; }
+# Merge the create-file results into this run's report: their result files (only on the local results
+# commit, unless main has them by now) and their two step rows, renamed 0431-2 and 0431-3.
+# .run-start first, so night-run-3 commits the restored files on this run's results branch too.
+ND="$L/ni""ght3-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$ND" && : > "$ND/.run-start"
+for f in $CF; do
+  [ -e "$f" ] || { git show "$OLDC:$f" > "$f.tmp" && mv -f "$f.tmp" "$f"; } || { rm -f "$f.tmp"; say "cannot restore $f from $OLDC; not running"; exit 1; }
+done
+python3 -c 'import json, sys
+for l in sys.stdin:
+    s = json.loads(l)
+    if s.get("classes") == "create-file" and s.get("status") == "OK":
+        s["n"] = "0431-" + s["n"]; print(json.dumps(s))' < "$OLD/steps.jsonl" > "$ND/steps.jsonl"
+[ "$(grep -c . "$ND/steps.jsonl")" = 2 ] || { say "expected 2 create-file rows in $OLD/steps.jsonl; not running"; exit 1; }
+cp .mise/tasks/ni""ght-run-3 "$NR.tmp" && mv -f "$NR.tmp" "$NR" || { say "could not stage a copy of night-run-3; not running"; exit 1; }
+# From here the queue runs: any exit marks it done.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap 'exit 130' INT TERM
+say "checkout at $(git rev-parse --short HEAD); night dir $ND; report $R/v2-ladders.md"
+NIGHT_DIR="$ND" NIGHT_REPORT="$R/v2-ladders.md" "$NR" --part local --queue "$R/v2-edit.queue"
+say "queue exited $?"

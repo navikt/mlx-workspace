@@ -181,8 +181,16 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
 - **Touch the `.done` marker as soon as the queue exits**, before any slow step of the launcher's
   own, and only when the queue actually ran. A check that fails before the run leaves no marker,
   so a fixed relaunch can still start.
+- **The main checkout is live while a queue runs.** Launchers and queues run from
+  `/Users/hans/mlx-workspace` itself and read untracked files there. While any queue or launcher is
+  running or waiting, no agent deletes, cleans, stashes or switches branches in that checkout; do
+  other work in a `git worktree`. On 30 September an agent deleted the untracked
+  `bench/frontier/validated-17d0cf33d776.json` at about 07:00 while the v2 ladders night ran from
+  it, and steps 4-7 failed in a second each at 08:35. A launcher's preflight checks the files its
+  queue needs, so a missing file stops the launcher with one log line instead of failing every step.
 
-`reports/2026-09-26-64gb-tier/requeue-646c-launcher` follows these rules.
+`reports/2026-09-26-64gb-tier/requeue-646c-launcher` and `reports/2026-09-29-v2-ladders/v2-edit-launcher`
+follow these rules.
 
 ## Queued runs
 
