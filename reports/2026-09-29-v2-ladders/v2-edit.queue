@@ -1,0 +1,14 @@
+# v2 base ladders, steps 4-7 of v2-ladders.queue: the edit classes on optiq and the 64 GB 8-bit.
+# The 30 September night (.bench-logs/night3-20260930-043109) ran steps 1-3 (create-file on both
+# models, OK), then failed steps 4-7 in about a second each at 08:35: an agent had deleted the
+# untracked bench/frontier/validated-17d0cf33d776.json from the main checkout at about 07:00 while
+# the queue ran from it. #152 has since committed that file.
+# The lines below are v2-ladders.queue's steps 4-7, unchanged; see that file for the runs, rungs,
+# timeouts and the 8-bit's 2x minutes. v2-edit-launcher runs this queue and writes one
+# v2-ladders.md that holds the 04:31 create-file rows and these runs.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  base     edit-single           base    5    1-5   190         95           qwen3.6-35b-a3b-optiq
+local  base     edit-single           base    5    1-5   380         190          qwen3.6-35b-a3b-8bit-64g
+local  base     edit-multi-mechanical base    5    1-6   276         138          qwen3.6-35b-a3b-optiq
+local  base     edit-multi-mechanical base    5    1-6   552         276          qwen3.6-35b-a3b-8bit-64g
