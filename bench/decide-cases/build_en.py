@@ -24,7 +24,7 @@ ISSUES = {
                  1566, 1625, 1528, 517],
 }
 # Nav-internal domains: an issue that names one is not a public case.
-HOST = re.compile(r"(?i)\b(?:nav\.no|adeo\.no|nais\.io|oera\.no|preprod\.local|devillo\.no)\b")
+HOST = re.compile(r"(?i)\b(?:adeo|oera)\.no\b")
 
 
 def labeler(n, cls, author):

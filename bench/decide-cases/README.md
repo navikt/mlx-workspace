@@ -221,7 +221,7 @@ are a question ("Is it possible …", "How to …", `#1844`, `#1272`, `#1219`, `
 `question` issues that are a feature request (`#1380`, `#581`, `#1177`, `#330`, `#749`, `#634`, `#477`) or a
 bug report (`#521`, `#1151`, `#841`, `#1627`, `#629`, `#369`), and one maintainer announcement (`#327`).
 Issues whose text has an email address, an fnr-like number or a token pattern were skipped too (the
-builder refuses them), as would be any naming a Nav-internal domain. The first 40 left per class are in.
+builder refuses them), as would be any naming an internal Nav domain. The first 40 left per class are in.
 
 Evidence is short to medium (median 1,291 characters for `bug`, 1,012 for `feature`, 1,388 for
 `question`); nothing is truncated. Known limits: one project, all about an auth proxy, and support

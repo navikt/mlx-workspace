@@ -87,17 +87,20 @@ while read -r kind cap sets _; do
     wait "$child"; rc=$?; child=""; rm -rf .queue.lock
   else
     # The wrapper takes and frees the queue lock itself and starts and stops the server.
-    ( cd "$MAIN" && DECIDE_PY=_decide_sets.py "$WRAP" --sets "$sets" --models optiq ) \
+    ( cd "$MAIN" && BENCH_WAIT=1 DECIDE_PY=_decide_sets.py "$WRAP" --sets "$sets" --models optiq ) \
       >> "$RUN/optiq.log" 2>&1 & child=$!
     wait "$child"; rc=$?; child=""
   fi
   kill "$smp" 2>/dev/null; smp=""
   say "$kind: exit $rc; end $(date +%s)"
+  [ "$kind" = optiq ] && optiq_rc=$rc
 done < <(grep -vE '^\s*(#|$)' "$Q")
 
 touch "$DONE"; say "queue ran; done marker"
-OPT=$(ls -t "$MAIN"/bench/decide-sets-optiq-*.json 2>/dev/null | head -1)
+# Only an optiq file from this run: never the 25 September one, which has no issue-type-en.
+OPT=$(find "$MAIN/bench" -name "decide-sets-optiq-*.json" -newer "$RUN/mem.tsv" 2>/dev/null | head -1)
 "$MAIN/.venv/bin/python" "$S1" summary "$STAMP" kev-4b-8bit >> "$RUN/summary.log" 2>&1
-"$MAIN/.venv/bin/python" "$DS" summary "$MAIN/bench/decide-sets-en-$STAMP.md" "$OPT" \
+[ "${optiq_rc:-1}" = 0 ] && [ -n "$OPT" ] || say "optiq step failed (rc ${optiq_rc:-none}); no decide-sets-en summary"
+[ "${optiq_rc:-1}" = 0 ] && [ -n "$OPT" ] && "$MAIN/.venv/bin/python" "$DS" summary "$MAIN/bench/decide-sets-en-$STAMP.md" "$OPT" \
   "$MAIN/bench/decide-sets-kev-4b-8bit-$STAMP.json" >> "$RUN/summary.log" 2>&1
 say "summaries: bench/decide-{limits,sets,why,loop}-s1-$STAMP.md, bench/decide-sets-en-$STAMP.md ($(basename "$OPT")); memory $L/$RUN/mem.tsv; report $R/report.md (to write)"
