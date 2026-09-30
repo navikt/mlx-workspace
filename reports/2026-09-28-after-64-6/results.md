@@ -10,6 +10,13 @@ and the hook has 500 ms for three calls.
 (Fisher p = 0.56). Neither run meets the plan's bar for "B better". The nav-pilot change for
 presence_penalty is not worth building on this evidence.
 
+**Correction, 30 Sep.** Both #122 runs (29 Sep 18:00 to 30 Sep 04:25) ran while the sandbox blocked the
+Gradle daemon (see the v2 ladders report). Gradle builds inside the agent's sandbox failed in both arms
+alike. So the comparison between the arms is fair, but the absolute pass rates are depressed, and a
+difference that needs working builds could be hidden. The verdict stands as "no effect seen" at lower
+confidence. Qwen3.8 is not a shipped profile, so it is not re-run. The action check makes no Gradle calls
+and is not affected.
+
 Plan: [plan.md](plan.md). Script: [analyse.py](analyse.py) (`python3 reports/2026-09-28-after-64-6/analyse.py`).
 
 ## The queue ran twice
