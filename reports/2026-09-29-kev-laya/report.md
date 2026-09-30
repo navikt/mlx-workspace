@@ -142,8 +142,9 @@ nav-pilot and mlx-lm, so their figures include the CLI and server round trip.
 | length 30k, p50 | 2475 | 11563 | 2628 | 23 | 27 |
 | Load | – | – | 16.5 s | 0.3 s | 0.6 s |
 
-Kev's first load, in the dry run, took 22,758 s (6.3 h) before the first call; the second load took
-16.5 s. The cause was not investigated (the weights were the cached snapshot, with HF offline).
+The dry-run log shows Kev's first load at 22,758 s (6.3 h). That is not load time: the whole queue
+was paused with SIGSTOP from late morning until about 18:00 on 29 September and resumed with SIGCONT.
+The full pass loaded in 16.5 s.
 
 ## 5. Injection
 
