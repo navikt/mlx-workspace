@@ -49,12 +49,17 @@ k/n per rung, [two-sided 95 % Wilson], and the verdict. The sources are the six 
 There were 3 timeouts in 300 samples (one each: optiq and 8-bit create-file r4, optiq emm r5) and no
 loops. Pooling with the 29 Sep validation files changes no verdict.
 
-**Open anomaly.** The 29 Sep validation had optiq create-file r1–r3 at 12/12, with the same harness,
-task set and code. This ladder got 5/30 on the same rungs. Both numbers cannot stand until the difference is explained.
+**Correction, 30 Sep: the create-file rows are invalid.** Since 29 Sep 15:11 the user's cplt config
+no longer allowed any localhost port, and the harness granted only the model server's port. So the
+agent's `./gradlew` inside the sandbox could not reach the Gradle daemon. 28 of 40 optiq and 29 of 40 8-bit
+create-file samples hit "Could not connect to the Gradle daemon", and the model wrote its tests
+without running them. On 29 Sep 07:44 (the 12/12 validation) all 43 Gradle calls ran. Harness, tasks,
+sampling, context, wired limit, JDK, Gradle, prompt and caps were otherwise identical. The 12/12 is the
+valid number. The edit-single and emm ladders made no Gradle calls inside the sandbox and are not affected.
 
 ## Verdict
-- **create-file:** trusted on neither model. The gap is model quality: its own tests fail to compile
-  (backtick names with `:`, unresolved references, conflicting overloads) or fail when run.
+- **create-file:** no verdict. The rows above are invalid (see the correction). They are re-run with
+  a harness-scoped sandbox fix and a Gradle preflight, and the stop rule for create-file is decided again from that run.
 - **edit-single:** trusted on neither model. The gap is model quality: it misses call sites more often as
   d grows, and sometimes makes no change.
 - **emm:** trusted on the 8-bit at r1–r3, and on optiq at r1 only. optiq's r1 is weak, because the
@@ -62,8 +67,8 @@ task set and code. This ladder got 5/30 on the same rungs. Both numbers cannot s
   r4 is 10/10 and still not-yet only because n=10.
 
 **Decision** (owner, 30 Sep):
-1. Stop the ladder work for create-file and edit-single on both profiles, and for emm on optiq.
-2. Explain the create-file anomaly (12/12 against 5/30) before trusting either number.
+1. Stop the ladder work for edit-single on both profiles, and for emm on optiq.
+2. Re-run create-file on both profiles with the sandbox fixed. The anomaly was the sandbox, not the model.
 3. Go on only with emm on the 8-bit: a delegate cost-ratio measurement under the bench-only trust
    overlay (#147), plus 5 more r4 runs.
 
