@@ -181,7 +181,8 @@ def gradle_preflight(probe: Path, repo_root: Path) -> bool:
     out = r.stdout + r.stderr
     print(out[-2000:], end="")
     ok = r.returncode == 0 and "Could not connect to the Gradle daemon" not in out
-    print(f"{'\u2713' if ok else '\u2717'} gradle preflight in cplt (CPLT_CONFIG={os.environ.get('CPLT_CONFIG', '-')}): exit {r.returncode}")
+    mark = "\u2713" if ok else "\u2717"
+    print(f"{mark} gradle preflight in cplt (CPLT_CONFIG={os.environ.get('CPLT_CONFIG', '-')}): exit {r.returncode}")
     return ok
 
 
