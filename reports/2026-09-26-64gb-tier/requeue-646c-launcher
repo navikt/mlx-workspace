@@ -4,7 +4,8 @@
 #     nohup bash ~/tmp/requeue-646c-launcher >> .bench-logs/requeue-64-6c.log 2>&1 &
 # Waits for a free GPU for 5 min (no lock, no GPU job, nothing on :8080), AC, 48 GB wired and a
 # 1-min load below 6 (steps 1 and 6-12 were lost to load > 8). Then runs night-64-6c-requeue.queue under
-# the bench-only trust overlay, one ledger capped at $8. Touches requeue-64-6c.done on exit.
+# the bench-only trust overlay, one ledger capped at $8. Touches requeue-64-6c.done when the queue exits.
+# Exits at once if that marker exists or another instance waits (requeue-64-6c.pid).
 # No command line of this script carries "bench-", "night", "np-serve" or "dispatch-probe". Gives up after 48 h.
 set -u
 cd /Users/hans/mlx-workspace || exit 1
@@ -24,6 +25,14 @@ blocker() {
   [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
   awk '{exit !($2 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
 }
+# One instance only, and never a second run of a queue that already finished: on 29 Sep a stale
+# after-64-6 waiter survived a relaunch and reran that whole queue (4 h 47 min of GPU) after its
+# twin had touched the done marker. See BENCHMARKING.md, "Waiting launchers".
+DONE="$BL/requeue-64-6c.done" PIDF="$BL/requeue-64-6c.pid"
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
 say "pid $$: waits for a free GPU for 5 min"
 caffeinate -is -w $$ &
 stable=0 last=""
@@ -34,7 +43,8 @@ while :; do
   else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
   last=$b; sleep 60
 done
-trap 'git switch -q main 2>/dev/null; touch "$BL/requeue-64-6c.done"; say "done marker"' EXIT
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+trap 'rm -f "$PIDF"' EXIT   # a failed check below leaves no done marker, so a fixed relaunch can run
 [ -x "$NP" ] || { say "no binary $NP; not running"; exit 1; }
 git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-only failed; not running"; exit 1; }
 [ -f "$R/capabilities-bench-only-64-6c.json" ] || { say "no overlay on main; not running"; exit 1; }
@@ -42,6 +52,8 @@ git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-
 for c in isoppfolgingstilfelle-large-np-2bcca023-sonnet5-aggressive-5 isoppfolgingstilfelle-tests-np-2bcca023-sonnet5-aggressive-1; do
   [ -f "bench/hybrid-$c-control.json" ] || { say "no bench/hybrid-$c-control.json on main (merge #148 first); not running"; exit 1; }
 done
+# Mark done when the GPU part ends (success or not), before anything slow, so no waiter idles on it.
+trap 'git switch -q main 2>/dev/null; touch "$DONE"; rm -f "$PIDF"; say "done marker"' EXIT
 cp .mise/tasks/ni""ght-run-3 "$NR.tmp" && mv -f "$NR.tmp" "$NR"
 say "checkout at $(git rev-parse --short HEAD); overlay $R/capabilities-bench-only-64-6c.json, cap \$8"
 BENCH_NAV_PILOT="$NP" BENCH_NP_CONFIG_LINE='local_dispatch = "aggressive"' \

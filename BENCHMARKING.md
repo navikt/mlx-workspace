@@ -161,6 +161,29 @@ The machine is part of the measurement, and these four are done by hand around a
   run. Queue scripts use `mise run model-use <key> || exit 1`, and the runner backs up an existing
   results file to `bench/.previous/` first.
 
+## Waiting launchers
+
+Unattended runs start from a launcher script (`reports/*/*-launcher`, copied to `~/tmp`) that
+waits for a free GPU and then runs a queue. The rules for a new launcher:
+
+- **Gate on the GPU, not on a sibling's marker.** Wait for no `.bench-logs/.queue.lock`, no
+  benchmark, night-run or model-server process, AC power and the right wired limit, for 5 minutes
+  straight. A queue's bench tasks take the lock one step at a time, so the lock alone is free for
+  a moment between steps; the night-run process check covers those moments. A `.done` marker from
+  another launcher may order the runs, but must not be the only gate.
+- **One instance per launcher.** Keep a pidfile in `.bench-logs/` and exit when it names a live
+  process. Kill the old pid before relaunching an edited copy.
+- **Never run a finished queue twice.** Exit, both at start and after the wait, when the
+  launcher's own `.done` marker exists. On 29 September a stale after-64-6 waiter survived a
+  relaunch, both copies saw the GPU free at 18:09, and the stale one reran the whole queue from
+  23:38 to 04:25 after the other had already finished it. The GPU was never idle: it spent
+  4 h 47 min on a duplicate run while the next queue waited on it.
+- **Touch the `.done` marker as soon as the queue exits**, before any report writing or network
+  step, and only when the queue actually ran. A check that fails before the run leaves no marker,
+  so a fixed relaunch can still start.
+
+`reports/2026-09-26-64gb-tier/requeue-646c-launcher` follows these rules.
+
 ## Loop detection
 
 A looping model and a merely slow one produce the same wall clock, and the difference is the whole
