@@ -1,0 +1,23 @@
+# 8-bit emm follow-up (plan.md): the v2 ladders decision, item 3.
+# Worker qwen3.6-35b-a3b-8bit-64g at 48 GB wired. Orchestrator claude-sonnet-5, nav-pilot-main-2bcca023,
+# local_dispatch = "aggressive", bench-only overlay capabilities-bench-only-64-6c.json (#147/#149),
+# new tag np-2bcca023-sonnet5-aggressive-emm8, so every control is fresh and from the same day as its
+# hybrid arm. One new ledger, hard cap $8 (FRONTIER_COST_CAP=8); ~$4.80 expected.
+# Run by emm8-delegate-launcher with night-run-3 --part all.
+#
+# Hybrid cells: the four emm tasks the worker can be dispatched on (fm-r4-a has today's pair already;
+# M2 never dispatched in 38 samples and is left out). Each cell: control first, then hybrid.
+#
+# part  kind   target                      arm     samples rung timeout expected profile
+hybrid hybrid isoppfolgingstilfelle-large control 2       5    30      5        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-large hybrid  4       5    60      12       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-large control 2       6    30      5        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid isoppfolgingstilfelle-large hybrid  4       6    60      14       qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       control 2       3    20      3        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       hybrid  4       3    40      6        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       control 2       6    30      5        qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks                       hybrid  4       6    60      12       qwen3.6-35b-a3b-8bit-64g
+#
+# Five more base runs on emm r4 (2 tasks x 5 = 10 samples), the v2-edit.queue line cut to r4.
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  base     edit-multi-mechanical base    5    4     92          46           qwen3.6-35b-a3b-8bit-64g
