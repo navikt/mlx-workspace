@@ -19,7 +19,7 @@ If `bar_verdict` reads `trusted` for emm on the 8-bit, the owner gives the 8-bit
 
 If the tally is `cloud` or `not-yet`, nothing ships and emm on the 8-bit stops here too.
 
-The five r4 runs answer a separate question. r4 has 10/10 and is `not-yet` only because the floor needs n = 15. With 10 more samples, r4 reaches trusted or drops.
+The five r4 runs answer a separate question. At 10/10, r4 is `not-yet` because its one-sided 90 % Wilson bound is 0.859, below the 0.90 bar. With 10 more samples, 20/20 makes it trusted, and a single miss (19/20, bound about 0.85) leaves it `not-yet`.
 
 ## The queue
 
@@ -42,7 +42,7 @@ The run uses:
 | **Total** | | | **24 cloud + 10 local** | | **~$4.80** | **~110 min / 422 min** |
 
 - **Costs:** the large-target figures come from 29–30 Sep, Sonnet 5 (controls $0.13–0.14, dispatched hybrid samples $0.21–0.26). M1 and D2 come from the August Sonnet 4.6 files.
-- **Left out:** fm-r4-a already has a same-day pair from the requeue: 4 dispatched, ratio about 1.8. M2 dispatched 0 of 38 times, so it would add cost and no delegation.
+- **Left out:** fm-r4-a already has a same-day pair from the requeue: 4 dispatched, ratio about 1.8. It sits only on the local branch `bench/night3-results-20260930-134536` for now. Once merged, it pools with these cells (same policy sha), although gradle was broken when it ran. The rule needs only one cell below 1, so it cannot veto on its own. M2 dispatched 0 of 38 times, so it would add cost and no delegation.
 - **Cloud:** about $4.80 expected. The hard cap is $8 on a new ledger (`FRONTIER_COST_CAP=8`), which leaves room for bench-hybrid's retries (up to 2n + 2 attempts a cell).
 - **Hours:** about 2 h: 62 min of hybrid, 46 min of local and model loads. The worst case is the sum of the timeouts, 7 h, and the cap stops the cloud steps before that.
 
@@ -64,7 +64,7 @@ The launcher waits until `cplt config get sandbox.allow_localhost_any` prints `t
 
 ## Arming it
 
-The launcher is already armed from `~/tmp` (see the PR). By hand:
+To arm it by hand:
 
 ```
 cp reports/2026-09-30-emm8-delegate/emm8-delegate-launcher ~/tmp/ && nohup bash ~/tmp/emm8-delegate-launcher >/dev/null 2>&1 &
