@@ -1,0 +1,271 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-09-30T13:46:28+0200",
+      "seconds": 47.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 175051,
+        "input": 12,
+        "output": 3061,
+        "reasoning": 30,
+        "cache_write": 31530,
+        "cache_read": 140418
+      },
+      "cloud_cost_usd": 0.1378,
+      "cloud_cost_seen_usd": 0.1378,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2430
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2538
+        }
+      },
+      "local_server_pid": 39107,
+      "local_server_started": "2026-09-30T13:46:21.862342+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-09-30T13:46:11.203623+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-control-0-20260930-134628.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+          "src/test/kotlin/testhelper/TestEnvironment.kt",
+          "src/test/kotlin/testhelper/mock/MockUtils.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-09-30T13:47:17+0200",
+      "seconds": 32.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 198777,
+        "input": 14,
+        "output": 1344,
+        "reasoning": 88,
+        "cache_write": 31057,
+        "cache_read": 166274
+      },
+      "cloud_cost_usd": 0.1252,
+      "cloud_cost_seen_usd": 0.1252,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2279
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2353
+        }
+      },
+      "local_server_pid": 39107,
+      "local_server_started": "2026-09-30T13:46:21.862342+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-09-30T13:46:11.203623+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-control-1-20260930-134717.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-09-30T13:46:27+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260930-134620.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260930-134620.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 3.21,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 39107,
+        "port": "61101",
+        "started": "2026-09-30T13:46:21.862342+02:00",
+        "probe_seconds": 0.24
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 2432
+      }
+    }
+  ],
+  "rung": 4,
+  "arm": "control",
+  "task": "fm-r4-a",
+  "tag": "np-2bcca023-sonnet5-aggressive",
+  "target": "isoppfolgingstilfelle-large",
+  "worker_profile": null,
+  "kind": "edit-multi-mechanical",
+  "verify": {
+    "kind": "thread-arg",
+    "name": "configuredJacksonMapper",
+    "def_file": "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+    "sites": {
+      "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt": 1,
+      "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt": 1,
+      "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt": 1,
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt": 1,
+      "src/test/kotlin/testhelper/InMemoryValkeyStore.kt": 1,
+      "src/test/kotlin/testhelper/TestEnvironment.kt": 1,
+      "src/test/kotlin/testhelper/mock/MockUtils.kt": 1
+    },
+    "allowed_files": [
+      "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+      "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+      "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+      "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+      "src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+      "src/test/kotlin/testhelper/TestEnvironment.kt",
+      "src/test/kotlin/testhelper/mock/MockUtils.kt"
+    ],
+    "build": "compile"
+  },
+  "prompt": "Add a new first parameter `origin: String` to the function configuredJacksonMapper defined in src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt. Do not give it a default value. Update every call to configuredJacksonMapper in this repository, in main and test code, to pass the name of the file the call is in, without the .kt extension, as a string literal. For example, a call in src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt passes \"APIConsumerAccessService\". Change nothing else."
+}
