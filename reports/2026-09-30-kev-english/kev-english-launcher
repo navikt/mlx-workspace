@@ -2,7 +2,7 @@
 # Kev 4B on English, with latency and memory next to optiq (plan.md, #154). NOT ARMED by the repo. Arm it:
 #   cp reports/2026-09-30-kev-english/kev-english-launcher ~/tmp/ && nohup bash ~/tmp/kev-english-launcher >/dev/null 2>&1 &
 # Logs to .bench-logs/kev-english.log. Follows BENCHMARKING.md, "Waiting launchers":
-#   - runs after the phase C requeue: waits for .bench-logs/requeue-64-6c.done, and then for a free GPU for
+#   - runs after the v2 base ladders and before the phase C requeue: waits for .bench-logs/v2-ladders.done, and then for a free GPU for
 #     5 min straight (no queue lock, no benchmark, night-run, model-server or in-process decide process, AC);
 #   - one instance (kev-english.pid), never twice (exits at start and after the wait if kev-english.done exists);
 #   - touches kev-english.done only once the queue has run, before the summaries.
@@ -15,13 +15,13 @@ cd "$MAIN" || exit 1
 L=".b""ench-logs"
 exec >> "$MAIN/$L/kev-english.log" 2>&1
 R=reports/2026-09-30-kev-english
-AFTER="$L/requeue-64-6c.done"
+AFTER="$L/v2-ladders.done"
 DONE="$L/kev-english.done" PIDF="$L/kev-english.pid"
 BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|_decide_s1"
 GIVE_UP=$(( $(date +%s) + 259200 ))
 say() { echo "[$(date '+%F %T')] kev-english: $*"; }
 blocker() {
-  [ -e "$AFTER" ] || { echo "no $AFTER yet (phase C requeue)"; return; }
+  [ -e "$AFTER" ] || { echo "no $AFTER yet (v2 base ladders)"; return; }
   [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
   local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
   [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
