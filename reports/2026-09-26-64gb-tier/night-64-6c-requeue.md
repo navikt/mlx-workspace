@@ -45,6 +45,6 @@ The per-sample costs come from 29 September (controls $0.135 and $0.225, and the
 1. Merge #148 first: it holds the reused controls (steps 3 and 5) and the two step 2 and 4 files. The launcher refuses to start without the controls.
 2. `cp reports/2026-09-26-64gb-tier/requeue-646c-launcher ~/tmp/ && nohup bash ~/tmp/requeue-646c-launcher >> .bench-logs/requeue-64-6c.log 2>&1 &`
 
-The launcher then waits for a free GPU for 5 min: no queue lock, no GPU job and nothing on :8080. It also needs AC power, 48 GB wired and a 1-minute load below 6. It pulls main and runs night-run-3 `--part hybrid`. It writes `night-64-6c-requeue-results.md` and touches `.bench-logs/requeue-64-6c.done`.
+The launcher first waits for `.bench-logs/kev-english.done` (Kev English runs first), then for a free GPU for 5 min: no queue lock, no GPU job and nothing on :8080. It also needs AC power, 48 GB wired and a 1-minute load below 6. It pulls main and runs night-run-3 `--part hybrid`. It writes `night-64-6c-requeue-results.md` and touches `.bench-logs/requeue-64-6c.done`.
 
 Afterwards, `mise run bench-capabilities` prints the overlay rows under "NOT SHIPPED overlay". The shipped blocks come out the same as without them.
