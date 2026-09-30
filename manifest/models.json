@@ -222,19 +222,19 @@
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
-            "local": "cloud",
-            "delegate_k": 0,
-            "delegate_n": 0,
-            "local_k": 7,
-            "local_n": 8
-          },
-          "create-file": {
-            "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
             "local_k": 4,
-            "local_n": 8
+            "local_n": 4
+          },
+          "create-file": {
+            "delegate": "cloud",
+            "local": "not-yet",
+            "delegate_k": 0,
+            "delegate_n": 0,
+            "local_k": 4,
+            "local_n": 4
           },
           "debug": {
             "delegate": "cloud",
@@ -286,35 +286,35 @@
         "classes": {
           "read-qa": {
             "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 6,
+            "local_n": 6
           },
           "edit-single": {
             "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 4,
+            "local_n": 4
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
             "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 3,
+            "local_n": 4
           },
           "create-file": {
             "delegate": "cloud",
-            "local": "cloud",
+            "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 0,
-            "local_n": 0
+            "local_k": 4,
+            "local_n": 4
           },
           "debug": {
             "delegate": "cloud",

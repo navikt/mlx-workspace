@@ -12,6 +12,159 @@
     "E3": "Retired on 25 Sept: asked the model to log the parameters of getOppfolgingstilfeller, which is personIdent (a f\u00f8dselsnummer), and passed on compile. Its results stay in bench/ as recorded; E3b replaces it with a count and a check that personIdent is not logged."
   },
   "manifest_blocks": {
+    "Accio-Lab/occamy-1.0-MLX-4bit": {
+      "bar": {
+        "confidence": 0.9,
+        "x_caught": 0.9,
+        "x_silent": 0.95,
+        "min_runs": 5,
+        "min_tasks": 2
+      },
+      "classes": {
+        "read-qa": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 6,
+          "local_n": 6
+        },
+        "edit-single": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "edit-multi-mechanical": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "create-file": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 3,
+          "local_n": 4
+        },
+        "debug": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 0,
+          "local_n": 0
+        }
+      }
+    },
+    "mlx-community/Laguna-XS-2.1-8bit": {
+      "bar": {
+        "confidence": 0.9,
+        "x_caught": 0.9,
+        "x_silent": 0.95,
+        "min_runs": 5,
+        "min_tasks": 2
+      },
+      "classes": {
+        "read-qa": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 5,
+          "local_n": 6
+        },
+        "edit-single": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "edit-multi-mechanical": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "create-file": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "debug": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 0,
+          "local_n": 0
+        }
+      }
+    },
+    "mlx-community/Qwen3.6-35B-A3B-8bit": {
+      "bar": {
+        "confidence": 0.9,
+        "x_caught": 0.9,
+        "x_silent": 0.95,
+        "min_runs": 5,
+        "min_tasks": 2
+      },
+      "classes": {
+        "read-qa": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 6,
+          "local_n": 6
+        },
+        "edit-single": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "edit-multi-mechanical": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 3,
+          "local_n": 4
+        },
+        "create-file": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
+        },
+        "debug": {
+          "delegate": "cloud",
+          "local": "cloud",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 0,
+          "local_n": 0
+        }
+      }
+    },
     "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit": {
       "bar": {
         "confidence": 0.9,
@@ -141,19 +294,19 @@
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
-          "local": "cloud",
-          "delegate_k": 0,
-          "delegate_n": 0,
-          "local_k": 7,
-          "local_n": 8
-        },
-        "create-file": {
-          "delegate": "cloud",
-          "local": "cloud",
+          "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
           "local_k": 4,
-          "local_n": 8
+          "local_n": 4
+        },
+        "create-file": {
+          "delegate": "cloud",
+          "local": "not-yet",
+          "delegate_k": 0,
+          "delegate_n": 0,
+          "local_k": 4,
+          "local_n": 4
         },
         "debug": {
           "delegate": "cloud",
@@ -269,6 +422,381 @@
     }
   },
   "models": {
+    "Accio-Lab/occamy-1.0-MLX-4bit": {
+      "read-qa": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 6,
+          "n": 6,
+          "lb": 0.785,
+          "bar": 0.95,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D1",
+            "R2",
+            "R3"
+          ],
+          "condition": "cheap-ops profile=occamy-1.0-4bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-occamy-1.0-4bit-64g-20260926-134948-01.json",
+            "results-occamy-1.0-4bit-64g-20260926-141448-01.json"
+          ]
+        }
+      },
+      "edit-single": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "E1",
+            "E3b"
+          ],
+          "condition": "cheap-ops profile=occamy-1.0-4bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-occamy-1.0-4bit-64g-20260926-134948-01.json",
+            "results-occamy-1.0-4bit-64g-20260926-141448-01.json"
+          ]
+        }
+      },
+      "edit-multi-mechanical": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "M1",
+            "M2"
+          ],
+          "condition": "cheap-ops profile=occamy-1.0-4bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-occamy-1.0-4bit-64g-20260926-134948-01.json",
+            "results-occamy-1.0-4bit-64g-20260926-141448-01.json"
+          ]
+        }
+      },
+      "create-file": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 3,
+          "n": 4,
+          "lb": 0.433,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D3",
+            "G2"
+          ],
+          "condition": "cheap-ops profile=occamy-1.0-4bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-occamy-1.0-4bit-64g-20260926-134948-01.json",
+            "results-occamy-1.0-4bit-64g-20260926-141448-01.json"
+          ]
+        }
+      },
+      "debug": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        }
+      }
+    },
+    "mlx-community/Laguna-XS-2.1-8bit": {
+      "read-qa": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 5,
+          "n": 6,
+          "lb": 0.575,
+          "bar": 0.95,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D1",
+            "R2",
+            "R3"
+          ],
+          "condition": "cheap-ops profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-laguna-xs-2.1-8bit-64g-20260927-000600-01.json",
+            "results-laguna-xs-2.1-8bit-64g-20260927-005837-01.json"
+          ]
+        }
+      },
+      "edit-single": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "E1",
+            "E3b"
+          ],
+          "condition": "cheap-ops profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-laguna-xs-2.1-8bit-64g-20260927-000600-01.json",
+            "results-laguna-xs-2.1-8bit-64g-20260927-005837-01.json"
+          ]
+        }
+      },
+      "edit-multi-mechanical": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "M1",
+            "M2"
+          ],
+          "condition": "cheap-ops profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-laguna-xs-2.1-8bit-64g-20260927-000600-01.json",
+            "results-laguna-xs-2.1-8bit-64g-20260927-005837-01.json"
+          ]
+        }
+      },
+      "create-file": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D3",
+            "G2"
+          ],
+          "condition": "cheap-ops profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-laguna-xs-2.1-8bit-64g-20260927-000600-01.json",
+            "results-laguna-xs-2.1-8bit-64g-20260927-005837-01.json"
+          ]
+        }
+      },
+      "debug": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        }
+      }
+    },
+    "mlx-community/Qwen3.6-35B-A3B-8bit": {
+      "read-qa": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 6,
+          "n": 6,
+          "lb": 0.785,
+          "bar": 0.95,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D1",
+            "R2",
+            "R3"
+          ],
+          "condition": "cheap-ops profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-qwen3.6-35b-a3b-8bit-64g-20260926-235253-01.json",
+            "results-qwen3.6-35b-a3b-8bit-64g-20260927-004645-01.json"
+          ]
+        }
+      },
+      "edit-single": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "E1",
+            "E3b"
+          ],
+          "condition": "cheap-ops profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-qwen3.6-35b-a3b-8bit-64g-20260926-235253-01.json",
+            "results-qwen3.6-35b-a3b-8bit-64g-20260927-004645-01.json"
+          ]
+        }
+      },
+      "edit-multi-mechanical": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 3,
+          "n": 4,
+          "lb": 0.433,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "M1",
+            "M2"
+          ],
+          "condition": "cheap-ops profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-qwen3.6-35b-a3b-8bit-64g-20260926-235253-01.json",
+            "results-qwen3.6-35b-a3b-8bit-64g-20260927-004645-01.json"
+          ]
+        }
+      },
+      "create-file": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
+          "bar": 0.9,
+          "p_cloud": 1.0,
+          "runs": 2,
+          "tasks": [
+            "D3",
+            "G2"
+          ],
+          "condition": "cheap-ops profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=492141135fe6",
+          "cost_ratios": {},
+          "files": [
+            "results-qwen3.6-35b-a3b-8bit-64g-20260926-235253-01.json",
+            "results-qwen3.6-35b-a3b-8bit-64g-20260927-004645-01.json"
+          ]
+        }
+      },
+      "debug": {
+        "delegate": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        },
+        "local": {
+          "verdict": "cloud",
+          "k": 0,
+          "n": 0,
+          "note": "no data"
+        }
+      }
+    },
     "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit": {
       "read-qa": {
         "delegate": {
@@ -319,9 +847,10 @@
           ],
           "condition": "opencode delegate orchestrator=claude-sonnet-4.6 fragment=original",
           "cost_ratios": {
-            "hybrid-spring-ia-tjenester-metrikker-2": 1.02
+            "hybrid-spring-ia-tjenester-metrikker-2": 1.03
           },
           "files": [
+            "hybrid-2-hybrid.json",
             "hybrid-spring-ia-tjenester-metrikker-2-hybrid.json"
           ]
         },
@@ -368,7 +897,7 @@
           "cost_ratios": {
             "hybrid-3": 0.8,
             "hybrid-6": 0.39,
-            "hybrid-frontend-familie-tilbake-3": 0.53,
+            "hybrid-frontend-familie-tilbake-3": 0.52,
             "hybrid-spring-ia-tjenester-metrikker-6": 1.79
           },
           "files": [
@@ -651,17 +1180,16 @@
           "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 4,
+          "runs": 2,
           "tasks": [
-            "E1"
+            "E1",
+            "E3b"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-nopin temp=0.6 harness=492141135fe6",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-64g temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "files": [
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-01.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-02.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-03.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-04.json"
+            "results-qwen3.8-27b-8bit-64g-20260927-002153-01.json",
+            "results-qwen3.8-27b-8bit-64g-20260927-011430-01.json"
           ]
         }
       },
@@ -673,24 +1201,22 @@
           "note": "no data"
         },
         "local": {
-          "verdict": "cloud",
-          "k": 7,
-          "n": 8,
-          "lb": 0.66,
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 4,
+          "runs": 2,
           "tasks": [
             "M1",
             "M2"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-nopin temp=0.6 harness=492141135fe6",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-64g temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "files": [
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-01.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-02.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-03.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-04.json"
+            "results-qwen3.8-27b-8bit-64g-20260927-002153-01.json",
+            "results-qwen3.8-27b-8bit-64g-20260927-011430-01.json"
           ]
         }
       },
@@ -702,24 +1228,22 @@
           "note": "no data"
         },
         "local": {
-          "verdict": "cloud",
+          "verdict": "not-yet",
           "k": 4,
-          "n": 8,
-          "lb": 0.294,
+          "n": 4,
+          "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 4,
+          "runs": 2,
           "tasks": [
             "D3",
             "G2"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-nopin temp=0.6 harness=492141135fe6",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-64g temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "files": [
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-01.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-02.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-03.json",
-            "results-qwen3.8-27b-8bit-nopin-20260923-083958-04.json"
+            "results-qwen3.8-27b-8bit-64g-20260927-002153-01.json",
+            "results-qwen3.8-27b-8bit-64g-20260927-011430-01.json"
           ]
         }
       },
@@ -866,5 +1390,9 @@
         }
       }
     }
+  },
+  "delegate_probe": {
+    "note": "Bench-only trust overlay samples (BENCH_CAPABILITIES_OVERRIDE, #147). NOT SHIPPED: never in models or manifest_blocks. Promote a class by hand when bar_verdict is trusted.",
+    "models": {}
   }
 }
