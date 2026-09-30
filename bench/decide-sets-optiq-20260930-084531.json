@@ -1,0 +1,3047 @@
+{
+  "key": "optiq",
+  "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+  "sets": [
+    "issue-type-en"
+  ],
+  "nav_pilot_commit": "2bcca023aa8a946e41ff8713921b39230d6d7130",
+  "started": "2026-09-30T08:45:35+0200",
+  "cases": [
+    {
+      "id": "issue-type-en-oauth2-proxy-1508",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1052,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 226,
+      "wall_s": 0.368,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1508,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1205",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2954,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 474,
+      "wall_s": 0.612,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1205,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1946",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1787,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 435,
+      "wall_s": 0.581,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1946,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1482",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 466,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9994,
+        "feature": 0.0006,
+        "question": 0
+      },
+      "ms": 348,
+      "wall_s": 0.504,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1482,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1681",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 634,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 375,
+      "wall_s": 0.528,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1681,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1666",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 501,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9985,
+        "feature": 0.0015,
+        "question": 0
+      },
+      "ms": 368,
+      "wall_s": 0.519,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1666,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2066",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 882,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9933,
+        "feature": 0.0067,
+        "question": 0.0001
+      },
+      "ms": 379,
+      "wall_s": 0.524,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2066,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1163",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1525,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9995,
+        "feature": 0.0005,
+        "question": 0
+      },
+      "ms": 406,
+      "wall_s": 0.552,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1163,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2287",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1370,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.999,
+        "feature": 0.001,
+        "question": 0
+      },
+      "ms": 412,
+      "wall_s": 0.556,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2287,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1209",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1319,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 374,
+      "wall_s": 0.523,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1209,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1686",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1116,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9985,
+        "feature": 0.0015,
+        "question": 0
+      },
+      "ms": 388,
+      "wall_s": 0.538,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1686,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1516",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1371,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 415,
+      "wall_s": 0.572,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1516,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1178",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 803,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 385,
+      "wall_s": 0.544,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1178,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1132",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 803,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9859,
+        "feature": 0.0141,
+        "question": 0.0001
+      },
+      "ms": 377,
+      "wall_s": 0.526,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1132,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1365",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1431,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 1,
+        "feature": 0,
+        "question": 0
+      },
+      "ms": 403,
+      "wall_s": 0.547,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1365,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1442",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1730,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 466,
+      "wall_s": 0.612,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1442,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1724",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 280,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9973,
+        "feature": 0.0025,
+        "question": 0.0002
+      },
+      "ms": 348,
+      "wall_s": 0.494,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1724,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1813",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 415,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9948,
+        "feature": 0.0052,
+        "question": 0
+      },
+      "ms": 346,
+      "wall_s": 0.491,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1813,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1669",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1330,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 412,
+      "wall_s": 0.557,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1669,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2275",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1745,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9997,
+        "feature": 0.0003,
+        "question": 0
+      },
+      "ms": 434,
+      "wall_s": 0.583,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2275,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1526",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 542,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.3628,
+        "feature": 0.4658,
+        "question": 0.1714
+      },
+      "ms": 347,
+      "wall_s": 0.493,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1526,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1646",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 986,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 391,
+      "wall_s": 0.545,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1646,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1769",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3465,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9997,
+        "feature": 0.0003,
+        "question": 0
+      },
+      "ms": 506,
+      "wall_s": 0.653,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1769,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1663",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1133,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9994,
+        "feature": 0.0006,
+        "question": 0
+      },
+      "ms": 392,
+      "wall_s": 0.532,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1663,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2801",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1299,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 387,
+      "wall_s": 0.518,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2801,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1878",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 690,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9987,
+        "feature": 0.0013,
+        "question": 0
+      },
+      "ms": 358,
+      "wall_s": 0.501,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1878,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1157",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1971,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9995,
+        "feature": 0.0005,
+        "question": 0
+      },
+      "ms": 479,
+      "wall_s": 0.627,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1157,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2264",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1010,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 377,
+      "wall_s": 0.533,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2264,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1626",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2363,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 1,
+        "feature": 0,
+        "question": 0
+      },
+      "ms": 460,
+      "wall_s": 0.614,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1626,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1841",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2718,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9996,
+        "feature": 0.0004,
+        "question": 0
+      },
+      "ms": 546,
+      "wall_s": 0.686,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1841,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1544",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2377,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 504,
+      "wall_s": 0.663,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1544,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1356",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 5325,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 1,
+        "feature": 0,
+        "question": 0
+      },
+      "ms": 951,
+      "wall_s": 1.107,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1356,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1716",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 703,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 364,
+      "wall_s": 0.514,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1716,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1467",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 417,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9984,
+        "feature": 0.0015,
+        "question": 0.0001
+      },
+      "ms": 357,
+      "wall_s": 0.506,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1467,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1260",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1349,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 396,
+      "wall_s": 0.534,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1260,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1732",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1404,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 1,
+        "feature": 0,
+        "question": 0
+      },
+      "ms": 408,
+      "wall_s": 0.544,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1732,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2061",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1013,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 377,
+      "wall_s": 0.507,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2061,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1396",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1231,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 406,
+      "wall_s": 0.543,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1396,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2020",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1283,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9997,
+        "feature": 0.0003,
+        "question": 0
+      },
+      "ms": 396,
+      "wall_s": 0.536,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2020,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1745",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2388,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 463,
+      "wall_s": 0.611,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1745,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1834",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 934,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.033,
+        "feature": 0.9655,
+        "question": 0.0015
+      },
+      "ms": 403,
+      "wall_s": 0.55,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1834,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1475",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1439,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0044,
+        "feature": 0.8318,
+        "question": 0.1638
+      },
+      "ms": 391,
+      "wall_s": 0.522,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1475,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1134",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 845,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0028,
+        "feature": 0.9969,
+        "question": 0.0003
+      },
+      "ms": 378,
+      "wall_s": 0.512,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1134,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1537",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 268,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0069,
+        "feature": 0.6182,
+        "question": 0.3749
+      },
+      "ms": 356,
+      "wall_s": 0.494,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1537,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1696",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2365,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0008,
+        "feature": 0.9991,
+        "question": 0.0001
+      },
+      "ms": 440,
+      "wall_s": 0.593,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1696,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1372",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 559,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.001,
+        "feature": 0.9965,
+        "question": 0.0025
+      },
+      "ms": 383,
+      "wall_s": 0.535,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1372,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1148",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1345,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0009,
+        "feature": 0.9989,
+        "question": 0.0002
+      },
+      "ms": 396,
+      "wall_s": 0.548,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1148,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1483",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 411,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0012,
+        "feature": 0.9988,
+        "question": 0
+      },
+      "ms": 350,
+      "wall_s": 0.5,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1483,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1295",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1477,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0032,
+        "feature": 0.9963,
+        "question": 0.0005
+      },
+      "ms": 402,
+      "wall_s": 0.562,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1295,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1162",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1484,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.9996,
+        "question": 0.0001
+      },
+      "ms": 408,
+      "wall_s": 0.566,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1162,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2304",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1265,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0076,
+        "feature": 0.221,
+        "question": 0.7714
+      },
+      "ms": 402,
+      "wall_s": 0.558,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2304,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1908",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1036,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1192,
+        "feature": 0.8798,
+        "question": 0.001
+      },
+      "ms": 397,
+      "wall_s": 0.556,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1908,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1092",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 861,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0097,
+        "feature": 0.9888,
+        "question": 0.0015
+      },
+      "ms": 371,
+      "wall_s": 0.524,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1092,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1714",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2101,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0849,
+        "feature": 0.9126,
+        "question": 0.0026
+      },
+      "ms": 442,
+      "wall_s": 0.595,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1714,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1656",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1319,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9044,
+        "feature": 0.0953,
+        "question": 0.0003
+      },
+      "ms": 389,
+      "wall_s": 0.538,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1656,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1896",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 690,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1187,
+        "feature": 0.8777,
+        "question": 0.0036
+      },
+      "ms": 375,
+      "wall_s": 0.515,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1896,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1602",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 721,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0041,
+        "feature": 0.9953,
+        "question": 0.0006
+      },
+      "ms": 351,
+      "wall_s": 0.49,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1602,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1228",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1134,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.9991,
+        "question": 0.0002
+      },
+      "ms": 383,
+      "wall_s": 0.537,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1228,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1140",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1542,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.999,
+        "question": 0.0002
+      },
+      "ms": 423,
+      "wall_s": 0.574,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1140,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1678",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 584,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.4995,
+        "feature": 0.4994,
+        "question": 0.0011
+      },
+      "ms": 366,
+      "wall_s": 0.509,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1678,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1081",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 170,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.992,
+        "question": 0.0076
+      },
+      "ms": 333,
+      "wall_s": 0.478,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1081,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2383",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2414,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.06,
+        "feature": 0.939,
+        "question": 0.001
+      },
+      "ms": 427,
+      "wall_s": 0.574,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2383,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1319",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3166,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0002,
+        "feature": 0.9998,
+        "question": 0
+      },
+      "ms": 496,
+      "wall_s": 0.632,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1319,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1628",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 852,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0109,
+        "feature": 0.9863,
+        "question": 0.0028
+      },
+      "ms": 360,
+      "wall_s": 0.501,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1628,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1609",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1198,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0041,
+        "feature": 0.995,
+        "question": 0.0009
+      },
+      "ms": 384,
+      "wall_s": 0.52,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1609,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1837",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 774,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1479,
+        "feature": 0.8507,
+        "question": 0.0014
+      },
+      "ms": 361,
+      "wall_s": 0.508,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1837,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1231",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1148,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.3758,
+        "feature": 0.6195,
+        "question": 0.0047
+      },
+      "ms": 422,
+      "wall_s": 0.572,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1231,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2146",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1035,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0952,
+        "feature": 0.9035,
+        "question": 0.0014
+      },
+      "ms": 405,
+      "wall_s": 0.56,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2146,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1804",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 989,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0046,
+        "feature": 0.9937,
+        "question": 0.0017
+      },
+      "ms": 380,
+      "wall_s": 0.535,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1804,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1384",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 676,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0529,
+        "feature": 0.9379,
+        "question": 0.0092
+      },
+      "ms": 360,
+      "wall_s": 0.508,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1384,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1542",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 400,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0114,
+        "feature": 0.9045,
+        "question": 0.0841
+      },
+      "ms": 338,
+      "wall_s": 0.481,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1542,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1593",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 769,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9994,
+        "feature": 0.0006,
+        "question": 0
+      },
+      "ms": 368,
+      "wall_s": 0.519,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1593,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1287",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2374,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0373,
+        "feature": 0.9619,
+        "question": 0.0008
+      },
+      "ms": 439,
+      "wall_s": 0.583,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1287,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1871",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 602,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0109,
+        "feature": 0.9806,
+        "question": 0.0085
+      },
+      "ms": 366,
+      "wall_s": 0.52,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1871,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1659",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3108,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 487,
+      "wall_s": 0.632,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1659,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1186",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 707,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0008,
+        "feature": 0.9951,
+        "question": 0.0041
+      },
+      "ms": 357,
+      "wall_s": 0.506,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1186,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1314",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2254,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.999,
+        "question": 0.0003
+      },
+      "ms": 441,
+      "wall_s": 0.595,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1314,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1865",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 237,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.9983,
+        "question": 0.001
+      },
+      "ms": 352,
+      "wall_s": 0.504,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1865,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1281",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 926,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.4991,
+        "feature": 0.4991,
+        "question": 0.0018
+      },
+      "ms": 372,
+      "wall_s": 0.516,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1281,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1361",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1669,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0028,
+        "feature": 0.9969,
+        "question": 0.0003
+      },
+      "ms": 427,
+      "wall_s": 0.582,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1361,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1223",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 746,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0,
+        "question": 0.9999
+      },
+      "ms": 390,
+      "wall_s": 0.549,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1223,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1484",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2748,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9995,
+        "feature": 0.0004,
+        "question": 0
+      },
+      "ms": 474,
+      "wall_s": 0.626,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1484,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1735",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1122,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.2638,
+        "feature": 0.0191,
+        "question": 0.7171
+      },
+      "ms": 417,
+      "wall_s": 0.561,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1735,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1346",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1050,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.0001,
+        "question": 0.9992
+      },
+      "ms": 375,
+      "wall_s": 0.527,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1346,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1034",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2112,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 449,
+      "wall_s": 0.603,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1034,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-935",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1207,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9995,
+        "feature": 0.0004,
+        "question": 0
+      },
+      "ms": 408,
+      "wall_s": 0.562,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 935,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-390",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1519,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0023,
+        "feature": 0.3478,
+        "question": 0.6498
+      },
+      "ms": 410,
+      "wall_s": 0.566,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 390,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-809",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1066,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0004,
+        "feature": 0.0003,
+        "question": 0.9994
+      },
+      "ms": 365,
+      "wall_s": 0.516,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 809,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-815",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2078,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9983,
+        "feature": 0.0017,
+        "question": 0
+      },
+      "ms": 454,
+      "wall_s": 0.613,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 815,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1351",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 778,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9687,
+        "feature": 0.0157,
+        "question": 0.0157
+      },
+      "ms": 393,
+      "wall_s": 0.549,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1351,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1823",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1781,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9993,
+        "feature": 0.0006,
+        "question": 0
+      },
+      "ms": 428,
+      "wall_s": 0.582,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1823,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1367",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 5309,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8945,
+        "feature": 0.0113,
+        "question": 0.0943
+      },
+      "ms": 645,
+      "wall_s": 0.801,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1367,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1363",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 316,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0007,
+        "feature": 0.0002,
+        "question": 0.9991
+      },
+      "ms": 363,
+      "wall_s": 0.528,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1363,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1035",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1741,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9999,
+        "feature": 0.0001,
+        "question": 0
+      },
+      "ms": 417,
+      "wall_s": 0.558,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1035,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-857",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 456,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0001,
+        "feature": 0,
+        "question": 0.9998
+      },
+      "ms": 372,
+      "wall_s": 0.52,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 857,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1042",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 942,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6442,
+        "feature": 0.0872,
+        "question": 0.2686
+      },
+      "ms": 379,
+      "wall_s": 0.521,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1042,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1634",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3547,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 681,
+      "wall_s": 0.832,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1634,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-359",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 413,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0019,
+        "feature": 0.0017,
+        "question": 0.9964
+      },
+      "ms": 369,
+      "wall_s": 0.519,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 359,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1440",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1713,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0036,
+        "feature": 0.0002,
+        "question": 0.9962
+      },
+      "ms": 432,
+      "wall_s": 0.566,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1440,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1322",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3393,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9991,
+        "feature": 0.0008,
+        "question": 0.0001
+      },
+      "ms": 502,
+      "wall_s": 0.637,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1322,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-910",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 192,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0002,
+        "feature": 0.0001,
+        "question": 0.9997
+      },
+      "ms": 343,
+      "wall_s": 0.498,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 910,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2263",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 703,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0006,
+        "feature": 0.0001,
+        "question": 0.9994
+      },
+      "ms": 363,
+      "wall_s": 0.51,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2263,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1085",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1673,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.4926,
+        "feature": 0.0149,
+        "question": 0.4926
+      },
+      "ms": 444,
+      "wall_s": 0.591,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1085,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-726",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2041,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0006,
+        "feature": 0.0005,
+        "question": 0.999
+      },
+      "ms": 447,
+      "wall_s": 0.605,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 726,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1909",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 307,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0003,
+        "feature": 0.0001,
+        "question": 0.9996
+      },
+      "ms": 349,
+      "wall_s": 0.497,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1909,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2257",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1357,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0035,
+        "feature": 0.9806,
+        "question": 0.0158
+      },
+      "ms": 394,
+      "wall_s": 0.542,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2257,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1143",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1133,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0848,
+        "feature": 0.0037,
+        "question": 0.9115
+      },
+      "ms": 406,
+      "wall_s": 0.558,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1143,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-315",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1931,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0085,
+        "feature": 0.0066,
+        "question": 0.9848
+      },
+      "ms": 446,
+      "wall_s": 0.602,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 315,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2027",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 414,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0208,
+        "feature": 0.0934,
+        "question": 0.8858
+      },
+      "ms": 355,
+      "wall_s": 0.511,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2027,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-602",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1419,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9202,
+        "feature": 0.0755,
+        "question": 0.0043
+      },
+      "ms": 396,
+      "wall_s": 0.542,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 602,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1737",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 933,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.001,
+        "feature": 0.0006,
+        "question": 0.9983
+      },
+      "ms": 399,
+      "wall_s": 0.549,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1737,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-868",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1887,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.3287,
+        "feature": 0.0571,
+        "question": 0.6141
+      },
+      "ms": 451,
+      "wall_s": 0.599,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 868,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1257",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 704,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0028,
+        "feature": 0.0019,
+        "question": 0.9953
+      },
+      "ms": 386,
+      "wall_s": 0.546,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1257,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1188",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2228,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9515,
+        "feature": 0.0287,
+        "question": 0.0197
+      },
+      "ms": 500,
+      "wall_s": 0.649,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1188,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2326",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2034,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.1455,
+        "feature": 0.0174,
+        "question": 0.8371
+      },
+      "ms": 444,
+      "wall_s": 0.598,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2326,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-516",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 352,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0012,
+        "feature": 0.0003,
+        "question": 0.9986
+      },
+      "ms": 355,
+      "wall_s": 0.509,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 516,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1566",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3244,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9998,
+        "feature": 0.0002,
+        "question": 0
+      },
+      "ms": 518,
+      "wall_s": 0.674,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1566,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1625",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 4197,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8634,
+        "feature": 0.0335,
+        "question": 0.1031
+      },
+      "ms": 559,
+      "wall_s": 0.722,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1625,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1528",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 4262,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9758,
+        "feature": 0.0203,
+        "question": 0.004
+      },
+      "ms": 586,
+      "wall_s": 0.744,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1528,
+      "construction": null
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-517",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1065,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0002,
+        "feature": 0.0002,
+        "question": 0.9997
+      },
+      "ms": 387,
+      "wall_s": 0.537,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 517,
+      "construction": null
+    }
+  ],
+  "eval": {
+    "issue-type-en": {
+      "cases": 120,
+      "correct": 95,
+      "accuracy": 0.7917,
+      "confusion": {
+        "bug": {
+          "bug": 39,
+          "feature": 1
+        },
+        "feature": {
+          "bug": 5,
+          "feature": 34,
+          "question": 1
+        },
+        "question": {
+          "bug": 17,
+          "feature": 1,
+          "question": 22
+        }
+      },
+      "mean_p_correct": 0.9647,
+      "mean_p_wrong": 0.873,
+      "p50_ms": 380,
+      "p95_ms": 499,
+      "cases_without_evidence": 0
+    }
+  },
+  "cold": {
+    "ms": 371,
+    "wall_s": 0.595
+  },
+  "sanity": "OK",
+  "finished": "2026-09-30T08:47:31+0200",
+  "seconds": 116
+}

@@ -16,7 +16,8 @@ L=".b""ench-logs"
 exec >> "$MAIN/$L/kev-english.log" 2>&1
 R=reports/2026-09-30-kev-english
 AFTER="$L/v2-ladders.done"
-DONE="$L/kev-english.done" PIDF="$L/kev-english.pid"
+# Absolute: the steps below cd into the logs dir, and the EXIT traps touch and remove these there.
+DONE="$MAIN/$L/kev-english.done" PIDF="$MAIN/$L/kev-english.pid"
 BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|_decide_s1"
 GIVE_UP=$(( $(date +%s) + 259200 ))
 say() { echo "[$(date '+%F %T')] kev-english: $*"; }

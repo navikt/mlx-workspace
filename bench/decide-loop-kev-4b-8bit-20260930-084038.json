@@ -1,0 +1,200 @@
+{
+  "key": "kev-4b-8bit",
+  "model": "RoderickQiu/kev-4b-mlx-8bit@e1c35947",
+  "nav_pilot": "in-process kev (no nav-pilot)",
+  "nav_pilot_commit": null,
+  "backend": {
+    "temperature": 2.1435469250725863,
+    "kev_code": "08ab0b87d27cb5577a3b371ad7ed4e4686b0502b",
+    "kev_revision": "485ace87",
+    "base": "Qwen/Qwen3.5-4B-Base",
+    "dtype": "uint32",
+    "revision": "e1c35947b19b74d8cbc34d127ffd38119e722b85"
+  },
+  "load_s": 3.9,
+  "started": "2026-09-30T08:41:12+0200",
+  "cases": [
+    {
+      "id": "loopclf-rerun-tests",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 175,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.6074,
+        "legitimate": 0.3926
+      },
+      "ms": 60.5,
+      "wall_s": 0.060497333004605025,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "rerun-tests",
+      "state_tokens": 40,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-poll-ci",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 191,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.7886,
+        "legitimate": 0.2114
+      },
+      "ms": 62.2,
+      "wall_s": 0.06217779201688245,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "poll-ci",
+      "state_tokens": 53,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-recompile",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 157,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.8684,
+        "legitimate": 0.1316
+      },
+      "ms": 60.8,
+      "wall_s": 0.06081799999810755,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 7,
+      "scenario": "recompile",
+      "state_tokens": 36,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-rerun-go-test",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 173,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.571,
+        "legitimate": 0.429
+      },
+      "ms": 59.8,
+      "wall_s": 0.059809874976053834,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "rerun-go-test",
+      "state_tokens": 40,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-poll-pr-checks",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 157,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.8647,
+        "legitimate": 0.1353
+      },
+      "ms": 59.6,
+      "wall_s": 0.05957237497204915,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 7,
+      "scenario": "poll-pr-checks",
+      "state_tokens": 38,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-reread-file",
+      "set": "loop-classifier",
+      "expect": "stuck loop",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 136,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.7922,
+        "legitimate": 0.2078
+      },
+      "ms": 59.6,
+      "wall_s": 0.0595760410069488,
+      "error": null,
+      "ok": true,
+      "legitimate": false,
+      "n": 6,
+      "scenario": "reread-file",
+      "state_tokens": 35,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "loopclf-same-grep",
+      "set": "loop-classifier",
+      "expect": "stuck loop",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 129,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.8855,
+        "legitimate": 0.1145
+      },
+      "ms": 59.4,
+      "wall_s": 0.05939791694981977,
+      "error": null,
+      "ok": true,
+      "legitimate": false,
+      "n": 7,
+      "scenario": "same-grep",
+      "state_tokens": 32,
+      "truncated": false,
+      "over_train": false
+    }
+  ],
+  "eval": {},
+  "limit": null,
+  "cold": {
+    "ms": 80.5
+  },
+  "finished": "2026-09-30T08:41:12+0200",
+  "seconds": 1
+}
