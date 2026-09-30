@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Kev 4B on English, with latency and memory next to optiq (plan.md, #154). NOT ARMED by the repo. Arm it:
+#   cp reports/2026-09-30-kev-english/kev-english-launcher ~/tmp/ && nohup bash ~/tmp/kev-english-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/kev-english.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - runs after the phase C requeue: waits for .bench-logs/requeue-64-6c.done, and then for a free GPU for
+#     5 min straight (no queue lock, no benchmark, night-run, model-server or in-process decide process, AC);
+#   - one instance (kev-english.pid), never twice (exits at start and after the wait if kev-english.done exists);
+#   - touches kev-english.done only once the queue has run, before the summaries.
+# No command line of this script carries "bench-", "night", "np-serve" or "dispatch-probe": such strings are
+# built from pieces, and the steps run from inside the logs directory with relative paths. Gives up after 72 h.
+# Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L=".b""ench-logs"
+exec >> "$MAIN/$L/kev-english.log" 2>&1
+R=reports/2026-09-30-kev-english
+AFTER="$L/requeue-64-6c.done"
+DONE="$L/kev-english.done" PIDF="$L/kev-english.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve|_decide_s1"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+say() { echo "[$(date '+%F %T')] kev-english: $*"; }
+blocker() {
+  [ -e "$AFTER" ] || { echo "no $AFTER yet (phase C requeue)"; return; }
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || echo "not on AC"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/kev-english.queue after $AFTER and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-only failed; not running"; exit 1; }
+Q="$MAIN/$R/kev-english.queue" S1="$MAIN/.mise/tasks/_decide_s1.py" DS="$MAIN/.mise/tasks/_decide_sets.py"
+WRAP="$MAIN/.mise/tasks/be""nch-decide-why"
+[ -f "$Q" ] && [ -f "$MAIN/bench/decide-cases/issue-type-en.jsonl" ] && grep -q S1_SETS "$S1" \
+  || { say "main has no $R/kev-english.queue, issue-type-en.jsonl or S1_SETS in _decide_s1.py; not running"; exit 1; }
+cd "$MAIN/$L" || exit 1   # from here on, relative paths: no command line names the logs dir
+[ -x venv-kev/bin/python ] || { say "no venv-kev (kev-laya-launcher builds it); not running"; exit 1; }
+RUN="kev-english-$(date +%Y%m%d-%H%M)" STAMP=$(date +%Y%m%d-%H%M%S)
+mkdir -p "$RUN"
+say "checkout at $(git -C "$MAIN" rev-parse --short HEAD); run dir $L/$RUN, stamp $STAMP"
+
+# Memory: every 5 s, the wired pages and each model process's phys_footprint_peak (Kev's python, the
+# mlx_lm server nav-pilot starts). The idle wired baseline is the 30 s before each step.
+wired_mb() { vm_stat | awk '/page size of/{ps=$8} /wired down/{gsub("\\.","",$4); print int($4*ps/1048576)}'; }
+sample() {  # $1 step
+  while :; do
+    local w; w=$(wired_mb)
+    for p in $(pgrep -f "mlx_lm[._]server|_decide_s1\.py run"); do
+      printf '%s\t%s\t%s\t%s\t%s\n' "$1" "$(date +%s)" "$w" "$p" \
+        "$(footprint -p "$p" --noCategories -f bytes 2>/dev/null | awk '/phys_footprint_peak/{print $2}')"
+    done
+    sleep 5
+  done
+}
+printf 'step\tepoch\twired_mb\tpid\tfootprint_peak_bytes\n' > "$RUN/mem.tsv"
+child="" smp=""
+# From here the queue is running: any exit marks it done, and frees the lock only if this script holds it.
+trap 'touch "$DONE"; rm -f "$PIDF"; [ -n "$smp" ] && kill "$smp" 2>/dev/null; [ -n "$child" ] && kill "$child" 2>/dev/null
+      [ "$(cat .queue.lock/pid 2>/dev/null)" = $$ ] && rm -rf .queue.lock; say "exit; done marker"' EXIT
+trap 'exit 130' INT TERM
+
+while read -r kind cap sets _; do
+  until pmset -g batt | head -1 | grep -q "AC Power"; do say "$kind: on battery, waiting for AC"; sleep 60; done
+  base=0; for _i in 1 2 3 4 5 6; do base=$(( base + $(wired_mb) )); sleep 5; done
+  say "$kind: idle wired $(( base / 6 )) MB; start $(date +%s); sets $sets"
+  sample "$kind" >> "$RUN/mem.tsv" & smp=$!
+  if [ "$kind" = kev ]; then
+    until mkdir .queue.lock 2>/dev/null; do say "kev: queue lock held; waiting"; sleep 60; done
+    echo $$ > .queue.lock/pid
+    HF_HUB_OFFLINE=1 S1_SETS="$sets" S1_MAX_S=$((cap * 60)) venv-kev/bin/python "$S1" run kev-4b-8bit --stamp "$STAMP" \
+      >> "$RUN/kev.log" 2>&1 & child=$!
+    wait "$child"; rc=$?; child=""; rm -rf .queue.lock
+  else
+    # The wrapper takes and frees the queue lock itself and starts and stops the server.
+    ( cd "$MAIN" && DECIDE_PY=_decide_sets.py "$WRAP" --sets "$sets" --models optiq ) \
+      >> "$RUN/optiq.log" 2>&1 & child=$!
+    wait "$child"; rc=$?; child=""
+  fi
+  kill "$smp" 2>/dev/null; smp=""
+  say "$kind: exit $rc; end $(date +%s)"
+done < <(grep -vE '^\s*(#|$)' "$Q")
+
+touch "$DONE"; say "queue ran; done marker"
+OPT=$(ls -t "$MAIN"/bench/decide-sets-optiq-*.json 2>/dev/null | head -1)
+"$MAIN/.venv/bin/python" "$S1" summary "$STAMP" kev-4b-8bit >> "$RUN/summary.log" 2>&1
+"$MAIN/.venv/bin/python" "$DS" summary "$MAIN/bench/decide-sets-en-$STAMP.md" "$OPT" \
+  "$MAIN/bench/decide-sets-kev-4b-8bit-$STAMP.json" >> "$RUN/summary.log" 2>&1
+say "summaries: bench/decide-{limits,sets,why,loop}-s1-$STAMP.md, bench/decide-sets-en-$STAMP.md ($(basename "$OPT")); memory $L/$RUN/mem.tsv; report $R/report.md (to write)"

@@ -1,0 +1,8 @@
+# Kev 4B on English, with resource numbers (plan.md). Run by kev-english-launcher, top to bottom.
+# kind: kev = _decide_s1.py in .bench-logs/venv-kev, in-process, S1_SETS = the sets column;
+#       optiq = nav-pilot alpha decide through _decide_sets.py (its own queue lock), --sets = the sets column.
+# A step stops at cap-min and keeps what it measured.
+#
+# kind  cap-min  sets
+kev     60       issue-type-en,issue-type,pr-motivation,why-en,lang-en,describes,goapi,loop-near,options,position,injection,length,loop-classifier
+optiq   30       issue-type-en

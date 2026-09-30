@@ -13,6 +13,7 @@ Extra fields (`id`, `set`, `meta`) are ignored by nav-pilot.
 | `issue-type.jsonl` | 105 (35 per class) | Is this GitHub issue a bug report, a feature request, or a question? | the label a person put on the issue, below |
 | `aksel-kind.jsonl` | 65 (13 per class) | Which of five kinds is this navikt/aksel issue? | navikt/aksel's own labels, below |
 | `pr-motivation.jsonl` | 48 (24 yes, 24 no) | Does this pull request description explain why the change is needed? | hand labels plus construction, below |
+| `issue-type-en.jsonl` | 120 (40 per class) | The `issue-type` question on English issues from oauth2-proxy/oauth2-proxy | the class label a maintainer applied, below |
 | `action-check.jsonl` | 159 (53 commands × 3 questions; 24 risky, 29 harmless) | navikt/copilot#1161's action check: is the command proportional, destructive, supported by the evidence? | copied unchanged from navikt/copilot `cli/nav-pilot/internal/cli/testdata/action-check.jsonl` at 902aa5af (PR #1163); labels and `meta` are that PR's. Run by `bench-decide-action` |
 
 The first question is a poor use of `decide`: a regex answers it exactly and in microseconds. The
@@ -192,3 +193,39 @@ Spot-check list for the labels (reread against the PR; the reason is what makes 
 | copilot#944, #927 | no | what the articles now cover |
 | mlx-workspace#44 | no | the results table and what it shows, not why the PR |
 | controlled: mlx-workspace#53, copilot#824, #600, #698, #684, #694, #700, #444, #675, #510, #756, #764 | no | reason removed; compare with `meta.original_body` |
+
+## `issue-type-en`: English issues from oauth2-proxy
+
+Kev 4B is English-only, and `issue-type` has 32 English issues, too few to tell it from optiq within 5
+points ([plan](../../reports/2026-09-30-kev-english/plan.md)). navikt and nais have only about ten more
+English `question` issues. This set adds 120 English issues from one public project,
+`oauth2-proxy/oauth2-proxy`, 40 per class, so the project cannot predict the class. Same question,
+options and evidence format as `issue-type`. Built by `build_en.py` (`python3 bench/decide-cases/build_en.py`),
+which reuses `build_sets.py`'s helpers and filters.
+
+The label is the class label on the issue (`bug`; `enhancement` or `feature`; `question`), and the builder
+checks two things for each one:
+
+- the issue carries exactly one class label, and no bot opened it;
+- in the issue's events, every `labeled` event for that label comes from someone other than the author, and
+  not from a bot. So a maintainer classified the issue; the reporter's own choice of label or template does
+  not count. `meta.labeled_by_maintainer` records the check; the maintainer's login is not stored.
+
+Candidates were English (the `lang()` heuristic), 80 to 7,500 characters after HTML comments were removed,
+and taken in a fixed shuffled order (`random.Random(30)`). Every candidate was read, and skipped when its
+text fits another class better, as for `issue-type`: `bug` issues that ask for an improvement or read as a
+support request (`#1786`, `#1682`, `#2250`, `#1192`, `#1221`, `#2271`, `#1945`); `enhancement` issues that
+are a question ("Is it possible …", "How to …", `#1844`, `#1272`, `#1219`, `#1068`, `#2226`, `#1731`,
+`#1090`, `#1360`, `#1885`, `#2368`) or report a failure (`#1692`, `#1144`, `#2141`, `#1530`, `#1901`,
+`#1083`, `#1730`, `#1960`, `#1072`, `#2270`, `#1174`, `#1729`, `#1836`, `#1476`, `#1601`, `#1808`, `#2324`);
+`question` issues that are a feature request (`#1380`, `#581`, `#1177`, `#330`, `#749`, `#634`, `#477`) or a
+bug report (`#521`, `#1151`, `#841`, `#1627`, `#629`, `#369`), and one maintainer announcement (`#327`).
+Issues whose text has an email address, an fnr-like number or a token pattern were skipped too (the
+builder refuses them), as would be any naming a Nav-internal domain. The first 40 left per class are in.
+
+Evidence is short to medium (median 1,291 characters for `bug`, 1,012 for `feature`, 1,388 for
+`question`); nothing is truncated. Known limits: one project, all about an auth proxy, and support
+requests make up much of `question`, which matches how navikt uses the label (something to clarify or
+investigate).
+
+Check: `python3 .mise/tasks/_decide_sets.py --check-cases --sets issue-type-en`.
