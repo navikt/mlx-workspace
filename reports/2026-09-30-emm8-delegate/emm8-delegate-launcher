@@ -2,8 +2,8 @@
 # 8-bit emm follow-up (plan.md, emm8-delegate.queue). NOT ARMED by the repo. Arm it:
 #   cp reports/2026-09-30-emm8-delegate/emm8-delegate-launcher ~/tmp/ && nohup bash ~/tmp/emm8-delegate-launcher >/dev/null 2>&1 &
 # Logs to .bench-logs/emm8-delegate.log. Follows BENCHMARKING.md, "Waiting launchers":
-#   - waits for requeue-64-6c.done and for PRs #161 and #162 to be merged (their merge job cleans
-#     untracked copies before a pull), then for a free GPU for 5 min straight: no queue lock, no
+#   - waits for requeue-64-6c.done, for PRs #161 and #162 to be merged (their merge job cleans
+#     untracked copies before a pull) and for this queue to be on main (#163), then for a free GPU for 5 min straight: no queue lock, no
 #     benchmark, night-run or model-server process, nothing on :8080, AC, 48 GB wired, load below 6;
 #   - also waits until cplt allows localhost on any port (sandbox.allow_localhost_any). Without it the
 #     agent's ./gradlew cannot reach its Gradle daemon ("Could not connect to the Gradle daemon"),
@@ -31,6 +31,7 @@ blocker() {
   local n; for n in 161 162; do
     [ "$(gh pr view "$n" --repo navikt/mlx-workspace --json state -q .state 2>/dev/null)" = MERGED ] || { echo "PR #$n not merged"; return; }
   done
+  gh api "repos/navikt/mlx-workspace/contents/$R/emm8-delegate.queue?ref=main" --silent 2>/dev/null || { echo "$R/emm8-delegate.queue not on main yet (PR #163)"; return; }
   [ "$(cplt config get sandbox.allow_localhost_any 2>/dev/null | head -1)" = true ] || { echo "cplt blocks localhost, so gradle cannot reach its daemon (cplt config set sandbox.allow_localhost_any true)"; return; }
   [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
   local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
