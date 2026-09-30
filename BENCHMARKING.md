@@ -246,6 +246,18 @@ fetches at `alpha local init`, so a model cannot be offered to users without bei
 enforces publishers limited to `mlx-community` and `lmstudio-community`, exactly one model carrying
 `default: true`, and only keys listed in its `OFFERED` table published.
 
+## models.json is a release, not a data file
+
+Released nav-pilot fetches `manifest/models.json` from this repo's `main` branch at runtime
+(`cli/nav-pilot/internal/local/local.go:83`). There is no version pin and no staging step: the
+moment a PR touching it merges to `main`, every user's next `alpha local init` reads the new file.
+Review it like you would review a release, not a config tweak.
+
+A PR that changes `manifest/models.json` must say the user impact in its body: which verdicts or
+fields change, and whether nav-pilot reads them (for example, only `delegate == "trusted"` affects
+routing and the gate; most other fields are display-only). Get a Fable review focused on user
+impact before merge. CI enforces the PR-body requirement; it does not replace the review.
+
 ## Known limitations
 
 One run per model, so per-task variance is unmeasured and a 20-second difference on one task is not
