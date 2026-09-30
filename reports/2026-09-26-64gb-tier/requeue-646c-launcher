@@ -33,6 +33,7 @@ DONE="$BL/requeue-64-6c.done" PIDF="$BL/requeue-64-6c.pid"
 op=$(cat "$PIDF" 2>/dev/null)
 [ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
 echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no pidfile and no done marker
 say "pid $$: waits for a free GPU for 5 min"
 caffeinate -is -w $$ &
 stable=0 last=""
@@ -44,7 +45,6 @@ while :; do
   last=$b; sleep 60
 done
 [ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
-trap 'rm -f "$PIDF"' EXIT   # a failed check below leaves no done marker, so a fixed relaunch can run
 [ -x "$NP" ] || { say "no binary $NP; not running"; exit 1; }
 git switch -q main && git pull -q --ff-only origin main || { say "git pull --ff-only failed; not running"; exit 1; }
 [ -f "$R/capabilities-bench-only-64-6c.json" ] || { say "no overlay on main; not running"; exit 1; }
@@ -53,7 +53,7 @@ for c in isoppfolgingstilfelle-large-np-2bcca023-sonnet5-aggressive-5 isoppfolgi
   [ -f "bench/hybrid-$c-control.json" ] || { say "no bench/hybrid-$c-control.json on main (merge #148 first); not running"; exit 1; }
 done
 # Mark done when the GPU part ends (success or not), before anything slow, so no waiter idles on it.
-trap 'git switch -q main 2>/dev/null; touch "$DONE"; rm -f "$PIDF"; say "done marker"' EXIT
+trap 'touch "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
 cp .mise/tasks/ni""ght-run-3 "$NR.tmp" && mv -f "$NR.tmp" "$NR"
 say "checkout at $(git rev-parse --short HEAD); overlay $R/capabilities-bench-only-64-6c.json, cap \$8"
 BENCH_NAV_PILOT="$NP" BENCH_NP_CONFIG_LINE='local_dispatch = "aggressive"' \
