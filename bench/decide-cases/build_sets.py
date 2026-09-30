@@ -251,9 +251,14 @@ def pr_rows():
                    "evidence": clean_pii(ev, cid), "expect": "yes" if kind == "real-why" else "no", "meta": meta}
 
 
-for name, rows in (("issue-type", issue_rows), ("aksel-kind", aksel_rows), ("pr-motivation", pr_rows)):
-    rows = list(rows())
+def write(name, rows):
+    rows = list(rows)
     ids = [r["id"] for r in rows]
     assert len(ids) == len(set(ids)), f"duplicate ids in {name}"
     (OUT / f"{name}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
     print(OUT / f"{name}.jsonl", len(rows))
+
+
+if __name__ == "__main__":   # build_en.py imports the helpers
+    for name, rows in (("issue-type", issue_rows), ("aksel-kind", aksel_rows), ("pr-motivation", pr_rows)):
+        write(name, rows())

@@ -6,7 +6,7 @@ returns a probability per option from its own head. This adapter runs one in-pro
 (.bench-logs/venv-kev, .bench-logs/venv-laya), and writes the same per-case records as _decide_limits,
 _decide_sets and _decide_why, so their summaries compare it with optiq and Qwen3.8 unchanged.
 
-  run <model> [--limit N] [--out DIR] [--stamp S]   every case of every set, four JSON files:
+  run <model> [--limit N] [--out DIR] [--stamp S]   every case of every set (S1_SETS=a,b: only those), four JSON files:
         DIR/decide-{limits,sets,why,loop}-<model>-<S>.json (DIR defaults to bench/). --limit N takes the
         first N cases per set and exits 1 when more than 20 % of them errored (the dry run).
         Run it with the model's venv python; it only reads the HF cache (HF_HUB_OFFLINE=1).
@@ -68,7 +68,7 @@ def loop_summary(docs):
 GROUPS = {  # group -> (sets, case loader, extra fields per case, as the group's own run() adds them)
     "loop": (("loop-classifier",), DS.cases, ("legitimate", "n", "scenario")),   # same bench/decide-cases/*.jsonl reader as sets
     "limits": (DL.SETS, DL.cases, ()),
-    "sets": (DS.SETS, DS.cases, ("lang", "repo", "number", "construction")),
+    "sets": ((*DS.SETS, "issue-type-en"), DS.cases, ("lang", "repo", "number", "construction")),
     "why": (tuple(DW.FILES), DW.cases, ("lang", "construction", "sha")),
 }
 # The runs the summaries set the new models against (the manifest's two default decide models).
@@ -175,6 +175,7 @@ def run(model, limit=None, out=ROOT / "bench", stamp=None):
     repo, rev, backend = MODELS.get(model, ("fake/model", "0" * 40, "fake"))
     stamp = stamp or time.strftime("%Y%m%d-%H%M%S")
     max_s = float(os.environ.get("S1_MAX_S", "inf"))   # the launcher's cap for one model's whole pass
+    only = [s for s in os.environ.get("S1_SETS", "").split(",") if s]   # run only these sets (kev-english-launcher)
     t0 = time.time()
     snap = snapshot(model) if backend != "fake" else None
     predict, extras, info = {"kev": load_kev, "laya": load_laya, "fake": fake_backend}[backend](snap)
@@ -184,6 +185,9 @@ def run(model, limit=None, out=ROOT / "bench", stamp=None):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     errors = total = 0
     for group, (sets, loader, fields) in GROUPS.items():
+        sets = [s for s in sets if not only or s in only]
+        if not sets:
+            continue
         path = out / f"decide-{group}-{model}-{stamp}.json"
         doc = {"key": model, "model": f"{repo}@{rev[:8]}", "nav_pilot": f"in-process {backend} (no nav-pilot)",
                "nav_pilot_commit": None, "backend": {**info, "revision": rev}, "load_s": load_s,
@@ -241,7 +245,7 @@ def selftest():
     with tempfile.TemporaryDirectory() as t:
         assert run("fake", out=Path(t), stamp="T") == 0
         n = {g: len(json.loads((Path(t) / f"decide-{g}-fake-T.json").read_text())["cases"]) for g in GROUPS}
-        assert n == {"loop": 7, "limits": 974, "sets": 218, "why": 96}, n
+        assert n == {"loop": 7, "limits": 974, "sets": 338, "why": 96}, n
         doc = json.loads((Path(t) / "decide-why-fake-T.json").read_text())
         c = doc["cases"][0]
         assert c["choice"] == c["options"][0] and c["error"] is None and "sha" in c, c

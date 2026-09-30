@@ -33,6 +33,7 @@ THRESHOLDS = (0.5, 0.7, 0.8, 0.9, 0.95, 0.99)
 TITLES = {"issue-type": "Is this issue a bug, a feature request or a question?",
           "aksel-kind": "Which of five kinds is this Aksel issue?",
           "pr-motivation": "Does the PR description explain why the change is needed?",
+          "issue-type-en": "Is this English issue a bug, a feature request or a question?",
           "action-check": "navikt/copilot#1161's three questions about a risky shell command"}
 # action-check (not a default set): the answer that counts as a flag, per meta.question. The hook flags
 # a command when any of its three questions gives that answer.
@@ -123,7 +124,7 @@ def ev_cell(e):
 
 
 def summary(docs):
-    sets = [s for s in (*SETS, "action-check") if any(c["set"] == s for d in docs for c in d["cases"])]
+    sets = [s for s in (*SETS, "issue-type-en", "action-check") if any(c["set"] == s for d in docs for c in d["cases"])]
     L = ["# `nav-pilot alpha decide` on the recipe questions (pending-tasks §8.5)", "",
          "Cases and labels: [decide-cases/README.md](decide-cases/README.md). Cells are correct/n = accuracy "
          "[95% Wilson]. An errored call counts as wrong.", "",
@@ -194,7 +195,8 @@ def set_section(s, runs):
         f"{DL.pct([c['ms'] for c in cs], .5)} / {DL.pct([c['ms'] for c in cs], .95)}" for _, cs in runs) + " |")
     L.append("| `--eval` (nav-pilot's totals) | " + " | ".join(ev_cell(d["eval"].get(s, {})) for d, _ in runs) + " |")
     for d, cs in runs:
-        L += model_section(s, opts, d, cs)
+        if cs:   # a run without this set (issue-type-en is newer than the 25 September runs)
+            L += model_section(s, opts, d, cs)
     return L
 
 
