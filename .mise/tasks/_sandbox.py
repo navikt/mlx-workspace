@@ -9,8 +9,11 @@ through a harness that trusted them to stay put.
 Every client launch goes through here so the sandbox cannot be forgotten in one
 place and remembered in another.
 """
+import os
 import re
 import shutil
+import subprocess
+import sys
 import tomllib
 from pathlib import Path
 
@@ -152,7 +155,41 @@ def bench_cplt_config(dest: Path, src: Path | None = None) -> Path:
     return dest
 
 
-if __name__ == "__main__":
+def gradle_preflight(probe: Path, repo_root: Path) -> bool:
+    """Run `./gradlew -q help` in a scratch Gradle project inside `cplt exec`, under
+    whatever CPLT_CONFIG the caller exported, with the same toolchain grants as a run.
+    `--version` never contacts a daemon; `help` does. False when the client cannot
+    reach its daemon, so a night step fails fast instead of measuring a blocked build.
+    """
+    wrappers = sorted(repo_root.glob("workspaces/*/gradle/wrapper/gradle-wrapper.properties"))
+    if not wrappers:
+        print("\u2717 no workspaces/*/gradlew to copy for the gradle preflight")
+        return False
+    src = wrappers[0].parents[2]
+    shutil.copytree(src / "gradle/wrapper", probe / "gradle/wrapper", dirs_exist_ok=True)
+    shutil.copy2(src / "gradlew", probe / "gradlew")
+    (probe / "settings.gradle.kts").write_text('rootProject.name = "probe"\n')
+    # A short idle timeout, so the probe's daemon does not linger into the step.
+    (probe / "gradle.properties").write_text("org.gradle.daemon.idletimeout=60000\n")
+    argv = ["cplt", "--project-dir", str(probe), *toolchain_grants(repo_root),
+            "exec", "--", "./gradlew", "-q", "help"]
+    try:
+        r = subprocess.run(argv, cwd=probe, capture_output=True, text=True, timeout=300)
+    except subprocess.TimeoutExpired:
+        print("\u2717 gradle preflight timed out after 5 min")
+        return False
+    out = r.stdout + r.stderr
+    print(out[-2000:], end="")
+    ok = r.returncode == 0 and "Could not connect to the Gradle daemon" not in out
+    print(f"{'\u2713' if ok else '\u2717'} gradle preflight in cplt (CPLT_CONFIG={os.environ.get('CPLT_CONFIG', '-')}): exit {r.returncode}")
+    return ok
+
+
+if __name__ == "__main__" and sys.argv[1:2] == ["config"]:
+    bench_cplt_config(Path(sys.argv[2]))
+elif __name__ == "__main__" and sys.argv[1:2] == ["gradle"]:
+    sys.exit(0 if gradle_preflight(Path(sys.argv[2]), Path(__file__).resolve().parents[2]) else 1)
+elif __name__ == "__main__":
     import tempfile
     d = Path(tempfile.mkdtemp())
     for body in ("", "[sandbox]\nyes = true\n", "[sandbox]\nallow_localhost_any = false\n",

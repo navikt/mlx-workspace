@@ -253,6 +253,11 @@ record() {
 say "=== night-run-3 from step $FROM, part $PART, dir $DIR, pid $$"
 plan | tee -a "$DIR/night.log"
 if [ -z "$FAKE" ]; then
+  # Every sandboxed step (opencode-headless and every nav-pilot path) reads this copy of the
+  # user's cplt config plus sandbox.allow_localhost_any, so ./gradlew reaches its daemon on a
+  # random port. The user's ~/.config/cplt/config.toml is never touched.
+  export CPLT_CONFIG="$ROOT/$DIR/cplt-bench.toml"
+  python3 .mise/tasks/_sandbox.py config "$CPLT_CONFIG" || { say "✗ could not write $CPLT_CONFIG; nothing started"; exit 1; }
   preflight 2>&1 | tee "$DIR/preflight-$(date +%H%M%S).log"
   [ "${PIPESTATUS[0]}" -eq 0 ] || { say "✗ preflight failed; nothing started"; exit 1; }
 else
@@ -366,6 +371,11 @@ for q in "${QUEUE[@]}"; do
     continue
   fi
 
+  if [ -z "$FAKE" ] && ! python3 .mise/tasks/_sandbox.py gradle "$ROOT/$DIR/gradle-probe" >> "$log" 2>&1; then
+    say "  FAIL: ./gradlew in cplt cannot reach its daemon (gradle preflight, see $log)"
+    record "${base[@]}" start "$(date -Iseconds)" end "$(date -Iseconds)" status FAIL rc "" note "gradle preflight failed"
+    continue
+  fi
   marker="$DIR/.start-$i"; : > "$marker"
   run=(python3 .mise/tasks/bench-frontier run --classes "$classes" --variant "$variant" --runs "$runs")
   [ "$rungs" != - ] && run+=(--rungs "$rungs")

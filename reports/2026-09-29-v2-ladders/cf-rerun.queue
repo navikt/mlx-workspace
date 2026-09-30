@@ -1,0 +1,10 @@
+# create-file re-run: v2-ladders.queue's optiq and 8-bit create-file lines (plus its validate line).
+# Since 29 Sep 15:11 the global cplt config lacked allow_localhost_any, so ./gradlew inside the
+# sandbox could not reach its Gradle daemon and both models' create-file ladders were invalid.
+# night-run-3 now runs every step under a bench-only CPLT_CONFIG with that grant and a gradle
+# preflight (PR #165). Run by cf-rerun-launcher. Wired: 48 GB.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  validate -                     -       -    -     60          40           qwen3.6-35b-a3b-optiq
+local  base     create-file           base    5    1-4   280         140          qwen3.6-35b-a3b-optiq
+local  base     create-file           base    5    1-4   560         280          qwen3.6-35b-a3b-8bit-64g
