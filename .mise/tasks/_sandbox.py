@@ -9,7 +9,9 @@ through a harness that trusted them to stay put.
 Every client launch goes through here so the sandbox cannot be forgotten in one
 place and remembered in another.
 """
+import re
 import shutil
+import tomllib
 from pathlib import Path
 
 
@@ -125,3 +127,38 @@ def warn_unsandboxed(stream) -> None:
     print("⚠  cplt not found — launching unsandboxed.", file=stream)
     print("   The model can read sibling workspaces and modify this machine.", file=stream)
     print("   Install it with: brew install cplt", file=stream)
+
+
+def bench_cplt_config(dest: Path, src: Path | None = None) -> Path:
+    """Write a benchmark-only cplt config to dest: the user's config plus
+    sandbox.allow_localhost_any, for CPLT_CONFIG. Never touches the user's file.
+
+    Gradle's client talks to its daemon (and the Kotlin daemon) over TCP on a random
+    localhost port, and cplt has no narrower grant than any-port. Since 29 Sep 15:11
+    the global config lacks the key, so `./gradlew` inside the bench sandbox failed
+    with "Could not connect to the Gradle daemon" and invalidated create-file runs.
+    """
+    src = src or Path.home() / ".config/cplt/config.toml"
+    text = src.read_text() if src.exists() else ""
+    if not tomllib.loads(text).get("sandbox", {}).get("allow_localhost_any"):
+        text, n = re.subn(r"(?m)^(allow_localhost_any\s*=\s*)false\b", r"\1true", text)
+        if not n:
+            text, n = re.subn(r"(?m)^\[sandbox\][^\n]*\n", lambda m: m.group(0) + "allow_localhost_any = true\n", text, count=1)
+        if not n:
+            text += "\n[sandbox]\nallow_localhost_any = true\n"
+    if tomllib.loads(text).get("sandbox", {}).get("allow_localhost_any") is not True:
+        raise SystemExit(f"\u2717 could not add allow_localhost_any to a copy of {src}")
+    dest.write_text(text)
+    return dest
+
+
+if __name__ == "__main__":
+    import tempfile
+    d = Path(tempfile.mkdtemp())
+    for body in ("", "[sandbox]\nyes = true\n", "[sandbox]\nallow_localhost_any = false\n",
+                 "[allow]\nread = []\n", "[sandbox]\nallow_localhost_any = true\n"):
+        (d / "u.toml").write_text(body)
+        out = tomllib.loads(bench_cplt_config(d / "b.toml", d / "u.toml").read_text())
+        assert out["sandbox"]["allow_localhost_any"] is True, body
+        assert (d / "u.toml").read_text() == body  # the user's file is never changed
+    print("\u2713 _sandbox self-check passed")
