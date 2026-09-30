@@ -1,5 +1,8 @@
 # The GPU queue after night 64-6
 
+**Results:** [results.md](results.md) (29–30 September; the queue ran twice). The action check stays
+log-only; #122 showed no effect.
+
 What runs when night 64-6 is done, so the GPU does not sit idle. Everything here runs on this Mac,
 on the GPU only, with cached models, at 48 GB wired, and costs $0. The queue is
 [after-64-6.queue](after-64-6.queue). [after-64-6-launcher](after-64-6-launcher) starts it when

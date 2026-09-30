@@ -1,0 +1,475 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-09-29T23:15:24+0200",
+      "seconds": 33.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 9,
+      "cloud_tokens": {
+        "total": 268630,
+        "input": 18,
+        "output": 1687,
+        "reasoning": 41,
+        "cache_write": 31532,
+        "cache_read": 235352
+      },
+      "cloud_cost_usd": 0.1432,
+      "cloud_cost_seen_usd": 0.1432,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 12344
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 12665
+        }
+      },
+      "local_server_pid": 31527,
+      "local_server_started": "2026-09-29T23:04:55.573586+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "74de07758ff914da74426003e6228f3a065768b3",
+          "fetched_at": "2026-09-29T11:36:28.801166+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-control-0-20260929-231524.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-09-29T23:15:59+0200",
+      "seconds": 31.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 213872,
+        "input": 14,
+        "output": 1379,
+        "reasoning": 106,
+        "cache_write": 34133,
+        "cache_read": 178240
+      },
+      "cloud_cost_usd": 0.1359,
+      "cloud_cost_seen_usd": 0.1359,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 12430
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11349
+        }
+      },
+      "local_server_pid": 31527,
+      "local_server_started": "2026-09-29T23:04:55.573586+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "74de07758ff914da74426003e6228f3a065768b3",
+          "fetched_at": "2026-09-29T11:36:28.801166+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-control-1-20260929-231559.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-09-29T23:16:32+0200",
+      "seconds": 40.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 356446,
+        "input": 22,
+        "output": 2200,
+        "reasoning": 97,
+        "cache_write": 35864,
+        "cache_read": 318263
+      },
+      "cloud_cost_usd": 0.1763,
+      "cloud_cost_seen_usd": 0.1763,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11325
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11669
+        }
+      },
+      "local_server_pid": 31527,
+      "local_server_started": "2026-09-29T23:04:55.573586+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "74de07758ff914da74426003e6228f3a065768b3",
+          "fetched_at": "2026-09-29T11:36:28.801166+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-control-2-20260929-231631.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-09-29T23:17:13+0200",
+      "seconds": 38.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 10,
+      "cloud_tokens": {
+        "total": 339924,
+        "input": 20,
+        "output": 2059,
+        "reasoning": 164,
+        "cache_write": 38109,
+        "cache_read": 299572
+      },
+      "cloud_cost_usd": 0.1775,
+      "cloud_cost_seen_usd": 0.1775,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11755
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11478
+        }
+      },
+      "local_server_pid": 31527,
+      "local_server_started": "2026-09-29T23:04:55.573586+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "74de07758ff914da74426003e6228f3a065768b3",
+          "fetched_at": "2026-09-29T11:36:28.801166+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-control-3-20260929-231712.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 4,
+      "arm": "control",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-09-29T23:17:52+0200",
+      "seconds": 46.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 10,
+      "cloud_tokens": {
+        "total": 311688,
+        "input": 20,
+        "output": 2655,
+        "reasoning": 33,
+        "cache_write": 36833,
+        "cache_read": 272147
+      },
+      "cloud_cost_usd": 0.1734,
+      "cloud_cost_seen_usd": 0.1734,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11297
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 11305
+        }
+      },
+      "local_server_pid": 31527,
+      "local_server_started": "2026-09-29T23:04:55.573586+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "74de07758ff914da74426003e6228f3a065768b3",
+          "fetched_at": "2026-09-29T11:36:28.801166+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-control-4-20260929-231752.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-09-29T23:15:23+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-230453.config.toml",
+      "tag": "probe-2bcca023-balanced-caps",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-230453.models.json",
+      "bench_capabilities_override": {
+        "_label": "BENCH-ONLY, dispatch re-probe 7 (call-site gate rule and worker-output verification), same block as dispatch probe 6. Not a measured delegate verdict. edit-multi-mechanical: trusted, as the shipped optiq entry measured it (delegate 35/35); the 8-bit worker inherits it from that entry, as in probe 5. create-file: trusted as a bench assumption so aggressive's create-file rule can fire (evidence is local mode only: night 64-2 retry2 r1-r3, 11/12). _by_class skips every sample recorded with this override, and dispatch-probe keeps the results out of bench/.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"balanced\"",
+      "load_average": 3.88,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 31527,
+        "port": "51341",
+        "started": "2026-09-29T23:04:55.573586+02:00",
+        "probe_seconds": 0.48
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 12343
+      }
+    }
+  ],
+  "rung": 6,
+  "arm": "control",
+  "task": "fm-r6-a",
+  "tag": "probe-2bcca023-balanced-caps",
+  "target": "isoppfolgingstilfelle-large",
+  "worker_profile": null,
+  "kind": "edit-multi-mechanical",
+  "verify": {
+    "kind": "thread-arg",
+    "name": "generateOppfolgingstilfelleList",
+    "def_file": "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt",
+    "sites": {
+      "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt": 1,
+      "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt": 1,
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt": 58
+    },
+    "allowed_files": [
+      "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+      "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt",
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt"
+    ],
+    "build": "compile"
+  },
+  "prompt": "Add a new first parameter `origin: String` to the function generateOppfolgingstilfelleList defined in src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt. Do not give it a default value. Update every call to generateOppfolgingstilfelleList in this repository, in main and test code, to pass the name of the file the call is in, without the .kt extension, as a string literal. For example, a call in src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt passes \"OppfolgingstilfellePersonService\". Change nothing else."
+}

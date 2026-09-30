@@ -622,7 +622,7 @@ where they are, and night 64-4 runs them.
     | aggressive | 17/17 (100 %) | 17/17 | 0/5 | **GO**, with cf5-a at 4 and cf5-b at 3 valid samples, under local-dispatch.md's 5 per cell | NO-GO: cost 0.83–2.10×, below control only on cf5-a |
     | balanced | 2/20 (10 %) | 2/2 | 0/5 | NO-GO: the checkpoint lets the orchestrator decline | see below |
 
-    - **local-dispatch.md's rule for keeping `balanced`:** pass rate no lower than control on the large rungs and the false-positive cell (10/10 and 5/5: met), and cloud cost at or below control on at least two of three large rungs. Cost was 1.58× on r4 and 1.61× on r6 against the probe 4–6 controls, and r5 is not in the cells. By the rule as written, `balanced` falls back to prose. The controls are from other days, and at 2 dispatches in 10 the extra cost is the policy and the refusals, not delegation. **Re-run the controls before acting on it.** Needs a user decision.
+    - **local-dispatch.md's rule for keeping `balanced`:** pass rate no lower than control on the large rungs and the false-positive cell (10/10 and 5/5: met), and cloud cost at or below control on at least two of three large rungs. Cost was 1.58× on r4 and 1.61× on r6 against the probe 4–6 controls, and r5 is not in the cells. By the rule as written, `balanced` falls back to prose. The controls are from other days, and at 2 dispatches in 10 the extra cost is the policy and the refusals, not delegation. **Re-run the controls before acting on it.** Needs a user decision. **Re-run on 29 September with same-day controls ([results](../2026-09-28-balanced-controls/results.md)): still over, 1.57× on r4 and 1.49× on r6, so `balanced` fails the rule; r5 was cut by the cap and cannot change that.**
   - **Recommendation.**
     1. **`aggressive` now passes on quality.** 17/17 dispatched samples verified, with no false positive, and every failure was the `/tmp` permission. It costs more than doing the work in the cloud (1.1–2.1× on three of four cells) and takes 2.7–3.6× the time. A PR in navikt/copilot proposes it as the default for local-enabled users, for new setups only. **Held for the user, not merged.** Fixing navikt/copilot#1237 comes first: without it, a headless create-file dispatch can end with the code left broken.
     2. **Night 64-6 phase C** runs at `aggressive` with this binary and Sonnet 5 (`~/tmp/tier64-6-hybrid.env`). Its create-file cells can hit the same `/tmp` abort. bench-hybrid would then score those samples as failures until mlx #116 lands.
@@ -766,7 +766,7 @@ decides is [UNMEASURED.md](../UNMEASURED.md). The nav-pilot side is tracked in n
 | 4 | Frontier harness v2 merges | `v2-merge-waiter` | #113, #89, #90, #107 | steps 1 and 3 |
 | 5 | The v2 validation night | results agent, after step 4 | #89 | step 4 |
 | 6 | Night 64-6: the 8-bit past 49k, and its capabilities | `tier64-6-launcher` (`V2_DONE`) | #134, navikt/copilot#1010 | step 5, re-probe 7's level, the user's sudo twice |
-| 7 | The after-64-6 queue: the action check's case set, then #122 | `after-64-6-launcher` | navikt/copilot#1161, #122 ([plan](../2026-09-28-after-64-6/plan.md)) | step 6 |
+| 7 | The after-64-6 queue: the action check's case set, then #122 | `after-64-6-launcher` | navikt/copilot#1161, #122 ([plan](../2026-09-28-after-64-6/plan.md), [results](../2026-09-28-after-64-6/results.md)) | done 30 September |
 
 Not in a queue yet, each with its issue:
 - GPT-6 Sol at `balanced` and n ≥ 5 per cell: #135, after #116.
