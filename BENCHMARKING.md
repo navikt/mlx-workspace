@@ -175,11 +175,11 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   process. Kill the old pid before relaunching an edited copy.
 - **Never run a finished queue twice.** Exit, both at start and after the wait, when the
   launcher's own `.done` marker exists. On 29 September a stale after-64-6 waiter survived a
-  relaunch, both copies saw the GPU free at 18:09, and the stale one reran the whole queue from
+  relaunch, both copies saw the GPU free at 18:09, and the second copy reran the whole queue from
   23:38 to 04:25 after the other had already finished it. The GPU was never idle: it spent
   4 h 47 min on a duplicate run while the next queue waited on it.
-- **Touch the `.done` marker as soon as the queue exits**, before any report writing or network
-  step, and only when the queue actually ran. A check that fails before the run leaves no marker,
+- **Touch the `.done` marker as soon as the queue exits**, before any slow step of the launcher's
+  own, and only when the queue actually ran. A check that fails before the run leaves no marker,
   so a fixed relaunch can still start.
 
 `reports/2026-09-26-64gb-tier/requeue-646c-launcher` follows these rules.
