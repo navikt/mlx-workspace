@@ -5,6 +5,8 @@ Copy into `reports/<YYYY-MM-DD>-<topic>/report.md`, then add a row to the right 
 
 ## Question
 One or two sentences. What would each possible answer change?
+Name the decision the run gates: the shipped setting, model choice or manifest verdict, and the
+result that would change it.
 
 ## What shipped
 PR, setting or manifest value, with its merge date. "Nothing" is a valid answer.
@@ -20,6 +22,9 @@ One paragraph: what the numbers support, and what they do not.
 
 ## Limits
 What was not measured, where n is too small, and what would change the verdict.
+
+## Decision
+The decision that was made, or "No decision:" and why.
 
 ## Reproduce
 `mise run <task> -- <args>`, and `python3 bench/analyse.py` where it covers the figures.

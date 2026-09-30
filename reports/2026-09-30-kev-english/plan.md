@@ -115,14 +115,16 @@ held up on issue-type (Norwegian issue texts 62/73 against optiq's 63/73). So:
 - **A larger `why-en`.** Not needed for the verdict: at t = 0.9 Kev caught none of the 48 no-why messages in #154.
 - **The nav-pilot integration**: a probability-head backend, its own venv (mlx-lm < 0.32, torch < 2.9)
   and the routing in §5. That comes after the report, if the criteria pass.
+  That PR also updates the docs with Kev and optiq side by side for English: accuracy with 95 %
+  intervals, latency and memory. The docs say plainly that Norwegian goes to optiq.
 
 ## 7. Queue and launcher
 
 - [`kev-english.queue`](kev-english.queue): Kev in-process on the English sets (`S1_SETS`), then optiq
   through nav-pilot on `issue-type-en`.
 - [`kev-english-launcher`](kev-english-launcher), armed from `~/tmp`, logs to `.bench-logs/kev-english.log`.
-  It follows BENCHMARKING.md, "Waiting launchers": it waits for `.bench-logs/requeue-64-6c.done` (the
-  phase C requeue runs first), then for 5 min of free GPU (no queue lock, no benchmark, night-run, model
+  It follows BENCHMARKING.md, "Waiting launchers": it waits for `.bench-logs/v2-ladders.done` (the v2
+  base ladders run first; the phase C requeue waits for `kev-english.done`), then for 5 min of free GPU (no queue lock, no benchmark, night-run, model
   server or in-process decide process, on AC). It has a pidfile (`kev-english.pid`), exits at start and
   after the wait if `kev-english.done` exists, and touches that marker only once the queue has run. None
   of its command lines while it waits contain `bench-`, `night`, `np-serve` or `dispatch-probe`.

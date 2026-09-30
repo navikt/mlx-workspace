@@ -2,7 +2,7 @@
 # Night 64-6 phase C requeue (#147, night-64-6c-requeue.md). NOT ARMED: nothing starts this. Arm it by hand:
 #   cp reports/2026-09-26-64gb-tier/requeue-646c-launcher ~/tmp/ && \
 #     nohup bash ~/tmp/requeue-646c-launcher >> .bench-logs/requeue-64-6c.log 2>&1 &
-# Waits for a free GPU for 5 min (no lock, no GPU job, nothing on :8080), AC, 48 GB wired and a
+# Runs after Kev English: waits for kev-english.done, then for a free GPU for 5 min (no lock, no GPU job, nothing on :8080), AC, 48 GB wired and a
 # 1-min load below 6 (steps 1 and 6-12 were lost to load > 8). Then runs night-64-6c-requeue.queue under
 # the bench-only trust overlay, one ledger capped at $8. Touches requeue-64-6c.done when the queue exits.
 # Exits at once if that marker exists or another instance waits (requeue-64-6c.pid).
@@ -17,6 +17,7 @@ BUSY="ni""ght-run|ni""ght64|be""nch-|np""-serve|dispatch""-probe|mlx_lm[._]serve
 GIVE_UP=$(( $(date +%s) + 172800 ))
 say() { echo "[$(date '+%F %T')] requeue-64-6c: $*"; }
 blocker() {
+  [ -e "$BL/kev-english.done" ] || { echo "no $BL/kev-english.done yet (Kev English)"; return; }
   [ -d "$BL/.queue.lock" ] && { echo "queue lock held"; return; }
   local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
   [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
@@ -34,7 +35,7 @@ op=$(cat "$PIDF" 2>/dev/null)
 [ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
 echo $$ > "$PIDF"
 trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no pidfile and no done marker
-say "pid $$: waits for a free GPU for 5 min"
+say "pid $$: waits for $BL/kev-english.done, then a free GPU for 5 min"
 caffeinate -is -w $$ &
 stable=0 last=""
 while :; do
