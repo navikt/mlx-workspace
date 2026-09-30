@@ -373,11 +373,14 @@ def hybrid_md(files):
     for worker, fl in sorted(by_worker.items()):
         valid = [s for _, d in fl for s in d.get("samples", []) if s.get("valid")]
         disp = [s for s in valid if s.get("local_calls")]
+        ovl = " (bench-only overlay, not shipped)" if any(overlay(d, s) for _, d in fl for s in d.get("samples", [])
+                                                           if s.get("valid")) else ""
         ctrl = []
         for f, d in fl:
             c = control_for(f, d)
             cd = docs.get(c) or (json.loads(c.read_text()) if c.exists() else {})
-            ctrl += [s for s in cd.get("samples", []) if s.get("valid")]
+            # As in rows(): an overlay control never prices a shipped worker's row; a probe row may use either.
+            ctrl += [s for s in cd.get("samples", []) if s.get("valid") and (ovl or not overlay(cd, s))]
         hk = [o for o in map(_outcome, disp) if o is not None]
         ck = [o for o in map(_outcome, ctrl) if o is not None]
         ci = diff_ci(sum(hk), len(hk), sum(ck), len(ck))
@@ -387,8 +390,6 @@ def hybrid_md(files):
         pol = sorted({(s.get("policy") or {}).get("sha256", "")[:8] for s in valid} - {""})
         heads = sorted({(s.get("workspace_head") or "?")[:8] for s in valid})
         cells = ", ".join(sorted(f"{d.get('target', 'tasks')}:{d.get('rung')}" for _, d in fl))
-        ovl = " (bench-only overlay, not shipped)" if any(overlay(d, s) for _, d in fl for s in d.get("samples", [])
-                                                           if s.get("valid")) else ""
         L.append(f"| `{worker}`{ovl} | {cells} | {len(disp)}/{len(valid)} | {sum(hk)}/{len(hk)} | {sum(ck)}/{len(ck)} | "
                  + (f"{ci[0]:+.2f} [{ci[1]:+.2f}, {ci[2]:+.2f}]" if ci else "–") + " | "
                  + (f"{hc:.3f} / {cc:.3f} = {hc / cc:.2f}×" if hc is not None and cc else "–")
@@ -454,4 +455,10 @@ if __name__ == "__main__":
                                                   "samples": [smp(True, 2, 0.1), smp(False, 0, 0.5), {"valid": False}]})]
         md = "\n".join(hybrid_md(fs))
         assert "| `w` | tasks:3 | 1/2 | 1/1 | 2/2 |" in md and "0.100 / 0.300 = 0.33×" in md and "abababab" in md, md
+        # An overlay control sample never counts against a shipped worker.
+        c = json.loads(Path(fs[0]).read_text())
+        c["preflight"] = [{"bench_capabilities_override": {"classes": {}}}]
+        c["samples"].append({**smp(False, 0, 9.0), "preflight": 0})
+        put("hybrid-np-x-3-control.json", c)
+        assert "| `w` | tasks:3 | 1/2 | 1/1 | 2/2 |" in "\n".join(hybrid_md(fs))
     print("✓ _by_class self-check passed")
