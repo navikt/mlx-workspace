@@ -24,7 +24,7 @@ One paragraph: what the numbers support, and what they do not.
 What was not measured, where n is too small, and what would change the verdict.
 
 ## Decision
-The decision that was made, or "No decision:" and why.
+The decision made, or "No decision:" and why.
 
 ## Reproduce
 `mise run <task> -- <args>`, and `python3 bench/analyse.py` where it covers the figures.

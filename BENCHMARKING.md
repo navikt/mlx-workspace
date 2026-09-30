@@ -192,8 +192,8 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   or "no decision:" and the reason.
 - **Stop rule for local delegation.** If the v2 base ladders
   ([reports/2026-09-29-v2-ladders](reports/2026-09-29-v2-ladders/plan.md)) make no class `trusted`
-  on optiq or on the 64 GB 8-bit, stop the ladder runs for that profile. Before it gets more GPU
-  time, write a short gap analysis: is the gap in model quality, in the harness, or in the task
+  on optiq or on the 64 GB 8-bit profile, stop the ladder runs for that profile. Before that
+  profile gets more GPU time, write a short gap analysis: is the gap in model quality, in the harness, or in the task
   design?
 
 ## Loop detection
