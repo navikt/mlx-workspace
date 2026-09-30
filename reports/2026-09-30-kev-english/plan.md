@@ -123,8 +123,9 @@ held up on issue-type (Norwegian issue texts 62/73 against optiq's 63/73). So:
 - [`kev-english.queue`](kev-english.queue): Kev in-process on the English sets (`S1_SETS`), then optiq
   through nav-pilot on `issue-type-en`.
 - [`kev-english-launcher`](kev-english-launcher), armed from `~/tmp`, logs to `.bench-logs/kev-english.log`.
-  It follows BENCHMARKING.md, "Waiting launchers": it waits for `.bench-logs/v2-ladders.done` (the v2
-  base ladders run first; the phase C requeue waits for `kev-english.done`), then for 5 min of free GPU (no queue lock, no benchmark, night-run, model
+  It follows BENCHMARKING.md, "Waiting launchers": it waits for
+  `.bench-logs/v2-ladders.done` (the v2 base ladders run first; the phase C requeue waits for
+  `kev-english.done`), then for 5 min of free GPU (no queue lock, no benchmark, night-run, model
   server or in-process decide process, on AC). It has a pidfile (`kev-english.pid`), exits at start and
   after the wait if `kev-english.done` exists, and touches that marker only once the queue has run. None
   of its command lines while it waits contain `bench-`, `night`, `np-serve` or `dispatch-probe`.
