@@ -1,7 +1,7 @@
 # Kev 4B and Laya on the decide sets: plan
 
 Pending-tasks §8.6, #95; gate 2 of the [hosted-decide PRD](../2026-09-27-hosted-decide-prd/prd.md).
-Background: [research.md](research.md). Queue: [kev-laya.queue](kev-laya.queue). Launcher:
+**Result: [report.md](report.md).** Background: [research.md](research.md). Queue: [kev-laya.queue](kev-laya.queue). Launcher:
 [kev-laya-launcher](kev-laya-launcher). Adapter: `.mise/tasks/_decide_s1.py`.
 
 ## Question

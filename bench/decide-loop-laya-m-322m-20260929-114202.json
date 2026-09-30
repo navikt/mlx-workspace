@@ -1,0 +1,191 @@
+{
+  "key": "laya-m-322m",
+  "model": "aac6fef/laya-multilingual-mlx@f2b4faf5",
+  "nav_pilot": "in-process laya (no nav-pilot)",
+  "nav_pilot_commit": null,
+  "backend": {
+    "laya_mlx": "0.2.0",
+    "max_len": 1024,
+    "head_max_len": 256,
+    "revision": "f2b4faf51023039425946074e2cf1361d2db11d5"
+  },
+  "load_s": 0.6,
+  "started": "2026-09-29T18:08:43+0200",
+  "cases": [
+    {
+      "id": "loopclf-rerun-tests",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 175,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.0558,
+        "legitimate": 0.9442
+      },
+      "ms": 6.7,
+      "wall_s": 0.006720582954585552,
+      "error": null,
+      "ok": true,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "rerun-tests",
+      "state_tokens": 40,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-poll-ci",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 191,
+      "choice": "stuck loop",
+      "p": {
+        "stuck loop": 0.9298,
+        "legitimate": 0.0702
+      },
+      "ms": 7.4,
+      "wall_s": 0.00735954096307978,
+      "error": null,
+      "ok": false,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "poll-ci",
+      "state_tokens": 52,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-recompile",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 157,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.1036,
+        "legitimate": 0.8964
+      },
+      "ms": 6.7,
+      "wall_s": 0.006749249994754791,
+      "error": null,
+      "ok": true,
+      "legitimate": true,
+      "n": 7,
+      "scenario": "recompile",
+      "state_tokens": 35,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-rerun-go-test",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 173,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.0216,
+        "legitimate": 0.9784
+      },
+      "ms": 6.7,
+      "wall_s": 0.006692791997920722,
+      "error": null,
+      "ok": true,
+      "legitimate": true,
+      "n": 6,
+      "scenario": "rerun-go-test",
+      "state_tokens": 40,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-poll-pr-checks",
+      "set": "loop-classifier",
+      "expect": "legitimate",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 157,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.1039,
+        "legitimate": 0.8961
+      },
+      "ms": 6.7,
+      "wall_s": 0.006696457974612713,
+      "error": null,
+      "ok": true,
+      "legitimate": true,
+      "n": 7,
+      "scenario": "poll-pr-checks",
+      "state_tokens": 38,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-reread-file",
+      "set": "loop-classifier",
+      "expect": "stuck loop",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 136,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.07,
+        "legitimate": 0.93
+      },
+      "ms": 6.7,
+      "wall_s": 0.006665332999546081,
+      "error": null,
+      "ok": false,
+      "legitimate": false,
+      "n": 6,
+      "scenario": "reread-file",
+      "state_tokens": 39,
+      "truncated": false
+    },
+    {
+      "id": "loopclf-same-grep",
+      "set": "loop-classifier",
+      "expect": "stuck loop",
+      "options": [
+        "stuck loop",
+        "legitimate"
+      ],
+      "chars": 129,
+      "choice": "legitimate",
+      "p": {
+        "stuck loop": 0.0857,
+        "legitimate": 0.9143
+      },
+      "ms": 6.5,
+      "wall_s": 0.006537040986586362,
+      "error": null,
+      "ok": false,
+      "legitimate": false,
+      "n": 7,
+      "scenario": "same-grep",
+      "state_tokens": 32,
+      "truncated": false
+    }
+  ],
+  "eval": {},
+  "limit": null,
+  "cold": {
+    "ms": 19.8
+  },
+  "finished": "2026-09-29T18:08:43+0200",
+  "seconds": 0
+}
