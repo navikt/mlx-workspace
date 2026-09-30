@@ -1,0 +1,7573 @@
+{
+  "key": "kev-4b-8bit",
+  "model": "RoderickQiu/kev-4b-mlx-8bit@e1c35947",
+  "nav_pilot": "in-process kev (no nav-pilot)",
+  "nav_pilot_commit": null,
+  "backend": {
+    "temperature": 2.1435469250725863,
+    "kev_code": "08ab0b87d27cb5577a3b371ad7ed4e4686b0502b",
+    "kev_revision": "485ace87",
+    "base": "Qwen/Qwen3.5-4B-Base",
+    "dtype": "uint32",
+    "revision": "e1c35947b19b74d8cbc34d127ffd38119e722b85"
+  },
+  "load_s": 3.9,
+  "started": "2026-09-30T08:44:15+0200",
+  "cases": [
+    {
+      "id": "issue-type-mock-oauth2-server-33",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 736,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9469,
+        "feature": 0.0158,
+        "question": 0.0373
+      },
+      "ms": 95.4,
+      "wall_s": 0.09536429098807275,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 33,
+      "construction": null,
+      "state_tokens": 197,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-stub-oidc-provider-5",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 332,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9648,
+        "feature": 0.0071,
+        "question": 0.0281
+      },
+      "ms": 74.3,
+      "wall_s": 0.07431424997048452,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/stub-oidc-provider",
+      "number": 5,
+      "construction": null,
+      "state_tokens": 99,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-383",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0565,
+        "feature": 0.75,
+        "question": 0.1935
+      },
+      "ms": 83.2,
+      "wall_s": 0.08317900000838563,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 383,
+      "construction": null,
+      "state_tokens": 132,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-889",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 607,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9638,
+        "feature": 0.0215,
+        "question": 0.0147
+      },
+      "ms": 95.3,
+      "wall_s": 0.09525741694960743,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 889,
+      "construction": null,
+      "state_tokens": 175,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-659",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 452,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9758,
+        "feature": 0.0083,
+        "question": 0.0159
+      },
+      "ms": 95.4,
+      "wall_s": 0.09535366704221815,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 659,
+      "construction": null,
+      "state_tokens": 190,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-copilot-419",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1923,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5329,
+        "feature": 0.1538,
+        "question": 0.3132
+      },
+      "ms": 170.3,
+      "wall_s": 0.17028154100989923,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 419,
+      "construction": null,
+      "state_tokens": 559,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-circleci-nais-orb-14",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 183,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.966,
+        "feature": 0.0103,
+        "question": 0.0237
+      },
+      "ms": 72.8,
+      "wall_s": 0.07275420799851418,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/circleci-nais-orb",
+      "number": 14,
+      "construction": null,
+      "state_tokens": 41,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-cplt-190",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3044,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9319,
+        "feature": 0.0341,
+        "question": 0.034
+      },
+      "ms": 250.6,
+      "wall_s": 0.25061108299996704,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 190,
+      "construction": null,
+      "state_tokens": 877,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-242",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2262,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.2972,
+        "feature": 0.4825,
+        "question": 0.2203
+      },
+      "ms": 178.4,
+      "wall_s": 0.178446082980372,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/cplt",
+      "number": 242,
+      "construction": null,
+      "state_tokens": 499,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-copilot-517",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1984,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7721,
+        "feature": 0.0224,
+        "question": 0.2055
+      },
+      "ms": 210.2,
+      "wall_s": 0.21019908302696422,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 517,
+      "construction": null,
+      "state_tokens": 651,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-825",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1866,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9831,
+        "feature": 0.0055,
+        "question": 0.0114
+      },
+      "ms": 185.5,
+      "wall_s": 0.18552516697673127,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 825,
+      "construction": null,
+      "state_tokens": 532,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1584",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 312,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9167,
+        "feature": 0.02,
+        "question": 0.0633
+      },
+      "ms": 87.1,
+      "wall_s": 0.0871284999884665,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1584,
+      "construction": null,
+      "state_tokens": 109,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mangfold-i-mai-45",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 277,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7466,
+        "feature": 0.122,
+        "question": 0.1315
+      },
+      "ms": 85.4,
+      "wall_s": 0.08541641698684543,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mangfold-i-mai",
+      "number": 45,
+      "construction": null,
+      "state_tokens": 118,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-cplt-417",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2348,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.166,
+        "feature": 0.0541,
+        "question": 0.7799
+      },
+      "ms": 171.4,
+      "wall_s": 0.17142808402422816,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/cplt",
+      "number": 417,
+      "construction": null,
+      "state_tokens": 552,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-443",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 545,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.2505,
+        "feature": 0.1765,
+        "question": 0.573
+      },
+      "ms": 103.9,
+      "wall_s": 0.1039371250080876,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 443,
+      "construction": null,
+      "state_tokens": 200,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-melosys-eessi-29",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1266,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6176,
+        "feature": 0.0776,
+        "question": 0.3048
+      },
+      "ms": 134.7,
+      "wall_s": 0.13466929201968014,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/melosys-eessi",
+      "number": 29,
+      "construction": null,
+      "state_tokens": 362,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-dagpenger-226",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 647,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8155,
+        "feature": 0.0331,
+        "question": 0.1514
+      },
+      "ms": 90.1,
+      "wall_s": 0.09005733300000429,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 226,
+      "construction": null,
+      "state_tokens": 130,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-forenklet-deploy-15",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6919,
+        "feature": 0.2128,
+        "question": 0.0953
+      },
+      "ms": 81.2,
+      "wall_s": 0.08124870801111683,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/forenklet-deploy",
+      "number": 15,
+      "construction": null,
+      "state_tokens": 103,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-Designsystemet-old-28",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 385,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9734,
+        "feature": 0.0109,
+        "question": 0.0158
+      },
+      "ms": 90.1,
+      "wall_s": 0.09011537494370714,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/Designsystemet-old",
+      "number": 28,
+      "construction": null,
+      "state_tokens": 137,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-860",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 824,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8393,
+        "feature": 0.0084,
+        "question": 0.1523
+      },
+      "ms": 106.2,
+      "wall_s": 0.10622449999209493,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 860,
+      "construction": null,
+      "state_tokens": 231,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-350",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 309,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8696,
+        "feature": 0.0456,
+        "question": 0.0848
+      },
+      "ms": 80.4,
+      "wall_s": 0.08044312498532236,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 350,
+      "construction": null,
+      "state_tokens": 121,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-412",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 617,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.967,
+        "feature": 0.0114,
+        "question": 0.0216
+      },
+      "ms": 100.2,
+      "wall_s": 0.10020191699732095,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 412,
+      "construction": null,
+      "state_tokens": 207,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-ebxml-processor-274",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 691,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9566,
+        "feature": 0.0072,
+        "question": 0.0362
+      },
+      "ms": 102.1,
+      "wall_s": 0.10214016702957451,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ebxml-processor",
+      "number": 274,
+      "construction": null,
+      "state_tokens": 205,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nks-bob-frontend-235",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 598,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8914,
+        "feature": 0.0326,
+        "question": 0.076
+      },
+      "ms": 106.7,
+      "wall_s": 0.1066819170373492,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nks-bob-frontend",
+      "number": 235,
+      "construction": null,
+      "state_tokens": 246,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-copilot-514",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1753,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6472,
+        "feature": 0.0214,
+        "question": 0.3315
+      },
+      "ms": 189.2,
+      "wall_s": 0.1891902910429053,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 514,
+      "construction": null,
+      "state_tokens": 596,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-dagpenger-1010",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 323,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9815,
+        "feature": 0.0082,
+        "question": 0.0104
+      },
+      "ms": 93.1,
+      "wall_s": 0.09314229199662805,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dagpenger",
+      "number": 1010,
+      "construction": null,
+      "state_tokens": 95,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren-160",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 191,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6679,
+        "feature": 0.1375,
+        "question": 0.1946
+      },
+      "ms": 74.7,
+      "wall_s": 0.074718291987665,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren",
+      "number": 160,
+      "construction": null,
+      "state_tokens": 61,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-794",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 719,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9839,
+        "feature": 0.0054,
+        "question": 0.0107
+      },
+      "ms": 99.8,
+      "wall_s": 0.09981616598088294,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 794,
+      "construction": null,
+      "state_tokens": 228,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nytt-sykefravaer-38",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 335,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.3243,
+        "feature": 0.3067,
+        "question": 0.369
+      },
+      "ms": 85.2,
+      "wall_s": 0.08518445800291374,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nytt-sykefravaer",
+      "number": 38,
+      "construction": null,
+      "state_tokens": 78,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-ghep-119",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 181,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8337,
+        "feature": 0.0253,
+        "question": 0.141
+      },
+      "ms": 74.4,
+      "wall_s": 0.0743534590001218,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 119,
+      "construction": null,
+      "state_tokens": 55,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-tiltakspenger-meldekort-128",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 460,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9454,
+        "feature": 0.0402,
+        "question": 0.0144
+      },
+      "ms": 91.5,
+      "wall_s": 0.09148891596123576,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tiltakspenger-meldekort",
+      "number": 128,
+      "construction": null,
+      "state_tokens": 137,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-Designsystemet-old-148",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 243,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.4329,
+        "feature": 0.1011,
+        "question": 0.466
+      },
+      "ms": 84.4,
+      "wall_s": 0.08440437499666587,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/Designsystemet-old",
+      "number": 148,
+      "construction": null,
+      "state_tokens": 64,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helved-peisen-7",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 289,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9608,
+        "feature": 0.0164,
+        "question": 0.0228
+      },
+      "ms": 85.7,
+      "wall_s": 0.08572641701903194,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helved-peisen",
+      "number": 7,
+      "construction": null,
+      "state_tokens": 82,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-remove-package-versions-3",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 770,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8204,
+        "feature": 0.0604,
+        "question": 0.1192
+      },
+      "ms": 93.7,
+      "wall_s": 0.09367270796792582,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/remove-package-versions",
+      "number": 3,
+      "construction": null,
+      "state_tokens": 168,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2134",
+      "set": "issue-type",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 486,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.962,
+        "feature": 0.0068,
+        "question": 0.0312
+      },
+      "ms": 89.0,
+      "wall_s": 0.08895091700833291,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2134,
+      "construction": null,
+      "state_tokens": 165,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-copilot-168",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1039,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0062,
+        "feature": 0.9698,
+        "question": 0.024
+      },
+      "ms": 97.9,
+      "wall_s": 0.09789758297847584,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 168,
+      "construction": null,
+      "state_tokens": 241,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-copilot-171",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1657,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0092,
+        "feature": 0.9566,
+        "question": 0.0342
+      },
+      "ms": 125.8,
+      "wall_s": 0.1257548329886049,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 171,
+      "construction": null,
+      "state_tokens": 367,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-aksel-arcade-31",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1400,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0058,
+        "feature": 0.9813,
+        "question": 0.0129
+      },
+      "ms": 115.6,
+      "wall_s": 0.11560804198961705,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 31,
+      "construction": null,
+      "state_tokens": 294,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-tilbakemeldingsmottak-api-361",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1316,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1088,
+        "feature": 0.7089,
+        "question": 0.1823
+      },
+      "ms": 148.6,
+      "wall_s": 0.14859416603576392,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/tilbakemeldingsmottak-api",
+      "number": 361,
+      "construction": null,
+      "state_tokens": 401,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-copilot-314",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3121,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0095,
+        "feature": 0.9728,
+        "question": 0.0177
+      },
+      "ms": 245.9,
+      "wall_s": 0.24592508299974725,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 314,
+      "construction": null,
+      "state_tokens": 797,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-helsemelding-message-generator-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 301,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.3708,
+        "feature": 0.3201,
+        "question": 0.3091
+      },
+      "ms": 94.7,
+      "wall_s": 0.09471845801454037,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-message-generator",
+      "number": 11,
+      "construction": null,
+      "state_tokens": 84,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-645",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 112,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1622,
+        "feature": 0.3659,
+        "question": 0.4719
+      },
+      "ms": 76.1,
+      "wall_s": 0.07607645797543228,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 645,
+      "construction": null,
+      "state_tokens": 36,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-1176",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.054,
+        "feature": 0.8098,
+        "question": 0.1362
+      },
+      "ms": 83.8,
+      "wall_s": 0.08381229202495888,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 1176,
+      "construction": null,
+      "state_tokens": 108,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-innbyggerpanelet-3",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 416,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0206,
+        "feature": 0.9412,
+        "question": 0.0382
+      },
+      "ms": 87.6,
+      "wall_s": 0.0876414580270648,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/innbyggerpanelet",
+      "number": 3,
+      "construction": null,
+      "state_tokens": 90,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-attachment-service-22",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 705,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.2297,
+        "feature": 0.607,
+        "question": 0.1633
+      },
+      "ms": 100.2,
+      "wall_s": 0.10018666699761525,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-attachment-service",
+      "number": 22,
+      "construction": null,
+      "state_tokens": 193,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-169",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 315,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0619,
+        "feature": 0.5386,
+        "question": 0.3995
+      },
+      "ms": 86.4,
+      "wall_s": 0.08643845899496228,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 169,
+      "construction": null,
+      "state_tokens": 89,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-g-83",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1431,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0196,
+        "feature": 0.8959,
+        "question": 0.0845
+      },
+      "ms": 229.0,
+      "wall_s": 0.22902033297577873,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 83,
+      "construction": null,
+      "state_tokens": 770,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-ghep-104",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 686,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0126,
+        "feature": 0.9669,
+        "question": 0.0205
+      },
+      "ms": 112.7,
+      "wall_s": 0.112668042012956,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/ghep",
+      "number": 104,
+      "construction": null,
+      "state_tokens": 215,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-payload-signing-service-32",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1195,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1246,
+        "feature": 0.2889,
+        "question": 0.5865
+      },
+      "ms": 155.0,
+      "wall_s": 0.1549767500255257,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-payload-signing-service",
+      "number": 32,
+      "construction": null,
+      "state_tokens": 414,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-dinesykmeldte-696",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1397,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0026,
+        "feature": 0.9911,
+        "question": 0.0063
+      },
+      "ms": 156.8,
+      "wall_s": 0.15684416599106044,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dinesykmeldte",
+      "number": 696,
+      "construction": null,
+      "state_tokens": 400,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-skjemabygging-formio-2215",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3756,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0068,
+        "feature": 0.9802,
+        "question": 0.013
+      },
+      "ms": 267.2,
+      "wall_s": 0.26717595796799287,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/skjemabygging-formio",
+      "number": 2215,
+      "construction": null,
+      "state_tokens": 903,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-9",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1820,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0043,
+        "feature": 0.9875,
+        "question": 0.0081
+      },
+      "ms": 168.3,
+      "wall_s": 0.1683100420050323,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 9,
+      "construction": null,
+      "state_tokens": 453,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-nav-enonicxp-search-133",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 554,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0152,
+        "feature": 0.927,
+        "question": 0.0577
+      },
+      "ms": 109.8,
+      "wall_s": 0.10976295795990154,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-search",
+      "number": 133,
+      "construction": null,
+      "state_tokens": 245,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-gandalf-30",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 875,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.2306,
+        "feature": 0.6926,
+        "question": 0.0768
+      },
+      "ms": 107.7,
+      "wall_s": 0.10770433297147974,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/gandalf",
+      "number": 30,
+      "construction": null,
+      "state_tokens": 255,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-918",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 223,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6899,
+        "feature": 0.0878,
+        "question": 0.2223
+      },
+      "ms": 70.6,
+      "wall_s": 0.07063716696575284,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 918,
+      "construction": null,
+      "state_tokens": 45,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-frontend-2501",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 664,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0978,
+        "feature": 0.8579,
+        "question": 0.0444
+      },
+      "ms": 107.3,
+      "wall_s": 0.10730141698149964,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp-frontend",
+      "number": 2501,
+      "construction": null,
+      "state_tokens": 222,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2058",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 370,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0127,
+        "feature": 0.939,
+        "question": 0.0483
+      },
+      "ms": 87.3,
+      "wall_s": 0.08729991700965911,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2058,
+      "construction": null,
+      "state_tokens": 129,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-1060",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 741,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0051,
+        "feature": 0.6167,
+        "question": 0.3782
+      },
+      "ms": 112.8,
+      "wall_s": 0.1128479580511339,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 1060,
+      "construction": null,
+      "state_tokens": 301,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-252",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 293,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0254,
+        "feature": 0.9237,
+        "question": 0.0509
+      },
+      "ms": 83.0,
+      "wall_s": 0.08300470898393542,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 252,
+      "construction": null,
+      "state_tokens": 109,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-enonicxp-2240",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 283,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1099,
+        "feature": 0.8344,
+        "question": 0.0557
+      },
+      "ms": 86.5,
+      "wall_s": 0.08646575000602752,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-enonicxp",
+      "number": 2240,
+      "construction": null,
+      "state_tokens": 76,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-farskapsportal-ui-11",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 238,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.151,
+        "feature": 0.5264,
+        "question": 0.3226
+      },
+      "ms": 73.3,
+      "wall_s": 0.07332687499001622,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/farskapsportal-ui",
+      "number": 11,
+      "construction": null,
+      "state_tokens": 63,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nais-env-15",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 204,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0105,
+        "feature": 0.9635,
+        "question": 0.026
+      },
+      "ms": 73.4,
+      "wall_s": 0.07339350000256673,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nais-env",
+      "number": 15,
+      "construction": null,
+      "state_tokens": 62,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-cplt-144",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 7942,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0082,
+        "feature": 0.9631,
+        "question": 0.0287
+      },
+      "ms": 502.7,
+      "wall_s": 0.5026795419980772,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 144,
+      "construction": null,
+      "state_tokens": 1921,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-456",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 403,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0267,
+        "feature": 0.8961,
+        "question": 0.0772
+      },
+      "ms": 86.7,
+      "wall_s": 0.08670258399797603,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 456,
+      "construction": null,
+      "state_tokens": 113,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-lumi-255",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1971,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0114,
+        "feature": 0.9566,
+        "question": 0.032
+      },
+      "ms": 174.4,
+      "wall_s": 0.1743700000224635,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 255,
+      "construction": null,
+      "state_tokens": 572,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-data-catalog-policies-34",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 149,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0097,
+        "feature": 0.9693,
+        "question": 0.021
+      },
+      "ms": 67.7,
+      "wall_s": 0.0676907500019297,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/data-catalog-policies",
+      "number": 34,
+      "construction": null,
+      "state_tokens": 36,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-aksel-arcade-37",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1341,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0093,
+        "feature": 0.9743,
+        "question": 0.0164
+      },
+      "ms": 111.0,
+      "wall_s": 0.11100949998944998,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/aksel-arcade",
+      "number": 37,
+      "construction": null,
+      "state_tokens": 272,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-token-support-179",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 210,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0066,
+        "feature": 0.8327,
+        "question": 0.1606
+      },
+      "ms": 67.2,
+      "wall_s": 0.06716329202754423,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 179,
+      "construction": null,
+      "state_tokens": 45,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-lumi-262",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1186,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0348,
+        "feature": 0.8751,
+        "question": 0.0901
+      },
+      "ms": 132.0,
+      "wall_s": 0.13195974996779114,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/lumi",
+      "number": 262,
+      "construction": null,
+      "state_tokens": 381,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-dbt-dvh-macros-12",
+      "set": "issue-type",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 477,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0224,
+        "feature": 0.8903,
+        "question": 0.0873
+      },
+      "ms": 99.6,
+      "wall_s": 0.09957224997924641,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/dbt-dvh-macros",
+      "number": 12,
+      "construction": null,
+      "state_tokens": 130,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-copilot-471",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2618,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0312,
+        "feature": 0.029,
+        "question": 0.9399
+      },
+      "ms": 233.7,
+      "wall_s": 0.23365445801755413,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 471,
+      "construction": null,
+      "state_tokens": 801,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-copilot-500",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3158,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0488,
+        "feature": 0.1705,
+        "question": 0.7807
+      },
+      "ms": 286.6,
+      "wall_s": 0.28655554103897884,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 500,
+      "construction": null,
+      "state_tokens": 921,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-copilot-604",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3355,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0082,
+        "feature": 0.017,
+        "question": 0.9748
+      },
+      "ms": 284.8,
+      "wall_s": 0.2847816660068929,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 604,
+      "construction": null,
+      "state_tokens": 987,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-copilot-740",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1870,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1179,
+        "feature": 0.0144,
+        "question": 0.8677
+      },
+      "ms": 180.7,
+      "wall_s": 0.1807246669777669,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 740,
+      "construction": null,
+      "state_tokens": 548,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3519,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0078,
+        "feature": 0.0436,
+        "question": 0.9486
+      },
+      "ms": 254.4,
+      "wall_s": 0.25442804099293426,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 3,
+      "construction": null,
+      "state_tokens": 886,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-206",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3551,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.027,
+        "feature": 0.0164,
+        "question": 0.9565
+      },
+      "ms": 252.0,
+      "wall_s": 0.25204016600036994,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 206,
+      "construction": null,
+      "state_tokens": 845,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-424",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2754,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0145,
+        "feature": 0.0122,
+        "question": 0.9733
+      },
+      "ms": 190.6,
+      "wall_s": 0.19061066600261256,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 424,
+      "construction": null,
+      "state_tokens": 587,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-cplt-472",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2341,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0552,
+        "feature": 0.2995,
+        "question": 0.6454
+      },
+      "ms": 179.3,
+      "wall_s": 0.17933170904871076,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/cplt",
+      "number": 472,
+      "construction": null,
+      "state_tokens": 537,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-esyfo-narmesteleder-516",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2679,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1167,
+        "feature": 0.0322,
+        "question": 0.851
+      },
+      "ms": 222.6,
+      "wall_s": 0.22262245800811797,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/esyfo-narmesteleder",
+      "number": 516,
+      "construction": null,
+      "state_tokens": 761,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-g-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 147,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.017,
+        "feature": 0.8999,
+        "question": 0.0831
+      },
+      "ms": 75.4,
+      "wall_s": 0.07542324997484684,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/g",
+      "number": 3,
+      "construction": null,
+      "state_tokens": 48,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-g-4",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 104,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.011,
+        "feature": 0.2027,
+        "question": 0.7862
+      },
+      "ms": 73.4,
+      "wall_s": 0.07335729204351082,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/g",
+      "number": 4,
+      "construction": null,
+      "state_tokens": 30,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-7",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 405,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0114,
+        "feature": 0.0309,
+        "question": 0.9578
+      },
+      "ms": 84.3,
+      "wall_s": 0.08431266597472131,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 7,
+      "construction": null,
+      "state_tokens": 110,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-inbound-message-service-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 430,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0107,
+        "feature": 0.0476,
+        "question": 0.9417
+      },
+      "ms": 93.5,
+      "wall_s": 0.09351220802636817,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-inbound-message-service",
+      "number": 8,
+      "construction": null,
+      "state_tokens": 172,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-issues-10",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 750,
+      "lang": "no",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0196,
+        "feature": 0.6175,
+        "question": 0.3629
+      },
+      "ms": 108.2,
+      "wall_s": 0.108219750050921,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-issues",
+      "number": 10,
+      "construction": null,
+      "state_tokens": 213,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-issues-11",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 576,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.029,
+        "feature": 0.0632,
+        "question": 0.9079
+      },
+      "ms": 95.4,
+      "wall_s": 0.0953585000243038,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 11,
+      "construction": null,
+      "state_tokens": 167,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-issues-16",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 454,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0171,
+        "feature": 0.0216,
+        "question": 0.9612
+      },
+      "ms": 91.6,
+      "wall_s": 0.09160391602199525,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 16,
+      "construction": null,
+      "state_tokens": 143,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-issues-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 638,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0218,
+        "feature": 0.0239,
+        "question": 0.9542
+      },
+      "ms": 94.7,
+      "wall_s": 0.09474995802156627,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 17,
+      "construction": null,
+      "state_tokens": 178,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-issues-30",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 694,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0142,
+        "feature": 0.0427,
+        "question": 0.9431
+      },
+      "ms": 102.1,
+      "wall_s": 0.10210333397844806,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-issues",
+      "number": 30,
+      "construction": null,
+      "state_tokens": 206,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-message-converter-17",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 732,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.558,
+        "feature": 0.0134,
+        "question": 0.4287
+      },
+      "ms": 102.7,
+      "wall_s": 0.10274454101454467,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/helsemelding-message-converter",
+      "number": 17,
+      "construction": null,
+      "state_tokens": 222,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helsemelding-outbound-message-service-76",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1059,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0178,
+        "feature": 0.0944,
+        "question": 0.8877
+      },
+      "ms": 123.6,
+      "wall_s": 0.12356199999339879,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helsemelding-outbound-message-service",
+      "number": 76,
+      "construction": null,
+      "state_tokens": 292,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-helseopplysninger-21",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 135,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0067,
+        "feature": 0.0136,
+        "question": 0.9796
+      },
+      "ms": 76.4,
+      "wall_s": 0.07635149999987334,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/helseopplysninger",
+      "number": 21,
+      "construction": null,
+      "state_tokens": 44,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-306",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 562,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0117,
+        "feature": 0.1192,
+        "question": 0.8691
+      },
+      "ms": 86.0,
+      "wall_s": 0.0860336659825407,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 306,
+      "construction": null,
+      "state_tokens": 116,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-435",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 575,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0041,
+        "feature": 0.0084,
+        "question": 0.9874
+      },
+      "ms": 85.1,
+      "wall_s": 0.08507545804604888,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 435,
+      "construction": null,
+      "state_tokens": 121,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-460",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 365,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0133,
+        "feature": 0.012,
+        "question": 0.9747
+      },
+      "ms": 85.7,
+      "wall_s": 0.0856615420198068,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 460,
+      "construction": null,
+      "state_tokens": 86,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-513",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 356,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.127,
+        "feature": 0.1296,
+        "question": 0.7434
+      },
+      "ms": 85.7,
+      "wall_s": 0.08571366698015481,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 513,
+      "construction": null,
+      "state_tokens": 80,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-mock-oauth2-server-573",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1676,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0129,
+        "feature": 0.0133,
+        "question": 0.9738
+      },
+      "ms": 141.2,
+      "wall_s": 0.14120558300055563,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mock-oauth2-server",
+      "number": 573,
+      "construction": null,
+      "state_tokens": 393,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-modiapersonoversikt-126",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 272,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0979,
+        "feature": 0.1264,
+        "question": 0.7757
+      },
+      "ms": 86.5,
+      "wall_s": 0.08653650002088398,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/modiapersonoversikt",
+      "number": 126,
+      "construction": null,
+      "state_tokens": 81,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-387",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 359,
+      "lang": "no",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8528,
+        "feature": 0.0261,
+        "question": 0.1211
+      },
+      "ms": 89.3,
+      "wall_s": 0.0893349580001086,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 387,
+      "construction": null,
+      "state_tokens": 93,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-nav-dekoratoren_legacy-397",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 502,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0345,
+        "feature": 0.3349,
+        "question": 0.6306
+      },
+      "ms": 95.5,
+      "wall_s": 0.09547166700940579,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/nav-dekoratoren_legacy",
+      "number": 397,
+      "construction": null,
+      "state_tokens": 148,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-react-intl-bundler-3",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 132,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0269,
+        "feature": 0.1502,
+        "question": 0.8229
+      },
+      "ms": 72.0,
+      "wall_s": 0.07204337499570101,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/react-intl-bundler",
+      "number": 3,
+      "construction": null,
+      "state_tokens": 44,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-standbot-8",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 220,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.3995,
+        "feature": 0.0275,
+        "question": 0.573
+      },
+      "ms": 70.7,
+      "wall_s": 0.07071637496119365,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/standbot",
+      "number": 8,
+      "construction": null,
+      "state_tokens": 57,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-syfo-budstikka-166",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1574,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0501,
+        "feature": 0.1289,
+        "question": 0.821
+      },
+      "ms": 141.0,
+      "wall_s": 0.14098983304575086,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 166,
+      "construction": null,
+      "state_tokens": 405,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-syfo-budstikka-167",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1534,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0227,
+        "feature": 0.0329,
+        "question": 0.9445
+      },
+      "ms": 159.4,
+      "wall_s": 0.159408625040669,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/syfo-budstikka",
+      "number": 167,
+      "construction": null,
+      "state_tokens": 431,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-sykmeldinger-38",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 86,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.0135,
+        "feature": 0.3173,
+        "question": 0.6693
+      },
+      "ms": 67.7,
+      "wall_s": 0.0677162500214763,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/sykmeldinger",
+      "number": 38,
+      "construction": null,
+      "state_tokens": 26,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-token-support-83",
+      "set": "issue-type",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 119,
+      "lang": "no",
+      "choice": "question",
+      "p": {
+        "bug": 0.1096,
+        "feature": 0.0469,
+        "question": 0.8436
+      },
+      "ms": 74.3,
+      "wall_s": 0.07430425001075491,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/token-support",
+      "number": 83,
+      "construction": null,
+      "state_tokens": 33,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-mlx-workspace-53",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 350,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9703,
+        "no": 0.0297
+      },
+      "ms": 77.6,
+      "wall_s": 0.07758958300109953,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 53,
+      "construction": "real-why",
+      "state_tokens": 83,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-431",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 382,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9462,
+        "no": 0.0538
+      },
+      "ms": 77.3,
+      "wall_s": 0.07725425000535324,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 431,
+      "construction": "real-why",
+      "state_tokens": 92,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-824",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 376,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9672,
+        "no": 0.0328
+      },
+      "ms": 77.5,
+      "wall_s": 0.0774862079997547,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 824,
+      "construction": "real-why",
+      "state_tokens": 95,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-600",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 447,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9541,
+        "no": 0.0459
+      },
+      "ms": 66.9,
+      "wall_s": 0.06693420797819272,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 600,
+      "construction": "real-why",
+      "state_tokens": 106,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-421",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 586,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9289,
+        "no": 0.0711
+      },
+      "ms": 77.2,
+      "wall_s": 0.07724712503841147,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 421,
+      "construction": "real-why",
+      "state_tokens": 133,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-698",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 630,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9422,
+        "no": 0.0578
+      },
+      "ms": 81.8,
+      "wall_s": 0.08177141699707136,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 698,
+      "construction": "real-why",
+      "state_tokens": 161,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-684",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 644,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9687,
+        "no": 0.0313
+      },
+      "ms": 84.1,
+      "wall_s": 0.084106124995742,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 684,
+      "construction": "real-why",
+      "state_tokens": 155,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-694",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 674,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9805,
+        "no": 0.0195
+      },
+      "ms": 93.0,
+      "wall_s": 0.09303774998988956,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 694,
+      "construction": "real-why",
+      "state_tokens": 198,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-700",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 882,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9659,
+        "no": 0.0341
+      },
+      "ms": 97.1,
+      "wall_s": 0.09706495801219717,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 700,
+      "construction": "real-why",
+      "state_tokens": 243,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-mlx-workspace-42",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 892,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9473,
+        "no": 0.0527
+      },
+      "ms": 98.8,
+      "wall_s": 0.09883154096314684,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 42,
+      "construction": "real-why",
+      "state_tokens": 255,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-822",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 1000,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9361,
+        "no": 0.0639
+      },
+      "ms": 100.2,
+      "wall_s": 0.10015883296728134,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 822,
+      "construction": "real-why",
+      "state_tokens": 221,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-524",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 778,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.949,
+        "no": 0.051
+      },
+      "ms": 88.5,
+      "wall_s": 0.08853566698962823,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 524,
+      "construction": "real-why",
+      "state_tokens": 173,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-916",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 397,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9839,
+        "no": 0.0161
+      },
+      "ms": 77.2,
+      "wall_s": 0.07716862502275035,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 916,
+      "construction": "real-why",
+      "state_tokens": 117,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-738",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 470,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9569,
+        "no": 0.0431
+      },
+      "ms": 80.0,
+      "wall_s": 0.07995220902375877,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 738,
+      "construction": "real-why",
+      "state_tokens": 140,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-444",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 554,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9688,
+        "no": 0.0312
+      },
+      "ms": 75.3,
+      "wall_s": 0.07531400001607835,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 444,
+      "construction": "real-why",
+      "state_tokens": 168,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-675",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 568,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9793,
+        "no": 0.0207
+      },
+      "ms": 78.0,
+      "wall_s": 0.07796958304243162,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 675,
+      "construction": "real-why",
+      "state_tokens": 183,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-757",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 633,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.8403,
+        "no": 0.1597
+      },
+      "ms": 79.6,
+      "wall_s": 0.07963950000703335,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 757,
+      "construction": "real-why",
+      "state_tokens": 182,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-764",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 805,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9762,
+        "no": 0.0238
+      },
+      "ms": 90.0,
+      "wall_s": 0.08996224997099489,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 764,
+      "construction": "real-why",
+      "state_tokens": 237,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-758",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 817,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9662,
+        "no": 0.0338
+      },
+      "ms": 92.0,
+      "wall_s": 0.09197333303745836,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 758,
+      "construction": "real-why",
+      "state_tokens": 233,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-756",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 915,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9218,
+        "no": 0.0782
+      },
+      "ms": 107.3,
+      "wall_s": 0.10733849997632205,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 756,
+      "construction": "real-why",
+      "state_tokens": 258,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-510",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 741,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9285,
+        "no": 0.0715
+      },
+      "ms": 101.0,
+      "wall_s": 0.10104837501421571,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 510,
+      "construction": "real-why",
+      "state_tokens": 218,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-680",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 846,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.9721,
+        "no": 0.0279
+      },
+      "ms": 117.9,
+      "wall_s": 0.11785150005016476,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 680,
+      "construction": "real-why",
+      "state_tokens": 271,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-766",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 855,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.7046,
+        "no": 0.2954
+      },
+      "ms": 100.9,
+      "wall_s": 0.10086529096588492,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 766,
+      "construction": "real-why",
+      "state_tokens": 246,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-why-copilot-954",
+      "set": "pr-motivation",
+      "expect": "yes",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 830,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.6418,
+        "no": 0.3582
+      },
+      "ms": 100.8,
+      "wall_s": 0.10075537499506027,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 954,
+      "construction": "real-why",
+      "state_tokens": 207,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-405",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 85,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.0854,
+        "no": 0.9146
+      },
+      "ms": 58.1,
+      "wall_s": 0.058056875015608966,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 405,
+      "construction": "real-what",
+      "state_tokens": 23,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-924",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 98,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "yes": 0.1043,
+        "no": 0.8957
+      },
+      "ms": 55.0,
+      "wall_s": 0.05497150000883266,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 924,
+      "construction": "real-what",
+      "state_tokens": 27,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-52",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 126,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.1203,
+        "no": 0.8797
+      },
+      "ms": 53.0,
+      "wall_s": 0.05296416603960097,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 52,
+      "construction": "real-what",
+      "state_tokens": 28,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-430",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 231,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3022,
+        "no": 0.6978
+      },
+      "ms": 75.6,
+      "wall_s": 0.07556462497450411,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 430,
+      "construction": "real-what",
+      "state_tokens": 75,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-761",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 230,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "yes": 0.316,
+        "no": 0.684
+      },
+      "ms": 61.7,
+      "wall_s": 0.061689457972534,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 761,
+      "construction": "real-what",
+      "state_tokens": 63,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-45",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 263,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3859,
+        "no": 0.6141
+      },
+      "ms": 74.3,
+      "wall_s": 0.0742823330219835,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 45,
+      "construction": "real-what",
+      "state_tokens": 67,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-26",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 397,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3315,
+        "no": 0.6685
+      },
+      "ms": 72.3,
+      "wall_s": 0.07234912499552593,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 26,
+      "construction": "real-what",
+      "state_tokens": 97,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-427",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 355,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.4103,
+        "no": 0.5897
+      },
+      "ms": 75.6,
+      "wall_s": 0.07560854201437905,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 427,
+      "construction": "real-what",
+      "state_tokens": 83,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-417",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 388,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3972,
+        "no": 0.6028
+      },
+      "ms": 76.1,
+      "wall_s": 0.076056832971517,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 417,
+      "construction": "real-what",
+      "state_tokens": 78,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-944",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 733,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "yes": 0.239,
+        "no": 0.761
+      },
+      "ms": 92.3,
+      "wall_s": 0.09230349998688325,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 944,
+      "construction": "real-what",
+      "state_tokens": 213,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-copilot-927",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 718,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.7229,
+        "no": 0.2771
+      },
+      "ms": 93.2,
+      "wall_s": 0.09322275000158697,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 927,
+      "construction": "real-what",
+      "state_tokens": 206,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-real-what-mlx-workspace-44",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 976,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.6745,
+        "no": 0.3255
+      },
+      "ms": 131.3,
+      "wall_s": 0.13126741698943079,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/mlx-workspace",
+      "number": 44,
+      "construction": "real-what",
+      "state_tokens": 381,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-mlx-workspace-53",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 333,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3934,
+        "no": 0.6066
+      },
+      "ms": 81.4,
+      "wall_s": 0.08136116695823148,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/mlx-workspace",
+      "number": 53,
+      "construction": "controlled",
+      "state_tokens": 75,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-824",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 345,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3452,
+        "no": 0.6548
+      },
+      "ms": 75.2,
+      "wall_s": 0.07521570904646069,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 824,
+      "construction": "controlled",
+      "state_tokens": 96,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-600",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 463,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.5123,
+        "no": 0.4877
+      },
+      "ms": 78.2,
+      "wall_s": 0.0782039999612607,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 600,
+      "construction": "controlled",
+      "state_tokens": 108,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-698",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 678,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.3072,
+        "no": 0.6928
+      },
+      "ms": 86.1,
+      "wall_s": 0.0860630830284208,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 698,
+      "construction": "controlled",
+      "state_tokens": 181,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-684",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 645,
+      "lang": "en",
+      "choice": "yes",
+      "p": {
+        "yes": 0.7803,
+        "no": 0.2197
+      },
+      "ms": 86.7,
+      "wall_s": 0.08668991597369313,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 684,
+      "construction": "controlled",
+      "state_tokens": 165,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-694",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 531,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.4585,
+        "no": 0.5415
+      },
+      "ms": 79.8,
+      "wall_s": 0.07978787500178441,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 694,
+      "construction": "controlled",
+      "state_tokens": 161,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-700",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 833,
+      "lang": "en",
+      "choice": "no",
+      "p": {
+        "yes": 0.4083,
+        "no": 0.5917
+      },
+      "ms": 89.0,
+      "wall_s": 0.08903733303304762,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 700,
+      "construction": "controlled",
+      "state_tokens": 225,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-444",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 526,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "yes": 0.4216,
+        "no": 0.5784
+      },
+      "ms": 84.1,
+      "wall_s": 0.08413258305517957,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 444,
+      "construction": "controlled",
+      "state_tokens": 158,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-675",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 463,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.6039,
+        "no": 0.3961
+      },
+      "ms": 87.9,
+      "wall_s": 0.0879283330286853,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 675,
+      "construction": "controlled",
+      "state_tokens": 142,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-510",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 699,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.5855,
+        "no": 0.4145
+      },
+      "ms": 93.8,
+      "wall_s": 0.09377608302747831,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 510,
+      "construction": "controlled",
+      "state_tokens": 196,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-756",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 824,
+      "lang": "no",
+      "choice": "yes",
+      "p": {
+        "yes": 0.5403,
+        "no": 0.4597
+      },
+      "ms": 96.7,
+      "wall_s": 0.09671729197725654,
+      "error": null,
+      "ok": false,
+      "repo": "navikt/copilot",
+      "number": 756,
+      "construction": "controlled",
+      "state_tokens": 194,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "pr-motivation-controlled-copilot-764",
+      "set": "pr-motivation",
+      "expect": "no",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "chars": 569,
+      "lang": "no",
+      "choice": "no",
+      "p": {
+        "yes": 0.4637,
+        "no": 0.5363
+      },
+      "ms": 84.3,
+      "wall_s": 0.08429704199079424,
+      "error": null,
+      "ok": true,
+      "repo": "navikt/copilot",
+      "number": 764,
+      "construction": "controlled",
+      "state_tokens": 159,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1508",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1052,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9699,
+        "feature": 0.011,
+        "question": 0.019
+      },
+      "ms": 112.8,
+      "wall_s": 0.11279308301163837,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1508,
+      "construction": null,
+      "state_tokens": 237,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1205",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2954,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9832,
+        "feature": 0.0053,
+        "question": 0.0115
+      },
+      "ms": 238.5,
+      "wall_s": 0.23846974998014048,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1205,
+      "construction": null,
+      "state_tokens": 788,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1946",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1787,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9571,
+        "feature": 0.0062,
+        "question": 0.0367
+      },
+      "ms": 176.8,
+      "wall_s": 0.1768293339991942,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1946,
+      "construction": null,
+      "state_tokens": 494,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1482",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 466,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9759,
+        "feature": 0.0133,
+        "question": 0.0108
+      },
+      "ms": 97.4,
+      "wall_s": 0.09736008296022192,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1482,
+      "construction": null,
+      "state_tokens": 102,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1681",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 634,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9678,
+        "feature": 0.0071,
+        "question": 0.0251
+      },
+      "ms": 104.1,
+      "wall_s": 0.10410799999954179,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1681,
+      "construction": null,
+      "state_tokens": 188,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1666",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 501,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.928,
+        "feature": 0.0044,
+        "question": 0.0676
+      },
+      "ms": 93.9,
+      "wall_s": 0.09386116598034278,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1666,
+      "construction": null,
+      "state_tokens": 147,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2066",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 882,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9623,
+        "feature": 0.0189,
+        "question": 0.0188
+      },
+      "ms": 103.5,
+      "wall_s": 0.10348729096585885,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2066,
+      "construction": null,
+      "state_tokens": 232,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1163",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1525,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8989,
+        "feature": 0.0345,
+        "question": 0.0666
+      },
+      "ms": 134.7,
+      "wall_s": 0.1347323750378564,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1163,
+      "construction": null,
+      "state_tokens": 370,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2287",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1370,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9641,
+        "feature": 0.012,
+        "question": 0.0239
+      },
+      "ms": 135.8,
+      "wall_s": 0.1358033749856986,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2287,
+      "construction": null,
+      "state_tokens": 337,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1209",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1319,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9401,
+        "feature": 0.0226,
+        "question": 0.0374
+      },
+      "ms": 113.6,
+      "wall_s": 0.11358816601568833,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1209,
+      "construction": null,
+      "state_tokens": 294,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1686",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1116,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8318,
+        "feature": 0.0306,
+        "question": 0.1376
+      },
+      "ms": 126.0,
+      "wall_s": 0.12604579201433808,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1686,
+      "construction": null,
+      "state_tokens": 272,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1516",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1371,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9758,
+        "feature": 0.0073,
+        "question": 0.0169
+      },
+      "ms": 134.7,
+      "wall_s": 0.1347057079547085,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1516,
+      "construction": null,
+      "state_tokens": 371,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1178",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 803,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9718,
+        "feature": 0.0069,
+        "question": 0.0214
+      },
+      "ms": 111.0,
+      "wall_s": 0.11101754102855921,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1178,
+      "construction": null,
+      "state_tokens": 211,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1132",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 803,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6817,
+        "feature": 0.0785,
+        "question": 0.2398
+      },
+      "ms": 98.9,
+      "wall_s": 0.09891958301886916,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1132,
+      "construction": null,
+      "state_tokens": 186,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1365",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1431,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9161,
+        "feature": 0.0084,
+        "question": 0.0755
+      },
+      "ms": 141.3,
+      "wall_s": 0.1413199169910513,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1365,
+      "construction": null,
+      "state_tokens": 344,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1442",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1730,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9859,
+        "feature": 0.004,
+        "question": 0.0101
+      },
+      "ms": 206.6,
+      "wall_s": 0.20656200003577396,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1442,
+      "construction": null,
+      "state_tokens": 688,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1724",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 280,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.971,
+        "feature": 0.0082,
+        "question": 0.0208
+      },
+      "ms": 89.1,
+      "wall_s": 0.08908383297966793,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1724,
+      "construction": null,
+      "state_tokens": 73,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1813",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 415,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9537,
+        "feature": 0.0266,
+        "question": 0.0197
+      },
+      "ms": 77.2,
+      "wall_s": 0.07716504100244492,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1813,
+      "construction": null,
+      "state_tokens": 103,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1669",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1330,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9664,
+        "feature": 0.0062,
+        "question": 0.0274
+      },
+      "ms": 139.1,
+      "wall_s": 0.1391414170502685,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1669,
+      "construction": null,
+      "state_tokens": 438,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2275",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1745,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8872,
+        "feature": 0.0928,
+        "question": 0.0201
+      },
+      "ms": 173.2,
+      "wall_s": 0.17317629198078066,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2275,
+      "construction": null,
+      "state_tokens": 529,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1526",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 542,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.2952,
+        "feature": 0.271,
+        "question": 0.4339
+      },
+      "ms": 93.1,
+      "wall_s": 0.09307041601277888,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1526,
+      "construction": null,
+      "state_tokens": 137,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1646",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 986,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7562,
+        "feature": 0.0366,
+        "question": 0.2072
+      },
+      "ms": 112.7,
+      "wall_s": 0.1127002919674851,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1646,
+      "construction": null,
+      "state_tokens": 263,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1769",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3465,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9421,
+        "feature": 0.0124,
+        "question": 0.0455
+      },
+      "ms": 250.2,
+      "wall_s": 0.25017395796021447,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1769,
+      "construction": null,
+      "state_tokens": 854,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1663",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1133,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.975,
+        "feature": 0.0104,
+        "question": 0.0146
+      },
+      "ms": 119.8,
+      "wall_s": 0.11975520802661777,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1663,
+      "construction": null,
+      "state_tokens": 291,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2801",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1299,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9531,
+        "feature": 0.0081,
+        "question": 0.0388
+      },
+      "ms": 130.5,
+      "wall_s": 0.1304870419553481,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2801,
+      "construction": null,
+      "state_tokens": 331,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1878",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 690,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9885,
+        "feature": 0.0044,
+        "question": 0.0072
+      },
+      "ms": 95.8,
+      "wall_s": 0.0958317500189878,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1878,
+      "construction": null,
+      "state_tokens": 188,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1157",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1971,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8959,
+        "feature": 0.0268,
+        "question": 0.0773
+      },
+      "ms": 174.7,
+      "wall_s": 0.17469958396395668,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1157,
+      "construction": null,
+      "state_tokens": 561,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2264",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1010,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9612,
+        "feature": 0.0064,
+        "question": 0.0324
+      },
+      "ms": 112.1,
+      "wall_s": 0.1120833340100944,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2264,
+      "construction": null,
+      "state_tokens": 242,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1626",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2363,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9796,
+        "feature": 0.0055,
+        "question": 0.0149
+      },
+      "ms": 193.8,
+      "wall_s": 0.19384074996924028,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1626,
+      "construction": null,
+      "state_tokens": 606,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1841",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2718,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9833,
+        "feature": 0.0048,
+        "question": 0.012
+      },
+      "ms": 291.5,
+      "wall_s": 0.2914735000231303,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1841,
+      "construction": null,
+      "state_tokens": 1009,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1544",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2377,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9658,
+        "feature": 0.0172,
+        "question": 0.017
+      },
+      "ms": 260.0,
+      "wall_s": 0.26003016700269654,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1544,
+      "construction": null,
+      "state_tokens": 810,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1356",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 5325,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9827,
+        "feature": 0.006,
+        "question": 0.0113
+      },
+      "ms": 630.4,
+      "wall_s": 0.6303657499956898,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1356,
+      "construction": null,
+      "state_tokens": 2275,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1716",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 703,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9772,
+        "feature": 0.0066,
+        "question": 0.0162
+      },
+      "ms": 106.6,
+      "wall_s": 0.1065897920052521,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1716,
+      "construction": null,
+      "state_tokens": 162,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1467",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 417,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9177,
+        "feature": 0.0121,
+        "question": 0.0702
+      },
+      "ms": 82.8,
+      "wall_s": 0.08281937497667968,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1467,
+      "construction": null,
+      "state_tokens": 99,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1260",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1349,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9209,
+        "feature": 0.0198,
+        "question": 0.0594
+      },
+      "ms": 111.9,
+      "wall_s": 0.11193516600178555,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1260,
+      "construction": null,
+      "state_tokens": 318,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1732",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1404,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.98,
+        "feature": 0.0058,
+        "question": 0.0142
+      },
+      "ms": 118.7,
+      "wall_s": 0.11872283299453557,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1732,
+      "construction": null,
+      "state_tokens": 321,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2061",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1013,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9642,
+        "feature": 0.0124,
+        "question": 0.0234
+      },
+      "ms": 102.2,
+      "wall_s": 0.10219875001348555,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2061,
+      "construction": null,
+      "state_tokens": 237,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1396",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1231,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9737,
+        "feature": 0.0061,
+        "question": 0.0202
+      },
+      "ms": 123.4,
+      "wall_s": 0.12335900001926348,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1396,
+      "construction": null,
+      "state_tokens": 293,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2020",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1283,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8877,
+        "feature": 0.0117,
+        "question": 0.1006
+      },
+      "ms": 120.2,
+      "wall_s": 0.12018533400259912,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2020,
+      "construction": null,
+      "state_tokens": 290,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1745",
+      "set": "issue-type-en",
+      "expect": "bug",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2388,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9726,
+        "feature": 0.0039,
+        "question": 0.0234
+      },
+      "ms": 192.1,
+      "wall_s": 0.19214124995050952,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1745,
+      "construction": null,
+      "state_tokens": 637,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1834",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 934,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0311,
+        "feature": 0.9291,
+        "question": 0.0397
+      },
+      "ms": 115.1,
+      "wall_s": 0.1150715000112541,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1834,
+      "construction": null,
+      "state_tokens": 194,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1475",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1439,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0057,
+        "feature": 0.9101,
+        "question": 0.0843
+      },
+      "ms": 127.4,
+      "wall_s": 0.1274017920368351,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1475,
+      "construction": null,
+      "state_tokens": 320,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1134",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 845,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0074,
+        "feature": 0.9805,
+        "question": 0.0121
+      },
+      "ms": 95.0,
+      "wall_s": 0.09503316599875689,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1134,
+      "construction": null,
+      "state_tokens": 188,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1537",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 268,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.1835,
+        "feature": 0.619,
+        "question": 0.1975
+      },
+      "ms": 71.8,
+      "wall_s": 0.07177887501893565,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1537,
+      "construction": null,
+      "state_tokens": 63,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1696",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2365,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0048,
+        "feature": 0.9759,
+        "question": 0.0192
+      },
+      "ms": 171.3,
+      "wall_s": 0.17131437495118007,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1696,
+      "construction": null,
+      "state_tokens": 548,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1372",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 559,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.007,
+        "feature": 0.9821,
+        "question": 0.0109
+      },
+      "ms": 95.5,
+      "wall_s": 0.09546850004699081,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1372,
+      "construction": null,
+      "state_tokens": 129,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1148",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1345,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0091,
+        "feature": 0.9608,
+        "question": 0.0301
+      },
+      "ms": 122.8,
+      "wall_s": 0.12283062504138798,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1148,
+      "construction": null,
+      "state_tokens": 304,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1483",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 411,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0033,
+        "feature": 0.9815,
+        "question": 0.0153
+      },
+      "ms": 90.8,
+      "wall_s": 0.09079179202672094,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1483,
+      "construction": null,
+      "state_tokens": 94,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1295",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1477,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0192,
+        "feature": 0.9441,
+        "question": 0.0366
+      },
+      "ms": 118.7,
+      "wall_s": 0.11866183398524299,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1295,
+      "construction": null,
+      "state_tokens": 298,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1162",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1484,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0028,
+        "feature": 0.9877,
+        "question": 0.0095
+      },
+      "ms": 132.4,
+      "wall_s": 0.13235362502746284,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1162,
+      "construction": null,
+      "state_tokens": 332,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2304",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1265,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0159,
+        "feature": 0.7261,
+        "question": 0.258
+      },
+      "ms": 131.4,
+      "wall_s": 0.13135295803658664,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2304,
+      "construction": null,
+      "state_tokens": 282,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1908",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1036,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0398,
+        "feature": 0.9314,
+        "question": 0.0288
+      },
+      "ms": 128.0,
+      "wall_s": 0.12797375000081956,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1908,
+      "construction": null,
+      "state_tokens": 258,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1092",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 861,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0063,
+        "feature": 0.984,
+        "question": 0.0097
+      },
+      "ms": 98.4,
+      "wall_s": 0.09835216595092788,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1092,
+      "construction": null,
+      "state_tokens": 192,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1714",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2101,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5031,
+        "feature": 0.3011,
+        "question": 0.1958
+      },
+      "ms": 169.7,
+      "wall_s": 0.16974154202034697,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1714,
+      "construction": null,
+      "state_tokens": 520,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1656",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1319,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5676,
+        "feature": 0.3995,
+        "question": 0.0329
+      },
+      "ms": 121.2,
+      "wall_s": 0.12120475003030151,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1656,
+      "construction": null,
+      "state_tokens": 291,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1896",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 690,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0264,
+        "feature": 0.9474,
+        "question": 0.0263
+      },
+      "ms": 99.3,
+      "wall_s": 0.09932304196991026,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1896,
+      "construction": null,
+      "state_tokens": 175,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1602",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 721,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.015,
+        "feature": 0.9533,
+        "question": 0.0317
+      },
+      "ms": 95.6,
+      "wall_s": 0.09563625004375353,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1602,
+      "construction": null,
+      "state_tokens": 166,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1228",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1134,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0043,
+        "feature": 0.9813,
+        "question": 0.0143
+      },
+      "ms": 116.9,
+      "wall_s": 0.11687608301872388,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1228,
+      "construction": null,
+      "state_tokens": 262,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1140",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1542,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0076,
+        "feature": 0.9604,
+        "question": 0.0321
+      },
+      "ms": 146.3,
+      "wall_s": 0.14630716701503843,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1140,
+      "construction": null,
+      "state_tokens": 388,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1678",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 584,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5914,
+        "feature": 0.3075,
+        "question": 0.1011
+      },
+      "ms": 98.9,
+      "wall_s": 0.09886362496763468,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1678,
+      "construction": null,
+      "state_tokens": 173,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1081",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 170,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0042,
+        "feature": 0.9881,
+        "question": 0.0077
+      },
+      "ms": 79.7,
+      "wall_s": 0.07967858301708475,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1081,
+      "construction": null,
+      "state_tokens": 40,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2383",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2414,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0612,
+        "feature": 0.8982,
+        "question": 0.0406
+      },
+      "ms": 174.2,
+      "wall_s": 0.17415291699580848,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2383,
+      "construction": null,
+      "state_tokens": 515,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1319",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3166,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0058,
+        "feature": 0.9747,
+        "question": 0.0196
+      },
+      "ms": 269.9,
+      "wall_s": 0.2699411670328118,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1319,
+      "construction": null,
+      "state_tokens": 898,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1628",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 852,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0119,
+        "feature": 0.9703,
+        "question": 0.0178
+      },
+      "ms": 103.8,
+      "wall_s": 0.10383187496336177,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1628,
+      "construction": null,
+      "state_tokens": 191,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1609",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1198,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0055,
+        "feature": 0.9777,
+        "question": 0.0168
+      },
+      "ms": 127.5,
+      "wall_s": 0.12753829098073766,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1609,
+      "construction": null,
+      "state_tokens": 275,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1837",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 774,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0536,
+        "feature": 0.9206,
+        "question": 0.0258
+      },
+      "ms": 94.2,
+      "wall_s": 0.09417879197280854,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1837,
+      "construction": null,
+      "state_tokens": 160,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1231",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1148,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7821,
+        "feature": 0.1848,
+        "question": 0.033
+      },
+      "ms": 125.9,
+      "wall_s": 0.12590391596313566,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1231,
+      "construction": null,
+      "state_tokens": 383,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2146",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1035,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0356,
+        "feature": 0.9343,
+        "question": 0.0301
+      },
+      "ms": 116.4,
+      "wall_s": 0.11637025000527501,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2146,
+      "construction": null,
+      "state_tokens": 285,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1804",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 989,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0083,
+        "feature": 0.967,
+        "question": 0.0247
+      },
+      "ms": 101.7,
+      "wall_s": 0.10167404101230204,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1804,
+      "construction": null,
+      "state_tokens": 211,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1384",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 676,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0305,
+        "feature": 0.9145,
+        "question": 0.055
+      },
+      "ms": 95.2,
+      "wall_s": 0.09516858297865838,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1384,
+      "construction": null,
+      "state_tokens": 133,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1542",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 400,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0168,
+        "feature": 0.7144,
+        "question": 0.2688
+      },
+      "ms": 90.3,
+      "wall_s": 0.09032883303007111,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1542,
+      "construction": null,
+      "state_tokens": 87,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1593",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 769,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9047,
+        "feature": 0.0275,
+        "question": 0.0678
+      },
+      "ms": 103.9,
+      "wall_s": 0.10393633303465322,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1593,
+      "construction": null,
+      "state_tokens": 198,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1287",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2374,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0597,
+        "feature": 0.9199,
+        "question": 0.0204
+      },
+      "ms": 175.7,
+      "wall_s": 0.17570554197300225,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1287,
+      "construction": null,
+      "state_tokens": 546,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1871",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 602,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0232,
+        "feature": 0.948,
+        "question": 0.0288
+      },
+      "ms": 103.0,
+      "wall_s": 0.1030310420319438,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1871,
+      "construction": null,
+      "state_tokens": 145,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1659",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3108,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.966,
+        "feature": 0.0111,
+        "question": 0.0229
+      },
+      "ms": 237.6,
+      "wall_s": 0.23760979197686538,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1659,
+      "construction": null,
+      "state_tokens": 773,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1186",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 707,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.002,
+        "feature": 0.9858,
+        "question": 0.0122
+      },
+      "ms": 103.1,
+      "wall_s": 0.10309891699580476,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1186,
+      "construction": null,
+      "state_tokens": 175,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1314",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2254,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0034,
+        "feature": 0.9183,
+        "question": 0.0783
+      },
+      "ms": 168.6,
+      "wall_s": 0.16862262500217184,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1314,
+      "construction": null,
+      "state_tokens": 505,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1865",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 237,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0042,
+        "feature": 0.9862,
+        "question": 0.0095
+      },
+      "ms": 77.7,
+      "wall_s": 0.07772658404428512,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1865,
+      "construction": null,
+      "state_tokens": 63,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1281",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 926,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.2207,
+        "feature": 0.6923,
+        "question": 0.0871
+      },
+      "ms": 99.9,
+      "wall_s": 0.09989399998448789,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1281,
+      "construction": null,
+      "state_tokens": 188,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1361",
+      "set": "issue-type-en",
+      "expect": "feature",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1669,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0208,
+        "feature": 0.9495,
+        "question": 0.0296
+      },
+      "ms": 145.0,
+      "wall_s": 0.14504941599443555,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1361,
+      "construction": null,
+      "state_tokens": 439,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1223",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 746,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0033,
+        "feature": 0.0043,
+        "question": 0.9924
+      },
+      "ms": 93.4,
+      "wall_s": 0.09340766700915992,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1223,
+      "construction": null,
+      "state_tokens": 190,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1484",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2748,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.804,
+        "feature": 0.0069,
+        "question": 0.1891
+      },
+      "ms": 214.5,
+      "wall_s": 0.2145372909726575,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1484,
+      "construction": null,
+      "state_tokens": 736,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1735",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1122,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8118,
+        "feature": 0.0079,
+        "question": 0.1803
+      },
+      "ms": 126.7,
+      "wall_s": 0.1267108330503106,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1735,
+      "construction": null,
+      "state_tokens": 316,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1346",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1050,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0364,
+        "feature": 0.0049,
+        "question": 0.9588
+      },
+      "ms": 106.9,
+      "wall_s": 0.10687524999957532,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1346,
+      "construction": null,
+      "state_tokens": 215,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1034",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2112,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9064,
+        "feature": 0.0159,
+        "question": 0.0777
+      },
+      "ms": 190.4,
+      "wall_s": 0.1904059160151519,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1034,
+      "construction": null,
+      "state_tokens": 580,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-935",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1207,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9223,
+        "feature": 0.0059,
+        "question": 0.0717
+      },
+      "ms": 132.6,
+      "wall_s": 0.1325988750322722,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 935,
+      "construction": null,
+      "state_tokens": 273,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-390",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1519,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0084,
+        "feature": 0.5652,
+        "question": 0.4264
+      },
+      "ms": 143.1,
+      "wall_s": 0.14310283301165327,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 390,
+      "construction": null,
+      "state_tokens": 335,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-809",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1066,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0055,
+        "feature": 0.0093,
+        "question": 0.9852
+      },
+      "ms": 108.2,
+      "wall_s": 0.1081705839606002,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 809,
+      "construction": null,
+      "state_tokens": 227,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-815",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2078,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9485,
+        "feature": 0.007,
+        "question": 0.0445
+      },
+      "ms": 192.3,
+      "wall_s": 0.1923286669771187,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 815,
+      "construction": null,
+      "state_tokens": 593,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1351",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 778,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.4192,
+        "feature": 0.0152,
+        "question": 0.5656
+      },
+      "ms": 108.3,
+      "wall_s": 0.10829445900162682,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1351,
+      "construction": null,
+      "state_tokens": 195,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1823",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1781,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8357,
+        "feature": 0.0471,
+        "question": 0.1171
+      },
+      "ms": 162.4,
+      "wall_s": 0.16239658294944093,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1823,
+      "construction": null,
+      "state_tokens": 449,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1367",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 5309,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.3376,
+        "feature": 0.0127,
+        "question": 0.6498
+      },
+      "ms": 440.3,
+      "wall_s": 0.44031779101351276,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1367,
+      "construction": null,
+      "state_tokens": 1651,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1363",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 316,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0027,
+        "feature": 0.0193,
+        "question": 0.978
+      },
+      "ms": 88.1,
+      "wall_s": 0.08813820901559666,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1363,
+      "construction": null,
+      "state_tokens": 72,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1035",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1741,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9725,
+        "feature": 0.005,
+        "question": 0.0225
+      },
+      "ms": 149.1,
+      "wall_s": 0.1491356249898672,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1035,
+      "construction": null,
+      "state_tokens": 446,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-857",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 456,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0042,
+        "feature": 0.0039,
+        "question": 0.992
+      },
+      "ms": 80.5,
+      "wall_s": 0.08050779200857505,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 857,
+      "construction": null,
+      "state_tokens": 112,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1042",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 942,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.38,
+        "feature": 0.0274,
+        "question": 0.5926
+      },
+      "ms": 100.1,
+      "wall_s": 0.10005216597346589,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1042,
+      "construction": null,
+      "state_tokens": 221,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1634",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3547,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9277,
+        "feature": 0.0084,
+        "question": 0.0639
+      },
+      "ms": 450.2,
+      "wall_s": 0.450241458020173,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1634,
+      "construction": null,
+      "state_tokens": 1708,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-359",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 413,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0111,
+        "feature": 0.0744,
+        "question": 0.9145
+      },
+      "ms": 88.0,
+      "wall_s": 0.08802954200655222,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 359,
+      "construction": null,
+      "state_tokens": 112,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1440",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1713,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0241,
+        "feature": 0.0082,
+        "question": 0.9678
+      },
+      "ms": 163.8,
+      "wall_s": 0.16377254197141156,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1440,
+      "construction": null,
+      "state_tokens": 495,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1322",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3393,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.8884,
+        "feature": 0.0285,
+        "question": 0.0831
+      },
+      "ms": 276.0,
+      "wall_s": 0.27601554204011336,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1322,
+      "construction": null,
+      "state_tokens": 913,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-910",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 192,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0047,
+        "feature": 0.0368,
+        "question": 0.9585
+      },
+      "ms": 74.3,
+      "wall_s": 0.07433866697829217,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 910,
+      "construction": null,
+      "state_tokens": 43,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2263",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 703,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0051,
+        "feature": 0.0132,
+        "question": 0.9817
+      },
+      "ms": 90.5,
+      "wall_s": 0.09047841600840911,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2263,
+      "construction": null,
+      "state_tokens": 144,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1085",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1673,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7122,
+        "feature": 0.0139,
+        "question": 0.2739
+      },
+      "ms": 168.5,
+      "wall_s": 0.1685070419916883,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1085,
+      "construction": null,
+      "state_tokens": 513,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-726",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2041,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0107,
+        "feature": 0.01,
+        "question": 0.9793
+      },
+      "ms": 162.3,
+      "wall_s": 0.16226658294908702,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 726,
+      "construction": null,
+      "state_tokens": 507,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1909",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 307,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0051,
+        "feature": 0.0147,
+        "question": 0.9803
+      },
+      "ms": 91.3,
+      "wall_s": 0.09126516699325293,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1909,
+      "construction": null,
+      "state_tokens": 69,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2257",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1357,
+      "lang": "en",
+      "choice": "feature",
+      "p": {
+        "bug": 0.0096,
+        "feature": 0.7081,
+        "question": 0.2823
+      },
+      "ms": 120.4,
+      "wall_s": 0.12041012500412762,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2257,
+      "construction": null,
+      "state_tokens": 306,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1143",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1133,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0656,
+        "feature": 0.0131,
+        "question": 0.9214
+      },
+      "ms": 134.1,
+      "wall_s": 0.1340808339882642,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1143,
+      "construction": null,
+      "state_tokens": 330,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-315",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1931,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.11,
+        "feature": 0.0593,
+        "question": 0.8307
+      },
+      "ms": 166.7,
+      "wall_s": 0.166736250044778,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 315,
+      "construction": null,
+      "state_tokens": 474,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2027",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 414,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0525,
+        "feature": 0.0661,
+        "question": 0.8814
+      },
+      "ms": 91.6,
+      "wall_s": 0.09164708398748189,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2027,
+      "construction": null,
+      "state_tokens": 95,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-602",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1419,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.7049,
+        "feature": 0.0889,
+        "question": 0.2062
+      },
+      "ms": 133.8,
+      "wall_s": 0.133823208976537,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 602,
+      "construction": null,
+      "state_tokens": 301,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1737",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 933,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0155,
+        "feature": 0.012,
+        "question": 0.9725
+      },
+      "ms": 126.4,
+      "wall_s": 0.12640683294739574,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1737,
+      "construction": null,
+      "state_tokens": 274,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-868",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1887,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.3572,
+        "feature": 0.0207,
+        "question": 0.6222
+      },
+      "ms": 208.7,
+      "wall_s": 0.20868000003974885,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 868,
+      "construction": null,
+      "state_tokens": 642,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1257",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 704,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0114,
+        "feature": 0.0271,
+        "question": 0.9615
+      },
+      "ms": 103.0,
+      "wall_s": 0.10295929101994261,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1257,
+      "construction": null,
+      "state_tokens": 182,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1188",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2228,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.5262,
+        "feature": 0.0118,
+        "question": 0.462
+      },
+      "ms": 255.7,
+      "wall_s": 0.25574416696326807,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1188,
+      "construction": null,
+      "state_tokens": 857,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-2326",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 2034,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.3942,
+        "feature": 0.0084,
+        "question": 0.5975
+      },
+      "ms": 171.6,
+      "wall_s": 0.17160887498175725,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 2326,
+      "construction": null,
+      "state_tokens": 480,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-516",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 352,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0091,
+        "feature": 0.016,
+        "question": 0.9749
+      },
+      "ms": 87.2,
+      "wall_s": 0.08722950000083074,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 516,
+      "construction": null,
+      "state_tokens": 100,
+      "truncated": false,
+      "over_train": false
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1566",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 3244,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.9385,
+        "feature": 0.0078,
+        "question": 0.0537
+      },
+      "ms": 267.0,
+      "wall_s": 0.26695312501396984,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1566,
+      "construction": null,
+      "state_tokens": 899,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1625",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 4197,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.6433,
+        "feature": 0.0142,
+        "question": 0.3425
+      },
+      "ms": 334.4,
+      "wall_s": 0.3343820829759352,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1625,
+      "construction": null,
+      "state_tokens": 1168,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-1528",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 4262,
+      "lang": "en",
+      "choice": "bug",
+      "p": {
+        "bug": 0.4875,
+        "feature": 0.0357,
+        "question": 0.4768
+      },
+      "ms": 389.6,
+      "wall_s": 0.38959291600622237,
+      "error": null,
+      "ok": false,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 1528,
+      "construction": null,
+      "state_tokens": 1346,
+      "truncated": false,
+      "over_train": true
+    },
+    {
+      "id": "issue-type-en-oauth2-proxy-517",
+      "set": "issue-type-en",
+      "expect": "question",
+      "options": [
+        "bug",
+        "feature",
+        "question"
+      ],
+      "chars": 1065,
+      "lang": "en",
+      "choice": "question",
+      "p": {
+        "bug": 0.0065,
+        "feature": 0.0055,
+        "question": 0.988
+      },
+      "ms": 108.2,
+      "wall_s": 0.1082334999809973,
+      "error": null,
+      "ok": true,
+      "repo": "oauth2-proxy/oauth2-proxy",
+      "number": 517,
+      "construction": null,
+      "state_tokens": 237,
+      "truncated": false,
+      "over_train": false
+    }
+  ],
+  "eval": {},
+  "limit": null,
+  "cold": {
+    "ms": 103.8
+  },
+  "finished": "2026-09-30T08:44:50+0200",
+  "seconds": 35
+}
