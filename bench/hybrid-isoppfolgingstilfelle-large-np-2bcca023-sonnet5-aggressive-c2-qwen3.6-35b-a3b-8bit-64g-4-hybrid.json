@@ -1,0 +1,948 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-10-01T01:43:27+0200",
+      "seconds": 120.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 48,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 265906,
+        "input": 16,
+        "output": 4533,
+        "reasoning": 85,
+        "cache_write": 38222,
+        "cache_read": 223050
+      },
+      "cloud_cost_usd": 0.1864,
+      "cloud_cost_seen_usd": 0.1864,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 5173
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 3941
+        }
+      },
+      "local_server_pid": 89548,
+      "local_server_started": "2026-10-01T01:43:23.173234+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T01:43:10.946373+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-0-20261001-014326.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/mock/MockUtils.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/TestEnvironment.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 11
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt"
+        ],
+        "worker_files": [
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/TestEnvironment.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/mock/MockUtils.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-10-01T01:45:28+0200",
+      "seconds": 348.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 48,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 14,
+      "cloud_tokens": {
+        "total": 469711,
+        "input": 28,
+        "output": 5409,
+        "reasoning": 61,
+        "cache_write": 41260,
+        "cache_read": 422953
+      },
+      "cloud_cost_usd": 0.2425,
+      "cloud_cost_seen_usd": 0.2425,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 3935
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2520
+        }
+      },
+      "local_server_pid": 89548,
+      "local_server_started": "2026-10-01T01:43:23.173234+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T01:43:10.946373+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-1-20261001-014528.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Update configuredJacksonMapper call in OppfolgingstilfellePersonTest.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in MockUtils.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/mock/MockUtils.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in TestEnvironment.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/TestEnvironment.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in InMemoryValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in ValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in IValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in APIConsumerAccessService.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in OppfolgingstilfellePersonRepository.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in KafkaOppfolgingstilfelleSerializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in KafkaSykmeldingstatusDeserializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in KafkaSyketilfellebitDeserializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call in LeaderPodClient.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 12,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 1,
+        "deny_create": 0,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "bash",
+            "outcome": "deny_scripted",
+            "target": "cd /Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large && for f in $(grep -rl \"configuredJacksonMapper(\" . --include=\"*.kt\"); do\n  bas"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt"
+        ],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+          "src/test/kotlin/testhelper/TestEnvironment.kt",
+          "src/test/kotlin/testhelper/mock/MockUtils.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-10-01T01:51:18+0200",
+      "seconds": 84.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 8,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 368885,
+        "input": 22,
+        "output": 4328,
+        "reasoning": 1098,
+        "cache_write": 38020,
+        "cache_read": 325417
+      },
+      "cloud_cost_usd": 0.2144,
+      "cloud_cost_seen_usd": 0.2144,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2432
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2574
+        }
+      },
+      "local_server_pid": 89548,
+      "local_server_started": "2026-10-01T01:43:23.173234+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T01:43:10.946373+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-2-20261001-015118.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Fix configuredJacksonMapper call",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 1
+      },
+      "gate": {
+        "deny_files": 2,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "edit",
+            "outcome": "deny_files",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+          },
+          {
+            "tool": "edit",
+            "outcome": "deny_files",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "src/test/kotlin/testhelper/TestEnvironment.kt",
+          "src/test/kotlin/testhelper/mock/MockUtils.kt"
+        ],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+          "src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "fm-r4-a",
+      "preflight": 0,
+      "started": "2026-10-01T01:52:44+0200",
+      "seconds": 141.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 48,
+      "lines_changed": 26,
+      "files_changed": 13,
+      "cloud_steps": 10,
+      "cloud_tokens": {
+        "total": 332855,
+        "input": 20,
+        "output": 5160,
+        "reasoning": 767,
+        "cache_write": 39980,
+        "cache_read": 286928
+      },
+      "cloud_cost_usd": 0.2166,
+      "cloud_cost_seen_usd": 0.2166,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2518
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 3562
+        }
+      },
+      "local_server_pid": 89548,
+      "local_server_started": "2026-10-01T01:43:23.173234+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T01:43:10.946373+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-3-20261001-015244.jsonl",
+      "verified": true,
+      "note": "12 call sites in 12 files and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Update call site in LeaderPodClient.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in InMemoryValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in IValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in OppfolgingstilfellePersonRepository.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in KafkaSyketilfellebitDeserializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in ValkeyStore.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in TestEnvironment.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/TestEnvironment.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in MockUtils.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/testhelper/mock/MockUtils.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in KafkaSykmeldingstatusDeserializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in APIConsumerAccessService.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in KafkaOppfolgingstilfelleSerializer.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        },
+        {
+          "description": "Update call site in OppfolgingstilfellePersonTest.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 12,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt"
+        ],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+          "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+          "src/test/kotlin/testhelper/TestEnvironment.kt",
+          "src/test/kotlin/testhelper/mock/MockUtils.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-01T01:43:25+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-014321.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-c2",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-014321.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.61,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 89548,
+        "port": "50718",
+        "started": "2026-10-01T01:43:23.173234+02:00",
+        "probe_seconds": 0.2
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 5171
+      }
+    }
+  ],
+  "rung": 4,
+  "arm": "hybrid",
+  "task": "fm-r4-a",
+  "tag": "np-2bcca023-sonnet5-aggressive-c2",
+  "target": "isoppfolgingstilfelle-large",
+  "worker_profile": "qwen3.6-35b-a3b-8bit-64g",
+  "kind": "edit-multi-mechanical",
+  "verify": {
+    "kind": "thread-arg",
+    "name": "configuredJacksonMapper",
+    "def_file": "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+    "sites": {
+      "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt": 1,
+      "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt": 1,
+      "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt": 1,
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt": 1,
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt": 1,
+      "src/test/kotlin/testhelper/InMemoryValkeyStore.kt": 1,
+      "src/test/kotlin/testhelper/TestEnvironment.kt": 1,
+      "src/test/kotlin/testhelper/mock/MockUtils.kt": 1
+    },
+    "allowed_files": [
+      "src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt",
+      "src/main/kotlin/no/nav/syfo/api/cache/IValkeyStore.kt",
+      "src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/client/leaderelection/LeaderPodClient.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/database/OppfolgingstilfellePersonRepository.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/KafkaOppfolgingstilfelleSerializer.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/syketilfelle/KafkaSyketilfellebitDeserializer.kt",
+      "src/main/kotlin/no/nav/syfo/infrastructure/kafka/sykmeldingstatus/KafkaSykmeldingstatusDeserializer.kt",
+      "src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt",
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+      "src/test/kotlin/testhelper/InMemoryValkeyStore.kt",
+      "src/test/kotlin/testhelper/TestEnvironment.kt",
+      "src/test/kotlin/testhelper/mock/MockUtils.kt"
+    ],
+    "build": "compile"
+  },
+  "prompt": "Add a new first parameter `origin: String` to the function configuredJacksonMapper defined in src/main/kotlin/no/nav/syfo/util/ObjectMapperConfig.kt. Do not give it a default value. Update every call to configuredJacksonMapper in this repository, in main and test code, to pass the name of the file the call is in, without the .kt extension, as a string literal. For example, a call in src/main/kotlin/no/nav/syfo/api/access/APIConsumerAccessService.kt passes \"APIConsumerAccessService\". Change nothing else."
+}

@@ -1,0 +1,336 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 1,
+      "task": "cf5-a",
+      "preflight": 0,
+      "started": "2026-10-01T02:20:09+0200",
+      "seconds": 84.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 309,
+      "files_changed": 5,
+      "cloud_steps": 15,
+      "cloud_tokens": {
+        "total": 490428,
+        "input": 30,
+        "output": 6579,
+        "reasoning": 74,
+        "cache_write": 38790,
+        "cache_read": 444955
+      },
+      "cloud_cost_usd": 0.2526,
+      "cloud_cost_seen_usd": 0.2526,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 507
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 976
+        }
+      },
+      "local_server_pid": 41101,
+      "local_server_started": "2026-10-01T02:20:03.207686+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:19:50.802882+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-1-control-0-20261001-022008.jsonl",
+      "verified": true,
+      "note": "5/5 test files pass and kill their mutants",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DateUtilFrontierTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/IsBeforeOrEqualTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/LocalDateComparisonTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 1,
+      "task": "cf5-a",
+      "preflight": 0,
+      "started": "2026-10-01T02:21:44+0200",
+      "seconds": 73.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 309,
+      "files_changed": 5,
+      "cloud_steps": 13,
+      "cloud_tokens": {
+        "total": 448257,
+        "input": 26,
+        "output": 6030,
+        "reasoning": 62,
+        "cache_write": 39599,
+        "cache_read": 402540
+      },
+      "cloud_cost_usd": 0.2405,
+      "cloud_cost_seen_usd": 0.2405,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 898
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 964
+        }
+      },
+      "local_server_pid": 41101,
+      "local_server_started": "2026-10-01T02:20:03.207686+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:19:50.802882+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-1-control-1-20261001-022144.jsonl",
+      "verified": true,
+      "note": "5/5 test files pass and kill their mutants",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DateUtilFrontierTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/IsBeforeOrEqualTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/LocalDateComparisonTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-01T02:20:07+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-022001.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-c2",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-022001.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 4.39,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 41101,
+        "port": "52923",
+        "started": "2026-10-01T02:20:03.207686+02:00",
+        "probe_seconds": 0.21
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 507
+      }
+    }
+  ],
+  "rung": 1,
+  "arm": "control",
+  "task": "cf5-a",
+  "tag": "np-2bcca023-sonnet5-aggressive-c2",
+  "target": "isoppfolgingstilfelle-tests",
+  "worker_profile": null,
+  "kind": "create-file",
+  "verify": {
+    "kind": "new-tests",
+    "parts": [
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+        "test_class": "no.nav.syfo.frontier.DagerMellomDatoerTest",
+        "functions": [
+          "dagerMellomDatoer"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "dagerMellomDatoer",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt() + 1",
+            "replace": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt()"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/IsBeforeOrEqualTest.kt",
+        "test_class": "no.nav.syfo.frontier.IsBeforeOrEqualTest",
+        "functions": [
+          "isBeforeOrEqual"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "isBeforeOrEqual",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "fun LocalDate.isBeforeOrEqual(date: LocalDate) = !this.isAfter(date)",
+            "replace": "fun LocalDate.isBeforeOrEqual(date: LocalDate) = this.isBefore(date)"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/LocalDateComparisonTest.kt",
+        "test_class": "no.nav.syfo.frontier.LocalDateComparisonTest",
+        "functions": [
+          "isBeforeOrEqual",
+          "isAfterOrEqual"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "isBeforeOrEqual",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "fun LocalDate.isBeforeOrEqual(date: LocalDate) = !this.isAfter(date)",
+            "replace": "fun LocalDate.isBeforeOrEqual(date: LocalDate) = this.isBefore(date)"
+          },
+          {
+            "function": "isAfterOrEqual",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "fun LocalDate.isAfterOrEqual(date: LocalDate) = !this.isBefore(date)",
+            "replace": "fun LocalDate.isAfterOrEqual(date: LocalDate) = this.isAfter(date)"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/DateUtilFrontierTest.kt",
+        "test_class": "no.nav.syfo.frontier.DateUtilFrontierTest",
+        "functions": [
+          "dagerMellomDatoer",
+          "isAfterOrEqual"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "dagerMellomDatoer",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt() + 1",
+            "replace": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt()"
+          },
+          {
+            "function": "isAfterOrEqual",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "fun LocalDate.isAfterOrEqual(date: LocalDate) = !this.isBefore(date)",
+            "replace": "fun LocalDate.isAfterOrEqual(date: LocalDate) = this.isAfter(date)"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+        "test_class": "no.nav.syfo.frontier.DaysInTilfelleTest",
+        "functions": [
+          "daysInTilfelle"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "daysInTilfelle",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "fun daysInTilfelle(): Int = antallSykedager ?: dagerMellomDatoer(start, end)",
+            "replace": "fun daysInTilfelle(): Int = dagerMellomDatoer(start, end)"
+          }
+        ]
+      }
+    ]
+  },
+  "prompt": "Write 5 new JUnit 5 test files, all in package no.nav.syfo.frontier, each with one test class named after its file:\n- src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt (class DagerMellomDatoerTest): test dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt\n- src/test/kotlin/no/nav/syfo/frontier/IsBeforeOrEqualTest.kt (class IsBeforeOrEqualTest): test isBeforeOrEqual in src/main/kotlin/no/nav/syfo/util/DateUtil.kt\n- src/test/kotlin/no/nav/syfo/frontier/LocalDateComparisonTest.kt (class LocalDateComparisonTest): test isBeforeOrEqual in src/main/kotlin/no/nav/syfo/util/DateUtil.kt; isAfterOrEqual in src/main/kotlin/no/nav/syfo/util/DateUtil.kt\n- src/test/kotlin/no/nav/syfo/frontier/DateUtilFrontierTest.kt (class DateUtilFrontierTest): test dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt; isAfterOrEqual in src/main/kotlin/no/nav/syfo/util/DateUtil.kt\n- src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt (class DaysInTilfelleTest): test daysInTilfelle in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt (a member of Oppfolgingstilfelle)\nIn every file, cover each function's edge and boundary cases, so that a wrong comparison or an off-by-one in it would make a test fail. Match the style of the existing tests under src/test/kotlin; you may use the helpers in src/test/kotlin/testhelper. Every new test class must pass. Do not change any other file."
+}
