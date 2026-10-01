@@ -1,0 +1,762 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 2,
+      "task": "cf5-b",
+      "preflight": 0,
+      "started": "2026-10-01T02:45:57+0200",
+      "seconds": 70.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 2,
+      "lines_changed": 56,
+      "files_changed": 1,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 288878,
+        "input": 16,
+        "output": 3324,
+        "reasoning": 47,
+        "cache_write": 40613,
+        "cache_read": 244878
+      },
+      "cloud_cost_usd": 0.1843,
+      "cloud_cost_seen_usd": 0.1843,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 543
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1840
+        }
+      },
+      "local_server_pid": 59479,
+      "local_server_started": "2026-10-01T02:45:53.209043+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:45:40.339302+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-hybrid-0-20261001-024557.jsonl",
+      "verified": false,
+      "note": "4 of 5 test files missing: DaysInTilfelleTest, GjentakendeSykefravarTest, LongTilfelleTest",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DagerMellomDatoerTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 2,
+      "task": "cf5-b",
+      "preflight": 0,
+      "started": "2026-10-01T02:47:09+0200",
+      "seconds": 420.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 37,
+      "lines_changed": 464,
+      "files_changed": 5,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 481854,
+        "input": 22,
+        "output": 9174,
+        "reasoning": 594,
+        "cache_write": 53066,
+        "cache_read": 418998
+      },
+      "cloud_cost_usd": 0.3142,
+      "cloud_cost_seen_usd": 0.3142,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1849
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 4549
+        }
+      },
+      "local_server_pid": 59479,
+      "local_server_started": "2026-10-01T02:45:53.209043+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:45:40.339302+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-hybrid-1-20261001-024708.jsonl",
+      "verified": true,
+      "note": "5/5 test files pass and kill their mutants",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DagerMellomDatoerTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write LongTilfelleTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+            "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write DaysInTilfelleTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+            "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write OppfolgingstilfelleFrontierTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+            "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write GjentakendeSykefravarTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 4
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt",
+          "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 2,
+      "task": "cf5-b",
+      "preflight": 0,
+      "started": "2026-10-01T02:54:22+0200",
+      "seconds": 480.0,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 17,
+      "lines_changed": 198,
+      "files_changed": 3,
+      "cloud_steps": 15,
+      "cloud_tokens": {
+        "total": 738426,
+        "input": 30,
+        "output": 7819,
+        "reasoning": 786,
+        "cache_write": 98956,
+        "cache_read": 630835
+      },
+      "cloud_cost_usd": 0.4597,
+      "cloud_cost_seen_usd": 0.4597,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 4447
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 4192
+        }
+      },
+      "local_server_pid": 59479,
+      "local_server_started": "2026-10-01T02:45:53.209043+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:45:40.339302+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-hybrid-2-20261001-025420.jsonl",
+      "verified": false,
+      "note": "2 of 5 test files missing: GjentakendeSykefravarTest, OppfolgingstilfelleFrontierTest",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DagerMellomDatoerTest.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        },
+        {
+          "description": "Write LongTilfelleTest.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+            "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write DaysInTilfelleTest.kt",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+            "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 1,
+        "redone": 1
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 0,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt"
+        ],
+        "worker_files": [
+          "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+          "src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+          "src/test/kotlin/testhelper/generator/GenerateOppfolgingstilfellePerson.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 2,
+      "task": "cf5-b",
+      "preflight": 0,
+      "started": "2026-10-01T03:02:22+0200",
+      "seconds": 583.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 62,
+      "lines_changed": 472,
+      "files_changed": 5,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 491919,
+        "input": 22,
+        "output": 11819,
+        "reasoning": 500,
+        "cache_write": 98315,
+        "cache_read": 381263
+      },
+      "cloud_cost_usd": 0.4453,
+      "cloud_cost_seen_usd": 0.4453,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 4186
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 4811
+        }
+      },
+      "local_server_pid": 59479,
+      "local_server_started": "2026-10-01T02:45:53.209043+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T02:45:40.339302+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-hybrid-3-20261001-030222.jsonl",
+      "verified": true,
+      "note": "5/5 test files pass and kill their mutants",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DaysInTilfelleTest.kt",
+          "status": "error",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": true,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write LongTilfelleTest.kt",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write OppfolgingstilfelleFrontierTest.kt",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt",
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write GjentakendeSykefravarTest.kt",
+          "status": "completed",
+          "files": [
+            "OppfolgingstilfellePersonTest.kt",
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt",
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write DagerMellomDatoerTest.kt",
+          "status": "completed",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+            "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": true,
+          "cloud_wrote": false,
+          "verdict": "redone"
+        },
+        {
+          "description": "Write DaysInTilfelleTest.kt",
+          "status": "error",
+          "files": [
+            "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+            "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": true,
+          "verdict": "redone"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 6
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt"
+        ],
+        "worker_files": [
+          "OppfolgingstilfellePersonTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+          "Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-tests/src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt",
+          "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-01T02:45:56+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-024551.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-c2",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-024551.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.51,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 59479,
+        "port": "54872",
+        "started": "2026-10-01T02:45:53.209043+02:00",
+        "probe_seconds": 0.21
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 546
+      }
+    }
+  ],
+  "rung": 2,
+  "arm": "hybrid",
+  "task": "cf5-b",
+  "tag": "np-2bcca023-sonnet5-aggressive-c2",
+  "target": "isoppfolgingstilfelle-tests",
+  "worker_profile": "qwen3.6-35b-a3b-8bit-64g",
+  "kind": "create-file",
+  "verify": {
+    "kind": "new-tests",
+    "parts": [
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt",
+        "test_class": "no.nav.syfo.frontier.DagerMellomDatoerTest",
+        "functions": [
+          "dagerMellomDatoer"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "dagerMellomDatoer",
+            "file": "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "find": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt() + 1",
+            "replace": "ChronoUnit.DAYS.between(startDato, sluttDato).toInt()"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt",
+        "test_class": "no.nav.syfo.frontier.LongTilfelleTest",
+        "functions": [
+          "isLongTilfelle"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "isLongTilfelle",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "daysInTilfelle() >= MIN_DAYS_IN_LONG_TILFELLE",
+            "replace": "daysInTilfelle() > MIN_DAYS_IN_LONG_TILFELLE"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt",
+        "test_class": "no.nav.syfo.frontier.DaysInTilfelleTest",
+        "functions": [
+          "daysInTilfelle"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "daysInTilfelle",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "fun daysInTilfelle(): Int = antallSykedager ?: dagerMellomDatoer(start, end)",
+            "replace": "fun daysInTilfelle(): Int = dagerMellomDatoer(start, end)"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt",
+        "test_class": "no.nav.syfo.frontier.OppfolgingstilfelleFrontierTest",
+        "functions": [
+          "isLongTilfelle",
+          "daysInTilfelle",
+          "calculateCurrentVarighetUker"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "isLongTilfelle",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "daysInTilfelle() >= MIN_DAYS_IN_LONG_TILFELLE",
+            "replace": "daysInTilfelle() > MIN_DAYS_IN_LONG_TILFELLE"
+          },
+          {
+            "function": "daysInTilfelle",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "fun daysInTilfelle(): Int = antallSykedager ?: dagerMellomDatoer(start, end)",
+            "replace": "fun daysInTilfelle(): Int = dagerMellomDatoer(start, end)"
+          },
+          {
+            "function": "calculateCurrentVarighetUker",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "return currentVarighetDays.toInt() / DAYS_IN_WEEK",
+            "replace": "return currentVarighetDays.toInt() / (DAYS_IN_WEEK - 1)"
+          }
+        ]
+      },
+      {
+        "kind": "new-test",
+        "path": "src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt",
+        "test_class": "no.nav.syfo.frontier.GjentakendeSykefravarTest",
+        "functions": [
+          "hasGjentakendeSykefravar"
+        ],
+        "build": "test",
+        "mutants": [
+          {
+            "function": "hasGjentakendeSykefravar",
+            "file": "src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt",
+            "find": "return tilfeller >= 5 && sykedager >= 100",
+            "replace": "return tilfeller > 5 && sykedager >= 100"
+          }
+        ]
+      }
+    ]
+  },
+  "prompt": "Write 5 new JUnit 5 test files, all in package no.nav.syfo.frontier, each with one test class named after its file:\n- src/test/kotlin/no/nav/syfo/frontier/DagerMellomDatoerTest.kt (class DagerMellomDatoerTest): test dagerMellomDatoer in src/main/kotlin/no/nav/syfo/util/DateUtil.kt\n- src/test/kotlin/no/nav/syfo/frontier/LongTilfelleTest.kt (class LongTilfelleTest): test isLongTilfelle in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt (a member of Oppfolgingstilfelle)\n- src/test/kotlin/no/nav/syfo/frontier/DaysInTilfelleTest.kt (class DaysInTilfelleTest): test daysInTilfelle in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt (a member of Oppfolgingstilfelle)\n- src/test/kotlin/no/nav/syfo/frontier/OppfolgingstilfelleFrontierTest.kt (class OppfolgingstilfelleFrontierTest): test isLongTilfelle in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt (a member of Oppfolgingstilfelle); daysInTilfelle in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt (a member of Oppfolgingstilfelle); calculateCurrentVarighetUker in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt\n- src/test/kotlin/no/nav/syfo/frontier/GjentakendeSykefravarTest.kt (class GjentakendeSykefravarTest): test hasGjentakendeSykefravar in src/main/kotlin/no/nav/syfo/domain/OppfolgingstilfellePerson.kt\nIn every file, cover each function's edge and boundary cases, so that a wrong comparison or an off-by-one in it would make a test fail. Match the style of the existing tests under src/test/kotlin; you may use the helpers in src/test/kotlin/testhelper. Every new test class must pass. Do not change any other file."
+}
