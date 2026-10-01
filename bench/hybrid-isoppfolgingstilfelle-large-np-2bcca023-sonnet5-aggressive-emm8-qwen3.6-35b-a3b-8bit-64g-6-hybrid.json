@@ -1,0 +1,459 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-10-01T03:57:57+0200",
+      "seconds": 106.7,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 6,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 17,
+      "cloud_tokens": {
+        "total": 626885,
+        "input": 34,
+        "output": 3966,
+        "reasoning": 557,
+        "cache_write": 41523,
+        "cache_read": 580805
+      },
+      "cloud_cost_usd": 0.2653,
+      "cloud_cost_seen_usd": 0.2653,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 552
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2068
+        }
+      },
+      "local_server_pid": 5358,
+      "local_server_started": "2026-10-01T03:57:52.969827+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:57:40.042259+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-hybrid-0-20261001-035756.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Add origin arg to generateOppfolgingstilfelleList calls",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 1,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "bash",
+            "outcome": "deny_files",
+            "target": "cd /Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large && sed -i '' 's/\\.generateOppfolgingstilfelleList()/.generateOppfolgingstilfell"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-10-01T03:59:45+0200",
+      "seconds": 52.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 354967,
+        "input": 22,
+        "output": 2205,
+        "reasoning": 472,
+        "cache_write": 34915,
+        "cache_read": 317353
+      },
+      "cloud_cost_usd": 0.1776,
+      "cloud_cost_seen_usd": 0.1776,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 2065
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1495
+        }
+      },
+      "local_server_pid": 5358,
+      "local_server_started": "2026-10-01T03:57:52.969827+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:57:40.042259+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-hybrid-1-20261001-035944.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-10-01T04:00:38+0200",
+      "seconds": 41.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 240437,
+        "input": 14,
+        "output": 1660,
+        "reasoning": 729,
+        "cache_write": 39947,
+        "cache_read": 198087
+      },
+      "cloud_cost_usd": 0.1634,
+      "cloud_cost_seen_usd": 0.1634,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1498
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 930
+        }
+      },
+      "local_server_pid": 5358,
+      "local_server_started": "2026-10-01T03:57:52.969827+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:57:40.042259+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-hybrid-2-20261001-040038.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 6,
+      "task": "fm-r6-a",
+      "preflight": 0,
+      "started": "2026-10-01T04:01:21+0200",
+      "seconds": 53.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 122,
+      "files_changed": 3,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 371459,
+        "input": 22,
+        "output": 2429,
+        "reasoning": 441,
+        "cache_write": 37161,
+        "cache_read": 331406
+      },
+      "cloud_cost_usd": 0.1879,
+      "cloud_cost_seen_usd": 0.1879,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
+        "bytes": 3969,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 929
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 933
+        }
+      },
+      "local_server_pid": 5358,
+      "local_server_started": "2026-10-01T03:57:52.969827+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:57:40.042259+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-6-hybrid-3-20261001-040120.jsonl",
+      "verified": true,
+      "note": "60 call sites in 3 files and compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3969
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+          "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-01T03:57:55+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-035751.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-emm8",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-035751.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 3.67,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 5358,
+        "port": "58898",
+        "started": "2026-10-01T03:57:52.969827+02:00",
+        "probe_seconds": 0.22
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 551
+      }
+    }
+  ],
+  "rung": 6,
+  "arm": "hybrid",
+  "task": "fm-r6-a",
+  "tag": "np-2bcca023-sonnet5-aggressive-emm8",
+  "target": "isoppfolgingstilfelle-large",
+  "worker_profile": "qwen3.6-35b-a3b-8bit-64g",
+  "kind": "edit-multi-mechanical",
+  "verify": {
+    "kind": "thread-arg",
+    "name": "generateOppfolgingstilfelleList",
+    "def_file": "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt",
+    "sites": {
+      "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt": 1,
+      "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt": 1,
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt": 58
+    },
+    "allowed_files": [
+      "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt",
+      "src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt",
+      "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/bit/OppfolgingstilfelleBitTest.kt"
+    ],
+    "build": "compile"
+  },
+  "prompt": "Add a new first parameter `origin: String` to the function generateOppfolgingstilfelleList defined in src/main/kotlin/no/nav/syfo/domain/Oppfolgingstilfellebit.kt. Do not give it a default value. Update every call to generateOppfolgingstilfelleList in this repository, in main and test code, to pass the name of the file the call is in, without the .kt extension, as a string literal. For example, a call in src/main/kotlin/no/nav/syfo/application/OppfolgingstilfellePersonService.kt passes \"OppfolgingstilfellePersonService\". Change nothing else."
+}
