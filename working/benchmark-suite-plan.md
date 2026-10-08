@@ -1,5 +1,7 @@
 # Evolving the benchmark suite
 
+> Parked, 2026-10-09: benchmarks now run on triggers only. Open benchmark rows here wait for one. See [BENCHMARKING.md](../BENCHMARKING.md#when-we-benchmark).
+
 31 August 2026. Written after the suite had produced 200 cost samples and 146 capability
 samples, and after a night of running it hard enough to find where it wastes effort.
 

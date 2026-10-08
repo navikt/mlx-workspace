@@ -42,6 +42,7 @@ original single-model call in [alpha-model-decision.md](reports/alpha-model-deci
 | [`working/`](working/) | Plans and trackers in progress | To change under you. Do not link from outside |
 | [`runbooks/`](runbooks/) | Operational guides | To be read by someone on call, in a hurry |
 | [`archive/`](archive/) | Superseded documents | To be wrong. Kept so we do not repeat ourselves |
+| [`MODEL-STATUS.md`](MODEL-STATUS.md) | What runs locally today, what was rejected, what triggers the next run | To be one page |
 | [`MODELS.md`](MODELS.md) | The append-only run log | To grow, never to be edited in place |
 | [`BENCHMARKING.md`](BENCHMARKING.md) | How the harnesses work | To explain the bug behind each rule |
 | [`bench/`](bench/) | Harnesses, targets, specs and raw result JSON | |

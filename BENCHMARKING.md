@@ -8,6 +8,18 @@ MODELS.md tables goes to `bench/quarantine/` under a suffix naming the condition
 listed there. Do not edit `bench/specs/weather-cli.md` or `bench/specs/cheap-ops.md` once a model has been
 measured against one: every recorded number assumes the version in the workspace at the time.
 
+## When we benchmark
+
+Routine benchmarking has stopped. A run needs a trigger:
+
+- **A new candidate model.** A standard set of about 4 hours that answers "better than optiq?".
+- **A nav-pilot release that touches local mode.** A short regression check.
+
+No other runs. Every run names the decision it gates (see Queued runs below). The create-file
+retry2 run ([#169](https://github.com/navikt/mlx-workspace/pull/169)) is the last routine run.
+Open items in [reports/UNMEASURED.md](reports/UNMEASURED.md) are parked until a trigger fires.
+Current state: [MODEL-STATUS.md](MODEL-STATUS.md).
+
 ## The three benchmarks
 
 **cheap-ops** is the shape we intend to route locally: eleven short operations inside
