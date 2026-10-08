@@ -221,7 +221,7 @@ def rows(probe=False):
         r = out.setdefault((cls, model, mode, cond), {
             "class": cls, "model": model, "mode": mode, "condition": cond,
             "k": 0, "n": 0, "tasks": set(), "runs": set(), "files": set(),
-            "seconds": [], "cost_ratios": {}, "dispatch": [0, 0], "control": [0, 0]})
+            "seconds": [], "cost_ratios": {}, "costs": ([], []), "dispatch": [0, 0], "control": [0, 0]})
         r["k"] += ok
         r["n"] += 1
         r["tasks"].add(tid)
@@ -296,7 +296,7 @@ def rows(probe=False):
             # A cell the worker was never dispatched on still has a dispatch rate (0/n).
             r = out.setdefault(key, {"class": key[0], "model": key[1], "mode": key[2], "condition": key[3],
                                      "k": 0, "n": 0, "tasks": {tid}, "runs": set(), "files": {f.name},
-                                     "seconds": [], "cost_ratios": {}, "dispatch": [0, 0], "control": [0, 0]})
+                                     "seconds": [], "cost_ratios": {}, "costs": ([], []), "dispatch": [0, 0], "control": [0, 0]})
             r["dispatch"][0] += k
             r["dispatch"][1] += n
         # Cost ratio: dispatched median over control median, same target and task.
@@ -315,6 +315,9 @@ def rows(probe=False):
                     out[key]["control"][1] += len(judged)
                     if cc:
                         out[key]["cost_ratios"][f.name.replace("-hybrid.json", "")] = round(hc / cc, 2)
+                        # Priced cells only, pooled for the class-wide ratio the delegate bar uses.
+                        out[key]["costs"][0].extend(s.get("cloud_cost_usd") or 0 for s in delegated)
+                        out[key]["costs"][1].extend(s.get("cloud_cost_usd") or 0 for s in cv)
     # Overlay rows and verdict rows never share a result (#147).
     if any((r["mode"] == "delegate-probe") != probe for r in out.values()):
         raise SystemExit("✗ _by_class.rows mixed bench-only overlay rows with verdict rows")
@@ -329,9 +332,15 @@ def as_json(r):
         "k": r["k"], "n": r["n"], "tasks": sorted(r["tasks"]), "runs": len(r["runs"]),
         "lb": None if lb is None else round(lb, 3),
         "median_seconds": round(st.median(r["seconds"])) if r["seconds"] else None,
-        "cost_ratios": r["cost_ratios"], "files": sorted(r["files"]),
+        "cost_ratios": r["cost_ratios"], "pooled_cost_ratio": pooled_cost_ratio(r), "files": sorted(r["files"]),
         **hybrid_figures(r),
     }
+
+
+def pooled_cost_ratio(r):
+    """Median dispatched cost over median control cost, every priced cell pooled. None when unpriced."""
+    h, c = r.get("costs", ([], []))
+    return round(st.median(h) / st.median(c), 2) if h and c and st.median(c) else None
 
 
 def hybrid_figures(r):
@@ -442,6 +451,10 @@ if __name__ == "__main__":
                        {"tag": "np-x-sonnet5", "worker_profile": "occamy-1.0-4bit-64g", "rung": 3}).name == \
         "hybrid-np-x-sonnet5-3-control.json"
     assert control_for(Path("hybrid-6-hybrid.json"), {}).name == "hybrid-6-control.json"
+    # One cheap cell no longer carries the class: the pooled ratio does (0.9 / 0.2).
+    assert pooled_cost_ratio({"costs": ([0.1, 0.9, 0.9], [0.2, 0.2])}) == 4.5
+    assert pooled_cost_ratio({"costs": ([], [])}) is None
+    assert pooled_cost_ratio({"costs": ([0.2], [0.2])}) == 1.0
     import tempfile
     with tempfile.TemporaryDirectory() as t:
         def put(name, doc):

@@ -277,6 +277,8 @@ fields change, and whether nav-pilot reads them (for example, only `delegate == 
 routing and the gate; most other fields are display-only). Get a Fable review focused on user
 impact before merge. CI enforces the PR-body requirement; it does not replace the review.
 
+A delegate verdict is `trusted` only if the pooled hybrid/control median cost ratio across the class's priced cells is at most 1.00; one cheap cell no longer carries the class.
+
 ## Known limitations
 
 One run per model, so per-task variance is unmeasured and a 20-second difference on one task is not
