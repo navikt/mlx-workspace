@@ -3,6 +3,11 @@
 What we have not measured yet, what each one decides, and when it runs. Keep this table current:
 move a row out when its result lands in a report, and add one when a report names a gap.
 
+**Parked, 9 October 2026:** benchmarks now run on triggers only (a new candidate model, or a nav-pilot
+release that touches local mode), see [BENCHMARKING.md](../BENCHMARKING.md#when-we-benchmark). Every open
+row below that needs GPU time or a benchmark is parked until a trigger fires. Rows that need a
+decision, hardware or no GPU keep their status.
+
 Status is one of **queued** (a launcher or queue will run it), **waiting on X**, **needs user
 decision**, **needs hardware**, or **not built**. `PT` is
 [pending-tasks.md](2026-09-23-local-model-evaluation/pending-tasks.md). Last checked 2026-10-08.

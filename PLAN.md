@@ -1,5 +1,7 @@
 # What we are doing next
 
+> Parked, 2026-10-09: benchmarks now run on triggers only. Open benchmark rows here wait for one. See [BENCHMARKING.md](BENCHMARKING.md#when-we-benchmark).
+
 > **Living document.** The single tracker for outstanding work. Finished write-ups live in
 > [`reports/`](reports/), the design behind individual experiments in [`working/`](working/).
 > This file says what to do and why; it does not repeat their reasoning.
