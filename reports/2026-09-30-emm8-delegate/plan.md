@@ -1,6 +1,6 @@
 # 8-bit emm follow-up: delegate cost ratio and five more r4 runs
 
-**Status: written, not armed by the repo.** [emm8-delegate-launcher](emm8-delegate-launcher) runs [emm8-delegate.queue](emm8-delegate.queue).
+**Status: ran 1 Oct 03:25–04:16. Result: emm on the 8-bit is `not-yet` as a delegate (13/13, LB 0.888); nothing ships. See [report.md](report.md).** The tasks:6 rows below named D2, which is retired; those two steps never ran. [emm8-delegate-launcher](emm8-delegate-launcher) runs [emm8-delegate.queue](emm8-delegate.queue).
 
 This is item 3 of the owner's decision in [the v2 ladders report](../2026-09-29-v2-ladders/report.md): go on only with edit-multi-mechanical (emm) on `qwen3.6-35b-a3b-8bit-64g`.
 
@@ -36,8 +36,8 @@ The run uses:
 | isoppfolgingstilfelle-large:6 | fm-r6-a | hybrid | 4 | 0.27 | 1.08 | 14 / 60 |
 | tasks:3 | M1 | control | 2 | 0.11 | 0.22 | 3 / 20 |
 | tasks:3 | M1 | hybrid | 4 | 0.10 | 0.40 | 6 / 40 |
-| tasks:6 | D2 | control | 2 | 0.34 | 0.68 | 5 / 30 |
-| tasks:6 | D2 | hybrid | 4 | 0.20 | 0.80 | 12 / 60 |
+| ~~tasks:6~~ | ~~D2~~ (retired; bench-hybrid refuses it, steps 7–8 failed in 0 s) | control | 0 | – | 0 | – |
+| ~~tasks:6~~ | ~~D2~~ (retired) | hybrid | 0 | – | 0 | – |
 | frontier emm r4, base | fm-r4-a, fm-r4-b | local | 5 runs × 2 | 0 | 0 | 46 / 92 |
 | **Total** | | | **24 cloud + 10 local** | | **~$4.80** | **~110 min / 422 min** |
 

@@ -28,6 +28,8 @@ The Qwen3.6-35B-A3B 8-bit won the tier over Occamy 4-bit. Its manifest entry,
 capabilities are measured by [night 64-6](plan-64-6.md). The 64-3 decision rule (§5.2) was never applied: there was
 no dispatched population, so the choice rests on the frontier, e2e and decide suites.
 
+Update 1 Oct: under the bench-only overlay the hybrid arm finally dispatched. The [phase C re-run](../2026-10-01-phase-c-rerun/report.md) fails the rule (lower bound −0.23, cost 1.28×), and 8-bit emm is `not-yet` as a delegate ([emm8](../2026-09-30-emm8-delegate/report.md)). The 8-bit stays a selectable model with all-`cloud` capabilities.
+
 ## 1. The memory budget on 64 GB
 
 | Term | Value | Source |
