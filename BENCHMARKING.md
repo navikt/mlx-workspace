@@ -16,7 +16,7 @@ Routine benchmarking has stopped. A run needs a trigger:
 - **A nav-pilot release that touches local mode.** A short regression check.
 
 No other runs. Every run names the decision it gates (see Queued runs below). The create-file
-retry2 run ([#169](https://github.com/navikt/mlx-workspace/pull/169)) is the last routine run.
+retry2 run ([#169](https://github.com/navikt/mlx-workspace/pull/169), queued) is the last routine run.
 Open items in [reports/UNMEASURED.md](reports/UNMEASURED.md) are parked until a trigger fires.
 Current state: [MODEL-STATUS.md](MODEL-STATUS.md).
 
