@@ -1,3 +1,8 @@
+---
+models: ["Kev 4B 8-bit", "qwen3.6-35b-a3b-optiq"]
+verdict: "fail"
+---
+
 # Kev 4B as an optional English System 1 model, 2026-09-30
 
 ## Question

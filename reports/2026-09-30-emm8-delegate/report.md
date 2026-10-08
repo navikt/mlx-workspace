@@ -1,3 +1,9 @@
+---
+models: ["qwen3.6-35b-a3b-8bit-64g"]
+headline: "13/13"
+verdict: "not-yet"
+---
+
 # 8-bit emm as a delegate, and r4 at n = 20, 2026-10-01
 
 ## Question

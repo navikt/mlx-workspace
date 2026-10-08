@@ -1,3 +1,8 @@
+---
+models: ["Kev 4B 8-bit", "Laya 421M", "Laya multilingual 322M", "qwen3.6-35b-a3b-optiq"]
+verdict: "fail"
+---
+
 # Kev 4B and Laya on the decide sets, 2026-09-29
 
 Pending-tasks §8.6, #95; gate 2 of the [hosted-decide PRD](../2026-09-27-hosted-decide-prd/prd.md).

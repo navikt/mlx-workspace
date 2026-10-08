@@ -1,3 +1,8 @@
+---
+models: ["qwen3.6-35b-a3b-optiq", "qwen3.6-35b-a3b-8bit-64g"]
+verdict: "mixed"
+---
+
 # Quality frontier, v2 base ladders, 2026-09-30
 
 ## Question
