@@ -24,8 +24,8 @@ Totals: optiq 19/40, 8-bit 24/40. Failures by kind:
 
 | Model | Timeout | No files written | Tests failed | Compilation error | Other |
 |---|---|---|---|---|---|
-| optiq | 9 | 6 | 3 | 0 | 3 |
-| 8-bit | 7 | 0 | 6 | 3 | 0 |
+| optiq | 9 | 6 | 4 | 2 | 0 |
+| 8-bit | 7 | 0 | 4 | 5 | 0 |
 
 No samples were discarded. The cloud arm (Sonnet 5) on this class has n = 4 per rung (2/4, 4/4, 4/4, 3/4), so p_cloud is itself loose.
 
