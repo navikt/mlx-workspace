@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# create-file retry2 ladders on optiq and the 8-bit (plan.md, cf-retry2.queue).
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-08-cf-retry2/cf-retry2-launcher ~/tmp/ && nohup bash ~/tmp/cf-retry2-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/cf-retry2.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - starts no earlier than 2026-10-08 20:00, then waits for a free GPU for 5 min straight: no queue lock, no benchmark,
+#     night-run or model-server process, nothing on :8080, AC, 48 GB wired, 1-min load below 6;
+#   - one instance (cf-retry2.pid), never twice (exits at start and after the wait if cf-retry2.done exists);
+#     touches cf-retry2.done only once the queue has run;
+#   - runs .mise/tasks/night-run-3 in place. It writes the bench-only cplt config (CPLT_CONFIG,
+#     sandbox.allow_localhost_any) and fails a step whose gradle preflight cannot reach the daemon.
+# No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=cf-retry2
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-08-cf-retry2 Q=cf-retry2.queue
+AFTER=""
+NOT_BEFORE=$(date -j -f "%F %T" "2026-10-08 20:00:00" +%s)
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ "$(date +%s)" -ge "$NOT_BEFORE" ] || { echo "not before 2026-10-08 20:00"; return; }
+  [ -z "$AFTER" ] || [ -e "$AFTER" ] || { echo "no $AFTER yet"; return; }
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/$Q not before 2026-10-08 20:00, after ${AFTER:-nothing} and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
+# From here the queue runs: any exit marks it done, before anything slow.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap 'exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD)"
+NIGHT_REPORT="$R/cf-retry2.md" .mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q"
+say "queue exited $?"

@@ -1,0 +1,8 @@
+# create-file retry2 ladders (plan.md): the same two models, rungs and run count as
+# reports/2026-09-29-v2-ladders/cf-rerun.queue, variant retry2 instead of base.
+# Run by cf-retry2-launcher. Wired: 48 GB.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  validate -                     -       -    -     60          40           qwen3.6-35b-a3b-optiq
+local  base     create-file           retry2  5    1-4   420         210          qwen3.6-35b-a3b-optiq
+local  base     create-file           retry2  5    1-4   840         420          qwen3.6-35b-a3b-8bit-64g
