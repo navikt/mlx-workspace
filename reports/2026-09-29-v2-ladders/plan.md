@@ -4,6 +4,8 @@ UNMEASURED's "v2 base ladders for optiq and the 64 GB 8-bit" row, mlx #144. Back
 [night-v2-validate.md](../2026-09-28-frontier-harness-v2/night-v2-validate.md) Review. Queue:
 [v2-ladders.queue](v2-ladders.queue). Launcher: [v2-ladders-launcher](v2-ladders-launcher).
 
+**Status (1 Oct): done.** Results in [report.md](report.md). Follow-ups: the create-file re-run ([report](../2026-10-01-create-file-rerun/report.md), not trusted, stop rule applied), and 8-bit emm r4 at 20/20 plus the delegate run ([report](../2026-09-30-emm8-delegate/report.md), `not-yet`). No ladder work is queued for these profiles.
+
 ## Question
 
 The v2 validation night ran optiq's create-file, edit-single, edit-multi-mechanical and read-qa
