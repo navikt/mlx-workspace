@@ -1,3 +1,9 @@
+---
+models: ["qwen3.6-35b-a3b-8bit-64g"]
+headline: "17/19"
+verdict: "fail"
+---
+
 # Phase C re-run: the 8-bit as a delegate worker, 2026-10-01
 
 ## Question

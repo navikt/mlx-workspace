@@ -1,0 +1,22 @@
+name: manifest check
+
+# manifest/*.json are generated. Fail a PR that changes their sources without
+# regenerating them, so main never serves a stale file.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: models.json and the README table are current
+        run: python3 .mise/tasks/model-manifest --check
+      - name: reports.json is current
+        run: python3 .mise/tasks/reports-manifest --check

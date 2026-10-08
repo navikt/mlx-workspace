@@ -1,3 +1,8 @@
+---
+models: ["qwen3.6-35b-a3b-optiq", "qwen3.8-27b-optiq-4bit", "qwen3.8-27b-8bit-mlx"]
+verdict: "mixed"
+---
+
 # System One in nav-pilot: from the loop classifier to `alpha decide`, 2026-09-25
 
 "System One" here means a fast typed decision from a local model: one question, fixed options, and

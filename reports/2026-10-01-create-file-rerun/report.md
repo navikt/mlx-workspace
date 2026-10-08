@@ -1,3 +1,8 @@
+---
+models: ["qwen3.6-35b-a3b-optiq", "qwen3.6-35b-a3b-8bit-64g"]
+verdict: "fail"
+---
+
 # create-file re-run with the sandbox fixed, 2026-10-01
 
 ## Question

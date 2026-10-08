@@ -1,3 +1,12 @@
+---
+# Optional, read by `mise run reports-manifest` into manifest/reports.json. JSON values only.
+# models: profile keys or model names; headline: the one k/n result, if the report has one;
+# verdict: pass | fail | mixed | not-yet | none. Delete a line rather than guess.
+models: ["<profile key>"]
+headline: "<k>/<n>"
+verdict: "<pass|fail|mixed|not-yet|none>"
+---
+
 # <Title: the question in a few words>, <YYYY-MM-DD>
 
 Copy into `reports/<YYYY-MM-DD>-<topic>/report.md`, then add a row to the right section of

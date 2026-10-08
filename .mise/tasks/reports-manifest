@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+# mise description="Generate manifest/reports.json from reports/README.md, reports/UNMEASURED.md and report frontmatter, for the ki-utvikling site. --check: fail if stale"
+"""Index the finished reports as JSON, so a site can list new results without a code change.
+
+reports/README.md is the curated index and stays the source of truth: every table row whose
+first cell links a report becomes an entry, its section heading is the class, and the "In
+nav-pilot" table says which shipped feature a report justifies. Fields that cannot be read
+reliably from prose (models, a headline k/n, a one-word verdict) come only from the optional
+frontmatter at the top of a report file; see reports/TEMPLATE.md.
+"""
+import json
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+
+ROOT = Path(__file__).resolve().parents[2]
+REPORTS = ROOT / "reports"
+OUT = ROOT / "manifest" / "reports.json"
+BLOB = "https://github.com/navikt/mlx-workspace/blob/main/"
+SCHEMA_VERSION = 1
+VERDICTS = {"pass", "fail", "mixed", "not-yet", "none"}
+LINK = re.compile(r"\[([^\]]+)\]\(([^)\s]+)\)")
+DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def tables(path: Path):
+    """Yield (section heading, header cells, row cells) for every Markdown table row."""
+    section, header = "", None
+    for line in path.read_text().splitlines():
+        if line.startswith("## "):
+            section, header = line[3:].strip(), None
+        elif line.startswith("|---"):
+            continue
+        elif line.startswith("|"):
+            cells = [c.strip().replace("\\|", "|") for c in line.strip().strip("|").split(" | ")]
+            if header is None:
+                header = cells
+            elif len(cells) != len(header):
+                raise SystemExit(f"✗ {path.name}: row has {len(cells)} cells, header {len(header)}: {line[:80]}")
+            else:
+                yield section, header, cells
+        else:
+            header = None
+
+
+def repo_path(target: str) -> str:
+    """A link target in reports/*.md, as a path from the repo root, without the anchor."""
+    p = PurePosixPath("reports") / target.split("#")[0]
+    parts = []
+    for part in p.parts:
+        parts = parts[:-1] if part == ".." else parts + [part]
+    return "/".join(parts)
+
+
+def frontmatter(path: Path) -> dict:
+    text = path.read_text() if path.suffix == ".md" and path.is_file() else ""
+    if not text.startswith("---\n"):
+        return {}
+    block = text[4:text.index("\n---\n", 4)]
+    fm = {}
+    for line in block.splitlines():
+        if line.strip() and not line.startswith("#"):
+            key, _, value = line.partition(":")
+            fm[key.strip()] = json.loads(value)
+    if fm.get("verdict") not in VERDICTS | {None}:
+        raise SystemExit(f"✗ {path.relative_to(ROOT)}: verdict {fm['verdict']!r} not in {sorted(VERDICTS)}")
+    if "headline" in fm:
+        m = re.fullmatch(r"(\d+)/(\d+)", fm["headline"])
+        if not m:
+            raise SystemExit(f"✗ {path.relative_to(ROOT)}: headline must be k/n, got {fm['headline']!r}")
+        fm["headline"] = {"k": int(m[1]), "n": int(m[2])}
+    return fm
+
+
+features, reports = [], {}
+for section, header, cells in tables(REPORTS / "README.md"):
+    if section == "In nav-pilot":
+        feature, shipped, justified, verdict = cells
+        paths = list(dict.fromkeys(repo_path(t) for _, t in LINK.findall(justified)))
+        features.append({"feature": feature, "shipped": DATE.findall(shipped), "justified_by": paths, "verdict": verdict})
+    elif header[:2] == ["Report", "Date"]:
+        title, target = LINK.search(cells[0]).groups()
+        path = repo_path(target)
+        if path in reports:
+            raise SystemExit(f"✗ {path} is listed twice in reports/README.md")
+        dates = DATE.findall(cells[1])
+        reports[path] = {
+            "id": path.removeprefix("reports/").removesuffix(".md"),
+            "title": title.replace("`", ""),
+            "date": max(dates),
+            "class": section,
+            "summary": cells[2],
+            "path": path,
+            "url": BLOB + path,
+            **frontmatter(ROOT / path),
+            "justifies": [],
+        }
+
+for f in features:
+    for p in f["justified_by"]:
+        if p in reports:
+            reports[p]["justifies"].append(f["feature"])
+
+unmeasured = [dict(zip(["item", "decides", "status", "when", "where"], cells))
+              for _, header, cells in tables(REPORTS / "UNMEASURED.md") if header[0] == "Item"]
+
+manifest = {
+    "schema_version": SCHEMA_VERSION,
+    "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
+    "generated_at": None,
+    "reports": sorted(reports.values(), key=lambda r: (r["date"], r["id"]), reverse=True),
+    "nav_pilot": features,
+    "unmeasured": unmeasured,
+}
+
+# generated_at moves only when the content does, so a re-run with nothing new is not a diff.
+old = json.loads(OUT.read_text()) if OUT.exists() else {}
+unchanged = {**old, "generated_at": None} == manifest
+manifest["generated_at"] = old.get("generated_at") if unchanged else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+if "--check" in sys.argv[1:]:
+    if not unchanged:
+        raise SystemExit("✗ stale: manifest/reports.json. Run: mise run reports-manifest")
+    print("✓ manifest/reports.json is current")
+    sys.exit(0)
+
+OUT.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+print(f"✓ {OUT.relative_to(ROOT)}  schema {SCHEMA_VERSION}, {len(reports)} reports, {len(features)} nav-pilot features, {len(unmeasured)} unmeasured")

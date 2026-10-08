@@ -1,3 +1,8 @@
+---
+models: ["qwen3.6-35b-a3b-optiq"]
+verdict: "pass"
+---
+
 # nav-pilot's own-endpoint path on real servers, 2026-09-28
 
 ## Question

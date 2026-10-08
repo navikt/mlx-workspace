@@ -49,7 +49,7 @@ original single-model call in [alpha-model-decision.md](reports/alpha-model-deci
 | [`workspaces/`](workspaces/README.md) | Benchmark checkouts, almost all gitignored | `git status` noise here to be a run, not a break |
 | [`profiles/`](profiles/) | One file per model build | |
 | [`AGENTS.md`](AGENTS.md) | Rules for agents working **on** this repo | Each one to cost a night if ignored |
-| `manifest/` | `models.json`, generated from `profiles/` **for nav-pilot to fetch** | To be an external interface: do not restructure |
+| `manifest/` | `models.json`, generated from `profiles/` **for nav-pilot to fetch**; `reports.json`, generated from `reports/` for the ki-utvikling site | To be an external interface: do not restructure |
 
 Naming: SHOUTING.md only at the root, and only for manuals covering the whole repo. Everything
 inside a directory is kebab-case. A date suffix means the file is a snapshot of one day and
@@ -137,6 +137,26 @@ scripts must use `model-use <key> || exit 1`.
 `mise run model-manifest` generates `manifest/models.json` from the profiles, which is the file
 nav-pilot fetches to configure a user's machine, and the model table at the top of this README
 from it. `mise run model-manifest -- --check` fails if either is stale.
+
+`mise run reports-manifest` generates `manifest/reports.json`, the report index the
+ki-utvikling site (`/innsikt/lokale-modeller` in navikt/copilot) fetches from
+`https://raw.githubusercontent.com/navikt/mlx-workspace/main/manifest/reports.json`. A report
+appears there once it has a row in `reports/README.md`; no change in navikt/copilot is needed.
+CI (`.github/workflows/manifest-check.yml`) runs both tasks with `--check` and fails if either
+file is stale. The format, `schema_version` 1:
+
+| Field | Source |
+|---|---|
+| `generated_at` | UTC time of the last content change; a re-run with nothing new keeps it |
+| `reports[]` | One per table row in `reports/README.md` that links a report, newest first |
+| `.id`, `.path`, `.url` | The link target: id is the path under `reports/` without `.md`; url is the GitHub page |
+| `.title`, `.date`, `.class`, `.summary` | Link text, the newest date in the Date cell, the section heading, the Summary cell (Markdown, links relative to `reports/`) |
+| `.models`, `.headline` `{k, n}`, `.verdict` | Optional, only from the report file's frontmatter (see `reports/TEMPLATE.md`); verdict is `pass`, `fail`, `mixed`, `not-yet` or `none` |
+| `.justifies[]` | Features in the "In nav-pilot" table that link this report |
+| `nav_pilot[]` | That table: `feature`, `shipped` (dates), `justified_by` (paths), `verdict` (text) |
+| `unmeasured[]` | `reports/UNMEASURED.md`: `item`, `decides`, `status`, `when`, `where` (Markdown) |
+
+New fields may appear within schema 1; a reader should ignore fields it does not know.
 
 An entry that sets a param an older nav-pilot must not ignore gets `min_nav_pilot`, the newest
 release any of those params needs (the `MIN_NAV_PILOT` table in the generator). Params an older

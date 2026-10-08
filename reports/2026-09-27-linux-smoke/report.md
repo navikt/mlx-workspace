@@ -1,3 +1,7 @@
+---
+verdict: "pass"
+---
+
 # Linux smoke test of nav-pilot's local endpoint path, 2026-09-27
 
 ## Question
