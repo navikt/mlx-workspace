@@ -1,0 +1,225 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-10-01T03:16:54+0200",
+      "seconds": 20.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 105467,
+        "input": 8,
+        "output": 644,
+        "reasoning": 25,
+        "cache_write": 26845,
+        "cache_read": 77945
+      },
+      "cloud_cost_usd": 0.0894,
+      "cloud_cost_seen_usd": 0.0894,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 543
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1016
+        }
+      },
+      "local_server_pid": 76499,
+      "local_server_started": "2026-10-01T03:16:49.847194+02:00",
+      "workspace_head": "7abba6100dde41c0b726063bc5958c6a65ad5aa8",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:16:38.220602+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-control-0-20261001-031654.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/frontend/utils/dateUtils.ts"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 2,
+      "task": "E1",
+      "preflight": 0,
+      "started": "2026-10-01T03:17:18+0200",
+      "seconds": 20.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 7,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 105757,
+        "input": 8,
+        "output": 644,
+        "reasoning": 23,
+        "cache_write": 26915,
+        "cache_read": 78167
+      },
+      "cloud_cost_usd": 0.0896,
+      "cloud_cost_seen_usd": 0.0896,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 1050
+        },
+        "after": {
+          "swap_used_mb": 2.12,
+          "swap_free_mb": 1021.88,
+          "free_mb": 983
+        }
+      },
+      "local_server_pid": 76499,
+      "local_server_started": "2026-10-01T03:16:49.847194+02:00",
+      "workspace_head": "7abba6100dde41c0b726063bc5958c6a65ad5aa8",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "86a656706b47851e1b6a33627b68ef02b29ddb54",
+          "fetched_at": "2026-10-01T03:16:38.220602+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-2-control-1-20261001-031718.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/frontend/utils/dateUtils.ts"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-01T03:16:53+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-8bit-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-031648.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-c2",
+      "opencode_version": "1.18.33",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-031648.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.79,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 76499,
+        "port": "56541",
+        "started": "2026-10-01T03:16:49.847194+02:00",
+        "probe_seconds": 0.21
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "7abba6100dde41c0b726063bc5958c6a65ad5aa8",
+      "workspace_pinned": "7abba6100dde41c0b726063bc5958c6a65ad5aa8",
+      "memory_at_preflight": {
+        "swap_used_mb": 2.12,
+        "swap_free_mb": 1021.88,
+        "free_mb": 548
+      }
+    }
+  ],
+  "rung": 2,
+  "arm": "control",
+  "task": "E1",
+  "tag": "np-2bcca023-sonnet5-aggressive-c2",
+  "target": "frontend-familie-tilbake",
+  "worker_profile": null,
+  "kind": "edit",
+  "verify": "compile",
+  "prompt": "Add a TSDoc comment to the exported function hentPeriodelengde in src/frontend/utils/dateUtils.ts describing what it does, its parameters and what it returns. Change nothing else."
+}
