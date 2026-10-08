@@ -2545,6 +2545,51 @@
   {
    "class": "edit-multi-mechanical",
    "model": "qwen3.6-35b-a3b-8bit-64g",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=9db581bed642 tasks=17d0cf33d776",
+   "mode": "local",
+   "rungs": {
+    "4": {
+     "k": 10,
+     "n": 10,
+     "lb": 0.859,
+     "ub": 1.0,
+     "lb_monotone": 0.859,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 5,
+     "median_seconds": 52,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 4,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 13.0,
+    "beyond": true,
+    "a": 2.565,
+    "b": 0.933
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-8bit-64g-base-20261001-040605.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "qwen3.6-35b-a3b-8bit-64g",
    "variant": "decompose",
    "condition": "temp=0.6 ctx=65536 harness=df7deb1af416 tasks=17d0cf33d776",
    "mode": "local",
