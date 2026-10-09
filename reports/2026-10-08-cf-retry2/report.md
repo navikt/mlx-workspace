@@ -22,17 +22,17 @@ Pass rate with 95 % Wilson interval. The verdict uses the summary's monotone low
 
 | Profile | r1 | r2 | r3 | r4 | Total |
 |---|---|---|---|---|---|
-| optiq retry2 | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) not-yet | 7/10 (0.40–0.89) cloud | 37/40 (0.80–0.97) |
+| optiq retry2 | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) not-yet | 7/10 (0.40–0.89) not-yet | 37/40 (0.80–0.97) |
 | 8-bit retry2 | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) trusted | 10/10 (0.72–1.00) not-yet | 5/10 (0.24–0.76) cloud | 35/40 (0.74–0.95) |
 
-Frontier (trusted / open): 2 / 3 for both profiles. First break at r4. d at bar: 3.2 for optiq and 2.9 for the 8-bit.
+Frontier (trusted / open): optiq 2 / 4 with no break; 8-bit 2 / 3 with first break at r4. d at bar: 3.2 for optiq and 2.9 for the 8-bit.
 
-Failures: all are timeouts at r4 (3 on optiq, 5 on the 8-bit). There are no build or test failures and no sessions without a file. Retries were used on passing samples 16 times on optiq and 6 times on the 8-bit. No samples were discarded.
+Failures: all are timeouts at r4 (3 on optiq, 5 on the 8-bit). There are no build or test failures. One optiq timeout (cf-r4-b run 1) changed no files. Retries were used on passing samples 16 times on optiq and 6 times on the 8-bit. No samples were discarded.
 
 Base on harness `9db581bed642` ([2026-10-01](../2026-10-01-create-file-rerun/report.md)): optiq 19/40 (0.33–0.63), 8-bit 24/40 (0.45–0.74). Trusted at no rung.
 
 ## Verdict
-retry2 on the current harness makes create-file trusted locally at r1–r2 on both profiles. r3 is not ruled out, and r4 breaks on timeouts. The comparison with base mixes two causes, because the harness and tasks changed in between (JDK 21 via mise, java/21 task configs, bench-only cplt config, Gradle preflight). The run does not show how much of the gain comes from retry2 alone.
+retry2 on the current harness makes create-file trusted locally at r1–r2 on both profiles. r3 is not ruled out on either profile; r4 is still open on optiq and breaks on timeouts on the 8-bit. The comparison with base mixes two causes, because the harness and tasks changed in between (JDK 21 via mise, java/21 task configs, bench-only cplt config, Gradle preflight). The run does not show how much of the gain comes from retry2 alone.
 
 ## Limits
 - There is no base run on harness `98da309f03c1`, so the effect of retry2 alone is unknown.
