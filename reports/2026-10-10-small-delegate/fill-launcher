@@ -47,7 +47,6 @@ until [ -e "$L/small-delegate.done" ]; do
   [ -z "$last" ] && { say "waiting for the small-delegate done marker"; last=1; }
   sleep 60
 done
-sleep 30; git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
 stable=0 last=""
 while :; do
   [ "$(date +%s)" -lt "$NO_START" ] || { say "gave up at the 13:00 gate: $last"; exit 1; }
@@ -57,6 +56,8 @@ while :; do
   last=$b; sleep 60
 done
 [ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+# Pull only once the GPU is free: no switch or pull while another queue runs from the checkout.
+git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
 [ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
 [ -x "$JDK/bin/java" ] || { say "no JDK 21 at $JDK; not running"; exit 1; }
 [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { say "wired limit not 49152; not running"; exit 1; }
@@ -68,6 +69,7 @@ export FRONTIER_COST_CAP=0 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq-64g NIGHT_REPORT
 trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
 trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "$NR"; exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD); local only, $0 cloud"
+[ "$(date +%s)" -lt "$NO_START" ] || { say "13:00 gate: not starting the queue"; exit 1; }
 .mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q" &
 NR=$!
 say "queue pid $NR"
