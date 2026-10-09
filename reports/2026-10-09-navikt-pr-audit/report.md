@@ -8,9 +8,9 @@ Nothing. This report changes what we benchmark, not what nav-pilot does.
 
 ## Method
 - Source: merged PRs in public `navikt` repos, 2026-07-11 to 2026-10-09, fetched with the GitHub GraphQL API (up to 100 recent merged PRs per repo, from 43 recently pushed repos).
-- Bots (dependabot, renovate, github-actions and similar) are counted separately. The main sample is 356 human PRs from 30 repos, capped at 20 per repo. By language: TypeScript 108, Kotlin 83, Java 64, Python 60, Go 21, Shell/JS 18.
+- Bots (dependabot, renovate, github-actions and similar) are counted separately. The main sample is 356 human PRs from 30 repos, capped at 20 per repo. By language: TypeScript 108, Kotlin 83, Java 64, Python 60, Go 21, Shell/JS 18, and 2 with no detected language. 20 of the 356 are from mlx-workspace itself; without them, create-file is 4.2 %.
 - Classes are assigned by a heuristic on file paths and added/deleted lines, not by reading the code. New classes were added where real work did not fit ours.
-- Data: [sample.csv](sample.csv) (the 356 PRs, no author fields) and [repos.tsv](repos.tsv).
+- Data: [sample.csv](sample.csv) (the 356 PRs, no author fields) and [repos.tsv](repos.tsv). The repo count (43) and the bot totals come from the full pull, which is not committed; they cannot be recomputed from these files.
 
 ## Results
 Bots made 1602 of 2437 PRs (66 %): 71 % of those are dependency bumps and 13 % config or workflow changes.
@@ -37,7 +37,7 @@ Overall, 44 % of human PRs include tests and 15 % touch more than one module. re
 Task types we do not benchmark, with examples:
 - Feature across service, domain, repo and test layers in a Kotlin backend (about 20 %): aap-behandlingsflyt#3319, #3623.
 - DB migration plus model plus repository code (about 4 %): sykepengesoknad-backend#1590, aap-behandlingsflyt#3624, fptilbake#3240.
-- Dependency upgrade with code fixes, where a bot bumps the version and a person fixes the breakage (about 7 % of titles, skewed by one repo): melosys-web#3230, #3227, #3225.
+- Dependency upgrade with code fixes, where a bot bumps the version and a person fixes the breakage (about 7 % of PR titles mention an upgrade or migration of a dependency; a keyword match, skewed by one repo): melosys-web#3230, #3227, #3225.
 - Config, nais or workflow tweak (9 % of human PRs, plus 13 % of bot PRs): melosys-muninn#11, #12, rekrutteringsbistand-stilling-api#320.
 - Test-only additions (3 %): sykepengesoknad-backend#1592, #1587, melosys-web#3233.
 
