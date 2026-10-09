@@ -1,0 +1,9 @@
+# Small delegate, item 2 (plan.md). Run by small-delegate-launcher after optiq.queue, cap $6, its own ledger.
+# Same rungs on the 8-bit. The control lines skip when item 1 already wrote 4 valid samples
+# (controls carry no worker in their name), so both profiles share one same-day control.
+# Decision: the same trust question for the 8-bit profile. Measure only.
+# part kind target arm samples rung timeout expected profile
+hybrid hybrid tasks control 4 8 30 8 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks hybrid 8 8 70 25 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks control 4 9 40 15 qwen3.6-35b-a3b-8bit-64g
+hybrid hybrid tasks hybrid 8 9 90 45 qwen3.6-35b-a3b-8bit-64g
