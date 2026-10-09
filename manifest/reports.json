@@ -1,8 +1,28 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-08T21:37:17Z",
+  "generated_at": "2026-10-09T21:06:32Z",
   "reports": [
+    {
+      "id": "2026-10-09-new-candidates/report",
+      "title": "K2-Horizon MoVA as a local candidate",
+      "date": "2026-10-09",
+      "class": "Model and profile evaluations",
+      "summary": "Rejected: 0/40, no parseable tool calls. Revisit only with a parser fix",
+      "path": "reports/2026-10-09-new-candidates/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-09-new-candidates/report.md",
+      "justifies": []
+    },
+    {
+      "id": "2026-10-09-navikt-pr-audit/report",
+      "title": "What code changes at Nav look like: a navikt PR audit",
+      "date": "2026-10-09",
+      "class": "Agentic task benchmarks",
+      "summary": "356 human PRs from 30 public navikt repos, classed by a path-and-line heuristic. create-file is de-prioritised; cheap-ops gains a one-file config task (O1) and a test-only unit test task (T1)",
+      "path": "reports/2026-10-09-navikt-pr-audit/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-09-navikt-pr-audit/report.md",
+      "justifies": []
+    },
     {
       "id": "2026-10-01-phase-c-rerun/report",
       "title": "Phase C re-run: the 8-bit as a delegate worker",
