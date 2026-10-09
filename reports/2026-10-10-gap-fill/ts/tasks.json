@@ -1,0 +1,36 @@
+{
+  "_note": "Q3 (#183) TypeScript rung: navikt/melosys-web at a pinned ref, React 19 + vitest under jsdom. Install needs a GitHub Packages token with read:packages (@navikt/melosys-kodeverk is not on npmjs); node_modules is vendored into the image at build, so runs are offline. Checked by validate-ts in Docker; not wired into bench-cheap-ops until validation passes.",
+  "repo": "https://github.com/navikt/melosys-web.git",
+  "ref": "881771a0c1483ea287f94ef57dc264311fc862ba",
+  "node": "22.23.2",
+  "install": "pnpm install --frozen-lockfile --ignore-scripts",
+  "compile_cmd": "pnpm exec tsc --noEmit",
+  "tasks": [
+    {
+      "id": "F1",
+      "kind": "edit",
+      "verify": "compile+test",
+      "touches": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.tsx",
+      "only": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/",
+      "prompt": "In src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.tsx, add an optional boolean prop erDnummer to the Ident component. When it is true, the hover text must be \"Kopier D-nummer\"; otherwise it stays \"Kopier fødselsnummer\". Existing callers must not need changes. Change nothing else.",
+      "check_tests": ["F1/ident.erDnummer.test.tsx", "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.test.tsx"],
+      "reference": {"F1/ident.tsx": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.tsx"}
+    },
+    {
+      "id": "F2",
+      "kind": "test",
+      "verify": "test+breaks",
+      "touches": "src/sider/tekstblokker/labels.test.ts",
+      "only": "src/sider/tekstblokker/labels.test.ts",
+      "prompt": "src/sider/tekstblokker/labels.ts has no tests. Write src/sider/tekstblokker/labels.test.ts with vitest covering labelForType, labelForEndringstype and labelForStatus, including the fallback for an unknown value. Do not change any other file.",
+      "check_tests": ["src/sider/tekstblokker/labels.test.ts"],
+      "reference": {"F2/labels.test.ts": "src/sider/tekstblokker/labels.test.ts"},
+      "breaks": [
+        {"file": "src/sider/tekstblokker/labels.ts", "find": "type === \"BREVMAL\" ? \"brevmal\" : \"tekstblokk\"", "replace": "type === \"BREVMAL\" ? \"tekstblokk\" : \"brevmal\""},
+        {"file": "src/sider/tekstblokker/labels.ts", "find": "ENDRET: \"Endret\"", "replace": "ENDRET: \"Endra\""},
+        {"file": "src/sider/tekstblokker/labels.ts", "find": "ENDRINGSTYPER[endringstype] ?? endringstype", "replace": "ENDRINGSTYPER[endringstype] ?? \"\""},
+        {"file": "src/sider/tekstblokker/labels.ts", "find": "STATUSER[status] ?? status", "replace": "STATUSER[status] ?? \"\""}
+      ]
+    }
+  ]
+}

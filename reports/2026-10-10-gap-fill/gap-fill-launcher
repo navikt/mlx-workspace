@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Gap-fill (plan.md): 1. TS task validation (Q3, CPU), 2. base create-file on optiq (Q2, GPU). $0 cloud.
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-10-gap-fill/gap-fill-launcher ~/tmp/ && nohup bash ~/tmp/gap-fill-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/gap-fill.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for 2026-10-10 14:00 (owner's GPU window), then for small-fill.done or the fill launcher's exit
+#     (order only), then for a free GPU for 5 min straight: no queue lock, no benchmark, night-run or
+#     model-server process, nothing on :8080, AC, 48 GB wired, 1-min load below 6;
+#   - one instance (gap-fill.pid), never twice (exits at start and after the wait if gap-fill.done exists);
+#     touches gap-fill.done only once the steps have run;
+#   - preflight: night-run-3 --dry-run (gradle-deps, nav-pilot, network), JDK 21, wired limit 49152,
+#     bench/frontier/validated-cd8780d1d644.json;
+#   - runs .mise/tasks/night-run-3 in place.
+# Step 1 is skipped with one log line when Docker is down or the gh token lacks read:packages.
+# No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=gap-fill
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-10-gap-fill Q=gap-fill.queue
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+START=$(date -j -f '%Y-%m-%d %H:%M:%S' '2026-10-10 14:00:00' +%s)
+JDK="$HOME/.local/share/mise/installs/java/21"
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+fill_running() { local p; p=$(cat "$L/small-fill.pid" 2>/dev/null); [ -n "$p" ] && kill -0 "$p" 2>/dev/null; }
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill or a failed check leaves no done marker
+say "pid $$: waiting for 2026-10-10 14:00, then small-fill.done or the fill launcher's exit, then 5 min of free GPU; runs $R"
+caffeinate -is -w $$ &
+until [ "$(date +%s)" -ge "$START" ]; do sleep 60; done
+say "14:00 passed; waiting for the fill launcher"
+until [ -e "$L/small-fill.done" ] || ! fill_running; do sleep 60; done
+stable=0 last=""
+while :; do
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+[ -f bench/frontier/validated-cd8780d1d644.json ] || { say "no validated-cd8780d1d644.json; not running"; exit 1; }
+[ -x "$JDK/bin/java" ] || { say "no JDK 21 at $JDK; not running"; exit 1; }
+[ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { say "wired limit not 49152; not running"; exit 1; }
+export FRONTIER_COST_CAP=0 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq NIGHT_REPORT="$R/gap-fill-results.md" NIGHT_CAFFEINATED=1
+.mise/tasks/ni""ght-run-3 --dry-run --part local --queue "$R/$Q" > "$L/$N-preflight.log" 2>&1 \
+  || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "${NR:-}"; exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD); local only, \$0 cloud"
+# Step 1, Q3: TS validation. Decision: does a TS rung enter cheap-ops (all ok) or do the tasks need rework.
+tok=$(gh auth token 2>/dev/null)
+if ! docker info >/dev/null 2>&1; then say "step 1 skipped: Docker is not running"
+elif [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $tok" https://npm.pkg.github.com/@navikt%2fmelosys-kodeverk)" != 200 ]; then
+  say "step 1 skipped: gh token lacks read:packages (gh auth refresh -s read:packages)"
+else
+  NPM_AUTH_TOKEN=$tok "$MAIN/$R/ts/validate-ts" > "$L/$N-ts.log" 2>&1; say "step 1 exited $? (0 = tasks valid), see $L/$N-ts.log"
+fi
+unset tok
+# Step 2, Q2: base create-file. Decision in plan.md.
+.mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q" &
+NR=$!
+say "queue pid $NR"
+wait "$NR"
+say "queue exited $?"

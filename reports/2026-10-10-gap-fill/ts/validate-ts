@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Q3 validation (#183): the two melosys-web tasks are well-formed when
+#   baseline:  tsc green, the repo's own ident test green;
+#   F1:        the hidden check fails on the untouched tree and passes with the reference edit;
+#   F2:        the reference test passes, and fails under each of the four planted breaks.
+# CPU-heavy (docker build + pnpm install); run only from the gap-fill launcher.
+# Needs NPM_AUTH_TOKEN with read:packages. Exit 0 = all checks hold.
+set -u
+cd "$(dirname "$0")" || exit 1
+T=$PWD IMG=melosys-web-bench fail=0
+docker build -q --secret id=npm_token,env=NPM_AUTH_TOKEN -t $IMG . >/dev/null || { echo "FAIL image build"; exit 2; }
+run() { docker run --rm --network none -v "$T:/t:ro" $IMG bash -c "$1" >/dev/null 2>&1; }
+ok() { if run "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
+no() { if run "$2"; then echo "FAIL $1 (should fail)"; fail=1; else echo "ok   $1 fails"; fi; }
+ID=src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident
+VT="pnpm exec vitest run"
+ok "baseline tsc" "pnpm exec tsc --noEmit"
+ok "baseline ident test" "$VT $ID/ident.test.tsx"
+no "F1 check on untouched tree" "cp /t/F1/ident.erDnummer.test.tsx $ID/ && $VT $ID/"
+ok "F1 reference: tsc + tests" "cp /t/F1/ident.tsx /t/F1/ident.erDnummer.test.tsx $ID/ && pnpm exec tsc --noEmit && $VT $ID/"
+L=src/sider/tekstblokker
+ok "F2 reference test" "cp /t/F2/labels.test.ts $L/ && pnpm exec tsc --noEmit && $VT $L/labels.test.ts"
+i=0
+while IFS=$'\t' read -r find repl; do
+  i=$((i + 1))
+  brk="python3 -c 'import sys;p=sys.argv[1];s=open(p).read();open(p,\"w\").write(s.replace(sys.argv[2],sys.argv[3],1))' $L/labels.ts '$find' '$repl' && ! grep -qF '$find' $L/labels.ts"
+  ok "F2 break $i applies" "$brk"
+  no "F2 break $i" "cp /t/F2/labels.test.ts $L/ && $brk && $VT $L/labels.test.ts"
+done < <(python3 -c 'import json;[print(b["find"]+"\t"+b["replace"]) for b in json.load(open("tasks.json"))["tasks"][1]["breaks"]]')
+exit $fail
