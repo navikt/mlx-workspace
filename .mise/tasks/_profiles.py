@@ -266,7 +266,10 @@ def jdk_home(configured: str | None = None) -> Path:
     if configured and Path(os.path.expanduser(configured)).is_dir():
         return Path(os.path.expanduser(configured))
     import subprocess
-    r = subprocess.run(["mise", "where", "java@21"], capture_output=True, text=True)
-    if r.returncode == 0 and Path(r.stdout.strip()).is_dir():
+    try:
+        r = subprocess.run(["mise", "where", "java@21"], capture_output=True, text=True)
+    except OSError:
+        r = None
+    if r and r.returncode == 0 and Path(r.stdout.strip()).is_dir():
         return Path(r.stdout.strip())
     return Path.home() / ".local/share/mise/installs/java/21"

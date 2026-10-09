@@ -2,7 +2,7 @@
   "_note": "Spring Boot target, verified by building it: ./gradlew clean test --offline gives 63 tests, 0 failures, 30s, with JAVA_HOME on the pinned Temurin 21. Swap into bench/tasks.json to run. Pin the ref to the SHA: token-support 5.0.30 is the last version on Maven Central, and Dependabot will bump it.",
   "repo": "https://github.com/navikt/ia-tjenester-metrikker.git",
   "ref": "95e82724b8d8bfcc4787d25eed1cf3dd0cf59048",
-  "jdk": "~/.local/share/mise/installs/java/temurin-21",
+  "jdk": "~/.local/share/mise/installs/java/21",
   "tasks": [
     {
       "id": "R1",
