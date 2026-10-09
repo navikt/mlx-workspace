@@ -61,7 +61,7 @@ compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/front
 snap=$(ls -d "$HOME/.cache/huggingface/hub/models--mlx-community--K2-Horizon-MoVA-36B-A4B-4bit/snapshots/"* 2>/dev/null | head -1)
 .venv/bin/python -I -c 'import json,os,sys;d=sys.argv[1];m=set(json.load(open(d+"/model.safetensors.index.json"))["weight_map"].values());sys.exit(any(not os.path.isfile(d+"/"+f) for f in m) or not os.path.isfile(d+"/k2_horizon.py"))' "$snap" || { say "K2-Horizon weights incomplete in $snap; not running"; exit 1; }
 # From here the queue runs: any exit marks it done, before anything slow.
-trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker";' EXIT
 trap 'exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD)"
 grep -q 'MLX_TOOL_PARSER *= *"ifm"' profiles/k2-horizon-mova-36b-a4b-4bit.toml || { say "profile has no ifm parser; not running"; exit 1; }
