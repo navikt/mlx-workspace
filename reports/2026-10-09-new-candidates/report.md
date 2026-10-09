@@ -11,7 +11,7 @@ The standard set from the plan, on 9 Oct from 19:02. The model needs about 27 GB
 
 ## Results
 - create-file, base: 0/40. Every sample ended in about 10 s with "0 tools · no changes made".
-- edit-multi-mechanical: 0/1, the same failure, before the run was stopped at 19:15.
+- edit-multi-mechanical: 0/2, the same failure, before the run was stopped at 19:15.
 
 ## Verdict
 The model never produced a tool call that nav-pilot parsed. Under the plan, that is a reject. The cause may be a mismatch between the model's tool-call format and the server's tool parser or chat template, not model quality. This run does not tell the two apart.
