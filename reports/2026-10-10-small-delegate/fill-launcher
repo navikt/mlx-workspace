@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Fill (plan.md item 4, fill.queue): cheap-ops passes until the 13:00 gate, $0 cloud.
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-10-small-delegate/fill-launcher ~/tmp/ && nohup bash ~/tmp/fill-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/small-fill.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for .bench-logs/small-delegate.done (order only), then for a free GPU for 5 min straight: no queue lock, no benchmark, night-run or
+#     model-server process, nothing on :8080, AC, 48 GB wired, 1-min load below 6;
+#   - one instance (small-fill.pid), never twice (exits at start and after the wait if small-fill.done exists);
+#     touches small-fill.done only once the queue has run;
+#   - preflight: night-run-3 --dry-run (gradle-deps, nav-pilot, network), JDK 21, wired limit 49152;
+#   - runs .mise/tasks/night-run-3 in place.
+# Hard stop (owner, GPU until Sat 2026-10-10 14:00): no step starts at or after 13:00; a step
+# that starts then is killed at once, and the queue is killed by PID at 14:00.
+# No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=small-fill
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-10-small-delegate Q=fill.queue
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+NO_START=$(date -j -f '%Y-%m-%d %H:%M:%S' '2026-10-10 13:00:00' +%s)
+HARD_STOP=$(date -j -f '%Y-%m-%d %H:%M:%S' '2026-10-10 14:00:00' +%s)
+JDK="$HOME/.local/share/mise/installs/java/21"
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: waits for $L/small-delegate.done, then runs $R/$Q after 5 min of free GPU; no step starts after 2026-10-10 13:00"
+caffeinate -is -w $$ &
+last=""
+until [ -e "$L/small-delegate.done" ]; do
+  [ "$(date +%s)" -lt "$NO_START" ] || { say "gave up at the 13:00 gate: no small-delegate.done"; exit 1; }
+  [ -z "$last" ] && { say "waiting for the small-delegate done marker"; last=1; }
+  sleep 60
+done
+sleep 30; git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$NO_START" ] || { say "gave up at the 13:00 gate: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+[ -x "$JDK/bin/java" ] || { say "no JDK 21 at $JDK; not running"; exit 1; }
+[ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { say "wired limit not 49152; not running"; exit 1; }
+export FRONTIER_COST_CAP=0 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq-64g NIGHT_REPORT="$R/fill-results.md" \
+  NIGHT_CAFFEINATED=1   # no exec into caffeinate, so the PID below is night-run-3 itself
+.mise/tasks/ni""ght-run-3 --dry-run --part local --queue "$R/$Q" > "$L/$N-preflight.log" 2>&1 \
+  || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
+# From here the queue runs: any exit marks it done, before anything slow.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "$NR"; exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD); local only, $0 cloud"
+.mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q" &
+NR=$!
+say "queue pid $NR"
+steps0=""
+while kill -0 "$NR" 2>/dev/null; do
+  now=$(date +%s)
+  if [ "$now" -ge "$HARD_STOP" ]; then say "14:00 hard stop: killing queue pid $NR"; kill -TERM "$NR"; break; fi
+  if [ "$now" -ge "$NO_START" ]; then
+    s=$(grep -c -- '--- step' "$L/$N.log")
+    [ -z "$steps0" ] && steps0=$s
+    [ "$s" -gt "$steps0" ] && { say "13:00 gate: a step started after 13:00; killing queue pid $NR"; kill -TERM "$NR"; break; }
+  fi
+  sleep 5
+done
+wait "$NR"
+say "queue exited $?"
