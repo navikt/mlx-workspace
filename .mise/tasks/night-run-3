@@ -218,12 +218,12 @@ EOF
   fi
   # Runs build with --offline, so a dependency missing from ~/.gradle fails validation
   # 40 s into the night. On 9 Oct 2026 the cache, rebuilt 6 Oct, lacked io.confluent and kotlin-test.
-  if [ -z "$FAKE" ] && in_part local && [ -d "workspaces/$MODEL/kotlin" ]; then
+  if [ -z "$FAKE" ] && { in_part local || in_part hybrid; } && [ -d "workspaces/$MODEL/kotlin" ]; then
     local g J
     g=$(mktemp -d) && git clone -q "workspaces/$MODEL/kotlin" "$g/k" \
       && J=$(mise where java@21 2>/dev/null || echo "$HOME/.local/share/mise/installs/java/21") \
       && out=$(cd "$g/k" && JAVA_HOME=$J PATH=$J/bin:$PATH bash ./gradlew --offline --console=plain dependencies 2>&1) \
-      && ! echo "$out" | grep -q ' FAILED$' \
+      && ! grep -q ' FAILED$' <<<"$out" \
       && ok gradle-deps "workspaces/$MODEL resolves --offline" \
       || { echo "$out" | grep ' FAILED$' | sort -u | head -5 | sed 's/^/      /'
            no gradle-deps "Gradle cache misses deps; warm it: cd workspaces/$MODEL/kotlin && ./gradlew dependencies testClasses (online, JDK 21)"; }
