@@ -61,8 +61,6 @@ git switch -q main && git pull -q --ff-only origin main || { say "git pull faile
 export FRONTIER_COST_CAP=0 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq NIGHT_REPORT="$R/gap-fill-results.md" NIGHT_CAFFEINATED=1
 .mise/tasks/ni""ght-run-3 --dry-run --part local --queue "$R/$Q" > "$L/$N-preflight.log" 2>&1 \
   || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
-trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
-trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "${NR:-}"; exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD); local only, \$0 cloud"
 # Step 1, Q3: TS validation. Decision: does a TS rung enter cheap-ops (all ok) or do the tasks need rework.
 tok=$(gh auth token 2>/dev/null)
@@ -73,7 +71,9 @@ else
   NPM_AUTH_TOKEN=$tok "$MAIN/$R/ts/validate-ts" > "$L/$N-ts.log" 2>&1; say "step 1 exited $? (0 = tasks valid), see $L/$N-ts.log"
 fi
 unset tok
-# Step 2, Q2: base create-file. Decision in plan.md.
+# Step 2, Q2: base create-file. Decision in plan.md. From here the queue runs: any exit marks it done.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap '[ -n "${NR:-}" ] && { kill -TERM "$NR" 2>/dev/null; wait "$NR"; }; exit 130' INT TERM
 .mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q" &
 NR=$!
 say "queue pid $NR"
