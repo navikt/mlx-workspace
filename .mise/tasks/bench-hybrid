@@ -530,7 +530,9 @@ if CFG.get("tasks_from"):
         raise SystemExit(f"✗ {_target_path.name}: {CFG['tasks_from']} has no task {', '.join(_missing)}")
     CFG = {**_src, **CFG, "tasks": [new_tests_task(v, [_by[i] for i in _combine[v]]) if v in _combine else _by[v]
                                     for v in RUNGS.values()]}
-JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import _profiles as _P  # noqa: E402
+JDK = _P.jdk_home(CFG.get("jdk"))
 # A workspace of its own. bench-cheap-ops owns workspaces/<profile>/, and two
 # harnesses resetting the same checkout is the failure that made three earlier
 # workspaces hold a previous run's code.
@@ -1333,7 +1335,7 @@ def check_large():
     for tid, (kind, sites, files) in tasks.items():
         assert kind == "thread-arg" and (sites >= 10 or files >= 5), (tid, sites, files)
     assert ref == json.loads((ROOT / "bench" / "tasks.json").read_text())["ref"], ref
-    assert jhome.endswith("temurin-21") and first == f"{jhome}/bin", (jhome, first)
+    assert Path(jhome, "bin/java").exists() and first == f"{jhome}/bin", (jhome, first)
     assert ceiling == str(WS), ceiling
     print(f"  ✓ large target: {', '.join(f'{t} {s} sites/{f} files' for t, (_, s, f) in tasks.items())}")
 

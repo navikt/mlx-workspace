@@ -52,7 +52,7 @@ def _harness_sha():
 
 
 HARNESS_SHA = _harness_sha()
-JDK = Path(os.path.expanduser(CFG.get("jdk", "~")))
+JDK = P.jdk_home(CFG.get("jdk"))
 
 
 def profile_sha(profile):
