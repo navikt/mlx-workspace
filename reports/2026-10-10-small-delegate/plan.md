@@ -29,3 +29,10 @@ its night-run-3 by PID at 14:00.
 
 Run by `small-delegate-launcher` (BENCHMARKING.md «Waiting launchers»). Results go to
 `optiq-results.md` and `8bit-results.md`, and a report with the decisions follows.
+
+## Item 4: fill until 13:00
+
+`fill-launcher` waits for `.bench-logs/small-delegate.done`, then runs `fill.queue`: cheap-ops
+passes (all 13 tasks, O1 and T1 included) alternating optiq-64g and the 8-bit, one pass per step,
+local only, $0 cloud. The 13:00 gate cuts what does not fit, and every finished step counts.
+Decision: tighter intervals for the local small-task verdicts from the small-tasks queue.
