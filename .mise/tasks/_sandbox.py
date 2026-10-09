@@ -9,6 +9,7 @@ through a harness that trusted them to stay put.
 Every client launch goes through here so the sandbox cannot be forgotten in one
 place and remembered in another.
 """
+import json
 import os
 import re
 import shutil
@@ -171,10 +172,21 @@ def gradle_preflight(probe: Path, repo_root: Path) -> bool:
     (probe / "settings.gradle.kts").write_text('rootProject.name = "probe"\n')
     # A short idle timeout, so the probe's daemon does not linger into the step.
     (probe / "gradle.properties").write_text("org.gradle.daemon.idletimeout=60000\n")
+    # The bench's JDK, not the caller's: on 9 Oct 2026 this probe passed on mise's
+    # ambient java while every task pointed JAVA_HOME at a deleted temurin-21 dir.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import _profiles
+    jdk = _profiles.jdk_home(json.loads((repo_root / "bench/tasks.json").read_text()).get("jdk"))
+    v = subprocess.run([str(jdk / "bin/java"), "-version"], capture_output=True, text=True) \
+        if (jdk / "bin/java").exists() else None
+    if not v or not re.search(r'version "21[."]', v.stderr):
+        print(f"\u2717 JAVA_HOME={jdk} is not a JDK 21: {v.stderr.strip()[:200] if v else 'no bin/java'}")
+        return False
+    env = {**os.environ, "JAVA_HOME": str(jdk), "PATH": f"{jdk}/bin:{os.environ.get('PATH', '')}"}
     argv = ["cplt", "--project-dir", str(probe), *toolchain_grants(repo_root),
             "exec", "--", "./gradlew", "-q", "help"]
     try:
-        r = subprocess.run(argv, cwd=probe, capture_output=True, text=True, timeout=300)
+        r = subprocess.run(argv, cwd=probe, capture_output=True, text=True, timeout=300, env=env)
     except subprocess.TimeoutExpired:
         print("\u2717 gradle preflight timed out after 5 min")
         return False
@@ -182,7 +194,7 @@ def gradle_preflight(probe: Path, repo_root: Path) -> bool:
     print(out[-2000:], end="")
     ok = r.returncode == 0 and "Could not connect to the Gradle daemon" not in out
     mark = "\u2713" if ok else "\u2717"
-    print(f"{mark} gradle preflight in cplt (CPLT_CONFIG={os.environ.get('CPLT_CONFIG', '-')}): exit {r.returncode}")
+    print(f"{mark} gradle preflight in cplt (JAVA_HOME={jdk}, CPLT_CONFIG={os.environ.get('CPLT_CONFIG', '-')}): exit {r.returncode}")
     return ok
 
 

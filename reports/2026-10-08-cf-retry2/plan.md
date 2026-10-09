@@ -25,5 +25,7 @@ runs») for that profile.
   2026-10-08 20:00. Results go to `cf-retry2.md`.
 - Check before scoring, as for base: no sample contains "Could not connect to the Gradle daemon".
 
+- The first attempt (night dir `night3-20261009-004050`) is invalid and not merged: the task commands pointed JAVA_HOME at `installs/java/temurin-21`, which mise had replaced with `21.0.2` on 6 Oct, so every Gradle build failed (optiq 0/40).
+
 ## Arm
     cp reports/2026-10-08-cf-retry2/cf-retry2-launcher ~/tmp/ && nohup bash ~/tmp/cf-retry2-launcher >/dev/null 2>&1 &

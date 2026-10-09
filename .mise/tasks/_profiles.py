@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Shared helpers for model profile tasks (model-use, model-list, model-status)."""
+import os
 import sys
 import tomllib
 from pathlib import Path
@@ -253,3 +254,19 @@ if __name__ == "__main__":
     for k in list_keys():
         load(k)
     print(f"✓ penalties() self-check passed, {len(list_keys())} profiles validate")
+
+
+# Gradle needs JDK 21 (jvmToolchain(21)). Task configs name a path, but mise renames
+# its install dirs (temurin-21 became 21.0.2 on 6 Oct 2026, which zeroed a night run),
+# so a missing configured path falls back to what mise resolves today.
+JDK21_SH = '$(mise where java@21 2>/dev/null || echo "$HOME/.local/share/mise/installs/java/21")'
+
+
+def jdk_home(configured: str | None = None) -> Path:
+    if configured and Path(os.path.expanduser(configured)).is_dir():
+        return Path(os.path.expanduser(configured))
+    import subprocess
+    r = subprocess.run(["mise", "where", "java@21"], capture_output=True, text=True)
+    if r.returncode == 0 and Path(r.stdout.strip()).is_dir():
+        return Path(r.stdout.strip())
+    return Path.home() / ".local/share/mise/installs/java/21"
