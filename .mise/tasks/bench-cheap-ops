@@ -300,6 +300,15 @@ def touched_a_test(files):
     return [f for f in files if ".test." in f or "/__tests__/" in f or f.endswith("Test.kt")]
 
 
+def _added_lines():
+    diff = sh(["git", "diff", "-U0"], cwd=repo).stdout
+    return [l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
+
+
+def _added_has(term):
+    return any(term in l for l in _added_lines())
+
+
 def logged_forbidden(task):
     """A forbidden term on any line the model added, or None.
 
@@ -348,6 +357,18 @@ def verify(task):
             touched = changed_files()
             if not any(wanted in f for f in touched):
                 return False, f"nothing changed in {wanted} (touched: {', '.join(touched) or 'nothing'})"
+        # `only`: every changed path must start with it. O1 is a one-file
+        # config change and T1 is test-only; an edit outside either fails.
+        # [2:] not [3:]: changed_files() strips the whole output, so the first
+        # line loses the leading space of " M path".
+        only = task.get("only")
+        if only:
+            stray = [p for p in (l[2:].strip() for l in changed_files()) if not p.startswith(only)]
+            if stray:
+                return False, f"changed outside {only}: {', '.join(stray)}"
+        missing = [t for t in task.get("expect_added", []) if not _added_has(t)]
+        if missing:
+            return False, f"no added line with {missing[0]}"
         bad = logged_forbidden(task)
         if bad:
             return False, f"added a line with {bad} (personal data must not be logged)"
@@ -620,6 +641,15 @@ def self_check():
         assert verify(e3b) == (True, "compiles")
         f.write_text('good\nlog.info("p={}", personIdent.value)\n')
         assert verify(e3b)[0] is False, "logging personIdent must fail"
+
+        o1 = {"id": "O1", "verify": "compile", "touches": "src/a.ts", "only": "src/a.ts",
+              "expect_added": ["768Mi"]}
+        reset_repo(); f.write_text("memory: 768Mi\n")
+        assert verify(o1) == (True, "compiles"), "the asked-for value in the one file must pass"
+        f.write_text("memory: 1Gi\n")
+        assert verify(o1)[0] is False, "a different value must fail"
+        f.write_text("memory: 768Mi\n"); (repo / "src" / "a.test.ts").write_text("y\n")
+        assert verify(o1)[0] is False, "touching a second file must fail"
     print("✓ bench-cheap-ops self-check passed")
 
 

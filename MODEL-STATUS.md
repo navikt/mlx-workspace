@@ -27,6 +27,12 @@ Last updated 2026-10-09. Sources: the linked reports. Routine benchmarking has s
   [phase C](reports/2026-10-01-phase-c-rerun/report.md),
   [emm8 delegate](reports/2026-09-30-emm8-delegate/report.md)
 
+- **K2-Horizon MoVA (36B-A4B 4-bit):** 0/40, no parseable tool calls. Revisit only with a parser fix.
+  [new candidates](reports/2026-10-09-new-candidates/report.md)
+
+The [navikt PR audit](reports/2026-10-09-navikt-pr-audit/report.md) de-prioritises create-file and
+extends cheap-ops with O1 (one-file config change) and T1 (test-only unit test).
+
 ## What triggers the next run
 
 - A new candidate model: the standard set of about 4 hours, "better than optiq?".
