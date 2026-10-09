@@ -58,14 +58,14 @@ NP="$L/bin/nav-pilot-main-2bcca023"
 [ -f "$R/capabilities-bench-only-small.json" ] || { say "no overlay on main; not running"; exit 1; }
 export BENCH_NAV_PILOT="$NP" BENCH_NP_CONFIG_LINE='local_dispatch = "aggressive"' \
   BENCH_CAPABILITIES_OVERRIDE="$MAIN/$R/capabilities-bench-only-small.json" \
-  FRONTIER_COST_CAP=10 FRONTIER_CLOUD_MODEL=claude-sonnet-5 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq \
+  FRONTIER_COST_CAP=10 FRONTIER_CLOUD_MODEL=claude-sonnet-5 FRONTIER_MODEL=qwen3.6-35b-a3b-optiq-64g \
   NIGHT_HYBRID_TAG=np-2bcca023-sonnet5-aggressive-small NIGHT_REPORT="$R/small-tasks-results.md" \
   NIGHT_CAFFEINATED=1   # no exec into caffeinate, so the PID below is night-run-3 itself
 .mise/tasks/ni""ght-run-3 --dry-run --part all --queue "$R/$Q" > "$L/$N-preflight.log" 2>&1 \
   || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
 # From here the queue runs: any exit marks it done, before anything slow.
 trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
-trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait; exit 130' INT TERM
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "$NR"; exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD); overlay capabilities-bench-only-small.json, cap \$10"
 .mise/tasks/ni""ght-run-3 --part all --queue "$R/$Q" &
 NR=$!
