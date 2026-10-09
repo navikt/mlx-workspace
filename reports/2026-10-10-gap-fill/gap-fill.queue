@@ -1,0 +1,5 @@
+# Gap-fill (plan.md, step 2; #183 Q2). Run by gap-fill-launcher with night-run-3 --part local, $0 cloud.
+# Base create-file on the cf-retry2 conditions: same profile, rungs, runs and tasks (cd8780d1d644), variant base.
+# Decision: does retry2 (#1156) earn its place, or did the harness fixes do the work?
+# part kind     classes      variant runs rungs timeout-min expected-min profile
+local  base     create-file  base    5    1-4   420         210          qwen3.6-35b-a3b-optiq
