@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# New-candidate standard set on K2-Horizon MoVA (plan.md, new-candidates.queue).
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-09-new-candidates/new-candidates-launcher ~/tmp/ && nohup bash ~/tmp/new-candidates-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/new-candidates.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for cf-retry2.done, then for a free GPU for 5 min straight: no queue lock, no benchmark,
+#     night-run or model-server process, nothing on :8080, AC, 48 GB wired, 1-min load below 6;
+#   - one instance (new-candidates.pid), never twice (exits at start and after the wait if new-candidates.done exists);
+#     touches new-candidates.done only once the queue has run;
+#   - runs .mise/tasks/night-run-3 in place. It writes the bench-only cplt config (CPLT_CONFIG,
+#     sandbox.allow_localhost_any) and fails a step whose gradle preflight cannot reach the daemon.
+# No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=new-candidates
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-09-new-candidates Q=new-candidates.queue
+AFTER="$L/cf-retry2.done"
+NOT_BEFORE=$(date -j -f "%F %T" "2026-10-09 00:00:00" +%s)
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ "$(date +%s)" -ge "$NOT_BEFORE" ] || { echo "not before 2026-10-09 00:00"; return; }
+  [ -z "$AFTER" ] || [ -e "$AFTER" ] || { echo "no $AFTER yet"; return; }
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/$Q not before 2026-10-09 00:00, after ${AFTER:-nothing} and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }   # the queue, profile and plan arrive with this PR
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
+snap=$(ls -d "$HOME/.cache/huggingface/hub/models--mlx-community--K2-Horizon-MoVA-36B-A4B-4bit/snapshots/"* 2>/dev/null | head -1)
+.venv/bin/python -I -c 'import json,os,sys;d=sys.argv[1];m=set(json.load(open(d+"/model.safetensors.index.json"))["weight_map"].values());sys.exit(any(not os.path.isfile(d+"/"+f) for f in m) or not os.path.isfile(d+"/k2_horizon.py"))' "$snap" || { say "K2-Horizon weights incomplete in $snap; not running"; exit 1; }
+# From here the queue runs: any exit marks it done, before anything slow.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap 'exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD)"
+NIGHT_REPORT="$R/new-candidates.md" .mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q"
+say "queue exited $?"

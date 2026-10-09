@@ -1,0 +1,7 @@
+# New-candidate standard set (plan.md): create-file r1-r4 and emm r1-r4, base, 5 runs,
+# on K2-Horizon MoVA 36B A4B 4bit. Run by new-candidates-launcher. Wired: 48 GB.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  validate -                     -       -    -     60          40           k2-horizon-mova-36b-a4b-4bit
+local  base     create-file           base    5    1-4   280         140          k2-horizon-mova-36b-a4b-4bit
+local  base     edit-multi-mechanical base    5    1-4   190         95           k2-horizon-mova-36b-a4b-4bit
