@@ -47,7 +47,9 @@
       "verify": "compile",
       "prompt": "In src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt, add a log line to getOppfolgingstilfeller recording how many oppfolgingstilfeller it returns. Use the existing logging style in this codebase. Do not log personIdent or any other personal data. Change nothing else.",
       "touches": "src/main/kotlin/no/nav/syfo/application/OppfolgingstilfelleService.kt",
-      "forbid_added": ["personIdent"],
+      "forbid_added": [
+        "personIdent"
+      ],
       "_why": "Replaces E3, which asked for the values of the first public function's parameters. That parameter is personIdent, a fødselsnummer, and E3 passed on compile: it rewarded writing personal data to an application log. A new id rather than a new prompt under the old one, so no result file means two things by E3. forbid_added fails a sample whose diff adds a line naming personIdent."
     },
     {
@@ -87,13 +89,34 @@
       "kind": "edit",
       "verify": "retired",
       "prompt": "Add a nullable field kilde of type String to the data class POppfolgingstilfelleBit in src/main/kotlin/no/nav/syfo/infrastructure/database/bit/POppfolgingstilfelleBit.kt, and thread it through the toOppfolgingstilfelleBit mapper to the domain class it maps to. Update every construction site so the project still compiles and all tests pass. Change nothing else.",
-      "retired_reason": "Passed 1 of 54 judged attempts, and 0 of 8 on the repaired harness where models could finally compile \u2014 half of those hit the 420s cap. It asks for a field threaded through a mapper and every construction site with the suite still green, which costs more than the budget allows for a model averaging 58 to 104 seconds per task. By this suite's own rule a task no arm passes is a broken task, not a hard one. Retired from the scored set rather than deleted: it is the only multi-file task here, and it becomes measurable again with a larger cap."
+      "retired_reason": "Passed 1 of 54 judged attempts, and 0 of 8 on the repaired harness where models could finally compile — half of those hit the 420s cap. It asks for a field threaded through a mapper and every construction site with the suite still green, which costs more than the budget allows for a model averaging 58 to 104 seconds per task. By this suite's own rule a task no arm passes is a broken task, not a hard one. Retired from the scored set rather than deleted: it is the only multi-file task here, and it becomes measurable again with a larger cap."
     },
     {
       "id": "D3",
       "kind": "edit",
       "verify": "test",
       "prompt": "Write a JUnit 5 test that builds a KafkaIdenthendelseDTO with three identifikatorer, one AKTORID, one inactive FOLKEREGISTERIDENT and one active FOLKEREGISTERIDENT, then asserts that getActivePersonident() returns the active one and getInactivePersonidenter() returns exactly the inactive one. Match the style of the existing tests under src/test/kotlin."
+    },
+    {
+      "id": "O1",
+      "kind": "edit",
+      "verify": "compile",
+      "prompt": "In .nais/naiserator-dev.yaml, raise the memory limit under spec.resources.limits from 512Mi to 768Mi. Change nothing else.",
+      "touches": ".nais/naiserator-dev.yaml",
+      "only": ".nais/naiserator-dev.yaml",
+      "expect_added": [
+        "memory: 768Mi"
+      ],
+      "_why": "A small one-file deployment config change, the most common shape in the navikt PR audit (reports/2026-10-09-navikt-pr-audit). Compile only proves the tree is intact; expect_added and only check the value and that nothing else changed."
+    },
+    {
+      "id": "T1",
+      "kind": "edit",
+      "verify": "test",
+      "prompt": "Write a JUnit 5 unit test for the class Virksomhetsnummer in src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt. Cover a valid nine-digit value and at least one invalid value that must throw IllegalArgumentException. Match the style of the existing tests under src/test/kotlin. Change only files under src/test/kotlin.",
+      "touches": "src/test/kotlin/",
+      "only": "src/test/kotlin/",
+      "_why": "Test-only unit test for an existing class with no test, from the navikt PR audit (reports/2026-10-09-navikt-pr-audit). only fails a sample that edits main code to make its test pass."
     }
   ],
   "_ref_note": "Pinned to a commit, not a branch. It said \"master\" and the workspaces drifted to three different commits: the two models in the headline comparison were solving different code, and one task threads a field into a class that differs between them. A moving ref makes every cross-model number incomparable.",
