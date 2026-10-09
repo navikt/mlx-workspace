@@ -1,0 +1,357 @@
+repo,lang,url,bot,cls,files,lines,tests,cross_module,new_files,title
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/176,0,create-file,4,135,0,0,4,plan(new-candidates): K2-Horizon MoVA standard set against optiq
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/17,0,config-deploy,1,6,0,0,1,TEK Åpne melosys-felles i Oversikt-linsen som standard
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/177,0,create-file,6,3653,0,0,6,docs(reports): create-file retry2 results and verdict
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/320,0,config-deploy,2,7,0,0,0,Fjern dupliserte avhengigheter
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/16,0,edit-single,7,1530,1,0,3,"TEK Publiser datafilene en side viser, uten kolonner med NAVident"
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/318,0,edit-single,21,1082,0,0,10,Bytt fra maven til gradlew
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3234,0,frontend-feature,5,100,0,0,0,8336 G4P Oppgrader @hookform/resolvers til versjon 5
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3625,0,edit-single,1,2,0,0,0,MeldekortRepository har byttet pakke
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/470,0,edit-multi-logic,3,43,0,0,2,Chore: Enable sonar
+copilot,Go,https://github.com/navikt/copilot/pull/1517,0,feature-multi,6,366,1,0,4,feat(my-copilot): 3D-prototype på forsiden
+copilot,Go,https://github.com/navikt/copilot/pull/1516,0,feature-multi,3,28,0,0,2,docs(cplt): ask for plain cplt doctor output when reporting problems
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3319,0,feature-multi,8,136,1,1,7,AAPM-71 Synkroniser meldekortsyklus med Arena
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3623,0,feature-multi,6,159,1,1,3,AAP-2540 refusjonskrav sosialkontor
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/319,0,create-file,2,21,0,0,2,nav-pilot init
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3229,0,edit-multi-logic,3,435,0,0,0,8336 Oppgrader Vitest og coverage til versjon 5
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3233,0,test-only,1,7,1,0,0,NOJIRA Fiks flaky test for kopi til bruker i SendBrev
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3232,0,deps-bump,2,78,0,0,0,8336 G4P Fjern ubrukte avhengigheter
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/928,0,frontend-feature,11,251,1,1,5,Kan vise manuell behandlingsgrunn for alle typer rammebehandling
+grillmester,Python,https://github.com/navikt/grillmester/pull/84,0,feature-multi,57,7571,1,1,34,Få Java og andre verktøy til å virke smidig i appens sandkasse
+testnorge,Java,https://github.com/navikt/testnorge/pull/4364,0,feature-multi,2,26,0,0,0,Feature/oppfoelgingsvedtak tilpasning form
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3230,0,edit-multi-mechanical,59,835,1,1,8,8343 Migrer fra React Router 5 til React Router 8
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/41,0,create-file,3,188,1,0,3,Håndter manglende vitest dependency ved make observability-apply
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/261,0,docs,1,2,0,0,1,Legg til url-referanse til beregninger i intro-webpage
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/759,0,feature-multi,9,137,1,0,2,RAMP-297 ramp-løft-av-teknisk-helse Sender dato til utmelding når henter fastsatt meldedat
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3624,0,db-migration,7,63,1,1,3,AAP-BAU: legge til nye felter for egenvirksomhet
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3231,0,edit-single,2,75,1,0,1,NOJIRA Velg kun relevante slices i ErrorBoundary
+copilot,Go,https://github.com/navikt/copilot/pull/1515,0,feature-multi,13,572,1,0,7,"feat(my-copilot): /reisen, tidslinjen for KI-arbeidet i Nav"
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/259,0,edit-multi-logic,1,6,0,0,0,Legg til static/beregninger i nginx location config
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3242,0,feature-multi,3,36,0,1,3,Chore: Vedtakssperre i produksjon pga omlegging hos SKE
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/258,0,edit-single,11,1815,0,0,9,AAP-BAU: Legg til beregninger dokumentasjon
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/175,0,edit-multi-logic,1,11,0,0,0,"fix(night-run-3): check jars, not only metadata, in the gradle-deps preflight"
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/174,0,create-file,1,13,0,0,1,fix(night-run-3): fail preflight when the Gradle cache cannot resolve offline
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3615,0,feature-multi,15,142,1,1,1,AAP-2555 skal ikke flette uførevedtak fra atomære behandlinger som IK…
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/173,0,feature-multi,9,65,0,0,2,"fix(bench): resolve JDK 21 via mise, check it in the gradle preflight"
+grillmester,Python,https://github.com/navikt/grillmester/pull/82,0,feature-multi,31,7605,1,1,22,"Del app-sandbox-setup i regeltabell, ren policymotor og moduler"
+testnorge,Java,https://github.com/navikt/testnorge/pull/4363,0,feature-multi,11,249,1,0,3,feat: oppdatering adferd min side og dashboard
+grillmester,Python,https://github.com/navikt/grillmester/pull/81,0,edit-multi-logic,12,83,1,1,2,Ikke foreslå sletting av appens egne data.db-filer i app-sandbox-setup
+copilot,Go,https://github.com/navikt/copilot/pull/1505,0,feature-multi,11,1110,1,0,4,feat(my-copilot): charts and report timeline on the local models page
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/170,0,edit-multi-logic,14,1000,0,0,13,feat(manifest): machine-readable reports index for ki-utvikling
+copilot,Go,https://github.com/navikt/copilot/pull/1496,0,feature-multi,134,5540,0,0,57,feat(nav-pilot): @nav-pilot som koordinator (steg 3)
+copilot,Go,https://github.com/navikt/copilot/pull/1506,0,edit-single,2,14,1,0,1,fix(nav-pilot): news e2e no longer depends on today's date
+copilot,Go,https://github.com/navikt/copilot/pull/1503,0,edit-multi-mechanical,17,300,1,0,0,docs(nav-pilot): bruk «branch» og skriv om push-avsnittet i cplt-git
+copilot,Go,https://github.com/navikt/copilot/pull/1504,0,edit-single,5,111,1,0,2,feat(nav-pilot): require minNavPilotVersion for fail-closed hooks
+copilot,Go,https://github.com/navikt/copilot/pull/1502,0,feature-multi,8,659,1,0,0,feat(my-copilot): live approval counts and rejected models on the local models page
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/172,0,docs,6,60,0,0,5,"docs: benchmarks run on triggers only, add MODEL-STATUS.md"
+copilot,Go,https://github.com/navikt/copilot/pull/1495,0,edit-single,3,85,0,0,1,fix(bench): leave no Gradle daemons after golden runs
+copilot,Go,https://github.com/navikt/copilot/pull/1500,0,edit-single,6,26,0,0,4,docs: link news about local models to the latest numbers
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/171,0,edit-single,3,66,0,0,1,bench: delegate trusted needs pooled cost ratio <= 1.00
+copilot,Go,https://github.com/navikt/copilot/pull/1498,0,feature-multi,13,333,1,0,5,feat(nav-pilot): opt-in fail-closed gate hooks
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/169,0,create-file,3,97,0,0,3,docs(reports): plan and queue create-file retry2 ladders
+copilot,Go,https://github.com/navikt/copilot/pull/1497,0,feature-multi,3,60,0,0,0,docs(cplt-git): upstream is now recorded after git push -u on macOS
+copilot,Go,https://github.com/navikt/copilot/pull/1499,0,edit-multi-logic,3,567,0,0,0,"fix(my-copilot): wider, more scannable local models page"
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/168,0,docs,1,4,0,0,0,docs(reports): fix the create-file failure split
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/167,0,edit-multi-logic,35,12533,0,0,32,docs(reports): 1 Oct benchmark verdicts and plan forward
+copilot,Go,https://github.com/navikt/copilot/pull/1493,0,edit-multi-mechanical,38,494,1,0,1,"docs: plainer Norwegian terms (delegering, default branch, hoster, …)"
+copilot,Go,https://github.com/navikt/copilot/pull/1494,0,feature-multi,6,78,1,0,1,docs(nav-pilot): record what a missed hook margin costs
+copilot,Go,https://github.com/navikt/copilot/pull/1491,0,edit-multi-logic,17,982,1,0,5,feat(my-copilot): open insight page for local models
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/15,0,docs,1,14,0,0,0,"TEK Legg WIKI_ANSWER_GROUPS inn i NAIS Console, ikke med kubectl"
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/14,0,create-file,2,18,0,0,2,TEK Dokumenter nøkkelen WIKI_ANSWER_GROUPS i appens hemmelighet
+copilot,Go,https://github.com/navikt/copilot/pull/1492,0,feature-multi,15,396,1,1,7,"fix(nav-pilot): give local probes the gate's deadline, start nothing after a hook kill"
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/13,0,docs,2,9,0,0,0,TEK Dokumenter at SCHEDULER_ENABLED også styrer oppryddingen av sporinger
+copilot,Go,https://github.com/navikt/copilot/pull/1488,0,edit-multi-logic,5,152,0,0,3,"feat(nav-pilot): ny agent @worker, pinnet til GPT-6 Luna"
+copilot,Go,https://github.com/navikt/copilot/pull/1490,0,feature-multi,12,93,1,0,3,test(nav-pilot): fix e2e flakes under parallel load
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1596,0,edit-single,5,35,1,0,0,Fjern SYKMELDINGSGRAD underspørsmål fra opphold utland søknad
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4320,0,edit-multi-logic,4,43,1,0,0,Fjern SYKMELDINGSGRAD underspørsmål fra opphold utland søknad
+grillmester,Python,https://github.com/navikt/grillmester/pull/79,0,feature-multi,54,4855,1,1,17,Legg til app-sandbox-setup for portabel sandbox i Copilot-appen
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/12,0,config-deploy,1,8,0,0,0,TEK Slå på svar på spørsmålskort i melosys-felles
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3616,0,edit-single,1,15,0,0,0,AAP-BAU avslag 11-5 skal også gi avslagsbrev på revurdering
+testnorge,Java,https://github.com/navikt/testnorge/pull/4362,0,edit-multi-logic,28,1724,1,0,10,Feature/inntektstub forbedring av form
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3228,0,edit-single,3,898,0,0,0,8336 G4P Oppgrader Vite til versjon 8
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/11,0,config-deploy,1,13,0,0,0,TEK Slett svar fra spørsmålskort etter oppbevaringstiden
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3227,0,frontend-feature,8,1349,0,0,0,8336 G4P Oppgrader ESLint til versjon 10
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3226,0,edit-single,3,45,1,0,1,VAKT Fiks krasj ved manglende svar på anmodning
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3225,0,frontend-feature,30,1405,1,0,2,8336 G4P Fiks gjentatte GraphQL-kall etter Apollo-oppgradering
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/10,0,edit-single,11,413,1,0,8,TEK Skann svar på spørsmålskort med felles-wiki-skanneren
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8020,0,edit-single,1,4,0,0,0,Bugfix: tolerere testdata fra Kabal
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3604,0,feature-multi,6,63,1,1,4,Aap 2512 dodsfall brev
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8019,0,edit-multi-logic,2,6,0,0,0,TFP-7201: Oppdaterer kun forespørsler i førstegangsbehandlinger og de…
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3618,0,edit-single,1,6,0,0,0,AAP-BAU Også send resultat når det finnes for revurdering
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3224,0,edit-single,5,29,0,0,1,8336 G4P Fiks bredden på datovelgere
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/214,0,frontend-feature,22,521,1,0,8,chore(deps): oppgrader nav-dekoratoren-moduler til 4.5.0
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/926,0,frontend-feature,5,44,0,0,4,la inn mulighet for å legge inn mottatt dato for manuelle søknader
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1528,0,frontend-feature,14,587,0,0,1,Dsos 704 vedlegg 2.0 klage form
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1593,0,config-deploy,1,6,0,0,0,Fjern tilganger til slettede altinn-apper
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3223,0,frontend-feature,15,3193,1,0,1,8336 G4P Oppgrader Apollo Client og GraphQL Codegen
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1592,0,test-only,6,301,1,0,1,Endrer til FellesQueueDispatcher for inntektskomponenten og oppdater tester
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3222,0,frontend-feature,148,13395,1,0,0,8336 G4P Oppgrader Aksel til versjon 8
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3210,0,frontend-feature,4,301,1,0,1,8330 TOGGLE DAPI Fiks trygdeavgiftsvisning for tidligere år
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3474,0,feature-multi,25,2272,1,1,7,FAGSYSTEM-447110: Sammenhengende institusjonsopphold skal sees på som ett opphold ved over
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/256,0,feature-multi,14,1515,0,0,11,Kelvin-presentasjon seksjonfrokost
+testnorge,Java,https://github.com/navikt/testnorge/pull/4360,0,feature-multi,4,295,1,0,1,Bugfix/inntekstub status
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3611,0,create-file,6,127,1,0,6,AAP-2394: Returner revurdering.url i kafka-hendelse til Tilbakeløsningen
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3610,0,edit-multi-mechanical,97,364,1,1,3,AAP-BAU Saml klasser relatert til meldeplikt i en pakke
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3205,0,frontend-feature,8,189,1,0,2,8310 DAPI Vis tilbakelagt innbetalt og beløp fra backend i årsavregningen
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8017,0,edit-single,1,10,0,0,0,TFP-7136: Tittel på historikkinnslaget tilpases utifra om det kun er …
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3600,0,feature-multi,4,221,1,0,1,AAP-1335 gir bedre feilmeldinger for yrkesskade
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1590,0,db-migration,13,48,1,0,11,Lagrer Lott og Hyre på søknad
+testnorge,Java,https://github.com/navikt/testnorge/pull/4358,0,edit-multi-logic,3,12,0,0,0,refactor: remove excessive logging in authentication and token handling
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3565,0,edit-multi-logic,4,14,1,0,0,AAP-BAU: Fjern gammel toggle SamordningFaktagrunnlagBrev
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3609,0,edit-single,1,7,0,0,0,"AAP-BAU Fiks hvor aktivt steg hentes fra flyt, uten at det er satt"
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/918,0,frontend-feature,19,138,1,1,14,kan journalføre begrunnelse for behandlinger
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3218,0,docs,2,248,0,0,1,8280 G4P Legg til ADR for Express-server
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/750,0,edit-single,2,6,1,0,0,RAMP-288 ramp-løft-av-teknisk-helse Forventer NoContent fra siste-fastsatt-meldedato
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3608,0,edit-multi-mechanical,44,131,1,1,0,AAP-BAU Saml bistandsbehov til egen pakke
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8010,0,feature-multi,5,275,1,0,3, TFP-6833: Midlertidig endepunkt for å sjekke behov for inntektsmelding
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1578,0,feature-multi,9,190,1,0,1,Send pensjonsgivende inntekt per skatteordning for naringsdrivende
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3219,0,config-deploy,1,2,0,0,0,8280 G4P Fiks Q1-deploy etter nginx-migrering
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8015,0,edit-single,1,4,0,0,0,Chore: Logger maskert orgnr
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3172,0,feature-multi,35,3290,1,1,23,MELOSYS-8280 Erstatt nginx med Node/Express-server
+testnorge,Java,https://github.com/navikt/testnorge/pull/4350,0,feature-multi,289,20768,1,0,58,Feature/dolly status feedback
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/9,0,edit-single,5,37,0,0,1,TEK Dokumenter erfaringer fra første prod-deploy
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8014,0,edit-single,2,92,1,0,0,TFP-7136: Skrur på toggle for hyppigere oppdatering av forespørsler
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3211,0,config-deploy,4,407,0,0,2,TEK G4P E2E før merge via merge queue
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4309,0,create-file,1,2,0,0,1,Legg til flexjar på FLERE_INNTEKTSKILDER_GRUPPE og ANDRE_INNTEKTSKILDER_V2
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3606,0,edit-multi-mechanical,24,75,1,1,0,AAP-BAU Saml klasser relatert til overgang arbeid i en pakke
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3601,0,feature-multi,6,42,1,1,3,AAP-2484 Informer om hvilket avklaringsbehov behandling er stoppet 
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4308,0,edit-single,1,5,0,0,0,Retter opp i liten skrivefeil
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3605,0,edit-single,2,262,1,0,0,FAGSYSTEM-449720: Fiks smitte av reduksjonsvurdering til nye institusjonsopphold i revurde
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3607,0,edit-single,1,9,0,0,0,AAP-2537 - AAP-BAU - Skal drøye med å sjekke endrede informasjonskrav…
+aap-behandlingsflyt,Kotlin,https://github.com/navikt/aap-behandlingsflyt/pull/3578,0,feature-multi,8,299,1,1,3,AAP-2472 Registrer at bruker har meldt seg
+melosys-web,TypeScript,https://github.com/navikt/melosys-web/pull/3209,0,frontend-feature,2,17,0,0,0,8330 TOGGLE Fiks validering av trygdeavgiftssteget
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1531,0,deps-bump,2,377,0,0,0,oppdatere pakker for å fikse svakheter
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1571,0,db-migration,36,836,1,0,17,Nytt spørsmål om ghost inntekter
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4216,0,frontend-feature,42,1958,1,0,10,Nytt spørsmål om ghost inntekter
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/8,0,edit-multi-mechanical,23,528,1,1,0,TEK Flytt melosys-muninn til prod-gcp på ansatt.nav.no
+testnorge,Java,https://github.com/navikt/testnorge/pull/4356,0,feature-multi,33,1274,1,0,14,Feature: forbedre innsending til Inntekstub; ny funksjonalitet for slett aarMaaned
+grillmester,Python,https://github.com/navikt/grillmester/pull/78,0,edit-multi-mechanical,11,48,0,0,0,Bytt modeller til GPT-6.1 Sol og Sonnet 5.5
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1587,0,test-only,4,341,1,0,0,Fiks flaky test
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1586,0,edit-multi-mechanical,4,15,0,0,0,Log arbeidssituasjon med name istedenfor navn/tostring
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/7,0,create-file,3,164,0,0,3,TEK Legg til make deploy-q2 for deploy fra laptopen
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1585,0,edit-multi-logic,14,365,1,0,0,Kall nytt endepunkt for ventetid i flex-syketilfelle
+testnorge,Java,https://github.com/navikt/testnorge/pull/4355,0,edit-single,2,13,1,0,1,Bestillingsstatus fix for misvisende import
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/6,0,edit-single,3,119,1,0,0,TEK Si fra om utløpt gcloud-innlogging i felles-wiki-skriptet
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/469,0,feature-multi,13,453,1,0,8,TFP-7110: harmoner Spring Security-oppsett med fp-infotrygd
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3240,0,db-migration,2,11,0,0,1,TFP-7152 fase 2 etterpopulere evt mangler i fagsakProsessTask
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/734,0,config-deploy,1,1,0,0,1,Tillatt kommunikasjon fra dp-meldekort
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/5,0,edit-multi-logic,2,8,0,0,0,TEK Flytt DHI Bun-basen til Debian 13.7
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8000,0,feature-multi,3,94,1,0,1,TFP-7118: Innhent IM ved velferdspermisjon som skyldes SVP
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1525,0,edit-single,3,21,0,0,1,Oppgrader nav-dekoratoren-moduler til 4.5.0 og sett teamName
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8011,0,db-migration,1,11,0,0,1,TFP-7152 fase 2 etterpopuler saksnummer og indeksere
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/317,0,edit-multi-mechanical,10,249,1,0,2,Oppgrader avhengigheter
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4300,0,deps-bump,2,18,0,0,0,Bump nav-dekoratoren-moduler
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/165,0,edit-single,9,393,0,0,8,bench: scope cplt localhost-any to benchmark runs
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/164,0,docs,2,24,0,0,1,docs(reports): correct results hit by the sandbox Gradle block
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1583,0,edit-single,1,1,0,0,0,Slett override av auto.offset.reset
+testnorge,Java,https://github.com/navikt/testnorge/pull/4352,0,feature-multi,19,1140,1,0,14,Feature/nais apm dolly frontend
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/162,0,edit-multi-logic,9,11325,0,0,8,docs(reports): v2 ladders results and stop-rule decision
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/161,0,edit-single,15,37748,0,0,14,docs(reports): Kev 4B as an English System 1 model fails on memory
+testnorge,Java,https://github.com/navikt/testnorge/pull/4354,0,edit-multi-mechanical,12,101,0,0,1,Bugfix/visning av feilinfo dokarkiv
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1582,0,create-file,1,1,0,0,1,Sett auto.offset.reset til erliest for nytt topic
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8012,0,feature-multi,13,860,1,0,5,TFP-7095 filtrerer bort urelevante oppgitte perioder i mottak og utta…
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1581,0,edit-multi-mechanical,9,153,1,0,1,Lytt på nytt StartStopp topic fra flex-arbeidssokerregister-oppdatering 
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8001,0,feature-multi,15,671,1,1,4,TFP-7136: Tar i bruk nye endepunkt for å bestille komplett liste over…
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/160,0,edit-multi-logic,3,107,0,0,2,bench(v2): requeue the edit-class ladders after Kev English
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/159,0,edit-multi-logic,6,37,0,0,2,bench: run Kev English before the phase C requeue; decision and stop rules
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/547,0,feature-multi,7,232,1,0,6,UAA: Jobb som varsler om klager som ikke blir ferdigstilt innen fire måneder
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/158,0,create-file,2,46,0,0,2,docs+ci: guard manifest/models.json like a release
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/157,0,feature-multi,9,489,0,1,6,bench(kev): plan and queue Kev 4B on English
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3236,0,db-migration,4,37,0,0,2,TFP-7152 fagsakProsessTask bytt fagsakid med saksnummer (1 av 4)
+mlx-workspace,Python,https://github.com/navikt/mlx-workspace/pull/155,0,edit-single,41,25902,0,0,39,docs(reports): after-64-6 results and balanced against same-day controls
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/4,0,docs,1,2,0,0,0,TEK Fest upstream-entrypoint på nytt etter kommentarendring i muninn #592
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/3,0,edit-single,11,2071,1,0,9,"TEK Legg til felles-wiki-bøtte, speil-env og publiseringsskript"
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/242,0,docs,1,4,0,0,1,Doc/runbook reorg
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/39,0,feature-multi,10,996,1,0,4,nytt oppsett maven credentials
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/316,0,edit-multi-logic,5,114,0,0,0,Fjern auditlogg
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/546,0,db-migration,10,130,1,1,1,"Fjerner frist fra oppfølging, da på-vent-funksjonalitet dekker behovet"
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1579,0,edit-multi-logic,2,7,0,0,1,Slå av jobb som aktiverer Julesøknader
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1580,0,edit-single,1,19,0,0,0,Fjern gammelt harSoknad endepunkt
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1577,0,feature-multi,5,258,1,0,1,"Nytt endepunkt for harSoknad som tar hensyn til arbeidssituasjon, OG klipp HVIS det er NAE"
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3237,0,test-only,2,24,1,0,0,Teknisk oppdater fp-felles til 7.9.2
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8007,0,test-only,2,16,1,0,0,Teknisk oppdater fp-felles til 7.9.2
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1576,0,create-file,1,2,0,0,1,Legg på eksplisitt span ved henting av roller
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8006,0,edit-single,2,99,1,0,1,Bedre feilmelding som ikke inneholder stacktrace når kall til fpinnte…
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/725,0,edit-single,3,19,1,0,0,"Sett ansvarlig system = DP uansett utfall, og be alltid dp-meldekortregister om migrere ua"
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8008,0,create-file,1,1,0,0,1,Bugfix manglende init av ny kolonne fagsak_prosess_task
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8005,0,db-migration,4,38,0,0,2,TFP-7152 fagsakProsessTask bytt fagsakid med saksnummer
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8003,0,edit-multi-mechanical,7,154,1,0,0,FAGSYSTEM-447369 skille hvilket system som har aap/dag ved nøs-oppgave
+testnorge,Java,https://github.com/navikt/testnorge/pull/4353,0,test-only,4,110,1,0,3,Fix for kafka i arbeidsforhold service
+testnorge,Java,https://github.com/navikt/testnorge/pull/4338,0,feature-multi,30,866,1,0,18,Feature/maler for soek frontend
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/723,0,api-schema,14,504,1,1,4,RAMP-276 Endepunkt som returnerer meldedato for en gitt personId
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8004,0,edit-multi-logic,6,321,1,1,3,TFP-7147: Rett ansvarlig saksbehandler når behandling henlegges
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3234,0,edit-multi-logic,6,112,0,1,0,TFP-7063 samle logging og bruk standardiserte logg-felt-navn
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4280,0,create-file,1,2,0,0,1,Legg til min-release-age
+testnorge,Java,https://github.com/navikt/testnorge/pull/4351,0,edit-multi-logic,7,31,0,0,0,Fix aar-dropdown for Safari
+grillmester,Python,https://github.com/navikt/grillmester/pull/77,0,feature-multi,49,1013,1,0,5,"Gjør Designer fleksibel med oppsett, implementering og perspektiver"
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/912,0,frontend-feature,3,103,0,0,3,saksbehandlerne kan nå angre meldekortbehandling sendt til beslutning
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/14,0,config-deploy,2,10,0,0,0,fix: rett sikkerhetsfunn fra sheriff-rapporten
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/36,0,feature-multi,9,1194,1,0,6,Chore/replace npm token
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/538,0,edit-single,3,24,0,0,0,Bump dependency og fiks sikkerhetsvalidering for Avro 1.12.2
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/37,0,docs,1,2,0,0,1,docs: dokumenter samlet sårbarhetsrapport
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/38,0,docs,1,2,0,0,0,Unngå at facade blir med i masseoperasjoner
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/34,0,feature-multi,6,243,1,0,2,Gjør logging agent sikrere
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/35,0,edit-single,4,64,1,0,1,"Facade tilbake til ikke managed, vis ""ikke managed ""med badge"
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/31,0,feature-multi,12,1492,1,0,7,Feature/logging agent orchestrator
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1574,0,deps-bump,1,2,0,0,0,Oppgraderer Distroless til java21-debian13@sha256:26a517c7
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/910,0,frontend-feature,27,888,1,0,10,Min benk
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/33,0,edit-single,4,64,0,0,0,chore: oppdater forvaltede repos
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4282,0,edit-multi-mechanical,5,156,0,0,0,Bytter ut gridItems
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/240,0,docs,3,142,0,0,2,flyttet runbook for statistikk til statistikk-repoet
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4270,0,edit-multi-mechanical,23,534,1,0,0,Forbedring av kvitteringene
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/213,0,frontend-feature,3,84,1,0,0,Fjern infomelding om etterbetaling av pensjon
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4281,0,deps-bump,1,2,0,0,0,Oppgraderer Distroless til nodejs24-debian13@sha256:b1fc3324
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/8002,0,edit-multi-mechanical,4,44,0,1,0,TFP-7063 bruk standardiserte logg-felt-navn
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3231,0,edit-single,1,4,0,0,0,Rett OpenAPI-kontrakt for feilutbetalingsårsaker
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3227,0,feature-multi,4,145,1,1,0,TFP-3873: historikkinnslag når bruker uttaler seg om varsel
+grillmester,Python,https://github.com/navikt/grillmester/pull/76,0,edit-single,28,449,1,0,4,La Grillmester implementere små slices og Designer grille nye konsepter
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/519,0,db-migration,36,429,1,1,18,feat(behandling): registrer hvem som oppretter behandlinger
+grillmester,Python,https://github.com/navikt/grillmester/pull/75,0,edit-multi-logic,15,3302,1,0,4,Rull ut ved versjonsbump på main
+grillmester,Python,https://github.com/navikt/grillmester/pull/73,0,test-only,16,85,1,0,0,Oppgrader agentmodellene til Opus 5.5 og GPT-6 Sol
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/32,0,config-deploy,1,2,0,0,0,Lagt riktig miljø for databaseuttrikk app
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/522,0,db-migration,15,278,1,1,5,Spor hvilke opplysninger som (gjen)åpnet en avklaring
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/536,0,edit-single,4,33,1,0,1,UAA: Håndtere tilbakekreving når oppgaven har status UNDER_KONTROLL
+testnorge,Java,https://github.com/navikt/testnorge/pull/4348,0,feature-multi,5,139,1,0,0,Feature/forbedre adferd endepunkter
+testnorge,Java,https://github.com/navikt/testnorge/pull/4347,0,edit-multi-mechanical,26,312,1,1,3,Feature/oppgradere til junit6
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/315,0,config-deploy,2,4,0,0,0,Override tomcat fra spring
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/212,0,create-file,3,84,1,0,3,Infomelding om etterbetaling av pensjon
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/13,0,edit-single,3,62,1,0,0,"Juster status-farger, progresjonslinje og BAKS-dato"
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/314,0,config-deploy,2,4,0,0,0,Bump spring
+testnorge,Java,https://github.com/navikt/testnorge/pull/4345,0,feature-multi,4,294,1,0,2,"Fix: Bad Request - Values must not contain a null value, path :  /api/v1/gruppe/10197/page"
+testnorge,Java,https://github.com/navikt/testnorge/pull/4344,0,feature-multi,3,215,1,0,1,Fix: improve error handling in PersonServiceClient and PersonServiceE…
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/25,0,feature-multi,34,8007,1,1,24,Legg til sheriff-agent for sikkerhetsoppfølging
+testnorge,Java,https://github.com/navikt/testnorge/pull/4346,0,feature-multi,26,1084,1,1,10,Bugfix/dokarkiv store dokumenter
+testnorge,Java,https://github.com/navikt/testnorge/pull/4343,0,edit-multi-logic,5,525,1,0,2,Add smooth scrolling for expanded table rows and update dependencies
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4271,0,edit-single,5,253,0,0,0,Oppgrader til vitest 5 + ny config
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1516,0,edit-single,2,123,1,0,0,Fix/dsos 683 landingsside tidligere soknader
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/898,0,edit-multi-mechanical,15,319,1,1,8,Håndterer at en bruker kan mangle tilgang til å se benken
+dp-migrering,Kotlin,https://github.com/navikt/dp-migrering/pull/69,0,edit-multi-logic,53,3370,1,1,15,Integrert StPeter for tilgangskontroll
+dp-stpeter,Kotlin,https://github.com/navikt/dp-stpeter/pull/69,0,edit-multi-logic,53,2479,1,1,24,Feat/plugin
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/237,0,edit-multi-logic,2,204,0,0,1,AAP-BAU Skriver overordnet om konsepter i Kelvin
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4265,0,edit-single,1,21,0,0,0,Trekker ut reset av feilmelding i janeistor fra validering til onChange
+testnorge,Java,https://github.com/navikt/testnorge/pull/4342,0,feature-multi,11,96,1,0,0,Fix: enhance error handling in reactive commands to prevent applicati…
+tilleggsstonader,Shell,https://github.com/navikt/tilleggsstonader/pull/52,0,config-deploy,4,301,0,0,4,Lag workflows som bruker pnpm i stedet for yarn
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/521,0,config-deploy,1,1,0,0,0,dp-mellom-barken-og-veden trenger ikke lenger tilgang. Den brukte API…
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/28,0,edit-single,5,269,1,0,4,logging-agent oppdatert
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/7999,0,edit-single,2,45,1,0,0,TFP-6770: Historikkinnslag inntektsmelding forespørsel
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/509,0,feature-multi,10,581,1,0,7,Unngå duplikate rettighetsperioder ved kant-i-kant sammenslåing
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/897,0,frontend-feature,14,403,0,0,4,885/tildele flere rammebehandlinger
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/513,0,feature-multi,9,594,1,0,6,Rydd i RettighetsperiodePlugin: skill domenelogikk fra mekanikk
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/27,0,docs,1,99,0,0,1,dokumenter plan for endring logging i alle repo
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/7990,0,edit-single,2,9,0,0,0,TFP-5197 Bruk overstyrt/beregnet beregningsgrunnlag per år for tilkom…
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/893,0,frontend-feature,11,290,0,1,6,kan gjenopprette en avbrutt søknad
+grillmester,Python,https://github.com/navikt/grillmester/pull/72,0,test-only,5,235,1,0,1,Forenkle oppstart med plugin og automatisk oppdatering
+fp-sak,Java,https://github.com/navikt/fp-sak/pull/7997,0,edit-single,1,9,0,0,0,Hindre KabalHendelse med ugyldig UUID fra å drepe hele fpsak
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/895,0,frontend-feature,59,780,1,1,4,Typesikker sladding
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/26,0,edit-multi-logic,2,31,0,0,0,Endret namespace og endring i makefile github clone command
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/24,0,edit-single,2,82,0,0,0,Oppdatert make setup for å funke med WSL
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/19,0,edit-multi-logic,4,73,0,0,1,Feat/personkort shell
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/508,0,feature-multi,4,138,1,0,2,Legg til støtte for å mangle fagsakId om fagsystem er annet enn Arena
+dp-mellom-barken-og-veden,Kotlin,https://github.com/navikt/dp-mellom-barken-og-veden/pull/236,0,edit-multi-mechanical,13,287,1,0,4,Fjerne henting av sakId fra dp-saksbehandlng
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/11,0,frontend-feature,1,16,0,0,0,fix(frontend): migrate color tokens to Aksel 8
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/688,0,config-deploy,1,3,0,0,1,RAMP-270 ramp-bau preStopHook
+dp-datadeling,Kotlin,https://github.com/navikt/dp-datadeling/pull/472,0,config-deploy,2,4,0,0,0,Bruker Java 25 LTS i build
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1508,0,edit-multi-mechanical,3,15,0,0,1,Bytt til converted-felt i stedet for filnavn-sammenligning
+apt,none,https://github.com/navikt/apt/pull/4,0,docs,1,15,0,0,0,"docs: archive is signed, drop the stale status section"
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/10,0,edit-single,3,96,1,0,2,feat(frontend): add BAKS milestone counter
+melosys-muninn,TypeScript,https://github.com/navikt/melosys-muninn/pull/1,0,edit-single,10,686,0,0,4,"Kjør på Docker Hardened Images Bun, og stopp deploy på skannet digest"
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1502,0,frontend-feature,7,217,0,0,6,Dsos 750 3 stegskjema lage prosesskomponent i toppen
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1507,0,deps-bump,2,2065,0,0,0,Chore/mandagsrusk 14092026
+apt,none,https://github.com/navikt/apt/pull/3,0,docs,1,17,0,0,0,docs: tighten the README
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/9,0,edit-single,1,2,0,0,0,fix(frontend): korriger årstall for enslig forsørger
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/8,0,edit-single,2,47,0,0,0,feat(frontend): komprimer dashboard-layout
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/6,0,edit-single,5,1119,1,0,2,feat(frontend): legg til Aksel-statusikoner
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/466,0,create-file,1,3,0,0,1,TFP-7138: Forbedre team-logs-konfigurasjon i logback.xml
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1569,0,config-deploy,1,4,0,0,0,Endre min/max replicas tilbake til 3-5
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1560,0,feature-multi,6,267,1,0,3,Lås fnr også ved aktivering for å hindre at en søknad kan klippes samtidig som den aktiver
+grillmester,Python,https://github.com/navikt/grillmester/pull/71,0,edit-multi-logic,6,20,0,0,2,Bevar konfigurert modell ved delegering til spesialister
+grillmester,Python,https://github.com/navikt/grillmester/pull/70,0,config-deploy,1,6,0,0,0,Publiser Grillmester v0.4.0
+grillmester,Python,https://github.com/navikt/grillmester/pull/69,0,test-only,5,126,1,0,1,La release fortsette automatisk etter grønne porter
+grillmester,Python,https://github.com/navikt/grillmester/pull/68,0,edit-single,5,165,1,0,3,Bind rettighetsjournalen til Grillmester 0.4.0
+Infotrygd-The-Final-Countdown,JavaScript,https://github.com/navikt/Infotrygd-The-Final-Countdown/pull/4,0,edit-single,3,500,1,0,1,Lag utfasing-dashboard
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/886,0,edit-single,1,25,0,0,0,tar i bruk ny route for rammebehandling
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/884,0,edit-single,4,446,1,0,3,Forbedrer testdekning og fjerner throw fra periodeutfyllern
+sykepengesoknad-backend,Kotlin,https://github.com/navikt/sykepengesoknad-backend/pull/1566,0,edit-single,1,2,0,0,0,Skru på listener igjen
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/234,0,docs,1,16,0,0,0,Slett praksis som vi jobber oss bort fra
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/507,0,db-migration,21,587,1,1,9,Nytt endepunkt for å avbryte en klage
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/23,0,feature-multi,10,611,0,0,4,chore: innfør trygg git-update og cplt-oppsett
+grillmester,Python,https://github.com/navikt/grillmester/pull/67,0,edit-multi-logic,429,10646,1,0,6,Rydd skillnavn og forenkle agentflyten
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/465,0,deps-bump,1,2,0,0,1,fix(deps): overstyr tomcat-embed-core til 11.0.25
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/22,0,feature-multi,8,622,0,0,5,chore: forbedre teamets utviklerverktøy og cplt-oppsett
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/882,0,frontend-feature,8,2047,0,0,4,Bruker nais/apm for observability + legger til error boundary
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/497,0,feature-multi,6,151,1,1,3,fix(prøvingsdato): unngå uendelig regelkjøringsloop ved erstattet søk…
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/673,0,feature-multi,8,90,1,0,4,RAMP-252 Sender årsakTilUtmelding ved henting av fastsatt meldedato ramp-klar-til-oppskale
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4246,0,edit-single,1,36,0,0,0,Bruk InfoCard for Demo Warning
+dp-migrering,Kotlin,https://github.com/navikt/dp-migrering/pull/56,0,db-migration,24,8792,1,0,4,Testdata
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/880,0,config-deploy,3,12,0,0,0,Legger til ingresser for veileder
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/879,0,frontend-feature,8,176,0,0,2,Benk paginering
+grillmester,Python,https://github.com/navikt/grillmester/pull/66,0,edit-single,13,1851,1,0,1,Kollaps RC- og stabilkanalen til én releasevei
+grillmester,Python,https://github.com/navikt/grillmester/pull/65,0,edit-multi-logic,25,2220,1,0,1,Fjern Homebrew-formelen som distribusjonsartefakt
+dp-rapportering-personregister,Kotlin,https://github.com/navikt/dp-rapportering-personregister/pull/658,0,edit-multi-logic,9,100,1,0,0,Ramp bau 31 rydd opp feature toggles
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3224,0,config-deploy,2,7,0,0,1,TFP-6363: backfill contents:read på deploy og miljønavn i manuell deploy
+grillmester,Python,https://github.com/navikt/grillmester/pull/64,0,edit-single,20,368,1,0,0,"Fordel agentmodeller mellom Terra, Opus og Sol"
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/488,0,feature-multi,46,2070,1,1,10,Tell fritaksperiode ved permittering som en kvote
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4235,0,deps-bump,1,2,0,0,0,Oppgraderer Distroless til nodejs24-debian13@sha256:7cca079b
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1491,0,deps-bump,2,1931,0,0,0,Oppgrader dependencies
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/462,0,config-deploy,1,2,0,0,0,TFP-6363: inkluder miljø i navnet på manuell deploy
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3223,0,feature-multi,3,54,0,0,2,TFP-6470 flytt ut Jackson2-JakartaRS binding
+dp-datadeling,Kotlin,https://github.com/navikt/dp-datadeling/pull/440,0,config-deploy,2,2,0,0,2,Gi dp-innsyn tilgang til beregninger-endepunktet
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/207,0,edit-single,2,2505,0,0,1,Meldekort infomelding
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/461,0,feature-multi,18,491,1,0,8,TFP-7110: token-support til spring security
+grillmester,Python,https://github.com/navikt/grillmester/pull/63,0,edit-single,7,316,1,0,0,Gjør Tier 2-agentpakken installerbar i nav-pilot
+grillmester,Python,https://github.com/navikt/grillmester/pull/62,0,test-only,6,462,1,0,0,Prioriter plugininstallasjon i dokumentasjonen
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3222,0,config-deploy,3,5,0,0,0,"TFP-6363: eksplisitte secrets i codeql, deploy-manuelt og dependency-submission"
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3220,0,config-deploy,2,12,0,0,0,TFP-6363: eksplisitte secrets og rett-dimensjonerte permissions
+dp-behov-pdf-generator,Kotlin,https://github.com/navikt/dp-behov-pdf-generator/pull/171,0,edit-single,1,2,0,0,0,chore(deps): bump dp-version-catalog to 20260728.277
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1485,0,config-deploy,1,24,0,0,0,Dependabot config
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4208,0,feature-multi,9,230,0,0,3,Retter demodata så alle søknader kan åpnes
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/458,0,edit-multi-logic,180,1637,1,0,6,Lag ny liste for barnetillegg slik at vi automatisk håndterer 18-årsdag
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/460,0,config-deploy,3,9,0,0,0,TFP-6363: fjern bruk av READER_TOKEN
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/473,0,edit-single,1,2,0,0,0,Bytt fra last til lastOrNull for å håndtere passerte perioder
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/204,0,docs,1,73,0,0,0,docs(readme): dokumenter app og integrasjoner
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/202,0,config-deploy,1,13,0,0,1,Add tms-copilot customization sync
+dp-saksbehandling,Kotlin,https://github.com/navikt/dp-saksbehandling/pull/471,0,db-migration,16,1101,1,0,5,fix(statistikk): erstatt kursor med kandidattabell i statistikkeksport
+dp-datadeling,Kotlin,https://github.com/navikt/dp-datadeling/pull/420,0,api-schema,32,260,1,1,0,Java 25 + Jackson 3
+aap-intern-sysdok,Shell,https://github.com/navikt/aap-intern-sysdok/pull/221,0,config-deploy,1,1,0,0,1,chore: add systemkatalog.nav.no/system label to nais manifest
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4201,0,edit-single,1,23,0,0,0,Bruk GlobalAlert for Demo Warning
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4200,0,edit-multi-mechanical,4,20,0,0,0,Fiks trykkfeil 'KvtteringPanel' til 'KvitteringPanel'
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4199,0,deps-bump,2,13,0,0,0,Fjern @types/classnames
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4198,0,edit-single,1,8,0,0,0,Endre fra Swaziland til Eswatini
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1484,0,deps-bump,2,1770,0,0,0,Chore/mandagsrsuken 18082006
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/459,0,config-deploy,1,2,0,0,0,Chore: mute shibboleth deprecation warning from 3rd pty
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/468,0,feature-multi,7,682,1,1,3,Innfør per-type cache (Opplysningsindeks) for gjeldende opplysninger
+fp-ws-proxy,Java,https://github.com/navikt/fp-ws-proxy/pull/457,0,deps-bump,1,4,0,0,0,Chore: Spring Boot 4.1.1 - sårbarheter
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/21,0,edit-multi-logic,3,194,0,0,0,feat: utvid git-status og legg til trygg opprydding av merged branches
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3219,0,edit-multi-logic,14,108,1,1,0,TFP-6470 standardiser jackson3
+infotek-parent,Python,https://github.com/navikt/infotek-parent/pull/20,0,feature-multi,9,4793,0,1,9,feat: legg til nav-etterlevelse skill for etterlevelsesanalyse
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1483,0,edit-single,4,32,0,0,3,Legg på loader og avbryt knapp ved treg opplasting
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/461,0,feature-multi,10,408,1,1,6,Tombstone arvede opplysninger ved rekjøring med oppfriskOpplysningIder
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4187,0,create-file,1,1,0,0,1,Legger til Nord-Kypros.
+zrooms,Go,https://github.com/navikt/zrooms/pull/42,0,deps-bump,1,2,0,0,0,chore: bump Go version to 1.26.6
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1482,0,edit-multi-mechanical,5,10,0,0,1,Chore: bumb wonderwall image.
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3214,0,edit-multi-logic,6,63,1,0,1,TFP-6470 jackson3 i en dvh-modul
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3213,0,feature-multi,28,281,0,0,1,TFP-6470 jackson3 i brevbestiller
+dp-behandling,Kotlin,https://github.com/navikt/dp-behandling/pull/459,0,edit-multi-mechanical,16,97,1,1,4,Enkapsuler Behandling.opplysninger (internal + read-only utenfor modell)
+sykepengesoknad-frontend,TypeScript,https://github.com/navikt/sykepengesoknad-frontend/pull/4178,0,edit-single,1,7,0,0,0,Fjerner alert om å ikke sende søknad for spørsmål om sykepenger i eøs for utlandsk sykmeld
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/197,0,config-deploy,2,158,0,0,0,ci: bruk astro-deploy workflow fra tms-deploy
+rekrutteringsbistand-stilling-api,Kotlin,https://github.com/navikt/rekrutteringsbistand-stilling-api/pull/313,0,create-file,1,1,0,0,1,Ikke les meldingene som kommer om behov på kandidatlisteinfo
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/196,0,deps-bump,1,2,0,0,0,Update Node runtime image
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/195,0,config-deploy,1,24,0,0,1,Add Digestabot workflow
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1481,0,frontend-feature,10,490,0,0,0,Dsos 736 fjerne toggle for ny upload i innsyn
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/194,0,deps-bump,2,166,0,0,0,Update jsdom to 30.0.1
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1480,0,edit-single,4,19,0,0,0,"fjerner lenke fra ""Les vedtaksbrevet ditt"" i henhold til todo fra: https://nav.atlassian.n"
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1478,0,frontend-feature,6,83,0,0,0,Upgrade to dekoratoren v4.
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/875,0,frontend-feature,48,2593,0,0,13,"Pynter litt på vibe-designet, forbedrer navngivning for benk v2 komponenter, diverse refac"
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/873,0,frontend-feature,37,2329,0,0,37,Benk v2
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1476,0,frontend-feature,4,104,0,0,1,Optimistic response på uploads
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1477,0,deps-bump,2,3907,0,0,0,Upgrade all minors and patches.
+fptilbake,Java,https://github.com/navikt/fptilbake/pull/3212,0,edit-multi-logic,2,4,0,0,0,"Ny ingress for k9-sak-web, den gamle er deprecated"
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/871,0,frontend-feature,44,1139,0,1,13,Flere åpne meldekortbehandlinger + meldekortbehandling kontrollsimulering
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/192,0,edit-multi-logic,5,332,0,0,0,chore: oppdater Astro til 7.1.6 og bruk AstroRuntimeLogger
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/865,0,frontend-feature,166,5706,0,1,4,Tilpasser personoversikt og fjerner legacy meldekortbehandling
+sosialhjelp-innsyn,TypeScript,https://github.com/navikt/sosialhjelp-innsyn/pull/1475,0,config-deploy,4,8,0,0,0,Change to specific wonderwall image tag.
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/191,0,edit-multi-mechanical,19,25,1,1,0,refactor(test): samle tester i test/unit og test/integration
+tiltakspenger-saksbehandling,TypeScript,https://github.com/navikt/tiltakspenger-saksbehandling/pull/870,0,frontend-feature,36,1421,1,1,19,Benytt nytt format for simulering
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/189,0,edit-multi-logic,16,211,1,1,1,feat: replace Hono mock server with @navikt/astro-mocks
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/184,0,edit-multi-logic,1,4,0,0,0,Remove compressHTML config from astro.config.mjs
+tms-utbetalingsoversikt-frontend,TypeScript,https://github.com/navikt/tms-utbetalingsoversikt-frontend/pull/182,0,edit-multi-mechanical,8,158,0,0,3,feat: replace custom auth middleware with @navikt/astro-auth
