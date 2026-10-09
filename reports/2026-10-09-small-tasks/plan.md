@@ -7,8 +7,8 @@ test). This queue measures how well the local models handle that work. GPU windo
 
 | Item | Steps | Runs | Decision it gates |
 |---|---|---|---|
-| 1 | 1-8 | cheap-ops, all 13 tasks, 4 passes each on `qwen3.6-35b-a3b-optiq` and `qwen3.6-35b-a3b-8bit-64g` at 48 GB wired | Which small task types each profile can do locally. Per task class: 4/4 or 3/4 counts as "can", 0-1/4 as "cannot", 2/4 waits for item 3. |
-| 2 | 9-16 | bench-hybrid on target `tasks`, worker optiq, rungs 1-4 (R2 read-qa, E1 edit-single, M1 rename, G2 test file); each rung gets 2 control samples, then 4 hybrid samples, all on the same day | Whether `manifest/models.json` should trust these classes for delegation. A class qualifies when the hybrid arm passes as often as its control and dispatches at least once. This step only measures; any manifest change is a separate release. |
+| 1 | 1-8 | cheap-ops, all 13 tasks, 4 passes each on `qwen3.6-35b-a3b-optiq-64g` and `qwen3.6-35b-a3b-8bit-64g` at 48 GB wired | Which small task types each profile can do locally. Per task class: 4/4 or 3/4 counts as "can", 0-1/4 as "cannot", 2/4 waits for item 3. |
+| 2 | 9-16 | bench-hybrid on target `tasks`, worker optiq-64g (same parameters as optiq, declared 48 GB), rungs 1-4 (R2 read-qa, E1 edit-single, M1 rename, G2 test file); each rung gets 2 control samples, then 4 hybrid samples, all on the same day | Whether `manifest/models.json` should trust these classes for delegation. A class qualifies when the hybrid arm passes as often as its control and dispatches at least once. This step only measures; any manifest change is a separate release. |
 | 3 | 17-28 | 6 more cheap-ops passes per profile | Tightens item 1's intervals (up to 10 passes per task). Mostly decides the 2/4 cases. |
 
 The cheap-ops sizing follows the 64 GB tier: two passes is the floor and gives a smoke result
@@ -29,3 +29,4 @@ its night-run-3 by PID at 14:00.
 
 Run by `small-tasks-launcher` (BENCHMARKING.md «Waiting launchers»). Results go to
 `small-tasks-results.md`, and a report with the decisions follows.
+A kill at 13:00 or 14:00 ends night-run-3 before it writes the results file; `steps.jsonl` and the bench files remain, and `night-run-3 --from 29` writes the report afterwards.
