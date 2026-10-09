@@ -170,6 +170,9 @@ else:
         cmd += ["--prefill-step-size", prefill_step]
     if trust_remote:
         cmd += ["--trust-remote-code"]
+    if os.environ.get("MLX_TOOL_PARSER", "").strip() == "ifm":
+        print("  tool-parser: ifm (.mise/tasks/_ifm_parser.py)")
+        cmd = ["python", os.path.join(os.path.dirname(os.path.abspath(__file__)), "_ifm_parser.py")] + cmd[1:]
 
 # Repetition control is per request, not per server. mlx_lm 0.31.3 reads repetition_penalty,
 # repetition_context_size, presence_penalty and frequency_penalty from the request body

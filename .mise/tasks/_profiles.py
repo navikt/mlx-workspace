@@ -32,6 +32,7 @@ OPTIONAL_DEFAULTS = {
     "MLX_CHAT_TEMPLATE":          "",
     "MLX_CHAT_TEMPLATE_ARGS":     "",
     "MLX_TRUST_REMOTE_CODE":      "",       # non-empty enables --trust-remote-code
+    "MLX_TOOL_PARSER":            "",       # "ifm": serve through _ifm_parser.py (K2-Horizon tags)
     # sampling
     "MLX_TEMP":                   "0.6",    # 0.0 (mlx-lm default) causes repetition loops
     "MLX_TOP_P":                  "1.0",

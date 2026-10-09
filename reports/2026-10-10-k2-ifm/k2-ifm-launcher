@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# K2-Horizon re-run with the ifm tool parser (issue #183, plan.md here).
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-10-k2-ifm/k2-ifm-launcher ~/tmp/ && nohup bash ~/tmp/k2-ifm-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/k2-ifm.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - not before 2026-10-10 14:00; waits while a gap-fill launcher is alive (pid in gap-fill.pid
+#     or "gap-fill" in a command line) unless gap-fill.done exists; then 5 min of free GPU: no
+#     queue lock, no benchmark, night-run or model-server process, nothing on :8080, AC, 48 GB
+#     wired, 1-min load below 6;
+#   - one instance (k2-ifm.pid), never twice (k2-ifm.done, checked at start and after the wait),
+#     done marker touched as soon as the probe or queue has run;
+#   - a 5-min probe first: one chat completion with tools on the K2 profile, response logged to
+#     .bench-logs/k2-ifm-probe.json. Runs the new-candidates standard set only if tool_calls parse.
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=k2-ifm
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-09-new-candidates Q=new-candidates.queue OUT=reports/2026-10-10-k2-ifm
+AFTER="$L/gap-fill.done"
+NOT_BEFORE=$(date -j -f "%F %T" "2026-10-10 14:00:00" +%s)
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ "$(date +%s)" -ge "$NOT_BEFORE" ] || { echo "not before 2026-10-10 14:00"; return; }
+  if [ ! -e "$AFTER" ]; then   # gap-fill launcher alive and not done: let it go first
+    local g; g=$(cat "$L/gap-fill.pid" 2>/dev/null)
+    { [ -n "$g" ] && kill -0 "$g" 2>/dev/null; } && { echo "gap-fill launcher $g alive, no $AFTER"; return; }
+    pgrep -f "gap-fill" | grep -vqE "^($$|$PPID)$" && { echo "gap-fill process alive, no $AFTER"; return; }
+  fi
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/$Q not before 2026-10-10 14:00, after ${AFTER:-nothing} (or no gap-fill launcher) and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }   # the ifm parser arrives with PR for #183
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
+snap=$(ls -d "$HOME/.cache/huggingface/hub/models--mlx-community--K2-Horizon-MoVA-36B-A4B-4bit/snapshots/"* 2>/dev/null | head -1)
+.venv/bin/python -I -c 'import json,os,sys;d=sys.argv[1];m=set(json.load(open(d+"/model.safetensors.index.json"))["weight_map"].values());sys.exit(any(not os.path.isfile(d+"/"+f) for f in m) or not os.path.isfile(d+"/k2_horizon.py"))' "$snap" || { say "K2-Horizon weights incomplete in $snap; not running"; exit 1; }
+# From here the queue runs: any exit marks it done, before anything slow.
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"; git switch -q main 2>/dev/null' EXIT
+trap 'exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD)"
+grep -q 'MLX_TOOL_PARSER *= *"ifm"' profiles/k2-horizon-mova-36b-a4b-4bit.toml || { say "profile has no ifm parser; not running"; exit 1; }
+# Probe: one completion with tools, 5 min cap.
+P="$L/$N-probe.json"
+MLX_ACTIVE_PROFILE=k2-horizon-mova-36b-a4b-4bit PATH="$MAIN/.venv/bin:$PATH" .mise/tasks/server > "$L/$N-server.log" 2>&1 &
+spid=$!
+ok=1
+.venv/bin/python -I - "$P" <<'PY' || ok=0
+import json, sys, time, urllib.request
+url = "http://127.0.0.1:8080/v1/"
+end = time.time() + 300
+while True:
+    try: urllib.request.urlopen(url + "models", timeout=5); break
+    except Exception:
+        if time.time() > end: sys.exit("server not up in 5 min")
+        time.sleep(5)
+tool = {"type": "function", "function": {"name": "read_file", "description": "Read a file",
+        "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}}}
+body = {"messages": [{"role": "user", "content": "Read build.gradle.kts with the tool, then stop."}],
+        "tools": [tool], "max_tokens": 2048}
+req = urllib.request.Request(url + "chat/completions", json.dumps(body).encode(), {"Content-Type": "application/json"})
+r = json.load(urllib.request.urlopen(req, timeout=max(30, end - time.time())))
+json.dump(r, open(sys.argv[1], "w"), indent=1)
+m = r["choices"][0]["message"]
+print("content:", repr((m.get("content") or "")[:1500]))
+print("reasoning:", repr((m.get("reasoning") or "")[:300]))
+print("tool_calls:", json.dumps(m.get("tool_calls")))
+sys.exit(0 if m.get("tool_calls") else 1)
+PY
+kill "$spid" 2>/dev/null; mise run server-stop >/dev/null 2>&1 < /dev/null
+if [ "$ok" = 1 ]; then
+  say "probe parsed tool_calls; running the standard set"
+  NIGHT_REPORT="$OUT/k2-ifm.md" .mise/tasks/ni""ght-run-3 --part local --queue "$R/$Q"
+  say "queue exited $?"
+else
+  say "probe: no tool_calls (see $P and $L/$N-server.log); K2 rejected, queue not run"
+fi
