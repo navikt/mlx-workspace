@@ -118,6 +118,8 @@ RUNGS = {
     5: "M2",   # thread a field through a type, its mapper and every construction site
     6: "D2",   # change a database row class, its mapper and all call sites
     7: None,   # add a small endpoint with a test — never attempted, no verified prompt
+    8: "O1",   # raise a nais memory limit: exactly one config line (navikt PR audit)
+    9: "T1",   # write a JUnit test for a class that has none, test files only
 }
 
 
@@ -812,6 +814,22 @@ def verify(task, reply):
         return not bad, f"{n - len(bad)}/{n} test files pass and kill their mutants" + (f"; {'; '.join(bad)}" if bad else "")
     if kind in ("compile", "test", "rename") and not files:
         return False, "no changes made (model did not edit anything)"
+    # O1 and T1 (rungs 8-9): the same `only` and `expect_diff` checks as bench-cheap-ops,
+    # so a hybrid pass means what a cheap-ops pass means.
+    only = task.get("only")
+    if only:
+        paths = [l[3:].strip() for l in sh(["git", "status", "--porcelain", "-uall"], cwd=REPO).stdout.splitlines()
+                 if l.strip()]
+        stray = [p for p in paths if not p.startswith(only)]
+        if stray:
+            return False, f"changed outside {only}: {', '.join(stray)}"
+    want = task.get("expect_diff")
+    if want:
+        diff = [l for l in sh(["git", "diff", "-U0"], cwd=REPO).stdout.splitlines() if not l.startswith(("+++", "---"))]
+        norm = lambda l: l[1:].replace('"', "").replace("'", "").strip()
+        got = (sorted(norm(l) for l in diff if l.startswith("+")), sorted(norm(l) for l in diff if l.startswith("-")))
+        if got != (sorted(want["added"]), sorted(want["removed"])):
+            return False, f"diff is not exactly {want} (added {got[0]}, removed {got[1]})"
     if kind == "compile":
         r = build("compile")
         return r.returncode == 0, "compiles" if r.returncode == 0 else "compile failed"
