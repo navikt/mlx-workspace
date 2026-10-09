@@ -1,0 +1,304 @@
+{
+ "tasks_sha": "cd8780d1d644",
+ "harness_sha": "98da309f03c1",
+ "started": "2026-10-09T09:51:06",
+ "tasks": {
+  "cf-r1-a": {
+   "ok": true,
+   "note": "reference passes (2 tests, green, kills 1/1 mutants); vacuous test rejected (green, but a bug in dagerMellomDatoer goes unnoticed (mutant)"
+  },
+  "cf-r1-b": {
+   "ok": true,
+   "note": "reference passes (2 tests, green, kills 1/1 mutants); vacuous test rejected (green, but a bug in isBeforeOrEqual goes unnoticed (mutant s)"
+  },
+  "cf-r2-a": {
+   "ok": true,
+   "note": "reference passes (4 tests, green, kills 2/2 mutants); vacuous test rejected (green, but a bug in isBeforeOrEqual, isAfterOrEqual goes unn)"
+  },
+  "cf-r2-b": {
+   "ok": true,
+   "note": "reference passes (4 tests, green, kills 2/2 mutants); vacuous test rejected (green, but a bug in dagerMellomDatoer, isAfterOrEqual goes u)"
+  },
+  "cf-r3-a": {
+   "ok": true,
+   "note": "reference passes (1 tests, green, kills 1/1 mutants); vacuous test rejected (green, but a bug in isLongTilfelle goes unnoticed (mutant su)"
+  },
+  "cf-r3-b": {
+   "ok": true,
+   "note": "reference passes (1 tests, green, kills 1/1 mutants); vacuous test rejected (green, but a bug in daysInTilfelle goes unnoticed (mutant su)"
+  },
+  "cf-r4-a": {
+   "ok": true,
+   "note": "reference passes (3 tests, green, kills 3/3 mutants); vacuous test rejected (green, but a bug in isLongTilfelle, daysInTilfelle, calculat)"
+  },
+  "cf-r4-b": {
+   "ok": true,
+   "note": "reference passes (1 tests, green, kills 1/1 mutants); vacuous test rejected (green, but a bug in hasGjentakendeSykefravar goes unnoticed )"
+  },
+  "db-r1-b1": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r1-b2": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r1-b3": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleSystemApiTest$HappyPath"
+   ],
+   "note": "suite fails: OppfolgingstilfelleSystemApiTest$HappyPath"
+  },
+  "db-r2-b1": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r2-b2": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r2-b3": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleSystemApiTest$HappyPath"
+   ],
+   "note": "suite fails: OppfolgingstilfelleSystemApiTest$HappyPath"
+  },
+  "db-r3-b1": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r3-b2": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath",
+    "OppfolgingstilfellePersonTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleApiTest$GetOppfolgingstilfellePersonDTOForPersonIdent$HappyPath, OppfolgingstilfellePersonTest"
+  },
+  "db-r3-b3": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleSystemApiTest$HappyPath"
+   ],
+   "note": "suite fails: OppfolgingstilfelleSystemApiTest$HappyPath"
+  },
+  "db-r4-b4": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleBitTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleBitTest"
+  },
+  "db-r4-b5": {
+   "ok": false,
+   "failing_tests": [],
+   "note": "suite still green: the break is not caught"
+  },
+  "db-r4-b6": {
+   "ok": true,
+   "failing_tests": [
+    "OppfolgingstilfelleBitTest"
+   ],
+   "note": "suite fails: OppfolgingstilfelleBitTest"
+  },
+  "fm-r1-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r1-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r1-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fm-r2-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r2-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r2-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fm-r3-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r3-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r3-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fm-r4-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r4-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r4-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fm-r5-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r5-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r5-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fm-r6-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fm-r6-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r1-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r1-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r1-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fs-r2-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r2-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r2-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fs-r3-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r3-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r3-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "fs-r4-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r4-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r5-a": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "fs-r5-b": {
+   "ok": true,
+   "note": "reference compiles"
+  },
+  "rq-r1-a": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r1-b": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r1-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "rq-r2-a": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r2-b": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r2-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "rq-r3-a": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r3-b": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r3-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "rq-r4-a": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r4-b": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r4-c": {
+   "ok": false,
+   "note": "spare, not needed"
+  },
+  "rq-r5-a": {
+   "ok": true,
+   "note": "answer-set, static only"
+  },
+  "rq-r5-b": {
+   "ok": true,
+   "note": "answer-set, static only"
+  }
+ },
+ "baseline_test": true
+}
