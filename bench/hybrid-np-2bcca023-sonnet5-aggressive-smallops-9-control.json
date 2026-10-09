@@ -1,0 +1,386 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:28:19+0200",
+      "seconds": 40.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 9,
+      "cloud_tokens": {
+        "total": 264307,
+        "input": 18,
+        "output": 1402,
+        "reasoning": 92,
+        "cache_write": 31980,
+        "cache_read": 230815
+      },
+      "cloud_cost_usd": 0.1411,
+      "cloud_cost_seen_usd": 0.1411,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1416
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1041
+        }
+      },
+      "local_server_pid": 64118,
+      "local_server_started": "2026-10-10T01:28:08.62616+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:27:55.463398+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-control-0-20261010-012816.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:29:07+0200",
+      "seconds": 36.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 28,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 210951,
+        "input": 14,
+        "output": 1162,
+        "reasoning": 35,
+        "cache_write": 31850,
+        "cache_read": 177890
+      },
+      "cloud_cost_usd": 0.1272,
+      "cloud_cost_seen_usd": 0.1272,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 966
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1104
+        }
+      },
+      "local_server_pid": 64118,
+      "local_server_started": "2026-10-10T01:28:08.62616+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:27:55.463398+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-control-1-20261010-012905.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:29:51+0200",
+      "seconds": 59.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 11,
+      "cloud_tokens": {
+        "total": 336987,
+        "input": 22,
+        "output": 1490,
+        "reasoning": 154,
+        "cache_write": 33064,
+        "cache_read": 302257
+      },
+      "cloud_cost_usd": 0.1596,
+      "cloud_cost_seen_usd": 0.1596,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1196
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 30327
+        }
+      },
+      "local_server_pid": 64118,
+      "local_server_started": "2026-10-10T01:28:08.62616+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:27:55.463398+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-control-2-20261010-012949.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:30:59+0200",
+      "seconds": 36.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 28,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 179109,
+        "input": 12,
+        "output": 1215,
+        "reasoning": 103,
+        "cache_write": 31941,
+        "cache_read": 145838
+      },
+      "cloud_cost_usd": 0.1222,
+      "cloud_cost_seen_usd": 0.1222,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 30335
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 29689
+        }
+      },
+      "local_server_pid": 64118,
+      "local_server_started": "2026-10-10T01:28:08.62616+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:27:55.463398+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-control-3-20261010-013057.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-10T01:28:10+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012807.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012807.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "read-qa": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 7.15,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 64118,
+        "port": "54866",
+        "started": "2026-10-10T01:28:08.62616+02:00",
+        "probe_seconds": 0.18
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 1367
+      }
+    }
+  ],
+  "rung": 9,
+  "arm": "control",
+  "task": "T1",
+  "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+  "target": "tasks",
+  "worker_profile": null,
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Write a JUnit 5 unit test for the class Virksomhetsnummer in src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt. Cover a valid nine-digit value and at least one invalid value that must throw IllegalArgumentException. Match the style of the existing tests under src/test/kotlin. Change only files under src/test/kotlin."
+}
