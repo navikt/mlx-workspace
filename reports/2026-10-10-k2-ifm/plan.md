@@ -8,7 +8,7 @@ and reasons inside `<ifm|think>`. mlx-lm 0.31.3 has no parser for either, so the
 ## Fix
 
 `.mise/tasks/_ifm_parser.py` renames the tags and hands each call to mlx-lm's own glm47 parser.
-It also registers `<ifm|think>` as the think pair, so reasoning leaves the content. The server task
+It also registers the think pair the profile's `reasoning_effort` opens (`<ifm|think_faster>` for low), so reasoning leaves the content. The server task
 runs it in place of `mlx_lm.server` when a profile sets `MLX_TOOL_PARSER = "ifm"`; only the K2
 profile does. Nothing in `.venv` changes. Self-check:
 `.venv/bin/python .mise/tasks/_ifm_parser.py --check`.
