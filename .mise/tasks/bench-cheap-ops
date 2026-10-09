@@ -300,13 +300,14 @@ def touched_a_test(files):
     return [f for f in files if ".test." in f or "/__tests__/" in f or f.endswith("Test.kt")]
 
 
-def _added_lines():
+def _diff_lines():
+    """Added and removed lines, stripped of whitespace and quotes, so a quoted
+    YAML value ("768Mi") and a bare one compare equal."""
     diff = sh(["git", "diff", "-U0"], cwd=repo).stdout
-    return [l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
-
-
-def _added_has(term):
-    return any(term in l for l in _added_lines())
+    norm = lambda l: l[1:].replace('"', "").replace("'", "").strip()
+    lines = [l for l in diff.splitlines() if not l.startswith(("+++", "---"))]
+    return (sorted(norm(l) for l in lines if l.startswith("+")),
+            sorted(norm(l) for l in lines if l.startswith("-")))
 
 
 def logged_forbidden(task):
@@ -366,9 +367,13 @@ def verify(task):
             stray = [p for p in (l[2:].strip() for l in changed_files()) if not p.startswith(only)]
             if stray:
                 return False, f"changed outside {only}: {', '.join(stray)}"
-        missing = [t for t in task.get("expect_added", []) if not _added_has(t)]
-        if missing:
-            return False, f"no added line with {missing[0]}"
+        # `expect_diff`: the exact lines added and removed. O1 must change the
+        # limits line and nothing else; bumping requests.memory too fails.
+        want = task.get("expect_diff")
+        if want:
+            added, removed = _diff_lines()
+            if (added, removed) != (sorted(want["added"]), sorted(want["removed"])):
+                return False, f"diff is not exactly {want} (added {added}, removed {removed})"
         bad = logged_forbidden(task)
         if bad:
             return False, f"added a line with {bad} (personal data must not be logged)"
@@ -643,12 +648,20 @@ def self_check():
         assert verify(e3b)[0] is False, "logging personIdent must fail"
 
         o1 = {"id": "O1", "verify": "compile", "touches": "src/a.ts", "only": "src/a.ts",
-              "expect_added": ["768Mi"]}
-        reset_repo(); f.write_text("memory: 768Mi\n")
-        assert verify(o1) == (True, "compiles"), "the asked-for value in the one file must pass"
-        f.write_text("memory: 1Gi\n")
+              "expect_diff": {"added": ["memory: 768Mi"], "removed": ["memory: 512Mi"]}}
+        (repo / "src" / "a.ts").write_text("limits:\n  memory: 512Mi\nrequests:\n  memory: 384Mi\n")
+        sh(["git", "-c", "user.name=b", "-c", "user.email=b@b", "-c", "commit.gpgsign=false",
+            "commit", "-qam", "yaml"], cwd=repo)
+        base = f.read_text()
+        reset_repo(); f.write_text(base.replace("512Mi", "768Mi"))
+        assert verify(o1) == (True, "compiles"), "the asked-for value must pass"
+        f.write_text(base.replace("512Mi", '"768Mi"'))
+        assert verify(o1) == (True, "compiles"), "a quoted value must pass"
+        f.write_text(base.replace("512Mi", "1Gi"))
         assert verify(o1)[0] is False, "a different value must fail"
-        f.write_text("memory: 768Mi\n"); (repo / "src" / "a.test.ts").write_text("y\n")
+        f.write_text(base.replace("512Mi", "768Mi").replace("384Mi", "768Mi"))
+        assert verify(o1)[0] is False, "also changing requests.memory must fail"
+        f.write_text(base.replace("512Mi", "768Mi")); (repo / "src" / "a.test.ts").write_text("y\n")
         assert verify(o1)[0] is False, "touching a second file must fail"
     print("✓ bench-cheap-ops self-check passed")
 
