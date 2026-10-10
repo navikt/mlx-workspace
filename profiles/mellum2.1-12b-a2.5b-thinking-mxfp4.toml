@@ -1,0 +1,22 @@
+[meta]
+name               = "Mellum 2.1 12B A2.5B Thinking mxfp4"
+released           = "2026-10"
+status             = "untested"
+spec_source        = "config.json"
+notes              = "New candidate (reports/2026-10-11-newmodels/plan.md). JetBrains, Apache-2.0, MoE with 2.5B active, built for coding agents and sub-agents. Community MLX build (no mlx-community build yet), 6.5 GB. The vLLM card uses hermes tool calls with the qwen3 reasoning parser; mlx-lm has a mellum model class. Thinking stays on (the model's default). Same cache and context as optiq so the comparison holds. Bench-only."
+model_vram_gb      = 7
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "randmaru/Mellum2.1-12B-A2.5B-Thinking-mlx-mxfp4"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_TOP_P                  = "0.95"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

@@ -1,0 +1,22 @@
+[meta]
+name               = "Muse Glimmer 30B OptiQ 4bit"
+released           = "2026-08"
+status             = "untested"
+spec_source        = "config.json"
+notes              = "New candidate (reports/2026-10-11-newmodels/plan.md). Meta, Apache-2.0, pitched as a local agentic model with strict function-calling schemas. 23.9 GB. mlx-lm has a muse_glimmer model class; whether its tool format parses is what the launcher probe checks. Bench-only."
+model_vram_gb      = 24
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Muse-Glimmer-30B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_TOP_P                  = "0.95"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

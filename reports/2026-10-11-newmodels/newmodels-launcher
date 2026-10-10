@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# newmodels: tool-call probe, then the new-candidate standard set, for Mellum 2.1, Muse Glimmer,
+# Nemotron 3.5 Lightning and Gemma 4 26B QAT, in that order (plan.md here).
+# NOT ARMED by the repo. Needs this PR on main. Arm it:
+#   cp reports/2026-10-11-newmodels/newmodels-launcher ~/tmp/ && nohup bash ~/tmp/newmodels-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/newmodels.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for cf-r3c.done, or for no cf-r3c launcher alive (order only); then 5 min of free GPU:
+#     no queue lock, no benchmark, night-run or model-server process, nothing on :8080, AC, 48 GB
+#     wired, 1-min load below 6;
+#   - one instance (newmodels.pid), never twice (newmodels.done, checked at start and after the wait);
+#   - per model a 5-min probe: one chat completion with tools, response in
+#     .bench-logs/newmodels-probe-<profile>.json. No parsed tool_calls: "rejected: parser", next model.
+#     Parsed: that model's lines of newmodels.queue, one night-run-3 call per line, a stray src/
+#     moved to .bench-logs/ before each (#186);
+#   - done marker only if every probe ran and every pass passed. A failed pass stops the launcher.
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=newmodels
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-11-newmodels QF=reports/2026-10-11-newmodels/newmodels.queue
+AFTER="$L/cf-r3c.done"
+MODELS="mellum2.1-12b-a2.5b-thinking-mxfp4 muse-glimmer-30b-optiq-4bit nemotron-3.5-lightning-30b-a3b-optiq-4bit gemma-4-26b-a4b-qat-optiq-4bit"
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+JDK="$HOME/.local/share/mise/installs/java/21"
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  if [ ! -e "$AFTER" ]; then   # cf-r3c launcher alive and not done: let it go first
+    local g; g=$(cat "$L/cf-r3c.pid" 2>/dev/null)
+    { [ -n "$g" ] && kill -0 "$g" 2>/dev/null; } && { echo "cf-r3c launcher $g alive, no $AFTER"; return; }
+    pgrep -f "cf-r3c" | grep -vqE "^($$|$PPID)$" && { echo "cf-r3c process alive, no $AFTER"; return; }
+  fi
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $QF after $AFTER (or no cf-r3c launcher) and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
+[ -f "$QF" ] || { say "no $QF in the checkout (PR not merged?); not running"; exit 1; }
+for m in $MODELS; do [ -f "profiles/$m.toml" ] || { say "no profiles/$m.toml; not running"; exit 1; }; done
+[ -x "$JDK/bin/java" ] || { say "no JDK 21 at $JDK; not running"; exit 1; }
+compgen -G "bench/frontier/validated-*.json" >/dev/null || { say "no bench/frontier/validated-*.json; not running"; exit 1; }
+unstray() { local m s; for m in $MODELS; do [ -e "workspaces/$m/src" ] || continue; s="$L/$N-stray-src-$(date +%H%M%S)-$m"; mv "workspaces/$m/src" "$s" && say "$1: moved stray workspaces/$m/src to $s"; done; }
+unstray "before preflight"
+export FRONTIER_COST_CAP=0 NIGHT_CAFFEINATED=1
+# Also checks every model's weights are complete in the HF cache.
+.mise/tasks/ni""ght-run-3 --dry-run --part local --queue "$QF" > "$L/$N-preflight.log" 2>&1 \
+  || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
+trap 'mise run server-stop >/dev/null 2>&1 < /dev/null; rm -f "$PIDF" "$L/$N-step.queue"' EXIT   # no done marker unless all passed
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "${NR:-}"; exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD); local only, \$0 cloud"
+# probe <profile>: 0 = tool_calls parsed, 1 = no tool_calls, 2 = server or request error
+probe() {
+  local P="$L/$N-probe-$1.json" spid rc
+  MLX_ACTIVE_PROFILE="$1" PATH="$MAIN/.venv/bin:$PATH" .mise/tasks/server > "$L/$N-server-$1.log" 2>&1 < /dev/null &
+  spid=$!
+  .venv/bin/python -I - "$P" <<'PY'
+import json, sys, time, urllib.request
+url = "http://127.0.0.1:8080/v1/"
+end = time.time() + 300
+while True:
+    try: urllib.request.urlopen(url + "models", timeout=5); break
+    except Exception:
+        if time.time() > end: print("server not up in 5 min"); sys.exit(2)
+        time.sleep(5)
+tool = {"type": "function", "function": {"name": "read_file", "description": "Read a file",
+        "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}}}
+body = {"messages": [{"role": "user", "content": "Read build.gradle.kts with the tool, then stop."}],
+        "tools": [tool], "max_tokens": 2048}
+req = urllib.request.Request(url + "chat/completions", json.dumps(body).encode(), {"Content-Type": "application/json"})
+try: r = json.load(urllib.request.urlopen(req, timeout=max(30, end - time.time())))
+except Exception as e: print("request failed:", e); sys.exit(2)
+json.dump(r, open(sys.argv[1], "w"), indent=1)
+m = r["choices"][0]["message"]
+print("content:", repr((m.get("content") or "")[:1500]))
+print("reasoning:", repr((m.get("reasoning") or "")[:300]))
+print("tool_calls:", json.dumps(m.get("tool_calls")))
+sys.exit(0 if m.get("tool_calls") else 1)
+PY
+  rc=$?
+  kill "$spid" 2>/dev/null; mise run server-stop >/dev/null 2>&1 < /dev/null; sleep 10
+  return $rc
+}
+failed=0 i=0
+for m in $MODELS; do
+  say "$m: probe"
+  probe "$m"; prc=$?
+  if [ "$prc" = 1 ]; then say "$m: rejected: parser (see $L/$N-probe-$m.json)"; continue; fi
+  if [ "$prc" != 0 ]; then say "$m: probe error (see $L/$N-server-$m.log); next model, no done marker"; failed=1; continue; fi
+  say "$m: probe parsed tool_calls; running the standard set"
+  while read -r line; do
+    i=$((i + 1))
+    unstray "before pass $i"   # #186: a sample wrote outside its task directory
+    { sed -n '/^#/p' "$QF"; echo "$line"; } > "$L/$N-step.queue"
+    say "pass $i ($m)"
+    FRONTIER_MODEL="$m" NIGHT_REPORT="$R/$m-results-$i.md" .mise/tasks/ni""ght-run-3 --part local --queue "$L/$N-step.queue" < /dev/null &
+    NR=$!; wait "$NR"; rc=$?; say "pass $i exited $rc"
+    # night-run-3 exits 0 even when a step FAILs (preflight included): check its step lines too
+    if [ "$rc" -ne 0 ] || tail -n 40 "$L/$N.log" | grep -qE '^[0-9:]+ +(FAIL|SKIP)'; then
+      say "pass $i failed; stopping, no done marker"; exit 1
+    fi
+    sleep 60   # cf-r34 pass 3 hit its gradle preflight 0 s after pass 2 ended
+  done < <(grep -v '^#' "$QF" | awk -v m="$m" '$NF == m')
+done
+unstray "after the last pass"
+[ "$failed" = 0 ] || { say "a probe errored; no done marker"; exit 1; }
+: > "$DONE"; say "done marker"
