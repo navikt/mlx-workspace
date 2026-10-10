@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-10T12:16:23Z",
+  "generated_at": "2026-10-10T17:28:08Z",
   "reports": [
     {
       "id": "2026-10-10-small-delegate/report",
@@ -53,6 +53,25 @@
         "n": 40
       },
       "verdict": "fail",
+      "justifies": []
+    },
+    {
+      "id": "2026-10-10-fixed-small/report",
+      "title": "Small PR types on the fixed harness",
+      "date": "2026-10-10",
+      "class": "Agentic task benchmarks",
+      "summary": "After the O1 fix (#189), config-deploy passes locally: O1 12/14 on optiq and 14/14 on 8-bit (0/15 and 0/30 before). Edit-single is 37/42 on optiq and 42/42 on 8-bit; D2 retired and R1 excluded",
+      "path": "reports/2026-10-10-fixed-small/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-10-fixed-small/report.md",
+      "models": [
+        "qwen3.6-35b-a3b-optiq",
+        "qwen3.6-35b-a3b-8bit"
+      ],
+      "headline": {
+        "k": 26,
+        "n": 28
+      },
+      "verdict": "pass",
       "justifies": []
     },
     {
@@ -905,13 +924,6 @@
       "status": "waiting on owner: `gh auth refresh -s read:packages` (`@navikt/melosys-kodeverk` is on GitHub Packages); else gap-fill step 1 is skipped",
       "when": "gap-fill, after 2026-10-10 14:00",
       "where": "[gap-fill plan](2026-10-10-gap-fill/plan.md), #185"
-    },
-    {
-      "item": "**K2-Horizon retest with the `ifm` parser** (#184)",
-      "decides": "Whether K2 replaces optiq, runs next to it, or is rejected",
-      "status": "queued: `k2-ifm-launcher` runs a 5-min tool-call probe, then the standard set if calls parse",
-      "when": "after 2026-10-10 14:00",
-      "where": "[k2-ifm plan](2026-10-10-k2-ifm/plan.md), #183 Q4"
     },
     {
       "item": "**O1 harness defect:** every O1 sample ends with \"no changes made\" after ~7 s, cloud control 4/4",

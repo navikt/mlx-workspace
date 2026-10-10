@@ -1,6 +1,6 @@
 ---
 models: ["qwen3.6-35b-a3b-optiq", "qwen3.6-35b-a3b-8bit"]
-headline: "O1 12/14 optiq, 14/14 8-bit"
+headline: "26/28"
 verdict: "pass"
 ---
 
