@@ -1,6 +1,6 @@
 # Model status
 
-Last updated 2026-10-09. Sources: the linked reports. Routine benchmarking has stopped, see
+Last updated 2026-10-10. Sources: the linked reports. Routine benchmarking has stopped, see
 [BENCHMARKING.md](BENCHMARKING.md#when-we-benchmark).
 
 ## What runs locally today
@@ -9,6 +9,12 @@ Last updated 2026-10-09. Sources: the linked reports. Routine benchmarking has s
   Delegation is `trusted` for edit-multi-mechanical (35/35 verified). Everything else stays on cloud.
 - **The 64 GB 8-bit (`qwen3.6-35b-a3b-8bit`) is a selectable model with no trusted delegate class.**
   Everything stays on cloud.
+- **create-file with retry2 is trusted locally at r1-r2 on both profiles** (optiq 37/40, 8-bit 35/40).
+  retry2 is kept, but its own effect is not isolated (the harness changed too), and delegate is
+  unmeasured, so the manifest stays `cloud`. [cf-retry2](reports/2026-10-08-cf-retry2/report.md)
+- **Small tasks:** both profiles do edit-single, docs and test-only locally (about 29 % of human PRs).
+  O1 (config) failed on every sample, most likely a harness defect. Delegating small tasks costs
+  1.3-1.5x the cloud control, so delegate stays `cloud`. [small-delegate](reports/2026-10-10-small-delegate/report.md)
 
 ## Rejected
 
@@ -20,14 +26,13 @@ Last updated 2026-10-09. Sources: the linked reports. Routine benchmarking has s
 - **Qwen3.8 for the action check:** too slow, 0.5 s per call at p50 against 500 ms for three calls.
   The check stays log-only; optiq at 0.9 is the best setting measured, if the hook ever acts.
   [after-64-6](reports/2026-09-28-after-64-6/results.md)
-- **create-file on both profiles:** trusted at no rung. The gap is model quality, not the harness.
-  [create-file re-run](reports/2026-10-01-create-file-rerun/report.md)
 - **Phase C (hybrid delegation on the 8-bit):** fails both rules; delegation costs 1.28x the control
   median. emm on the 8-bit is `not-yet` (13/13 passes on 13 of 20 dispatched, lower bound 0.888 against 0.90, cost about 2x cloud).
   [phase C](reports/2026-10-01-phase-c-rerun/report.md),
   [emm8 delegate](reports/2026-09-30-emm8-delegate/report.md)
 
-- **K2-Horizon MoVA (36B-A4B 4-bit):** 0/40, no parseable tool calls. Revisit only with a parser fix.
+- **K2-Horizon MoVA (36B-A4B 4-bit):** 0/40, no parseable tool calls; rejected on the parser.
+  The parser fix ([#184](https://github.com/navikt/mlx-workspace/pull/184)) is queued for a retest.
   [new candidates](reports/2026-10-09-new-candidates/report.md)
 
 The [navikt PR audit](reports/2026-10-09-navikt-pr-audit/report.md) de-prioritises create-file and
@@ -38,5 +43,4 @@ extends cheap-ops with O1 (one-file config change) and T1 (test-only unit test).
 - A new candidate model: the standard set of about 4 hours, "better than optiq?".
 - A nav-pilot release that touches local mode: a short regression check.
 
-The create-file retry2 run ([#169](https://github.com/navikt/mlx-workspace/pull/169)) is queued, its
-report pending. It is the last routine run. Parked items: [reports/UNMEASURED.md](reports/UNMEASURED.md).
+Parked items: [reports/UNMEASURED.md](reports/UNMEASURED.md).
