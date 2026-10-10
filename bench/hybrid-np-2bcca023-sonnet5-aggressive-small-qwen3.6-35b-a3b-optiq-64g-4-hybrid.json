@@ -1,0 +1,502 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:54:19+0200",
+      "seconds": 114.8,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 6,
+      "lines_changed": 68,
+      "files_changed": 1,
+      "cloud_steps": 16,
+      "cloud_tokens": {
+        "total": 583526,
+        "input": 32,
+        "output": 5284,
+        "reasoning": 540,
+        "cache_write": 42156,
+        "cache_read": 535514
+      },
+      "cloud_cost_usd": 0.2708,
+      "cloud_cost_seen_usd": 0.2708,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 887
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 2278
+        }
+      },
+      "local_server_pid": 19073,
+      "local_server_started": "2026-10-09T21:54:06.999133+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:53:53.434999+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-0-20261009-215414.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DateUtil unit test",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/main/kotlin/no/nav/syfo/util/DateUtil.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 1,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 2,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          },
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt"
+        ],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+          "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:56:25+0200",
+      "seconds": 81.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 7,
+      "lines_changed": 48,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 233909,
+        "input": 14,
+        "output": 2861,
+        "reasoning": 177,
+        "cache_write": 36592,
+        "cache_read": 194265
+      },
+      "cloud_cost_usd": 0.1607,
+      "cloud_cost_seen_usd": 0.1607,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 2249
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 4014
+        }
+      },
+      "local_server_pid": 19073,
+      "local_server_started": "2026-10-09T21:54:06.999133+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:53:53.434999+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-1-20261009-215620.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DateUtil unit test",
+          "status": "completed",
+          "files": [
+            "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:57:58+0200",
+      "seconds": 89.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 39,
+      "files_changed": 1,
+      "cloud_steps": 10,
+      "cloud_tokens": {
+        "total": 363920,
+        "input": 20,
+        "output": 4726,
+        "reasoning": 156,
+        "cache_write": 40406,
+        "cache_read": 318612
+      },
+      "cloud_cost_usd": 0.2136,
+      "cloud_cost_seen_usd": 0.2136,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3927
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3409
+        }
+      },
+      "local_server_pid": 19073,
+      "local_server_started": "2026-10-09T21:54:06.999133+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:53:53.434999+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-2-20261009-215752.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 2,
+        "dispatched_after_deny": 0,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          },
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:59:38+0200",
+      "seconds": 125.9,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 7,
+      "lines_changed": 50,
+      "files_changed": 1,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 284553,
+        "input": 16,
+        "output": 2609,
+        "reasoning": 105,
+        "cache_write": 39375,
+        "cache_read": 242448
+      },
+      "cloud_cost_usd": 0.1741,
+      "cloud_cost_seen_usd": 0.1741,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 3311
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 4817
+        }
+      },
+      "local_server_pid": 19073,
+      "local_server_started": "2026-10-09T21:54:06.999133+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:53:53.434999+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-hybrid-3-20261009-215933.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write DateUtilTest.kt",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+            "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/util/DateUtil.kt",
+          "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-09T21:54:09+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261009-215405.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-small",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261009-215405.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "read-qa": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 1.22,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 19073,
+        "port": "58014",
+        "started": "2026-10-09T21:54:06.999133+02:00",
+        "probe_seconds": 0.17
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 695
+      }
+    }
+  ],
+  "rung": 4,
+  "arm": "hybrid",
+  "task": "G2",
+  "tag": "np-2bcca023-sonnet5-aggressive-small",
+  "target": "tasks",
+  "worker_profile": "qwen3.6-35b-a3b-optiq-64g",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day."
+}
