@@ -158,6 +158,11 @@ file is stale. The format, `schema_version` 1:
 
 New fields may appear within schema 1; a reader should ignore fields it does not know.
 
+Every entry in `models.json` pins `revision`, the full Hugging Face commit SHA of the weights
+whose provenance was checked and benchmarked. A nav-pilot that reads it (navikt/copilot#1577 and
+later) downloads and serves that commit. Older releases ignore it and keep pulling the
+repository's main branch, as before.
+
 An entry that sets a param an older nav-pilot must not ignore gets `min_nav_pilot`, the newest
 release any of those params needs (the `MIN_NAV_PILOT` table in the generator). Params an older
 client can safely ignore, such as the sampling params, are not gated. A nav-pilot that
