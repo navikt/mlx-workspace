@@ -1,0 +1,386 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-10T01:21:36+0200",
+      "seconds": 22.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 114382,
+        "input": 8,
+        "output": 356,
+        "reasoning": 37,
+        "cache_write": 29644,
+        "cache_read": 84337
+      },
+      "cloud_cost_usd": 0.0949,
+      "cloud_cost_seen_usd": 0.0949,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 473
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 755
+        }
+      },
+      "local_server_pid": 59214,
+      "local_server_started": "2026-10-10T01:21:24.590169+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:21:10.632495+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-8-control-0-20261010-012134.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-10T01:22:01+0200",
+      "seconds": 22.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 114305,
+        "input": 8,
+        "output": 380,
+        "reasoning": 12,
+        "cache_write": 29626,
+        "cache_read": 84279
+      },
+      "cloud_cost_usd": 0.0949,
+      "cloud_cost_seen_usd": 0.0949,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 529
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 750
+        }
+      },
+      "local_server_pid": 59214,
+      "local_server_started": "2026-10-10T01:21:24.590169+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:21:10.632495+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-8-control-1-20261010-012159.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 2,
+      "arm": "control",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-10T01:22:27+0200",
+      "seconds": 22.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 114452,
+        "input": 8,
+        "output": 383,
+        "reasoning": 43,
+        "cache_write": 29662,
+        "cache_read": 84356
+      },
+      "cloud_cost_usd": 0.0953,
+      "cloud_cost_seen_usd": 0.0953,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 750
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1176
+        }
+      },
+      "local_server_pid": 59214,
+      "local_server_started": "2026-10-10T01:21:24.590169+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:21:10.632495+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-8-control-2-20261010-012224.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 3,
+      "arm": "control",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-10T01:22:52+0200",
+      "seconds": 22.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 4,
+      "cloud_tokens": {
+        "total": 114452,
+        "input": 8,
+        "output": 370,
+        "reasoning": 53,
+        "cache_write": 29658,
+        "cache_read": 84363
+      },
+      "cloud_cost_usd": 0.0953,
+      "cloud_cost_seen_usd": 0.0953,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1119
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1190
+        }
+      },
+      "local_server_pid": 59214,
+      "local_server_started": "2026-10-10T01:21:24.590169+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:21:10.632495+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-8-control-3-20261010-012249.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-10T01:21:28+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012122.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012122.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "read-qa": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.49,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 59214,
+        "port": "54550",
+        "started": "2026-10-10T01:21:24.590169+02:00",
+        "probe_seconds": 0.18
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 448
+      }
+    }
+  ],
+  "rung": 8,
+  "arm": "control",
+  "task": "O1",
+  "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+  "target": "tasks",
+  "worker_profile": null,
+  "kind": "edit",
+  "verify": "compile",
+  "prompt": "In .nais/naiserator-dev.yaml, raise the memory limit under spec.resources.limits from 512Mi to 768Mi. Change nothing else."
+}

@@ -101,7 +101,7 @@
       "id": "O1",
       "kind": "edit",
       "verify": "compile",
-      "prompt": "In .nais/naiserator-dev.yaml, raise the memory limit under spec.resources.limits from 512Mi to 768Mi. Change nothing else.",
+      "prompt": "In kotlin/.nais/naiserator-dev.yaml, raise the memory limit under spec.resources.limits from 512Mi to 768Mi. Change nothing else.",
       "touches": ".nais/naiserator-dev.yaml",
       "only": ".nais/naiserator-dev.yaml",
       "_why": "A small one-file deployment config change, the most common shape in the navikt PR audit (reports/2026-10-09-navikt-pr-audit). Compile only proves the tree is intact; expect_diff and only require exactly that one line changed (quotes ignored), nothing else.",

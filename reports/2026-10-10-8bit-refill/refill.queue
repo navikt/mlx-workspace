@@ -1,0 +1,17 @@
+# 8-bit cheap-ops on the fixed harness (#189). Same 14 passes as the optiq refill, one per step. $0 cloud.
+# Decision: local config-deploy (O1) and small-task verdicts per profile. Compare with optiq-refill on the same generation.
+# part kind classes variant runs rungs timeout expected profile
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-8bit-64g

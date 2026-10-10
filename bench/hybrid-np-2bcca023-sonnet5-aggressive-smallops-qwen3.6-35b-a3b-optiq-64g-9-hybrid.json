@@ -1,0 +1,972 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:32:26+0200",
+      "seconds": 88.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 5,
+      "lines_changed": 26,
+      "files_changed": 1,
+      "cloud_steps": 18,
+      "cloud_tokens": {
+        "total": 602714,
+        "input": 36,
+        "output": 3451,
+        "reasoning": 118,
+        "cache_write": 38192,
+        "cache_read": 560917
+      },
+      "cloud_cost_usd": 0.2434,
+      "cloud_cost_seen_usd": 0.2434,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 24430
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 28085
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-0-20261010-013221.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write Virksomhetsnummer test",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 1,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+        ],
+        "worker_files": [
+          "class.java",
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:34:06+0200",
+      "seconds": 62.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 27,
+      "files_changed": 1,
+      "cloud_steps": 9,
+      "cloud_tokens": {
+        "total": 295314,
+        "input": 18,
+        "output": 2260,
+        "reasoning": 99,
+        "cache_write": 39868,
+        "cache_read": 253069
+      },
+      "cloud_cost_usd": 0.1739,
+      "cloud_cost_seen_usd": 0.1739,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 27948
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 27129
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-1-20261010-013401.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write Virksomhetsnummer unit test",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "class.java",
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:35:19+0200",
+      "seconds": 70.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 15,
+      "cloud_tokens": {
+        "total": 489468,
+        "input": 30,
+        "output": 2787,
+        "reasoning": 115,
+        "cache_write": 36916,
+        "cache_read": 449620
+      },
+      "cloud_cost_usd": 0.2113,
+      "cloud_cost_seen_usd": 0.2113,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 27236
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 26563
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-2-20261010-013514.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write VirksomhetsnummerTest",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+        ],
+        "worker_files": [
+          "class.java",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:36:41+0200",
+      "seconds": 75.5,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 2,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 17,
+      "cloud_tokens": {
+        "total": 553328,
+        "input": 34,
+        "output": 3201,
+        "reasoning": 111,
+        "cache_write": 36731,
+        "cache_read": 513251
+      },
+      "cloud_cost_usd": 0.2277,
+      "cloud_cost_seen_usd": 0.2277,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 26553
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 25541
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-3-20261010-013636.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write VirksomhetsnummerTest",
+          "status": "completed",
+          "files": [
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 1,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+        ],
+        "worker_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 4,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:38:07+0200",
+      "seconds": 82.6,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 3,
+      "lines_changed": 28,
+      "files_changed": 1,
+      "cloud_steps": 16,
+      "cloud_tokens": {
+        "total": 524576,
+        "input": 32,
+        "output": 3087,
+        "reasoning": 32,
+        "cache_write": 36822,
+        "cache_read": 484603
+      },
+      "cloud_cost_usd": 0.2202,
+      "cloud_cost_seen_usd": 0.2202,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 25509
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 25694
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-4-20261010-013802.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write Virksomhetsnummer test",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 1,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+        ],
+        "worker_files": [
+          "class.java",
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 5,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:39:41+0200",
+      "seconds": 55.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 2,
+      "lines_changed": 26,
+      "files_changed": 1,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 254567,
+        "input": 16,
+        "output": 2209,
+        "reasoning": 86,
+        "cache_write": 34737,
+        "cache_read": 217519
+      },
+      "cloud_cost_usd": 0.1533,
+      "cloud_cost_seen_usd": 0.1533,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 25754
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 25208
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-5-20261010-013936.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write VirksomhetsnummerTest.kt",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "class.java",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 6,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:40:47+0200",
+      "seconds": 72.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 4,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 12,
+      "cloud_tokens": {
+        "total": 419256,
+        "input": 24,
+        "output": 3326,
+        "reasoning": 109,
+        "cache_write": 38379,
+        "cache_read": 377418
+      },
+      "cloud_cost_usd": 0.2058,
+      "cloud_cost_seen_usd": 0.2058,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 24556
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23723
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-6-20261010-014042.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Create Virksomhetsnummer test",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          ],
+          "cloud_edited": [
+            "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+          ],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "fixed"
+        }
+      ],
+      "rework": {
+        "accepted": 0,
+        "fixed": 1,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt"
+        ],
+        "worker_files": [
+          "class.java",
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    },
+    {
+      "n": 7,
+      "arm": "hybrid",
+      "rung": 9,
+      "task": "T1",
+      "preflight": 0,
+      "started": "2026-10-10T01:42:11+0200",
+      "seconds": 60.4,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 2,
+      "lines_changed": 29,
+      "files_changed": 1,
+      "cloud_steps": 9,
+      "cloud_tokens": {
+        "total": 306444,
+        "input": 18,
+        "output": 2431,
+        "reasoning": 52,
+        "cache_write": 37990,
+        "cache_read": 265953
+      },
+      "cloud_cost_usd": 0.173,
+      "cloud_cost_seen_usd": 0.173,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "6fcf66c67e580e9e39c215c23b2bcf158432036f0eea1d0df18e34b55d88119b",
+        "bytes": 3957,
+        "send": "Send it: lookups and questions about the code; a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 23882
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 22794
+        }
+      },
+      "local_server_pid": 70696,
+      "local_server_started": "2026-10-10T01:32:12.917977+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-10T01:31:59.702791+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-9-hybrid-7-20261010-014206.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": true,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3957
+        }
+      ],
+      "dispatches": [
+        {
+          "description": "Write Virksomhetsnummer test",
+          "status": "completed",
+          "files": [
+            "class.java",
+            "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+            "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt",
+            "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+          ],
+          "cloud_edited": [],
+          "redispatched": false,
+          "cloud_wrote": false,
+          "verdict": "accepted"
+        }
+      ],
+      "rework": {
+        "accepted": 1,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 1,
+        "dispatched_after_deny": 1,
+        "denied": [
+          {
+            "tool": "write",
+            "outcome": "deny_create",
+            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/tasks/src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt"
+          }
+        ],
+        "orchestrator_files": [],
+        "worker_files": [
+          "class.java",
+          "src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt",
+          "src/test/kotlin/no/nav/syfo/domain/VirksomhetsnummerTest.kt",
+          "src/test/kotlin/no/nav/syfo/oppfolgingstilfelle/domain/OppfolgingstilfellePersonTest.kt"
+        ],
+        "checked_after_dispatch": true,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-10T01:32:15+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-013211.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-013211.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "read-qa": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.03,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 70696,
+        "port": "58260",
+        "started": "2026-10-10T01:32:12.917977+02:00",
+        "probe_seconds": 0.18
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 24324
+      }
+    }
+  ],
+  "rung": 9,
+  "arm": "hybrid",
+  "task": "T1",
+  "tag": "np-2bcca023-sonnet5-aggressive-smallops",
+  "target": "tasks",
+  "worker_profile": "qwen3.6-35b-a3b-optiq-64g",
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Write a JUnit 5 unit test for the class Virksomhetsnummer in src/main/kotlin/no/nav/syfo/domain/Virksomhetsnummer.kt. Cover a valid nine-digit value and at least one invalid value that must throw IllegalArgumentException. Match the style of the existing tests under src/test/kotlin. Change only files under src/test/kotlin."
+}

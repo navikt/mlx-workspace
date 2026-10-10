@@ -1,0 +1,228 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "control",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:51:59+0200",
+      "seconds": 45.3,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 49,
+      "files_changed": 1,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 309998,
+        "input": 16,
+        "output": 1688,
+        "reasoning": 35,
+        "cache_write": 57017,
+        "cache_read": 251242
+      },
+      "cloud_cost_usd": 0.2101,
+      "cloud_cost_seen_usd": 0.2101,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1266
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 944
+        }
+      },
+      "local_server_pid": 15766,
+      "local_server_started": "2026-10-09T21:51:49.223737+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:51:35.502232+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-control-0-20261009-215156.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    },
+    {
+      "n": 1,
+      "arm": "control",
+      "rung": 4,
+      "task": "G2",
+      "preflight": 0,
+      "started": "2026-10-09T21:52:53+0200",
+      "seconds": 37.2,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 47,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 194035,
+        "input": 12,
+        "output": 1378,
+        "reasoning": 25,
+        "cache_write": 35523,
+        "cache_read": 157097
+      },
+      "cloud_cost_usd": 0.1343,
+      "cloud_cost_seen_usd": 0.1343,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "policy": null,
+      "memory": {
+        "before": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 938
+        },
+        "after": {
+          "swap_used_mb": 0.0,
+          "swap_free_mb": 0.0,
+          "free_mb": 1001
+        }
+      },
+      "local_server_pid": 15766,
+      "local_server_started": "2026-10-09T21:51:49.223737+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": {
+        "nais-pilot": {
+          "sha": "8303a4447bd311704b8ca85b0b1b83f003857226",
+          "fetched_at": "2026-10-09T21:51:35.502232+02:00"
+        }
+      },
+      "log": ".bench-logs/hybrid-4-control-1-20261009-215250.jsonl",
+      "verified": true,
+      "note": "suite passes",
+      "dispatched": null,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          "src/test/kotlin/no/nav/syfo/util/DateUtilTest.kt"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": false
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-09T21:51:51+0200",
+      "arm": "control",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
+      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261009-215147.config.toml",
+      "tag": "np-2bcca023-sonnet5-aggressive-small",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261009-215147.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "read-qa": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          },
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"aggressive\"",
+      "load_average": 2.2,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 15766,
+        "port": "56295",
+        "started": "2026-10-09T21:51:49.223737+02:00",
+        "probe_seconds": 0.17
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 0.0,
+        "swap_free_mb": 0.0,
+        "free_mb": 1219
+      }
+    }
+  ],
+  "rung": 4,
+  "arm": "control",
+  "task": "G2",
+  "tag": "np-2bcca023-sonnet5-aggressive-small",
+  "target": "tasks",
+  "worker_profile": null,
+  "kind": "edit",
+  "verify": "test",
+  "prompt": "Write a unit test file for src/main/kotlin/no/nav/syfo/util/DateUtil.kt. Use JUnit 5, matching the style of the existing tests under src/test/kotlin. Cover dagerMellomDatoer including the boundary where start and end are the same day."
+}

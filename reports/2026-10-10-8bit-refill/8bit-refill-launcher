@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Runs 14 cheap-ops passes on the 8-bit 64 GB profile after the optiq refill, on the fixed O1 harness (plan.md here).
+# NOT ARMED by the repo. Arm it: cp reports/2026-10-10-8bit-refill/8bit-refill-launcher ~/tmp/ && nohup bash ~/tmp/8bit-refill-launcher >/dev/null 2>&1 &
+# Logs to .bench-logs/8bit-refill.log. Follows BENCHMARKING.md, "Waiting launchers":
+#   - waits for optiq-refill.done, or for no optiq-refill launcher alive (order only); then 5 min of free GPU:
+#     no queue lock, no benchmark, night-run or model-server process, nothing on :8080, AC, 48 GB
+#     wired, 1-min load below 6;
+#   - one instance (8bit-refill.pid), never twice (8bit-refill.done, checked at start and after the wait),
+#     done marker touched as soon as the queue has run;
+#   - one night-run-3 call per pass; before each, a stray src/ at the 8-bit workspace root is moved
+#     to .bench-logs/ (#186), so it costs one pass, not the rest.
+# Gives up after 72 h. Stop it: kill <pid on the first log line>.
+set -u
+MAIN=/Users/hans/mlx-workspace
+cd "$MAIN" || exit 1
+L="$MAIN/.b""ench-logs"
+N=8bit-refill
+exec >> "$L/$N.log" 2>&1
+R=reports/2026-10-10-8bit-refill Q=refill.queue
+AFTER="$L/optiq-refill.done"
+WS="$MAIN/workspaces/qwen3.6-35b-a3b-8bit-64g"
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|llama-server|ollama serve"
+GIVE_UP=$(( $(date +%s) + 259200 ))
+JDK="$HOME/.local/share/mise/installs/java/21"
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  if [ ! -e "$AFTER" ]; then   # optiq-refill launcher alive and not done: let it go first
+    local g; g=$(cat "$L/optiq-refill.pid" 2>/dev/null)
+    { [ -n "$g" ] && kill -0 "$g" 2>/dev/null; } && { echo "optiq-refill launcher $g alive, no $AFTER"; return; }
+    pgrep -f "optiq-refill" | grep -vqE "^($$|$PPID)$" && { echo "optiq-refill process alive, no $AFTER"; return; }
+  fi
+  [ -d "$L/.queue.lock" ] && { echo "queue lock held by pid $(cat "$L/.queue.lock/pid" 2>/dev/null)"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB, want 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT   # a kill, a give-up or a failed check leaves no done marker
+say "pid $$: runs $R/$Q after $AFTER (or no optiq-refill launcher) and 5 min of free GPU"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt "$GIVE_UP" ] || { say "gave up: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -e "$DONE" ] && { say "$DONE appeared while waiting; not running twice"; exit 0; }
+git switch -q main && git pull -q --ff-only origin main || { say "git pull failed; not running"; exit 1; }
+[ -f "$R/$Q" ] || { say "no $R/$Q in the checkout; not running"; exit 1; }
+[ -x "$JDK/bin/java" ] || { say "no JDK 21 at $JDK; not running"; exit 1; }
+unstray() { [ -e "$WS/src" ] || return 0; local s="$L/$N-stray-src-$(date +%H%M%S)"; mv "$WS/src" "$s" && say "$1: moved stray $WS/src to $s"; }
+unstray "before preflight"
+export FRONTIER_COST_CAP=0 FRONTIER_MODEL=qwen3.6-35b-a3b-8bit-64g NIGHT_CAFFEINATED=1
+.mise/tasks/ni""ght-run-3 --dry-run --part local --queue "$R/$Q" > "$L/$N-preflight.log" 2>&1 \
+  || { say "preflight failed, see $L/$N-preflight.log; not running"; exit 1; }
+# From here the queue runs: any exit marks it done, before anything slow.
+trap ': > "$DONE"; rm -f "$PIDF" "$L/$N-step.queue"; say "done marker"' EXIT
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "${NR:-}"; exit 130' INT TERM
+say "running: checkout at $(git rev-parse --short HEAD); local only, \$0 cloud"
+i=0
+while read -r line; do
+  i=$((i + 1))
+  unstray "before pass $i"   # #186: a sample wrote outside its task directory
+  { sed -n '/^#/p' "$R/$Q"; echo "$line"; } > "$L/$N-step.queue"
+  say "pass $i"
+  NIGHT_REPORT="$R/refill-results-$i.md" .mise/tasks/ni""ght-run-3 --part local --queue "$L/$N-step.queue" < /dev/null &
+  NR=$!; wait "$NR"; say "pass $i exited $?"
+done < <(grep -v '^#' "$R/$Q" | grep .)
+unstray "after the last pass"
