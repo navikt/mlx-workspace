@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-10T17:30:14Z",
+  "generated_at": "2026-10-10T21:37:32Z",
   "reports": [
     {
       "id": "2026-10-10-small-delegate/report",
@@ -72,6 +72,25 @@
         "n": 28
       },
       "verdict": "pass",
+      "justifies": []
+    },
+    {
+      "id": "2026-10-10-cf-r34/report",
+      "title": "create-file retry2 r3–r4 extras",
+      "date": "2026-10-10",
+      "class": "Agentic task benchmarks",
+      "summary": "Harness 6967c4bae943: optiq r3 19/20 (LB 0.85), 8-bit r3 9/10 (LB 0.72). Both are not-yet against the 0.90 bar, and r4 breaks on both, mostly on timeouts. Without priced cells the cost rule cannot be checked. Routing stays at r2",
+      "path": "reports/2026-10-10-cf-r34/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-10-cf-r34/report.md",
+      "models": [
+        "qwen3.6-35b-a3b-optiq",
+        "qwen3.6-35b-a3b-8bit-64g"
+      ],
+      "headline": {
+        "k": 19,
+        "n": 20
+      },
+      "verdict": "not-yet",
       "justifies": []
     },
     {
