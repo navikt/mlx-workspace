@@ -11,10 +11,11 @@ Last updated 2026-10-10. Sources: the linked reports. Routine benchmarking has s
   Everything stays on cloud.
 - **create-file with retry2 is trusted locally at r1-r2 on both profiles** (optiq 37/40, 8-bit 35/40).
   retry2 is kept, but its own effect is not isolated (the harness changed too), and delegate is
-  unmeasured, so the manifest stays `cloud`. [cf-retry2](reports/2026-10-08-cf-retry2/report.md)
-- **Small tasks:** both profiles do edit-single, docs and test-only locally (about 29 % of human PRs).
-  O1 (config) failed on every sample, most likely a harness defect. Delegating small tasks costs
-  1.3-1.5x the cloud control, so delegate stays `cloud`. [small-delegate](reports/2026-10-10-small-delegate/report.md)
+  unmeasured, so create-file delegate stays `cloud`. [cf-retry2](reports/2026-10-08-cf-retry2/report.md)
+- **Small tasks:** both profiles pass edit-single, docs and test-only locally at >= 75 % (about 29 % of
+  human PRs). Under the shipped bar only the 8-bit's edit-single is trusted (59/60; optiq not-yet);
+  shipping it is an open owner decision. O1 (config) failed on every sample, most likely a harness
+  defect. Delegated T1 passes but costs 1.3-1.5x cloud; one-line edits were never dispatched (0/32). [small-delegate](reports/2026-10-10-small-delegate/report.md)
 
 ## Rejected
 
@@ -31,7 +32,7 @@ Last updated 2026-10-10. Sources: the linked reports. Routine benchmarking has s
   [phase C](reports/2026-10-01-phase-c-rerun/report.md),
   [emm8 delegate](reports/2026-09-30-emm8-delegate/report.md)
 
-- **K2-Horizon MoVA (36B-A4B 4-bit):** 0/40, no parseable tool calls; rejected on the parser.
+- **K2-Horizon MoVA (36B-A4B 4-bit):** 0/40, no parseable tool calls; rejected until the parser is fixed.
   The parser fix ([#184](https://github.com/navikt/mlx-workspace/pull/184)) is queued for a retest.
   [new candidates](reports/2026-10-09-new-candidates/report.md)
 
