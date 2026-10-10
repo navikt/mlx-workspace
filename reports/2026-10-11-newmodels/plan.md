@@ -32,7 +32,7 @@ gets one chat completion with a tool (5 min cap). No parsed `tool_calls`: logged
 
 ## Standard set
 
-`newmodels.queue`: per model validate, create-file r1-r4 and edit-multi-mechanical r1-r4, variant
+`newmodels.queue`: per model create-file r1-r4 and edit-multi-mechanical r1-r4, variant
 `base`, 5 runs. About 4 h a model, local only, $0 cloud.
 
 ## Run

@@ -41,7 +41,7 @@ else:
 # real server moves behind it. opencode would not talk to a non-default port under
 # the sandbox, so capturing its traffic means moving the server, not the client.
 port          = os.environ.get("MLX_SERVER_PORT", "8080")
-model         = os.environ["MLX_MODEL"]
+model         = os.path.expanduser(os.environ["MLX_MODEL"])  # local "~/..." conversions
 max_tokens    = os.environ.get("MLX_MAX_TOKENS", "32768")
 cache_bytes   = os.environ.get("MLX_CACHE_BYTES", "")
 cache_size    = os.environ.get("MLX_CACHE_SIZE", "")

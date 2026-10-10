@@ -78,7 +78,7 @@ for hf, keys in sorted(models.items()):
         shards = set(idx["weight_map"].values())
         missing = sorted(f for f in shards if not (snap / f).exists())
         broken = sorted(p.name for p in snap.rglob("*") if not p.exists())  # dangling symlinks
-        partial = sorted(p.name for p in (d / "blobs").glob("*.incomplete"))
+        partial = [] if hf.startswith(("/", "~")) else sorted(p.name for p in (d / "blobs").glob("*.incomplete"))
     except (OSError, KeyError, ValueError) as e:
         print(f"FAIL  model              {hf}: {e}"); bad += 1; continue
     if missing or broken or partial:

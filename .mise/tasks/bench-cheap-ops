@@ -441,7 +441,7 @@ def assert_serving_profile():
         raise SystemExit(f"✗ profile mismatch: MLX_ACTIVE_PROFILE={key} expects "
                          f"{want!r}, server is serving {ids!r}. Re-run "
                          f"`mise run model-use {key}` and check it succeeded.")
-    SERVED = want
+    SERVED = P.params_for(key)["MLX_MODEL"]  # "~/..." for a local model: no home path in results
     return want
 
 
@@ -691,6 +691,8 @@ def self_check():
         for t in CFG["tasks"]:
             if t.get("touches", "").startswith("."):
                 assert "kotlin/" + t["touches"] in t["prompt"], f"{t['id']}: prompt must say kotlin/{t['touches']}"
+        for k in P.list_keys():  # served_model is recorded from MLX_MODEL, never the resolved id
+            assert "/Users/" not in P.params_for(k)["MLX_MODEL"], f"{k}: home path in served_model"
     print("✓ bench-cheap-ops self-check passed")
 
 
