@@ -16,7 +16,7 @@ Nothing. The manifest is unchanged (create-file `delegate: cloud`).
 Three `night-run-3` passes on 10 Oct, all on harness `6967c4bae943` and tasks `cd8780d1d644`, $0 cloud, 420 s cap per attempt:
 
 1. cf-r34, 19:35–20:58: optiq retry2 r3–r4, 5 runs (`.bench-logs/night3-20261010-193512`). The 8-bit pass in the same queue failed its gradle preflight after 2 s, so it produced no samples.
-2. cf-r34b pass 1, 21:09–22:49: 8-bit retry2 r3–r4, 5 runs (`.bench-logs/night3-20261010-210854`). It took 100 min instead of the planned ~4 h because the plan used the worst-case estimate. 20/20 samples are valid. 9 timed out at the 420 s cap, and those count as failures.
+2. cf-r34b pass 1, 21:09–22:49: 8-bit retry2 r3–r4, 5 runs (`.bench-logs/night3-20261010-210854`). It took 100 min instead of the planned ~4 h because the plan used the worst-case estimate. 20/20 samples are valid. 8 timed out at the 420 s cap, and those count as failures.
 3. cf-r34b pass 2, 22:50–23:29: optiq retry2 r3 only, 5 more runs (`.bench-logs/night3-20261010-225023`). 10/10 samples are valid, and 1 timed out.
 
 All three files share one harness and task hash, so this report pools them per profile. Earlier retry2 data ran on harness `98da309f03c1` and stays separate. The local `bench-frontier -- summary` on branch `bench/night3-results-20261010-225023` does not see pass 1's optiq file, which lives on `bench/night3-results-20261010-193512`. The pooled verdicts below come from the same `summarise()` code, run on all three files together.
@@ -34,7 +34,7 @@ Optiq r3, per pass: 10/10, then 9/10. The single failure was `cf-r3-a` run 2, wh
 ## Verdict
 r3 is not trusted on either profile. Optiq is close: 19/20 pass, but the lower bound of 0.85 is under the 0.90 bar. 20/20 would have cleared it. The 8-bit reaches 9/10 at r3 with a lower bound of 0.72, so it is further away. r4 breaks on both profiles, mostly on timeouts.
 
-The cost ratio cannot be checked. These runs are local only, with no priced hybrid/control cells. BENCHMARKING.md requires a pooled hybrid/control median cost ratio ≤ 1.00 before a delegate verdict can be `trusted`, so r3 would stay short of trusted on this rule even with enough samples.
+The cost ratio cannot be checked. These runs are local only, with no priced hybrid/control cells. BENCHMARKING.md requires a pooled hybrid/control median cost ratio ≤ 1.00 before a delegate verdict can be `trusted`, so even a frontier `trusted` at r3 would not by itself move the manifest `delegate` verdict.
 
 ## Limits
 n = 20 (optiq) and 10 (8-bit) at r3, on two tasks. Timeouts at the 420 s cap explain most r4 failures and both r3 failures, so the cap affects the result as much as the model does. The cloud create-file arm still has n = 4 per rung.
