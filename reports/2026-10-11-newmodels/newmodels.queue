@@ -1,0 +1,17 @@
+# New-candidate standard set (../2026-10-09-new-candidates/plan.md): validate, create-file r1-r4 and
+# emm r1-r4, base, 5 runs, per model. Run by newmodels-launcher, which runs one model's lines only
+# after its tool-call probe parses. Wired: 48 GB.
+#
+# part kind     classes               variant runs rungs timeout-min expected-min profile
+local  validate -                     -       -    -     60          40           mellum2.1-12b-a2.5b-thinking-mxfp4
+local  base     create-file           base    5    1-4   280         140          mellum2.1-12b-a2.5b-thinking-mxfp4
+local  base     edit-multi-mechanical base    5    1-4   190         95           mellum2.1-12b-a2.5b-thinking-mxfp4
+local  validate -                     -       -    -     60          40           muse-glimmer-30b-optiq-4bit
+local  base     create-file           base    5    1-4   280         140          muse-glimmer-30b-optiq-4bit
+local  base     edit-multi-mechanical base    5    1-4   190         95           muse-glimmer-30b-optiq-4bit
+local  validate -                     -       -    -     60          40           nemotron-3.5-lightning-30b-a3b-optiq-4bit
+local  base     create-file           base    5    1-4   280         140          nemotron-3.5-lightning-30b-a3b-optiq-4bit
+local  base     edit-multi-mechanical base    5    1-4   190         95           nemotron-3.5-lightning-30b-a3b-optiq-4bit
+local  validate -                     -       -    -     60          40           gemma-4-26b-a4b-qat-optiq-4bit
+local  base     create-file           base    5    1-4   280         140          gemma-4-26b-a4b-qat-optiq-4bit
+local  base     edit-multi-mechanical base    5    1-4   190         95           gemma-4-26b-a4b-qat-optiq-4bit

@@ -1,0 +1,22 @@
+[meta]
+name               = "Nemotron 3.5 Lightning 30B A3B OptiQ 4bit"
+released           = "2026-09"
+status             = "untested"
+spec_source        = "config.json"
+notes              = "New candidate (reports/2026-10-11-newmodels/plan.md). NVIDIA open model licence. Same A3B shape as optiq, 22.8 GB. mlx-lm has nemotron_h; tool parsing is unverified, the launcher probe checks it. Bench-only."
+model_vram_gb      = 23
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-OptiQ-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_SIZE             = "3"
+MLX_CACHE_BYTES            = "12884901888"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "16384"
+MLX_OPENCODE_CHUNK_TIMEOUT = "600000"
+MLX_TOP_P                  = "0.95"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"
