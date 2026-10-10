@@ -24,7 +24,7 @@ k/n with the summary's 90 % one-sided Wilson bounds. Bar: 0.90 at r3 (p_cloud 1.
 |---|---|---|---|
 | optiq retry2 | 17/20 | 36/40 (0.82–0.95) not-yet | 0 / 3 |
 
-The three failures this pass were all timeouts: `cf-r3-b` runs 6 and 8, `cf-r3-a` run 7. The one earlier failure was also a timeout, so all 4 pooled failures are timeouts at the 420 s cap. Median time per sample at r3 is 191 s. The r4 cell is unchanged at 4/10 (cloud).
+The three failures this pass were all timeouts: `cf-r3-b` runs 6 and 8, `cf-r3-a` run 7. The one earlier failure was also a timeout, so all 4 pooled failures are timeouts at the 420 s cap. Median time per sample at r3 is 191 s pooled (211 s this pass). The r4 cell is unchanged at 4/10 (cloud).
 
 ## Verdict
 r3 is still not trusted on optiq. The pooled rate is exactly 0.90, so the rung is not ruled out, but the lower bound of 0.82 is well under the bar. The pass went backwards: 17/20 against 19/20 before. It did not reach the 39/40 target.
