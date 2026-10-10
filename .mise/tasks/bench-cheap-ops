@@ -68,7 +68,9 @@ if not key:
     sys.exit("✗ MLX_ACTIVE_PROFILE not set — run: mise run model-use")
 
 wanted = [a for a in sys.argv[1:] if not a.startswith("-")]
-tasks = [t for t in CFG["tasks"] if not wanted or t["id"] in wanted]
+# A retired task runs only when named: D2 still cost up to 420 s a pass and gave no verdict.
+tasks = [t for t in CFG["tasks"]
+         if t["id"] in wanted or (not wanted and t.get("verify") != "retired")]
 if not tasks:
     sys.exit(f"✗ No tasks matched {wanted}")
 
@@ -474,6 +476,23 @@ def restart_server():
     raise SystemExit(f"✗ server did not come back: {r.stdout}{r.stderr}")
 
 
+def full_reply(out):
+    """The model's whole reply, from the task's log; the printed line if there is none."""
+    m = re.search(r"log: (\S+\.jsonl)", out)
+    path = ROOT / m.group(1) if m else None
+    if not path or not path.exists():
+        return out.split("reply:", 1)[1] if "reply:" in out else out
+    text = []
+    for line in path.read_text(errors="replace").splitlines():
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(e, dict) and e.get("type") == "text":
+            text.append(str(e.get("part", {}).get("text", "")))
+    return " ".join(text)
+
+
 def loop_check(out):
     """Count the longest run of identical consecutive tool calls in a task.
 
@@ -580,7 +599,10 @@ def run_task(task):
     # Record term hits before any early return, so a timed-out task is still
     # comparable field-for-field with a completed one.
     if task.get("expect_terms"):
-        reply = out.split("reply:", 1)[1] if "reply:" in out else out
+        # The "reply:" line opencode-headless prints is cut at 300 characters.
+        # R1's terms sit later in a normal answer, so it failed 27 of 28 runs
+        # whose full replies held all four terms. Read the reply from the log.
+        reply = full_reply(out)
         rec["terms_found"] = [t for t in task["expect_terms"] if t in reply]
         rec["terms_expected"] = task["expect_terms"]
     rec.update(loop_check(out))
