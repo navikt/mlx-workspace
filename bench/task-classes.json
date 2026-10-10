@@ -17,6 +17,7 @@
     },
     "E3b": {"class": "edit-single"},
     "O1": {"class": "edit-single"},
+    "O2": {"class": "edit-single"},
     "T1": {"class": "create-file"},
     "fm-r4-a": {"class": "edit-multi-mechanical"},
     "fm-r5-a": {"class": "edit-multi-mechanical"},
