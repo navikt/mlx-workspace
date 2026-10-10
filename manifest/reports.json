@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-10T17:28:08Z",
+  "generated_at": "2026-10-10T17:30:14Z",
   "reports": [
     {
       "id": "2026-10-10-small-delegate/report",
@@ -924,13 +924,6 @@
       "status": "waiting on owner: `gh auth refresh -s read:packages` (`@navikt/melosys-kodeverk` is on GitHub Packages); else gap-fill step 1 is skipped",
       "when": "gap-fill, after 2026-10-10 14:00",
       "where": "[gap-fill plan](2026-10-10-gap-fill/plan.md), #185"
-    },
-    {
-      "item": "**O1 harness defect:** every O1 sample ends with \"no changes made\" after ~7 s, cloud control 4/4",
-      "decides": "Config-deploy (9 % of PRs) locally",
-      "status": "not confirmed: read a transcript, fix the harness, re-run O1 at the next trigger",
-      "when": "–",
-      "where": "[small-delegate](2026-10-10-small-delegate/report.md)"
     },
     {
       "item": "**deps-bump by hand** (4.5 % of human PRs)",

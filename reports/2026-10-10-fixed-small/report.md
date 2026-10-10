@@ -28,17 +28,17 @@ Local, k/n [95 % Wilson].
 | R2, R3 (read-qa) | 14/14, 14/14 | 14/14, 14/14 |
 | D1 (read-qa) | 11/14 | 14/14 |
 | R1 (excluded) | 0/14 | 1/14 |
-| D2 (excluded) | 0/14 | 0/14 |
+| D2 (excluded) | – | – |
 
 Per class: edit-single optiq 37/42 [0.75, 0.95], 8-bit 42/42 [0.92, 1.00]; create-file 29/42 [0.54, 0.81] vs 31/42 [0.59, 0.85]; edit-multi-mechanical 25/28 [0.73, 0.96] vs 19/28 [0.49, 0.82]; read-qa 39/42 [0.81, 0.98] vs 42/42 [0.92, 1.00].
 
 Before #189 ([small-delegate](../2026-10-10-small-delegate/report.md)): O1 was 0/15 optiq and 0/30 8-bit, every sample "no changes made". E1 15/15 and 30/30, E3b 12/15 and 29/30, T1 14/15 and 28/30. The figures for the other tasks are in line with those.
 
 ## Verdict
-The O1 fix worked. Both profiles now do config-deploy locally; the 8-bit passed all 14. The two optiq misses were "no changes made" (14:58 and 15:13). The 8-bit is again the steadier profile on edit-single and read-qa. Its weak spot is M1, where 8 of 14 left the old symbol in place.
+The O1 fix worked. Both profiles now do config-deploy locally; the 8-bit passed all 14. The two optiq misses were "no changes made" (14:58 and 15:13). The 8-bit is again the steadier profile on edit-single and read-qa. Its weak spot is M1: of the 8 misses, 7 left the old symbol in place and 1 made no change.
 
 ## Caveats
-n = 14 per task. The pre-#189 numbers come from another harness generation and are not pooled. D2 is still in the queue even though it is retired: about half its samples timed out at 420 s and the rest were marked retired, with no verdict. These are not counted as failures. R1 is excluded, and it failed on the same note ("1 of 4 expected terms") 27 of 28 times, which supports the checker-problem theory. No `bench-capabilities` verdict was run for this draft.
+n = 14 per task. The pre-#189 numbers come from another harness generation and are not pooled. D2 is still in the queue even though it is retired: 19 of its 28 samples timed out at 420 s and the rest were marked retired, with no verdict. These are not counted as failures. R1 is excluded, and it failed on the same note ("1 of 4 expected terms") 27 of 28 times, which supports the checker-problem theory. No `bench-capabilities` verdict was run for this draft.
 
 ## Sources
 Launcher logs `.bench-logs/optiq-refill.log`, `.bench-logs/8bit-refill.log`; step logs `.bench-logs/night3-20261010-*`. Result files (harness `5cdeda213eba`):
