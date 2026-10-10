@@ -10,7 +10,7 @@ decision, hardware or no GPU keep their status.
 
 **Recently answered:** Kev 4B and Laya fail ([kev-laya](2026-09-29-kev-laya/report.md), [kev-english](2026-09-30-kev-english/report.md)).
 
-Status is one of **parked (triggers only)**, **queued** (a launcher or queue will run it), **waiting on X**, **needs user
+Status is one of **parked (triggers only)**, **ready** (no GPU, can run now), **queued** (a launcher or queue will run it), **waiting on X**, **needs user
 decision**, **needs hardware**, or **not built**. `PT` is
 [pending-tasks.md](2026-09-23-local-model-evaluation/pending-tasks.md). Last checked 2026-10-10.
 The GPU queue in run order is PT §8.12. The nav-pilot side of this work is tracked in
