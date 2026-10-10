@@ -5093,6 +5093,110 @@
    ]
   },
   {
+   "class": "create-file",
+   "model": "qwen3.6-35b-a3b-optiq",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=521cdea78914 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 9,
+     "n": 10,
+     "lb": 0.718,
+     "ub": 0.97,
+     "lb_monotone": 0.718,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "trusted",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 5,
+     "median_seconds": 134,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 6,
+     "n": 10,
+     "lb": 0.401,
+     "ub": 0.77,
+     "lb_monotone": 0.507,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 5,
+     "median_seconds": 61,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 7,
+     "n": 10,
+     "lb": 0.497,
+     "ub": 0.846,
+     "lb_monotone": 0.497,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 5,
+     "median_seconds": 126,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    },
+    "4": {
+     "k": 4,
+     "n": 10,
+     "lb": 0.23,
+     "ub": 0.599,
+     "lb_monotone": 0.23,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r4-a",
+      "cf-r4-b"
+     ],
+     "runs": 5,
+     "median_seconds": 228,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 1,
+    "open": 1,
+    "first_break": 2
+   },
+   "fit": {
+    "d50": 3.6,
+    "d_bar": null,
+    "beyond": false,
+    "a": 1.892,
+    "b": -1.027
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-optiq-base-20261010-090107.json"
+   ]
+  },
+  {
    "class": "edit-multi-mechanical",
    "model": "qwen3.6-35b-a3b-optiq",
    "variant": "cap900",
