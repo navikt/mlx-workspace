@@ -1,3 +1,8 @@
+---
+models: ["qwen3.6-35b-a3b-optiq-64g", "qwen3.6-35b-a3b-8bit-64g"]
+verdict: "mixed"
+---
+
 # Small tasks locally and by delegation on optiq-64g and the 8-bit, 2026-10-10
 
 ## Question
