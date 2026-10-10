@@ -191,8 +191,8 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   23:38 to 04:25 after the other had already finished it. The GPU was never idle: it spent
   4 h 47 min on a duplicate run while the next queue waited on it.
 - **Touch the `.done` marker only when every pass succeeded**, before any slow step of the
-  launcher's own. A pass that exits non-zero or logs a `FAIL` or `SKIP` step stops the launcher with
-  a non-zero exit and no marker, so a fixed relaunch can still start. `night-run-3` exits 0 even when
+  launcher's own. A pass that exits non-zero, logs a `FAIL` step, or skips a step the queue expected to run
+  stops the launcher with a non-zero exit and no marker, so a fixed relaunch can still start. `night-run-3` exits 0 even when
   a step fails its gradle preflight, so check its step lines as well as its exit code (#197). A
   check that fails before the run leaves no marker either.
 - **The main checkout is live while a queue runs.** Launchers and queues run from
