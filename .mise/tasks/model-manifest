@@ -32,11 +32,18 @@ SCHEMA_VERSION = 1
 # rather than one made by whoever can edit a file we serve.
 ALLOWED_ORGS = {"mlx-community", "lmstudio-community"}
 
+# Each offered entry pins "revision", the Hugging Face commit nav-pilot downloads
+# and serves: a full 40-character SHA, the one whose provenance was checked (the
+# weights benchmarked here, verified 2026-10-11). Without it a client pulls
+# whatever main is today. Moving a pin is a release like any other manifest change.
+REVISION = re.compile(r"^[0-9a-f]{40}$")
+
 # Models we are willing to put in front of an alpha user, and what to say about
 # each. A profile is not an offer: the repo carries profiles for models we have
 # rejected, and those must never reach the manifest.
 OFFERED = {
     "qwen3.6-35b-a3b-optiq": {
+        "revision": "70a3aa32c7feef511182bf16aa332f37e8d82014",
         "default": True,
         "role": "Sub-agent worker for focused tasks",
         "evidence": "reports/2026-09-23-local-model-evaluation/decision.md",
@@ -68,6 +75,7 @@ OFFERED = {
     # What the expect text has to carry is the speed and the instability,
     # because that is what a user cannot see for themselves in a short trial.
     "qwen3.8-27b-optiq-4bit": {
+        "revision": "a97e1450285cb818b0572a3515f0fc59b8cd7228",
         "default": False,
         "role": "Opt-in alternative, slower, the more robust 4-bit build",
         "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md#10-optiq-4bit-replaces-the-plain-4-bit",
@@ -77,6 +85,7 @@ OFFERED = {
         "expect": "Opt-in, never the default, and much slower: median task about 50 seconds against about 12. The OptiQ build, mixed precision: sensitive layers at 8-bit, the rest at 4-bit. More robust than the plain 4-bit it replaces: 18 of 30 cheap tasks against 11 of 20, no seven-minute timeouts against 4, and 12 of 12 Copilot sessions verified. Decodes about 15% slower, 21 tokens a second at 30k. Context is 64k with an 8k reply, and a full session measured 37.2 GB at peak.",
     },
     "qwen3.8-27b-8bit-mlx": {
+        "revision": "815b83c0df8ffd1d1b5244cf75fd6ef14fca9ef9",
         "default": False,
         "role": "Opt-in alternative, the 8-bit build, slowest here",
         "evidence": "reports/2026-09-23-local-model-evaluation/qwen38-tuning.md",
@@ -93,6 +102,7 @@ OFFERED = {
     # own in manifest/capabilities.json yet, so it gets the unmeasured block; the 64-3
     # hybrid arm, the only delegate evidence the bar counts, was NO-GO.
     "qwen3.6-35b-a3b-8bit": {
+        "revision": "e06a74e6236a60c8367e1a3214e83d8b61b637b0",
         "default": False,
         "role": "Opt-in for 64 GB machines, the default's model at 8-bit",
         "evidence": "reports/2026-09-26-64gb-tier/night-64-5.md#review-2026-09-28",
@@ -177,10 +187,13 @@ def entry(key: str) -> dict:
     if org not in ALLOWED_ORGS:
         raise SystemExit(f"✗ {key} publishes {hf_id}, and {org} is not an allowed org")
     offer = OFFERED[key]
+    if not REVISION.match(offer.get("revision", "")):
+        raise SystemExit(f"\u2717 {key} has no revision pinned as a full 40-character commit SHA")
     return {
         "key": key,
         "name": meta["name"],
         "model": hf_id,
+        "revision": offer["revision"],
         "backend": params.get("MLX_SERVER_TYPE", "mlx-lm"),
         "default": offer["default"],
         "role": offer["role"],
