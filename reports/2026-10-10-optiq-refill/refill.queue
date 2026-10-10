@@ -1,0 +1,17 @@
+# Re-run of the 14 optiq fill passes lost to #186. One pass per step; the launcher feeds them one at a time.
+# Decision: tighter intervals for the optiq small-task verdicts (same as reports/2026-10-10-small-delegate/fill.queue). $0 cloud.
+# part kind classes variant runs rungs timeout expected profile
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
+local ops - - - - 40 25 qwen3.6-35b-a3b-optiq-64g
