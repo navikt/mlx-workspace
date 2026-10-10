@@ -75,3 +75,4 @@ while read -r line; do
   NIGHT_REPORT="$R/refill-results-$i.md" .mise/tasks/ni""ght-run-3 --part local --queue "$L/$N-step.queue" < /dev/null &
   NR=$!; wait "$NR"; say "pass $i exited $?"
 done < <(grep -v '^#' "$R/$Q" | grep .)
+unstray "after the last pass"
