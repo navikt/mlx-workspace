@@ -1,7 +1,7 @@
 ---
 models: ["qwen3.6-35b-a3b-optiq", "qwen3.6-35b-a3b-8bit-64g"]
 headline: "19/20"
-verdict: "inconclusive"
+verdict: "not-yet"
 ---
 
 # create-file retry2 r3–r4 extras, 2026-10-10
