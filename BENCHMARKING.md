@@ -257,6 +257,26 @@ appears in the reply. That mode was unimplemented until 28 August 2026, so R2 ca
 list, `total_seconds`, a `tests` block with `passed`, `exit`, `runner`, `pass_count` and
 `fail_count`, and the files produced.
 
+## Model sources
+
+Every model we download, for a benchmark or for `manifest/models.json`, passes these checks
+before it is used. Record the result in the queue's `plan.md`.
+
+- **Source.** Use the official model organisation or `mlx-community`. If the only MLX build comes
+  from an individual uploader, convert the official base weights with `mlx_lm.convert` instead.
+- **Base model.** The card's `base_model` points to a repo under the real official organisation,
+  and the architecture in `config.json` matches it.
+- **Files.** Only safetensors, JSON, tokenizer and Jinja template files. No `.py`, `.pkl`, `.bin`
+  or `.pt` files, and no `auto_map` or `trust_remote_code` in the configs. The safetensors
+  headers parse.
+- **Chat template.** It matches the base model's template. Read any difference: a template can
+  carry hidden instructions or inject tool calls.
+- **Scan.** The Hugging Face security scan has finished and flags nothing.
+- **Profiles.** No profile sets `trust_remote_code`.
+
+Models that `manifest/models.json` ships get the same checks again whenever their entry
+changes.
+
 ## Model profiles
 
 A profile is `profiles/<key>.toml`: a `[meta]` block, notes, and a `[params]` block of `MLX_*`
