@@ -73,7 +73,7 @@ for key in sys.argv[1:]:
 for hf, keys in sorted(models.items()):
     d = P.hf_cache_dir(hf)
     try:
-        snap = d / "snapshots" / (d / "refs" / "main").read_text().strip()
+        snap = P.snapshot_dir(hf)
         idx = json.loads((snap / "model.safetensors.index.json").read_text())
         shards = set(idx["weight_map"].values())
         missing = sorted(f for f in shards if not (snap / f).exists())

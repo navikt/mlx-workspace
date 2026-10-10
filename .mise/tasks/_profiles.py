@@ -166,6 +166,8 @@ def load(key: str) -> tuple[dict, dict]:
             f"Profile '{key}' has invalid status '{meta.get('status')}'. "
             f"Must be one of: {', '.join(sorted(VALID_STATUS))}"
         )
+    if params.get("MLX_MODEL", "").startswith("~"):  # local conversion, not an HF id
+        params["MLX_MODEL"] = os.path.expanduser(params["MLX_MODEL"])
     return meta, params
 
 
@@ -173,7 +175,17 @@ def hf_cache_dir(hf_id: str) -> Path:
     return HF_HUB / ("models--" + hf_id.replace("/", "--"))
 
 
+def snapshot_dir(model: str) -> Path:
+    """Weights dir: a local path as-is, else the HF cache snapshot at refs/main."""
+    if model.startswith(("/", "~")):
+        return Path(model).expanduser()
+    d = hf_cache_dir(model)
+    return d / "snapshots" / (d / "refs" / "main").read_text().strip()
+
+
 def is_downloaded(hf_id: str) -> bool:
+    if hf_id.startswith(("/", "~")):
+        return any(Path(hf_id).expanduser().glob("*.safetensors"))
     snaps = hf_cache_dir(hf_id) / "snapshots"
     if not snaps.is_dir():
         return False

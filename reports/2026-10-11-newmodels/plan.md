@@ -5,10 +5,17 @@ the owner on 2026-10-11, about 76 GB.
 
 | Profile | Weights | Size |
 |---|---|---|
-| `mellum2.1-12b-a2.5b-thinking-mxfp4` | randmaru/Mellum2.1-12B-A2.5B-Thinking-mlx-mxfp4 | 6.5 GB |
+| `mellum2.1-12b-a2.5b-thinking-mxfp4` | local conversion of JetBrains/Mellum2.1-12B-A2.5B-Thinking (see below) | 6.5 GB |
 | `muse-glimmer-30b-optiq-4bit` | mlx-community/Muse-Glimmer-30B-OptiQ-4bit | 23.9 GB |
 | `nemotron-3.5-lightning-30b-a3b-optiq-4bit` | mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-OptiQ-4bit | 22.8 GB |
 | `gemma-4-26b-a4b-qat-optiq-4bit` | mlx-community/gemma-4-26B-A4B-it-qat-OptiQ-4bit | 21.9 GB |
+
+Mellum has no official or mlx-community MLX build; the only one was a single-person upload. We
+convert the official JetBrains safetensors ourselves (no remote code) with
+`mlx_lm.convert --hf-path JetBrains/Mellum2.1-12B-A2.5B-Thinking -q --q-mode mxfp4`, the same
+quantisation as that upload, into `~/models/mlx/Mellum2.1-12B-A2.5B-Thinking-mxfp4`. The source
+download is 24.3 GB. The profile points `MLX_MODEL` at that local path; `_profiles.py` accepts a
+`~/` or absolute path next to HF ids.
 
 ## Decision this run gates
 
