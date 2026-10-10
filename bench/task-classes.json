@@ -16,6 +16,8 @@
       "reason": "Retired on 25 Sept: asked the model to log the parameters of getOppfolgingstilfeller, which is personIdent (a fødselsnummer), and passed on compile. Its results stay in bench/ as recorded; E3b replaces it with a count and a check that personIdent is not logged."
     },
     "E3b": {"class": "edit-single"},
+    "O1": {"class": "edit-single"},
+    "T1": {"class": "create-file"},
     "fm-r4-a": {"class": "edit-multi-mechanical"},
     "fm-r5-a": {"class": "edit-multi-mechanical"},
     "fm-r6-a": {"class": "edit-multi-mechanical"},

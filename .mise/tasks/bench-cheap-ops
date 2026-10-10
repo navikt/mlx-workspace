@@ -663,6 +663,12 @@ def self_check():
         assert verify(o1)[0] is False, "also changing requests.memory must fail"
         f.write_text(base.replace("512Mi", "768Mi")); (repo / "src" / "a.test.ts").write_text("y\n")
         assert verify(o1)[0] is False, "touching a second file must fail"
+        # The agent's cwd is the directory above the checkout, and glob skips dot
+        # dirs, so a dot-path task must name its file as kotlin/<path> (O1 scored
+        # 0/45 locally on "In .nais/..." because the model never found the file).
+        for t in CFG["tasks"]:
+            if t.get("touches", "").startswith("."):
+                assert "kotlin/" + t["touches"] in t["prompt"], f"{t['id']}: prompt must say kotlin/{t['touches']}"
     print("✓ bench-cheap-ops self-check passed")
 
 
