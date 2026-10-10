@@ -266,13 +266,15 @@ before it is used. Record the result in the queue's `plan.md`.
   from an individual uploader, convert the official base weights with `mlx_lm.convert` instead.
 - **Base model.** The card's `base_model` points to a repo under the real official organisation,
   and the architecture in `config.json` matches it.
-- **Files.** Only safetensors, JSON, tokenizer and Jinja template files. No `.py`, `.pkl`, `.bin`
-  or `.pt` files, and no `auto_map` or `trust_remote_code` in the configs. The safetensors
-  headers parse.
+- **Files.** Besides the card and licence, only safetensors, JSON, tokenizer and Jinja template
+  files. No `.py`, `.pkl`, `.bin` or `.pt` files, and no `auto_map`, `model_file` or
+  `trust_remote_code` in the configs. The safetensors headers parse.
 - **Chat template.** It matches the base model's template. Read any difference: a template can
   carry hidden instructions or inject tool calls.
 - **Scan.** The Hugging Face security scan has finished and flags nothing.
-- **Profiles.** No profile sets `trust_remote_code`.
+- **Profiles.** No profile sets `MLX_TRUST_REMOTE_CODE`. Profiles that predate this rule
+  (`k2-horizon-mova-36b-a4b-4bit`, `occamy-1.0-4bit-64g`, `qwen3.8-27b-8bit*`) stay bench-only and
+  are never offered in `manifest/models.json`.
 
 Models that `manifest/models.json` ships get the same checks again whenever their entry
 changes.
