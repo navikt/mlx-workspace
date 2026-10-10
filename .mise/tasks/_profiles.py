@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Shared helpers for model profile tasks (model-use, model-list, model-status)."""
+import json
 import os
 import sys
 import tomllib
@@ -123,6 +124,8 @@ def served_model_id(params: dict) -> str:
     model = params.get("MLX_MODEL", "")
     if params.get("MLX_SERVER_TYPE", "mlx-lm").strip() == "omlx":
         return model.replace("/", "--")
+    if model.startswith(("/", "~")):  # mlx-lm /v1/models reports the resolved local path
+        return str(Path(model).expanduser().resolve())
     return model
 
 
@@ -166,8 +169,8 @@ def load(key: str) -> tuple[dict, dict]:
             f"Profile '{key}' has invalid status '{meta.get('status')}'. "
             f"Must be one of: {', '.join(sorted(VALID_STATUS))}"
         )
-    if params.get("MLX_MODEL", "").startswith("~"):  # local conversion, not an HF id
-        params["MLX_MODEL"] = os.path.expanduser(params["MLX_MODEL"])
+    # A local conversion stays "~/..." here: params land in public result JSON, so only
+    # server, snapshot_dir() and is_downloaded() expand it.
     return meta, params
 
 
@@ -264,8 +267,13 @@ if __name__ == "__main__":
     assert penalties({v: OPTIONAL_DEFAULTS[v] for _, v, _ in PENALTY_PARAMS}) == {}
     assert penalties({"MLX_REPETITION_PENALTY": "0"}) == {}, "0 and 0.0 are the same value"
     assert penalties({"MLX_REPETITION_PENALTY": "1.05"}) == {"repetition_penalty": 1.05}
+    home = str(Path.home())
     for k in list_keys():
         load(k)
+        # params_for() is what result JSON records (meta.profile_params, served_model).
+        assert home not in json.dumps(params_for(k)), f"{k}: home path would leak into results"
+    assert served_model_id({"MLX_MODEL": "~/m"}) == str(Path.home().resolve() / "m")
+    assert served_model_id({"MLX_MODEL": "org/m"}) == "org/m"
     print(f"✓ penalties() self-check passed, {len(list_keys())} profiles validate")
 
 

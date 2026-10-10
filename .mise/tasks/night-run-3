@@ -179,7 +179,8 @@ want = meta.get("gpu_wired_limit_gb")
 cur = subprocess.run(["/usr/sbin/sysctl", "-n", "iogpu.wired_limit_mb"], capture_output=True, text=True).stdout.strip()
 if want and cur != str(want * 1024):
     print(f"WARN  wired-limit    {sys.argv[1]} declares {want} GB, iogpu.wired_limit_mb={cur or '?'} (mise run vram-set {want})")
-sys.exit(1 if missing or list((d / "blobs").glob("*.incomplete")) else 0)
+local = params["MLX_MODEL"].startswith(("/", "~"))
+sys.exit(1 if missing or (not local and list((d / "blobs").glob("*.incomplete"))) else 0)
 EOF
     # bench-frontier's per-step assert_workspace_is_clean refuses to start on a stray
     # file next to kotlin/ (a model's leftover .git, .git2, ...); catch it here so the
