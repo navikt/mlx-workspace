@@ -1,8 +1,26 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-10T21:37:32Z",
+  "generated_at": "2026-10-10T23:20:30Z",
   "reports": [
+    {
+      "id": "2026-10-11-cf-r3c/report",
+      "title": "create-file retry2 r3, more optiq runs",
+      "date": "2026-10-11",
+      "class": "Agentic task benchmarks",
+      "summary": "Harness 6967c4bae943: optiq r3 17/20 this pass, 36/40 pooled (LB 0.82). Not-yet against the 0.90 bar, missing the 39/40 target. All 4 failures are timeouts at the 420 s cap. Routing stays at r2",
+      "path": "reports/2026-10-11-cf-r3c/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-11-cf-r3c/report.md",
+      "models": [
+        "qwen3.6-35b-a3b-optiq"
+      ],
+      "headline": {
+        "k": 36,
+        "n": 40
+      },
+      "verdict": "not-yet",
+      "justifies": []
+    },
     {
       "id": "2026-10-10-small-delegate/report",
       "title": "Small tasks locally and by delegation on optiq-64g and the 8-bit",
@@ -866,13 +884,6 @@
       "status": "parked (triggers only): needs re-probe 7 (#121)",
       "when": "–",
       "where": "[night-2.md](2026-09-25-quality-frontier/night-2.md), navikt/copilot#1011"
-    },
-    {
-      "item": "**create-file `retry2` against design §7's time rule**",
-      "decides": "Whether retry2 counts as replicated on create-file: 15/20 against 5/20 (p = 0.002), but 2.02× base's median seconds per sample, 2.7× on cf-r1-a where base never passes; per verified result it is cheaper (322 s against 618 s)",
-      "status": "retry2 run landed: r1–r2 trusted on both profiles, but mixed with harness changes ([cf-retry2](2026-10-08-cf-retry2/report.md)); base on the current harness is gap-fill step 2",
-      "when": "queued after 2026-10-10 14:00",
-      "where": "[night-followups-1.md](2026-09-25-quality-frontier/night-followups-1.md) Review §3, #126"
     },
     {
       "item": "**read-qa: an ANSWER-line reminder on top of `example`**",
