@@ -118,7 +118,7 @@
       "id": "O2",
       "kind": "edit",
       "verify": "compile",
-      "prompt": "In .github/workflows/main.yaml, add the permission packages: write to the build-and-deploy job, next to the existing contents and id-token permissions. Change nothing else.",
+      "prompt": "In kotlin/.github/workflows/main.yaml the build-and-deploy job calls the shared navikt build-deploy workflow. Add `packages: write` to its permissions, next to the existing contents and id-token entries, so the shared workflow can push the image. Change nothing else.",
       "touches": ".github/workflows/main.yaml",
       "only": ".github/workflows/main.yaml",
       "_why": "The GitHub workflow half of the config-deploy shape in the navikt PR audit (reports/2026-10-09-navikt-pr-audit); O1 covers the nais.yaml half. expect_diff requires exactly one added line and none removed, so a reordered or reformatted block fails.",
