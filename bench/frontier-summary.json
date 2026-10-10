@@ -865,6 +865,215 @@
    ]
   },
   {
+   "class": "create-file",
+   "model": "k2-horizon-mova-36b-a4b-4bit",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=6967c4bae943 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 5,
+     "median_seconds": 39,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 5,
+     "median_seconds": 22,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 5,
+     "median_seconds": 31,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    },
+    "4": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r4-a",
+      "cf-r4-b"
+     ],
+     "runs": 5,
+     "median_seconds": 48,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": 0.0,
+    "d_bar": null,
+    "beyond": false,
+    "a": -5.996,
+    "b": -0.507
+   },
+   "files": [
+    "frontier-k2-horizon-mova-36b-a4b-4bit-base-20261010-105856.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "k2-horizon-mova-36b-a4b-4bit",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=6967c4bae943 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.63,
+     "p_cloud": 0.7,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r1-a",
+      "fm-r1-b"
+     ],
+     "runs": 5,
+     "median_seconds": 14,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "2": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.81,
+     "p_cloud": 0.9,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r2-a",
+      "fm-r2-b"
+     ],
+     "runs": 5,
+     "median_seconds": 13,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    },
+    "3": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r3-a",
+      "fm-r3-b"
+     ],
+     "runs": 5,
+     "median_seconds": 18,
+     "median_cost_usd": 0.0,
+     "d": [
+      6
+     ]
+    },
+    "4": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r4-a",
+      "fm-r4-b"
+     ],
+     "runs": 5,
+     "median_seconds": 24,
+     "median_cost_usd": 0.0,
+     "d": [
+      12,
+      13
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": 0.0,
+    "d_bar": null,
+    "beyond": false,
+    "a": -5.055,
+    "b": -0.828
+   },
+   "files": [
+    "frontier-k2-horizon-mova-36b-a4b-4bit-base-20261010-120918.json"
+   ]
+  },
+  {
    "class": "edit-multi-mechanical",
    "model": "laguna-xs-2.1-8bit-64g",
    "variant": "base",
