@@ -1,5 +1,5 @@
 [tools]
-python = "latest"
+python = "3.12"   # pinned: "latest" moved to 3.13 and a rerun of setup rebuilt .venv mid-benchmark
 pipx = "latest"
 
 [settings]
