@@ -77,7 +77,7 @@ while read -r pass; do
   env "${envs[@]}" FRONTIER_MODEL="$m" NIGHT_REPORT="$R/$N-results-$i.md" .mise/tasks/ni""ght-run-3 --part all --queue "$L/$N-step.queue" < /dev/null &
   NR=$!; wait "$NR"; rc=$?; say "pass $i exited $rc"
   # the run task exits 0 even when a step FAILs (preflight included): check its step lines too
-  if [ "$rc" -ne 0 ] || tail -n 60 "$L/$N.log" | grep -qE '^[0-9:]+ +(FAIL|SKIP)'; then
+  if [ "$rc" -ne 0 ] || tail -n 60 "$L/$N.log" | grep -qE '^[0-9:]+ +(FAIL|SKIP|TIMEOUT|UNREACHABLE)'; then
     say "pass $i failed; stopping, no done marker"; exit 1
   fi
   sleep 60   # cf-r34 pass 3 hit its gradle preflight 0 s after pass 2 ended
