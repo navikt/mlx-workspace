@@ -1,0 +1,19 @@
+# oq: open questions on ki-utvikling.nav.no, group B + re-probe 7 (plan.md). Run by oq-launcher.
+# Hybrid lines run as ONE night-run-3 pass so they share one ledger: FRONTIER_COST_CAP=50 is a hard
+# cap over all of them. Local lines run one pass each. Order = value to the site.
+#
+# 1. Re-probe 7, edit-single dispatch (#121, #1011, #1010): nav-pilot-main-b998fab (release
+#    2026.10.11-201029), local_dispatch = "balanced", Sonnet 5, worker optiq-64g, bench-only overlay
+#    capabilities-bench-only-64-6c.json. Rung 2 = E1, rung 8 = O1 (bench-hybrid RUNGS). Control first.
+# part   kind   target arm     samples rung timeout expected profile
+hybrid  hybrid tasks  control 3       2    30      8        qwen3.6-35b-a3b-optiq-64g
+hybrid  hybrid tasks  hybrid  15      2    150     45       qwen3.6-35b-a3b-optiq-64g
+hybrid  hybrid tasks  control 3       8    30      8        qwen3.6-35b-a3b-optiq-64g
+hybrid  hybrid tasks  hybrid  15      8    150     45       qwen3.6-35b-a3b-optiq-64g
+#
+# 2. create-file r3 with the 420 s cap lifted (cf-r3c: all 4 failures were timeouts). 2 tasks x 18.
+# part kind     classes               variant       runs rungs timeout-min expected-min profile
+local  base     create-file           retry2+cap900 18   3     420         190          qwen3.6-35b-a3b-optiq
+#
+# 3. edit-multi 3-8 call sites (rungs 2-3, 9/10 each today): 3 tasks x 5 = +15 a rung.
+local  base     edit-multi-mechanical base          5    2-3   200         80           qwen3.6-35b-a3b-optiq
