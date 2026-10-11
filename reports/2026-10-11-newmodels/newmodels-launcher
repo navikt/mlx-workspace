@@ -15,7 +15,7 @@
 #   - done marker only if every probe ran and every pass passed. A failed pass stops the launcher.
 # Gives up after 72 h. Stop it: kill <pid on the first log line>.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=~/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
 N=newmodels

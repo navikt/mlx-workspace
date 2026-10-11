@@ -12,7 +12,7 @@
 # all stop the chain with a line in the log, and night-run-2 does not start.
 set -uo pipefail
 NIGHT_PID="${1:?usage: night-chain <night-run pid>}"
-WS="${NIGHT_CHAIN_WS:-/Users/hans/mlx-workspace}"
+WS="${NIGHT_CHAIN_WS:-$HOME/mlx-workspace}"
 LOG="$WS/.bench-logs/night-chain.log"
 POLL="${NIGHT_CHAIN_POLL:-60}"
 WAIT_PR="${NIGHT_CHAIN_WAIT_PR:-10800}"

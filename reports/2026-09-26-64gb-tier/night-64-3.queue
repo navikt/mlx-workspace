@@ -6,7 +6,7 @@
 # dispatch on tasks:3 in the pilot (0 of 2). Resolve both before this queue runs.
 # Before: mise run vram-set 48 (every profile here declares 48).
 # Run (the cap covers every sample, invalid ones included; the cloud probes, ~$0.05 each, ~$0.70 a night, are outside it):
-#   FRONTIER_COST_CAP=35 BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6 \
+#   FRONTIER_COST_CAP=35 BENCH_NAV_PILOT=~/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6 \
 #     mise run night-run-3 -- --part hybrid --queue reports/2026-09-26-64gb-tier/night-64-3.queue
 #
 # Files are tagged np-dd859ac6-sonnet5; bench-hybrid adds the worker profile to each hybrid

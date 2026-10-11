@@ -13,7 +13,7 @@ No label comes from a model. Each one is fixed by how the case was built, or by 
 check, and `python3 bench/decide-limits/build.py --check` recomputes all of them from the case text.
 It needs nothing but this directory. `build.py` with no arguments rebuilds the files. It reads
 navikt/copilot at `d24a65e5` and mlx-workspace at `6306154`, both pinned, and reads
-`/Users/hans/mlx-workspace/.bench-logs` without writing to it. The seed is fixed, so a rebuild
+`~/mlx-workspace/.bench-logs` without writing to it. The seed is fixed, so a rebuild
 gives the same bytes.
 
 Every case fits under the 32 KiB evidence cap, so nav-pilot truncates nothing. The largest is

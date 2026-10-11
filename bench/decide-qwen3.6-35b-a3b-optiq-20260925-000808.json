@@ -1,7 +1,7 @@
 {
   "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
   "port": 62680,
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
   "nav_pilot_commit": "d24a65e5fd81c3347e7325722354c998d7499f08",
   "profile": "qwen3.6-35b-a3b-optiq",
   "started": "2026-09-25T00:08:13+0200",

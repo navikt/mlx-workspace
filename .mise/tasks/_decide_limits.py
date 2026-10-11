@@ -277,7 +277,7 @@ def run_all(keys, stamp):
 
 
 def newest_binary():
-    for d in (ROOT / ".bench-logs" / "bin", Path("/Users/hans/mlx-workspace/.bench-logs/bin")):
+    for d in (ROOT / ".bench-logs" / "bin", Path.home() / "mlx-workspace/.bench-logs/bin"):
         bins = sorted(d.glob("nav-pilot-main-*"), key=lambda p: p.stat().st_mtime)
         if bins:
             return str(bins[-1])

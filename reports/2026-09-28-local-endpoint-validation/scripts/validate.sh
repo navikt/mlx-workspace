@@ -6,10 +6,10 @@
 set -u
 S=/private/tmp/claude-501/-Users-hans-mlx-workspace/f869846d-5571-4e13-94f1-74f86278bb0b/scratchpad
 V=$S/val; OUT=$V/out; NPS=$S/nps; SH=$S/np-home
-WS=/Users/hans/mlx-workspace; LOCK=$WS/.bench-logs/.queue.lock; DONE=$WS/.bench-logs/endpoint-validation.done
-GGUF=$(ls /Users/hans/.cache/huggingface/hub/models--unsloth--Qwen3.6-35B-A3B-GGUF/snapshots/*/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf)
+WS=~/mlx-workspace; LOCK=$WS/.bench-logs/.queue.lock; DONE=$WS/.bench-logs/endpoint-validation.done
+GGUF=$(ls ~/.cache/huggingface/hub/models--unsloth--Qwen3.6-35B-A3B-GGUF/snapshots/*/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf)
 MLX_MODEL=mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit
-export PATH="$PATH:/Users/hans/.local/share/mise/installs/go/1.26.8/bin"
+export PATH="$PATH:~/.local/share/mise/installs/go/1.26.8/bin"
 export NO_COLOR=1
 mkdir -p "$OUT"
 
@@ -77,7 +77,7 @@ log "=== queue free; lock held by pid $$"
 log "power: $(pmset -g batt | head -1)"
 log "network: en0 $(/usr/sbin/ipconfig getifaddr en0 2>/dev/null)"
 log "wired limit: $(/usr/sbin/sysctl -n iogpu.wired_limit_mb) MB"
-log "nav-pilot: $(go version -m /Users/hans/tmp/nav-pilot-local-endpoint | grep -E 'vcs.revision|vcs.modified' | tr -s ' \t' ' ')"
+log "nav-pilot: $(go version -m ~/tmp/nav-pilot-local-endpoint | grep -E 'vcs.revision|vcs.modified' | tr -s ' \t' ' ')"
 log "ollama $(ollama --version 2>&1 | tail -1); llama-server $(llama-server --version 2>&1 | head -1); mlx_lm $("$WS/.venv/bin/python" -c 'import mlx_lm; print(mlx_lm.__version__)')"
 
 rm -rf "$SH"; mkdir -p "$SH"

@@ -1,9 +1,9 @@
 {
   "profile": "qwen3.8-27b-4bit",
   "model": "mlx-community/Qwen3.8-27B-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
   "nav_pilot_commit": "e72319e0",
-  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-4bit --host 127.0.0.1 --port 56715 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
+  "server_argv": "~/.nav-pilot/local/venv/bin/python ~/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-4bit --host 127.0.0.1 --port 56715 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
   "mlx_lm": [
     "0.31.3"
   ],

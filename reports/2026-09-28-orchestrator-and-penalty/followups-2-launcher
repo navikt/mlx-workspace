@@ -12,8 +12,8 @@
 #   cp reports/2026-09-28-orchestrator-and-penalty/followups-2-launcher ~/tmp/fu2-launcher \
 #     && nohup bash ~/tmp/fu2-launcher >> .bench-logs/followups-2-launcher.log 2>&1 &
 set -u
-cd /Users/hans/mlx-workspace || exit 1
-BIN=/Users/hans/mlx-workspace/.bench-logs/bin
+cd ~/mlx-workspace || exit 1
+BIN=~/mlx-workspace/.bench-logs/bin
 R=reports/2026-09-28-orchestrator-and-penalty
 CAP="${SOL_CAP:-14.75}"
 SOL=gpt-6-sol

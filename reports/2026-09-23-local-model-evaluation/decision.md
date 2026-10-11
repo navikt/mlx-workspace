@@ -139,7 +139,7 @@ untracked profiles are settled by the [profile audit](profile-audit.md):
 
 - `feat/local-system-one-loop-guard` (e72319e0): local only, superseded by #933. The main checkout `~/go/src/github.com/navikt/copilot` is **on** this branch; switch it to `main` before deleting the branch.
 - The 2026-09-23 copilot worktrees, all PRs now merged, so they can go: `copilot-deadthread` (#931), `copilot-instrdirs` (#932), `copilot-loopguard` (#933), `copilot-e2e` (`test/e2e-combined`, local only; it built `.bench-logs/bin/nav-pilot-combined-915e27c6`).
-- `/Users/hans/mlx-workspace-hotfix`: worktree for #20's branch, clean. Remove after #20 merges.
+- `~/mlx-workspace-hotfix`: worktree for #20's branch, clean. Remove after #20 merges.
 - 39 other `~/go/src/github.com/navikt/copilot-*` worktrees predate today and were not reviewed here.
 - `~/.copilot/session-state` (#10): `a4734d79…/files/{copilot-worktree,cplt-worktree}` and `fbe281f6…/files/{article,benchmark,models}-worktree`.
 
@@ -235,7 +235,7 @@ poll from a loop. #933 uses the result.
 rtk, from events in `~/.copilot/session-state/958221ad-…/events.jsonl` (the first poll session):
 the model issued `rtk grep`/`rtk find` because `copilot-instructions.md` tells it to. Inside the
 repo, rtk **ran** (exit 0), but it reduced the output to `... (51 filtered) [+51 hidden: rtk recall …]`,
-so the model never saw the file list and repeated the call. The later calls on `/Users/hans` were
+so the model never saw the file list and repeated the call. The later calls on `~ were
 denied by Copilot's permission layer, and the plain `find` was denied just the same. The
 denial is about the path, not about rtk. The four identical denied `rtk find` calls tripped #933,
 correctly.

@@ -1,7 +1,7 @@
 {
   "key": "qwen3.6-35b-a3b-8bit-64g",
   "model": "mlx-community/Qwen3.6-35B-A3B-8bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-7236795f",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-7236795f",
   "sets": [
     "issue-type",
     "aksel-kind",

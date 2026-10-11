@@ -13,7 +13,7 @@
 # No command line run while it waits carries "bench-", "night", "np-serve" or "dispatch-probe".
 # Stop it: kill <pid on the first log line>.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=~/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
 N=small-tasks

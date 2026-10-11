@@ -228,7 +228,7 @@ binary are the ones that start nav-pilot's own server for Occamy: an `e2e` step 
 64-1 retry), the hybrid arm with Occamy as worker (64-3), and np-e2e full and the decide sets
 for Occamy (64-4). Cheap-ops and the local frontier arm (64-2) run on the workspace server and
 do not depend on it. From 64-2 on, the launchers set
-`BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6`.
+`BENCH_NAV_PILOT=~/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6`.
 
 **The 64 GB workers' dispatch policy is not optiq's.** nav-pilot writes the orchestrator's
 dispatch policy from the worker's manifest entry (navikt/copilot#941). A model with no entry used

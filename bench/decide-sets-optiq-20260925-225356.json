@@ -1,7 +1,7 @@
 {
   "key": "optiq",
   "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
   "sets": [
     "issue-type",
     "aksel-kind",

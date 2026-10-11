@@ -23,11 +23,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 DECIDE_CASES = ROOT / "bench" / "decide-cases"
-COPILOT = Path(os.environ.get("COPILOT_REPO", "/Users/hans/go/src/github.com/navikt/copilot"))
+COPILOT = Path(os.environ.get("COPILOT_REPO", "~/go/src/github.com/navikt/copilot"))
 # Pinned so a rebuild picks the same commits: navikt/copilot and mlx-workspace main on 2026-09-24.
 COPILOT_REF = "d24a65e5fd81c3347e7325722354c998d7499f08"
 MLXWS_REF = "6306154c4315e44c44d9bebba89db5eb781f992d"
-BENCH_LOGS = Path(os.environ.get("BENCH_LOGS", "/Users/hans/mlx-workspace/.bench-logs"))
+BENCH_LOGS = Path(os.environ.get("BENCH_LOGS", "~/mlx-workspace/.bench-logs"))
 LOGS_BEFORE = 1790287200   # 2026-09-24 22:00 UTC: only logs finished by then, so later runs do not change the pick
 CAP = 32 << 10          # alpha_decide.go decideEvidenceCap; every case stays under it, so nothing is truncated
 DIFF_MAX = 6000         # chars; commits are picked at or under it, so the diff is whole
@@ -349,7 +349,7 @@ def loopnear_sets(rng):
                 e += rng.randint(1, 2)               # one or two new lines per read: a small change
             bodies = ["\n".join(lines[start:start + e]) for e in ends]
         job = f"job-{rng.randrange(1000, 9999)}"
-        path = f"/Users/hans/mlx-workspace/workspaces/jobs/{job}.log"
+        path = f"~/mlx-workspace/workspaces/jobs/{job}.log"
         if noise == "counter":
             args = json.dumps({"command": f"cat {path}"})
             s0 = rng.randint(3, 40)

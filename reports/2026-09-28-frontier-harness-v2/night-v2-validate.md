@@ -127,7 +127,7 @@ This section covers the five result files, checked against the queue's criteria 
 - 29 `./gradlew` invocations ran in the sessions. 12 printed BUILD SUCCESSFUL, and 8 show the JDK 21 runtime (`java.base@21.0.12.1`) in their stack traces.
 - The 15 BUILD FAILED are the model's own code: 9 are failing tests and 6 are `compileTestKotlin` errors (`e:` lines in the new test files). Of the 2 that printed neither, one is failing tests, and one is a `-q run` whose cause `head` cut off. None shows a toolchain error.
 - No transcript mentions JDK 27.
-- The only "Operation not permitted" lines (2, in one session) are the sandbox refusing `ls /Users/hans/` and `ls` of the repo root. That is the confinement working, not mise walking up.
+- The only "Operation not permitted" lines (2, in one session) are the sandbox refusing `ls ~/` and `ls` of the repo root. That is the confinement working, not mise walking up.
 
 **#107, daemon pile-up: fixed.** Samples record `daemons_stopped`: 11 on create-file and 1 on debug, the classes that build. After the night, no sandboxed Gradle or Kotlin daemon was running. Two daemons were left from 07:49, a Gradle daemon and its Kotlin daemon, with no cplt tmpdir. They are the verifier's, which v2 leaves alone by design, and they were stopped by hand after the night.
 

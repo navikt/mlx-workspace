@@ -1,9 +1,9 @@
 {
   "profile": "qwen3.8-27b-8bit-nopin-c32k",
   "model": "mlx-community/Qwen3.8-27B-8bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-f1507caa",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-f1507caa",
   "nav_pilot_commit": null,
-  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: pid %d: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (os.getpid(), a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 64202 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 2415919104 --chat-template-args {\"enable_thinking\": false}",
+  "server_argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: pid %d: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (os.getpid(), a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 64202 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 2415919104 --chat-template-args {\"enable_thinking\": false}",
   "mlx_lm": [
     "0.31.3"
   ],

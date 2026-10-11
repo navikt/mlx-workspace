@@ -31,7 +31,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "c1b8a6df41acaf383ce54f84591a6e3c7a2ccc98e9433bfdeea867cd083bdb0a",
         "bytes": 2039,
         "send": "Send it nothing for now: no kind of task has yet passed the measurements for this model, so do the work yourself."
@@ -65,7 +65,7 @@
       "invalid_reason": "local_dispatch = aggressive but the gate was not armed: the manifest trusts no class it has a rule for",
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 2039
         }
       ],
@@ -97,13 +97,13 @@
       "local_profile": "qwen3.6-35b-a3b-8bit-64g",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
       "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
-      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
       "nav_pilot_auto_update": false,
-      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-112951.config.toml",
+      "nav_pilot_config": "~/mlx-workspace/.bench-logs/np-serve-20260929-112951.config.toml",
       "tag": "np-2bcca023-sonnet5-aggressive",
       "opencode_version": "1.18.33",
       "cloud_model": "claude-sonnet-5",
-      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-112951.models.json",
+      "bench_manifest": "~/mlx-workspace/.bench-logs/np-serve-20260929-112951.models.json",
       "bench_capabilities_override": null,
       "np_config_line": "local_dispatch = \"aggressive\"",
       "load_average": 6.92,

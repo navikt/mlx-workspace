@@ -11,7 +11,7 @@
 #     to .bench-logs/ (#186), so it costs one pass, not the rest.
 # Gives up after 72 h. Stop it: kill <pid on the first log line>.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=~/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
 N=8bit-refill

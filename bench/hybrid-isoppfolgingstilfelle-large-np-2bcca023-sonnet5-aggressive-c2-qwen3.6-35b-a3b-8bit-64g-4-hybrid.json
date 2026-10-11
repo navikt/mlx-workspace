@@ -31,7 +31,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
         "bytes": 3969,
         "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -65,7 +65,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3969
         }
       ],
@@ -266,7 +266,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
         "bytes": 3969,
         "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -300,7 +300,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3969
         }
       ],
@@ -452,7 +452,7 @@
           {
             "tool": "bash",
             "outcome": "deny_scripted",
-            "target": "cd /Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large && for f in $(grep -rl \"configuredJacksonMapper(\" . --include=\"*.kt\"); do\n  bas"
+            "target": "cd ~/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large && for f in $(grep -rl \"configuredJacksonMapper(\" . --include=\"*.kt\"); do\n  bas"
           }
         ],
         "orchestrator_files": [
@@ -507,7 +507,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
         "bytes": 3969,
         "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -541,7 +541,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3969
         }
       ],
@@ -583,12 +583,12 @@
           {
             "tool": "edit",
             "outcome": "deny_files",
-            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
+            "target": "~/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/test/kotlin/testhelper/InMemoryValkeyStore.kt"
           },
           {
             "tool": "edit",
             "outcome": "deny_files",
-            "target": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
+            "target": "~/mlx-workspace/workspaces/hybrid-bench/isoppfolgingstilfelle-large/src/main/kotlin/no/nav/syfo/api/cache/ValkeyStore.kt"
           }
         ],
         "orchestrator_files": [
@@ -643,7 +643,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "f814d19d7c38780983404d64deb8951ee5e245ed462f4ecd20f425d81d903bb2",
         "bytes": 3969,
         "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -677,7 +677,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3969
         }
       ],
@@ -855,13 +855,13 @@
       "local_profile": "qwen3.6-35b-a3b-8bit-64g",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-8bit",
       "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
-      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
       "nav_pilot_auto_update": false,
-      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-014321.config.toml",
+      "nav_pilot_config": "~/mlx-workspace/.bench-logs/np-serve-20261001-014321.config.toml",
       "tag": "np-2bcca023-sonnet5-aggressive-c2",
       "opencode_version": "1.18.33",
       "cloud_model": "claude-sonnet-5",
-      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261001-014321.models.json",
+      "bench_manifest": "~/mlx-workspace/.bench-logs/np-serve-20261001-014321.models.json",
       "bench_capabilities_override": {
         "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
         "classes": {

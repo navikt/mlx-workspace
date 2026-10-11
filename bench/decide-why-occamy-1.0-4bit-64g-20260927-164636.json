@@ -1,7 +1,7 @@
 {
   "key": "occamy-1.0-4bit-64g",
   "model": "Accio-Lab/occamy-1.0-MLX-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-7236795f",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-7236795f",
   "nav_pilot_commit": "7236795f04e9984fc080a89ea6b92e7407a5d03f",
   "started": "2026-09-27T16:46:39+0200",
   "cases": [

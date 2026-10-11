@@ -1,7 +1,7 @@
 {
   "key": "qwen3.8-27b-optiq-4bit",
   "model": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-layout-9953dcc2",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-layout-9953dcc2",
   "nav_pilot_commit": "9953dcc2",
   "started": "2026-09-26T10:16:33+0200",
   "cases": [

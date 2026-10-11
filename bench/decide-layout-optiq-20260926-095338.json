@@ -1,7 +1,7 @@
 {
   "key": "optiq",
   "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-layout-9953dcc2",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-layout-9953dcc2",
   "nav_pilot_commit": "9953dcc2",
   "started": "2026-09-26T09:53:43+0200",
   "cases": [
