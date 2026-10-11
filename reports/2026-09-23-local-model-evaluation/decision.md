@@ -235,7 +235,7 @@ poll from a loop. #933 uses the result.
 rtk, from events in `~/.copilot/session-state/958221ad-…/events.jsonl` (the first poll session):
 the model issued `rtk grep`/`rtk find` because `copilot-instructions.md` tells it to. Inside the
 repo, rtk **ran** (exit 0), but it reduced the output to `... (51 filtered) [+51 hidden: rtk recall …]`,
-so the model never saw the file list and repeated the call. The later calls on `~ were
+so the model never saw the file list and repeated the call. The later calls on `~` were
 denied by Copilot's permission layer, and the plain `find` was denied just the same. The
 denial is about the path, not about rtk. The four identical denied `rtk find` calls tripped #933,
 correctly.
