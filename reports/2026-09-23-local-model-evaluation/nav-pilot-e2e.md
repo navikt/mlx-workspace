@@ -44,7 +44,7 @@ What was wrong the first time:
 
 - **Wrong cwd.** cplt uses the git root as the project dir, and Copilot runs there. For the
   sessions that was `~/mlx-workspace`, not the session's work dir. The poll session
-  never found `./poll.sh`. It went looking under `~ then ran `rtk find ...` 4 times on
+  never found `./poll.sh`. It went looking under `~`, then ran `rtk find ...` 4 times on
   paths outside the repo. Copilot's permission layer denied those calls because of the path, not
   because of rtk (a plain `find` there was denied too; inside the repo rtk ran but collapsed its
   output to "N filtered", see [decision.md §3.6](decision.md#36-combined-e2e-931--932--933--20-manifest)), and #933's same-result rule stopped it correctly (evidence:
