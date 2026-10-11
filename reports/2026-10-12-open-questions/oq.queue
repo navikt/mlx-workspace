@@ -4,7 +4,8 @@
 #
 # 0. O1 (config-deploy, edit-single) on the 8-bit, fixed harness (#189), blocks manifest PR #215.
 #    small-delegate settings: one bench-models cheap-ops pass a line on qwen3.6-35b-a3b-8bit-64g.
-#    fixed-small has 14/14; 16 more passes bring O1 to n = 30, as E1/E3b in the 59/60.
+#    New harness generation (7a11c4a406ce): pools with neither fixed-small 14/14 nor the 59/60.
+#    Verdict from these 16 passes alone: O1 16/16 and edit-single >= 46/48 (one-sided 90 % Wilson).
 # part kind classes variant runs rungs timeout-min expected-min profile
 local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
 local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
