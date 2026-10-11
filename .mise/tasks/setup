@@ -22,7 +22,9 @@ root = Path(__file__).resolve().parents[2]
 OMLX_REPO = "https://github.com/jundot/omlx.git"
 CACHE_DIR = Path.home() / ".cache" / "mlx-workspace"
 OMLX_SRC = CACHE_DIR / "omlx"
-OMLX_STAMP = CACHE_DIR / "omlx.installed"
+# The stamp lives inside .venv: a rebuilt venv has no oMLX, so it must not
+# inherit the previous venv's "already installed" record.
+OMLX_STAMP = root / ".venv" / "omlx.installed"
 FORCE = "--force" in sys.argv
 
 
