@@ -1,8 +1,29 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-10T23:20:30Z",
+  "generated_at": "2026-10-11T20:11:05Z",
   "reports": [
+    {
+      "id": "2026-10-11-newmodels/report",
+      "title": "Four new models on the quality frontier",
+      "date": "2026-10-11",
+      "class": "Agentic task benchmarks",
+      "summary": "Harness 855cba4e0fd0: 92/155 verified. Mellum fail (3/35, stopped), Muse-Glimmer none (failed the tool-call probe), Nemotron mixed (fm trusted to r2, cf r4 2/10), Gemma not-yet (fm cut short by a server crash; rerun pending). Routing unchanged",
+      "path": "reports/2026-10-11-newmodels/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-11-newmodels/report.md",
+      "models": [
+        "mellum2.1-12b-a2.5b-thinking-mxfp4",
+        "muse-glimmer-30b-optiq-4bit",
+        "nemotron-3.5-lightning-30b-a3b-optiq-4bit",
+        "gemma-4-26b-a4b-qat-optiq-4bit"
+      ],
+      "headline": {
+        "k": 92,
+        "n": 155
+      },
+      "verdict": "not-yet",
+      "justifies": []
+    },
     {
       "id": "2026-10-11-cf-r3c/report",
       "title": "create-file retry2 r3, more optiq runs",
