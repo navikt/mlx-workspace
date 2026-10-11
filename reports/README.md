@@ -48,6 +48,7 @@ frontier. What each one measures is in [`../bench/specs/`](../bench/specs/).
 
 | Report | Date | Summary |
 |---|---|---|
+| [Four new models on the quality frontier](2026-10-11-newmodels/report.md) | 2026-10-11 | Harness 855cba4e0fd0: 92/155 verified. Mellum fail (3/35, stopped), Muse-Glimmer none (failed the tool-call probe), Nemotron mixed (fm trusted to r2, cf r4 2/10), Gemma not-yet (fm cut short by a server crash; rerun pending). Routing unchanged |
 | [create-file retry2 r3, more optiq runs](2026-10-11-cf-r3c/report.md) | 2026-10-11 | Harness 6967c4bae943: optiq r3 17/20 this pass, 36/40 pooled (LB 0.82). Not-yet against the 0.90 bar, missing the 39/40 target. All 4 failures are timeouts at the 420 s cap. Routing stays at r2 |
 | [Small tasks locally and by delegation on optiq-64g and the 8-bit](2026-10-10-small-delegate/report.md) | 2026-10-10 | Both profiles do single edits, doc comments and test-only work locally (E1, E3b and T1 at 80 % or higher); the 8-bit is more consistent (edit-single 59/60). Config-deploy (O1) 0/45 cannot be judged until O1 is fixed. Delegation passes as often as the control at 1.3–1.5× the cloud cost; the orchestrator never hands over one-line edits (0/32) |
 | [create-file base vs retry2 on the same harness](2026-10-10-gap-fill/report.md) | 2026-10-10 | Base optiq create-file 26/40 (trusted only at r1) against retry2's 37/40 on a harness that matches for create-file: retry2 does the work, so #1156 stays and the manifest is unchanged |
