@@ -134,11 +134,12 @@
         },
         "edit-single": {
           "delegate": "cloud",
-          "local": "not-yet",
+          "local": "trusted",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 4,
-          "local_n": 4
+          "local_k": 92,
+          "local_n": 96,
+          "local_source": "reports/2026-10-12-open-questions/oq3a-results.md"
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
