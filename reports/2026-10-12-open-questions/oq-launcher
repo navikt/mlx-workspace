@@ -64,9 +64,9 @@ trap 'mise run server-stop >/dev/null 2>&1 < /dev/null; rm -f "$PIDF" "$L/$N-ste
 trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "${NR:-}"; exit 130' INT TERM
 say "running: checkout at $(git rev-parse --short HEAD); cloud cap \$$FRONTIER_COST_CAP (hybrid pass only)"
 i=0
-# Pass list: all hybrid lines as one pass (one ledger), then each local line, in queue order.
-passes() { local h; h=$(grep -v '^#' "$QF" | awk '$1 == "hybrid"'); [ -n "$h" ] && echo "$h" | paste -sd '|' -
-  grep -v '^#' "$QF" | awk 'NF && $1 != "hybrid"'; }
+# Queue order, except that consecutive hybrid lines join into one pass.
+passes() { grep -v '^#' "$QF" | awk 'NF { if ($1 == "hybrid") { h = h (h ? "|" : "") $0; next }
+  if (h) { print h; h = "" } print } END { if (h) print h }'; }
 while read -r pass; do
   i=$((i + 1))
   unstray "before pass $i"   # #186: a sample wrote outside its task directory

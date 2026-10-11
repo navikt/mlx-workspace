@@ -9,14 +9,15 @@ n1012 launcher, so it starts at about 01:35.
 
 | # | Run | GPU h | Site claim it answers | Decision it gates |
 |---|---|---|---|---|
+| 0 | **O1 (config-deploy) on the 8-bit, fixed harness.** 16 `local ops` passes (one `bench-models` cheap-ops pass each) on `qwen3.6-35b-a3b-8bit-64g`, the small-delegate settings. With fixed-small's 14/14 that makes O1 n = 30, like E1 and E3b. Owner-added, first because it blocks manifest PR #215. | ~8 | /innsikt/lokale-modeller: edit-single on the 8-bit, «Ikke godkjent ennå» | The 8-bit's local edit-single verdict with O1 counted (59/60 without it), so manifest PR #215 can go ahead or wait |
 | 1 | **Re-probe 7, edit-single dispatch.** `hybrid` target `tasks`, rungs 2 (E1) and 8 (O1); per rung control n = 3, then hybrid n = 15. Worker `qwen3.6-35b-a3b-optiq-64g`, orchestrator Sonnet 5, nav-pilot release `2026.10.11-201029-b998fab`, `local_dispatch = "balanced"`, bench-only overlay `capabilities-bench-only-64-6c.json`. One ledger, `FRONTIER_COST_CAP=50` (expected $10–20 at probe 7's ~$0.30 a sample). | ~1.8 | /nav-pilot/forklaring/lokal-modell and /innsikt/lokale-modeller: «Endre én fil: Ikke godkjent ennå»; delegate n = 0 for edit-single | #1011 (`retry2` default, needs re-probe 7), #121, the delegate verdict for edit-single. 15/15 dispatched passes on two tasks reach the 0.90 lower bound; one failed dispatched sample, or a pooled cost ratio above 1× (#166), keeps it `not-yet` or `cloud` |
 | 2 | **create-file r3, cap lifted.** `local base create-file retry2+cap900`, rung 3, runs 18 (2 tasks, n = 36), optiq. | ~3.2 | /innsikt/lokale-modeller: «dit er det ikke ennå», r3 LB 0.90 (cf-r3c: 36/40, all 4 failures 420 s timeouts) | Routing to r3. It is a new condition, so it pools alone: 35/36 gives LB ≈ 0.86, 36/36 gives 0.90. 36/36 → propose r3 at cap 900; timeouts again → the cap is not the gap, r2 stays |
 | 3 | **edit-multi at 3–8 call sites.** `local base edit-multi-mechanical base`, rungs 2–3, runs 5 (3 tasks a rung, +15 a rung), optiq. | ~1.3 | «Det samme i 3–8 kall: Ikke avgjort» (9/10 at 3–4 and at 5–8) | The local verdict for emm rungs 2–3. It pools with the earlier base runs only if `harness_sha` is unchanged; if not, it reports as its own condition (25/25 needed for LB 0.90 on its own is out of reach at n = 15, so it then says only whether the 9/10 holds) |
 
-Total about 6.3 GPU hours (night-run-3's own estimate: ~6 h 16 min, worst case 16 h 20 min). Expected
-end about 08:00 on 12 October, worst case early evening. Cloud: re-probe 7 only, hard cap $50.
+Total about 14 GPU hours: ~8 h for O1 (16 passes at ~30 min), plus ~6.3 h for the rest (night-run-3's estimate). Expected
+end about 16:00 on 12 October, worst case the night after. Cloud: re-probe 7 only, hard cap $50.
 
-The hybrid lines run as one pass, so one ledger caps all of them. A step that fails or skips (also a
+Passes run in queue order. Consecutive hybrid lines run as one pass, so one ledger caps all of them. A step that fails or skips (also a
 skipped hybrid step when the cloud is down) stops the launcher without the done marker.
 
 ## Answered without a run

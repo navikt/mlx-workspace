@@ -2,6 +2,27 @@
 # Hybrid lines run as ONE night-run-3 pass so they share one ledger: FRONTIER_COST_CAP=50 is a hard
 # cap over all of them. Local lines run one pass each. Order = value to the site.
 #
+# 0. O1 (config-deploy, edit-single) on the 8-bit, fixed harness (#189), blocks manifest PR #215.
+#    small-delegate settings: one bench-models cheap-ops pass a line on qwen3.6-35b-a3b-8bit-64g.
+#    fixed-small has 14/14; 16 more passes bring O1 to n = 30, as E1/E3b in the 59/60.
+# part kind classes variant runs rungs timeout-min expected-min profile
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+local ops - - - - 50 30 qwen3.6-35b-a3b-8bit-64g
+#
 # 1. Re-probe 7, edit-single dispatch (#121, #1011, #1010): nav-pilot-main-b998fab (release
 #    2026.10.11-201029), local_dispatch = "balanced", Sonnet 5, worker optiq-64g, bench-only overlay
 #    capabilities-bench-only-64-6c.json. Rung 2 = E1, rung 8 = O1 (bench-hybrid RUNGS). Control first.
