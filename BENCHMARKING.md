@@ -279,6 +279,20 @@ before it is used. Record the result in the queue's `plan.md`.
 Models that `manifest/models.json` ships get the same checks again whenever their entry
 changes.
 
+### Finding candidates
+
+Public leaderboards are a source of ideas, not evidence. Artificial Analysis
+(<https://artificialanalysis.ai/>) and front ends built on its data, such as
+<https://slopalytics.com/>, rank models by a general intelligence index, price, speed and
+thinking-token volume. Use them to shortlist open-weight models that may fit 64 GB: a high index,
+few active parameters, a small quantised size. Heavy thinking-token use hints at the 420 s
+timeout risk.
+
+Their scores never replace our own runs. They measure hosted, full-precision models on general
+tasks; we measure 4-bit MLX builds on our agentic Kotlin tasks, where the quantisation and the
+server's tool-call parser decide the result. A candidate still passes the source checks above
+and the tool-call probe before it gets a standard set.
+
 ## Model profiles
 
 A profile is `profiles/<key>.toml`: a `[meta]` block, notes, and a `[params]` block of `MLX_*`
