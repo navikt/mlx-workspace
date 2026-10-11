@@ -125,11 +125,12 @@
       "classes": {
         "read-qa": {
           "delegate": "cloud",
-          "local": "not-yet",
+          "local": "cloud",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 6,
-          "local_n": 6
+          "local_k": 84,
+          "local_n": 90,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "edit-single": {
           "delegate": "cloud",
@@ -144,16 +145,18 @@
           "local": "cloud",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 3,
-          "local_n": 4
+          "local_k": 37,
+          "local_n": 60,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "create-file": {
           "delegate": "cloud",
-          "local": "not-yet",
+          "local": "cloud",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 4,
-          "local_n": 4
+          "local_k": 71,
+          "local_n": 90,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "debug": {
           "delegate": "cloud",
@@ -179,32 +182,36 @@
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 27,
-          "local_n": 27
+          "local_k": 43,
+          "local_n": 45,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "edit-single": {
           "delegate": "cloud",
           "local": "not-yet",
           "delegate_k": 3,
           "delegate_n": 3,
-          "local_k": 9,
-          "local_n": 9
+          "local_k": 27,
+          "local_n": 30,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "edit-multi-mechanical": {
           "delegate": "trusted",
           "local": "cloud",
           "delegate_k": 35,
           "delegate_n": 35,
-          "local_k": 11,
-          "local_n": 18
+          "local_k": 25,
+          "local_n": 30,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "create-file": {
           "delegate": "cloud",
           "local": "cloud",
           "delegate_k": 1,
           "delegate_n": 2,
-          "local_k": 3,
-          "local_n": 18
+          "local_k": 33,
+          "local_n": 45,
+          "local_source": "reports/2026-10-10-small-delegate/report.md"
         },
         "debug": {
           "delegate": "cloud",
