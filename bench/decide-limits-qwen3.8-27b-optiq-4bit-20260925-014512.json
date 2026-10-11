@@ -2,7 +2,7 @@
   "key": "qwen3.8-27b-optiq-4bit",
   "model": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
   "port": 61120,
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
   "nav_pilot_commit": "d24a65e5fd81c3347e7325722354c998d7499f08",
   "started": "2026-09-25T01:56:27+0200",
   "timeout": "180s",

@@ -1,9 +1,9 @@
 {
   "profile": "qwen3.8-27b-8bit-nopin",
   "model": "mlx-community/Qwen3.8-27B-8bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-e72319e0",
   "nav_pilot_commit": "e72319e0",
-  "server_argv": "/Users/hans/.nav-pilot/local/venv/bin/python /Users/hans/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 59319 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false}",
+  "server_argv": "~/.nav-pilot/local/venv/bin/python ~/.nav-pilot/local/venv/bin/mlx_lm.server --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 59319 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false}",
   "mlx_lm": [
     "0.31.3"
   ],
@@ -253,7 +253,7 @@
       "kind": "loop",
       "legitimate": false,
       "log": ".bench-logs/system-one-loop-20260923-124323.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-124323",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/loop-20260923-124323",
       "exit": 0,
       "timed_out": false,
       "seconds": 6.0,
@@ -278,7 +278,7 @@
       "kind": "poll",
       "legitimate": true,
       "log": ".bench-logs/system-one-poll-20260923-124329.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/poll-20260923-124329",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/poll-20260923-124329",
       "exit": 0,
       "timed_out": false,
       "seconds": 6.0,

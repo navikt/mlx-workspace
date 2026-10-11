@@ -324,13 +324,13 @@
       "local_profile": "qwen3.6-35b-a3b-optiq-64g",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
       "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
-      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
       "nav_pilot_auto_update": false,
-      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012807.config.toml",
+      "nav_pilot_config": "~/mlx-workspace/.bench-logs/np-serve-20261010-012807.config.toml",
       "tag": "np-2bcca023-sonnet5-aggressive-smallops",
       "opencode_version": "1.18.35",
       "cloud_model": "claude-sonnet-5",
-      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261010-012807.models.json",
+      "bench_manifest": "~/mlx-workspace/.bench-logs/np-serve-20261010-012807.models.json",
       "bench_capabilities_override": {
         "_label": "Bench-only trust overlay for the small-tasks delegation measurement (plan.md item 2). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
         "classes": {

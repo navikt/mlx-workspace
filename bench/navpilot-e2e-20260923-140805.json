@@ -1,5 +1,5 @@
 {
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-combined-915e27c6",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-combined-915e27c6",
   "nav_pilot_commit": "915e27c6",
   "merged": [
     "#931 fix/local-server-dead-generation-thread",
@@ -13,17 +13,17 @@
   "servers": [
     {
       "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56607 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
+      "argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56607 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
       "at": 1790165291.060673
     },
     {
       "model": "mlx-community/Qwen3.8-27B-4bit",
-      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-4bit --host 127.0.0.1 --port 59850 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
+      "argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-4bit --host 127.0.0.1 --port 59850 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
       "at": 1790166176.33341
     },
     {
       "model": "mlx-community/Qwen3.8-27B-8bit",
-      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 60042 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
+      "argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.8-27B-8bit --host 127.0.0.1 --port 60042 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 2 --prompt-cache-bytes 4294967296 --chat-template-args {\"enable_thinking\": false, \"reasoning_effort\": \"medium\"}",
       "at": 1790166242.6551712
     }
   ],
@@ -187,7 +187,7 @@
       "kind": "loop",
       "legitimate": false,
       "log": ".bench-logs/system-one-loop-20260923-140942.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-140942",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/loop-20260923-140942",
       "exit": 0,
       "timed_out": false,
       "seconds": 627.9,
@@ -228,7 +228,7 @@
       "kind": "poll",
       "legitimate": true,
       "log": ".bench-logs/system-one-poll-20260923-142010.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/poll-20260923-142010",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/poll-20260923-142010",
       "exit": 0,
       "timed_out": false,
       "seconds": 141.5,
@@ -371,7 +371,7 @@
       ],
       "classifier_block": false,
       "static_block": false,
-      "guard_message": "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 bash({\"command\": \"rtk find /Users/hans -maxdepth 4 -name \\\"poll.sh\\\" -type f 2>/dev/null | head -5\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8).",
+      "guard_message": "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 bash({\"command\": \"rtk find ~ -maxdepth 4 -name \\\"poll.sh\\\" -type f 2>/dev/null | head -5\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8).",
       "session_errors": [],
       "tokens": {
         "input": 679900,

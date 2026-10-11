@@ -31,7 +31,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "d1cc5520ee4cf4a17badd3e22a9084936d506db925b2927d51e13e98240e425c",
         "bytes": 3789,
         "send": "Send it: large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -65,7 +65,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3789
         }
       ],
@@ -122,7 +122,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "d1cc5520ee4cf4a17badd3e22a9084936d506db925b2927d51e13e98240e425c",
         "bytes": 3789,
         "send": "Send it: large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -156,7 +156,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3789
         }
       ],
@@ -213,7 +213,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "d1cc5520ee4cf4a17badd3e22a9084936d506db925b2927d51e13e98240e425c",
         "bytes": 3789,
         "send": "Send it: large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -247,7 +247,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3789
         }
       ],
@@ -302,7 +302,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "d1cc5520ee4cf4a17badd3e22a9084936d506db925b2927d51e13e98240e425c",
         "bytes": 3789,
         "send": "Send it: large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -336,7 +336,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3789
         }
       ],
@@ -391,7 +391,7 @@
         "mlx_provider": false
       },
       "policy": {
-        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
         "sha256": "d1cc5520ee4cf4a17badd3e22a9084936d506db925b2927d51e13e98240e425c",
         "bytes": 3789,
         "send": "Send it: large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
@@ -425,7 +425,7 @@
       "invalid_reason": null,
       "instructions_after": [
         {
-          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "path": "~/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
           "bytes": 3789
         }
       ],
@@ -459,13 +459,13 @@
       "local_profile": "qwen3.6-35b-a3b-optiq-64g",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
       "nav_pilot_version": "nav-pilot dev (commit: 2bcca02, built: 2026-09-28T07:59:42Z)",
-      "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+      "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
       "nav_pilot_auto_update": false,
-      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-230453.config.toml",
+      "nav_pilot_config": "~/mlx-workspace/.bench-logs/np-serve-20260929-230453.config.toml",
       "tag": "probe-2bcca023-balanced-caps",
       "opencode_version": "1.18.33",
       "cloud_model": "claude-sonnet-5",
-      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20260929-230453.models.json",
+      "bench_manifest": "~/mlx-workspace/.bench-logs/np-serve-20260929-230453.models.json",
       "bench_capabilities_override": {
         "_label": "BENCH-ONLY, dispatch re-probe 7 (call-site gate rule and worker-output verification), same block as dispatch probe 6. Not a measured delegate verdict. edit-multi-mechanical: trusted, as the shipped optiq entry measured it (delegate 35/35); the 8-bit worker inherits it from that entry, as in probe 5. create-file: trusted as a bench assumption so aggressive's create-file rule can fire (evidence is local mode only: night 64-2 retry2 r1-r3, 11/12). _by_class skips every sample recorded with this override, and dispatch-probe keeps the results out of bench/.",
         "classes": {

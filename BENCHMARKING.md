@@ -196,7 +196,7 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   a step fails its gradle preflight, so check its step lines as well as its exit code (#197). A
   check that fails before the run leaves no marker either.
 - **The main checkout is live while a queue runs.** Launchers and queues run from
-  `/Users/hans/mlx-workspace` itself and read untracked files there. While any queue or launcher is
+  `~/mlx-workspace` itself and read untracked files there. While any queue or launcher is
   running or waiting, no agent deletes, cleans, stashes or switches branches in that checkout; do
   other work in a `git worktree`. On 30 September an agent deleted the untracked
   `bench/frontier/validated-17d0cf33d776.json` at about 07:00 while the v2 ladders night ran from

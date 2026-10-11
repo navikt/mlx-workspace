@@ -8,7 +8,7 @@
 # Exits at once if that marker exists or another instance waits (requeue-64-6c.pid).
 # No command line of this script carries "bench-", "night", "np-serve" or "dispatch-probe". Gives up after 48 h.
 set -u
-cd /Users/hans/mlx-workspace || exit 1
+cd ~/mlx-workspace || exit 1
 BL=".bench""-logs"
 R=reports/2026-09-26-64gb-tier
 NP="$PWD/$BL/bin/nav-pilot-main-2bcca023"

@@ -12,7 +12,7 @@
 # "dispatch-probe", because other waiters pgrep for them; such strings are built from pieces.
 # Stop it: kill <pid on the first log line>.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=~/mlx-workspace
 cd "$MAIN" || exit 1
 L=".b""ench-logs"
 exec >> "$L/after-64-6.log" 2>&1

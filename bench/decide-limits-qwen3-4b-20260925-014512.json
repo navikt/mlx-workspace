@@ -2,7 +2,7 @@
   "key": "qwen3-4b",
   "model": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
   "port": 64758,
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-d24a65e5",
   "nav_pilot_commit": "d24a65e5fd81c3347e7325722354c998d7499f08",
   "started": "2026-09-25T02:24:14+0200",
   "timeout": "180s",

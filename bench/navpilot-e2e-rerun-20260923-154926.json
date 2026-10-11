@@ -1,16 +1,16 @@
 {
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-combined-915e27c6",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-combined-915e27c6",
   "rerun_of": "bench/navpilot-e2e-20260923-140805.json",
   "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
   "servers": [
     {
       "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56573 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
+      "argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56573 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
       "at": 1790171370.6258051
     },
     {
       "model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
-      "argv": "/Users/hans/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56685 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
+      "argv": "~/.nav-pilot/local/venv/bin/python -c import os, sys, threading, traceback\\012def _die(a):\\012    if issubclass(a.exc_type, SystemExit):\\012        return\\012    traceback.print_exception(a.exc_type, a.exc_value, a.exc_traceback)\\012    print(\"nav-pilot: the server's thread %s died, so no request will ever be answered; exiting with status 70\" % (a.thread.name if a.thread else \"?\"), file=sys.stderr, flush=True)\\012    os._exit(70)\\012threading.excepthook = _die\\012sys.argv[0] = \"mlx_lm.server\"\\012from mlx_lm.server import main\\012sys.exit(main())\\012 --model mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit --host 127.0.0.1 --port 56685 --top-p 0.95 --top-k 20 --min-p 0.0 --max-tokens 32768 --prompt-cache-size 3 --prompt-cache-bytes 12884901888 --chat-template-args {\"enable_thinking\": false}",
       "at": 1790171421.242091
     }
   ],
@@ -19,7 +19,7 @@
       "kind": "loop",
       "legitimate": false,
       "log": ".bench-logs/system-one-loop-20260923-154930.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930",
       "exit": 0,
       "timed_out": false,
       "seconds": 20.1,
@@ -41,9 +41,9 @@
       ],
       "classifier_block": false,
       "static_block": false,
-      "guard_message": "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 view({\"path\": \"/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930/ready.txt\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8).",
+      "guard_message": "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 view({\"path\": \"~/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930/ready.txt\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8).",
       "session_errors": [
-        "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 view({\"path\": \"/Users/hans/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930/ready.txt\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8)."
+        "400 nav-pilot stopped this turn: the local model repeated the same tool call with the same result 4 times \u2014 view({\"path\": \"~/mlx-workspace/.bench-logs/system-one-work/loop-20260923-154930/ready.txt\"}). That is a runaway loop, not progress; repeating it will not change the answer, so try something else. Start a new turn with a narrower task, or raise the threshold with `nav-pilot config set local_loop_guard <n>` (current: 8)."
       ],
       "tokens": {
         "input": 111600,
@@ -56,20 +56,20 @@
         "view"
       ],
       "instruction_sources": [
-        "/Users/hans/.copilot/.github/instructions/accessibility.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/database.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/docker.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/github-actions.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/golang.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/kotlin-ktor.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/kotlin-spring.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/nextjs-aksel.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/norwegian-text.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/performance.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/security-owasp.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing-kotlin.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing-typescript.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing.instructions.md",
+        "~/.copilot/.github/instructions/accessibility.instructions.md",
+        "~/.copilot/.github/instructions/database.instructions.md",
+        "~/.copilot/.github/instructions/docker.instructions.md",
+        "~/.copilot/.github/instructions/github-actions.instructions.md",
+        "~/.copilot/.github/instructions/golang.instructions.md",
+        "~/.copilot/.github/instructions/kotlin-ktor.instructions.md",
+        "~/.copilot/.github/instructions/kotlin-spring.instructions.md",
+        "~/.copilot/.github/instructions/nextjs-aksel.instructions.md",
+        "~/.copilot/.github/instructions/norwegian-text.instructions.md",
+        "~/.copilot/.github/instructions/performance.instructions.md",
+        "~/.copilot/.github/instructions/security-owasp.instructions.md",
+        "~/.copilot/.github/instructions/testing-kotlin.instructions.md",
+        "~/.copilot/.github/instructions/testing-typescript.instructions.md",
+        "~/.copilot/.github/instructions/testing.instructions.md",
         "AGENTS.md",
         "output-style.instructions.md"
       ]
@@ -78,7 +78,7 @@
       "kind": "poll",
       "legitimate": true,
       "log": ".bench-logs/system-one-poll-20260923-154951.log",
-      "work": "/Users/hans/mlx-workspace/.bench-logs/system-one-work/poll-20260923-154951",
+      "work": "~/mlx-workspace/.bench-logs/system-one-work/poll-20260923-154951",
       "exit": 0,
       "timed_out": false,
       "seconds": 27.2,
@@ -120,20 +120,20 @@
         "task_complete"
       ],
       "instruction_sources": [
-        "/Users/hans/.copilot/.github/instructions/accessibility.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/database.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/docker.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/github-actions.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/golang.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/kotlin-ktor.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/kotlin-spring.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/nextjs-aksel.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/norwegian-text.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/performance.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/security-owasp.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing-kotlin.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing-typescript.instructions.md",
-        "/Users/hans/.copilot/.github/instructions/testing.instructions.md",
+        "~/.copilot/.github/instructions/accessibility.instructions.md",
+        "~/.copilot/.github/instructions/database.instructions.md",
+        "~/.copilot/.github/instructions/docker.instructions.md",
+        "~/.copilot/.github/instructions/github-actions.instructions.md",
+        "~/.copilot/.github/instructions/golang.instructions.md",
+        "~/.copilot/.github/instructions/kotlin-ktor.instructions.md",
+        "~/.copilot/.github/instructions/kotlin-spring.instructions.md",
+        "~/.copilot/.github/instructions/nextjs-aksel.instructions.md",
+        "~/.copilot/.github/instructions/norwegian-text.instructions.md",
+        "~/.copilot/.github/instructions/performance.instructions.md",
+        "~/.copilot/.github/instructions/security-owasp.instructions.md",
+        "~/.copilot/.github/instructions/testing-kotlin.instructions.md",
+        "~/.copilot/.github/instructions/testing-typescript.instructions.md",
+        "~/.copilot/.github/instructions/testing.instructions.md",
         "AGENTS.md",
         "output-style.instructions.md"
       ]

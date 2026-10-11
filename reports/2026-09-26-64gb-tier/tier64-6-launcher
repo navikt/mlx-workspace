@@ -11,10 +11,10 @@
 # Start it from ~/tmp, never from a path with "bench-", "night", "np-serve" or "dispatch-probe"
 # in it: other waiters pgrep for those. Stop it: kill <pid on the first log line>.
 set -u
-cd /Users/hans/mlx-workspace || exit 1
-BIN=/Users/hans/mlx-workspace/.bench-logs/bin
+cd ~/mlx-workspace || exit 1
+BIN=~/mlx-workspace/.bench-logs/bin
 R=reports/2026-09-26-64gb-tier
-HYB_ENV=/Users/hans/tmp/tier64-6-hybrid.env
+HYB_ENV=~/tmp/tier64-6-hybrid.env
 export BENCH_NAV_PILOT=$BIN/nav-pilot-main-7236795f   # 64-4/64-5's binary, for e2e and ops
 export NP_LATENCY_TARGETS=2000,60000,64000
 NR="$BIN/ni""ght-run-3-646"

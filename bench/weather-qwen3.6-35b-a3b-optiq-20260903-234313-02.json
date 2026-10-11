@@ -37,7 +37,7 @@
     "runner": "unknown",
     "pass_count": null,
     "fail_count": null,
-    "tail": "\n> weather-cli@1.0.0 test\n> node --test 'test/*.test.js'\n\nCould not find '/Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq/weather-cli/test/*.test.js'\n"
+    "tail": "\n> weather-cli@1.0.0 test\n> node --test 'test/*.test.js'\n\nCould not find '~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq/weather-cli/test/*.test.js'\n"
   },
   "files": [
     "WEATHER_CLI_SPEC.md",

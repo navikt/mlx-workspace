@@ -2,7 +2,7 @@
 # Ollama's num_ctx trap, forced: OLLAMA_CONTEXT_LENGTH=4096, then doctor, setup --fix-context --yes, doctor.
 set -u
 S=/private/tmp/claude-501/-Users-hans-mlx-workspace/f869846d-5571-4e13-94f1-74f86278bb0b/scratchpad
-OUT=$S/val/out; LOCK=/Users/hans/mlx-workspace/.bench-logs/.queue.lock
+OUT=$S/val/out; LOCK=~/mlx-workspace/.bench-logs/.queue.lock
 export NO_COLOR=1
 mkdir "$LOCK" || exit 1; echo $$ > "$LOCK/pid"
 mkdir -p $S/np-home

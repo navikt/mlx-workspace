@@ -10,7 +10,7 @@ Tasks 1–3 below are now one unattended run, `mise run night-run` (task 1, the 
 already). The queue, timeouts and failure handling are in [qwen38-tuning.md §6](qwen38-tuning.md#6-resume).
 
 ```sh
-cd /Users/hans/mlx-workspace
+cd ~/mlx-workspace
 # 1. plug in the charger
 mise run night-preflight                 # every line PASS (a WARN is fine); fix any FAIL
 mise run bench-netcheck -- --for ops,e2e # night-run-2: --for ops,e2e,hybrid; a FAIL names the firewall rule
@@ -250,7 +250,7 @@ switches to an up-to-date `main` (and stops if the checkout is dirty or the pull
 fast-forward), then queues behind any lock:
 
 ```sh
-cd /Users/hans/mlx-workspace && nohup bash -c 'until grep -q "=== night-run-2 exited" .bench-logs/night-chain.log; do sleep 60; done; while [ -e .git/index.lock ]; do sleep 5; done; git switch main && git pull --ff-only origin main && BENCH_WAIT=1 mise run bench-decide-limits' > .bench-logs/decide-limits.log 2>&1 &
+cd ~/mlx-workspace && nohup bash -c 'until grep -q "=== night-run-2 exited" .bench-logs/night-chain.log; do sleep 60; done; while [ -e .git/index.lock ]; do sleep 5; done; git switch main && git pull --ff-only origin main && BENCH_WAIT=1 mise run bench-decide-limits' > .bench-logs/decide-limits.log 2>&1 &
 ```
 
 Check it first with `mise run bench-decide-limits -- --dry-run`. The results are in
@@ -386,7 +386,7 @@ where they are, and night 64-4 runs them.
   - The rework count is in `bench-hybrid` (#63).
   - Still to do: the 64-3 hybrid block, and trimming 64-2 (about 13 h with all five) after 64-1.
 - **Blocked for Laguna:** nav-pilot's mlx-lm 0.31.3 has no `laguna`, so Laguna cannot enter np-e2e or the hybrid arm until nav-pilot's runtime moves.
-- **Occamy is measurable through nav-pilot (2026-09-26):** navikt/copilot #989's bench-only override (`NAV_PILOT_BENCH_MANIFEST`, `NAV_PILOT_BENCH_ALLOW_ORGS`) lets np-e2e, decide and the hybrid arm run Occamy on nav-pilot's own server. The bench tasks use it when the binary has #989 and keep the old cache rewrite otherwise. It needs `BENCH_NAV_PILOT=/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6` or newer; `nav-pilot-main-2e1e8ee1` (nights 4 and 64-1) still falls back to optiq, as on day 64-0. Steps that need it: an Occamy `e2e` retry, 64-3's hybrid arm with Occamy, 64-4's np-e2e and decide sets (plan §5.3). Shipping Occamy still needs an `ALLOWED_ORGS` decision, or a build in an allowed org.
+- **Occamy is measurable through nav-pilot (2026-09-26):** navikt/copilot #989's bench-only override (`NAV_PILOT_BENCH_MANIFEST`, `NAV_PILOT_BENCH_ALLOW_ORGS`) lets np-e2e, decide and the hybrid arm run Occamy on nav-pilot's own server. The bench tasks use it when the binary has #989 and keep the old cache rewrite otherwise. It needs `BENCH_NAV_PILOT=~/mlx-workspace/.bench-logs/bin/nav-pilot-main-dd859ac6` or newer; `nav-pilot-main-2e1e8ee1` (nights 4 and 64-1) still falls back to optiq, as on day 64-0. Steps that need it: an Occamy `e2e` retry, 64-3's hybrid arm with Occamy, 64-4's np-e2e and decide sets (plan §5.3). Shipping Occamy still needs an `ALLOWED_ORGS` decision, or a build in an allowed org.
 - **Night 64-3 made valid (2026-09-27, #76):** an adversarial review found that the hybrid block would put every worker into one file and one resume count. It also found no cost cap, a tasks checkout at 632cf5f5 against the b0351ed8 pin, tasks:6 (D2, retired) in the most expensive cell, and the 64 GB workers inheriting optiq's capabilities and so optiq's dispatch policy. All of these are fixed; the details are in the PR and in [plan.md](../2026-09-26-64gb-tier/plan.md) §5.2–5.3. The queue is [night-64-3.queue](../2026-09-26-64gb-tier/night-64-3.queue): three cells (tasks:3, frontend-familie-tilbake:3, spring-ia:6) × 8, control once, and optiq-64g, the Qwen3.6 8-bit and Occamy as workers. The cap is $35. The decision rule is now the lower bound of Newcombe's interval on the pass-rate difference, ≥ −10 points. The tasks checkout is back at b0351ed8.
 - **Occamy smoke start (2026-09-27, $0):** `np-serve -- occamy-1.0-4bit-64g` on `nav-pilot-main-dd859ac6` printed `bench override: allowing unvetted publisher Accio-Lab` and served `Accio-Lab/occamy-1.0-MLX-4bit`, which answered a completion ("ok"). The bench entry had no capabilities block, an empty `expect`, 48 GB wired and 64 GB RAM. nav-pilot does not pass the card's `presence_penalty` 1.5 (it is not in nav-pilot's server flags).
 - **Pilot for 64-3 (2026-09-27): NO-GO for the full cell.** Spend $0.27 of the $2 allowed: $0.20 on samples (ledger, capped at $1.80), plus two $0.034 probe sessions.

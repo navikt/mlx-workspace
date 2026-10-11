@@ -12,7 +12,7 @@
 #     .bench-logs/k2-ifm-probe.json. Runs the new-candidates standard set only if tool_calls parse.
 # Gives up after 72 h. Stop it: kill <pid on the first log line>.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=~/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
 N=k2-ifm

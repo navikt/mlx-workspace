@@ -9,9 +9,9 @@
 # No command line here carries "bench-", "night", "np-serve" or "dispatch-probe".
 # Start: nohup bash ~/tmp/balctl-launcher >> <logs dir>/balctl.log 2>&1 &   Gives up 2026-10-03 06:00.
 set -u
-cd /Users/hans/mlx-workspace || exit 1
+cd ~/mlx-workspace || exit 1
 BL=".bench""-logs"
-NP="/Users/hans/mlx-workspace/$BL/bin/nav-pilot-main-2bcca023"
+NP="~/mlx-workspace/$BL/bin/nav-pilot-main-2bcca023"
 BUSY="night""-run|night""64|bench""-|np""-serve|dispatch""-probe|dlv-waiter|fu1-launcher|fu2-launcher|followups-[12]-launcher|mlx_lm[._]server"
 GIVE_UP=$(date -j -f '%Y-%m-%d %H:%M' '2026-10-03 06:00' +%s)
 say() { echo "[$(date '+%F %T')] balctl: $*"; }

@@ -15,7 +15,7 @@
   "tasks_sha": "17d0cf33d776",
   "harness_sha": "df7deb1af416",
   "started": "20260926-084757",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
   "spent_usd": 28.1433
  },
  "samples": [
@@ -1137,7 +1137,7 @@
    "note": "6 call sites in 1 files and compiles",
    "build_tail": "",
    "valid": false,
-   "invalid_reason": "cplt scoped the session to /Users/hans/.cache/mlx-workspace/frontier-cloud/probe-p3ez8tjd, not the workspace",
+   "invalid_reason": "cplt scoped the session to ~/.cache/mlx-workspace/frontier-cloud/probe-p3ez8tjd, not the workspace",
    "served_model": "claude-sonnet-5"
   },
   {

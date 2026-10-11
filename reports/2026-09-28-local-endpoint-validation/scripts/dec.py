@@ -16,7 +16,7 @@ import os
 import sys
 import time
 
-sys.path.insert(0, "/Users/hans/mlx-workspace/.mise/tasks")
+sys.path.insert(0, "~/mlx-workspace/.mise/tasks")
 import _np_checks as C  # noqa: E402
 
 _post = C.post

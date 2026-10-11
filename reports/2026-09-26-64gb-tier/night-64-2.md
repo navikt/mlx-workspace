@@ -23,8 +23,8 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20260927-015045/steps
 | 12 | local | base | edit-multi-mechanical | base | OK | 23 | `bench/frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-073630.json` |
 | 13 | local | base | edit-single | base | OK | 16 | `bench/frontier-qwen3.6-35b-a3b-8bit-64g-base-20260927-075920.json` |
 | 14 | local | base | edit-multi-mechanical | base | TIMEOUT:    ✗ run 1 fm-r4-b        92.4s · 1 att · 28 tools · 1 call site(s) without the file-name literal: NarmesteLederMock.kt: 'listOf(\n                      ' | 30 | `bench/frontier-occamy-1.0-4bit-64g-base-20260927-081539.json` |
-| 15 | local | base | edit-multi-mechanical | base | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/laguna-xs-2.1-8bit-64g holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 16 | local | base | edit-single | base | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/laguna-xs-2.1-8bit-64g holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 15 | local | base | edit-multi-mechanical | base | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/laguna-xs-2.1-8bit-64g holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 16 | local | base | edit-single | base | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/laguna-xs-2.1-8bit-64g holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
 | 17 | local | lever | read-qa | example | OK | 11 | `bench/frontier-qwen3.6-35b-a3b-optiq-example-20260927-084548.json` |
 
 ## Frontier

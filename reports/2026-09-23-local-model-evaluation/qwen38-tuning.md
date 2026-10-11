@@ -214,7 +214,7 @@ run used the server's 0.6 default. The report compares these runs with the 2026-
 ### How to start tonight
 
 ```sh
-cd /Users/hans/mlx-workspace
+cd ~/mlx-workspace
 # 1. plug in the charger
 mise run night-preflight                 # every line PASS (a WARN is fine); fix any FAIL
 mise run bench-netcheck -- --for ops,e2e # night-run-2: --for ops,e2e,hybrid; a FAIL names the firewall rule
@@ -234,7 +234,7 @@ In the morning:
   `mise run night-run-selftest` runs the whole driver with stub steps (about 90 s, no GPU).
 
 To rebuild the binary after `main` moves:
-`cd ~/go/src/github.com/navikt/copilot && git switch main && git pull --ff-only && cd cli/nav-pilot && go build -o /Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-$(git rev-parse --short=8 HEAD) .`,
+`cd ~/go/src/github.com/navikt/copilot && git switch main && git pull --ff-only && cd cli/nav-pilot && go build -o ~/mlx-workspace/.bench-logs/bin/nav-pilot-main-$(git rev-parse --short=8 HEAD) .`,
 then update `BENCH_NAV_PILOT` at the top of `night-run` and `night-preflight`.
 
 After the night, update #20's manifest entries with the chosen parameters.

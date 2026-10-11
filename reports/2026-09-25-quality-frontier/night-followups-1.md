@@ -21,12 +21,12 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20260928-080235/steps
 | 10 | local | base | read-qa | base | OK | 6 | `bench/frontier-qwen3.6-35b-a3b-optiq-base-20260928-091956.json` |
 | 11 | local | base | create-file | base | OK | 13 | `bench/frontier-qwen3.6-35b-a3b-optiq-base-20260928-092542.json` |
 | 12 | local | lever | create-file | retry2 | OK | 12 | `bench/frontier-qwen3.6-35b-a3b-optiq-retry2-20260928-093833.json` |
-| 13 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 14 | local | base | create-file | base | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 15 | local | base | create-file | base | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 16 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 17 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
-| 18 | local | base | create-file | base | FAIL (exit 1): ✗ /Users/hans/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 13 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 14 | local | base | create-file | base | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 15 | local | base | create-file | base | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 16 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 17 | local | lever | create-file | retry2 | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
+| 18 | local | base | create-file | base | FAIL (exit 1): ✗ ~/mlx-workspace/workspaces/qwen3.6-35b-a3b-optiq holds src, which the agent can read and which the per-task reset does not touch. | 0 | `` |
 
 ## Frontier
 

@@ -15,7 +15,7 @@
   "tasks_sha": "17d0cf33d776",
   "harness_sha": "df7deb1af416",
   "started": "20260926-091425",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2e1e8ee1",
   "spent_usd": 33.034
  },
  "samples": [
@@ -511,7 +511,7 @@
    "files_changed": 1,
    "verified": false,
    "note": "the new test does not pass (or does not run)",
-   "build_tail": "\n  org.opentest4j.AssertionFailedError: expected: <true> but was: <false>\n      at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n      at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n      at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)\n      at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)\n      at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)\n      at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)\n      at app//no.nav.syfo.frontier.GjentakendeSykefravarTest.tilfelle ending exactly three years ago is included as recent(GjentakendeSykefravarTest.kt:102)\n      at java.base@21.0.12.1/java.lang.reflect.Method.invoke(Method.java:580)\n      at java.base@21.0.12.1/java.util.ArrayList.forEach(ArrayList.java:1596)\n      at java.base@21.0.12.1/java.util.ArrayList.forEach(ArrayList.java:1596)\n\n\nFAILURE: Executed 12 tests in 281ms (1 failed)\n\n9 actionable tasks: 4 executed, 5 up-to-date\n\n12 tests completed, 1 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///Users/hans/.cache/mlx-workspace/frontier-cloud/cloud-claude-sonnet-5/kotlin/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n\nBUILD FAILED in 1s",
+   "build_tail": "\n  org.opentest4j.AssertionFailedError: expected: <true> but was: <false>\n      at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n      at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n      at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)\n      at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)\n      at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)\n      at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)\n      at app//no.nav.syfo.frontier.GjentakendeSykefravarTest.tilfelle ending exactly three years ago is included as recent(GjentakendeSykefravarTest.kt:102)\n      at java.base@21.0.12.1/java.lang.reflect.Method.invoke(Method.java:580)\n      at java.base@21.0.12.1/java.util.ArrayList.forEach(ArrayList.java:1596)\n      at java.base@21.0.12.1/java.util.ArrayList.forEach(ArrayList.java:1596)\n\n\nFAILURE: Executed 12 tests in 281ms (1 failed)\n\n9 actionable tasks: 4 executed, 5 up-to-date\n\n12 tests completed, 1 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file://~/.cache/mlx-workspace/frontier-cloud/cloud-claude-sonnet-5/kotlin/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights from a Build Scan (powered by Develocity).\n\nBUILD FAILED in 1s",
    "valid": true,
    "served_model": "claude-sonnet-5"
   }

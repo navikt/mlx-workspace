@@ -1,7 +1,7 @@
 {
   "key": "qwen3.8-27b-optiq-4bit",
   "model": "mlx-community/Qwen3.8-27B-OptiQ-4bit",
-  "nav_pilot": "/Users/hans/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
+  "nav_pilot": "~/mlx-workspace/.bench-logs/bin/nav-pilot-main-2bcca023",
   "sets": [
     "action-check"
   ],
