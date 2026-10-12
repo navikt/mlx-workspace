@@ -68,14 +68,27 @@ def verdict(cls, mode, k, n, tasks, runs, p_cloud, ratio):
     return "trusted", bar
 
 
+def harness(r):
+    return r["condition"].split("harness=")[1].split()[0] if "harness=" in r["condition"] else None
+
+
 def p_clouds(rows):
-    """{class: pooled cloud pass rate}, 1.0 for a class with no cloud arm."""
+    """{class: pooled cloud pass rate}, 1.0 for a class with no cloud arm. Rows carrying a
+    harness= also get a (class, harness) pool, so a cloud arm only sets the bar for local
+    rows run on the same harness_sha."""
     cloud = {}
     for r in rows:
         if r["mode"] == "cloud":
-            k, n = cloud.get(r["class"], (0, 0))
-            cloud[r["class"]] = (k + r["k"], n + r["n"])
-    return {c: (cloud[c][0] / cloud[c][1] if cloud.get(c, (0, 0))[1] else 1.0) for c in CLASSES}
+            for key in (r["class"], (r["class"], harness(r))):
+                k, n = cloud.get(key, (0, 0))
+                cloud[key] = (k + r["k"], n + r["n"])
+    out = {c: (cloud[c][0] / cloud[c][1] if cloud.get(c, (0, 0))[1] else 1.0) for c in CLASSES}
+    out.update({key: k / n for key, (k, n) in cloud.items() if isinstance(key, tuple) and key[1] and n})
+    return out
+
+
+def p_cloud_for(pc, r):
+    return pc.get((r["class"], harness(r)), pc[r["class"]])
 
 
 def score(rows):
@@ -86,13 +99,13 @@ def score(rows):
     for m in models:
         out[m] = {}
         for cls in CLASSES:
-            p_cloud = pc[cls]
             out[m][cls] = {}
             for mode in ("delegate", "local"):
                 best = {"verdict": "cloud", "k": 0, "n": 0, "note": "no data"}
                 for r in rows:
                     if (r["model"], r["class"], r["mode"]) != (m, cls, mode):
                         continue
+                    p_cloud = p_cloud_for(pc, r)
                     v, bar = verdict(cls, mode, r["k"], r["n"], len(r["tasks"]), r["runs"],
                                      p_cloud, r.get("pooled_cost_ratio"))
                     cand = {"verdict": v, "k": r["k"], "n": r["n"], "lb": r["lb"],
@@ -115,7 +128,7 @@ def probe_tally(probe_rows, rows):
     out = {}
     for r in sorted(probe_rows, key=lambda r: (r["model"], r["class"], r["condition"])):
         v, bar = verdict(r["class"], "delegate", r["k"], r["n"], len(r["tasks"]), r["runs"],
-                         pc[r["class"]], r.get("pooled_cost_ratio"))
+                         p_cloud_for(pc, r), r.get("pooled_cost_ratio"))
         out.setdefault(r["model"], {}).setdefault(r["class"], []).append(
             {**r, "shipped": False, "bar_verdict": v, "bar": bar and round(bar, 3)})
     return {"note": "Bench-only trust overlay samples (BENCH_CAPABILITIES_OVERRIDE, #147). NOT SHIPPED: "

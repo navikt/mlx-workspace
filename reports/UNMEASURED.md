@@ -8,7 +8,7 @@ release that touches local mode), see [BENCHMARKING.md](../BENCHMARKING.md#when-
 row below that needs GPU time or a benchmark is parked until a trigger fires. Rows that need a
 decision, hardware or no GPU keep their status.
 
-**Recently answered:** Kev 4B and Laya fail ([kev-laya](2026-09-29-kev-laya/report.md), [kev-english](2026-09-30-kev-english/report.md)).
+**Recently answered:** `retry2` as the default for edit-single dispatch passes: 48/48 on harness 3ddd8d4e1be1 (#237, navikt/copilot#1675), after re-probe 7 (#234). Kev 4B and Laya fail ([kev-laya](2026-09-29-kev-laya/report.md), [kev-english](2026-09-30-kev-english/report.md)).
 
 Status is one of **parked (triggers only)**, **ready** (no GPU, can run now), **queued** (a launcher or queue will run it), **waiting on X**, **needs user
 decision**, **needs hardware**, or **not built**. `PT` is
@@ -31,7 +31,6 @@ navikt/copilot#1177.
 | **Laguna through nav-pilot** | Whether Laguna can enter np-e2e or the hybrid arm | parked (triggers only): a new-candidate run once nav-pilot's mlx-lm pin has `laguna` | when nav-pilot's pin moves | PT §8.8, #94 |
 | **Occamy shipping** | Whether Occamy can be offered to users | parked (triggers only): Occamy is not proposed | – (64-5 ran; the 8-bit won the tier and shipped, so Occamy is not proposed) | PT §8.8, navikt/copilot#1016 |
 | **Capabilities in the shipped manifest** | Whether routing uses measured verdicts for users | needs user decision; held until dispatch is shown to work | after dispatch re-probe 7 (#121); probe 6 kept create-file untrusted | PT §8.3 "Capabilities proposal", §8.8, navikt/copilot#1010 |
-| **`retry2` as the default for edit-single dispatch** | nav-pilot's check-and-retake policy | parked (triggers only): needs re-probe 7 (#121) | – | [night-2.md](2026-09-25-quality-frontier/night-2.md), navikt/copilot#1011 |
 | **read-qa: an ANSWER-line reminder on top of `example`** | Whether read-qa can reach its routing bar locally: `example` replicated (57/80 against 32/80) but 18 of its 23 failures end without an ANSWER line | parked (triggers only) | – | navikt/mlx-workspace#114, [night-followups-1.md](2026-09-25-quality-frontier/night-followups-1.md) Review §2 |
 | **GPT-6 Sol at `balanced`, and at n ≥ 5 per cell** | Whether an orchestrator that delegates on its own (aggressive 7/7 dispatched, 7/7 passing, 0 refusals; [gpt6-sol.md](2026-09-28-orchestrator-and-penalty/gpt6-sol.md)) passes the GO rule at the default level | parked (triggers only): owner dropped standalone cloud-model runs (#183) | – | [gpt6-sol.md](2026-09-28-orchestrator-and-penalty/gpt6-sol.md), #135 |
 | **Cheap-ops R1 and D2 fail for every model** | Whether the checker or the tasks are wrong (R1 is out of the bar pending a cloud arm) | analysis, no GPU | any day | [night-64-1.md](2026-09-26-64gb-tier/night-64-1.md), `bench/task-classes.json`, #91 |
