@@ -173,11 +173,12 @@ def _cheap_ops_files():
 
 
 def newest_generation(runs):
-    """The runs sharing the newest run's (already canonical) sha."""
-    if not runs:
-        return []
-    newest = max(runs)[2]
-    return [r for r in runs if r[2] == newest]
+    """Per model, the runs sharing that model's newest run's (already canonical) sha.
+    One model's harness change never drops another model's runs."""
+    newest = {}
+    for r in runs:
+        newest[r[1]] = max(newest.get(r[1], r), r)
+    return [r for r in runs if r[2] == newest[r[1]][2]]
 
 
 def _temp(profile):
@@ -446,6 +447,9 @@ if __name__ == "__main__":
     assert newest_generation([old, new, other]) == [other]
     e3fix = canon("20260926-0200", "d1229ad0e89f")
     assert newest_generation([old, new, e3fix]) == [old, new, e3fix]
+    # Two models on different harnesses both keep their runs.
+    other_model = ("20260927-0100", "q", "0123456789ab", None, None)
+    assert newest_generation([old, other_model]) == [old, other_model]
     assert all(k != v and v not in EQUIVALENT_HARNESS for k, v in EQUIVALENT_HARNESS.items())
     # Newcombe 1998, method 10, example (56/70 vs 48/80): 95% interval 0.0524 to 0.3339.
     d, lo, hi = diff_ci(56, 70, 48, 80, z=NormalDist().inv_cdf(0.975))
