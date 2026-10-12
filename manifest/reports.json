@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-12T19:52:00Z",
+  "generated_at": "2026-10-12T21:35:40Z",
   "reports": [
     {
       "id": "2026-10-11-newmodels/report",
@@ -965,8 +965,8 @@
     {
       "item": "**TS tasks F1/F2 on melosys-web** (#183 Q3)",
       "decides": "Whether small frontend edits (9 % of PRs) can route locally",
-      "status": "waiting on owner: `gh auth refresh -s read:packages` (`@navikt/melosys-kodeverk` is on GitHub Packages); else gap-fill step 1 is skipped",
-      "when": "gap-fill, after 2026-10-10 14:00",
+      "status": "wired into bench-cheap-ops as `BENCH_TARGET=frontend-melosys-web` (read:packages granted); waiting on GPU time",
+      "when": "first run on 8-bit and OptiQ",
       "where": "[gap-fill plan](2026-10-10-gap-fill/plan.md), #185"
     },
     {

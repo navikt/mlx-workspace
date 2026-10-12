@@ -1,0 +1,56 @@
+{
+  "_note": "TypeScript rung F1/F2 (#183 Q3): navikt/melosys-web, React 19 + vitest under jsdom. Run with BENCH_TARGET=frontend-melosys-web mise run bench-cheap-ops. Tasks validated in Docker by reports/2026-10-10-gap-fill/ts/validate-ts; hidden checks live in `fixtures`. Install needs a gh token with read:packages (@navikt/melosys-kodeverk is on GitHub Packages only); the token goes into .npmrc for the install and is reverted after.",
+  "repo": "https://github.com/navikt/melosys-web.git",
+  "ref": "881771a0c1483ea287f94ef57dc264311fc862ba",
+  "node": "22.23.2",
+  "workdir": "melosys-web",
+  "results_suffix": "-melosys",
+  "fixtures": "reports/2026-10-10-gap-fill/ts",
+  "install": "echo \"//npm.pkg.github.com/:_authToken=$(gh auth token)\" >> .npmrc && mise x node@22.23.2 -- corepack pnpm install --frozen-lockfile --ignore-scripts; r=$?; git checkout -q .npmrc; exit $r",
+  "compile_cmd": "mise x node@22.23.2 -- corepack pnpm exec tsc --noEmit",
+  "tasks": [
+    {
+      "id": "F1",
+      "kind": "edit",
+      "touches": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.tsx",
+      "only": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/",
+      "verify": "check",
+      "prompt": "In melosys-web/src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.tsx, add an optional boolean prop erDnummer to the Ident component. When it is true, the hover text must be \"Kopier D-nummer\"; otherwise it stays \"Kopier fødselsnummer\". Existing callers must not need changes. Change nothing else.",
+      "check_files": {
+        "F1/ident.erDnummer.test.tsx": "src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/ident.erDnummer.test.tsx"
+      },
+      "check_cmd": "mise x node@22.23.2 -- corepack pnpm exec tsc --noEmit && mise x node@22.23.2 -- corepack pnpm exec vitest run src/felleskomponenter/menypanel/menypunkter/familieforhold/familiemedlemmer/ident/"
+    },
+    {
+      "id": "F2",
+      "kind": "test",
+      "touches": "src/sider/tekstblokker/labels.test.ts",
+      "only": "src/sider/tekstblokker/labels.test.ts",
+      "verify": "check",
+      "prompt": "melosys-web/src/sider/tekstblokker/labels.ts has no tests. Write melosys-web/src/sider/tekstblokker/labels.test.ts with vitest covering labelForType, labelForEndringstype and labelForStatus, including the fallback for an unknown value. Do not change any other file.",
+      "check_cmd": "mise x node@22.23.2 -- corepack pnpm exec tsc --noEmit && mise x node@22.23.2 -- corepack pnpm exec vitest run src/sider/tekstblokker/labels.test.ts",
+      "breaks": [
+        {
+          "file": "src/sider/tekstblokker/labels.ts",
+          "find": "type === \"BREVMAL\" ? \"brevmal\" : \"tekstblokk\"",
+          "replace": "type === \"BREVMAL\" ? \"tekstblokk\" : \"brevmal\""
+        },
+        {
+          "file": "src/sider/tekstblokker/labels.ts",
+          "find": "ENDRET: \"Endret\"",
+          "replace": "ENDRET: \"Endra\""
+        },
+        {
+          "file": "src/sider/tekstblokker/labels.ts",
+          "find": "ENDRINGSTYPER[endringstype] ?? endringstype",
+          "replace": "ENDRINGSTYPER[endringstype] ?? \"\""
+        },
+        {
+          "file": "src/sider/tekstblokker/labels.ts",
+          "find": "STATUSER[status] ?? status",
+          "replace": "STATUSER[status] ?? \"\""
+        }
+      ]
+    }
+  ]
+}
