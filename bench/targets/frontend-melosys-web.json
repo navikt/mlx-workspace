@@ -1,12 +1,12 @@
 {
-  "_note": "TypeScript rung F1/F2 (#183 Q3): navikt/melosys-web, React 19 + vitest under jsdom. Run with BENCH_TARGET=frontend-melosys-web mise run bench-cheap-ops. Tasks validated in Docker by reports/2026-10-10-gap-fill/ts/validate-ts; hidden checks live in `fixtures`. Install needs a gh token with read:packages (@navikt/melosys-kodeverk is on GitHub Packages only); the token goes into .npmrc for the install and is reverted after.",
+  "_note": "TypeScript rung F1/F2 (#183 Q3): navikt/melosys-web, React 19 + vitest under jsdom. Run with BENCH_TARGET=frontend-melosys-web mise run bench-cheap-ops. Tasks validated in Docker by reports/2026-10-10-gap-fill/ts/validate-ts; hidden checks live in `fixtures`. Install needs a gh token with read:packages (@navikt/melosys-kodeverk is on GitHub Packages only); the token is passed to pnpm only through NODE_AUTH_TOKEN and never written to disk.",
   "repo": "https://github.com/navikt/melosys-web.git",
   "ref": "881771a0c1483ea287f94ef57dc264311fc862ba",
   "node": "22.23.2",
   "workdir": "melosys-web",
   "results_suffix": "-melosys",
   "fixtures": "reports/2026-10-10-gap-fill/ts",
-  "install": "echo \"//npm.pkg.github.com/:_authToken=$(gh auth token)\" >> .npmrc && mise x node@22.23.2 -- corepack pnpm install --frozen-lockfile --ignore-scripts; r=$?; git checkout -q .npmrc; exit $r",
+  "install": "mise x node@22.23.2 -- corepack pnpm install --frozen-lockfile --ignore-scripts",
   "compile_cmd": "mise x node@22.23.2 -- corepack pnpm exec tsc --noEmit",
   "tasks": [
     {
