@@ -6717,6 +6717,50 @@
     "frontier-qwen3.6-35b-a3b-optiq-retry2-20261010-225059.json",
     "frontier-qwen3.6-35b-a3b-optiq-retry2-20261010-234858.json"
    ]
+  },
+  {
+   "class": "create-file",
+   "model": "qwen3.6-35b-a3b-optiq",
+   "variant": "retry2+cap900",
+   "condition": "temp=0.6 ctx=65536 harness=855cba4e0fd0 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "3": {
+     "k": 33,
+     "n": 36,
+     "lb": 0.838,
+     "ub": 0.959,
+     "lb_monotone": 0.838,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "not-yet",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 18,
+     "median_seconds": 171,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 3,
+    "first_break": null
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": 3,
+    "beyond": true,
+    "a": 1.911,
+    "b": 0.303
+   },
+   "files": [
+    "frontier-qwen3.6-35b-a3b-optiq-retry2_cap900-20261012-045900.json"
+   ]
   }
  ]
 }
