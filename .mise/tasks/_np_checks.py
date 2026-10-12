@@ -85,6 +85,12 @@ def manifest(profile, cache):
             raise SystemExit(f"✗ {caps}: unknown class or verdict: {'; '.join(bad)}")
         base = (hits[0].get("capabilities") or m["models"][0].get("capabilities") or {}).get("classes", {})
         hits[0]["capabilities"] = {"classes": {**base, **{c: {**base.get(c, {}), **v} for c, v in over.items()}}}
+        # `expect` is the measured-strength prose nav-pilot pastes into the policy as
+        # "What it actually delivers". The shipped one says "Not yet trusted for ...
+        # single-file edits ... Keep those on the cloud model", which contradicted the
+        # overlay's "Send it" line, and re-probe 7's orchestrator kept every E1 and O1
+        # sample on the cloud (local_calls 0 in 30 of 30). Empty, as in bench_entry.
+        hits[0]["expect"] = ""
         print(f"⚠ bench-only capabilities for {hits[0]['key']} from {caps}")
     Path(cache).write_text(json.dumps(m, indent=2) + "\n")
     print(f"✓ manifest entry {hits[0]['key']} now carries {profile}'s params")
