@@ -230,13 +230,13 @@
       "local_profile": "qwen3.6-35b-a3b-optiq-64g",
       "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
       "nav_pilot_version": "nav-pilot 2026.10.11-201029-b998fab (commit: b998fab75e38f380ac53625312f6c7a1f05c480a, built: 2026-10-11T20:10:46Z)",
-      "nav_pilot": "/Users/hans/tmp/oq-bin/nav-pilot-main-b998fab",
+      "nav_pilot": "~/tmp/oq-bin/nav-pilot-main-b998fab",
       "nav_pilot_auto_update": false,
-      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261012-153011.config.toml",
+      "nav_pilot_config": "~/mlx-workspace/.bench-logs/np-serve-20261012-153011.config.toml",
       "tag": "np-b998fab-sonnet55-balanced-rp7c",
       "opencode_version": "1.18.35",
       "cloud_model": "claude-sonnet-5.5",
-      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261012-153011.models.json",
+      "bench_manifest": "~/mlx-workspace/.bench-logs/np-serve-20261012-153011.models.json",
       "bench_capabilities_override": {
         "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
         "classes": {
