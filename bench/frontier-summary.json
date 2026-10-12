@@ -727,30 +727,30 @@
    "rungs": {
     "1": {
      "k": 6,
-     "n": 8,
-     "lb": 0.524,
-     "ub": 0.891,
-     "lb_monotone": 0.815,
+     "n": 10,
+     "lb": 0.401,
+     "ub": 0.77,
+     "lb_monotone": 0.692,
      "bar": 0.675,
      "p_cloud": 0.75,
-     "verdict": "not-yet",
+     "verdict": "cloud",
      "tasks": [
       "cf-r1-a",
       "cf-r1-b"
      ],
-     "runs": 4,
-     "median_seconds": 130,
+     "runs": 5,
+     "median_seconds": 144,
      "median_cost_usd": 0.0,
      "d": [
       1
      ]
     },
     "2": {
-     "k": 8,
-     "n": 8,
-     "lb": 0.83,
+     "k": 10,
+     "n": 10,
+     "lb": 0.859,
      "ub": 1.0,
-     "lb_monotone": 0.907,
+     "lb_monotone": 0.859,
      "bar": 0.9,
      "p_cloud": 1.0,
      "verdict": "not-yet",
@@ -758,7 +758,7 @@
       "cf-r2-a",
       "cf-r2-b"
      ],
-     "runs": 4,
+     "runs": 5,
      "median_seconds": 186,
      "median_cost_usd": 0.0,
      "d": [
@@ -767,19 +767,19 @@
     },
     "3": {
      "k": 8,
-     "n": 8,
-     "lb": 0.83,
-     "ub": 1.0,
-     "lb_monotone": 0.83,
+     "n": 10,
+     "lb": 0.602,
+     "ub": 0.914,
+     "lb_monotone": 0.602,
      "bar": 0.9,
      "p_cloud": 1.0,
-     "verdict": "not-yet",
+     "verdict": "cloud",
      "tasks": [
       "cf-r3-a",
       "cf-r3-b"
      ],
-     "runs": 4,
-     "median_seconds": 193,
+     "runs": 5,
+     "median_seconds": 202,
      "median_cost_usd": 0.0,
      "d": [
       3
@@ -787,9 +787,9 @@
     },
     "4": {
      "k": 0,
-     "n": 8,
+     "n": 10,
      "lb": 0.0,
-     "ub": 0.17,
+     "ub": 0.141,
      "lb_monotone": 0.0,
      "bar": 0.675,
      "p_cloud": 0.75,
@@ -798,7 +798,7 @@
       "cf-r4-a",
       "cf-r4-b"
      ],
-     "runs": 4,
+     "runs": 5,
      "median_seconds": 236,
      "median_cost_usd": 0.0,
      "d": [
@@ -808,18 +808,19 @@
    },
    "frontier": {
     "trusted": 0,
-    "open": 3,
-    "first_break": 4
+    "open": 0,
+    "first_break": 1
    },
    "fit": {
-    "d50": 3.6,
-    "d_bar": 1.2,
+    "d50": 3.1,
+    "d_bar": null,
     "beyond": false,
-    "a": 2.673,
-    "b": -1.448
+    "a": 1.583,
+    "b": -0.973
    },
    "files": [
-    "frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261011-145520.json"
+    "frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261011-145520.json",
+    "frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261012-070411.json"
    ]
   },
   {
