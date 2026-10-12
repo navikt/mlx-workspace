@@ -1,15 +1,15 @@
 # Quality frontier, gemma 4 26b a4b qat optiq 4bit results 1: results
 
-Written by `mise run night-run-3` from `.bench-logs/night3-20261011-223717/steps.jsonl` and the result files. The plan and the rules are [design.md](design.md). Local model(s) `gemma-4-26b-a4b-qat-optiq-4bit`, cloud reference `claude-sonnet-5`.
+Written by `mise run night-run-3` from `.bench-logs/night3-20261012-070347/steps.jsonl` and the result files. The plan and the rules are [design.md](design.md). Local model(s) `gemma-4-26b-a4b-qat-optiq-4bit`, cloud reference `claude-sonnet-5`.
 
-- Started 2026-10-11T22:37:41+02:00, last step ended 2026-10-12T01:47:43+02:00.
+- Started 2026-10-12T07:04:11+02:00, last step ended 2026-10-12T07:41:01+02:00.
 - Cloud spend: $0 of the $0 cap.
 
 ## Steps
 
 | # | Part | Step | Classes | Variant | Status | Minutes | Result |
 |---|---|---|---|---|---|---|---|
-| 1 | local | base | edit-multi-mechanical | base | TIMEOUT:    ✗ run 1 fm-r2-a       420.1s · 1 att · None tools · timed out | 190 | `bench/frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261011-223741.json` |
+| 1 | local | base | create-file | base | OK | 37 | `bench/frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261012-070411.json` |
 
 ## Frontier
 
@@ -81,7 +81,7 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 |---|---|---|---|---|---|---|---|---|---|---|
 | cloud-claude-sonnet-5 | base | cloud | 2/4 0.66 cloud | 4/4 0.83 not-yet | 4/4 0.71 not-yet | 3/4 0.43 not-yet | 0 / 0 | 1 | – | 4.0+ |
 | cloud-gpt-6-sol | base | cloud | 4/4 0.88 not-yet | 4/4 0.83 not-yet | 4/4 0.71 not-yet |  | 0 / 3 | none | – | 3.0+ |
-| gemma-4-26b-a4b-qat-optiq-4bit | base | local | 6/8 0.81 not-yet | 8/8 0.91 not-yet | 8/8 0.83 not-yet | 0/8 0.00 cloud | 0 / 3 | 4 | 3.6 | 1.2 |
+| gemma-4-26b-a4b-qat-optiq-4bit | base | local | 6/10 0.69 cloud | 10/10 0.86 not-yet | 8/10 0.60 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | 3.1 | – |
 | k2-horizon-mova-36b-a4b-4bit | base | local | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | – | – |
 | k2-horizon-mova-36b-a4b-4bit | base | local | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | – | – |
 | laguna-xs-2.1-8bit-64g | retry2 | local | 2/4 0.23 cloud | 0/4 0.11 cloud | 2/4 0.23 cloud |  | 0 / 0 | 1 | 0.2 | – |
@@ -104,6 +104,7 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 | qwen3.6-35b-a3b-optiq | retry2 | local | 15/20 0.61 not-yet |  |  |  | 0 / 1 | none | – | – |
 | qwen3.6-35b-a3b-optiq | retry2 | local | 10/10 0.95 trusted | 10/10 0.92 trusted | 10/10 0.86 not-yet | 7/10 0.50 not-yet | 2 / 4 | none | 5.3 | 3.2 |
 | qwen3.6-35b-a3b-optiq | retry2 | local |  |  | 36/40 0.82 not-yet | 4/10 0.23 cloud | 0 / 3 | 4 | 4.1 | – |
+| qwen3.6-35b-a3b-optiq | retry2+cap900 | local |  |  | 33/36 0.84 not-yet |  | 0 / 3 | none | – | 3+ |
 
 ### debug (bar 0.95 × p_cloud; cell: k/n, monotone LB, verdict)
 
@@ -123,6 +124,7 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - create-file · qwen3.6-35b-a3b-optiq · retry2: 1 → 1 (no gain)
 - create-file · qwen3.6-35b-a3b-optiq · retry2: 1 → 4 (moves it)
 - create-file · qwen3.6-35b-a3b-optiq · retry2: 1 → 3 (moves it)
+- create-file · qwen3.6-35b-a3b-optiq · retry2+cap900: 1 → 3 (moves it)
 - edit-multi-mechanical · laguna-xs-2.1-8bit-64g · decompose: 0 → 3 (moves it)
 - edit-multi-mechanical · occamy-1.0-4bit-64g · decompose: 0 → 0 (no gain)
 - edit-multi-mechanical · qwen3.6-35b-a3b-8bit-64g · decompose: 4 → 0 (no gain)
