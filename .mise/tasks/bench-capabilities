@@ -190,6 +190,7 @@ def self_check():
                                               "delegate_n": 0, "local_k": 3, "local_n": 3}
     assert all(isinstance(x, (str, int)) for c in blk["classes"].values() for x in c.values())
     overlay_check()
+    frontier_check()
     print("✓ bench-capabilities self-check passed")
 
 
@@ -246,6 +247,28 @@ def overlay_check():
                 raise AssertionError("a verdict row entered the probe tally")
             except SystemExit:
                 pass
+        finally:
+            B.BENCH = real
+
+
+def frontier_check():
+    """bench-frontier debug samples: base variant only, one condition per harness_sha."""
+    import tempfile
+    real = B.BENCH
+    with tempfile.TemporaryDirectory() as t:
+        B.BENCH = Path(t)
+        try:
+            for f in ("task-classes.json", "tasks.json"):
+                (B.BENCH / f).write_text((real / f).read_text())
+            smp = lambda tid, run, ok, cls="debug": {"task": tid, "class": cls, "run": run, "verified": ok,
+                                                    "valid": True, "served_model": "w"}
+            for name, sha, var in (("a", "h1", "base"), ("b", "h2", "base"), ("c", "h1", "cap900")):
+                meta = {"key": "w", "variant": var, "cloud_model": None, "harness_sha": sha, "tasks_sha": "t"}
+                doc = {"meta": meta, "samples": [smp("db-1", 1, True), smp("db-2", 1, True), smp("es-1", 1, True, "edit-single")]}
+                (B.BENCH / f"frontier-w-{var}-{name}.json").write_text(json.dumps(doc))
+            r = [x for x in B.rows().values() if x["model"] == "w"]
+            assert sorted((x["class"], x["n"]) for x in r) == [("debug", 2), ("debug", 2)], r
+            assert {x["condition"].split("harness=")[1][:2] for x in r} == {"h1", "h2"}, r
         finally:
             B.BENCH = real
 
