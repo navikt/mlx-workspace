@@ -13,6 +13,21 @@ from pathlib import Path
 
 TARGET = os.environ.get("BENCH_TARGET", "").strip()
 HOOK = b"  # target-hook\n"
+NPMRC_AUTH = "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
+# Every `# target-hook` line in bench-cheap-ops, exactly. All but the import and the
+# hash strip are gated on a target, so with BENCH_TARGET unset none of this module's
+# code runs except strip_hooks, which is what keeps the Kotlin hash on main's bytes.
+# A new hook line fails the self-check until it is added here on purpose.
+ALLOWED_HOOKS = [
+    'import _cheap_ops_target as T',
+    'if T.TARGET: CFG = T.load(ROOT, CFG)',
+    'if rel == ".mise/tasks/bench-cheap-ops": h.update(T.strip_hooks(f.read_bytes())); continue',
+    'if T.TARGET and rel == "bench/tasks.json": return T.harness_sha(ROOT, CFG)',
+    'if T.TARGET: repo = ws / CFG["workdir"]',
+    'if CFG.get("workdir"): allowed.add(CFG["workdir"])',  # borrowed by bench-frontier, which has no T
+    'if T.TARGET and kind == "check": return T.check(task, globals())',
+    'if T.TARGET: T.install(repo, CFG, sh)',
+]
 
 
 def load(root, cfg):
@@ -34,12 +49,25 @@ def harness_sha(root, cfg):
 
 
 def install(repo, cfg, sh):
-    """Once per checkout: node_modules survives reset (git clean keeps ignored files)."""
-    if cfg.get("install") and not (repo / "node_modules").is_dir():
-        print(f"→ installing dependencies in {repo.name}")
-        r = sh(["bash", "-lc", cfg["install"]], cwd=repo, timeout=1800)
-        if r.returncode != 0:
-            raise SystemExit(f"✗ install failed: {(r.stdout + r.stderr)[-400:]}")
+    """Once per checkout: node_modules survives reset (git clean keeps ignored files).
+
+    The token never touches disk: .npmrc gets a ${NODE_AUTH_TOKEN} reference and the
+    token goes only into pnpm's environment. .npmrc is restored in `finally`, so a
+    timed-out install leaves nothing behind either.
+    """
+    if not cfg.get("install") or (repo / "node_modules").is_dir():
+        return
+    print(f"\u2192 installing dependencies in {repo.name}")
+    npmrc = repo / ".npmrc"
+    orig = npmrc.read_bytes() if npmrc.exists() else None
+    try:
+        npmrc.write_bytes((orig or b"").rstrip(b"\n") + b"\n" + NPMRC_AUTH.encode() + b"\n")
+        token = sh(["gh", "auth", "token"]).stdout.strip()
+        r = sh(["bash", "-lc", cfg["install"]], cwd=repo, timeout=1800, env={"NODE_AUTH_TOKEN": token})
+    finally:
+        npmrc.write_bytes(orig) if orig is not None else npmrc.unlink(missing_ok=True)
+    if r.returncode != 0:
+        raise SystemExit(f"\u2717 install failed: {(r.stdout + r.stderr)[-400:]}")
 
 
 def check(task, g):
@@ -83,6 +111,13 @@ if __name__ == "__main__":  # self-check: no model, no server
     import subprocess, tempfile
     sh = lambda c, cwd=None, timeout=60: subprocess.run(c, cwd=cwd, capture_output=True, text=True)
     assert strip_hooks(b"a\nx = 1" + HOOK + b"b\n") == b"a\nb\n"
+    here = Path(__file__).resolve().parent
+    hooks = [l.decode().strip() for l in (here / "bench-cheap-ops").read_bytes().splitlines(keepends=True)
+             if l.endswith(HOOK)]
+    hooks = [h[: -len("# target-hook")].strip() for h in hooks]
+    assert hooks == ALLOWED_HOOKS, f"target-hook lines differ from ALLOWED_HOOKS: {hooks}"
+    kotlin = json.loads((here.parents[1] / "bench" / "tasks.json").read_text())
+    assert "workdir" not in kotlin and "install" not in kotlin, "the ungated workdir hook must stay inert for Kotlin"
     with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as fx:
         repo = Path(d); (repo / "src").mkdir(); f = repo / "src" / "a.ts"; f.write_text("good\n")
         for c in (["init", "-q"], ["add", "."], ["-c", "user.name=b", "-c", "user.email=b@b",
