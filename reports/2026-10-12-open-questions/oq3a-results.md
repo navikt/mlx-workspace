@@ -156,3 +156,16 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · example: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
+## #215 gate: edit-single on the 8-bit, pooled within harness `7a11c4a406ce`
+
+Counts read from the result JSONs (`verified` true), one-sided 90 % Wilson lower bound, z = 1.2816. Last night's 16 passes are the files listed in `oq-results-1.md` to `oq-results-16.md` (#230); this run's 16 are the files above.
+
+| Set | E1 | E3b | O1 | edit-single (E1+E3b+O1) | LB | O1 LB |
+|---|---|---|---|---|---|---|
+| Last night (01:59–04:35) | 16/16 | 13/16 | 16/16 | 45/48 | 0.877 | 0.907 |
+| This run (11:14–14:06) | 16/16 | 15/16 | 16/16 | 47/48 | 0.933 | 0.907 |
+| **Pooled** | 32/32 | 28/32 | 32/32 | **92/96** | **0.924** | **0.951** |
+| Bar (owner, 12 Oct) | | | | 46/48 | 0.904 | 0.907 |
+
+Both bars hold. The 59/60 in `reports/2026-10-10-small-delegate/report.md` is from the previous harness generation and is not pooled in.
