@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-11T20:11:05Z",
+  "generated_at": "2026-10-12T19:52:00Z",
   "reports": [
     {
       "id": "2026-10-11-newmodels/report",
@@ -898,13 +898,6 @@
       "status": "needs user decision; held until dispatch is shown to work",
       "when": "after dispatch re-probe 7 (#121); probe 6 kept create-file untrusted",
       "where": "PT §8.3 \"Capabilities proposal\", §8.8, navikt/copilot#1010"
-    },
-    {
-      "item": "**`retry2` as the default for edit-single dispatch**",
-      "decides": "nav-pilot's check-and-retake policy",
-      "status": "parked (triggers only): needs re-probe 7 (#121)",
-      "when": "–",
-      "where": "[night-2.md](2026-09-25-quality-frontier/night-2.md), navikt/copilot#1011"
     },
     {
       "item": "**read-qa: an ANSWER-line reminder on top of `example`**",
