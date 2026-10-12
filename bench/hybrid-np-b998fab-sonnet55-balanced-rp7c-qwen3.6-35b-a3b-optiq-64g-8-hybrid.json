@@ -1,0 +1,1327 @@
+{
+  "samples": [
+    {
+      "n": 0,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:37:42+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181668,
+        "input": 14,
+        "output": 742,
+        "reasoning": 0,
+        "cache_write": 31821,
+        "cache_read": 149091
+      },
+      "cloud_cost_usd": 0.1019,
+      "cloud_cost_seen_usd": 0.1019,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 17883
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18081
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-0-20261012-153742.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 1,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:37:58+0200",
+      "seconds": 20.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181855,
+        "input": 14,
+        "output": 756,
+        "reasoning": 151,
+        "cache_write": 31885,
+        "cache_read": 149049
+      },
+      "cloud_cost_usd": 0.1037,
+      "cloud_cost_seen_usd": 0.1037,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18045
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18124
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-1-20261012-153758.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 2,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:38:19+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 209862,
+        "input": 16,
+        "output": 751,
+        "reasoning": 0,
+        "cache_write": 30777,
+        "cache_read": 178318
+      },
+      "cloud_cost_usd": 0.1023,
+      "cloud_cost_seen_usd": 0.1023,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18029
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18107
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-2-20261012-153819.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 3,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:38:36+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181544,
+        "input": 14,
+        "output": 761,
+        "reasoning": 0,
+        "cache_write": 31782,
+        "cache_read": 148987
+      },
+      "cloud_cost_usd": 0.102,
+      "cloud_cost_seen_usd": 0.102,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18091
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18553
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-3-20261012-153836.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 4,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:38:53+0200",
+      "seconds": 15.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181505,
+        "input": 14,
+        "output": 712,
+        "reasoning": 0,
+        "cache_write": 31769,
+        "cache_read": 149010
+      },
+      "cloud_cost_usd": 0.1015,
+      "cloud_cost_seen_usd": 0.1015,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18473
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18290
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-4-20261012-153853.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 5,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:39:09+0200",
+      "seconds": 15.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181513,
+        "input": 14,
+        "output": 690,
+        "reasoning": 0,
+        "cache_write": 31769,
+        "cache_read": 149040
+      },
+      "cloud_cost_usd": 0.1013,
+      "cloud_cost_seen_usd": 0.1013,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18298
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18950
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-5-20261012-153909.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 6,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:39:24+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181748,
+        "input": 14,
+        "output": 777,
+        "reasoning": 55,
+        "cache_write": 31874,
+        "cache_read": 149028
+      },
+      "cloud_cost_usd": 0.1029,
+      "cloud_cost_seen_usd": 0.1029,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18875
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18673
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-6-20261012-153924.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 7,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:39:42+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181737,
+        "input": 14,
+        "output": 776,
+        "reasoning": 61,
+        "cache_write": 31862,
+        "cache_read": 149024
+      },
+      "cloud_cost_usd": 0.103,
+      "cloud_cost_seen_usd": 0.103,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18649
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18752
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-7-20261012-153942.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 8,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:40:00+0200",
+      "seconds": 18.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181668,
+        "input": 14,
+        "output": 751,
+        "reasoning": 54,
+        "cache_write": 31842,
+        "cache_read": 149007
+      },
+      "cloud_cost_usd": 0.1026,
+      "cloud_cost_seen_usd": 0.1026,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18480
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18833
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-8-20261012-154000.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 9,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:40:19+0200",
+      "seconds": 19.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 182014,
+        "input": 14,
+        "output": 802,
+        "reasoning": 159,
+        "cache_write": 31918,
+        "cache_read": 149121
+      },
+      "cloud_cost_usd": 0.1043,
+      "cloud_cost_seen_usd": 0.1043,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18781
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18845
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-9-20261012-154019.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 10,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:40:39+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 211757,
+        "input": 16,
+        "output": 831,
+        "reasoning": 0,
+        "cache_write": 31970,
+        "cache_read": 178940
+      },
+      "cloud_cost_usd": 0.1062,
+      "cloud_cost_seen_usd": 0.1062,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18783
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18748
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-10-20261012-154039.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 11,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:40:57+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 208721,
+        "input": 16,
+        "output": 684,
+        "reasoning": 0,
+        "cache_write": 30609,
+        "cache_read": 177412
+      },
+      "cloud_cost_usd": 0.1011,
+      "cloud_cost_seen_usd": 0.1011,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18663
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18434
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-11-20261012-154057.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 12,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:41:14+0200",
+      "seconds": 16.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 7,
+      "cloud_tokens": {
+        "total": 208165,
+        "input": 16,
+        "output": 708,
+        "reasoning": 0,
+        "cache_write": 30293,
+        "cache_read": 177148
+      },
+      "cloud_cost_usd": 0.1006,
+      "cloud_cost_seen_usd": 0.1006,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18410
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18524
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-12-20261012-154113.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 13,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:41:30+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 6,
+      "cloud_tokens": {
+        "total": 181802,
+        "input": 14,
+        "output": 790,
+        "reasoning": 77,
+        "cache_write": 31873,
+        "cache_read": 149048
+      },
+      "cloud_cost_usd": 0.1033,
+      "cloud_cost_seen_usd": 0.1033,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18464
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18614
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-13-20261012-154130.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    },
+    {
+      "n": 14,
+      "arm": "hybrid",
+      "rung": 8,
+      "task": "O1",
+      "preflight": 0,
+      "started": "2026-10-12T15:41:48+0200",
+      "seconds": 17.1,
+      "timed_out": false,
+      "exit": 0,
+      "local_calls": 0,
+      "lines_changed": 2,
+      "files_changed": 1,
+      "cloud_steps": 8,
+      "cloud_tokens": {
+        "total": 241750,
+        "input": 18,
+        "output": 884,
+        "reasoning": 0,
+        "cache_write": 32027,
+        "cache_read": 208821
+      },
+      "cloud_cost_usd": 0.1098,
+      "cloud_cost_seen_usd": 0.1098,
+      "truncated": false,
+      "markers_after": {
+        "worker_model": false,
+        "dispatch_fragment": true,
+        "mlx_provider": false
+      },
+      "policy": {
+        "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+        "sha256": "07519e0c55da20ad7ae0ff436fe81391b09287a44ce0738f5215a9e96b7293c1",
+        "bytes": 3405,
+        "send": "Send it: a fully specified edit to one file, such as a comment or a log line; large mechanical changes that follow one pattern across many files or call sites, such as a parameter threaded through its call sites; a new file, tests included."
+      },
+      "memory": {
+        "before": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18369
+        },
+        "after": {
+          "swap_used_mb": 44.62,
+          "swap_free_mb": 979.38,
+          "free_mb": 18419
+        }
+      },
+      "local_server_pid": 9199,
+      "local_server_started": "2026-10-12T15:37:35.666205+02:00",
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "agentpakke": null,
+      "log": ".bench-logs/hybrid-8-hybrid-14-20261012-154148.jsonl",
+      "verified": true,
+      "note": "compiles",
+      "dispatched": false,
+      "valid": true,
+      "invalid_reason": null,
+      "instructions_after": [
+        {
+          "path": "/Users/hans/mlx-workspace/workspaces/hybrid-bench/.xdg-config/opencode/nav-pilot-local-dispatch.md",
+          "bytes": 3405
+        }
+      ],
+      "dispatches": [],
+      "rework": {
+        "accepted": 0,
+        "fixed": 0,
+        "redone": 0
+      },
+      "gate": {
+        "deny_files": 0,
+        "deny_scripted": 0,
+        "deny_create": 0,
+        "dispatched_after_deny": 0,
+        "denied": [],
+        "orchestrator_files": [
+          ".nais/naiserator-dev.yaml"
+        ],
+        "worker_files": [],
+        "checked_after_dispatch": false,
+        "armed": true
+      }
+    }
+  ],
+  "preflight": [
+    {
+      "checked_at": "2026-10-12T15:37:41+0200",
+      "arm": "hybrid",
+      "local_profile": "qwen3.6-35b-a3b-optiq-64g",
+      "local_model": "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit",
+      "nav_pilot_version": "nav-pilot 2026.10.11-201029-b998fab (commit: b998fab75e38f380ac53625312f6c7a1f05c480a, built: 2026-10-11T20:10:46Z)",
+      "nav_pilot": "/Users/hans/tmp/oq-bin/nav-pilot-main-b998fab",
+      "nav_pilot_auto_update": false,
+      "nav_pilot_config": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261012-153733.config.toml",
+      "tag": "np-b998fab-sonnet55-balanced-rp7c",
+      "opencode_version": "1.18.35",
+      "cloud_model": "claude-sonnet-5.5",
+      "bench_manifest": "/Users/hans/mlx-workspace/.bench-logs/np-serve-20261012-153733.models.json",
+      "bench_capabilities_override": {
+        "_label": "Bench-only trust overlay for the night 64-6 phase C requeue (#147). The classes to trial, not a measured verdict. Loaded only through BENCH_CAPABILITIES_OVERRIDE into the run's own manifest; never shipped, never counted toward a verdict.",
+        "classes": {
+          "edit-multi-mechanical": {
+            "delegate": "trusted"
+          },
+          "create-file": {
+            "delegate": "trusted"
+          },
+          "edit-single": {
+            "delegate": "trusted"
+          }
+        }
+      },
+      "np_config_line": "local_dispatch = \"balanced\"",
+      "load_average": 4.04,
+      "exclusive": true,
+      "wired_limit_gb": 48,
+      "wired_limit_expected_gb": 48,
+      "local_server": {
+        "pid": 9199,
+        "port": "54354",
+        "started": "2026-10-12T15:37:35.666205+02:00",
+        "probe_seconds": 0.31
+      },
+      "markers_before": {
+        "worker_model": false,
+        "dispatch_fragment": false,
+        "mlx_provider": false
+      },
+      "instructions_before": [],
+      "workspace_head": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "workspace_pinned": "b0351ed8ff9f2341119c67d299462ea2a136c9bb",
+      "memory_at_preflight": {
+        "swap_used_mb": 44.62,
+        "swap_free_mb": 979.38,
+        "free_mb": 17895
+      }
+    }
+  ],
+  "rung": 8,
+  "arm": "hybrid",
+  "task": "O1",
+  "tag": "np-b998fab-sonnet55-balanced-rp7c",
+  "target": "tasks",
+  "worker_profile": "qwen3.6-35b-a3b-optiq-64g",
+  "kind": "edit",
+  "verify": "compile",
+  "prompt": "In kotlin/.nais/naiserator-dev.yaml, raise the memory limit under spec.resources.limits from 512Mi to 768Mi. Change nothing else."
+}
