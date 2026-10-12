@@ -45,7 +45,7 @@ No new model replaces optiq yet. Nemotron is the only candidate with a full data
 Two tasks per rung. Different harness from the optiq reference. Timeouts drive much of the cf result for Nemotron.
 
 ## Decision
-Routing is unchanged. Drop Mellum and Muse-Glimmer. Wait for the Gemma fm rerun before deciding on Gemma.
+Routing is unchanged. Drop Mellum and Muse-Glimmer. Keep Gemma at not-yet; the fm rerun has landed and the [Gemma follow-up](gemma-followup.md) gives the numbers.
 
 ## Sources
 `bench/frontier-mellum2.1-12b-a2.5b-thinking-mxfp4-base-20261011-092657.json`, `bench/frontier-nemotron-3.5-lightning-30b-a3b-optiq-4bit-base-20261011-105741.json`, `bench/frontier-nemotron-3.5-lightning-30b-a3b-optiq-4bit-base-20261011-134827.json`, `bench/frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261011-145520.json`, `bench/frontier-gemma-4-26b-a4b-qat-optiq-4bit-base-20261011-203328.json`, [Nemotron 1](nemotron-3.5-lightning-30b-a3b-optiq-4bit-results-1.md), [Nemotron 2](nemotron-3.5-lightning-30b-a3b-optiq-4bit-results-2.md), [Gemma 3](gemma-4-26b-a4b-qat-optiq-4bit-results-3.md), [Gemma 4](gemma-4-26b-a4b-qat-optiq-4bit-results-4.md), [Gemma follow-up](gemma-followup.md), [plan](plan.md).
