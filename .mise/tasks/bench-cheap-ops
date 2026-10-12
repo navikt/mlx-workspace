@@ -121,7 +121,7 @@ def assert_workspace_is_clean():
     were committed to this repository, which is why no reset ever removed them.
     """
     allowed = {"AGENTS.md", "opencode.json", "kotlin", "weather-cli", ".DS_Store"}
-    if CFG.get("workdir"): allowed.add(CFG["workdir"])  # target-hook
+    if globals().get("CFG", {}).get("workdir"): allowed.add(CFG["workdir"])  # target-hook
     stray = sorted(p.name for p in ws.iterdir() if p.name not in allowed) if ws.exists() else []
     if stray:
         raise SystemExit(
