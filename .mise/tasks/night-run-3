@@ -316,9 +316,9 @@ cleanup_after() {
   else mise run server-stop >> "$log" 2>&1 < /dev/null; fi
   # A hybrid, e2e or decide step killed at its timeout skips its own cleanup: nav-pilot's
   # server is not in the step's process tree, would outlive it and hold the next step off.
-  # A hybrid step also leaves the dispatch policy in ~/.config/opencode. `off` against a
-  # scratch config removes the policy and the binding without touching the user's
-  # ~/.nav-pilot/config.toml.
+  # A hybrid step also leaves the dispatch policy in its XDG config. `off` against a
+  # scratch config and a HOME of its own (#227) removes it without touching the
+  # user's ~/.nav-pilot or ~/.config/opencode.
   case "${2:-}" in hybrid|e2e|decide) [ -z "$FAKE" ] && {
     local st="$HOME/.nav-pilot/local/server.json" spid
     "$BENCH_NAV_PILOT" alpha local stop >> "$log" 2>&1 < /dev/null
@@ -327,8 +327,15 @@ cleanup_after() {
   } ;; esac
   if [ "${2:-}" = hybrid ] && [ -z "$FAKE" ]; then
     : > "$DIR/np-off.toml"
-    NAV_PILOT_CONFIG="$DIR/np-off.toml" "$BENCH_NAV_PILOT" alpha local off >> "$log" 2>&1 < /dev/null
+    NAV_PILOT_CONFIG="$DIR/np-off.toml" python3 -c 'import os, subprocess, sys
+sys.path.insert(0, ".mise/tasks"); import _sandbox as S
+env = {**os.environ, **S.own_home("np-off-home-", ())[1], "XDG_CONFIG_HOME": sys.argv[1]}
+sys.exit(subprocess.run(sys.argv[2:], env=env).returncode)' \
+      "$ROOT/workspaces/hybrid-bench/.xdg-config" "$BENCH_NAV_PILOT" alpha local off >> "$log" 2>&1 < /dev/null
   fi
+  # SIGKILL skips own_home's atexit, which leaves a temp HOME with a copy of auth.json.
+  # Steps run one at a time, so none of these is in use here.
+  rm -rf "${TMPDIR:-/tmp}"/hybrid-home-* "${TMPDIR:-/tmp}"/frontier-home-* "${TMPDIR:-/tmp}"/np-off-home-* 2>/dev/null
   if [ -d "$LOCKDIR" ]; then
     holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
     if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then
