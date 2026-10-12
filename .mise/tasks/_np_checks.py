@@ -728,6 +728,12 @@ def selftest():
             assert got["create-file"] == {**shipped["create-file"], "delegate": "trusted"}, got
             assert {c: v for c, v in got.items() if c != "create-file"} == \
                 {c: v for c, v in shipped.items() if c != "create-file"}, got
+            # A shipped entry's expect prose is blanked; the others keep theirs (#223).
+            with contextlib.redirect_stdout(io.StringIO()):
+                manifest("qwen3.6-35b-a3b-8bit-64g", str(f))
+            q = json.loads(f.read_text())["models"]
+            assert [e["expect"] for e in q if e["model"] == "mlx-community/Qwen3.6-35B-A3B-8bit"] == [""], q
+            assert q[0]["expect"] and q[0]["expect"] == m[0]["expect"], q[0]
             o.write_text(json.dumps({"classes": {"create_file": {"delegate": "Trusted"}}}))
             try:
                 manifest("occamy-1.0-4bit-64g", str(f))
