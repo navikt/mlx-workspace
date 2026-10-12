@@ -24,7 +24,8 @@ ALLOWED_HOOKS = [
     'if rel == ".mise/tasks/bench-cheap-ops": h.update(T.strip_hooks(f.read_bytes())); continue',
     'if T.TARGET and rel == "bench/tasks.json": return T.harness_sha(ROOT, CFG)',
     'if T.TARGET: repo = ws / CFG["workdir"]',
-    'if CFG.get("workdir"): allowed.add(CFG["workdir"])',  # borrowed by bench-frontier, which has no T
+    # borrowed by bench-frontier and the night preflight, which exec it without CFG
+    'if globals().get("CFG", {}).get("workdir"): allowed.add(CFG["workdir"])',
     'if T.TARGET and kind == "check": return T.check(task, globals())',
     'if T.TARGET: T.install(repo, CFG, sh)',
 ]
@@ -112,6 +113,14 @@ if __name__ == "__main__":  # self-check: no model, no server
     sh = lambda c, cwd=None, timeout=60: subprocess.run(c, cwd=cwd, capture_output=True, text=True)
     assert strip_hooks(b"a\nx = 1" + HOOK + b"b\n") == b"a\nb\n"
     here = Path(__file__).resolve().parent
+    # Borrowed the way bench-frontier and night-preflight do: exec'd alone, no CFG in scope.
+    import sys; sys.path.insert(0, str(here)); import _night_workspace_clean as W
+    with tempfile.TemporaryDirectory() as d:
+        ns = W._borrow(); ns["ws"] = Path(d); (Path(d) / "kotlin").mkdir()
+        ns["assert_workspace_is_clean"]()  # NameError on CFG before the globals() guard
+        (Path(d) / "stray").touch()
+        try: ns["assert_workspace_is_clean"](); raise AssertionError("stray file not caught")
+        except SystemExit: pass
     hooks = [l.decode().strip() for l in (here / "bench-cheap-ops").read_bytes().splitlines(keepends=True)
              if l.endswith(HOOK)]
     hooks = [h[: -len("# target-hook")].strip() for h in hooks]
