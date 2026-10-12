@@ -263,7 +263,7 @@
       "backend": "mlx-lm",
       "default": false,
       "role": "Opt-in for 64 GB machines, the default's model at 8-bit",
-      "expect": "Opt-in for 64 GB machines, never the default: the default's model at 8-bit, 38 GB of weights. Not yet trusted for delegation. In a bench harness that split work one file per subtask it verified 34 of 36 single-file edits and 40 of 48 multi-file edits, and 30 of 36 new test files with one retry. 12 of 12 Copilot sessions verified. About 73 tokens a second at 30k. A 49k prompt peaked at 46 GB of the 48 GB limit; longer prompts are unmeasured.",
+      "expect": "Opt-in for 64 GB machines, never the default: the default's model at 8-bit, 38 GB of weights. Not yet trusted for delegation. It verified 92 of 96 single-file edits in the current bench harness. In an older harness that split work one file per subtask it verified 40 of 48 multi-file edits, and 30 of 36 new test files with one retry. 12 of 12 Copilot sessions verified. About 73 tokens a second at 30k. A 49k prompt peaked at 46 GB of the 48 GB limit; longer prompts are unmeasured.",
       "weights_gb": 38,
       "min_ram_gb": 64,
       "wired_limit_gb": 48,
