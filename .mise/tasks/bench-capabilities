@@ -147,6 +147,19 @@ def manifest_block(per_class):
     }
 
 
+def keep_local_source(blocks):
+    """local_source is entered by hand (#215, #232): the report a shipped local count
+    came from. Nothing in bench/ holds it, so it is carried over from the committed
+    file, per model and class, or a regen drops it (#240)."""
+    prev = json.loads(OUT.read_text())["manifest_blocks"] if OUT.exists() else {}
+    for m, b in blocks.items():
+        for cls, v in b["classes"].items():
+            src = prev.get(m, {}).get("classes", {}).get(cls, {}).get("local_source")
+            if src:
+                v["local_source"] = src
+    return blocks
+
+
 def build():
     rows = [B.as_json(r) for r in B.rows().values()]
     probe = [B.as_json(r) for r in B.rows(probe=True).values()]
@@ -161,7 +174,7 @@ def build():
             if v.get("exclude_from_bar")},
         # What model-manifest copies into each entry, by MLX_MODEL. A model with
         # no runs gets the unmeasured block: cloud everywhere, never no block.
-        "manifest_blocks": {m: manifest_block(v) for m, v in models.items()},
+        "manifest_blocks": keep_local_source({m: manifest_block(v) for m, v in models.items()}),
         "unmeasured_block": manifest_block({c: {"delegate": none, "local": none} for c in CLASSES}),
         "models": models,
         "delegate_probe": probe_tally(probe, rows),
