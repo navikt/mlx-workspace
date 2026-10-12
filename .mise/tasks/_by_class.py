@@ -76,9 +76,15 @@ DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 #   own_home runs only from bench-frontier's cloud_env and bench-hybrid; the local arm
 #   never calls it, and the rest of the bench-frontier diff is cloud_env and a help string.
 #   fd07267425b2 and 214f6a6e1f93: #233 put the owner's pid in own_home's dir name; same reach.
+#   b2aa8f6b0a8e and 574568dab9bf (bench-frontier): #242/#243 and #245 (12 Oct) changed
+#   only bench-cheap-ops among frontier's hashed files, and only by `# target-hook` lines;
+#   with them stripped the file is byte-identical to 3ddd8d4e1be1's. bench-frontier execs
+#   just BORROWED functions, whose one hook is `if CFG.get("workdir")`, and no frontier
+#   tasks file has workdir. cheap-ops' own hash strips the hooks, so it did not move.
 EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135fe6",
                       "8d466262d110": "7a11c4a406ce", "9b8666a6c422": "0da7d95c0d44",
-                      "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44"}
+                      "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44",
+                      "b2aa8f6b0a8e": "3ddd8d4e1be1", "574568dab9bf": "3ddd8d4e1be1"}
 
 Z90 = NormalDist().inv_cdf(0.90)  # one-sided 90%
 
