@@ -334,8 +334,13 @@ sys.exit(subprocess.run(sys.argv[2:], env=env).returncode)' \
       "$ROOT/workspaces/hybrid-bench/.xdg-config" "$BENCH_NAV_PILOT" alpha local off >> "$log" 2>&1 < /dev/null
   fi
   # SIGKILL skips own_home's atexit, which leaves a temp HOME with a copy of auth.json.
-  # Steps run one at a time, so none of these is in use here.
-  rm -rf "${TMPDIR:-/tmp}"/hybrid-home-* "${TMPDIR:-/tmp}"/frontier-home-* "${TMPDIR:-/tmp}"/np-off-home-* 2>/dev/null
+  # The name carries the owner's pid; only a dead owner's dir goes.
+  local h hp
+  for h in "${TMPDIR:-/tmp}"/{hybrid,frontier,np-off}-home-*; do
+    [ -d "$h" ] || continue
+    hp=${h##*-home-}; hp=${hp%%-*}
+    [[ "$hp" =~ ^[0-9]+$ ]] && ! kill -0 "$hp" 2>/dev/null && rm -rf "$h"
+  done
   if [ -d "$LOCKDIR" ]; then
     holder=$(cat "$LOCKDIR/pid" 2>/dev/null)
     if [ -z "$holder" ] || ! kill -0 "$holder" 2>/dev/null; then

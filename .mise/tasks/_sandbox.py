@@ -42,7 +42,7 @@ def own_home(prefix: str, copies=(".local/share/opencode/auth.json",)) -> tuple[
     Returns (home, env overrides). The copy holds auth tokens, so it goes at exit, and a
     SIGTERM (night-run-3's kill_tree) is turned into an exit so atexit still runs."""
     real = Path.home()
-    home = Path(tempfile.mkdtemp(prefix=prefix))
+    home = Path(tempfile.mkdtemp(prefix=f"{prefix}{os.getpid()}-"))  # night-run-3 reads the pid
     atexit.register(shutil.rmtree, home, True)
     if signal.getsignal(signal.SIGTERM) is signal.SIG_DFL:
         signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))

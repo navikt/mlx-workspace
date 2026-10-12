@@ -75,8 +75,10 @@ DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 #   the cloud arm's temporary HOME into _sandbox.own_home and gave the hybrid arm one.
 #   own_home runs only from bench-frontier's cloud_env and bench-hybrid; the local arm
 #   never calls it, and the rest of the bench-frontier diff is cloud_env and a help string.
+#   fd07267425b2 and 214f6a6e1f93: #233 put the owner's pid in own_home's dir name; same reach.
 EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135fe6",
-                      "8d466262d110": "7a11c4a406ce", "9b8666a6c422": "0da7d95c0d44"}
+                      "8d466262d110": "7a11c4a406ce", "9b8666a6c422": "0da7d95c0d44",
+                      "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44"}
 
 Z90 = NormalDist().inv_cdf(0.90)  # one-sided 90%
 
