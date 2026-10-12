@@ -1396,6 +1396,11 @@ def check_tests():
     print(f"  ✓ create-file target: {', '.join(f'{t[0]} {len(t[2])} files/{t[4]} mutants' for t in tasks)}")
 
 
+def in_checkout(prompt):
+    """A tasks.json prompt with paths made relative to the checkout (#235)."""
+    return re.sub(r"(?<![\w/.])kotlin/", "", prompt)
+
+
 def self_check():
     """One runnable check on the parsing, so a silent schema change is loud.
     Touches no GPU, no server and no config."""
@@ -1478,6 +1483,8 @@ def self_check():
 
     # One population per tag: an untagged run keeps the August names, a tagged
     # one never lands in them.
+    assert in_checkout("In kotlin/.nais/x.yaml and src/main/kotlin/A.kt") == \
+        "In .nais/x.yaml and src/main/kotlin/A.kt"
     assert out_path(3, "hybrid", "tasks", "").name == "hybrid-3-hybrid.json"
     assert out_path(6, "control", "spring-ia-tjenester-metrikker", "").name == \
         "hybrid-spring-ia-tjenester-metrikker-6-control.json"
@@ -1570,7 +1577,10 @@ def main():
     # so it cannot collide with the developer's own service, and 8080 is now only
     # what a state file written before that change is assumed to mean.
     port = os.environ.get("MLX_SERVER_PORT") or str(recorded_server_port())
-    by_id = {t["id"]: t for t in CFG["tasks"]}
+    # tasks.json names dot-paths from one level above the checkout (kotlin/.nais/...),
+    # where bench-cheap-ops and bench-frontier start the agent. This harness starts
+    # it inside the checkout, so the prefix goes (#235).
+    by_id = {t["id"]: {**t, "prompt": in_checkout(t["prompt"])} for t in CFG["tasks"]}
 
     # A watchdog's SIGTERM would otherwise end the process without the finally below,
     # leaving the dispatch policy in the user's opencode config.
