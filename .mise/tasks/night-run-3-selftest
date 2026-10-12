@@ -30,7 +30,7 @@ case "$b" in
       e2e) echo '{}' > "$B/np-e2e-$prof-$stamp.json" ;;
       ops) echo '{}' > "$B/results-$prof-$stamp.json" ;;
       decide) echo '{}' > "$B/decide-$classes-$prof-$stamp.json" ;;
-      base|lever) python3 - "$B/frontier-$prof-$variant-$stamp.json" "$classes" "$variant" "$prof" <<'P'
+      base|lever) python3 - "$B/frontier-$prof-${variant//+/_}-$stamp.json" "$classes" "$variant" "$prof" <<'P'
 import json, sys
 path, cls, variant, prof = sys.argv[1:]
 samples = [{"task": f"t{r}{x}", "class": cls, "family": "f", "rung": r, "d": 2 ** r, "run": k,
@@ -53,7 +53,7 @@ json.dump({"arm": arm, "tag": tag, "rung": 3, "target": "tasks", "worker_profile
            "samples": [s]}, open(f"{b}/{name}", "w"))
 P
       ;;
-      cloud) python3 - "$ledger" "$B/frontier-cloud-x-$variant-$stamp.json" "$classes" <<'P'
+      cloud) python3 - "$ledger" "$B/frontier-cloud-x-${variant//+/_}-$stamp.json" "$classes" <<'P'
 import json, os, sys
 ledger, path, cls = sys.argv[1:]
 spent = json.load(open(ledger))["spent_usd"] if os.path.exists(ledger) else 0.0
@@ -95,7 +95,7 @@ echo "### one pass over all 16 steps"
 
 echo
 echo "### --queue: a base and a lever step from a file, report named after it"
-printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-single retry2 2 1-2 5 4  # trailing\n' > "$T/night-2.queue"
+printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-single retry2+cap900 2 1-2 5 4  # trailing\n' > "$T/night-2.queue"
 NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"
 
 echo
@@ -135,9 +135,9 @@ check "queue lock released" '[ ! -e "$T/queue.lock" ] && grep -q "released the q
 check "report has the steps and the frontier tables" \
   'grep -q "## Steps" "$T/report.md" && grep -q "### edit-multi-mechanical" "$T/report.md" && grep -q "Cloud spend: \$1.2" "$T/report.md"'
 check "--queue ran its two steps" \
-  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"n\"] + \"=\" + r[\"status\"] + \":\" + r[\"variant\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night2/steps.jsonl")" = "1=OK:base 2=OK:retry2" ]'
+  '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"n\"] + \"=\" + r[\"status\"] + \":\" + r[\"variant\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night2/steps.jsonl")" = "1=OK:base 2=OK:retry2+cap900" ]'
 check "--queue report is titled night 2 and has the replication verdict" \
-  'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2 .* on edit-single" "$T/night-2.md"'
+  'grep -q "^# Quality frontier, night 2: results" "$T/night-2.md" && grep -q "^Verdict: retry2+cap900 .* on edit-single" "$T/night-2.md"'
 check "per-step profiles: e2e, ops and decide found their result files, base ran on p2" \
   '[ "$(python3 -c "import json,sys; print(\" \".join(r[\"kind\"] + \"=\" + r[\"status\"] + \":\" + r[\"profile\"] for r in map(json.loads, open(sys.argv[1]))))" "$T/night64/steps.jsonl")" = "e2e=OK:p1 ops=OK:p2 base=OK:p2 decide=OK:p1" ]'
 check "hybrid steps found their own files, one per worker" \
