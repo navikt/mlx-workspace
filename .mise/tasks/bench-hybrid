@@ -62,12 +62,27 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _sandbox  # noqa: E402
 
 HOME = Path.home()
 # This run's XDG_CONFIG_HOME (see the docstring). Emptied at the start of a run and
 # removed at its end; workspaces/hybrid-bench/*/ is gitignored.
 XDG = ROOT / "workspaces" / "hybrid-bench" / ".xdg-config"
-XDG_ENV = {"XDG_CONFIG_HOME": str(XDG)}
+_ISO = {}
+
+
+def iso_env():
+    """XDG_CONFIG_HOME plus a HOME of this run's own (#227): `alpha local on/off` and a
+    launch then write a copy of ~/.nav-pilot, never the real one. The copy holds the
+    top-level files, the running server's state (np-serve starts it under the real
+    HOME) and opencode's auth.json; logs, caches and the server venv stay behind."""
+    if not _ISO:
+        np_dir = HOME / ".nav-pilot"
+        copies = [".local/share/opencode/auth.json", ".nav-pilot/local/server.json", ".nav-pilot/local/env.json"]
+        copies += [str(f.relative_to(HOME)) for f in np_dir.glob("*") if f.is_file()]
+        _ISO["home"], env = _sandbox.own_home("hybrid-home-", copies)
+        _ISO["env"] = {**env, "XDG_CONFIG_HOME": str(XDG)}
+    return _ISO["env"]
 OPENCODE_CFG = XDG / "opencode" / "opencode.json"
 # The developer's own, which a run must leave exactly as it found it.
 REAL_OPENCODE = HOME / ".config" / "opencode"
@@ -647,7 +662,7 @@ def pakke_record():
     agentpakke from GitHub, and its skills and agents land in the prompt, so the sha
     it got is part of what the sample measured."""
     out = {}
-    for f in sorted((HOME / ".nav-pilot" / "source-cache").glob("*.json")):
+    for f in sorted((Path(iso_env()["HOME"]) / ".nav-pilot" / "source-cache").glob("*.json")):
         d = read_cfg(f)
         out[f.stem] = {"sha": d.get("sha"), "fetched_at": d.get("fetchedAt")}
     return out or None
@@ -692,7 +707,7 @@ def session_env():
     # opencode's own config overrides would bypass XDG_CONFIG_HOME: nav-pilot writes one
     # directory and opencode reads another.
     env = {k: v for k, v in os.environ.items() if not k.startswith("OPENCODE_CONFIG")}
-    env.update(MISE_CEILING_PATHS=str(WS), **XDG_ENV)
+    env.update(MISE_CEILING_PATHS=str(WS), **iso_env())
     if CFG.get("jdk"):
         env.update(JAVA_HOME=str(JDK), PATH=f"{JDK}/bin:{env.get('PATH', '')}")
     return env
@@ -871,7 +886,7 @@ def verify(task, reply):
 # ── preflight ─────────────────────────────────────────────────────────────────
 
 def np(cmd, what):
-    r = sh(cmd, timeout=300, env=XDG_ENV)
+    r = sh(cmd, timeout=300, env=iso_env())
     if r.returncode != 0:
         raise SystemExit(
             f"✗ {what} failed: {' '.join(cmd)}\n"
@@ -1332,6 +1347,7 @@ def check_gate():
     for p in (OPENCODE_CFG, POLICY_FILE):
         assert XDG in p.parents and REAL_OPENCODE not in p.parents, p
     assert session_env()["XDG_CONFIG_HOME"] == str(XDG)
+    assert Path(session_env()["HOME"]) != HOME and not Path(iso_env()["HOME"], ".nav-pilot").is_symlink()  # #227
     print("  ✓ gate events: deny_files, deny_scripted, deny_create, dispatched_after_deny")
 
 
@@ -1568,6 +1584,7 @@ def main():
         raise SystemExit("✗ another bench-hybrid is running, and this run would empty its XDG_CONFIG_HOME")
     shutil.rmtree(XDG, ignore_errors=True)
     (XDG / "opencode").mkdir(parents=True)
+    np([NAV_PILOT, "install", "--user", "--all", "--yes"], "install into the run's own HOME (#227)")
     real_before = tree_stat(REAL_OPENCODE)
     ledger = Path(args.cost_ledger) if args.cost_ledger else None
     spent = float(read_cfg(ledger).get("spent_usd") or 0.0) if ledger else 0.0
@@ -1713,13 +1730,13 @@ def main():
         # `off` against this run's config says whether nav-pilot still cleans up after
         # itself; then the whole directory goes. `on` only writes nav-pilot's own config
         # (local_enabled), never opencode's.
-        sh(LOCAL_OFF, timeout=300, env=XDG_ENV)
+        sh(LOCAL_OFF, timeout=300, env=iso_env())
         left = {k: v for k, v in markers().items() if v}
         if left or POLICY_FILE.exists():
             print(f"⚠ `alpha local off` left dispatch artefacts in {OPENCODE_CFG.parent}: {left or ''} "
                   f"{POLICY_FILE.name if POLICY_FILE.exists() else ''}")
         if was_enabled:
-            sh(LOCAL_ON, timeout=300, env=XDG_ENV)
+            sh(LOCAL_ON, timeout=300, env=iso_env())
         shutil.rmtree(XDG, ignore_errors=True)
         changed_real = sorted(set(real_before.items()) ^ set(tree_stat(REAL_OPENCODE).items()))
         if changed_real:

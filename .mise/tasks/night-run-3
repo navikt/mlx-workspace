@@ -39,8 +39,8 @@ ROOT=$PWD
 ARGS=("$@")
 
 MODEL="${FRONTIER_MODEL:-qwen3.6-35b-a3b-optiq}"
-# Copilot retired claude-sonnet-4.6 by 25 September; its Sonnet successor is claude-sonnet-5.
-CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-5}"
+# Copilot retired claude-sonnet-4.6 by 25 September and claude-sonnet-5 by 12 October (#228).
+CLOUD="${FRONTIER_CLOUD_MODEL:-claude-sonnet-5.5}"
 CAP_USD="${FRONTIER_COST_CAP:-80}"
 export BENCH_NAV_PILOT="${BENCH_NAV_PILOT:-$(ls -t "$ROOT"/.bench-logs/bin/nav-pilot-main-* 2>/dev/null | head -1)}"
 # Absolute: bench-np-e2e starts sessions with the workspace repo as cwd.

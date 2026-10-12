@@ -9,12 +9,15 @@ through a harness that trusted them to stay put.
 Every client launch goes through here so the sandbox cannot be forgotten in one
 place and remembered in another.
 """
+import atexit
 import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -30,6 +33,29 @@ BENCH_CONFIG_HOME = Path(__file__).resolve().parents[2] / "bench" / "opencode-ho
 def bench_env(env: dict) -> dict:
     """Return env with opencode's config home pointed at the benchmark copy."""
     return {**env, "XDG_CONFIG_HOME": str(BENCH_CONFIG_HOME)}
+
+
+def own_home(prefix: str, copies=(".local/share/opencode/auth.json",)) -> tuple[Path, dict]:
+    """A HOME of the run's own (#119, #227), so nav-pilot, opencode and cplt never write
+    the real ~/.nav-pilot, ~/.config/opencode or ~/.copilot. `copies` (relative to the
+    real HOME) are copied in, never linked. mise, Gradle and gh keep their real dirs.
+    Returns (home, env overrides). The copy holds auth tokens, so it goes at exit, and a
+    SIGTERM (night-run-3's kill_tree) is turned into an exit so atexit still runs."""
+    real = Path.home()
+    home = Path(tempfile.mkdtemp(prefix=prefix))
+    atexit.register(shutil.rmtree, home, True)
+    if signal.getsignal(signal.SIGTERM) is signal.SIG_DFL:
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
+    for rel in copies:
+        if (real / rel).is_file():
+            (home / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(real / rel, home / rel)
+    env = dict(HOME=str(home),
+               MISE_DATA_DIR=os.environ.get("MISE_DATA_DIR", str(real / ".local/share/mise")),
+               MISE_STATE_DIR=os.environ.get("MISE_STATE_DIR", str(real / ".local/state/mise")),
+               GRADLE_USER_HOME=os.environ.get("GRADLE_USER_HOME", str(real / ".gradle")),
+               GH_CONFIG_DIR=os.environ.get("GH_CONFIG_DIR", str(real / ".config/gh")))
+    return home, env
 
 
 # mlx_lm's server decides whether generation starts in reasoning state by scanning
