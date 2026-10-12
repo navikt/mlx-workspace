@@ -22,6 +22,7 @@ bench-cheap-ops at start-up and run unchanged, so a fix there reaches this suite
 bench-cheap-ops itself is not modified and still reads only bench/tasks.json.
 """
 import argparse
+import atexit
 import ast
 import hashlib
 import json
@@ -192,6 +193,31 @@ def session_env(H):
     env = {"MISE_CEILING_PATHS": str(H["ws"])}
     if H.get("CFG", {}).get("jdk"):
         env.update(JAVA_HOME=str(H["JDK"]), PATH=f"{H['JDK']}/bin:{os.environ.get('PATH', '')}")
+    return env
+
+
+def cloud_env(H):
+    """session_env plus a HOME of the arm's own (#119): nav-pilot, opencode and cplt then
+    never touch the real ~/.config/opencode, ~/.nav-pilot or ~/.copilot. Only opencode's
+    auth.json is copied in, and nav-pilot is installed into that HOME; mise, Gradle
+    and gh keep their real (read) dirs."""
+    if "home" not in H:
+        H["home"] = Path(tempfile.mkdtemp(prefix="frontier-home-"))
+        atexit.register(shutil.rmtree, H["home"], True)
+        auth = Path.home() / ".local" / "share" / "opencode" / "auth.json"
+        if auth.exists():
+            (H["home"] / ".local" / "share" / "opencode").mkdir(parents=True)
+            shutil.copy2(auth, H["home"] / ".local" / "share" / "opencode" / "auth.json")
+    real = Path.home()
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("OPENCODE_CONFIG", "XDG_"))}
+    env.update(session_env(H), HOME=str(H["home"]), XDG_CONFIG_HOME=str(H["home"] / ".config"),
+               MISE_DATA_DIR=os.environ.get("MISE_DATA_DIR", str(real / ".local/share/mise")),
+               MISE_STATE_DIR=os.environ.get("MISE_STATE_DIR", str(real / ".local/state/mise")),
+               GRADLE_USER_HOME=os.environ.get("GRADLE_USER_HOME", str(real / ".gradle")),
+               GH_CONFIG_DIR=os.environ.get("GH_CONFIG_DIR", str(real / ".config/gh")))
+    if not FAKE and not H.get("installed"):
+        H["installed"] = subprocess.run([NAV_PILOT, "install", "--user", "--all", "--yes"], env=env,
+                                        capture_output=True, timeout=300).returncode == 0
     return env
 
 
@@ -369,7 +395,7 @@ def agent_cloud(H, prompt, cont, cap, model):
             fh.flush()
             p = subprocess.Popen(argv, cwd=str(H["ws"]), stdin=subprocess.DEVNULL, stdout=fh,
                                  stderr=subprocess.STDOUT, start_new_session=True,
-                                 env={**os.environ, **session_env(H)})
+                                 env=cloud_env(H))
             try:
                 p.wait(timeout=cap)
             except subprocess.TimeoutExpired:
@@ -808,7 +834,7 @@ def cmd_run(args):
                 raise SystemExit(f"✗ model-use {key} failed; refusing to measure the previous model")
         if args.cloud and not FAKE:
             shutil.rmtree(H["ws"] / ".git", ignore_errors=True)  # ours, from the last run
-            subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True)
+            subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True, env=cloud_env(H))
         if not FAKE:
             H["assert_workspace_is_clean"]()
             H["ensure_clone"]()
@@ -1203,6 +1229,9 @@ def cmd_selftest(_args):
         assert session_env({"ws": ws, "JDK": Path("/j"), "CFG": {"jdk": "/j"}})["JAVA_HOME"] == "/j"
         assert "JAVA_HOME" not in session_env({"ws": ws, "JDK": Path.home(), "CFG": {}})
         assert session_env({"ws": ws})["MISE_CEILING_PATHS"] == str(ws)
+        ce = cloud_env({"ws": ws, "installed": True})  # #119: the cloud arm never sees the real config dirs
+        assert Path.home() not in Path(ce["XDG_CONFIG_HOME"]).parents and ce["HOME"] != str(Path.home()), ce
+        shutil.rmtree(ce["HOME"])
         print("✓ runner, variants, validation and summary with fake models")
     print("selftest: PASS")
     return 0
@@ -1216,8 +1245,8 @@ def cmd_cloud_probe(args):
     ws = Path(tempfile.mkdtemp(prefix="probe-", dir=CLOUD_WS))
     try:
         cloud_ws(ws)
-        subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True, check=False)
         H = {"ws": ws, "hide_git": lambda: None, "restore_git": lambda: None}
+        subprocess.run([NAV_PILOT, "alpha", "local", "off"], capture_output=True, check=False, env=cloud_env(H))
         a = agent_cloud(H, "Create a file named probe.txt in the current directory containing the single "
                            "word OK. Do nothing else.", False, args.timeout, args.cloud)
         if args.log:
