@@ -22,7 +22,6 @@ bench-cheap-ops at start-up and run unchanged, so a fix there reaches this suite
 bench-cheap-ops itself is not modified and still reads only bench/tasks.json.
 """
 import argparse
-import atexit
 import ast
 import hashlib
 import json
@@ -40,6 +39,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import _frontier as F  # noqa: E402
+import _sandbox as S  # noqa: E402
 
 REAL_ROOT = HERE.parents[1]
 ROOT = Path(os.environ.get("FRONTIER_ROOT") or REAL_ROOT)
@@ -202,19 +202,9 @@ def cloud_env(H):
     auth.json is copied in, and nav-pilot is installed into that HOME; mise, Gradle
     and gh keep their real (read) dirs."""
     if "home" not in H:
-        H["home"] = Path(tempfile.mkdtemp(prefix="frontier-home-"))
-        atexit.register(shutil.rmtree, H["home"], True)
-        auth = Path.home() / ".local" / "share" / "opencode" / "auth.json"
-        if auth.exists():
-            (H["home"] / ".local" / "share" / "opencode").mkdir(parents=True)
-            shutil.copy2(auth, H["home"] / ".local" / "share" / "opencode" / "auth.json")
-    real = Path.home()
+        H["home"], H["home_env"] = S.own_home("frontier-home-")
     env = {k: v for k, v in os.environ.items() if not k.startswith(("OPENCODE_CONFIG", "XDG_"))}
-    env.update(session_env(H), HOME=str(H["home"]), XDG_CONFIG_HOME=str(H["home"] / ".config"),
-               MISE_DATA_DIR=os.environ.get("MISE_DATA_DIR", str(real / ".local/share/mise")),
-               MISE_STATE_DIR=os.environ.get("MISE_STATE_DIR", str(real / ".local/state/mise")),
-               GRADLE_USER_HOME=os.environ.get("GRADLE_USER_HOME", str(real / ".gradle")),
-               GH_CONFIG_DIR=os.environ.get("GH_CONFIG_DIR", str(real / ".config/gh")))
+    env.update(session_env(H), **H["home_env"], XDG_CONFIG_HOME=str(H["home"] / ".config"))
     if not FAKE and not H.get("installed"):
         H["installed"] = subprocess.run([NAV_PILOT, "install", "--user", "--all", "--yes"], env=env,
                                         capture_output=True, timeout=300).returncode == 0
@@ -1275,7 +1265,7 @@ def main():
     r = sub.add_parser("run", help="run ladders for one profile or cloud model under one variant")
     who = r.add_mutually_exclusive_group()
     who.add_argument("--profile")
-    who.add_argument("--cloud", help="cloud model id for nav-pilot, e.g. claude-sonnet-4.6")
+    who.add_argument("--cloud", help="cloud model id for nav-pilot, e.g. claude-sonnet-5.5")
     r.add_argument("--classes", default="edit-multi-mechanical")
     r.add_argument("--rungs", help="e.g. 1-4 or 2,5, or past-frontier (the two rungs past the base frontier)")
     r.add_argument("--base-glob", default="frontier-*-base-*.json",
