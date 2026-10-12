@@ -251,6 +251,27 @@ def rows(probe=False):
             add(classes.get(tid), OPTIQ, "local", "debug-target frontend-debug",
                 tid, _outcome(rec), f"{dbg.name}#{tid}", dbg.name, rec.get("seconds"))
 
+    # bench-frontier debug ladders, base variant only (a lever is not what ships). The
+    # harness and tasks shas are in the condition, so samples pool only within one
+    # harness generation. Other classes still come from cheap-ops (design §7 follow-up).
+    for f in sorted(BENCH.glob("frontier-*.json")):
+        try:
+            d = json.loads(f.read_text())
+            m = d["meta"]
+        except (json.JSONDecodeError, OSError, KeyError, TypeError):
+            continue
+        if m.get("variant") != "base":
+            continue
+        sha = EQUIVALENT_HARNESS.get(m["harness_sha"], m["harness_sha"])
+        cloud = m.get("cloud_model")
+        cond = (f"frontier cloud harness={sha} tasks={m['tasks_sha']}" if cloud else
+                f"frontier profile={m['key']} temp={(m.get('profile_params') or {}).get('MLX_TEMP', '?')} "
+                f"harness={sha} tasks={m['tasks_sha']}")
+        for s in d.get("samples", []):
+            if s.get("class") == "debug" and s.get("valid", True):
+                add("debug", s.get("served_model") or cloud or "?", "cloud" if cloud else "local", cond,
+                    s["task"], _outcome(s), f"{f.name}#{s['run']}", f.name, s.get("seconds"))
+
     # Copilot whole sessions. Copilot sends temperature 0; each sample is a run.
     for f in sorted(BENCH.glob("copilot-*-*.json")):
         d = json.loads(f.read_text())
