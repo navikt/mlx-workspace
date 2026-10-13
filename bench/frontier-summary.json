@@ -7287,6 +7287,71 @@
   },
   {
    "class": "debug",
+   "model": "qwen3.8-27b-8bit-rapid",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=ac6bd2115239 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 10,
+     "n": 10,
+     "lb": 0.859,
+     "ub": 1.0,
+     "lb_monotone": 0.859,
+     "bar": 0.882,
+     "p_cloud": 0.929,
+     "verdict": "not-yet",
+     "tasks": [
+      "db-r1-b1",
+      "db-r1-b2"
+     ],
+     "runs": 5,
+     "median_seconds": 164,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 4,
+     "n": 10,
+     "lb": 0.23,
+     "ub": 0.599,
+     "lb_monotone": 0.23,
+     "bar": 0.95,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "db-r2-b1",
+      "db-r2-b2"
+     ],
+     "runs": 5,
+     "median_seconds": 288,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 1,
+    "first_break": 2
+   },
+   "fit": {
+    "d50": 1.9,
+    "d_bar": 1.1,
+    "beyond": false,
+    "a": 3.228,
+    "b": -3.49
+   },
+   "files": [
+    "frontier-qwen3.8-27b-8bit-rapid-base-20261013-181240.json",
+    "frontier-qwen3.8-27b-8bit-rapid-base-20261013-184547.json"
+   ]
+  },
+  {
+   "class": "debug",
    "model": "qwen3.8-27b-optiq-4bit",
    "variant": "base",
    "condition": "temp=0.6 ctx=65536 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
