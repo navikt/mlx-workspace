@@ -64,6 +64,9 @@ OPTIONAL_DEFAULTS = {
     "MLX_MTPLX_BIN":              "mtplx",  # binary in MTPLX's own venv
     "MLX_MTPLX_DEPTH":            "3",      # MTP draft depth
     "MLX_MTPLX_VERSION":          "",       # required version; server refuses another one
+    # Rapid-MLX-only (#257): its own server type, in its own venv
+    "MLX_RAPID_BIN":              "rapid-mlx",
+    "MLX_RAPID_VERSION":          "",       # required version; server refuses another one
     # nav-pilot only: its guard writes these into every completion request, from the Copilot
     # CLI and opencode alike (navikt/copilot#934). The workspace server never reads them.
     "MLX_NAV_PILOT_TEMPERATURE":  "",
@@ -91,6 +94,9 @@ IGNORED_BY_BACKEND = {
     "mtplx": [
         "MLX_CACHE_BYTES", "MLX_CACHE_SIZE", "MLX_CHAT_TEMPLATE", "MLX_CHAT_TEMPLATE_ARGS",
         "MLX_DRAFT_MODEL", "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE", "MLX_MIN_P",
+    ],    "rapid-mlx": [
+        "MLX_CACHE_BYTES", "MLX_CACHE_SIZE", "MLX_CHAT_TEMPLATE",
+        "MLX_DRAFT_MODEL", "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE",
     ],
 }
 # The MLX_*_PENALTY params are deliberately absent from both lists: all three backends read

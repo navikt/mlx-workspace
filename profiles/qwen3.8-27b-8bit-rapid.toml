@@ -1,0 +1,29 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit (Rapid-MLX 0.16.1), 64 GB tier: 64k context"
+released           = "2026-08"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "#257. Same weights, sampling and limits as qwen3.8-27b-8bit-64g, served by `rapid-mlx serve` (v0.16.1, df1f4db, own venv) instead of mlx_lm.server: its own variant key, so rows never pool with mlx-lm rows. Rapid-MLX manages its own prompt cache; the cache params are kept for the schema and ignored (warned). Bench-only, not offered in the manifest."
+model_vram_gb      = 30
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3.8-27B-8bit"
+MLX_SERVER_TYPE            = "rapid-mlx"
+MLX_RAPID_BIN              = "~/venvs/rapid-mlx-0.16.1/bin/rapid-mlx"
+MLX_RAPID_VERSION          = "0.16.1"
+# 4.5 GiB of prompt cache: 64 KiB/token x (65,536 + 8,192) holds a whole session.
+MLX_CACHE_BYTES            = "4831838208"
+MLX_PREFILL_STEP_SIZE      = "512"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+MLX_CHAT_TEMPLATE_ARGS     = '{"enable_thinking": false}'
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

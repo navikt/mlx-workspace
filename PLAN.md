@@ -20,15 +20,15 @@ on main, AC, wired limit; step regex), one launcher per batch. A launcher waits 
 
 | # | Batch | Item | Prerequisites (owner) | GPU h | Pass / fail |
 |---|---|---|---|---|---|
-| 1 | 1, running | #258 DFlash probe | in progress (other agent) | 1 | ≥ 1.3x decode at bench context, else drop the 6 h bench |
+| 1 | parked | #258 DFlash probe | owner skipped the 6 h bench; MTPLX (#256) covers speed | 0 | not run |
 | 2 | 1, ready | #260 Qwen3-Coder-Next fit check | 45 GB download off-GPU, provenance checks (coordinator) | 0.5 | loads and serves 32k context under the 48 GB wired limit without swap |
 | 3 | 1 | #260 cheap-ops + frontier | step 2 fits | 8 | per-class verdict; runs only if it fits |
 | 4 | 2 | #256 MTP variant | MTP harness PR merged (other agent) | 6 | debug-class pass rate ≥ base at lower wall time |
-| 5 | 2 | TS F1/F2, 8-bit and OptiQ | F1/F2 PR (`feat/cheap-ops-ts-f1f2`) opened and merged (coordinator) | 2.5 | first measurement; records a baseline, no verdict |
+| 5 | 2 | TS F1/F2, 8-bit and OptiQ | done (#245) | 2.5 | first measurement; records a baseline, no verdict |
 | 6 | 2 | #257 Rapid-MLX vs `mlx_lm.server` | license check (coordinator) | 6 | tool-call failures lower at equal pass rate |
 | 7 | 3, blocked | Debug rungs 2-3, 8-bit + OptiQ; Sonnet 5.5 ladder (~$5) | owner installs cplt release with cplt#761; bench enables `allow_sysv_ipc`, cplt version in harness hash, #253 rung-1 filter (#263) | 6 | agents can run the tests (no `shmget` EPERM); rerun scores replace dbg2 |
 
-GPU total: 30 h (22 h if #260 does not fit). Wall clock: batches 1-2 about 1.5 days with gate
+GPU total: 29 h (21 h if #260 does not fit). Wall clock: batches 1-2 about 1.5 days with gate
 waits; batch 3 slots in as soon as its blocker clears, plus about 7 h.
 
 ### Parking
