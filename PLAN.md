@@ -16,8 +16,8 @@ by someone else (#525), so that stops being ours.
 
 Triage of the speed and server ideas from 13 Oct web search, checked against HF configs and the
 GitHub repos. Goal: more local passes on nav-pilot bench classes (tool-call reliability, fewer
-timeouts such as Qwen3.8-27B debug rung 2). Owner GO (13 Oct) for #256, #258, #257 and Qwen3-Coder-Next (#260),
-after the current debug work.
+timeouts such as Qwen3.8-27B debug rung 2). Owner GO (13 Oct) for #256, #258, #257 and
+Qwen3-Coder-Next (#260), after the current debug work.
 
 Facts checked: Qwen/Qwen3.8-27B and Qwen/Qwen3.6-35B-A3B are hybrid (GatedDeltaNet + full
 attention, `layer_types`) with one MTP layer (`mtp_num_hidden_layers: 1`). The official weights
@@ -35,7 +35,8 @@ MTP needs a conversion from official weights. mlx-lm native MTP is still PR ml-e
 | 6 | mlx-vlm `--draft-kind`, EAGLE-3 | EAGLE-3 ~1.05x in mlx-lm prototype | Not worth it | 0 |
 | 7 | uzu, BaseRT, MetalRT, vLLM-mlx, MLC | Speed claims only | Harness rewrite; MetalRT binary-only; llama.cpp already covered by the endpoint path | 0 |
 
-Run order: 1. #256 MTP; 2. #258 DFlash 1 h probe (same Qwen3.8-27B base, reuses #256's baseline); 3. #257 Rapid-MLX; 4. #260 Qwen3-Coder-Next.
+Run order: 1. #256 MTP; 2. #258 DFlash 1 h probe (same Qwen3.8-27B base, reuses #256's
+baseline); 3. #257 Rapid-MLX; 4. #260 Qwen3-Coder-Next.
 
 Provenance: the z-lab DFlash drafter is a bench-only exception after file, template and scan
 checks; it never goes in the manifest.
