@@ -1,0 +1,27 @@
+[meta]
+name               = "Qwen 3.8 27B 8bit + MTP (MTPLX), 64 GB tier: 64k context"
+released           = "2026-08"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "#256. Same sampling and limits as qwen3.8-27b-8bit-64g, served by `mtplx serve` with native MTP (depth 3) instead of mlx_lm.server: its own variant key, so rows never pool with mlx-lm rows. Weights: official Qwen/Qwen3.8-27B@1d4bf0f converted with `mtplx forge build` (8-bit affine g64, mtp.* kept bf16). Probe 2026-10-13: 2.5-2.7x decode vs mlx_lm.server; greedy output not byte-identical (near-tie divergence). Bench-only, not offered in the manifest."
+model_vram_gb      = 31
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "~/models-mtplx/Qwen3.8-27B-q8-mtp"
+MLX_SERVER_TYPE            = "mtplx"
+MLX_MTPLX_BIN              = "~/venvs/mtplx-2.12.2/bin/mtplx"
+MLX_MTPLX_VERSION          = "2.12.2"
+MLX_MTPLX_DEPTH            = "3"
+# Required by the profile schema; mtplx serve manages its own cache (ignored, warned).
+MLX_CACHE_BYTES            = "4831838208"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+MLX_TOP_K                  = "20"
+MLX_TOP_P                  = "0.95"
+MLX_NAV_PILOT_TEMPERATURE  = "0.6"
+MLX_NAV_PILOT_TOP_P        = "0.95"

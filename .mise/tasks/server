@@ -12,6 +12,7 @@ Profile params are always re-read from disk at server startup so that
 changes to a profile take effect without needing to re-run model-use.
 """
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -109,6 +110,28 @@ if server_type == "omlx":
         if val:
             cmd += [flag, val]
             print(f"  {flag}: {val}")
+elif server_type == "mtplx":
+    # MTPLX (#256): MTP speculative decoding. Its own server type so its results never
+    # pool with mlx_lm.server rows. Reasoning off matches enable_thinking=false profiles.
+    depth = os.environ.get("MLX_MTPLX_DEPTH", "3").strip()
+    mtplx_bin = os.path.expanduser(os.environ.get("MLX_MTPLX_BIN", "mtplx").strip())
+    # Results record the profile params, so pinning the version here pins it in every row.
+    want = os.environ.get("MLX_MTPLX_VERSION", "").strip()
+    got = subprocess.run([os.path.join(os.path.dirname(mtplx_bin), "python"), "-c",
+                          "import importlib.metadata as m; print(m.version('mtplx'))"],
+                         capture_output=True, text=True).stdout.strip()
+    if want and got != want:
+        sys.exit(f"\u2717 MLX_MTPLX_VERSION is {want}, but {mtplx_bin} is mtplx {got or '(not found)'}")
+    print(f"→ Starting mtplx serve (MTP depth {depth})")
+    print(f"  model:      {model}")
+    cmd = [
+        mtplx_bin, "serve",
+        "--model", model, "--host", "127.0.0.1", "--port", port, "--no-auth", "--yes",
+        "--mtp", "--depth", depth, "--max-tokens", max_tokens, "--reasoning", "off",
+        "--temperature", temp, "--top-p", top_p,
+    ]
+    if top_k != "0":
+        cmd += ["--default-top-k", top_k]
 elif server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
     print(f"  model:      {model}")
