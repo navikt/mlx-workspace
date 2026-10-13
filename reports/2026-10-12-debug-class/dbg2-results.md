@@ -5,6 +5,24 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20261013-004420/steps
 - Started 2026-10-13T00:45:20+02:00, last step ended 2026-10-13T09:15:47+02:00.
 - Cloud spend: $2.9091 of the $15 cap.
 
+
+## Analysis
+
+Debug class, pooled over 12 Oct (harness `3ddd8d4e1be1`) and this run (`fb13f73def42`, mapped to `3ddd8d4e1be1` in `EQUIVALENT_HARNESS`). LB is Wilson one-sided 90% (z = 1.2816). Timed-out samples count as failures.
+
+| Model | r1 | r2 | r3 | Timeouts |
+|---|---|---|---|---|
+| qwen3.8-27b-8bit-64g | 28/32 (LB 0.78) | 1/9 (0.03) | 0/6 (0.00) | 8 |
+| qwen3.8-27b-optiq-4bit | 32/32 (LB 0.95) | 1/6 (0.05) | 1/6 (0.05) | 2 |
+| claude-sonnet-5.5 | 10/10 (LB 0.86) | 10/10 (0.86) | 0/10 (0.00) | 0 |
+
+- Rung 1: optiq-4bit just clears the 0.95 bar at the rung level. 8bit-64g does not.
+- Rungs 2–3: both local models fail. Samples are few (6–9), but the point estimates are so low that more runs would not change the result.
+- Steps 5, 7 and 8 hit the step timeout. Their finished samples are kept and the timed-out sample counts as a failure. The timeouts also explain the small n at rungs 2–3.
+- Anomaly: the cloud model fails all of rung 3 (0/10, every sample ends with "suite still failing", builds fail after 5 s). Check db-r3-b1/b2 before trusting rung 3. `bench-capabilities` pools p_cloud over all rungs, so this 0/10 lowers the debug bar for every model.
+
+**Verdict change.** A dry run of `mise run bench-capabilities` (result not committed) changes the debug verdicts: Qwen3.8-27B-OptiQ-4bit not-yet → trusted (34/44), Qwen3.8-27B-8bit not-yet → cloud (29/47), Qwen3.8-27B-4bit cloud → not-yet (7/9, no new data). The 4bit change and the optiq trusted verdict both come from the lower p_cloud caused by the rung-3 anomaly. Do not ship these changes until rung 3 is checked. `manifest/` is unchanged here.
+
 ## Steps
 
 | # | Part | Step | Classes | Variant | Status | Minutes | Result |
