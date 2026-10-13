@@ -12,6 +12,37 @@ Last touched 24 September 2026. Before that: 31 August 2026, the day the alpha s
 the Qwen3.8 correction (#532) is queued; and 30 of the 31 dependabot alerts were closed
 by someone else (#525), so that stops being ours.
 
+## Final GPU run, then parked (13 October 2026)
+
+Owner decision 13 Oct: one last GPU run with the items below, then active benchmarking parks
+again. Launch: the waiting-launcher pattern (`~/tmp/<name>-launcher`; gates: GPU free, load < 6,
+on main, AC, wired limit; step regex), one launcher per batch. A launcher waits for the one before.
+
+| # | Batch | Item | Prerequisites (owner) | GPU h | Pass / fail |
+|---|---|---|---|---|---|
+| 1 | 1, running | #258 DFlash probe | in progress (other agent) | 1 | ≥ 1.3x decode at bench context, else drop the 6 h bench |
+| 2 | 1, ready | #260 Qwen3-Coder-Next fit check | 45 GB download off-GPU, provenance checks (coordinator) | 0.5 | loads and serves 32k context under the 48 GB wired limit without swap |
+| 3 | 1 | #260 cheap-ops + frontier | step 2 fits | 8 | per-class verdict; runs only if it fits |
+| 4 | 2 | #256 MTP variant | MTP harness PR merged (other agent) | 6 | debug-class pass rate ≥ base at lower wall time |
+| 5 | 2 | TS F1/F2, 8-bit and OptiQ | F1/F2 PR (`feat/cheap-ops-ts-f1f2`) opened and merged (coordinator) | 2.5 | first measurement; records a baseline, no verdict |
+| 6 | 2 | #257 Rapid-MLX vs `mlx_lm.server` | license check (coordinator) | 6 | tool-call failures lower at equal pass rate |
+| 7 | 3, blocked | Debug rungs 2-3, 8-bit + OptiQ; Sonnet 5.5 ladder (~$5) | owner installs cplt release with cplt#761; bench enables `allow_sysv_ipc`, cplt version in harness hash, #253 rung-1 filter (#263) | 6 | agents can run the tests (no `shmget` EPERM); rerun scores replace dbg2 |
+
+GPU total: 30 h (22 h if #260 does not fit). Wall clock: batches 1-2 about 1.5 days with gate
+waits; batch 3 slots in as soon as its blocker clears, plus about 7 h.
+
+### Parking
+
+- **Parked** (label `parked`): open bench issues not in the final run: #17, #90, #114, #116, #124, #135.
+- **Resume triggers:** a new model worth testing, or a nav-pilot local-mode release. See [BENCHMARKING.md](BENCHMARKING.md#when-we-benchmark).
+- **Results land in** `bench/` (result JSON), `reports/2026-10-*/` (write-ups) and the issue for each item.
+- **Wrap-up checklist:**
+  1. A results PR per item; Opus review.
+  2. A manifest release only if a verdict changes, after Fable review.
+  3. Notify copilot-benchmark.
+  4. Update `.bench-logs/RESUME.md` and `USER-TODO.md`.
+  5. Remove stale worktrees and venvs; give the owner a list of model caches with sizes to decide on. The largest: DeepSeek-V4-Flash 2.4-bit 86 GB, Qwen3.6-35B-A3B 8-bit 35 GB, Laguna-XS 8-bit 33 GB, Qwen3.8-27B oQ8e-mtp 28 GB, Mellum 23 GB, Muse-Glimmer 22 GB, unsloth GGUF 21 GB.
+
 ## Next experiments, ranked (13 October 2026)
 
 Triage of the speed and server ideas from 13 Oct web search, checked against HF configs and the
@@ -30,13 +61,12 @@ MTP needs a conversion from official weights. mlx-lm native MTP is still PR ml-e
 | 1 | MTP on Qwen3.8-27B (MTPLX `serve`, Apache-2.0) | Measured 3.8x faster plan step before ([48gb-question](reports/48gb-question.md)); OpenAI/Anthropic endpoint | Convert from official weights (provenance) | ~6 |
 | 2 | Rapid-MLX as server (A/B against `mlx_lm.server`) | Claims tool-call reliability and prefix cache for hybrids; targets our failure class directly | LICENSE file not detected as Apache by GitHub; vendor numbers only | ~6 |
 | 3 | DFlash (`dflash-mlx` + `z-lab/Qwen3.8-27B-DFlash2`) | Vendor 1.8-2.4x on 27B-4bit, falls with context length | z-lab drafter: bench-only exception after file/template/scan checks, never in manifest | ~1 speed, ~6 bench |
-| 4 | Qwen3-Coder-Next 4-bit (mlx-community, 44.9 GB) | New coder MoE, 3B active | Tight on 64 GB at the 52 GB wired limit; fit check first (#260) | ~8.5 |
+| 4 | Qwen3-Coder-Next 4-bit (mlx-community, 44.9 GB) | New coder MoE, 3B active | Tight on 64 GB at the 48 GB wired limit of the `-64g` profiles; fit check first (#260) | ~8.5 |
 | 5 | Devstral Small 2 24B (mlx-community 4-bit) | Dense 24B, slower than A3B MoEs | Low expected gain | ~6 |
 | 6 | mlx-vlm `--draft-kind`, EAGLE-3 | EAGLE-3 ~1.05x in mlx-lm prototype | Not worth it | 0 |
 | 7 | uzu, BaseRT, MetalRT, vLLM-mlx, MLC | Speed claims only | Harness rewrite; MetalRT binary-only; llama.cpp already covered by the endpoint path | 0 |
 
-Run order: 1. #256 MTP; 2. #258 DFlash 1 h probe (same Qwen3.8-27B base, reuses #256's
-baseline); 3. #257 Rapid-MLX; 4. #260 Qwen3-Coder-Next.
+Run order: superseded by the final-run queue above.
 
 Provenance: the z-lab DFlash drafter is a bench-only exception after file, template and scan
 checks; it never goes in the manifest.
