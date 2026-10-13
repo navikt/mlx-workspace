@@ -1,0 +1,26 @@
+[meta]
+name               = "Qwen3-Coder-Next 4bit (mlx-lm), 64 GB tier: 64k context, 48 GB wired"
+released           = "2026-02"
+status             = "testing"
+spec_source        = "config.json"
+notes              = "#260. 80B/3B-active qwen3_next. mlx-community/Qwen3-Coder-Next-4bit@7b9321e (provenance checked on #260; chat template byte-identical to Qwen/Qwen3-Coder-Next). Sampling from generation_config.json (temp 1.0, top_p 0.95, top_k 40). KV is 24 KiB/token (12 full-attention layers x 2 KV heads x 256 x 2 x bf16), 1.5 GiB at 64k. Estimated peak ~46 GB (42 weights + 1.5 KV + 2 cache), tight under 48: the fit check measures it. Non-thinking model, no template args. Bench-only, not offered in the manifest."
+model_vram_gb      = 42
+gpu_wired_limit_gb = 48
+machine_min_ram_gb = 64
+
+[params]
+MLX_MODEL                  = "mlx-community/Qwen3-Coder-Next-4bit"
+MLX_SERVER_TYPE            = "mlx-lm"
+MLX_CACHE_BYTES            = "2147483648"
+MLX_PREFILL_STEP_SIZE      = "512"
+MLX_CACHE_SIZE             = "2"
+MLX_MAX_TOKENS             = "32768"
+MLX_OPENCODE_CONTEXT       = "65536"
+MLX_OPENCODE_OUTPUT        = "8192"
+MLX_OPENCODE_CHUNK_TIMEOUT = "900000"
+MLX_TEMP                   = "1.0"
+MLX_TOP_K                  = "40"
+MLX_TOP_P                  = "0.95"
+MLX_MIN_P                  = "0.0"
+MLX_NAV_PILOT_TEMPERATURE  = "1.0"
+MLX_NAV_PILOT_TOP_P        = "0.95"

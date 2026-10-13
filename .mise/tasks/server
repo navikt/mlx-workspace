@@ -132,6 +132,27 @@ elif server_type == "mtplx":
     ]
     if top_k != "0":
         cmd += ["--default-top-k", top_k]
+elif server_type == "rapid-mlx":
+    # Rapid-MLX (#257): its own server type so its rows never pool with mlx_lm.server rows.
+    rapid_bin = os.path.expanduser(os.environ.get("MLX_RAPID_BIN", "rapid-mlx").strip())
+    want = os.environ.get("MLX_RAPID_VERSION", "").strip()
+    got = subprocess.run([os.path.join(os.path.dirname(rapid_bin), "python"), "-c",
+                          "import importlib.metadata as m; print(m.version('rapid-mlx'))"],
+                         capture_output=True, text=True).stdout.strip()
+    if want and got != want:
+        sys.exit(f"\u2717 MLX_RAPID_VERSION is {want}, but {rapid_bin} is rapid-mlx {got or '(not found)'}")
+    os.environ.update(RAPID_MLX_TELEMETRY="0", RAPID_MLX_DISABLE_VERSION_CHECK="1")
+    print(f"→ Starting rapid-mlx serve {got}")
+    print(f"  model:      {model}")
+    cmd = [
+        rapid_bin, "serve", model, "--served-model-name", model,
+        "--host", "127.0.0.1", "--port", port, "--disable-model-downloads",
+        "--max-tokens", max_tokens, "--enable-auto-tool-choice", "--tool-call-parser", "auto",
+        "--default-temperature", temp, "--default-top-p", top_p,
+        "--default-top-k", top_k, "--default-min-p", min_p,
+    ]
+    if '"enable_thinking": false' in chat_template_args:
+        cmd += ["--no-thinking"]
 elif server_type == "mlx-vlm":
     print(f"→ Starting mlx_vlm.server  (model_type requires mlx-vlm)")
     print(f"  model:      {model}")
