@@ -28,7 +28,6 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 | cloud-claude-sonnet-5 | base | cloud | 7/10 0.88 trusted | 9/10 0.94 trusted | 10/10 0.96 trusted | 10/10 0.95 trusted | 10/10 0.92 trusted | 10/10 0.86 trusted | 6 / 6 | none | – | 317.0+ |
 | cloud-gpt-6-sol | base | cloud |  |  |  | 4/4 0.71 not-yet |  | 3/4 0.43 cloud | 0 / 4 | 6 | 414.2 | 66.9 |
 | gemma-4-26b-a4b-qat-optiq-4bit | base | local | 10/12 0.66 trusted | 6/11 0.36 cloud | 4/10 0.23 cloud | 2/10 0.09 cloud |  |  | 1 / 1 | 2 | 4.9 | – |
-| k2-horizon-mova-36b-a4b-4bit | base | local | 0/2 0.00 cloud |  |  |  |  |  | 0 / 0 | 1 | – | – |
 | k2-horizon-mova-36b-a4b-4bit | base | local | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud |  |  | 0 / 0 | 1 | – | – |
 | laguna-xs-2.1-8bit-64g | base | local |  |  | 1/2 0.51 cloud | 2/2 0.65 not-yet | 1/1 0.38 not-yet |  | 0 / 0 | 3 | – | 29.0+ |
 | laguna-xs-2.1-8bit-64g | decompose | local |  |  | 4/4 0.71 not-yet | 3/4 0.57 cloud | 3/4 0.52 cloud | 3/4 0.43 cloud | 0 / 3 | 4 | 477.1 | 6.8 |
@@ -90,7 +89,6 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 | cloud-claude-sonnet-5 | base | cloud | 2/4 0.66 cloud | 4/4 0.83 not-yet | 4/4 0.71 not-yet | 3/4 0.43 not-yet | 0 / 0 | 1 | – | 4.0+ |
 | cloud-gpt-6-sol | base | cloud | 4/4 0.88 not-yet | 4/4 0.83 not-yet | 4/4 0.71 not-yet |  | 0 / 3 | none | – | 3.0+ |
 | gemma-4-26b-a4b-qat-optiq-4bit | base | local | 6/10 0.69 cloud | 10/10 0.86 not-yet | 8/10 0.60 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | 3.1 | – |
-| k2-horizon-mova-36b-a4b-4bit | base | local | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | – | – |
 | k2-horizon-mova-36b-a4b-4bit | base | local | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0/10 0.00 cloud | 0 / 0 | 1 | – | – |
 | laguna-xs-2.1-8bit-64g | retry2 | local | 2/4 0.23 cloud | 0/4 0.11 cloud | 2/4 0.23 cloud |  | 0 / 0 | 1 | 0.2 | – |
 | mellum2.1-12b-a2.5b-thinking-mxfp4 | base | local | 2/10 0.09 cloud | 1/9 0.03 cloud | 0/8 0.00 cloud | 0/8 0.00 cloud | 0 / 0 | 1 | 0.5 | – |
@@ -163,26 +161,29 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 
 ✓ bench/frontier-summary.json
 
-## #256 verdict: pass
+## #256 verdict: speed met, quality not compared
 
-MTPLX 2.12.2, MTP depth 3, against `mlx_lm.server` on the same 8-bit weights (`qwen3.8-27b-8bit-64g`). MTP rows are their own model key and never pool with the baseline. Baseline debug rows come from the dbg/dbg2 runs (12-13 Oct). Baseline cheap-ops rows are from 27 Sep with 11 tasks, against 13 now, so the ops comparison is indicative only.
+Compared with `mlx_lm.server` (`qwen3.8-27b-8bit-64g`) on the same 8-bit weights. The MTP rows have their own model key and are never pooled with the baseline. The baseline debug rows come from the dbg/dbg2 runs on 12-13 Oct. The baseline cheap-ops rows are from 27 Sep and cover 11 tasks, not 13, so the ops comparison is a rough guide only. Medians and Wilson 95 % lower bounds are computed from the JSON files.
 
-| | Baseline (mlx-lm) | MTPLX | Ratio |
+| | Baseline (mlx-lm) | MTPLX | |
 |---|---|---|---|
-| debug r1 pass | 28/32 (2 TIMEOUT) | 9/10 (0 TIMEOUT) | within interval |
-| debug r2 pass | 1/9 (4 TIMEOUT) | 6/10 (0 TIMEOUT) | higher |
-| debug r1 median wall-clock | 245 s | 74 s | 3.3x faster |
-| debug r2 median wall-clock | 739 s | 158 s | 4.7x faster |
-| cheap-ops pass | 18/22 (2 TIMEOUT) | 64/65 (0 TIMEOUT) | higher |
-| cheap-ops mean wall-clock per task | 142 s | 31 s | 4.5x faster |
-| output tok/s over wall-clock (debug r1 / ops) | 3.3 / 5.0 | 16.8 / 25.2 | 5x |
+| debug r1 pass (Wilson LB) | 28/32 (0.72), 2 TIMEOUT | 9/10 (0.60), 0 TIMEOUT | intervals overlap |
+| debug r2 pass (Wilson LB) | 1/9 (0.02), 4 TIMEOUT | 6/10 (0.31), 0 TIMEOUT | |
+| debug r1 median wall-clock | 241 s | 72 s | 3.4x faster |
+| debug r2 median wall-clock | 739 s | 152 s | 4.9x faster |
+| cheap-ops pass (Wilson LB) | 18/22 (0.61), 2 TIMEOUT | 64/65 (0.92), 0 TIMEOUT | |
+| cheap-ops median wall-clock per task | 54 s | 17 s | 3.2x faster |
 | decode tok/s, isolated probe | 13.8-14.3 | 35.3-39.2 | 2.5-2.7x |
 
-Rung 2 and higher carry a caveat for both servers: the sandbox blocked the model's own test runs (#263), so a rung-2 pass depends on the harness verifying after the session.
+**The harnesses differ.** `harness_sha` is `3ddd8d4e1be1`/`fb13f73def42` for the baseline, `76c87b8ddec3` for MTPLX r1 and `ac6bd2115239` for MTPLX r2. The task file is the same in both (`tasks_sha` `cd8780d1d644`). Between the two runs, these commits changed hashed files: #255 and #250 (cloud-arm cplt config), #262 (reaping leaked Postgres shared memory), #265 and #266 (`_profiles.py`, new server types; #266 merged between r1 and r2), plus `d73fda0`, `3cb130f` and `afb8ff3` (target hooks, TypeScript cheap-ops tasks). None of them changes the debug tasks or how a debug run is scored. #262 does remove a cause of baseline failures.
 
-- Decode >=1.8x: **met** (2.5-2.7x in the probe; wall-clock per sample 3-5x).
+**Thinking was off in both runs.** The MTPLX profile leaves `MLX_CHAT_TEMPLATE_ARGS` empty, but the `mtplx` server type always passes `--reasoning off` (`.mise/tasks/server`, already in place at the run commit `b0c03bc`). The baseline sets `enable_thinking: false`, so the setting matches, but through a different mechanism.
+
+Rung 2 and higher have a caveat that applies to both servers: the sandbox blocked the model from running the tests itself (#263).
+
+- Decode >=1.8x: **met.** 2.5-2.7x in the probe, 3-5x wall-clock per sample.
 - No debug TIMEOUT at rung 2: **met** (0 of 10).
-- Pass rate within the baseline interval: **met** (r1 9/10 vs 28/32; r2 and ops higher).
-- Fail triggers: none. No drop in pass rate, and no tool-call parse errors in the server log.
+- Pass rate within the baseline interval: **met on the lower bounds.** On r1 the MTPLX LB is 0.60 against 0.72, inside the baseline interval but with n=10. r2 is higher than the baseline, but n is small and the harness changed. These numbers do not show a quality gain.
+- Fail triggers: none. Pass rate did not drop, and the server log has no tool-call parse errors.
 
-The wall-clock gain is larger than the decode gain because shorter turns avoid the 900 s cap and the timeout retries. MTP output is near-lossless, not byte-identical (see #256); the pass rates above are what count.
+MTP output is close to lossless but not byte-identical (see #256).
