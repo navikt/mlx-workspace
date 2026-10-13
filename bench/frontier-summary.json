@@ -977,6 +977,152 @@
    "class": "create-file",
    "model": "k2-horizon-mova-36b-a4b-4bit",
    "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=98da309f03c1 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r1-a",
+      "cf-r1-b"
+     ],
+     "runs": 5,
+     "median_seconds": 9,
+     "median_cost_usd": 0.0,
+     "d": [
+      1
+     ]
+    },
+    "2": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r2-a",
+      "cf-r2-b"
+     ],
+     "runs": 5,
+     "median_seconds": 9,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    },
+    "3": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.9,
+     "p_cloud": 1.0,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r3-a",
+      "cf-r3-b"
+     ],
+     "runs": 5,
+     "median_seconds": 9,
+     "median_cost_usd": 0.0,
+     "d": [
+      3
+     ]
+    },
+    "4": {
+     "k": 0,
+     "n": 10,
+     "lb": 0.0,
+     "ub": 0.141,
+     "lb_monotone": 0.0,
+     "bar": 0.675,
+     "p_cloud": 0.75,
+     "verdict": "cloud",
+     "tasks": [
+      "cf-r4-a",
+      "cf-r4-b"
+     ],
+     "runs": 5,
+     "median_seconds": 9,
+     "median_cost_usd": 0.0,
+     "d": [
+      4
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": 0.0,
+    "d_bar": null,
+    "beyond": false,
+    "a": -5.996,
+    "b": -0.507
+   },
+   "files": [
+    "frontier-k2-horizon-mova-36b-a4b-4bit-base-20261009-190251.json"
+   ]
+  },
+  {
+   "class": "edit-multi-mechanical",
+   "model": "k2-horizon-mova-36b-a4b-4bit",
+   "variant": "base",
+   "condition": "temp=0.6 ctx=65536 harness=98da309f03c1 tasks=cd8780d1d644",
+   "mode": "local",
+   "rungs": {
+    "1": {
+     "k": 0,
+     "n": 2,
+     "lb": 0.0,
+     "ub": 0.451,
+     "lb_monotone": 0.0,
+     "bar": 0.63,
+     "p_cloud": 0.7,
+     "verdict": "cloud",
+     "tasks": [
+      "fm-r1-a",
+      "fm-r1-b"
+     ],
+     "runs": 1,
+     "median_seconds": 8,
+     "median_cost_usd": 0.0,
+     "d": [
+      2
+     ]
+    }
+   },
+   "frontier": {
+    "trusted": 0,
+    "open": 0,
+    "first_break": 1
+   },
+   "fit": {
+    "d50": null,
+    "d_bar": null,
+    "beyond": false
+   },
+   "files": [
+    "frontier-k2-horizon-mova-36b-a4b-4bit-base-20261009-191517.json"
+   ]
+  },
+  {
+   "class": "create-file",
+   "model": "k2-horizon-mova-36b-a4b-4bit",
+   "variant": "base",
    "condition": "temp=0.6 ctx=65536 harness=6967c4bae943 tasks=cd8780d1d644",
    "mode": "local",
    "rungs": {
@@ -7137,94 +7283,6 @@
    },
    "files": [
     "frontier-qwen3.8-27b-8bit-64g-base-20261012-185619.json"
-   ]
-  },
-  {
-   "class": "debug",
-   "model": "qwen3.8-27b-8bit-mtplx",
-   "variant": "base",
-   "condition": "temp=0.6 ctx=65536 harness=76c87b8ddec3 tasks=cd8780d1d644",
-   "mode": "local",
-   "rungs": {
-    "1": {
-     "k": 9,
-     "n": 10,
-     "lb": 0.718,
-     "ub": 0.97,
-     "lb_monotone": 0.718,
-     "bar": 0.882,
-     "p_cloud": 0.929,
-     "verdict": "not-yet",
-     "tasks": [
-      "db-r1-b1",
-      "db-r1-b2"
-     ],
-     "runs": 5,
-     "median_seconds": 72,
-     "median_cost_usd": 0.0,
-     "d": [
-      1
-     ]
-    }
-   },
-   "frontier": {
-    "trusted": 0,
-    "open": 1,
-    "first_break": null
-   },
-   "fit": {
-    "d50": null,
-    "d_bar": null,
-    "beyond": false,
-    "a": 2.173,
-    "b": 0.0
-   },
-   "files": [
-    "frontier-qwen3.8-27b-8bit-mtplx-base-20261013-152427.json"
-   ]
-  },
-  {
-   "class": "debug",
-   "model": "qwen3.8-27b-8bit-mtplx",
-   "variant": "base",
-   "condition": "temp=0.6 ctx=65536 harness=ac6bd2115239 tasks=cd8780d1d644",
-   "mode": "local",
-   "rungs": {
-    "2": {
-     "k": 6,
-     "n": 10,
-     "lb": 0.401,
-     "ub": 0.77,
-     "lb_monotone": 0.401,
-     "bar": 0.95,
-     "p_cloud": 1.0,
-     "verdict": "cloud",
-     "tasks": [
-      "db-r2-b1",
-      "db-r2-b2"
-     ],
-     "runs": 5,
-     "median_seconds": 152,
-     "median_cost_usd": 0.0,
-     "d": [
-      2
-     ]
-    }
-   },
-   "frontier": {
-    "trusted": 0,
-    "open": 0,
-    "first_break": 2
-   },
-   "fit": {
-    "d50": null,
-    "d_bar": null,
-    "beyond": false,
-    "a": 0.367,
-    "b": 0.037
-   },
-   "files": [
-    "frontier-qwen3.8-27b-8bit-mtplx-base-20261013-154037.json"
    ]
   },
   {
