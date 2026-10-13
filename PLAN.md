@@ -16,8 +16,7 @@ by someone else (#525), so that stops being ours.
 
 Triage of the speed and server ideas from 13 Oct web search, checked against HF configs and the
 GitHub repos. Goal: more local passes on nav-pilot bench classes (tool-call reliability, fewer
-timeouts such as Qwen3.8-27B debug rung 2). Benchmarks still run on triggers only; these wait
-for the owner's go.
+timeouts such as Qwen3.8-27B debug rung 2). Owner GO (13 Oct) for #256, #258, #257 and Qwen3-Coder-Next, after the current debug work.
 
 Facts checked: Qwen/Qwen3.8-27B and Qwen/Qwen3.6-35B-A3B are hybrid (GatedDeltaNet + full
 attention, `layer_types`) with one MTP layer (`mtp_num_hidden_layers: 1`). The official weights
@@ -30,12 +29,15 @@ MTP needs a conversion from official weights. mlx-lm native MTP is still PR ml-e
 | 1 | MTP on Qwen3.8-27B (MTPLX `serve`, Apache-2.0) | Measured 3.8x faster plan step before ([48gb-question](reports/48gb-question.md)); OpenAI/Anthropic endpoint | Convert from official weights (provenance) | ~6 |
 | 2 | Rapid-MLX as server (A/B against `mlx_lm.server`) | Claims tool-call reliability and prefix cache for hybrids; targets our failure class directly | LICENSE file not detected as Apache by GitHub; vendor numbers only | ~6 |
 | 3 | DFlash (`dflash-mlx` + `z-lab/Qwen3.8-27B-DFlash2`) | Vendor 1.8-2.4x on 27B-4bit, falls with context length | Drafter from z-lab, not official org; needs owner ruling | ~1 speed, ~6 bench |
-| 4 | Qwen3-Coder-Next 4-bit (mlx-community, 44.9 GB) | New coder MoE, 3B active | Tight on 64 GB at the 52 GB wired limit | ~8 |
+| 4 | Qwen3-Coder-Next 4-bit (mlx-community, 44.9 GB) | New coder MoE, 3B active | Tight on 64 GB at the 52 GB wired limit; fit check first (#260) | ~8.5 |
 | 5 | Devstral Small 2 24B (mlx-community 4-bit) | Dense 24B, slower than A3B MoEs | Low expected gain | ~6 |
 | 6 | mlx-vlm `--draft-kind`, EAGLE-3 | EAGLE-3 ~1.05x in mlx-lm prototype | Not worth it | 0 |
 | 7 | uzu, BaseRT, MetalRT, vLLM-mlx, MLC | Speed claims only | Harness rewrite; MetalRT binary-only; llama.cpp already covered by the endpoint path | 0 |
 
-Top three, as issues: MTP (#256), Rapid-MLX (#257), DFlash (#258).
+Run order: 1. #256 MTP; 2. #258 DFlash 1 h probe (same Qwen3.8-27B base, reuses #256's baseline); 3. #257 Rapid-MLX; 4. #260 Qwen3-Coder-Next.
+
+Provenance: the z-lab DFlash drafter is a bench-only exception after file, template and scan
+checks; it never goes in the manifest.
 
 ## Roadmap from 24 September 2026
 
