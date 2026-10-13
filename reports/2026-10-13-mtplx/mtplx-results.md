@@ -162,3 +162,27 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 - read-qa · qwen3.6-35b-a3b-optiq · example: 0 → 0 (no gain)
 
 ✓ bench/frontier-summary.json
+
+## #256 verdict: pass
+
+MTPLX 2.12.2, MTP depth 3, against `mlx_lm.server` on the same 8-bit weights (`qwen3.8-27b-8bit-64g`). MTP rows are their own model key and never pool with the baseline. Baseline debug rows come from the dbg/dbg2 runs (12-13 Oct). Baseline cheap-ops rows are from 27 Sep with 11 tasks, against 13 now, so the ops comparison is indicative only.
+
+| | Baseline (mlx-lm) | MTPLX | Ratio |
+|---|---|---|---|
+| debug r1 pass | 28/32 (2 TIMEOUT) | 9/10 (0 TIMEOUT) | within interval |
+| debug r2 pass | 1/9 (4 TIMEOUT) | 6/10 (0 TIMEOUT) | higher |
+| debug r1 median wall-clock | 245 s | 74 s | 3.3x faster |
+| debug r2 median wall-clock | 739 s | 158 s | 4.7x faster |
+| cheap-ops pass | 18/22 (2 TIMEOUT) | 64/65 (0 TIMEOUT) | higher |
+| cheap-ops mean wall-clock per task | 142 s | 31 s | 4.5x faster |
+| output tok/s over wall-clock (debug r1 / ops) | 3.3 / 5.0 | 16.8 / 25.2 | 5x |
+| decode tok/s, isolated probe | 13.8-14.3 | 35.3-39.2 | 2.5-2.7x |
+
+Rung 2 and higher carry a caveat for both servers: the sandbox blocked the model's own test runs (#263), so a rung-2 pass depends on the harness verifying after the session.
+
+- Decode >=1.8x: **met** (2.5-2.7x in the probe; wall-clock per sample 3-5x).
+- No debug TIMEOUT at rung 2: **met** (0 of 10).
+- Pass rate within the baseline interval: **met** (r1 9/10 vs 28/32; r2 and ops higher).
+- Fail triggers: none. No drop in pass rate, and no tool-call parse errors in the server log.
+
+The wall-clock gain is larger than the decode gain because shorter turns avoid the 900 s cap and the timeout retries. MTP output is near-lossless, not byte-identical (see #256); the pass rates above are what count.
