@@ -5,14 +5,14 @@
 # The hybrid lines (re-probe 7) run as one pass under one ledger, hard cap FRONTIER_COST_CAP=50;
 # each local line is its own pass. Done marker oq.done only if every pass passed.
 set -u
-MAIN=/Users/hans/mlx-workspace
+MAIN=$HOME/mlx-workspace
 cd "$MAIN" || exit 1
 L="$MAIN/.b""ench-logs"
 N=oq
 exec >> "$L/$N.log" 2>&1
-R=reports/2026-10-12-open-questions QF=/Users/hans/tmp/oq.queue
+R=reports/2026-10-12-open-questions QF=$HOME/tmp/oq.queue
 MODELS=$(grep -v '^#' "$QF" | awk 'NF {print $NF}' | sort -u)
-NP=/Users/hans/tmp/oq-bin/nav-pilot-main-b998fab
+NP=$HOME/tmp/oq-bin/nav-pilot-main-b998fab
 CAPS="$MAIN/reports/2026-09-26-64gb-tier/capabilities-bench-only-64-6c.json"
 HYB=(BENCH_NAV_PILOT="$NP" BENCH_NP_CONFIG_LINE='local_dispatch = "balanced"' BENCH_CAPABILITIES_OVERRIDE="$CAPS"
      FRONTIER_CLOUD_MODEL=claude-sonnet-5 NIGHT_HYBRID_TAG=np-b998fab-sonnet5-balanced-rp7)
