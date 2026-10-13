@@ -60,6 +60,10 @@ OPTIONAL_DEFAULTS = {
     "MLX_OMLX_MEMORY_GUARD_GB":   "",
     "MLX_OMLX_HOT_CACHE_MAX_SIZE": "",
     "MLX_OMLX_SSD_CACHE_MAX_SIZE": "",
+    # MTPLX-only (#256): native MTP speculative decoding, its own runtime variant
+    "MLX_MTPLX_BIN":              "mtplx",  # binary in MTPLX's own venv
+    "MLX_MTPLX_DEPTH":            "3",      # MTP draft depth
+    "MLX_MTPLX_VERSION":          "",       # required version; server refuses another one
     # nav-pilot only: its guard writes these into every completion request, from the Copilot
     # CLI and opencode alike (navikt/copilot#934). The workspace server never reads them.
     "MLX_NAV_PILOT_TEMPERATURE":  "",
@@ -83,6 +87,10 @@ IGNORED_BY_BACKEND = {
         "MLX_TEMP", "MLX_TOP_P", "MLX_TOP_K", "MLX_MIN_P", "MLX_CACHE_BYTES", "MLX_CACHE_SIZE",
         "MLX_CHAT_TEMPLATE", "MLX_CHAT_TEMPLATE_ARGS", "MLX_DRAFT_MODEL",
         "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE",
+    ],
+    "mtplx": [
+        "MLX_CACHE_BYTES", "MLX_CACHE_SIZE", "MLX_CHAT_TEMPLATE", "MLX_CHAT_TEMPLATE_ARGS",
+        "MLX_DRAFT_MODEL", "MLX_NUM_DRAFT_TOKENS", "MLX_PREFILL_STEP_SIZE", "MLX_MIN_P",
     ],
 }
 # The MLX_*_PENALTY params are deliberately absent from both lists: all three backends read
@@ -124,6 +132,8 @@ def served_model_id(params: dict) -> str:
     model = params.get("MLX_MODEL", "")
     if params.get("MLX_SERVER_TYPE", "mlx-lm").strip() == "omlx":
         return model.replace("/", "--")
+    if params.get("MLX_SERVER_TYPE", "").strip() == "mtplx":  # lowercased directory name
+        return Path(model).name.lower()
     if model.startswith(("/", "~")):  # mlx-lm /v1/models reports the resolved local path
         return str(Path(model).expanduser().resolve())
     return model
@@ -274,6 +284,7 @@ if __name__ == "__main__":
         assert home not in json.dumps(params_for(k)), f"{k}: home path would leak into results"
     assert served_model_id({"MLX_MODEL": "~/m"}) == str(Path.home().resolve() / "m")
     assert served_model_id({"MLX_MODEL": "org/m"}) == "org/m"
+    assert served_model_id({"MLX_MODEL": "~/x/Q-8b", "MLX_SERVER_TYPE": "mtplx"}) == "q-8b"
     print(f"✓ penalties() self-check passed, {len(list_keys())} profiles validate")
 
 
