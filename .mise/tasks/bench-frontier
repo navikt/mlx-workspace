@@ -234,7 +234,39 @@ def stop_daemons():
             os.kill(pid, signal.SIGTERM)
         except OSError:
             pass
+    reap_shm()
     return len(new)
+
+
+def orphan_shm(ipcs_out, user, alive):
+    """SysV segment ids owned by user, unattached, whose creator is gone."""
+    ids = []
+    for line in ipcs_out.splitlines():
+        f = line.split()  # T ID KEY MODE OWNER GROUP NATTCH CPID LPID
+        if len(f) == 9 and f[0] == "m" and f[4] == user and f[6] == "0" and not alive(int(f[7])):
+            ids.append(f[1])
+    return ids
+
+
+def reap_shm():
+    """Remove SysV shared memory leaked by killed embedded Postgres (zonky) servers.
+
+    A sandboxed session's `gradlew test` starts one Postgres per DB test class; when they
+    die without shutdown each leaves a segment. macOS allows 32 (kern.sysv.shmmni), so one
+    session can fill the table and every later initdb, the verifier's included, fails
+    with shmget ENOSPC: the 13 Oct cloud ladder scored 1/30 on correct fixes that way.
+    """
+    def alive(pid):
+        try:
+            os.kill(pid, 0)
+            return True
+        except ProcessLookupError:
+            return False
+        except OSError:
+            return True
+    r = subprocess.run(["ipcs", "-m", "-o", "-p"], capture_output=True, text=True)
+    for i in orphan_shm(r.stdout, os.environ.get("USER", ""), alive):
+        subprocess.run(["ipcrm", "-m", i], capture_output=True)
 
 
 def sweep_stray(H, cloud, tag):
@@ -1219,6 +1251,9 @@ def cmd_selftest(_args):
         assert session_env({"ws": ws, "JDK": Path("/j"), "CFG": {"jdk": "/j"}})["JAVA_HOME"] == "/j"
         assert "JAVA_HOME" not in session_env({"ws": ws, "JDK": Path.home(), "CFG": {}})
         assert session_env({"ws": ws})["MISE_CEILING_PATHS"] == str(ws)
+        ipcs = "m 1 0x1 --rw------- u staff 0 10 10\nm 2 0x2 --rw------- u staff 1 11 11\n" \
+               "m 3 0x3 --rw------- u staff 0 12 12\nm 4 0x4 --rw------- v staff 0 13 13\n"
+        assert orphan_shm(ipcs, "u", lambda p: p == 12) == ["1"]
         ce = cloud_env({"ws": ws, "installed": True})  # #119: the cloud arm never sees the real config dirs
         assert Path.home() not in Path(ce["XDG_CONFIG_HOME"]).parents and ce["HOME"] != str(Path.home()), ce
         shutil.rmtree(ce["HOME"])
