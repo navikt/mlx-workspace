@@ -164,16 +164,16 @@ From `mise run bench-frontier -- summary`. Verdicts per rung use the routing bar
 
 ## #257: Rapid-MLX against mlx_lm.server and MTPLX (qwen3.8-27b-8bit, same weights)
 
-| Server | debug r1 | debug r2 | cheap-ops | Timeouts (r1+r2 / ops) | s/sample r1 / r2 / ops | harness_sha |
+| Server | debug r1 | debug r2 | cheap-ops | Timeouts (r1+r2 / ops) | median s/sample r1 / r2 / ops | harness_sha |
 |---|---|---|---|---|---|---|
-| mlx_lm (`-64g`) | 10/10, LB 0.72 | not run | 18/22, LB 0.61 (Sept, ×2) | 0 / 2 | 347 / – / 142 | 3ddd8d4e1be1 (debug), d1229ad0e89f (ops) |
-| MTPLX (#267) | 9/10, LB 0.60 | 6/10, LB 0.31 | 64/65, LB 0.92 | 0 / 0 | 81 / 238 / 31 | 76c87b8ddec3, ac6bd2115239, 24a8e606fea7 |
-| Rapid-MLX 0.16.1 | 10/10, LB 0.72 | 4/10, LB 0.17 | 61/65, LB 0.85 | 2 / 2 | 183 / 398 / 100 | ac6bd2115239 (debug), 24a8e606fea7 (ops) |
+| mlx_lm (`-64g`, as in #267) | 28/32, LB 0.72 | 1/9, LB 0.02 | 18/22, LB 0.61 (Sept, ×2) | 6 / 2 | 241 / 739 / 54 | 3ddd8d4e1be1, fb13f73def42 (debug), d1229ad0e89f (ops) |
+| MTPLX (#267) | 9/10, LB 0.60 | 6/10, LB 0.31 | 64/65, LB 0.92 | 0 / 0 | 72 / 152 / 17 | 76c87b8ddec3, ac6bd2115239, 24a8e606fea7 |
+| Rapid-MLX 0.16.1 | 10/10, LB 0.72 | 4/10, LB 0.17 | 61/65, LB 0.85 | 2 / 2 | 164 / 288 / 66 | ac6bd2115239 (debug), 24a8e606fea7 (ops) |
 
-- Thinking is off on all three. Rapid-MLX gets `--no-thinking` from `{"enable_thinking": false}` (`.mise/tasks/server`). MTPLX metadata records empty template args, but its profile sets `enable_thinking: false`.
+- Thinking is off on all three. Rapid-MLX gets `--no-thinking` from `{"enable_thinking": false}` (`.mise/tasks/server`). MTPLX leaves the template args empty; the `mtplx` server type passes `--reasoning off` (see #267).
 - Tool-call parse errors in the captured server and run logs: 0 for all three. Rapid-MLX runs with `--tool-call-parser auto`.
 - Rapid-MLX failures: cheap-ops M2 and G2 timed out at 420 s, and T1 failed twice (suite failed). Debug r2: 2 timeouts and 4 suites still red.
-- The harness SHAs differ, and the mlx_lm cheap-ops baseline is older (Sept, 2 runs, an earlier task set). The mlx_lm row is therefore a weak baseline. There is no mlx_lm debug r2 run.
+- The mlx_lm row uses the same sources as #267: debug from the dbg/dbg2 runs on 12-13 Oct (#249), cheap-ops from 27 Sep (2 runs, 11 tasks, not 13). The harness SHAs differ between all three servers; the debug tasks and scoring are unchanged, but #262 removed a cause of baseline failures, so the mlx_lm debug numbers are a weak baseline. Times are medians over samples, as in #267.
 - TTFT at a 23k-token prompt was not measured in this run.
 
-**Verdict on #257: fail.** The pass criterion was fewer tool-call parse failures or timeouts with no drop in pass rate. Parse failures are 0 on every server, so there is nothing to improve. Timeouts went up (4 against 0 for MTPLX on the same tasks). Debug r2 dropped from 6/10 to 4/10 against MTPLX. Rapid-MLX is faster than mlx_lm (about 1.4–1.9x per sample) but slower than MTPLX on every row. Keep MTPLX as the fast variant and do not adopt Rapid-MLX.
+**Verdict on #257: fail.** The pass criterion was fewer tool-call parse failures or timeouts with no drop in pass rate. Parse failures are 0 on every server, so there is nothing to improve. Timeouts went up (4 against 0 for MTPLX on the same tasks). Debug r2 dropped from 6/10 to 4/10 against MTPLX. Rapid-MLX is faster than mlx_lm on debug (about 1.5x on r1, 2.6x on r2; cheap-ops is not comparable because the task sets differ) but slower than MTPLX on every row. Keep MTPLX as the fast variant and do not adopt Rapid-MLX.
