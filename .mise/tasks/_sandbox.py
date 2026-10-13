@@ -178,6 +178,16 @@ def bench_cplt_config(dest: Path, src: Path | None = None) -> Path:
             text += "\n[sandbox]\nallow_localhost_any = true\n"
     if tomllib.loads(text).get("sandbox", {}).get("allow_localhost_any") is not True:
         raise SystemExit(f"\u2717 could not add allow_localhost_any to a copy of {src}")
+    # The cloud arm starts cplt through nav-pilot with HOME set to a temp dir (own_home),
+    # so cplt's own ~ toolchain grants and toolchain_grants' argv never reach it, and
+    # on 13 Oct 2026 every in-session gradlew died on mise's JDK ("sandbox blocked
+    # open() libjli.dylib"). The same grants as absolute paths, in the config it reads.
+    g = toolchain_grants(Path(__file__).resolve().parents[2])
+    allow = tomllib.loads(text).get("allow", {})
+    for flag, key in (("--allow-read", "read"), ("--allow-write", "write")):
+        allow[key] = allow.get(key, []) + [g[i + 1] for i in range(0, len(g), 2) if g[i] == flag]
+    text = re.sub(r"(?ms)^\[allow\][^\n]*\n.*?(?=^\[|\Z)", "", text)
+    text += "\n[allow]\n" + "".join(f"{k} = {json.dumps(v)}\n" for k, v in allow.items())
     dest.write_text(text)
     return dest
 
@@ -237,4 +247,6 @@ elif __name__ == "__main__":
         out = tomllib.loads(bench_cplt_config(d / "b.toml", d / "u.toml").read_text())
         assert out["sandbox"]["allow_localhost_any"] is True, body
         assert (d / "u.toml").read_text() == body  # the user's file is never changed
+        if (Path.home() / ".gradle").exists():
+            assert str(Path.home() / ".gradle") in out["allow"]["write"], out
     print("\u2713 _sandbox self-check passed")
