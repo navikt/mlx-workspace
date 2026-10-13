@@ -205,6 +205,14 @@ def cloud_env(H):
         H["home"], H["home_env"] = S.own_home("frontier-home-")
     env = {k: v for k, v in os.environ.items() if not k.startswith(("OPENCODE_CONFIG", "XDG_"))}
     env.update(session_env(H), **H["home_env"], XDG_CONFIG_HOME=str(H["home"] / ".config"))
+    # #250 put the toolchain grants in bench_cplt_config, but only night-run-3 exports
+    # CPLT_CONFIG: a direct `mise run bench-frontier` cloud run read the empty default
+    # config under the temp HOME, and java died on libjli.dylib (13 Oct 2026). Written
+    # at cplt's default path, since cplt refuses grants inside a config's own directory.
+    cfg = H["home"] / ".config/cplt/config.toml"
+    if "CPLT_CONFIG" not in env and not cfg.exists():
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+        S.bench_cplt_config(cfg)
     if not FAKE and not H.get("installed"):
         H["installed"] = subprocess.run([NAV_PILOT, "install", "--user", "--all", "--yes"], env=env,
                                         capture_output=True, timeout=300).returncode == 0
