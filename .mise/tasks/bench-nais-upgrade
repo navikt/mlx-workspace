@@ -413,6 +413,7 @@ def run_one(model, task):
         HOME_W += ["--allow-write", str(home / rel)]
     env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG), "CI": "true",
                        "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+                       "DOTNET_CLI_HOME": str(home),   # a DOTNET_CLI_HOME outside the temp HOME is unwritable in the sandbox
                        # Java dials the Gradle daemon over an IPv6 socket (::ffff:127.0.0.1), which the
                        # sandbox's localhost rule doesn't match: "Could not connect to the Gradle daemon"
                        "JDK_JAVA_OPTIONS": "-Djava.net.preferIPv4Stack=true",
