@@ -21,6 +21,8 @@ jobs:
           python-version: "3.12"
       - name: models.json and the README table are current
         run: python3 .mise/tasks/model-manifest --check
+      - name: capabilities.json is current
+        run: python3 .mise/tasks/bench-capabilities --check
       - name: reports.json is current
         run: python3 .mise/tasks/reports-manifest --check
       - name: bench-cheap-ops target hooks are allowlisted and inert for Kotlin
