@@ -413,11 +413,15 @@ def run_one(model, task):
         HOME_W += ["--allow-write", str(home / rel)]
     env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG), "CI": "true",
                        "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+                       # Java dials the Gradle daemon over an IPv6 socket (::ffff:127.0.0.1), which the
+                       # sandbox's localhost rule doesn't match: "Could not connect to the Gradle daemon"
+                       "JDK_JAVA_OPTIONS": "-Djava.net.preferIPv4Stack=true",
                        # the repo's pinned pnpm ahead of the global pnpm 12, and its store in the temp HOME
                        "PATH": f"{pnpm_bin(repo)}:{os.environ['PATH']}",
                        "npm_config_store_dir": str(home / "Library/pnpm/store")})
     prompt = TASKS[task]["prompt"] + COMMON
-    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W])
+    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W,
+                       *[x for e in ("CI", "JDK_JAVA_OPTIONS", "DOTNET_CLI_TELEMETRY_OPTOUT") for x in ("--pass-env", e)]])
     if argv is None:
         raise SystemExit("cplt missing; refusing to run unsandboxed")
     log = OUT / "logs" / f"{model}--{task}.jsonl"
