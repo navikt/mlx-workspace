@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="Dependency-upgrade tasks on nais/examples (loadgen, frontend, tools) per local model. Usage: mise run bench-nais-upgrade -- --base <clone> --out <dir> --models a,b --tasks loadgen,frontend,tools [--cap-min 25] [--deadline <epoch>]"
+# mise description="Dependency-upgrade tasks on nais/examples (loadgen, frontend, backend, analytics, tools) per local model. Usage: mise run bench-nais-upgrade -- --base <clone> --out <dir> --models a,b --tasks loadgen,frontend,backend,analytics,tools [--cap-min 25] [--deadline <epoch>]"
 """Each (model, task) gets a fresh clone of --base and a branch upgrade/<task>-<model>.
 The model runs once through opencode in cplt, capped at --cap-min. The grader then runs
 outside the sandbox on that clone: did the versions move, are the checks green, did it
@@ -7,6 +7,7 @@ touch only the task's files, did anything get removed or downgraded. One JSON li
 sample goes to <out>/results.jsonl. Nothing is pushed anywhere.
 """
 import argparse
+import functools
 import json
 import os
 import re
@@ -46,6 +47,22 @@ TASKS = {
                "`pnpm exec tsc --noEmit`, `pnpm exec eslint .` and `pnpm build` all pass. "
                "Scope: quotes-frontend/package.json, pnpm-lock.yaml, and source or config only "
                "where an upgrade forces it. "),
+    "backend": dict(
+        scope=r"^quotes-backend/(build\.gradle\.kts|settings\.gradle\.kts|gradle/.*|gradlew(\.bat)?|src/.*)$",
+        prompt="Upgrade every dependency and plugin in quotes-backend/build.gradle.kts to its latest "
+               "stable release, and the Gradle wrapper to the latest stable Gradle "
+               "(`./gradlew dependencyUpdates --no-parallel -Drevision=release` lists what is behind). "
+               "Success: `./gradlew build --no-daemon` passes in quotes-backend. "
+               "Scope: quotes-backend build files, the Gradle wrapper, and Kotlin source only "
+               "where an API changed. "),
+    "analytics": dict(
+        scope=r"^quotes-analytics/(.*\.csproj|.*\.cs|global\.json)$",
+        prompt="Upgrade every NuGet package in quotes-analytics (quotes-analytics.csproj and "
+               "Tests/Tests.csproj) to its latest stable version "
+               "(`dotnet list quotes-analytics.sln package --outdated` lists what is behind). "
+               "Keep the target framework. Success: `dotnet build quotes-analytics.sln` and "
+               "`dotnet test quotes-analytics.sln` pass in quotes-analytics. "
+               "Scope: the .csproj files, and C# source only where an API changed. "),
     "tools": dict(
         scope=r"^(\.mise\.toml|quotes-[a-z]+/\.mise\.toml|quotes-[a-z]+/Dockerfile|docker-compose\.yaml|\.github/workflows/[^/]+\.ya?ml)$",
         prompt="Upgrade tool and image versions to the latest stable releases: pinned tools in "
@@ -86,8 +103,15 @@ def sh(cmd, cwd, timeout=900, env=None):
         return 124, "timeout"
 
 
+GRADER_HOME = OUT / "grader-home"   # grader runs unsandboxed: keep its caches off the real ~/.nuget, ~/.dotnet, ~/.gradle
+
+
 def mise(cmd, cwd, timeout=900):
-    return sh(f"mise exec -- {cmd}", cwd, timeout, {**os.environ, "MISE_FETCH_REMOTE_VERSIONS_TIMEOUT": "2"})
+    # CI=true: without it pnpm aborts on a no-TTY modules purge (ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY)
+    return sh(f"mise exec -- {cmd}", cwd, timeout, {**os.environ, "CI": "true", "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+                                                        "NUGET_PACKAGES": str(GRADER_HOME / "nuget"),
+                                                        "DOTNET_CLI_HOME": str(GRADER_HOME),
+                                                        "GRADLE_USER_HOME": str(GRADER_HOME / "gradle")})
 
 
 def restart_server():
@@ -161,9 +185,18 @@ def _j(url):
     return json.load(urllib.request.urlopen(url, timeout=30))
 
 
+@functools.cache
 def _gh_latest(repo):
     r = subprocess.run(["gh", "api", f"repos/{repo}/releases/latest", "-q", ".tag_name"], capture_output=True, text=True)
     return r.stdout.strip() or None
+
+
+def version_exists(tool, ver, repo):
+    """True when `mise ls-remote tool` has ver, or a release under the pin prefix ("25" -> 25.x).
+    True also when mise can't list it (unknown is not counted as invalid)."""
+    rc, o = sh(["mise", "ls-remote", tool], repo, 120)
+    vs = o.split()
+    return rc != 0 or not vs or any(x == ver or x.startswith(ver + ".") for x in vs)
 
 
 def latest_versions():
@@ -204,7 +237,21 @@ def tools_behind(v, L):
     return out
 
 
-VERS = {"loadgen": vers_go, "frontend": vers_pkg, "tools": vers_tools}
+def vers_gradle(repo):
+    d = repo / "quotes-backend"
+    t = (d / "build.gradle.kts").read_text()
+    v = dict(re.findall(r'(?m)^val (\w+Version) = "([^"]+)"', t))
+    v |= {f"plugin:{a or b}": c for a, b, c in re.findall(r'(?m)^\s*(?:kotlin\("([^"]+)"\)|id\("([^"]+)"\))\s+version\s+"([^"]+)"', t)}
+    w = (d / "gradle/wrapper/gradle-wrapper.properties").read_text()
+    return v | {"gradle": (re.search(r"gradle-([\d.]+)-", w) or [None, None])[1]}
+
+
+def vers_nuget(repo):
+    return {f"{f.name}:{a}": b for f in repo.glob("quotes-analytics/**/*.csproj")
+            for a, b in re.findall(r'<PackageReference Include="([^"]+)" Version="([^"]+)"', f.read_text())}
+
+
+VERS = {"loadgen": vers_go, "frontend": vers_pkg, "backend": vers_gradle, "analytics": vers_nuget, "tools": vers_tools}
 
 
 def checks(task, repo):
@@ -226,6 +273,31 @@ def checks(task, repo):
         _, o = mise("pnpm outdated --format json", d, 300)
         try:
             res["behind"] = sum(1 for x in json.loads(o[o.index("{"):]).values() if x["current"] != x["latest"])
+        except Exception:
+            res["behind"] = None
+        return res
+    if task == "backend":
+        d = repo / "quotes-backend"
+        res = {"build": mise("./gradlew build --no-daemon -q", d, 1800)[0] == 0}
+        mise("./gradlew dependencyUpdates --no-daemon --no-parallel -q -Drevision=release -DoutputFormatter=json", d, 900)
+        pre = re.compile(r"(?i)[.-](alpha|beta|rc|m\d|eap|dev)")   # "release" still offers 2.5.0-Beta1
+        try:
+            r = json.loads((d / "build/dependencyUpdates/report.json").read_text())
+            res["behind"] = sum(1 for x in r["outdated"]["dependencies"]   # versions plugin >=0.60: release None, preRelease set
+                                if (rel := x["available"].get("release")) and (not pre.search(rel) or pre.search(x["version"]))) + \
+                (r.get("gradle", {}).get("current", {}).get("isUpdateAvailable") is True)
+        except Exception:
+            res["behind"] = None
+        return res
+    if task == "analytics":
+        d = repo / "quotes-analytics"
+        res = {}
+        for k, c in {"build": "dotnet build quotes-analytics.sln", "test": "dotnet test quotes-analytics.sln"}.items():
+            res[k] = mise(c, d, 1200)[0] == 0
+        _, o = mise("dotnet list quotes-analytics.sln package --outdated --format json", d, 300)
+        try:
+            j = json.loads(o[o.index("{"):])
+            res["behind"] = sum(len(f.get("topLevelPackages", [])) for p in j["projects"] for f in p.get("frameworks", []))
         except Exception:
             res["behind"] = None
         return res
@@ -258,6 +330,11 @@ def grade(task, repo, before):
                 ok = tag_exists(k.split(":", 1)[1], b)
                 if ok is False:
                     bad.append(f"{k}:{b}")
+        # a pin newer than anything upstream (watchexec 8.4.4) reads as "not behind"; check it exists
+        for k, (_, b) in moved.items():
+            f, _, name = k.partition(":")
+            if f.endswith(".mise.toml") and b != "latest" and not version_exists(name, b, repo):
+                bad.append(f"{k}:{b}")
         g["checks"]["missing_tags"] = bad
     c = {k: v for k, v in g["checks"].items() if isinstance(v, bool)}
     g["green"] = bool(files) and all(c.values()) and not g.get("checks", {}).get("missing_tags")
@@ -329,26 +406,37 @@ def run_one(model, task):
     red = [k for k, x in base_checks.items() if x is False]
     if red:
         return {"skipped": f"baseline red: {red}", "baseline": base_checks}
+    for nm in [repo / "node_modules", *repo.glob("*/node_modules")]:   # the model starts from a clean tree
+        shutil.rmtree(nm, ignore_errors=True)
     home, henv = S.own_home("nais-upgrade-")   # never the real ~/.local/share/opencode, ~/.copilot, ~/.nav-pilot
     # opencode's package cache, copied (never linked): a fresh one makes opencode install
     # its packages at start-up, and execs from that tree are denied, so the session hangs.
     shutil.copytree(Path.home() / ".cache/opencode", home / ".cache/opencode", dirs_exist_ok=True)
     HOME_W = []   # write grants inside the temp HOME; not HOME itself, which would deny exec under .cache/opencode/bin
-    for rel in (".local/share/opencode", ".cache/opencode", ".config", "go", "Library", ".npm", ".cache/go-build"):
+    for rel in (".local/share/opencode", ".cache/opencode", ".config", "go", "Library", ".npm", ".cache/go-build",
+                ".gradle", ".m2", ".nuget", ".dotnet", ".local/share/NuGet"):
         (home / rel).mkdir(parents=True, exist_ok=True)
         HOME_W += ["--allow-write", str(home / rel)]
-    env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG),
+    env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG), "CI": "true",
+                       "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+                       "DOTNET_CLI_HOME": str(home),   # a DOTNET_CLI_HOME outside the temp HOME is unwritable in the sandbox
+                       # Java dials the Gradle daemon over an IPv6 socket (::ffff:127.0.0.1), which the
+                       # sandbox's localhost rule doesn't match: "Could not connect to the Gradle daemon"
+                       "JDK_JAVA_OPTIONS": "-Djava.net.preferIPv4Stack=true",
                        # the repo's pinned pnpm ahead of the global pnpm 12, and its store in the temp HOME
                        "PATH": f"{pnpm_bin(repo)}:{os.environ['PATH']}",
                        "npm_config_store_dir": str(home / "Library/pnpm/store")})
     prompt = TASKS[task]["prompt"] + COMMON
-    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W])
+    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W,
+                       *[x for e in ("CI", "JDK_JAVA_OPTIONS", "DOTNET_CLI_TELEMETRY_OPTOUT") for x in ("--pass-env", e)]])
     if argv is None:
         raise SystemExit("cplt missing; refusing to run unsandboxed")
     log = OUT / "logs" / f"{model}--{task}.jsonl"
     log.parent.mkdir(exist_ok=True)
     t0 = time.time()
     for start in (1, 2):   # opencode sometimes never starts (no event at all); one retry
+        if start == 2:
+            log = log.with_suffix(".retry.jsonl")   # keep the first attempt's log
         with log.open("w") as fh:
             p = subprocess.Popen(argv + ["--", "--pure", "--print-logs", "run", "--format", "json", prompt], cwd=repo,
                                  stdout=fh, stderr=subprocess.STDOUT, env=env, start_new_session=True)
@@ -394,7 +482,7 @@ def main():
                 try:
                     rec = run_one(model, task)
                 except Exception as e:   # one task failing never stops the queue
-                    rec = {"error": f"{type(e).__name__}: {e}"}
+                    rec = {"error": f"{type(e).__name__}: {e}"[:500]}
             subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
             BF.stop_daemons()   # PID-only, sandbox-started Gradle/Kotlin daemons + orphan shm
             rec = {"model": model, "task": task, **meta, "at": time.strftime("%F %T"), **rec}
@@ -412,3 +500,4 @@ if __name__ == "__main__":
     finally:
         subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
         BF.stop_daemons()
+        shutil.rmtree(GRADER_HOME, ignore_errors=True)
