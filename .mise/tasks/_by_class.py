@@ -90,6 +90,12 @@ EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135
                       "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44",
                       "b2aa8f6b0a8e": "3ddd8d4e1be1", "574568dab9bf": "3ddd8d4e1be1",
                       "fb13f73def42": "3ddd8d4e1be1"}
+# Local debug rows at rung 1 only (owner call, #253/#278): #250/#255 changed only the
+# cloud arm's cplt grants, and #284 (824f3b2ff73c) added harness-run Postgres. The owner
+# accepted pooling at rung 1 only: local rung-1 rows from the older generations pool
+# with 824f3b2ff73c. Rungs 2-3 and every cloud row stay apart.
+LOCAL_R1_HARNESS = {s: "824f3b2ff73c" for s in (
+    "3ddd8d4e1be1", "b2aa8f6b0a8e", "574568dab9bf", "fb13f73def42", "9be387a3af5e", "0e3926c39d5a")}
 
 Z90 = NormalDist().inv_cdf(0.90)  # one-sided 90%
 
@@ -274,13 +280,15 @@ def rows(probe=False):
             continue
         if m.get("variant") != "base":
             continue
-        sha = EQUIVALENT_HARNESS.get(m["harness_sha"], m["harness_sha"])
         cloud = m.get("cloud_model")
-        cond = (f"frontier cloud harness={sha} tasks={m['tasks_sha']}" if cloud else
-                f"frontier profile={m['key']} temp={(m.get('profile_params') or {}).get('MLX_TEMP', '?')} "
-                f"harness={sha} tasks={m['tasks_sha']}")
         for s in d.get("samples", []):
             if s.get("class") == "debug" and s.get("valid", True):
+                sha = EQUIVALENT_HARNESS.get(m["harness_sha"], m["harness_sha"])
+                if not cloud and s.get("rung") == 1:
+                    sha = LOCAL_R1_HARNESS.get(m["harness_sha"], sha)
+                cond = (f"frontier cloud harness={sha} tasks={m['tasks_sha']}" if cloud else
+                        f"frontier profile={m['key']} temp={(m.get('profile_params') or {}).get('MLX_TEMP', '?')} "
+                        f"harness={sha} tasks={m['tasks_sha']}")
                 add("debug", s.get("served_model") or cloud or "?", "cloud" if cloud else "local", cond,
                     s["task"], _outcome(s), f"{f.name}#{s['run']}", f.name, s.get("seconds"))
 
@@ -483,6 +491,8 @@ if __name__ == "__main__":
     other_model = ("20260927-0100", "q", "0123456789ab", None, None)
     assert newest_generation([old, other_model]) == [old, other_model]
     assert all(k != v and v not in EQUIVALENT_HARNESS for k, v in EQUIVALENT_HARNESS.items())
+    assert all(v not in LOCAL_R1_HARNESS and EQUIVALENT_HARNESS.get(k, k) in LOCAL_R1_HARNESS
+               for k, v in LOCAL_R1_HARNESS.items())
     # Newcombe 1998, method 10, example (56/70 vs 48/80): 95% interval 0.0524 to 0.3339.
     d, lo, hi = diff_ci(56, 70, 48, 80, z=NormalDist().inv_cdf(0.975))
     assert (round(d, 4), round(lo, 4), round(hi, 4)) == (0.2, 0.0524, 0.3339), (d, lo, hi)
