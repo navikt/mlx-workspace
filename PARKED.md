@@ -24,17 +24,17 @@ Last updated 14 October 2026.
 
 | Item | Issue | Why parked | Resume trigger | What we'd need |
 |---|---|---|---|---|
-| Fleet upgrade: 48 vs 64 vs 128 GB | #17 | Unmeasured; no 128 GB machine to hand | Access to a 128 GB machine | Same task set across tiers |
-| Per-sample cleanup of stray files | #90 | Workaround in preflight | Next stray-file failure | Harness change + selftest |
-| read-qa with ANSWER-line reminder | #114 | Unmeasured; low priority | Next frontier run | ~1 GPU h |
-| bench-hybrid: auto-rejected permission = invalid | #116 | Rare | Next hybrid run | Harness change |
-| Linux endpoint on real hardware | #124 | No hardware | Linux/NVIDIA box available | Machine access |
-| GPT-6 Sol at balanced, n ≥ 5 | #135 | Cost; trigger-only policy | New GPT model or local-mode release | Cloud budget |
-| oMLX stamp keyed to site-packages | #212 | Harness nicety | Next setup bug | Small fix |
-| R1 checker on final answer only | #206 | Checker change shifts old scores | Next cheap-ops rerun | Rescore |
-| Pin model revisions bench-side | #205 | Manual pinning works for now | A model repo changes under us | Harness change |
+| Fleet upgrade: 48 vs 64 vs 128 GB | #17 | Not in the final GPU run (#264) | New model or local-mode release | Same task set across tiers |
+| Per-sample cleanup of stray files | #90 | Not in the final GPU run (#264) | New model or local-mode release | Harness change + selftest |
+| read-qa with ANSWER-line reminder | #114 | Not in the final GPU run (#264) | Next frontier run | ~1 GPU h |
+| bench-hybrid: auto-rejected permission = invalid | #116 | Not in the final GPU run (#264); hit 9 of 25 GPT-6 Sol samples | Next hybrid run | Harness change |
+| Linux endpoint on real hardware | #124 | Not in the final GPU run (#264); needs hardware | Linux/NVIDIA box available | Machine access |
+| GPT-6 Sol at balanced, n ≥ 5 | #135 | Not in the final GPU run (#264) | New model or local-mode release | Cloud budget |
+| oMLX stamp keyed to site-packages | #212 | Trigger-only policy | Next run that needs it | Small fix |
+| R1 checker on final answer only | #206 | Trigger-only policy | Next run that needs it | Rescore |
+| Pin model revisions bench-side | #205 | Trigger-only policy | Next run that needs it | Harness change |
 | Qwen3.8-27B 8-bit rerun with metadata | #214 | Trigger-only policy | Next Qwen3.8 run | ~1 GPU h |
-| night-run-3 preflight on hidden git history | #218 | Seen once after a killed run | Recurs | Preflight fix |
-| cheap-ops sample wrote src/ at root | #186 | Workaround in place | Recurs | See #90 |
-| Follow-ups from #178 | #179 | Small, not blocking | Next cheap-ops change | – |
-| requeue-646c-launcher follow-ups | #156 | Launcher retired | Launcher reused | – |
+| night-run-3 preflight on hidden git history | #218 | Trigger-only policy | Next run that needs it | Preflight fix |
+| cheap-ops sample wrote src/ at root | #186 | Trigger-only policy | Next run that needs it | See #90 |
+| Follow-ups from #178 | #179 | Trigger-only policy | Next run that needs it | – |
+| requeue-646c-launcher follow-ups | #156 | Trigger-only policy | Next run that needs it | – |
