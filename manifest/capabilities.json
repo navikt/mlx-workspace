@@ -281,24 +281,24 @@
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 15,
-          "local_n": 15
+          "local_k": 12,
+          "local_n": 12
         },
         "edit-single": {
           "delegate": "cloud",
-          "local": "trusted",
+          "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 20,
-          "local_n": 20
+          "local_k": 4,
+          "local_n": 4
         },
         "edit-multi-mechanical": {
           "delegate": "cloud",
           "local": "not-yet",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 9,
-          "local_n": 10
+          "local_k": 4,
+          "local_n": 4
         },
         "create-file": {
           "delegate": "cloud",
@@ -1365,26 +1365,25 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 15,
-          "n": 15,
-          "lb": 0.901,
+          "k": 12,
+          "n": 12,
+          "lb": 0.88,
           "bar": 0.95,
           "p_cloud": 1.0,
-          "runs": 5,
+          "runs": 4,
           "tasks": [
             "D1",
             "R2",
             "R3"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-rapid temp=0.6 harness=24a8e606fea7",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-nopin temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
-            "results-qwen3.8-27b-8bit-rapid-20261013-195439-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-201944-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-204629-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-210916-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-213303-01.json"
+            "results-qwen3.8-27b-8bit-nopin-20260923-083958-01.json",
+            "results-qwen3.8-27b-8bit-nopin-20260923-083958-02.json",
+            "results-qwen3.8-27b-8bit-nopin-20260923-083958-03.json",
+            "results-qwen3.8-27b-8bit-nopin-20260923-083958-04.json"
           ]
         }
       },
@@ -1396,28 +1395,23 @@
           "note": "no data"
         },
         "local": {
-          "verdict": "trusted",
-          "k": 20,
-          "n": 20,
-          "lb": 0.924,
+          "verdict": "not-yet",
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 5,
+          "runs": 2,
           "tasks": [
             "E1",
-            "E3b",
-            "O1",
-            "O2"
+            "E3b"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-rapid temp=0.6 harness=24a8e606fea7",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-64g temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
-            "results-qwen3.8-27b-8bit-rapid-20261013-195439-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-201944-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-204629-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-210916-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-213303-01.json"
+            "results-qwen3.8-27b-8bit-64g-20260927-002153-01.json",
+            "results-qwen3.8-27b-8bit-64g-20260927-011430-01.json"
           ]
         }
       },
@@ -1430,25 +1424,22 @@
         },
         "local": {
           "verdict": "not-yet",
-          "k": 9,
-          "n": 10,
-          "lb": 0.718,
+          "k": 4,
+          "n": 4,
+          "lb": 0.709,
           "bar": 0.9,
           "p_cloud": 1.0,
-          "runs": 5,
+          "runs": 2,
           "tasks": [
             "M1",
             "M2"
           ],
-          "condition": "cheap-ops profile=qwen3.8-27b-8bit-rapid temp=0.6 harness=24a8e606fea7",
+          "condition": "cheap-ops profile=qwen3.8-27b-8bit-64g temp=0.6 harness=492141135fe6",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
-            "results-qwen3.8-27b-8bit-rapid-20261013-195439-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-201944-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-204629-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-210916-01.json",
-            "results-qwen3.8-27b-8bit-rapid-20261013-213303-01.json"
+            "results-qwen3.8-27b-8bit-64g-20260927-002153-01.json",
+            "results-qwen3.8-27b-8bit-64g-20260927-011430-01.json"
           ]
         }
       },

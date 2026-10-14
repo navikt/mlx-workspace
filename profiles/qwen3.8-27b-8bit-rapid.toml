@@ -4,6 +4,7 @@ released           = "2026-08"
 status             = "testing"
 spec_source        = "config.json"
 notes              = "#257. Same weights, sampling and limits as qwen3.8-27b-8bit-64g, served by `rapid-mlx serve` (v0.16.1, df1f4db, own venv) instead of mlx_lm.server: its own variant key, so rows never pool with mlx-lm rows. Rapid-MLX manages its own prompt cache; the cache params are kept for the schema and ignored (warned). Bench-only, not offered in the manifest."
+measurement_only   = true
 model_vram_gb      = 30
 gpu_wired_limit_gb = 48
 machine_min_ram_gb = 64
