@@ -23,8 +23,10 @@ Several "model results" in this window turned out to be harness faults. Each one
 - **The sandbox blocked SysV IPC for the agent.** Separate from the leak: inside cplt, `shmget`
   returns EPERM, so agents could not run the Postgres-backed tests themselves (17 qwen3.8 sessions
   on 13 Oct, one cloud session on 26 Sep). Verifier grading is unaffected, but rungs 2–3 ask the
-  agent to run the tests, so those scores are likely depressed for every arm (#263). The fix is an
-  opt-in `sandbox.allow_sysv_ipc` in cplt (navikt/cplt#761, open).
+  agent to run the tests, so those scores are likely depressed for every arm (#263). An opt-in
+  `sandbox.allow_sysv_ipc` in cplt (navikt/cplt#761) stays open: the cplt owner blocked it because it
+  weakens the sandbox. The fix instead: the harness runs Postgres outside the sandbox and the
+  fixtures connect over localhost TCP (#277).
 - **Home paths leaked into results.** Frontier result JSONs carried absolute home paths in
   `build_tail`. They were found in review of #267 and scrubbed by hand. #271 removed three more from
   `oq-launcher`. The harness-side scrub is #268 (open).
@@ -51,8 +53,8 @@ collapse (#261) and the cloud rung-3 0/10 (#250) were both harness faults.
 - **Pooling (#253, open):** local rows on the older harness SHAs pool with `0e3926c39d5a`. Cloud
   rows stay apart.
 - **Batch 3 is blocked** (PLAN.md, row 7): debug rungs 2–3 on 8-bit and OptiQ plus a Sonnet 5.5
-  ladder (~$5). It waits until the owner installs a cplt release with cplt#761 and the bench
-  enables `allow_sysv_ipc`. The rerun scores replace dbg2.
+  ladder (~$5). It waits for the harness-run Postgres (#277); tracked in #278. The rerun
+  scores replace dbg2.
 
 ## 3. Runtime experiments
 
