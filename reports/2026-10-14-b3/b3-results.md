@@ -5,6 +5,24 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20261014-153307/steps
 - Started 2026-10-14T15:33:56+02:00, last step ended 2026-10-14T23:37:36+02:00.
 - Cloud spend: $4.3419 of the $10 cap.
 
+## Analysis
+
+Debug class, this run only (harness `824f3b2ff73c`, harness-run Postgres from #284). Agents ran the fixture tests in-session; no `shmget` EPERM or self-attach errors in the smoke transcripts. LB is Wilson one-sided 90% (z = 1.2816), bar 0.95. Timed-out samples count as failures.
+
+| Model | r1 | r2 | r3 | Timeouts |
+|---|---|---|---|---|
+| qwen3.8-27b-8bit-64g (mlx-lm) | – | 4/10 (LB 0.23) | 5/10 (0.31) | 8 |
+| qwen3.8-27b-optiq-4bit (mlx-lm) | – | 1/5 (0.06) | 6/10 (0.40) | 7 |
+| qwen3.8-27b-8bit-mtplx (measurement only, #279) | – | 8/10 (0.60) | 4/8 (0.29) | 2 |
+| claude-sonnet-5.5 | 10/10 (0.86) | 10/10 (0.86) | 10/10 (0.86) | 0 |
+
+- No local arm clears 0.95 at rung 2 or 3. Steps 2 and 7 hit the step timeout, so OptiQ r2 has n=5 and MTPLX r3 n=8.
+- The dbg2 cloud rung-3 anomaly (0/10) is gone: 10/10 with in-session DB tests. p_cloud from the new Sonnet rows: 30/30.
+- MTPLX has its own key and pools with nothing; it is not a verdict arm.
+- Rung 1 local pooling with older generations needs #253 (open).
+
+**Verdict change.** A run of `mise run bench-capabilities` on this branch (result not committed) leaves every existing debug verdict unchanged. It adds a debug entry for the MTPLX build (`cloud`), which is measurement-only and should not ship. `manifest/` is unchanged here.
+
 ## Steps
 
 | # | Part | Step | Classes | Variant | Status | Minutes | Result |
