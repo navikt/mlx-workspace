@@ -1,8 +1,18 @@
 {
   "schema_version": 1,
   "note": "Generated from reports/ by 'mise run reports-manifest'. Do not edit by hand.",
-  "generated_at": "2026-10-12T21:35:40Z",
+  "generated_at": "2026-10-14T08:49:06Z",
   "reports": [
+    {
+      "id": "2026-10-14-session-findings/report",
+      "title": "Session findings, 12–14 Oct",
+      "date": "2026-10-14",
+      "class": "Agentic task benchmarks",
+      "summary": "Harness faults (no JDK in the cloud arm, SysV shm leak, sandbox blocking SysV IPC) invalidated cloud debug baselines; MTPLX 3–5x wall-clock with no quality claim, Rapid-MLX fail, DFlash parked, Coder-Next does not fit; nais/examples upgrade loadgen 4/4, frontend 4/4, tools 0/4",
+      "path": "reports/2026-10-14-session-findings/report.md",
+      "url": "https://github.com/navikt/mlx-workspace/blob/main/reports/2026-10-14-session-findings/report.md",
+      "justifies": []
+    },
     {
       "id": "2026-10-11-newmodels/report",
       "title": "Four new models on the quality frontier",

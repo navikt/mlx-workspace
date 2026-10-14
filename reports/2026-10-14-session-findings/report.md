@@ -111,8 +111,9 @@ qwen3.6-35b-a3b-optiq-64g, qwen3.6-35b-a3b-8bit-64g, qwen3.8-27b-optiq-4bit.
   16 to 18 (existing data volumes will not start), and Node stays on 25.
 - **Harness follow-ups (#274):** set `CI=true`, make the "behind" check verify that the version
   exists, keep watchdog retry logs, and four smaller items.
-- **Out of scope for now:** backend (Gradle's JDK cannot finish TLS to the plugin portal from this
-  machine) and analytics (no .NET SDK, NuGet unreachable inside cplt). Both are recorded in the plan.
+- **Not yet covered, follow-up in progress:** backend (Gradle's JDK could not finish TLS to the
+  plugin portal) and analytics (no .NET SDK, NuGet unreachable inside cplt) were skipped in this
+  run. Both are being attempted now as follow-up work.
 
 ## 5. Process lessons
 
