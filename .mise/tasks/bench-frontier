@@ -23,6 +23,7 @@ bench-cheap-ops itself is not modified and still reads only bench/tasks.json.
 """
 import argparse
 import ast
+import atexit
 import hashlib
 import json
 import os
@@ -191,6 +192,8 @@ def session_env(H):
     carries it; checked under cplt: gradlew's launcher JVM and `java` are 21 either way.
     """
     env = {"MISE_CEILING_PATHS": str(H["ws"])}
+    if H.get("pg_url"):
+        env[S.PG_ENV] = H["pg_url"]
     if H.get("CFG", {}).get("jdk"):
         env.update(JAVA_HOME=str(H["JDK"]), PATH=f"{H['JDK']}/bin:{os.environ.get('PATH', '')}")
     return env
@@ -210,9 +213,12 @@ def cloud_env(H):
     # config under the temp HOME, and java died on libjli.dylib (13 Oct 2026). Written
     # at cplt's default path, since cplt refuses grants inside a config's own directory.
     cfg = H["home"] / ".config/cplt/config.toml"
-    if "CPLT_CONFIG" not in env and not cfg.exists():
+    src = env.get("CPLT_CONFIG")
+    if (src is None or H.get("pg_port")) and not cfg.exists():
         cfg.parent.mkdir(parents=True, exist_ok=True)
-        S.bench_cplt_config(cfg)
+        S.bench_cplt_config(cfg, src and Path(src), pg_port=H.get("pg_port"))
+    if H.get("pg_port"):  # #277: the port grant lives in our copy, so cplt reads that one
+        env.pop("CPLT_CONFIG", None)
     if not FAKE and not H.get("installed"):
         H["installed"] = subprocess.run([NAV_PILOT, "install", "--user", "--all", "--yes"], env=env,
                                         capture_output=True, timeout=300).returncode == 0
@@ -275,6 +281,145 @@ def reap_shm():
     r = subprocess.run(["ipcs", "-m", "-o", "-p"], capture_output=True, text=True)
     for i in orphan_shm(r.stdout, os.environ.get("USER", ""), alive):
         subprocess.run(["ipcrm", "-m", i], capture_output=True)
+
+
+# ── harness-run Postgres (#277) ──────────────────────────────────────────────
+# The fixture's TestDatabase starts zonky's embedded Postgres, which needs SysV shared
+# memory, and cplt denies it: in-session `gradlew test` died on shmget EPERM (#263).
+# So for test-running classes the harness starts one Postgres per sample outside the
+# sandbox, on one localhost port per run, and swaps TestDatabase for a version that
+# makes a fresh database on it per instance (as zonky gives a fresh server per
+# instance). The sandbox gains only that port and the variable naming it
+# (S.pg_grants). The verifier keeps its own path: the original TestDatabase is put
+# back before it runs, so it starts zonky outside the sandbox as before.
+PG_CLASSES = ("debug", "create-file")
+TESTDB = "src/test/kotlin/testhelper/TestDatabase.kt"
+TESTDB_CLASS = re.compile(r"(?ms)^class TestDatabase : DatabaseInterface \{\n.*?^\}\n")
+TESTDB_OVERLAY = """class TestDatabase : DatabaseInterface {
+    private val pg: EmbeddedPostgres?
+    private val ds: javax.sql.DataSource
+    private val benchDb: String?
+
+    override val connection: Connection
+        get() = ds.connection.apply {
+            autoCommit = false
+        }
+
+    init {
+        // The benchmark runs Postgres outside the sandbox and names it here; a fresh
+        // database per instance, as embedded Postgres gives a fresh server per instance.
+        val url = System.getenv("BENCH_PG_URL")
+        if (url != null) {
+            pg = null
+            benchDb = "t_" + java.util.UUID.randomUUID().toString().replace("-", "")
+            java.sql.DriverManager.getConnection(url).use { it.createStatement().execute("CREATE DATABASE $benchDb") }
+            ds = org.postgresql.ds.PGSimpleDataSource().apply { setURL(url.replace("/postgres?", "/$benchDb?")) }
+        } else {
+            benchDb = null
+            pg = try {
+                EmbeddedPostgres.start()
+            } catch (e: Exception) {
+                EmbeddedPostgres.builder().setLocaleConfig("locale", "en_US").start()
+            }
+            ds = pg.postgresDatabase
+        }
+
+        Flyway.configure().run {
+            dataSource(ds).load().migrate()
+        }
+    }
+
+    fun stop() {
+        pg?.close()
+        benchDb?.let { db ->
+            java.sql.DriverManager.getConnection(System.getenv("BENCH_PG_URL")).use {
+                it.createStatement().execute("DROP DATABASE $db WITH (FORCE)")
+            }
+        }
+    }
+}
+"""
+PG_PIDFILE = ROOT / ".bench-logs" / "frontier-pg.pid"
+
+
+def overlay_on(repo):
+    """Swap in TESTDB_OVERLAY. Returns (original, overlaid) for overlay_off."""
+    f = Path(repo) / TESTDB
+    orig = f.read_text()
+    new, n = TESTDB_CLASS.subn(lambda _: TESTDB_OVERLAY, orig)
+    if n != 1:
+        raise SystemExit(f"✗ {TESTDB}: class TestDatabase found {n} times, the Postgres overlay needs it once")
+    f.write_text(new)
+    return orig, new
+
+
+def overlay_off(repo, saved):
+    """Put the original back unless the agent changed the overlay; then it is the agent's edit."""
+    f = Path(repo) / TESTDB
+    if saved and f.exists() and f.read_text() == saved[1]:
+        f.write_text(saved[0])
+
+
+def pg_bin():
+    """zonky's own Postgres build, from the Gradle cache the fixture already filled."""
+    gh = Path(os.environ.get("GRADLE_USER_HOME") or Path.home() / ".gradle")
+    jars = sorted(gh.glob("caches/modules-2/files-2.1/io.zonky.test.postgres/embedded-postgres-binaries-darwin-*/"
+                          "*/*/embedded-postgres-binaries-darwin-*.jar"))
+    if not jars:
+        raise SystemExit("✗ no zonky Postgres binaries in the Gradle cache: run the fixture's tests once")
+    import zipfile
+    d = Path(tempfile.mkdtemp(prefix="frontier-pgbin-"))
+    atexit.register(shutil.rmtree, d, True)
+    with zipfile.ZipFile(jars[-1]) as z:
+        txz = next(n for n in z.namelist() if n.endswith(".txz"))
+        z.extract(txz, d)
+    subprocess.run(["tar", "xJf", txz], cwd=d, check=True)
+    return d / "bin"
+
+
+def pg_free_port():
+    import socket
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def pg_start(H):
+    """A fresh server for one sample: own data dir in temp, TCP only, PID recorded."""
+    if "pg_bin" not in H:
+        H["pg_bin"] = pg_bin()
+    d = Path(tempfile.mkdtemp(prefix="frontier-pg-"))
+    H["pg_dir"] = d
+    b = H["pg_bin"]
+    subprocess.run([str(b / "initdb"), "-A", "trust", "-U", "postgres", "-E", "UTF-8", "-D", str(d / "data")],
+                   check=True, capture_output=True)
+    # zonky's own server settings; no unix socket, so nothing outside the data dir.
+    opts = (f"-p {H['pg_port']} -h 127.0.0.1 -k '' -c fsync=off -c synchronous_commit=off "
+            f"-c full_page_writes=off -c max_connections=300")
+    subprocess.run([str(b / "pg_ctl"), "-D", str(d / "data"), "-l", str(d / "log"), "-w", "-o", opts, "start"],
+                   check=True, capture_output=True)
+    pid = (d / "data" / "postmaster.pid").read_text().split()[0]
+    PG_PIDFILE.parent.mkdir(exist_ok=True)
+    PG_PIDFILE.write_text(pid + "\n")
+    return f"jdbc:postgresql://127.0.0.1:{H['pg_port']}/postgres?user=postgres"
+
+
+def pg_stop(H):
+    """Stop the sample's server and remove its data dir; also a killed run's server."""
+    d = H.pop("pg_dir", None)
+    if d:
+        subprocess.run([str(H["pg_bin"] / "pg_ctl"), "-D", str(d / "data"), "-m", "fast", "-w", "-t", "30", "stop"],
+                       capture_output=True)
+    if PG_PIDFILE.exists():
+        pid = int(PG_PIDFILE.read_text().split()[0])
+        cmd = subprocess.run(["ps", "-o", "command=", "-p", str(pid)], capture_output=True, text=True).stdout
+        if "postgres" in cmd:
+            os.kill(pid, signal.SIGKILL)
+            time.sleep(1)
+        PG_PIDFILE.unlink()
+    if d:
+        shutil.rmtree(d, ignore_errors=True)
+    reap_shm()
 
 
 def sweep_stray(H, cloud, tag):
@@ -517,6 +662,8 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
     if task.get("break"):
         H["apply_break"](task)
     cap = var["cap"] or BASE_CAP[task["class"]]
+    if H.get("pg_port") and task["class"] in PG_CLASSES:
+        H["pg_url"] = pg_start(H)
     started = time.time()
     agg = {"turns": 0, "tool_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
     reply, loops, timed_out, dispatched, misscoped = "", [], False, False, None
@@ -524,14 +671,18 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
 
     def call(prompt, cont):
         nonlocal reply, timed_out, dispatched, misscoped
-        if FAKE:
-            a = agent_fake(H, task, prompt, cont, cap, attempts)
-        elif cloud:
-            a = agent_cloud(H, prompt, cont, cap, cloud)
-            dispatched = dispatched or a["dispatched"]
-            misscoped = misscoped or a["misscoped"]
-        else:
-            a = agent_local(H, prompt, cont, cap)
+        saved = overlay_on(H["repo"]) if H.get("pg_url") else None
+        try:
+            if FAKE:
+                a = agent_fake(H, task, prompt, cont, cap, attempts)
+            elif cloud:
+                a = agent_cloud(H, prompt, cont, cap, cloud)
+                dispatched = dispatched or a["dispatched"]
+                misscoped = misscoped or a["misscoped"]
+            else:
+                a = agent_local(H, prompt, cont, cap)
+        finally:
+            overlay_off(H["repo"], saved)
         reply = a["reply"]
         timed_out = timed_out or a["timed_out"]
         for k in agg:
@@ -564,6 +715,8 @@ def run_sample(H, cfg, task, var, run_i, cloud, failing_test):
         **({"invalid_reason": f"cplt scoped the session to {misscoped}, not the workspace"} if misscoped else {}),
     }
     # v2 teardown, after the clock: nothing here is in "seconds".
+    if H.pop("pg_url", None):
+        pg_stop(H)
     rec["daemons_stopped"] = 0 if FAKE else stop_daemons()
     rec["stray"] = sweep_stray(H, cloud, f"{H['key']}/{task['id']}-r{run_i}-{time.strftime('%Y%m%d-%H%M%S')}")
     return rec
@@ -853,6 +1006,11 @@ def cmd_run(args):
         return 0
 
     H = harness(key, doc)
+    if not FAKE and any(t["class"] in PG_CLASSES for t in tasks):
+        H["pg_port"] = pg_free_port()
+        atexit.register(lambda: H.pop("pg_url", None) and pg_stop(H))
+        if signal.getsignal(signal.SIGTERM) is signal.SIG_DFL:  # night-run-3's kill_tree
+            signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     lock = None if FAKE else queue_lock()
     stamp = time.strftime("%Y%m%d-%H%M%S")
     vslug = args.variant.replace("+", "_")
@@ -868,6 +1026,7 @@ def cmd_run(args):
         if not FAKE:
             H["assert_workspace_is_clean"]()
             H["ensure_clone"]()
+            pg_stop(H)  # a killed run's server
             stop_daemons()  # v1's pile, or a killed run's
         if args.cloud and not FAKE:
             cloud_ws(H["ws"])
@@ -1264,6 +1423,28 @@ def cmd_selftest(_args):
         assert orphan_shm(ipcs, "u", lambda p: p == 12) == ["1"]
         ce = cloud_env({"ws": ws, "installed": True})  # #119: the cloud arm never sees the real config dirs
         assert Path.home() not in Path(ce["XDG_CONFIG_HOME"]).parents and ce["HOME"] != str(Path.home()), ce
+        shutil.rmtree(ce["HOME"])
+        # #277: the overlay goes in and comes back out exactly; an agent's edit to it stays
+        td = tmp / "pgfix" / TESTDB
+        td.parent.mkdir(parents=True)
+        orig = ("package testhelper\n\nclass TestDatabase : DatabaseInterface {\n    private val pg: EmbeddedPostgres\n"
+                "    fun stop() {\n        pg.close()\n    }\n}\n\nclass TestDatabaseNotResponding : DatabaseInterface {\n}\n")
+        td.write_text(orig)
+        saved = overlay_on(tmp / "pgfix")
+        assert "BENCH_PG_URL" in td.read_text() and "TestDatabaseNotResponding" in td.read_text()
+        overlay_off(tmp / "pgfix", saved)
+        assert td.read_text() == orig
+        saved = overlay_on(tmp / "pgfix")
+        td.write_text(saved[1] + "// agent\n")
+        overlay_off(tmp / "pgfix", saved)
+        assert td.read_text().endswith("// agent\n")
+        # and the cloud arm's cplt config carries the one port grant and the variable
+        H = {"ws": ws, "installed": True, "pg_port": 5555, "pg_url": "jdbc:postgresql://127.0.0.1:5555/postgres?user=postgres"}
+        ce = cloud_env(H)
+        import tomllib
+        c = tomllib.loads((Path(ce["HOME"]) / ".config/cplt/config.toml").read_text())
+        assert c["allow"]["localhost"] == [5555] and c["sandbox"]["pass_env"] == [S.PG_ENV], c
+        assert ce[S.PG_ENV] == H["pg_url"] and "CPLT_CONFIG" not in ce
         shutil.rmtree(ce["HOME"])
         print("✓ runner, variants, validation and summary with fake models")
     print("selftest: PASS")

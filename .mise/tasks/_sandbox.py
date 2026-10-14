@@ -111,8 +111,26 @@ def cplt_argv(workspace_dir: Path, repo_root: Path, server_port: str = "8080",
         "--allow-write", str(BENCH_CONFIG_HOME),
     ]
     argv += toolchain_grants(repo_root)
+    argv += pg_grants(os.environ.get(PG_ENV))
     argv += extra or []
     return argv
+
+
+# bench-frontier's harness-run Postgres (#277): the fixture tests reach a server the
+# harness started outside the sandbox, over one localhost port, instead of starting
+# embedded Postgres in the sandbox, which needs SysV shared memory cplt denies (#263).
+PG_ENV = "BENCH_PG_URL"
+
+
+def pg_port(url: str | None) -> int | None:
+    m = re.match(r"jdbc:postgresql://127\.0\.0\.1:(\d+)/", url or "")
+    return int(m.group(1)) if m else None
+
+
+def pg_grants(url: str | None) -> list[str]:
+    """One localhost port and the variable naming it; nothing when no server runs."""
+    port = pg_port(url)
+    return ["--allow-localhost", str(port), "--pass-env", PG_ENV] if port else []
 
 
 def toolchain_grants(repo_root: Path) -> list[str]:
@@ -159,7 +177,7 @@ def warn_unsandboxed(stream) -> None:
     print("   Install it with: brew install cplt", file=stream)
 
 
-def bench_cplt_config(dest: Path, src: Path | None = None) -> Path:
+def bench_cplt_config(dest: Path, src: Path | None = None, pg_port: int | None = None) -> Path:
     """Write a benchmark-only cplt config to dest: the user's config plus
     sandbox.allow_localhost_any, for CPLT_CONFIG. Never touches the user's file.
 
@@ -186,6 +204,11 @@ def bench_cplt_config(dest: Path, src: Path | None = None) -> Path:
     allow = tomllib.loads(text).get("allow", {})
     for flag, key in (("--allow-read", "read"), ("--allow-write", "write")):
         allow[key] = allow.get(key, []) + [g[i + 1] for i in range(0, len(g), 2) if g[i] == flag]
+    if pg_port:  # pg_grants, as config: the cloud arm's cplt is started by nav-pilot
+        allow["localhost"] = allow.get("localhost", []) + [pg_port]
+        if "pass_env" in tomllib.loads(text).get("sandbox", {}):
+            raise SystemExit(f"\u2717 {src} sets sandbox.pass_env; merging {PG_ENV} into it is not supported")
+        text = re.sub(r"(?m)^\[sandbox\][^\n]*\n", lambda m: m.group(0) + f'pass_env = ["{PG_ENV}"]\n', text, count=1)
     text = re.sub(r"(?ms)^\[allow\][^\n]*\n.*?(?=^\[|\Z)", "", text)
     text += "\n[allow]\n" + "".join(f"{k} = {json.dumps(v)}\n" for k, v in allow.items())
     dest.write_text(text)
@@ -249,4 +272,9 @@ elif __name__ == "__main__":
         assert (d / "u.toml").read_text() == body  # the user's file is never changed
         if (Path.home() / ".gradle").exists():
             assert str(Path.home() / ".gradle") in out["allow"]["write"], out
+        out = tomllib.loads(bench_cplt_config(d / "b.toml", d / "u.toml", pg_port=5555).read_text())
+        assert out["allow"]["localhost"] == [5555] and out["sandbox"]["pass_env"] == [PG_ENV], out
+    assert pg_grants("jdbc:postgresql://127.0.0.1:5555/postgres?user=postgres") == \
+        ["--allow-localhost", "5555", "--pass-env", PG_ENV]
+    assert pg_grants(None) == [] and pg_grants("jdbc:postgresql://db.example:5432/x") == []
     print("\u2713 _sandbox self-check passed")
