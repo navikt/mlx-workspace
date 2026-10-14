@@ -13,7 +13,9 @@ Target: github.com/nais/examples at local main c876680, cloned to a scratch dir 
 | analytics | **out of scope**: no .NET SDK installed, NuGet unreachable inside cplt |
 
 ## Grading (per attempt, automated)
-versions moved (diff of manifests/lockfiles vs base and vs latest), checks green, `git diff --stat`
+baseline checks run first (task skipped if red); versions moved, and pass needs *fully upgraded*
+(0 direct deps behind latest; for tools: mise pins for node/go/pnpm/watchexec, golang/node image tags,
+action major tags vs latest release), checks green, `git diff --stat`
 touches only the task's files, no dep removed or downgraded.
 
 ## Schedule (8 GPU h)
@@ -33,5 +35,7 @@ Go and pnpm reach their registries, so loadgen and frontend are gradable.
 
 ## Harness
 `.mise/tasks/bench-nais-upgrade` (session per model x task, grader outside the sandbox, results.jsonl)
-and `nais-upgrade-launcher` (waiting launcher, 8 h window). Smoke 2026-10-14: loadgen on
-qwen3.8-27b-8bit-mtplx, 96 s, 7 direct deps moved, `go build`/`go test` green, 0 behind, only go.mod/go.sum.
+and `nais-upgrade-launcher` (waiting launcher, 8 h window). Each session runs with a temp HOME (`own_home`) and is killed as a process group on cap or SIGTERM.
+Smoke 2026-10-14 (after review fixes): loadgen on qwen3.8-27b-8bit-mtplx, 86 s, pass: 8 direct deps
+moved, 0 behind, `go build`/`go test` green, only go.mod/go.sum; no writes to the real opencode,
+copilot or nav-pilot dirs.

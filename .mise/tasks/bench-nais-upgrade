@@ -14,6 +14,7 @@ import signal
 import subprocess
 import sys
 import time
+import shutil
 import tomllib
 import urllib.request
 from importlib.machinery import SourceFileLoader
@@ -67,6 +68,8 @@ args = ap.parse_args()
 OUT = Path(args.out).expanduser()
 OUT.mkdir(parents=True, exist_ok=True)
 BASE = Path(args.base).expanduser()
+(OUT.parent / "cplt-cfg").mkdir(exist_ok=True)   # not OUT: cplt treats its config dir as state, clones can't live there
+CPLT_CFG = S.bench_cplt_config(OUT.parent / "cplt-cfg" / "cplt.toml")   # absolute toolchain grants; HOME is a temp dir
 HSHA = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
 
@@ -150,6 +153,53 @@ def tag_exists(image, tag):
         return None
 
 
+def _j(url):
+    return json.load(urllib.request.urlopen(url, timeout=30))
+
+
+def _gh_latest(repo):
+    r = subprocess.run(["gh", "api", f"repos/{repo}/releases/latest", "-q", ".tag_name"], capture_output=True, text=True)
+    return r.stdout.strip() or None
+
+
+def latest_versions():
+    """Upstream latest for what the tools task can move. Missing entries are not checked."""
+    L = {}
+    for k, f in {"node": lambda: _j("https://nodejs.org/dist/index.json")[0]["version"].lstrip("v"),
+                 "go": lambda: _j("https://go.dev/dl/?mode=json")[0]["version"].removeprefix("go"),
+                 "npm:pnpm": lambda: _j("https://registry.npmjs.org/pnpm/latest")["version"],
+                 "watchexec": lambda: _gh_latest("watchexec/watchexec").lstrip("v")}.items():
+        try:
+            L[k] = f()
+        except Exception:
+            pass
+    return L
+
+
+def tools_behind(v, L):
+    """Entries of vers_tools(v) still behind upstream. Pins compare on the pinned prefix
+    (node "25" vs 26.x is behind; "26" is not); "latest" is never behind. Actions compare
+    the ratchet tag's major with the latest release's major; branch refs are skipped."""
+    out = []
+    for k, val in v.items():
+        f, _, name = k.partition(":")
+        if f.endswith(".mise.toml") and name in L and val != "latest":
+            n = len(num(val))
+            if num(val) < num(L[name])[:n]:
+                out.append(f"{k}={val}<{L[name]}")
+        elif "Dockerfile" in f or "docker-compose" in f:
+            img = name.rsplit("/", 1)[-1]
+            ref = {"golang": L.get("go"), "node": L.get("node")}.get(img)
+            if ref and num(val) and num(val) < num(ref)[:len(num(val))]:
+                out.append(f"{k}={val}<{ref}")
+        elif f.endswith((".yml", ".yaml")) and (m := re.search(r"@(v\d[\w.]*)\s*$", val)):
+            repo = "/".join(name.split("/")[:2])
+            lat = _gh_latest(repo)
+            if lat and num(m[1])[:1] < num(lat)[:1]:
+                out.append(f"{k}={m[1]}<{lat}")
+    return out
+
+
 VERS = {"loadgen": vers_go, "frontend": vers_pkg, "tools": vers_tools}
 
 
@@ -207,7 +257,11 @@ def grade(task, repo, before):
         g["checks"]["missing_tags"] = bad
     c = {k: v for k, v in g["checks"].items() if isinstance(v, bool)}
     g["green"] = bool(files) and all(c.values()) and not g.get("checks", {}).get("missing_tags")
-    g["pass"] = g["green"] and g["n_moved"] > 0 and not g["unrelated"] and not removed and not down
+    if task == "tools":
+        g["checks"]["behind"] = len(tb := tools_behind(after, latest_versions()))
+        g["behind_list"] = tb
+    g["fully_upgraded"] = g["checks"].get("behind") == 0
+    g["pass"] = g["green"] and g["fully_upgraded"] and not g["unrelated"] and not removed and not down
     return g
 
 
@@ -223,8 +277,21 @@ def run_one(model, task):
     if subprocess.run(["mise", "run", "opencode-init", str(repo)], cwd=ROOT, capture_output=True).returncode:
         return {"error": "opencode-init failed"}
     before = VERS[task](repo)
+    base_checks = checks(task, repo)
+    red = [k for k, x in base_checks.items() if x is False]
+    if red:
+        return {"skipped": f"baseline red: {red}", "baseline": base_checks}
+    home, henv = S.own_home("nais-upgrade-")   # never the real ~/.local/share/opencode, ~/.copilot, ~/.nav-pilot
+    # opencode's package cache, copied (never linked): a fresh one makes opencode install
+    # its packages at start-up, and execs from that tree are denied, so the session hangs.
+    shutil.copytree(Path.home() / ".cache/opencode", home / ".cache/opencode", dirs_exist_ok=True)
+    HOME_W = []   # write grants inside the temp HOME; not HOME itself, which would deny exec under .cache/opencode/bin
+    for rel in (".local/share/opencode", ".cache/opencode", ".config", "go", "Library", ".npm", ".cache/go-build"):
+        (home / rel).mkdir(parents=True, exist_ok=True)
+        HOME_W += ["--allow-write", str(home / rel)]
+    env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG)})
     prompt = TASKS[task]["prompt"] + COMMON
-    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet"])
+    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W])
     if argv is None:
         raise SystemExit("cplt missing; refusing to run unsandboxed")
     log = OUT / "logs" / f"{model}--{task}.jsonl"
@@ -232,24 +299,27 @@ def run_one(model, task):
     t0 = time.time()
     with log.open("w") as fh:
         p = subprocess.Popen(argv + ["--", "--pure", "run", "--format", "json", prompt], cwd=repo, stdout=fh,
-                             stderr=subprocess.STDOUT, env=S.bench_env(os.environ), start_new_session=True)
+                             stderr=subprocess.STDOUT, env=env, start_new_session=True)
+        rc = "killed"
         try:
             rc = p.wait(timeout=args.cap_min * 60)
         except subprocess.TimeoutExpired:
-            os.killpg(p.pid, signal.SIGTERM)
-            time.sleep(5)
-            try:
-                os.killpg(p.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
             rc = "timeout"
+        finally:   # timeout, or SIGTERM from the launcher: the session's whole group goes
+            for sig in (signal.SIGTERM, signal.SIGKILL):
+                try:
+                    os.killpg(p.pid, sig)
+                except ProcessLookupError:
+                    break
+                time.sleep(5)
+            shutil.rmtree(home, ignore_errors=True)
     secs = round(time.time() - t0)
     n_tools = sum(1 for x in log.read_text().splitlines() if '"type":"tool_use"' in x.replace(" ", ""))
     sh(["git", "add", "-A"], repo)
     sh(["git", "-c", "user.name=bench", "-c", "user.email=bench@localhost", "commit", "-qm",
         f"upgrade {task} ({model})"], repo)
     g = grade(task, repo, before)
-    return {"rc": rc, "seconds": secs, "tool_calls": n_tools, **g}
+    return {"rc": rc, "seconds": secs, "tool_calls": n_tools, "baseline": base_checks, **g}
 
 
 def main():
@@ -272,12 +342,14 @@ def main():
             with (OUT / "results.jsonl").open("a") as fh:
                 fh.write(json.dumps(rec) + "\n")
             print(f"{'✓' if rec.get('pass') else '✗'} {model} {task} {rec.get('seconds')}s "
-                  f"moved={rec.get('n_moved')} green={rec.get('green')} unrelated={len(rec.get('unrelated') or [])} "
-                  f"{rec.get('error', '')}", flush=True)
+                  f"moved={rec.get("n_moved")} full={rec.get("fully_upgraded")} green={rec.get('green')} unrelated={len(rec.get('unrelated') or [])} "
+                  f"{rec.get("error") or rec.get("skipped") or ""}", flush=True)
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))   # the launcher's kill runs the cleanup below
     try:
         main()
     finally:
         subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
+        BF.stop_daemons()
