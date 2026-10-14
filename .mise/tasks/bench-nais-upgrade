@@ -70,6 +70,10 @@ OUT.mkdir(parents=True, exist_ok=True)
 BASE = Path(args.base).expanduser()
 (OUT.parent / "cplt-cfg").mkdir(exist_ok=True)   # not OUT: cplt treats its config dir as state, clones can't live there
 CPLT_CFG = S.bench_cplt_config(OUT.parent / "cplt-cfg" / "cplt.toml")   # absolute toolchain grants; HOME is a temp dir
+# The global mise config pins pnpm = latest (12), which shadows the repo's npm:pnpm 10 inside
+# `mise exec` and fails `pnpm install --frozen-lockfile` on a lockfile-settings mismatch.
+os.environ["MISE_DISABLE_TOOLS"] = "pnpm"
+os.environ.setdefault("MISE_FETCH_REMOTE_VERSIONS_TIMEOUT", "2")
 HSHA = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
 
@@ -77,7 +81,7 @@ def sh(cmd, cwd, timeout=900, env=None):
     try:
         r = subprocess.run(cmd, cwd=cwd, shell=isinstance(cmd, str), capture_output=True, text=True,
                            timeout=timeout, env=env)
-        return r.returncode, (r.stdout + r.stderr)[-3000:]
+        return r.returncode, r.stdout + r.stderr   # untruncated: `pnpm outdated --format json` is parsed whole
     except subprocess.TimeoutExpired:
         return 124, "timeout"
 
@@ -265,6 +269,50 @@ def grade(task, repo, before):
     return g
 
 
+def descendants(pid):
+    rows = [l.split() for l in subprocess.run(["ps", "-Ao", "pid=,ppid="], capture_output=True, text=True).stdout.splitlines()]
+    out, todo = [], [pid]
+    while todo:
+        q = todo.pop()
+        kids = [int(a) for a, b in rows if int(b) == q]
+        out += kids
+        todo += kids
+    return out
+
+
+def kill_session(pid):
+    """TERM then KILL the session's process group; when the group can't be signalled
+    (gone, or EPERM because cplt re-parented members), fall back to the tracked PIDs."""
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        pids = [pid, *descendants(pid)]
+        try:
+            os.killpg(pid, sig)
+        except (ProcessLookupError, PermissionError):
+            for x in pids:
+                try:
+                    os.kill(x, sig)
+                except (ProcessLookupError, PermissionError):
+                    pass
+        time.sleep(5)
+        if not any(_alive(x) for x in pids):
+            return
+
+
+def _alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def pnpm_bin(repo):
+    r = subprocess.run(["mise", "where", "npm:pnpm"], cwd=repo / "quotes-frontend", capture_output=True, text=True)
+    return r.stdout.strip() + "/bin"
+
+
 def run_one(model, task):
     repo = OUT / "clones" / f"{model}--{task}"
     if repo.exists():
@@ -273,7 +321,7 @@ def run_one(model, task):
     sh(["git", "remote", "remove", "origin"], repo)       # nothing to push to
     sh(["git", "branch", "base"], repo)
     sh(["git", "switch", "-q", "-c", f"upgrade/{task}-{model}"], repo)
-    (repo / ".git/info/exclude").write_text("opencode.json\n.opencode/\nnode_modules/\n.next/\nAGENTS.local.md\n")
+    (repo / ".git/info/exclude").write_text("opencode.json\n.opencode/\nnode_modules/\n.pnpm-store/\n.next/\nAGENTS.local.md\n")
     if subprocess.run(["mise", "run", "opencode-init", str(repo)], cwd=ROOT, capture_output=True).returncode:
         return {"error": "opencode-init failed"}
     before = VERS[task](repo)
@@ -289,7 +337,10 @@ def run_one(model, task):
     for rel in (".local/share/opencode", ".cache/opencode", ".config", "go", "Library", ".npm", ".cache/go-build"):
         (home / rel).mkdir(parents=True, exist_ok=True)
         HOME_W += ["--allow-write", str(home / rel)]
-    env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG)})
+    env = S.bench_env({**os.environ, **henv, "CPLT_CONFIG": str(CPLT_CFG),
+                       # the repo's pinned pnpm ahead of the global pnpm 12, and its store in the temp HOME
+                       "PATH": f"{pnpm_bin(repo)}:{os.environ['PATH']}",
+                       "npm_config_store_dir": str(home / "Library/pnpm/store")})
     prompt = TASKS[task]["prompt"] + COMMON
     argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet", *HOME_W])
     if argv is None:
@@ -297,22 +348,27 @@ def run_one(model, task):
     log = OUT / "logs" / f"{model}--{task}.jsonl"
     log.parent.mkdir(exist_ok=True)
     t0 = time.time()
-    with log.open("w") as fh:
-        p = subprocess.Popen(argv + ["--", "--pure", "run", "--format", "json", prompt], cwd=repo, stdout=fh,
-                             stderr=subprocess.STDOUT, env=env, start_new_session=True)
-        rc = "killed"
-        try:
-            rc = p.wait(timeout=args.cap_min * 60)
-        except subprocess.TimeoutExpired:
-            rc = "timeout"
-        finally:   # timeout, or SIGTERM from the launcher: the session's whole group goes
-            for sig in (signal.SIGTERM, signal.SIGKILL):
-                try:
-                    os.killpg(p.pid, sig)
-                except ProcessLookupError:
-                    break
-                time.sleep(5)
-            shutil.rmtree(home, ignore_errors=True)
+    for start in (1, 2):   # opencode sometimes never starts (no event at all); one retry
+        with log.open("w") as fh:
+            p = subprocess.Popen(argv + ["--", "--pure", "--print-logs", "run", "--format", "json", prompt], cwd=repo,
+                                 stdout=fh, stderr=subprocess.STDOUT, env=env, start_new_session=True)
+            rc = "killed"
+            try:
+                deadline = time.time() + args.cap_min * 60
+                while (rc := p.poll()) is None:
+                    if time.time() > deadline:
+                        rc = "timeout"
+                        break
+                    if time.time() - t0 > 240 and '"type":"step_start"' not in log.read_text().replace(" ", ""):
+                        rc = "no-start"
+                        break
+                    time.sleep(5)
+            finally:   # cap, stall, or SIGTERM from the launcher: the whole session goes
+                kill_session(p.pid)
+        if rc != "no-start":
+            break
+        t0 = time.time()
+    shutil.rmtree(home, ignore_errors=True)
     secs = round(time.time() - t0)
     n_tools = sum(1 for x in log.read_text().splitlines() if '"type":"tool_use"' in x.replace(" ", ""))
     sh(["git", "add", "-A"], repo)
@@ -335,7 +391,10 @@ def main():
             if not restart_server():
                 rec = {"error": "server did not start"}
             else:
-                rec = run_one(model, task)
+                try:
+                    rec = run_one(model, task)
+                except Exception as e:   # one task failing never stops the queue
+                    rec = {"error": f"{type(e).__name__}: {e}"}
             subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
             BF.stop_daemons()   # PID-only, sandbox-started Gradle/Kotlin daemons + orphan shm
             rec = {"model": model, "task": task, **meta, "at": time.strftime("%F %T"), **rec}

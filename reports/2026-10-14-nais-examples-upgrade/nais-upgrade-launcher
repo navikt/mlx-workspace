@@ -41,10 +41,11 @@ while :; do
   else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
   last=$b; sleep 60
 done
-END=$(( $(date +%s) + 8 * 3600 ))   # the 8 h window starts when the queue does
+END=$(( $(date +%s) + 8 * 3600 ))   # the 8 h window starts when the queue does, capped by HARD_END
+HARD_END=${NAIS_UPGRADE_HARD_END:-}; [ -n "$HARD_END" ] && [ "$HARD_END" -lt "$END" ] && END=$HARD_END
 say "window ends $(date -r $END '+%F %T')"
 [ -d "$BASE/.git" ] || { say "no base clone $BASE"; exit 1; }
-trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"' EXIT
+trap 'rm -f "$PIDF"' EXIT   # done marker only on a clean queue exit (below)
 trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "$NR"; exit 130' INT TERM
 .mise/tasks/be""nch-nais-upgrade --base "$BASE" --out "$OUT" --models "$MODELS" \
   --tasks loadgen,frontend,tools --cap-min 25 --deadline "$END" &
@@ -54,4 +55,5 @@ while kill -0 "$NR" 2>/dev/null; do
   [ "$(date +%s)" -ge "$END" ] && { say "window end: killing $NR"; kill -TERM "$NR"; break; }   # the harness traps TERM: server-stop, session groups, daemons
   sleep 10
 done
-wait "$NR"; say "queue exited $?"
+wait "$NR"; rc=$?; say "queue exited $rc"
+[ "$rc" = 0 ] && { : > "$DONE"; say "done marker"; }
