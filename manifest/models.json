@@ -160,11 +160,11 @@
           },
           "debug": {
             "delegate": "cloud",
-            "local": "not-yet",
+            "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 10,
-            "local_n": 10
+            "local_k": 17,
+            "local_n": 25
           }
         }
       }
@@ -212,24 +212,24 @@
             "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 12,
-            "local_n": 12
+            "local_k": 15,
+            "local_n": 15
           },
           "edit-single": {
             "delegate": "cloud",
-            "local": "not-yet",
+            "local": "trusted",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 4,
-            "local_n": 4
+            "local_k": 20,
+            "local_n": 20
           },
           "edit-multi-mechanical": {
             "delegate": "cloud",
             "local": "not-yet",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 4,
-            "local_n": 4
+            "local_k": 9,
+            "local_n": 10
           },
           "create-file": {
             "delegate": "cloud",
@@ -241,11 +241,11 @@
           },
           "debug": {
             "delegate": "cloud",
-            "local": "not-yet",
+            "local": "cloud",
             "delegate_k": 0,
             "delegate_n": 0,
-            "local_k": 10,
-            "local_n": 10
+            "local_k": 19,
+            "local_n": 30
           }
         }
       },
