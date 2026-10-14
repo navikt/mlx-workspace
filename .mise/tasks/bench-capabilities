@@ -44,6 +44,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import _by_class as B  # noqa: E402
+import _profiles as P  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "manifest" / "capabilities.json"
@@ -147,8 +148,23 @@ def manifest_block(per_class):
     }
 
 
+def measurement_only_ids():
+    """Model ids of profiles marked `measurement_only = true` in [meta] (#279): benched,
+    never shipped, so they get no capabilities row and no manifest block."""
+    out = set()
+    for key in P.list_keys():
+        meta, params = P.load(key)
+        if meta.get("measurement_only"):
+            out |= {params["MLX_MODEL"], P.served_model_id(params)}
+    return out
+
+
+def drop_measurement_only(rows, ids):
+    return [r for r in rows if r["mode"] == "cloud" or r["model"] not in ids]
+
+
 def build():
-    rows = [B.as_json(r) for r in B.rows().values()]
+    rows = drop_measurement_only([B.as_json(r) for r in B.rows().values()], measurement_only_ids())
     probe = [B.as_json(r) for r in B.rows(probe=True).values()]
     models = score(rows)
     none = {"verdict": "cloud", "k": 0, "n": 0}
@@ -202,6 +218,10 @@ def self_check():
     assert blk["classes"]["edit-single"] == {"delegate": "cloud", "local": "not-yet", "delegate_k": 0,
                                               "delegate_n": 0, "local_k": 3, "local_n": 3}
     assert all(isinstance(x, (str, int)) for c in blk["classes"].values() for x in c.values())
+    # measurement-only profiles yield no rows; cloud rows stay for p_cloud
+    rs = [{"mode": "local", "model": "x"}, {"mode": "cloud", "model": "x"}, {"mode": "local", "model": "y"}]
+    assert drop_measurement_only(rs, {"x"}) == rs[1:]
+    assert "~/models-mtplx/Qwen3.8-27B-q8-mtp" in measurement_only_ids()
     overlay_check()
     frontier_check()
     print("✓ bench-capabilities self-check passed")
