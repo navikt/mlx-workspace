@@ -194,6 +194,11 @@ def bench_cplt_config(dest: Path, src: Path | None = None, pg_port: int | None =
             text, n = re.subn(r"(?m)^\[sandbox\][^\n]*\n", lambda m: m.group(0) + "allow_localhost_any = true\n", text, count=1)
         if not n:
             text += "\n[sandbox]\nallow_localhost_any = true\n"
+    # MockK's inline mocking self-attaches through /tmp/.java_pid<PID>, which cplt blocks
+    # unless asked: 59 of the fixture's 153 tests failed in the sandbox without it (#277).
+    if not tomllib.loads(text).get("sandbox", {}).get("allow_jvm_attach"):
+        text = re.sub(r"(?m)^allow_jvm_attach\s*=.*\n", "", text)
+        text = re.sub(r"(?m)^\[sandbox\][^\n]*\n", lambda m: m.group(0) + "allow_jvm_attach = true\n", text, count=1)
     if tomllib.loads(text).get("sandbox", {}).get("allow_localhost_any") is not True:
         raise SystemExit(f"\u2717 could not add allow_localhost_any to a copy of {src}")
     # The cloud arm starts cplt through nav-pilot with HOME set to a temp dir (own_home),
@@ -269,6 +274,7 @@ elif __name__ == "__main__":
         (d / "u.toml").write_text(body)
         out = tomllib.loads(bench_cplt_config(d / "b.toml", d / "u.toml").read_text())
         assert out["sandbox"]["allow_localhost_any"] is True, body
+        assert out["sandbox"]["allow_jvm_attach"] is True, body
         assert (d / "u.toml").read_text() == body  # the user's file is never changed
         if (Path.home() / ".gradle").exists():
             assert str(Path.home() / ".gradle") in out["allow"]["write"], out

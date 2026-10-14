@@ -55,7 +55,8 @@ NAV_PILOT = os.environ.get("BENCH_NAV_PILOT", "nav-pilot")
 # happen landed in sibling models' checkouts. Out here, an empty repository (see
 # cloud_ws) makes the workspace its own project, and mise no longer walks up into a
 # mise.toml the sandbox cannot read, which would break java and ./gradlew.
-CLOUD_WS = Path(os.environ.get("FRONTIER_CLOUD_WS") or Path.home() / ".cache" / "mlx-workspace" / "frontier-cloud")
+# Not ~/.cache: cplt denies execute there, so ./gradlew could not start (#277).
+CLOUD_WS = Path(os.environ.get("FRONTIER_CLOUD_WS") or Path.home() / ".local" / "share" / "mlx-workspace" / "frontier-cloud")
 
 BORROWED = ["sh", "assert_workspace_is_clean", "ensure_clone", "assert_repo_is_the_workspace",
             "reset_repo", "hide_git", "restore_git", "changed_files", "apply_break",
@@ -360,17 +361,31 @@ def overlay_off(repo, saved):
         f.write_text(saved[0])
 
 
-def pg_bin():
-    """zonky's own Postgres build, from the Gradle cache the fixture already filled."""
+def pg_bin(repo):
+    """zonky's own Postgres build, the version the fixture's BOM pins, from the Gradle
+    cache the fixture already filled, checked against Maven Central's sha256."""
+    m = re.search(r'postgresRuntimeVersion\s*=\s*"([^"]+)"', (Path(repo) / "build.gradle.kts").read_text())
+    if not m:
+        raise SystemExit("✗ build.gradle.kts has no postgresRuntimeVersion: cannot pick the Postgres build")
+    ver = m.group(1)
     gh = Path(os.environ.get("GRADLE_USER_HOME") or Path.home() / ".gradle")
-    jars = sorted(gh.glob("caches/modules-2/files-2.1/io.zonky.test.postgres/embedded-postgres-binaries-darwin-*/"
-                          "*/*/embedded-postgres-binaries-darwin-*.jar"))
-    if not jars:
-        raise SystemExit("✗ no zonky Postgres binaries in the Gradle cache: run the fixture's tests once")
+    base = gh / "caches/modules-2/files-2.1/io.zonky.test.postgres"
+    for arch in ("arm64v8", "amd64"):  # native first; amd64 runs under Rosetta
+        art = f"embedded-postgres-binaries-darwin-{arch}"
+        jars = sorted(base.glob(f"{art}/{ver}/*/{art}-{ver}.jar"))
+        if jars:
+            break
+    else:
+        raise SystemExit(f"✗ no zonky Postgres {ver} binaries in the Gradle cache: run the fixture's tests once")
+    import urllib.request
+    url = f"https://repo1.maven.org/maven2/io/zonky/test/postgres/{art}/{ver}/{art}-{ver}.jar.sha256"
+    want = urllib.request.urlopen(url, timeout=30).read().decode().split()[0]
+    got = hashlib.sha256(jars[0].read_bytes()).hexdigest()
+    if got != want:
+        raise SystemExit(f"✗ {jars[0].name}: sha256 {got} does not match Maven Central's {want}")
     import zipfile
     d = Path(tempfile.mkdtemp(prefix="frontier-pgbin-"))
-    atexit.register(shutil.rmtree, d, True)
-    with zipfile.ZipFile(jars[-1]) as z:
+    with zipfile.ZipFile(jars[0]) as z:
         txz = next(n for n in z.namelist() if n.endswith(".txz"))
         z.extract(txz, d)
     subprocess.run(["tar", "xJf", txz], cwd=d, check=True)
@@ -384,15 +399,32 @@ def pg_free_port():
         return s.getsockname()[1]
 
 
+def pg_url(port, password):
+    """What the sandbox gets: the unprivileged bench role, never the superuser."""
+    return f"jdbc:postgresql://127.0.0.1:{port}/postgres?user=bench&password={password}"
+
+
 def pg_start(H):
-    """A fresh server for one sample: own data dir in temp, TCP only, PID recorded."""
+    """A fresh server for one sample: own data dir in temp, TCP only, password auth, PID
+    recorded. The superuser's password is random and never leaves this function; the
+    sandbox gets `bench`, which may create databases and roles (the fixture's migrations
+    create NOLOGIN roles) but is no superuser, so no COPY ... PROGRAM, pg_read_file or
+    lo_export: a server outside cplt that does not hand the agent a way out of it."""
+    import secrets
     if "pg_bin" not in H:
-        H["pg_bin"] = pg_bin()
+        H["pg_bin"] = pg_bin(H["repo"])
     d = Path(tempfile.mkdtemp(prefix="frontier-pg-"))
     H["pg_dir"] = d
     b = H["pg_bin"]
-    subprocess.run([str(b / "initdb"), "-A", "trust", "-U", "postgres", "-E", "UTF-8", "-D", str(d / "data")],
-                   check=True, capture_output=True)
+    pw = d / "pw"
+    pw.write_text(secrets.token_hex(24) + "\n")
+    subprocess.run([str(b / "initdb"), "-A", "scram-sha-256", "--pwfile", str(pw), "-U", "postgres",
+                    "-E", "UTF-8", "-D", str(d / "data")], check=True, capture_output=True)
+    pw.unlink()
+    bench_pw = secrets.token_hex(24)
+    subprocess.run([str(b / "postgres"), "--single", "-D", str(d / "data"), "postgres"], check=True,
+                   capture_output=True, text=True,
+                   input=f"CREATE ROLE bench LOGIN CREATEDB CREATEROLE NOSUPERUSER PASSWORD '{bench_pw}';\n")
     # zonky's own server settings; no unix socket, so nothing outside the data dir.
     opts = (f"-p {H['pg_port']} -h 127.0.0.1 -k '' -c fsync=off -c synchronous_commit=off "
             f"-c full_page_writes=off -c max_connections=300")
@@ -401,11 +433,12 @@ def pg_start(H):
     pid = (d / "data" / "postmaster.pid").read_text().split()[0]
     PG_PIDFILE.parent.mkdir(exist_ok=True)
     PG_PIDFILE.write_text(pid + "\n")
-    return f"jdbc:postgresql://127.0.0.1:{H['pg_port']}/postgres?user=postgres"
+    return pg_url(H["pg_port"], bench_pw)
 
 
-def pg_stop(H):
-    """Stop the sample's server and remove its data dir; also a killed run's server."""
+def pg_stop(H, stale=False):
+    """Stop the sample's server and remove its data dir. stale: also a killed run's
+    server (by recorded PID) and the temp dirs it left."""
     d = H.pop("pg_dir", None)
     if d:
         subprocess.run([str(H["pg_bin"] / "pg_ctl"), "-D", str(d / "data"), "-m", "fast", "-w", "-t", "30", "stop"],
@@ -419,7 +452,18 @@ def pg_stop(H):
         PG_PIDFILE.unlink()
     if d:
         shutil.rmtree(d, ignore_errors=True)
+    if stale:  # the queue lock is held: no other run's dirs are live
+        for old in Path(tempfile.gettempdir()).glob("frontier-pg*-*"):
+            shutil.rmtree(old, ignore_errors=True)
     reap_shm()
+
+
+def pg_exit(H):
+    """atexit: the server first, then the binaries it runs from."""
+    if H.pop("pg_url", None):
+        pg_stop(H)
+    if "pg_bin" in H:
+        shutil.rmtree(H.pop("pg_bin").parent, ignore_errors=True)
 
 
 def sweep_stray(H, cloud, tag):
@@ -1008,7 +1052,7 @@ def cmd_run(args):
     H = harness(key, doc)
     if not FAKE and any(t["class"] in PG_CLASSES for t in tasks):
         H["pg_port"] = pg_free_port()
-        atexit.register(lambda: H.pop("pg_url", None) and pg_stop(H))
+        atexit.register(pg_exit, H)
         if signal.getsignal(signal.SIGTERM) is signal.SIG_DFL:  # night-run-3's kill_tree
             signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     lock = None if FAKE else queue_lock()
@@ -1026,7 +1070,7 @@ def cmd_run(args):
         if not FAKE:
             H["assert_workspace_is_clean"]()
             H["ensure_clone"]()
-            pg_stop(H)  # a killed run's server
+            pg_stop(H, stale=True)  # a killed run's server and dirs
             stop_daemons()  # v1's pile, or a killed run's
         if args.cloud and not FAKE:
             cloud_ws(H["ws"])
@@ -1439,16 +1483,55 @@ def cmd_selftest(_args):
         overlay_off(tmp / "pgfix", saved)
         assert td.read_text().endswith("// agent\n")
         # and the cloud arm's cplt config carries the one port grant and the variable
-        H = {"ws": ws, "installed": True, "pg_port": 5555, "pg_url": "jdbc:postgresql://127.0.0.1:5555/postgres?user=postgres"}
+        H = {"ws": ws, "installed": True, "pg_port": 5555, "pg_url": pg_url(5555, "x")}
         ce = cloud_env(H)
         import tomllib
         c = tomllib.loads((Path(ce["HOME"]) / ".config/cplt/config.toml").read_text())
         assert c["allow"]["localhost"] == [5555] and c["sandbox"]["pass_env"] == [S.PG_ENV], c
         assert ce[S.PG_ENV] == H["pg_url"] and "CPLT_CONFIG" not in ce
         shutil.rmtree(ce["HOME"])
+        assert "user=bench" in pg_url(1, "x") and "user=postgres" not in pg_url(1, "x")
+        pg_live_check(tmp)
         print("✓ runner, variants, validation and summary with fake models")
     print("selftest: PASS")
     return 0
+
+
+def pg_live_check(tmp):
+    """#277 against a live server: what the sandbox's role can and cannot do. Skipped
+    without zonky's binaries in the Gradle cache or a psql client (CI has neither)."""
+    gh = Path(os.environ.get("GRADLE_USER_HOME") or Path.home() / ".gradle")
+    if not shutil.which("psql") or not list(gh.glob("caches/modules-2/files-2.1/io.zonky.test.postgres/"
+                                                       "embedded-postgres-binaries-darwin-*/17.9.0")):
+        print("· Postgres live check skipped (no psql or no zonky 17.9.0 binaries)")
+        return
+    repo = tmp / "pgrepo"
+    repo.mkdir()
+    (repo / "build.gradle.kts").write_text('val postgresRuntimeVersion = "17.9.0"\n')
+    H = {"repo": repo, "pg_port": pg_free_port()}
+    H["pg_url"] = pg_start(H)
+    try:
+        q = dict(re.findall(r"(\w+)=(\w+)", H["pg_url"].split("?")[1]))
+        env = {**os.environ, "PGPASSWORD": q["password"]}
+
+        def sql(stmt):
+            r = subprocess.run(["psql", "-h", "127.0.0.1", "-p", str(H["pg_port"]), "-U", q["user"], "-d", "postgres",
+                                "-v", "ON_ERROR_STOP=1", "-c", stmt], capture_output=True, text=True, env=env)
+            return r.returncode == 0, r.stderr
+        for stmt in ("CREATE DATABASE t_live", "CREATE ROLE live_nologin WITH NOLOGIN"):
+            ok, err = sql(stmt)
+            assert ok, (stmt, err)
+        for stmt in ("COPY (SELECT 1) TO PROGRAM 'true'", "SELECT pg_read_file('/etc/hosts')",
+                     "SELECT lo_export(lo_create(0), '/dev/null')", "CREATE ROLE live_su SUPERUSER",
+                     "ALTER ROLE postgres PASSWORD 'x'", "GRANT pg_execute_server_program TO bench"):
+            ok, err = sql(stmt)
+            assert not ok and ("permission denied" in err or "must be" in err or "privilege" in err), (stmt, err)
+        r = subprocess.run(["psql", "-h", "127.0.0.1", "-p", str(H["pg_port"]), "-U", "postgres", "-d", "postgres",
+                            "-w", "-c", "SELECT 1"], capture_output=True, text=True, env={**os.environ, "PGPASSWORD": ""})
+        assert r.returncode != 0, "the superuser logged in without its password"
+    finally:
+        pg_exit(H)
+    print("✓ Postgres live check: bench creates databases and roles, cannot run programs or read files")
 
 
 def cmd_cloud_probe(args):

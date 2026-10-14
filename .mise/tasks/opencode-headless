@@ -63,7 +63,7 @@ log_path = log_dir / f"{key}-{stamp}.jsonl"
 server_port = os.environ.get("MLX_SERVER_PORT", "8080")
 # --yes skips the confirmation prompt, which has no terminal to answer it here.
 # --quiet drops the sandbox banner so it does not pollute the event stream.
-prefix = S.cplt_argv(workspace_dir, workspace, server_port, extra=["--yes", "--quiet"])
+prefix = S.cplt_argv(workspace_dir, workspace, server_port, extra=["--yes", "--quiet", "--allow-jvm-attach"])
 if prefix is None:
     S.warn_unsandboxed(sys.stderr)
     prefix = []
