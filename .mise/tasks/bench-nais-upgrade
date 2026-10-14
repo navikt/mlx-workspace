@@ -103,9 +103,15 @@ def sh(cmd, cwd, timeout=900, env=None):
         return 124, "timeout"
 
 
+GRADER_HOME = OUT / "grader-home"   # grader runs unsandboxed: keep its caches off the real ~/.nuget, ~/.dotnet, ~/.gradle
+
+
 def mise(cmd, cwd, timeout=900):
     # CI=true: without it pnpm aborts on a no-TTY modules purge (ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY)
-    return sh(f"mise exec -- {cmd}", cwd, timeout, {**os.environ, "CI": "true", "DOTNET_CLI_TELEMETRY_OPTOUT": "1"})
+    return sh(f"mise exec -- {cmd}", cwd, timeout, {**os.environ, "CI": "true", "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+                                                        "NUGET_PACKAGES": str(GRADER_HOME / "nuget"),
+                                                        "DOTNET_CLI_HOME": str(GRADER_HOME),
+                                                        "GRADLE_USER_HOME": str(GRADER_HOME / "gradle")})
 
 
 def restart_server():
@@ -494,3 +500,4 @@ if __name__ == "__main__":
     finally:
         subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
         BF.stop_daemons()
+        shutil.rmtree(GRADER_HOME, ignore_errors=True)
