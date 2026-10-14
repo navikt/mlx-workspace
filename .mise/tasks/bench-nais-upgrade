@@ -277,8 +277,8 @@ def checks(task, repo):
         pre = re.compile(r"(?i)[.-](alpha|beta|rc|m\d|eap|dev)")   # "release" still offers 2.5.0-Beta1
         try:
             r = json.loads((d / "build/dependencyUpdates/report.json").read_text())
-            res["behind"] = sum(1 for x in r["outdated"]["dependencies"]
-                                if not pre.search(x["available"]["release"] or "") or pre.search(x["version"])) + \
+            res["behind"] = sum(1 for x in r["outdated"]["dependencies"]   # versions plugin >=0.60: release None, preRelease set
+                                if (rel := x["available"].get("release")) and (not pre.search(rel) or pre.search(x["version"]))) + \
                 (r.get("gradle", {}).get("current", {}).get("isUpdateAvailable") is True)
         except Exception:
             res["behind"] = None
