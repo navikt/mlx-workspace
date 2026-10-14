@@ -149,18 +149,19 @@ def manifest_block(per_class):
 
 
 def measurement_only_ids():
-    """Model ids of profiles marked `measurement_only = true` in [meta] (#279): benched,
-    never shipped, so they get no capabilities row and no manifest block."""
-    out = set()
-    for key in P.list_keys():
-        meta, params = P.load(key)
-        if meta.get("measurement_only"):
-            out |= {params["MLX_MODEL"], P.served_model_id(params)}
-    return out
+    """Profile keys marked `measurement_only = true` in [meta] (#279): benched, never
+    shipped, so their rows get no capabilities row. Keyed by profile, not model id: a
+    variant such as qwen3.8-27b-8bit-rapid serves the same weights as a shipped profile."""
+    return {key for key in P.list_keys() if P.load(key)[0].get("measurement_only")}
 
 
-def drop_measurement_only(rows, ids):
-    return [r for r in rows if r["mode"] == "cloud" or r["model"] not in ids]
+def _profile(r):
+    c = r.get("condition") or ""
+    return c.split("profile=")[1].split()[0] if "profile=" in c else None
+
+
+def drop_measurement_only(rows, keys):
+    return [r for r in rows if r["mode"] == "cloud" or _profile(r) not in keys]
 
 
 def build():
@@ -219,9 +220,10 @@ def self_check():
                                               "delegate_n": 0, "local_k": 3, "local_n": 3}
     assert all(isinstance(x, (str, int)) for c in blk["classes"].values() for x in c.values())
     # measurement-only profiles yield no rows; cloud rows stay for p_cloud
-    rs = [{"mode": "local", "model": "x"}, {"mode": "cloud", "model": "x"}, {"mode": "local", "model": "y"}]
+    rs = [{"mode": "local", "condition": "cheap-ops profile=x temp=0"}, {"mode": "cloud", "condition": "profile=x"},
+          {"mode": "local", "condition": "cheap-ops profile=y temp=0"}]
     assert drop_measurement_only(rs, {"x"}) == rs[1:]
-    assert "~/models-mtplx/Qwen3.8-27B-q8-mtp" in measurement_only_ids()
+    assert {"qwen3.8-27b-8bit-mtplx", "qwen3.8-27b-8bit-rapid"} <= measurement_only_ids()
     overlay_check()
     frontier_check()
     print("✓ bench-capabilities self-check passed")

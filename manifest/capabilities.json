@@ -310,11 +310,11 @@
         },
         "debug": {
           "delegate": "cloud",
-          "local": "not-yet",
+          "local": "cloud",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 10,
-          "local_n": 10
+          "local_k": 19,
+          "local_n": 30
         }
       }
     },
@@ -361,11 +361,11 @@
         },
         "debug": {
           "delegate": "cloud",
-          "local": "not-yet",
+          "local": "cloud",
           "delegate_k": 0,
           "delegate_n": 0,
-          "local_k": 10,
-          "local_n": 10
+          "local_k": 17,
+          "local_n": 25
         }
       }
     }
@@ -555,7 +555,7 @@
             "db-r1-b1",
             "db-r1-b2"
           ],
-          "condition": "frontier profile=occamy-1.0-4bit-64g temp=1.0 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=occamy-1.0-4bit-64g temp=1.0 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
@@ -697,7 +697,7 @@
             "db-r1-b1",
             "db-r1-b2"
           ],
-          "condition": "frontier profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=laguna-xs-2.1-8bit-64g temp=1.0 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
@@ -962,7 +962,7 @@
             "db-r1-b1",
             "db-r1-b2"
           ],
-          "condition": "frontier profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=qwen3.6-35b-a3b-8bit-64g temp=0.6 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
@@ -1201,7 +1201,7 @@
             "db-r1-b1",
             "db-r1-b2"
           ],
-          "condition": "frontier profile=qwen3.6-35b-a3b-optiq-64g temp=0.6 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=qwen3.6-35b-a3b-optiq-64g temp=0.6 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
@@ -1346,7 +1346,7 @@
             "db-r1-b1",
             "db-r1-b2"
           ],
-          "condition": "frontier profile=qwen3.8-27b-4bit temp=0.6 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=qwen3.8-27b-4bit temp=0.6 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
@@ -1479,22 +1479,28 @@
           "note": "no data"
         },
         "local": {
-          "verdict": "not-yet",
-          "k": 10,
-          "n": 10,
-          "lb": 0.859,
+          "verdict": "cloud",
+          "k": 19,
+          "n": 30,
+          "lb": 0.516,
           "bar": 0.95,
           "p_cloud": 1.0,
-          "runs": 5,
+          "runs": 15,
           "tasks": [
             "db-r1-b1",
-            "db-r1-b2"
+            "db-r1-b2",
+            "db-r2-b1",
+            "db-r2-b2",
+            "db-r3-b1",
+            "db-r3-b2"
           ],
-          "condition": "frontier profile=qwen3.8-27b-8bit-64g temp=0.6 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=qwen3.8-27b-8bit-64g temp=0.6 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
-            "frontier-qwen3.8-27b-8bit-64g-base-20261012-185619.json"
+            "frontier-qwen3.8-27b-8bit-64g-base-20261012-185619.json",
+            "frontier-qwen3.8-27b-8bit-64g-base-20261014-153356.json",
+            "frontier-qwen3.8-27b-8bit-64g-base-20261014-183147.json"
           ]
         }
       }
@@ -1657,22 +1663,28 @@
           "note": "no data"
         },
         "local": {
-          "verdict": "not-yet",
-          "k": 10,
-          "n": 10,
-          "lb": 0.859,
+          "verdict": "cloud",
+          "k": 17,
+          "n": 25,
+          "lb": 0.553,
           "bar": 0.95,
           "p_cloud": 1.0,
-          "runs": 5,
+          "runs": 13,
           "tasks": [
             "db-r1-b1",
-            "db-r1-b2"
+            "db-r1-b2",
+            "db-r2-b1",
+            "db-r2-b2",
+            "db-r3-b1",
+            "db-r3-b2"
           ],
-          "condition": "frontier profile=qwen3.8-27b-optiq-4bit temp=0.6 harness=3ddd8d4e1be1 tasks=cd8780d1d644",
+          "condition": "frontier profile=qwen3.8-27b-optiq-4bit temp=0.6 harness=824f3b2ff73c tasks=cd8780d1d644",
           "cost_ratios": {},
           "pooled_cost_ratio": null,
           "files": [
-            "frontier-qwen3.8-27b-optiq-4bit-base-20261012-195554.json"
+            "frontier-qwen3.8-27b-optiq-4bit-base-20261012-195554.json",
+            "frontier-qwen3.8-27b-optiq-4bit-base-20261014-171642.json",
+            "frontier-qwen3.8-27b-optiq-4bit-base-20261014-200113.json"
           ]
         }
       }
