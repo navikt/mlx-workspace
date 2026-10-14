@@ -113,9 +113,12 @@ qwen3.6-35b-a3b-optiq-64g, qwen3.6-35b-a3b-8bit-64g, qwen3.8-27b-optiq-4bit.
   16 to 18 (existing data volumes will not start), and Node stays on 25.
 - **Harness follow-ups (#274):** set `CI=true`, make the "behind" check verify that the version
   exists, keep watchdog retry logs, and four smaller items.
-- **Not yet covered, follow-up in progress:** backend (Gradle's JDK could not finish TLS to the
-  plugin portal) and analytics (no .NET SDK, NuGet unreachable inside cplt) were skipped in this
-  run. Both are being attempted now as follow-up work.
+- **Final outcome.** After the harness fixes in #276, qwen3.8-27b-8bit-mtplx upgraded all four
+  services: loadgen, frontend, backend and analytics. The tools task needed hand-picking: we kept
+  the valid pin bumps and rejected the invalid ones (`watchexec 8.4.4`, pnpm 12, postgres 18).
+  We also added a semgrep rule for minimum release age and pnpm `minimumReleaseAge`. The result
+  was merged upstream as nais/examples#312. CI on main after the merge was green for all four
+  services (tests, build_push_sign, deploy to Nais) and for CodeQL.
 
 ## 5. Process lessons
 
