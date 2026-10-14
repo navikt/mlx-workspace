@@ -1,0 +1,283 @@
+#!/usr/bin/env python3
+# mise description="Dependency-upgrade tasks on nais/examples (loadgen, frontend, tools) per local model. Usage: mise run bench-nais-upgrade -- --base <clone> --out <dir> --models a,b --tasks loadgen,frontend,tools [--cap-min 25] [--deadline <epoch>]"
+"""Each (model, task) gets a fresh clone of --base and a branch upgrade/<task>-<model>.
+The model runs once through opencode in cplt, capped at --cap-min. The grader then runs
+outside the sandbox on that clone: did the versions move, are the checks green, did it
+touch only the task's files, did anything get removed or downgraded. One JSON line per
+sample goes to <out>/results.jsonl. Nothing is pushed anywhere.
+"""
+import argparse
+import json
+import os
+import re
+import signal
+import subprocess
+import sys
+import time
+import tomllib
+import urllib.request
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+sys.path.insert(0, str(HERE))
+import _sandbox as S  # noqa: E402
+
+BF = SourceFileLoader("bench_frontier", str(HERE / "bench-frontier")).load_module()  # stop_daemons, reap_shm
+
+COMMON = ("Work only in this repository. Run the checks yourself and fix what breaks. "
+          "Do not touch files outside the scope below. Do not commit; leave the changes in "
+          "the working tree. When done, reply with a short list of what moved from which "
+          "version to which.")
+TASKS = {
+    "loadgen": dict(
+        scope=r"^quotes-loadgen/(go\.mod|go\.sum|.*\.go)$",
+        prompt="Upgrade every Go dependency in quotes-loadgen to its latest version "
+               "(go get -u ./... && go mod tidy, then direct deps one by one if needed). "
+               "Success: `go build ./... && go test ./...` pass in quotes-loadgen. "
+               "Scope: quotes-loadgen/go.mod, go.sum, and Go source only if an API changed. "),
+    "frontend": dict(
+        scope=r"^quotes-frontend/(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|src/.*|.*\.config\.(m?js|ts))$",
+        prompt="Upgrade every dependency in quotes-frontend/package.json to its latest version "
+               "with pnpm (e.g. `pnpm update --latest`), keeping pnpm-lock.yaml in sync. "
+               "Success: in quotes-frontend `pnpm install --frozen-lockfile`, `pnpm exec vitest run`, "
+               "`pnpm exec tsc --noEmit`, `pnpm exec eslint .` and `pnpm build` all pass. "
+               "Scope: quotes-frontend/package.json, pnpm-lock.yaml, and source or config only "
+               "where an upgrade forces it. "),
+    "tools": dict(
+        scope=r"^(\.mise\.toml|quotes-[a-z]+/\.mise\.toml|quotes-[a-z]+/Dockerfile|docker-compose\.yaml|\.github/workflows/[^/]+\.ya?ml)$",
+        prompt="Upgrade tool and image versions to the latest stable releases: pinned tools in "
+               ".mise.toml and quotes-*/.mise.toml, base image tags in quotes-*/Dockerfile and "
+               "docker-compose.yaml, and GitHub Actions versions in .github/workflows (keep SHA "
+               "pins as SHA pins with the version comment). Keep each Dockerfile's runtime in step "
+               "with the tool versions. Do not touch dependency manifests. Docker is not "
+               "available; check tags against the registries over HTTPS. Success: every changed "
+               "version exists upstream and nothing is downgraded. "),
+}
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--base", required=True)
+ap.add_argument("--out", required=True)
+ap.add_argument("--models", required=True)
+ap.add_argument("--tasks", default="loadgen,frontend,tools")
+ap.add_argument("--cap-min", type=float, default=25)
+ap.add_argument("--deadline", type=float, default=0, help="epoch secs; no sample starts after deadline - cap")
+args = ap.parse_args()
+OUT = Path(args.out).expanduser()
+OUT.mkdir(parents=True, exist_ok=True)
+BASE = Path(args.base).expanduser()
+HSHA = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+
+
+def sh(cmd, cwd, timeout=900, env=None):
+    try:
+        r = subprocess.run(cmd, cwd=cwd, shell=isinstance(cmd, str), capture_output=True, text=True,
+                           timeout=timeout, env=env)
+        return r.returncode, (r.stdout + r.stderr)[-3000:]
+    except subprocess.TimeoutExpired:
+        return 124, "timeout"
+
+
+def mise(cmd, cwd, timeout=900):
+    return sh(f"mise exec -- {cmd}", cwd, timeout, {**os.environ, "MISE_FETCH_REMOTE_VERSIONS_TIMEOUT": "2"})
+
+
+def restart_server():
+    (ROOT / ".bench-logs").mkdir(exist_ok=True)
+    log = open(ROOT / ".bench-logs" / "server-restart.log", "a")
+    for _ in range(3):
+        subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
+        time.sleep(2)
+        subprocess.Popen(["mise", "run", "server"], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                         start_new_session=True)
+        if subprocess.run(["mise", "run", "server-wait"], cwd=ROOT, capture_output=True,
+                          timeout=1800).returncode == 0:
+            return True
+    return False
+
+
+def vers_go(repo):
+    t = (repo / "quotes-loadgen/go.mod").read_text()   # direct deps only: tidy may drop indirect ones
+    return dict(re.findall(r"(?m)^\s*(?:require\s+)?([\w./-]+\.[\w./-]+)\s+(v[\w.+-]+)\s*$", t)) | \
+        {"go": (re.search(r"(?m)^go (\S+)", t) or [None, None])[1]}
+
+
+def vers_pkg(repo):
+    p = json.loads((repo / "quotes-frontend/package.json").read_text())
+    return {k: v for s in ("dependencies", "devDependencies") for k, v in p.get(s, {}).items()}
+
+
+def vers_tools(repo):
+    v = {}
+    for f in [repo / ".mise.toml", *repo.glob("quotes-*/.mise.toml")]:
+        for k, x in tomllib.loads(f.read_text()).get("tools", {}).items():
+            v[f"{f.relative_to(repo)}:{k}"] = str(x)
+    for f in [*repo.glob("quotes-*/Dockerfile"), repo / "docker-compose.yaml"]:
+        for img in re.findall(r"(?m)^\s*(?:FROM|image:)\s+(\S+:\S+)", f.read_text()):
+            v[f"{f.relative_to(repo)}:{img.rsplit(':', 1)[0]}"] = img.rsplit(":", 1)[1]
+    for f in repo.glob(".github/workflows/*.y*ml"):
+        for a, ref in re.findall(r"uses:\s*([\w.-]+/[\w./-]+)@(\S+(?:\s*#\s*\S+)?)", f.read_text()):
+            v[f"{f.name}:{a}"] = ref
+    return v
+
+
+def num(s):
+    return tuple(int(x) for x in re.findall(r"\d+", str(s).split("@")[-1])[:4])
+
+
+def tag_exists(image, tag):
+    """Anonymous registry v2 HEAD of image:tag. None when the registry can't be asked."""
+    if tag in ("latest",) or "$" in image + tag:
+        return None
+    host, _, path = image.partition("/")
+    if "." not in host:
+        host, path = "registry-1.docker.io", image if "/" in image else f"library/{image}"
+    try:
+        tok = None
+        if host == "registry-1.docker.io":
+            tok = json.load(urllib.request.urlopen(
+                f"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{path}:pull", timeout=20))["token"]
+        elif host == "gcr.io":
+            tok = json.load(urllib.request.urlopen(f"https://gcr.io/v2/token?scope=repository:{path}:pull", timeout=20))["token"]
+        req = urllib.request.Request(f"https://{host}/v2/{path}/manifests/{tag.split('@')[0]}", method="HEAD", headers={
+            "Accept": "application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json",
+            **({"Authorization": f"Bearer {tok}"} if tok else {})})
+        return urllib.request.urlopen(req, timeout=20).status == 200
+    except urllib.error.HTTPError as e:
+        return False if e.code == 404 else None
+    except Exception:
+        return None
+
+
+VERS = {"loadgen": vers_go, "frontend": vers_pkg, "tools": vers_tools}
+
+
+def checks(task, repo):
+    if task == "loadgen":
+        d = repo / "quotes-loadgen"
+        steps = {"build": "go build ./...", "test": "go test ./..."}
+        res = {k: mise(c, d)[0] == 0 for k, c in steps.items()}
+        _, o = mise("go list -m -u -f '{{if and (not .Indirect) .Update}}{{.Path}}{{end}}' all", d, 300)
+        res["behind"] = len([x for x in o.splitlines() if x.strip() and "WARN" not in x])
+        return res
+    if task == "frontend":
+        d = repo / "quotes-frontend"
+        res = {}
+        for k, c in {"install": "pnpm install --frozen-lockfile", "test": "pnpm exec vitest run",
+                     "tsc": "pnpm exec tsc --noEmit", "lint": "pnpm exec eslint .", "build": "pnpm build"}.items():
+            res[k] = mise(c, d)[0] == 0
+            if not res["install"]:
+                break
+        _, o = mise("pnpm outdated --format json", d, 300)
+        try:
+            res["behind"] = sum(1 for x in json.loads(o[o.index("{"):]).values() if x["current"] != x["latest"])
+        except Exception:
+            res["behind"] = None
+        return res
+    # tools: files parse, changed image tags exist upstream
+    res = {"parse": True}
+    try:
+        vers_tools(repo)
+        for f in repo.glob(".github/workflows/*.y*ml"):
+            if subprocess.run([sys.executable, "-c", "import sys,yaml;yaml.safe_load(open(sys.argv[1]))", f],
+                              capture_output=True).returncode == 1:
+                res["parse"] = False
+    except Exception:
+        res["parse"] = False
+    return res
+
+
+def grade(task, repo, before):
+    after = VERS[task](repo)
+    files = [x for x in sh("git diff --name-only base -- .", repo)[1].splitlines() if x]
+    moved = {k: [before[k], after[k]] for k in before if k in after and after[k] != before[k]}
+    removed = sorted(set(before) - set(after))
+    down = [k for k, (a, b) in moved.items() if num(b) and num(a) and num(b) < num(a)]
+    g = {"files": files, "unrelated": [f for f in files if not re.match(TASKS[task]["scope"], f)],
+         "moved": moved, "n_moved": len(moved), "removed": removed, "downgraded": down,
+         "checks": checks(task, repo) if files else {}}
+    if task == "tools":
+        bad = []
+        for k, (_, b) in moved.items():
+            if "Dockerfile" in k or "docker-compose" in k:
+                ok = tag_exists(k.split(":", 1)[1], b)
+                if ok is False:
+                    bad.append(f"{k}:{b}")
+        g["checks"]["missing_tags"] = bad
+    c = {k: v for k, v in g["checks"].items() if isinstance(v, bool)}
+    g["green"] = bool(files) and all(c.values()) and not g.get("checks", {}).get("missing_tags")
+    g["pass"] = g["green"] and g["n_moved"] > 0 and not g["unrelated"] and not removed and not down
+    return g
+
+
+def run_one(model, task):
+    repo = OUT / "clones" / f"{model}--{task}"
+    if repo.exists():
+        sh(["rm", "-rf", str(repo)], OUT)
+    sh(["git", "clone", "-q", str(BASE), str(repo)], OUT)
+    sh(["git", "remote", "remove", "origin"], repo)       # nothing to push to
+    sh(["git", "branch", "base"], repo)
+    sh(["git", "switch", "-q", "-c", f"upgrade/{task}-{model}"], repo)
+    (repo / ".git/info/exclude").write_text("opencode.json\n.opencode/\nnode_modules/\n.next/\nAGENTS.local.md\n")
+    if subprocess.run(["mise", "run", "opencode-init", str(repo)], cwd=ROOT, capture_output=True).returncode:
+        return {"error": "opencode-init failed"}
+    before = VERS[task](repo)
+    prompt = TASKS[task]["prompt"] + COMMON
+    argv = S.cplt_argv(repo, repo, "8080", extra=["--yes", "--quiet"])
+    if argv is None:
+        raise SystemExit("cplt missing; refusing to run unsandboxed")
+    log = OUT / "logs" / f"{model}--{task}.jsonl"
+    log.parent.mkdir(exist_ok=True)
+    t0 = time.time()
+    with log.open("w") as fh:
+        p = subprocess.Popen(argv + ["--", "--pure", "run", "--format", "json", prompt], cwd=repo, stdout=fh,
+                             stderr=subprocess.STDOUT, env=S.bench_env(os.environ), start_new_session=True)
+        try:
+            rc = p.wait(timeout=args.cap_min * 60)
+        except subprocess.TimeoutExpired:
+            os.killpg(p.pid, signal.SIGTERM)
+            time.sleep(5)
+            try:
+                os.killpg(p.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            rc = "timeout"
+    secs = round(time.time() - t0)
+    n_tools = sum(1 for x in log.read_text().splitlines() if '"type":"tool_use"' in x.replace(" ", ""))
+    sh(["git", "add", "-A"], repo)
+    sh(["git", "-c", "user.name=bench", "-c", "user.email=bench@localhost", "commit", "-qm",
+        f"upgrade {task} ({model})"], repo)
+    g = grade(task, repo, before)
+    return {"rc": rc, "seconds": secs, "tool_calls": n_tools, **g}
+
+
+def main():
+    meta = {"harness_sha": HSHA, "base_sha": sh(["git", "rev-parse", "--short", "HEAD"], BASE)[1].strip()}
+    for model in args.models.split(","):
+        if subprocess.run(["mise", "run", "model-use", model], cwd=ROOT, capture_output=True).returncode:
+            print(f"✗ model-use {model} failed; skipping", flush=True)
+            continue
+        for task in args.tasks.split(","):
+            if args.deadline and time.time() + args.cap_min * 60 > args.deadline:
+                print("deadline: stopping", flush=True)
+                return
+            if not restart_server():
+                rec = {"error": "server did not start"}
+            else:
+                rec = run_one(model, task)
+            subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
+            BF.stop_daemons()   # PID-only, sandbox-started Gradle/Kotlin daemons + orphan shm
+            rec = {"model": model, "task": task, **meta, "at": time.strftime("%F %T"), **rec}
+            with (OUT / "results.jsonl").open("a") as fh:
+                fh.write(json.dumps(rec) + "\n")
+            print(f"{'✓' if rec.get('pass') else '✗'} {model} {task} {rec.get('seconds')}s "
+                  f"moved={rec.get('n_moved')} green={rec.get('green')} unrelated={len(rec.get('unrelated') or [])} "
+                  f"{rec.get('error', '')}", flush=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    finally:
+        subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)

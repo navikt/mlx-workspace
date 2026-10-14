@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# nais/examples dependency upgrades on local models (PLAN.md). NOT ARMED by the repo.
+# Arm: cp reports/2026-10-14-nais-examples-upgrade/nais-upgrade-launcher ~/tmp/ && nohup bash ~/tmp/nais-upgrade-launcher >/dev/null 2>&1 &
+# Waiting-launcher rules (BENCHMARKING.md): 5 min of free GPU (no queue lock, no benchmark or
+# model server, :8080 free, AC, wired 49152, load < 6); one instance; done marker once run.
+# Window: 8 h from arming; no sample starts if it can't finish before then (--deadline),
+# and the run is killed by PID at the window's end.
+set -u
+WT=${NAIS_UPGRADE_WT:-$HOME/mlx-workspace-wt/nais-upgrade}
+cd "$WT" || exit 1
+L="$WT/.b""ench-logs"; mkdir -p "$L"
+N=nais-upgrade
+exec >> "$L/$N.log" 2>&1
+DONE="$L/$N.done" PIDF="$L/$N.pid"
+OUT=$HOME/tmp/nais-upgrade/run BASE=$HOME/tmp/nais-upgrade/base
+MODELS=qwen3.8-27b-8bit-mtplx,qwen3.6-35b-a3b-optiq-64g,qwen3.6-35b-a3b-8bit-64g,qwen3.8-27b-optiq-4bit
+BUSY="tasks/(ni""ght-run|be""nch-|np-""serve|dispatch-""probe|ni""ght-chain)|bin/ni""ght|mlx_lm[._]server|mtplx serve|llama-server|ollama serve"
+END=$(( $(date +%s) + 8 * 3600 ))
+say() { echo "[$(date '+%F %T')] $N: $*"; }
+blocker() {
+  [ -d "$HOME/mlx-workspace/.b""ench-logs/.queue.lock" ] && { echo "queue lock held"; return; }
+  local p; p=$(pgrep -fl "$BUSY" | grep -vE "^($$|$PPID) ")
+  [ -n "$p" ] && { echo "running: $(echo "$p" | head -1 | cut -c1-100)"; return; }
+  /usr/sbin/lsof -tiTCP:8080 -sTCP:LISTEN >/dev/null 2>&1 && { echo "port 8080 in use"; return; }
+  pmset -g batt | head -1 | grep -q "AC Power" || { echo "not on AC"; return; }
+  [ "$(/usr/sbin/sysctl -n iogpu.wired_limit_mb)" = 49152 ] || { echo "wired limit not 49152"; return; }
+  awk '{exit !($1 < 6)}' <<<"$(/usr/sbin/sysctl -n vm.loadavg | tr -d '{}')" || echo "load $(/usr/sbin/sysctl -n vm.loadavg)"
+}
+[ -e "$DONE" ] && { say "pid $$: $DONE exists; not running twice"; exit 0; }
+op=$(cat "$PIDF" 2>/dev/null)
+[ -n "$op" ] && [ "$op" != $$ ] && kill -0 "$op" 2>/dev/null && { say "pid $$: pid $op already waits; exiting"; exit 0; }
+echo $$ > "$PIDF"
+trap 'rm -f "$PIDF"' EXIT
+say "pid $$: harness $(git rev-parse --short HEAD); window ends $(date -r $END '+%F %T')"
+caffeinate -is -w $$ &
+stable=0 last=""
+while :; do
+  [ "$(date +%s)" -lt $((END - 1800)) ] || { say "gave up waiting: $last"; exit 1; }
+  b=$(blocker)
+  if [ -z "$b" ]; then stable=$((stable + 1)); [ "$stable" -ge 5 ] && break
+  else stable=0; [ "$b" != "$last" ] && say "waiting: $b"; fi
+  last=$b; sleep 60
+done
+[ -d "$BASE/.git" ] || { say "no base clone $BASE"; exit 1; }
+trap ': > "$DONE"; rm -f "$PIDF"; say "done marker"' EXIT
+trap '[ -n "${NR:-}" ] && kill -TERM "$NR" 2>/dev/null; wait "$NR"; exit 130' INT TERM
+.mise/tasks/be""nch-nais-upgrade --base "$BASE" --out "$OUT" --models "$MODELS" \
+  --tasks loadgen,frontend,tools --cap-min 25 --deadline "$END" &
+NR=$!
+say "queue pid $NR"
+while kill -0 "$NR" 2>/dev/null; do
+  [ "$(date +%s)" -ge "$END" ] && { say "window end: killing $NR"; kill -TERM "$NR"; break; }
+  sleep 10
+done
+wait "$NR"; say "queue exited $?"
