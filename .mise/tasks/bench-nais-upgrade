@@ -467,15 +467,19 @@ def run_one(model, task):
 
 
 def main():
+    """0 when every model ran every task (a capped session is a result); 3 when a model,
+    a task or the rest of the queue did not run, so the launcher leaves no done marker (#197)."""
+    missed = 0
     meta = {"harness_sha": HSHA, "base_sha": sh(["git", "rev-parse", "--short", "HEAD"], BASE)[1].strip()}
     for model in args.models.split(","):
         if subprocess.run(["mise", "run", "model-use", model], cwd=ROOT, capture_output=True).returncode:
             print(f"✗ model-use {model} failed; skipping", flush=True)
+            missed += 1
             continue
         for task in args.tasks.split(","):
             if args.deadline and time.time() + args.cap_min * 60 > args.deadline:
                 print("deadline: stopping", flush=True)
-                return
+                return 3
             if not restart_server():
                 rec = {"error": "server did not start"}
             else:
@@ -485,19 +489,22 @@ def main():
                     rec = {"error": f"{type(e).__name__}: {e}"[:500]}
             subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
             BF.stop_daemons()   # PID-only, sandbox-started Gradle/Kotlin daemons + orphan shm
+            missed += "error" in rec or "skipped" in rec
             rec = {"model": model, "task": task, **meta, "at": time.strftime("%F %T"), **rec}
             with (OUT / "results.jsonl").open("a") as fh:
                 fh.write(json.dumps(rec) + "\n")
             print(f"{'✓' if rec.get('pass') else '✗'} {model} {task} {rec.get('seconds')}s "
                   f"moved={rec.get("n_moved")} full={rec.get("fully_upgraded")} green={rec.get('green')} unrelated={len(rec.get('unrelated') or [])} "
                   f"{rec.get("error") or rec.get("skipped") or ""}", flush=True)
+    return 3 if missed else 0
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))   # the launcher's kill runs the cleanup below
     try:
-        main()
+        rc = main()
     finally:
         subprocess.run(["mise", "run", "server-stop"], cwd=ROOT, capture_output=True)
         BF.stop_daemons()
         shutil.rmtree(GRADER_HOME, ignore_errors=True)
+    sys.exit(rc)

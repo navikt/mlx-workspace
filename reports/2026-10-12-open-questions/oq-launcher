@@ -76,9 +76,11 @@ while read -r pass; do
   say "pass $i ($m): $(echo "$pass" | tr -s ' ' | cut -c1-80)"
   env "${envs[@]}" FRONTIER_MODEL="$m" NIGHT_REPORT="$R/$N-results-$i.md" .mise/tasks/ni""ght-run-3 --part all --queue "$L/$N-step.queue" < /dev/null &
   NR=$!; wait "$NR"; rc=$?; say "pass $i exited $rc"
-  # the run task exits 0 even when a step FAILs (preflight included): check its step lines too
-  if [ "$rc" -ne 0 ] || tail -n 60 "$L/$N.log" | grep -qE '^[0-9:]+ +(FAIL|SKIP|TIMEOUT|UNREACHABLE)'; then
-    say "pass $i failed; stopping, no done marker"; exit 1
+  # night-run-3 exits non-zero when a step ends FAIL, SKIP or UNREACHABLE (gradle preflight
+  # included); a budgeted TIMEOUT is a normal outcome and exits 0 (#197, #252)
+  if [ "$rc" -ne 0 ]; then
+    say "pass $i failed: $(tail -n 200 "$L/$N.log" | grep -m1 'steps not OK' | cut -c1-160)"
+    say "stopping, no done marker"; exit 1
   fi
   sleep 60   # cf-r34 pass 3 hit its gradle preflight 0 s after pass 2 ended
 done < <(passes)
