@@ -5,6 +5,8 @@ Written by `mise run night-run-3` from `.bench-logs/night3-20261012-083403/steps
 - Started 2026-10-12T08:34:40+02:00, last step ended 2026-10-12T08:53:53+02:00.
 - Cloud spend: $0 of the $50 cap.
 
+> Note (#226): the k2-horizon-mova-36b-a4b-4bit rows in the frontier tables below come from two result files (`frontier-k2-horizon-mova-36b-a4b-4bit-base-20261009-190251.json`, `...-191517.json`) that were never committed. `bench/frontier-summary.json` no longer has them, and `summary --check` now fails CI when a row's file is not in the repository.
+
 ## Steps
 
 | # | Part | Step | Classes | Variant | Status | Minutes | Result |
