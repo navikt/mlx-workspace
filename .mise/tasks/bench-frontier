@@ -173,6 +173,12 @@ def cplt_project(text):
     return m and m.group(1).strip()
 
 
+def public_json(doc):
+    """A result file's text with the home directory as `~` (#268): build_tail and notes
+    carry compiler output with absolute paths, and result files are public."""
+    return json.dumps(doc, indent=1).replace(str(Path.home()) + "/", "~/") + "\n"
+
+
 def harness_sha(tasks_file):
     h = hashlib.sha256()
     for f in (HERE / "bench-frontier", HERE / "_frontier.py", HERE / "bench-cheap-ops",
@@ -949,7 +955,7 @@ def cmd_validate(args):
                 out["tasks"][t["id"]] = res
                 good += res["ok"]
                 print(f"  {'✓' if res['ok'] else '✗'} {t['id']:12} {res['note']}")
-                vp.write_text(json.dumps(out, indent=1) + "\n")
+                vp.write_text(public_json(out))
         H["reset_repo"]()
     finally:
         if lock:
@@ -1107,13 +1113,13 @@ def cmd_run(args):
                 meta["spent_usd"] = round(spent, 4)
                 if ledger:
                     ledger.write_text(json.dumps({"spent_usd": round(spent, 4), "cap_usd": args.cost_cap}) + "\n")
-                out_path.write_text(json.dumps(doc_out, indent=1) + "\n")
+                out_path.write_text(public_json(doc_out))
                 flag = "✓" if rec["verified"] else "✗"
                 print(f"   {flag} run {run_i} {t['id']:12} {rec['seconds']:>6}s · {rec['attempts']} att · "
                       f"{rec['tool_calls']} tools · {rec['note']}", flush=True)
             if stop:
                 meta["stopped"] = stop
-                out_path.write_text(json.dumps(doc_out, indent=1) + "\n")
+                out_path.write_text(public_json(doc_out))
                 print(f"   COST CAP: {stop}; recorded in the file, stopping", flush=True)
                 break
         H["reset_repo"]()
@@ -1318,6 +1324,7 @@ if "x / 3" in calc:
 def cmd_selftest(_args):
     """Everything but the model and Gradle, on a three-file fixture repo."""
     F.self_check()
+    assert public_json({"build_tail": f"e: {Path.home()}/x/A.kt:3"}) == '{\n "build_tail": "e: ~/x/A.kt:3"\n}\n'
     # night 3: the cloud arm's workspace sat inside this repo, so cplt scoped the session to it
     assert not ws_for("cloud-x").resolve().is_relative_to(REAL_ROOT.resolve())
     assert cplt_project("\x1b[2m[cplt] Project:  /a/b\x1b[0m\n") == "/a/b" and cplt_project("no banner") is None
