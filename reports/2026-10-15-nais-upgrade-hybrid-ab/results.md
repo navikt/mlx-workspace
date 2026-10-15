@@ -8,19 +8,19 @@ Each cell gives the count over 2 runs.
 
 | Arm (flag / skill) | loadgen full+green | frontend full+green | tools full | Worker tasks | Guard violations | Cloud cost |
 |---|---|---|---|---|---|---|
-| off / without | 2/2 | 0/2 (pnpm) | 1/2 | 0 | 2 pm, 1 postgres 16→18, 2 pnpm pin | $1.23 |
-| on / without | 2/2 | 0/2 (pnpm) | 1/2 | 0 | 2 pm, 2 postgres 16→18, 2 pnpm pin | $1.24 |
-| off / with | 2/2 | 0/2 (pnpm) | 0/2 | 0 | 2 pm, 0 postgres, 1 pnpm pin | $1.41 |
-| on / with | 2/2 | 0/2 (pnpm) | 0/2 | 0 | 2 pm, 0 postgres, 0 pnpm pin | $1.49 |
+| off / without | 2/2 | invalid (env pnpm) | 1/2 | 0 | 2 pm, 1 postgres 16→18, 2 pnpm pin | $1.23 |
+| on / without | 2/2 | invalid (env pnpm) | 1/2 | 0 | 2 pm, 2 postgres 16→18, 2 pnpm pin | $1.24 |
+| off / with | 2/2 | invalid (env pnpm) | 0/2 | 0 | 2 pm, 0 postgres, 1 pnpm pin | $1.41 |
+| on / with | 2/2 | invalid (env pnpm) | 0/2 | 0 | 2 pm, 0 postgres, 0 pnpm pin | $1.49 |
 
-Totals: $5.37 cloud (cap $15), 70 min of session time (80 min wall clock), 0 nonexistent versions, 0 `pinned_deny`, and 0 edits to pinned files outside the tools task.
+The "2 pm" in each row is the two frontend runs and comes from the harness pnpm fault below. Totals: $5.37 cloud (cap $15), 70 min of session time (80 min wall clock), 0 nonexistent versions, 0 `pinned_deny`, and 0 edits to pinned files outside the tools task.
 
 ## Findings
 
-- **No work was dispatched to the local worker in any of the 24 sessions.** Each session made one local completion and started no `local-worker` task. Sonnet 5.5 did every upgrade itself. Dispatch share: 0 % in all arms.
+- **Main finding: routing was never exercised. No work was dispatched to the local worker in any of the 24 sessions.** Each session made one local completion and started no `local-worker` task. Sonnet 5.5 did every upgrade itself. Dispatch share: 0 % in all arms.
 - **The #1832 policy paragraph was never written.** `ProjectDepUpgrade` only checks the working directory for a lockfile. In a monorepo like nais/examples the lockfiles sit in `quotes-*/`, so a launch from the repo root gives `""`. With the flag on, the only thing that changes is the pinned-file gate, and it never fired because the worker never ran. The flag-on and flag-off arms therefore cannot be told apart in this run.
 - **Endpoint mode ignores the flag too.** `applyEndpointConfig` never calls `local.SetDepUpgrade`, so `local_dep_upgrade` has no effect with `local_endpoint`. For that reason this bench attaches nav-pilot to the harness's server through a managed-mode `server.json`.
-- **Frontend: 8/8 got every package upgraded and passed the checks inside the session, then failed `pnpm install --frozen-lockfile`.** Inside nav-pilot's sandbox the session ran the global pnpm 12.8.1, not the repo's pnpm 10, and that flipped `autoInstallPeers` in the lockfile. The skill (which says "use the repo's pinned package manager") was loaded in all 4 frontend skill runs and did not catch it. This is the lockfile/package-manager guard violation from #285, and it happened in every arm.
+- **Frontend results are invalid for comparing arms (harness fault, not a model failure).** In 8/8 sessions every package was upgraded and the checks passed inside the session, but the grader's `pnpm install --frozen-lockfile` then failed. The session resolved `pnpm` to 12.8.1 from the global mise pin (`pnpm = latest`, since removed), not the repo's pnpm 10. The harness prepends the repo's pnpm to PATH, but that did not reach the shell inside nav-pilot's sandbox. pnpm 12 flipped `autoInstallPeers` in the lockfile. The baseline install with pnpm 10 was green, so the environment, not the model, broke the lockfile. The skill was loaded in all 4 frontend skill runs; it did not catch the mismatch, but with the wrong pnpm first on PATH this says little about the skill.
 - **Tools: the skill arms made fewer guard violations.** postgres 16→18 (with the volume path changed): 3/4 without the skill, 0/4 with it. pnpm pin moved off the lockfile's major: 4/4 without, 1/4 with. With the skill, more tags stayed behind on purpose, so full upgrade was 2/4 without and 0/4 with. The skill was loaded explicitly in only 1 of 4 tools runs, so its description in the skill list may be doing the work. n=4 per side, so treat this as a direction, not a result.
 - loadgen: 8/8 full upgrade and green in all arms, about 50 s each.
 
@@ -34,4 +34,5 @@ Totals: $5.37 cloud (cap $15), 70 min of session time (80 min wall clock), 0 non
 
 - #1832: decide eligibility per project directory, not per cwd. A root launch in a monorepo must find `quotes-*/go.sum` and similar. Wire `SetDepUpgrade` in endpoint mode. Then rerun: with the paragraph missing, this run says nothing about routing.
 - #1832: an orchestrator that does the whole upgrade itself is the cheaper failure (about $0.13–0.37 per task). If the aim is to move the work local, the policy has to say "send it", not "may go to".
-- #1833: keep the infra and tool-pin hold-backs; they are the one measured effect. Make the package-manager step a check rather than prose: run `pnpm --version` against `packageManager` or the mise pin before installing, and stop on a mismatch.
+- #1833: keep the infra and tool-pin hold-backs; they are the one measured effect. A package-manager check (run `pnpm --version` against `packageManager` or the mise pin before installing, stop on a mismatch) is a guard idea only: this run does not measure it, because the frontend failures came from the harness.
+- Harness: put the repo's pinned pnpm first on PATH inside sessions, as #276 did for checks, then rerun frontend.
