@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# mise description="Dependency-upgrade tasks on nais/examples (loadgen, frontend, backend, analytics, tools) per local model. Usage: mise run bench-nais-upgrade -- --base <clone> --out <dir> --models a,b --tasks loadgen,frontend,backend,analytics,tools [--cap-min 25] [--deadline <epoch>]"
+# mise description="Dependency-upgrade tasks on nais/examples (loadgen, frontend, backend, analytics, tools) per local model. Usage: mise run bench-nais-upgrade -- --base <clone> --out <dir> --models a,b --tasks loadgen,frontend,backend,analytics,tools [--cap-min 25] [--deadline <epoch>] [--np <nav-pilot> --dep-upgrade on/off --skill <dir> --arm <label> --cost-ledger <json> --cost-cap 15]"
 """Each (model, task) gets a fresh clone of --base and a branch upgrade/<task>-<model>.
 The model runs once through opencode in cplt, capped at --cap-min. The grader then runs
 outside the sandbox on that clone: did the versions move, are the checks green, did it
@@ -81,12 +81,29 @@ ap.add_argument("--models", required=True)
 ap.add_argument("--tasks", default="loadgen,frontend,tools")
 ap.add_argument("--cap-min", type=float, default=25)
 ap.add_argument("--deadline", type=float, default=0, help="epoch secs; no sample starts after deadline - cap")
+# Hybrid (#285): the cloud orchestrator runs through nav-pilot, the --models profile is its local worker.
+ap.add_argument("--np", help="nav-pilot binary: run each sample as a nav-pilot hybrid session instead of bare opencode")
+ap.add_argument("--cloud-model", default="claude-sonnet-5.5")
+ap.add_argument("--dep-upgrade", choices=("on", "off"), default="off", help="nav-pilot local_dep_upgrade")
+ap.add_argument("--skill", help="skill directory copied into each clone's .opencode/skills/")
+ap.add_argument("--arm", default="", help="label recorded per row and in clone names")
+ap.add_argument("--cost-cap", type=float, default=15.0, help="USD across every run sharing --cost-ledger")
+ap.add_argument("--cost-ledger")
+ap.add_argument("--go-warm", help="a GOPATH warmed outside the sandbox, cloned into each hybrid clone: "
+                "cplt's proxy resets go get's ~150-module fetch for golangci-lint")
 args = ap.parse_args()
 OUT = Path(args.out).expanduser()
 OUT.mkdir(parents=True, exist_ok=True)
 BASE = Path(args.base).expanduser()
 (OUT.parent / "cplt-cfg").mkdir(exist_ok=True)   # not OUT: cplt treats its config dir as state, clones can't live there
 CPLT_CFG = S.bench_cplt_config(OUT.parent / "cplt-cfg" / "cplt.toml")   # absolute toolchain grants; HOME is a temp dir
+# cplt refuses the dotfiles (.env) some modules ship, so a session cannot unpack them: hybrid sessions use a
+# module cache warmed and unpacked outside the sandbox (--go-warm), as cache and as file:// GOPROXY.
+GOMOD = Path(args.go_warm).resolve() / "pkg/mod" if args.go_warm else OUT.parent / "gomod"
+if args.np:
+    GOMOD.mkdir(parents=True, exist_ok=True)
+    t = re.sub(r"(?m)^write = \[", lambda m: m.group(0) + json.dumps(str(GOMOD)) + ", ", CPLT_CFG.read_text(), count=1)
+    CPLT_CFG.write_text(t)
 # The global mise config pins pnpm = latest (12), which shadows the repo's npm:pnpm 10 inside
 # `mise exec` and fails `pnpm install --frozen-lockfile` on a lockfile-settings mismatch.
 os.environ["MISE_DISABLE_TOOLS"] = "pnpm"
@@ -390,15 +407,135 @@ def pnpm_bin(repo):
     return r.stdout.strip() + "/bin"
 
 
+PINNED = re.compile(r"(^|/)(\.tool-versions|\.?mise\.toml|\.nvmrc|\.node-version|\.python-version|global\.json|"
+                    r"gradle-wrapper\.properties|[Dd]ockerfile[^/]*|[^/]*\.dockerfile|(docker-)?compose\.ya?ml|nais\.ya?ml)$|"
+                    r"\.github/(workflows|actions)/|\.nais/")   # mirrors local.PinnedFile (navikt/copilot #1832)
+INFRA = re.compile(r"(?i)(postgres|redis|kafka|mysql|mariadb|mongo|valkey|rabbitmq)")
+GATE_PINNED = "nav-pilot (local_dep_upgrade)"
+
+
+def spent():
+    try:
+        return json.loads(Path(args.cost_ledger).read_text())["spent_usd"] if args.cost_ledger else 0.0
+    except (OSError, ValueError, KeyError):
+        return 0.0
+
+
+def guards(task, g, log_text):
+    """#285's guard violations, from the grade and the session log."""
+    out = {"pinned_edits": [f for f in g["files"] if PINNED.search(f)] if task != "tools" else [],
+           "infra_major": [k for k, (a, b) in g["moved"].items() if INFRA.search(k) and num(a)[:1] != num(b)[:1]],
+           "nonexistent": list(g.get("checks", {}).get("missing_tags") or []),
+           # pnpm pin moved off the lockfile's major, or the frozen install failed
+           "pm_mismatch": [k for k, (a, b) in g["moved"].items() if k.endswith(":npm:pnpm") and num(a)[:1] != num(b)[:1]]
+                          + (["frozen install failed"] if g.get("checks", {}).get("install") is False else []),
+           "pinned_deny": log_text.count(GATE_PINNED)}
+    out["n"] = sum(len(v) for k, v in out.items() if isinstance(v, list))
+    return out
+
+
+def hybrid_session(model, repo, prompt, log):
+    """One nav-pilot hybrid session in a HOME of its own. The worker is the mlx-lm server
+    restart_server started; nav-pilot attaches to it through a server.json written here,
+    so nothing touches the real ~/.nav-pilot. Returns (rc, cloud cost, hybrid facts)."""
+    import _np_checks as NC
+    H = SourceFileLoader("bench_hybrid", str(HERE / "bench-hybrid")).load_module()
+    prof = model
+    served = P_params(prof)["MLX_MODEL"]
+    man = OUT / "models.json"
+    if not man.exists():
+        NC.manifest(prof, str(man))
+    entry = next(e for e in json.loads(man.read_text())["models"] if e["model"] == served)
+    real = Path.home()
+    copies = [".local/share/opencode/auth.json", ".nav-pilot/local/env.json"]
+    copies += [str(f.relative_to(real)) for f in (real / ".nav-pilot").glob("*") if f.is_file() and f.name != "config.toml"]
+    home, henv = S.own_home("nais-upgrade-np-", copies)
+    shutil.copytree(real / ".cache/opencode", home / ".cache/opencode", dirs_exist_ok=True)   # see run_one: a fresh one hangs
+    pid = H.port_pid(8080)
+    lstart = subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)], capture_output=True, text=True,
+                            env={**os.environ, "LC_ALL": "C"}).stdout.strip()
+    (home / ".nav-pilot/local").mkdir(parents=True, exist_ok=True)
+    (home / ".nav-pilot/local/server.json").write_text(json.dumps(
+        {"pid": pid, "model": served, "started": __import__("datetime").datetime.now().astimezone().isoformat(timespec="seconds"), "port": 8080, "lstart": lstart}))
+    cfg = home / ".nav-pilot/config.toml"
+    cfg.write_text(f'version = 1\nmodel = "{args.cloud_model}"\nauto_update = false\nlocal_enabled = true\n'
+                   f'local_model = "{entry["key"]}"\nlocal_dep_upgrade = {str(args.dep_upgrade == "on").lower()}\n')
+    if args.skill:
+        shutil.copytree(args.skill, repo / ".opencode/skills" / Path(args.skill).name, dirs_exist_ok=True)
+    xdg = home / ".config"
+    env = {k: v for k, v in os.environ.items() if not k.startswith("OPENCODE_CONFIG")}
+    # cplt here is nav-pilot's, so the harness's argv grants never reach it: the toolchain grants come
+    # from CPLT_CONFIG, and Go's caches live in the clone (git-excluded), the one tree it may write.
+    env.update(henv, CPLT_CONFIG=str(CPLT_CFG), GOPATH=str(repo / ".gopath"), GOCACHE=str(repo / ".gopath/cache"),
+               GOMODCACHE=str(GOMOD), GOFLAGS="-modcacherw",
+               # the warm cache is the proxy (its latest = latest at warm time, verified then), so no fetch goes through cplt
+               **({"GOPROXY": f"file://{GOMOD}/cache/download", "GOSUMDB": "off"} if args.go_warm else {}),
+               XDG_CONFIG_HOME=str(xdg), NAV_PILOT_CONFIG=str(cfg), NAV_PILOT_BENCH_MANIFEST=str(man),
+               CI="true", DOTNET_CLI_TELEMETRY_OPTOUT="1", PATH=f"{pnpm_bin(repo)}:{os.environ['PATH']}")
+    # The user-level agent pack, into the temp HOME: a launch refuses to run with nothing installed.
+    r = subprocess.run([args.np, "install", "--user", "--all", "--yes"], cwd=home, env=env, capture_output=True, text=True, timeout=600)
+    if r.returncode:
+        raise RuntimeError(f"nav-pilot install: {(r.stdout + r.stderr)[-300:]}")
+    srv_log = ROOT / ".bench-logs" / "server-restart.log"
+    off = srv_log.stat().st_size if srv_log.exists() else 0
+    argv = [args.np, "--client", "opencode", "--model", args.cloud_model, "--", "run", "--format", "json", prompt]
+    before = spent()
+    with log.open("w") as fh:
+        p = subprocess.Popen(argv, cwd=repo, stdout=fh, stderr=subprocess.STDOUT, env=env, start_new_session=True)
+        rc, deadline = None, time.time() + args.cap_min * 60
+        try:
+            while (rc := p.poll()) is None:
+                if time.time() > deadline:
+                    rc = "timeout"
+                    break
+                txt = log.read_text(errors="replace")
+                if "no server is running" in txt:   # would measure the cloud alone
+                    rc = "no-worker"
+                    break
+                if time.time() > deadline - args.cap_min * 60 + 240 and '"type":"step_start"' not in txt.replace(" ", ""):
+                    rc = "no-start"
+                    break
+                ev = H.parse_events(log.read_text(errors="replace"))
+                if before + ev["cloud_cost_usd"] + ev["step_min_usd"] > args.cost_cap:
+                    rc = "cost-cap"
+                    break
+                time.sleep(5)
+        finally:
+            kill_session(p.pid)
+    text = log.read_text(errors="replace")
+    ev = H.parse_events(text)
+    policy = xdg / "opencode/nav-pilot-local-dispatch.md"
+    with srv_log.open("rb") as fh:
+        fh.seek(off)
+        local_calls = fh.read().decode("utf8", "replace").count("POST /v1/chat/completions")
+    tasks = [x for x in H.tool_parts(text) if x.get("tool") == "task"
+             and (x.get("state") or {}).get("input", {}).get("subagent_type") == H.WORKER_AGENT]
+    skill_used = any(x.get("tool") == "skill" for x in H.tool_parts(text))
+    if args.cost_ledger:
+        Path(args.cost_ledger).write_text(json.dumps({"spent_usd": round(before + ev["cloud_cost_usd"], 4),
+                                                      "cap_usd": args.cost_cap}) + "\n")
+    shutil.rmtree(home, ignore_errors=True)
+    return rc, {"cloud_cost_usd": ev["cloud_cost_usd"], "cloud_steps": ev["cloud_steps"], "local_calls": local_calls,
+                "worker_tasks": len(tasks), "local_share": round(local_calls / max(1, local_calls + ev["cloud_steps"]), 3),
+                "announced": "Local dispatch: nav-pilot ends a turn" in text,
+                "policy_dep_paragraph": policy.exists() and "Dependency upgrades (" in policy.read_text(),
+                "skill_loaded": skill_used, "gate": H.gate_events(text, repo)}
+
+
+def P_params(profile):
+    import _profiles as P
+    return P.load(profile)[1]
+
+
 def run_one(model, task):
-    repo = OUT / "clones" / f"{model}--{task}"
+    repo = OUT / "clones" / f"{model}{'-' + args.arm if args.arm else ''}--{task}"
     if repo.exists():
         sh(["rm", "-rf", str(repo)], OUT)
     sh(["git", "clone", "-q", str(BASE), str(repo)], OUT)
     sh(["git", "remote", "remove", "origin"], repo)       # nothing to push to
     sh(["git", "branch", "base"], repo)
     sh(["git", "switch", "-q", "-c", f"upgrade/{task}-{model}"], repo)
-    (repo / ".git/info/exclude").write_text("opencode.json\n.opencode/\nnode_modules/\n.pnpm-store/\n.next/\nAGENTS.local.md\n")
+    (repo / ".git/info/exclude").write_text("opencode.json\n.opencode/\nnode_modules/\n.pnpm-store/\n.next/\nAGENTS.local.md\n.gopath/\n")
     if subprocess.run(["mise", "run", "opencode-init", str(repo)], cwd=ROOT, capture_output=True).returncode:
         return {"error": "opencode-init failed"}
     before = VERS[task](repo)
@@ -408,6 +545,23 @@ def run_one(model, task):
         return {"skipped": f"baseline red: {red}", "baseline": base_checks}
     for nm in [repo / "node_modules", *repo.glob("*/node_modules")]:   # the model starts from a clean tree
         shutil.rmtree(nm, ignore_errors=True)
+    if args.np:
+        log = OUT / "logs" / f"{model}-{args.arm}--{task}-{time.strftime('%H%M%S')}.jsonl"
+        log.parent.mkdir(exist_ok=True)
+        t0 = time.time()
+        rc, hy = hybrid_session(model, repo, TASKS[task]["prompt"] + COMMON, log)
+        for n in (1, 2):   # opencode under nav-pilot never starts in about half the launches; two retries, logs kept
+            if rc != "no-start":
+                break
+            log = log.with_suffix(f".retry{n}.jsonl")
+            rc, hy = hybrid_session(model, repo, TASKS[task]["prompt"] + COMMON, log)
+        secs = round(time.time() - t0)
+        sh(["git", "add", "-A"], repo)
+        sh(["git", "-c", "user.name=bench", "-c", "user.email=bench@localhost", "commit", "-qm", f"upgrade {task}"], repo)
+        g = grade(task, repo, before)
+        return {"rc": rc, "seconds": secs, "arm": args.arm, "dep_upgrade": args.dep_upgrade,
+                "skill": bool(args.skill), "cloud_model": args.cloud_model, "log": log.name,
+                "guards": guards(task, g, log.read_text(errors="replace")), **hy, "baseline": base_checks, **g}
     home, henv = S.own_home("nais-upgrade-")   # never the real ~/.local/share/opencode, ~/.copilot, ~/.nav-pilot
     # opencode's package cache, copied (never linked): a fresh one makes opencode install
     # its packages at start-up, and execs from that tree are denied, so the session hangs.
@@ -471,6 +625,8 @@ def main():
     a task or the rest of the queue did not run, so the launcher leaves no done marker (#197)."""
     missed = 0
     meta = {"harness_sha": HSHA, "base_sha": sh(["git", "rev-parse", "--short", "HEAD"], BASE)[1].strip()}
+    if args.np:
+        meta["nav_pilot"] = Path(args.np).name
     for model in args.models.split(","):
         if subprocess.run(["mise", "run", "model-use", model], cwd=ROOT, capture_output=True).returncode:
             print(f"✗ model-use {model} failed; skipping", flush=True)
@@ -479,6 +635,9 @@ def main():
         for task in args.tasks.split(","):
             if args.deadline and time.time() + args.cap_min * 60 > args.deadline:
                 print("deadline: stopping", flush=True)
+                return 3
+            if args.np and spent() >= args.cost_cap - 0.5:
+                print(f"cost cap ${args.cost_cap}: stopping", flush=True)
                 return 3
             if not restart_server():
                 rec = {"error": "server did not start"}
@@ -495,7 +654,10 @@ def main():
                 fh.write(json.dumps(rec) + "\n")
             print(f"{'✓' if rec.get('pass') else '✗'} {model} {task} {rec.get('seconds')}s "
                   f"moved={rec.get("n_moved")} full={rec.get("fully_upgraded")} green={rec.get('green')} unrelated={len(rec.get('unrelated') or [])} "
-                  f"{rec.get("error") or rec.get("skipped") or ""}", flush=True)
+                  f"{rec.get("error") or rec.get("skipped") or ""}"
+                  + (f" local={rec.get('local_calls')} tasks={rec.get('worker_tasks')} ${rec.get('cloud_cost_usd')} "
+                     f"guards={(rec.get('guards') or {}).get('n')} pinned_deny={(rec.get('guards') or {}).get('pinned_deny')}"
+                     if args.np else ""), flush=True)
     return 3 if missed else 0
 
 
