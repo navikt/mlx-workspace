@@ -280,6 +280,16 @@ else
   say "(fake) preflight skipped"
 fi
 
+# #254: the cloud arm's cplt may write all of ~/.gradle and ~/.m2. Config left there (an init
+# script, gradle.properties, settings.xml) applies to every later build on the host, so a step
+# that adds or changes one is invalid: its result file moves out of bench/ and the queue stops.
+HOME_CFG=${NIGHT_HOME_CFG_ROOT:-$HOME}
+home_cfg() {
+  ( cd "$HOME_CFG" 2>/dev/null || exit 0
+    for f in .gradle/init.d/* .gradle/init.gradle .gradle/init.gradle.kts .gradle/gradle.properties .m2/settings.xml; do
+      [ -f "$f" ] && echo "~/$f $(shasum -a 256 < "$f" | cut -c1-16)"
+    done )
+}
 descendants() { local c; for c in $(pgrep -P "$1"); do echo "$c"; descendants "$c"; done; }
 strays() {
   local p cwd
@@ -427,6 +437,7 @@ for q in "${QUEUE[@]}"; do
   esac
   [ -n "$FAKE" ] && cmd=("$NIGHT_FAKE_STEP" "$i" "$kind" "$classes" "$variant" "$LEDGER" "$prof")
 
+  cfg_before=$(home_cfg)
   start=$(date -Iseconds); t0=$(date +%s)
   set -m
   PYTHONUNBUFFERED=1 "${cmd[@]}" > "$log" 2>&1 < /dev/null &
@@ -468,9 +479,15 @@ for q in "${QUEUE[@]}"; do
     OK) grep -q 'COST CAP' "$log" && note="stopped at the cost cap: $(grep -m1 'COST CAP' "$log" | cut -c1-160)" ;;
     *) note=$(grep -m1 '✗' "$log" | cut -c1-200) ;;
   esac
+  tainted=$(comm -13 <(sort <<<"$cfg_before") <(home_cfg | sort) | cut -d' ' -f1 | paste -sd' ' -)
+  if [ -n "$tainted" ]; then
+    status=FAIL note="invalid: the step left $tainted (new or changed; remove by hand, then resume)"
+    [ -n "$result" ] && mkdir -p "$DIR/invalid" && mv "$result" "$DIR/invalid/" && result=""
+  fi
   record "${base[@]}" start "$start" end "$(date -Iseconds)" seconds "$(( $(date +%s) - t0 ))" \
     status "$status" rc "$rc" result "$result" note "$note" cloud_spent_usd "$(spent)"
   say "  $status (exit $rc) ${result:-no result file} · log $log${note:+ · $note}"
+  [ -n "$tainted" ] && { say "✗ stopping the queue: later steps would build under that config"; break; }
 done
 
 say "=== queue done; writing $REPORT"
