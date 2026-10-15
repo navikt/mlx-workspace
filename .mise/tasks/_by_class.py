@@ -221,6 +221,14 @@ def hybrid_condition(d, s, fname):
             f"policy={policy[:8] if policy else 'none'}")
 
 
+def worker_profile(d, s):
+    """The profile key that served hybrid sample s of file d, or None for untagged files."""
+    pre = d.get("preflight") or []
+    ix = s.get("preflight")
+    snap = pre[ix] if isinstance(ix, int) and 0 <= ix < len(pre) else {}
+    return snap.get("local_profile") or d.get("worker_profile")
+
+
 def overlay(d, s):
     """The bench-only trust overlay hybrid sample s of file d ran under, or None. It is
     recorded in the preflight snapshot the sample points at (bench-hybrid)."""
@@ -229,8 +237,13 @@ def overlay(d, s):
     return (pre[ix] if isinstance(ix, int) and 0 <= ix < len(pre) else {}).get("bench_capabilities_override")
 
 
-def rows(probe=False):
+def rows(probe=False, skip_profiles=frozenset()):
     """{(cls, model, mode, condition): row} over every result file in bench/.
+
+    skip_profiles: local samples served by these profile keys are left out on every
+    path (bench-capabilities passes the measurement-only ones, #287). Copilot samples
+    carry the key as `profile`, hybrid ones in their preflight snapshot; older files
+    without it count as before.
 
     probe=False: the evidence for the verdicts. A sample run under a bench-only
     trust overlay is a probe's assumption about the worker and is never in it.
@@ -299,7 +312,7 @@ def rows(probe=False):
         if not mode:
             continue
         for i, s in enumerate(d.get("samples", [])):
-            if s.get("valid"):
+            if s.get("valid") and not (mode == "local" and s.get("profile") in skip_profiles):
                 add(classes.get(d["task"]), s.get("model") or "?", mode, "copilot temp=0",
                     d["task"], _outcome(s), f"{f.name}#{i}", f.name, s.get("seconds"))
 
@@ -309,6 +322,8 @@ def rows(probe=False):
         # A bench-only capabilities override is a probe's assumption about the worker:
         # its samples never count as evidence for a verdict, only for the probe tally.
         valid = [s for s in d.get("samples", []) if s.get("valid") and bool(overlay(d, s)) == probe]
+        if d.get("arm") == "hybrid":
+            valid = [s for s in valid if worker_profile(d, s) not in skip_profiles]
         tid = d.get("task")
         if d.get("arm") == "control":
             for i, s in enumerate(valid):

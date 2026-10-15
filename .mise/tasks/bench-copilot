@@ -354,6 +354,8 @@ def main():
                     attempts += 1
                     n = len(doc["samples"])
                     rec = run_sample(arm, rung, task, n, snap, args.timeout)
+                    if arm == "local":   # bench-capabilities drops measurement-only profiles by this key
+                        rec["profile"] = profile_key
                     assert "_token" not in rec, "the token must not reach a results file"
                     doc["samples"].append(rec)
                     out.write_text(json.dumps(doc, indent=2) + "\n")
