@@ -6,11 +6,39 @@
 > [`reports/`](reports/), the design behind individual experiments in [`working/`](working/).
 > This file says what to do and why; it does not repeat their reasoning.
 
-Last touched 24 September 2026. Before that: 31 August 2026, the day the alpha shipped.
+Last touched 15 October 2026. Before that: 31 August 2026, the day the alpha shipped.
 
 **Landed since:** the delta-counter fix (#529) and the news figure (#524) are in main;
 the Qwen3.8 correction (#532) is queued; and 30 of the 31 dependabot alerts were closed
 by someone else (#525), so that stops being ours.
+
+## Plan forward (15 October 2026)
+
+**Status.** The final-run benching is done and parked ([PARKED.md](PARKED.md)). Batch 3 merged
+(#286); release #289 moved Qwen3.8 8-bit and OptiQ debug to cloud; harness hardening landed in
+#290-#296; the #285 A/B ran (#297, #299). The sections below, down to "Roadmap", are history.
+
+**Next, in order:**
+
+1. [#300](https://github.com/navikt/mlx-workspace/issues/300): put the repo-pinned pnpm first on PATH inside nav-pilot sandbox sessions. Verify from inside a session.
+2. [navikt/copilot#1832](https://github.com/navikt/copilot/pull/1832), next draft iteration: scan projects under the repo root, `SetDepUpgrade` in `local_endpoint` mode, firmer policy wording. Leave a handoff comment on the PR.
+3. [navikt/copilot#1833](https://github.com/navikt/copilot/pull/1833), next draft iteration: a real package-manager version check and concrete version-exists checks. Leave a handoff comment on the PR.
+4. Rerun [#285](https://github.com/navikt/mlx-workspace/issues/285) (about $5, 1.5 h GPU).
+5. [#254](https://github.com/navikt/mlx-workspace/issues/254) leftovers in `_sandbox.py`: cache-only grants, TOML parse check, read-key self-check. Fable review.
+
+**Standing items:**
+
+- [#279](https://github.com/navikt/mlx-workspace/issues/279): MTPLX measurement-only arm. Decided; never a verdict arm.
+- [navikt/copilot#1781](https://github.com/navikt/copilot/issues/1781): watch for mlx-lm#990 or official MTP weights.
+- [navikt/copilot#1821](https://github.com/navikt/copilot/issues/1821): local-mode routing.
+- [#280](https://github.com/navikt/mlx-workspace/issues/280): tracking.
+
+**Rules.**
+
+- Benchmark on triggers only ([BENCHMARKING.md](BENCHMARKING.md#when-we-benchmark)).
+- Never widen the cplt sandbox for the bench (cplt#761 is closed).
+- Measurement-only profiles never reach the manifest.
+- `capabilities --check` runs in CI.
 
 ## Final GPU run, then parked (13 October 2026)
 
