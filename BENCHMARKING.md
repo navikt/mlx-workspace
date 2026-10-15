@@ -191,10 +191,13 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   23:38 to 04:25 after the other had already finished it. The GPU was never idle: it spent
   4 h 47 min on a duplicate run while the next queue waited on it.
 - **Touch the `.done` marker only when every pass succeeded**, before any slow step of the
-  launcher's own. A pass that exits non-zero, logs a `FAIL` step, or skips a step the queue expected to run
-  stops the launcher with a non-zero exit and no marker, so a fixed relaunch can still start. `night-run-3` exits 0 even when
-  a step fails its gradle preflight, so check its step lines as well as its exit code (#197). A
-  check that fails before the run leaves no marker either.
+  launcher's own. A pass succeeded when every step ended `OK` or `TIMEOUT`: a step that runs
+  out of its time budget keeps its samples and is a normal outcome (#252). A `FAIL` (the gradle
+  preflight included), `SKIP` or `UNREACHABLE` step stops the launcher with a non-zero exit and no
+  marker, so a fixed relaunch can still start. `night-run-3` exits 3 in that case and logs
+  `steps not OK: <n>=<status> ...`, so the launcher checks the exit code only and quotes that line
+  (#197). `bench-nais-upgrade` exits 3 when a model or task did not run. A check that fails
+  before the run leaves no marker either.
 - **The main checkout is live while a queue runs.** Launchers and queues run from
   `~/mlx-workspace` itself and read untracked files there. While any queue or launcher is
   running or waiting, no agent deletes, cleans, stashes or switches branches in that checkout; do
@@ -203,7 +206,7 @@ waits for a free GPU and then runs a queue. The rules for a new launcher:
   it, and steps 4-7 failed in a second each at 08:35. A launcher's preflight checks the files its
   queue needs, so a missing file stops the launcher with one log line instead of failing every step.
 
-`reports/2026-09-30-emm8-delegate/emm8-delegate-launcher` follows these rules.
+`reports/2026-10-12-open-questions/oq-launcher` follows these rules.
 
 ## Queued runs
 

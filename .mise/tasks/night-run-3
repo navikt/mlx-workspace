@@ -265,6 +265,7 @@ record() {
   python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps(dict(zip(a[::2], a[1::2]))))' "$@" >> "$DIR/steps.jsonl"
 }
 
+STEPS0=$(wc -l 2>/dev/null < "$DIR/steps.jsonl"); STEPS0=${STEPS0:-0}   # a resume appends; judge only this invocation's steps
 say "=== night-run-3 from step $FROM, part $PART, dir $DIR, pid $$"
 plan | tee -a "$DIR/night.log"
 if [ -z "$FAKE" ]; then
@@ -522,3 +523,9 @@ else
   wait "$cpid" 2>/dev/null && say "✓ committed on local branch $branch (not pushed)" || say "✗ commit failed; see $DIR/night.log"
 fi
 say "=== night-run-3 done. Report: $REPORT · steps: $DIR/steps.jsonl"
+# #197/#252: exit non-zero unless every step of this invocation ended OK or TIMEOUT (a budgeted
+# step that ran out of time, samples kept). FAIL, SKIP and UNREACHABLE (gradle preflight
+# included) exit 3, so a launcher's exit-code check alone keeps its done marker away.
+notok=$(tail -n +$((STEPS0 + 1)) "$DIR/steps.jsonl" 2>/dev/null | python3 -c 'import json, sys
+print(" ".join("%s=%s" % (r["n"], r["status"]) for r in map(json.loads, filter(str.strip, sys.stdin)) if r["status"] not in ("OK", "TIMEOUT")))')
+[ -z "$notok" ] || { say "✗ steps not OK: $notok; exit 3"; exit 3; }

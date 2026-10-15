@@ -95,12 +95,17 @@ export NIGHT_FAKE=1 NIGHT_FAKE_STEP="$T/bin/step" NIGHT_PMSET="$T/bin/pmset" SEL
 export PLAN="6=fail 7=hang 8=nolever" SET_BATTERY="4:5"
 
 echo "### one pass over all 16 steps"
-"$ROOT/.mise/tasks/night-run-3"
+"$ROOT/.mise/tasks/night-run-3"; rc_all=$?
 
 echo
 echo "### --queue: a base and a lever step from a file, report named after it"
 printf '# a comment\nlocal base edit-single base 2 1-2 5 4\n\nlocal lever edit-single retry2+cap900 2 1-2 5 4  # trailing\n' > "$T/night-2.queue"
-NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"
+NIGHT_DIR="$T/night2" NIGHT_REPORT="$T/night-2.md" PLAN="" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-2.queue"; rc_q=$?
+
+echo
+echo "### --queue whose only step times out: a budgeted TIMEOUT still exits 0 (#252)"
+printf 'local base edit-single base 2 1-2 2 4\n' > "$T/night-to.queue"
+NIGHT_DIR="$T/nightto" NIGHT_REPORT="$T/night-to.md" PLAN="1=hang" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-to.queue" > /dev/null; rc_to=$?
 
 echo
 echo "### --queue with a profile per step and the e2e, ops and decide kinds"
@@ -131,6 +136,8 @@ print(" ".join("%s=%s" % (r["n"], r["status"]) for r in map(json.loads, open(sys
 echo "      statuses: $got"
 check "statuses as planned" \
   '[ "$got" = "1=OK 2=OK 3=OK 4=OK 5=SKIP 6=FAIL 7=TIMEOUT 8=SKIP 9=OK 10=OK 11=OK 12=OK 13=OK 14=SKIP 15=SKIP 16=SKIP" ]'
+check "a pass with FAIL/SKIP steps exits 3; OK-only and TIMEOUT-only passes exit 0 (#197, #252)" \
+  '[ "$rc_all" = 3 ] && [ "$rc_q" = 0 ] && [ "$rc_to" = 0 ] && grep -q "steps not OK: 5=SKIP 6=FAIL 8=SKIP 14=SKIP" "$T/night/night.log" && grep -q "1=TIMEOUT\|\"status\": \"TIMEOUT\"" "$T/nightto/steps.jsonl"'
 check "step 6 recorded exit 3" 'grep -q "\"n\": \"6\".*\"rc\": \"3\"" "$T/night/steps.jsonl"'
 check "cost cap recorded on the skipped cloud steps" 'grep -q "\"n\": \"14\".*cost cap" "$T/night/steps.jsonl"'
 check "timed-out tree all dead (TERM-ignoring child, setsid stray)" \

@@ -56,4 +56,5 @@ while kill -0 "$NR" 2>/dev/null; do
   sleep 10
 done
 wait "$NR"; rc=$?; say "queue exited $rc"
+# exit 3: a model, task or the rest of the window did not run; 143: killed at the window end (#197)
 [ "$rc" = 0 ] && { : > "$DONE"; say "done marker"; }
