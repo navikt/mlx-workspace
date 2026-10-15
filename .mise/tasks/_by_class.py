@@ -92,13 +92,16 @@ DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 #   directory as `~`. Only the file text changes; samples, verdicts and timing are untouched.
 #   c0c3d3ae7bb7 (bench-frontier): #226 adds `summary --check` and writes summary lb as +0.0
 #   (never -0.0). Only the summary command and the selftest change; no run path does.
+#   3bb973ede870 (bench-frontier): two more statements in the selftest's Postgres negative
+#   check (#284 review). Selftest code only.
 EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135fe6",
                       "8d466262d110": "7a11c4a406ce", "9b8666a6c422": "0da7d95c0d44",
                       "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44",
                       "b2aa8f6b0a8e": "3ddd8d4e1be1", "574568dab9bf": "3ddd8d4e1be1",
                       "fb13f73def42": "3ddd8d4e1be1", "5f397a56beaa": "824f3b2ff73c",
                       "d3c9667d02f5": "824f3b2ff73c",
-                      "c0c3d3ae7bb7": "824f3b2ff73c"}
+                      "c0c3d3ae7bb7": "824f3b2ff73c",
+                      "3bb973ede870": "824f3b2ff73c"}
 # Local debug rows at rung 1 only (owner call, #253/#278): #250/#255 changed only the
 # cloud arm's cplt grants, and #284 (824f3b2ff73c) added harness-run Postgres. The owner
 # accepted pooling at rung 1 only: local rung-1 rows from the older generations pool
