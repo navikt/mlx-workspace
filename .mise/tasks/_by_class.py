@@ -85,11 +85,14 @@ DEBUG_FILE = "results-qwen3.6-35b-a3b-optiq-debug.json"
 #   (no CFG there); it now reads globals().get("CFG", {}). Still a `# target-hook` line,
 #   so stripped bytes equal 3ddd8d4e1be1's, and borrowed it adds nothing to `allowed`,
 #   which is 3ddd8d4e1be1's behaviour (that file had no hook at all).
+#   5f397a56beaa (bench-frontier): #247 hashes bench-cheap-ops without its `# target-hook`
+#   lines, as cheap-ops does, and #251 pools summary rows through this map. The rest of
+#   the diff is two imports; no run path changes, so it pools with 824f3b2ff73c.
 EQUIVALENT_HARNESS = {"f62fbb8cbeae": "492141135fe6", "d1229ad0e89f": "492141135fe6",
                       "8d466262d110": "7a11c4a406ce", "9b8666a6c422": "0da7d95c0d44",
                       "fd07267425b2": "7a11c4a406ce", "214f6a6e1f93": "0da7d95c0d44",
                       "b2aa8f6b0a8e": "3ddd8d4e1be1", "574568dab9bf": "3ddd8d4e1be1",
-                      "fb13f73def42": "3ddd8d4e1be1"}
+                      "fb13f73def42": "3ddd8d4e1be1", "5f397a56beaa": "824f3b2ff73c"}
 # Local debug rows at rung 1 only (owner call, #253/#278): #250/#255 changed only the
 # cloud arm's cplt grants, and #284 (824f3b2ff73c) added harness-run Postgres. The owner
 # accepted pooling at rung 1 only: local rung-1 rows from the older generations pool

@@ -39,6 +39,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import _by_class  # noqa: E402
+import _cheap_ops_target as T  # noqa: E402
 import _frontier as F  # noqa: E402
 import _sandbox as S  # noqa: E402
 
@@ -176,7 +178,9 @@ def harness_sha(tasks_file):
     for f in (HERE / "bench-frontier", HERE / "_frontier.py", HERE / "bench-cheap-ops",
               HERE / "_sandbox.py", HERE / "_profiles.py", tasks_file, REAL_ROOT / "bench" / "agents-prompt.md"):
         h.update(f.name.encode())
-        h.update(f.read_bytes() if f.exists() else b"<missing>")
+        # `# target-hook` lines are inert without BENCH_TARGET; hash bench-cheap-ops as cheap-ops does (#247)
+        b = f.read_bytes() if f.exists() else b"<missing>"
+        h.update(T.strip_hooks(b) if f.name == "bench-cheap-ops" else b)
     return h.hexdigest()[:12]
 
 
@@ -1131,9 +1135,10 @@ def summarise(files):
         d = json.loads(Path(f).read_text())
         m = d["meta"]
         params = m.get("profile_params") or {}
+        sha = _by_class.EQUIVALENT_HARNESS.get(m["harness_sha"], m["harness_sha"])  # pool as bench-capabilities does (#251)
         cond = (f"temp={params.get('MLX_TEMP', '0.6')} ctx={params.get('MLX_OPENCODE_CONTEXT', '?')} "
-                f"harness={m['harness_sha']} tasks={m['tasks_sha']}") if not m.get("cloud_model") else \
-            f"cloud harness={m['harness_sha']} tasks={m['tasks_sha']}"
+                f"harness={sha} tasks={m['tasks_sha']}") if not m.get("cloud_model") else \
+            f"cloud harness={sha} tasks={m['tasks_sha']}"
         mode = "cloud" if m.get("cloud_model") else "local"
         for s in d["samples"]:
             if not s.get("valid", True) or s["verified"] is None:
@@ -1316,6 +1321,31 @@ def cmd_selftest(_args):
     # night 3: the cloud arm's workspace sat inside this repo, so cplt scoped the session to it
     assert not ws_for("cloud-x").resolve().is_relative_to(REAL_ROOT.resolve())
     assert cplt_project("\x1b[2m[cplt] Project:  /a/b\x1b[0m\n") == "/a/b" and cplt_project("no banner") is None
+    global HERE
+    with tempfile.TemporaryDirectory() as tmp:   # #247: a `# target-hook` line does not move harness_sha
+        here, tmp = HERE, Path(tmp)
+        for n in ("bench-frontier", "_frontier.py", "bench-cheap-ops", "_sandbox.py", "_profiles.py"):
+            shutil.copy2(here / n, tmp / n)
+        try:
+            HERE = tmp
+            h0 = harness_sha(TASKS)
+            with (tmp / "bench-cheap-ops").open("a") as fh:
+                fh.write("x = 1  # target-hook\n")
+            assert harness_sha(TASKS) == h0
+            with (tmp / "bench-cheap-ops").open("a") as fh:
+                fh.write("x = 1\n")
+            assert harness_sha(TASKS) != h0
+        finally:
+            HERE = here
+        # #251: two EQUIVALENT_HARNESS generations pool into one summary row
+        a, b = next(iter(_by_class.EQUIVALENT_HARNESS.items()))
+        for i, sha in enumerate((a, b)):
+            (tmp / f"f{i}.json").write_text(json.dumps({
+                "meta": {"key": "m", "variant": "base", "harness_sha": sha, "tasks_sha": "t"},
+                "samples": [{"class": "read-qa", "rung": 1, "task": "t1", "run": 0, "d": 1, "seconds": 1,
+                             "verified": True}]}))
+        rows = list(summarise([tmp / "f0.json", tmp / "f1.json"]).values())
+        assert len(rows) == 1 and rows[0]["rungs"][1]["n"] == 2 and f"harness={b}" in rows[0]["condition"], rows
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         repo = tmp / "fixture"
