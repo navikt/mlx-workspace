@@ -25,6 +25,7 @@ cat > "$T/bin/step" <<'EOF'
 #!/usr/bin/env bash
 n=$1 kind=$2 classes=$3 variant=$4 ledger=$5 prof=${6:-m}
 b=$(tr ' ' '\n' <<<"$PLAN" | sed -n "s/^$n=//p"); b=${b:-ok}
+[ "$b" = persist ] && { mkdir -p "$NIGHT_HOME_CFG_ROOT/.gradle/init.d"; echo "// x" > "$NIGHT_HOME_CFG_ROOT/.gradle/init.d/x.gradle"; b=ok; }
 stamp=$(date +%Y%m%d-%H%M%S)-$n
 B=$NIGHT_BENCH_DIR
 case "$b" in
@@ -87,7 +88,7 @@ chmod +x "$T/bin/pmset" "$T/bin/step"
 export NIGHT_FAKE=1 NIGHT_FAKE_STEP="$T/bin/step" NIGHT_PMSET="$T/bin/pmset" SELFTEST_DIR="$T" \
   NIGHT_LOCKDIR="$T/queue.lock" NIGHT_BENCH_DIR="$T/bench" NIGHT_REPORT="$T/report.md" NIGHT_DIR="$T/night" \
   NIGHT_STRAY_ROOT="$T/stray" NIGHT_MIN_SECONDS=1 NIGHT_AC_WAIT_SECONDS=2 NIGHT_AC_POLL_SECONDS=1 \
-  FRONTIER_ROOT="$T" FRONTIER_COST_CAP=1 FRONTIER_MODEL=m
+  FRONTIER_ROOT="$T" FRONTIER_COST_CAP=1 FRONTIER_MODEL=m NIGHT_HOME_CFG_ROOT="$T/home"
 # NIGHT_MIN_SECONDS=1 turns minutes into seconds, so step 7 hangs for its 35 "minutes".
 # Step 4 leaves the machine on battery past the 2 s wait so step 5 is skipped, step 6
 # fails with exit 3, step 8 finds nothing to move, and the two cloud steps at $0.60
@@ -106,6 +107,13 @@ echo
 echo "### --queue whose only step times out: a budgeted TIMEOUT still exits 0 (#252)"
 printf 'local base edit-single base 2 1-2 2 4\n' > "$T/night-to.queue"
 NIGHT_DIR="$T/nightto" NIGHT_REPORT="$T/night-to.md" PLAN="1=hang" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-to.queue" > /dev/null; rc_to=$?
+
+echo
+echo "### a step that leaves ~/.gradle/init.d/x.gradle behind is invalid and stops the queue (#254)"
+mkdir -p "$T/home/.m2" && echo "<settings/>" > "$T/home/.m2/settings.xml"
+printf 'local base edit-single base 2 1-2 5 4\nlocal base read-qa base 2 1-2 5 4\n' > "$T/night-cfg.queue"
+NIGHT_DIR="$T/nightcfg" NIGHT_REPORT="$T/night-cfg.md" PLAN="1=persist" "$ROOT/.mise/tasks/night-run-3" --queue "$T/night-cfg.queue" > /dev/null; rc_cfg=$?
+rm -rf "$T/home/.gradle"
 
 echo
 echo "### --queue with a profile per step and the e2e, ops and decide kinds"
@@ -138,6 +146,8 @@ check "statuses as planned" \
   '[ "$got" = "1=OK 2=OK 3=OK 4=OK 5=SKIP 6=FAIL 7=TIMEOUT 8=SKIP 9=OK 10=OK 11=OK 12=OK 13=OK 14=SKIP 15=SKIP 16=SKIP" ]'
 check "a pass with FAIL/SKIP steps exits 3; OK-only and TIMEOUT-only passes exit 0 (#197, #252)" \
   '[ "$rc_all" = 3 ] && [ "$rc_q" = 0 ] && [ "$rc_to" = 0 ] && grep -q "steps not OK: 5=SKIP 6=FAIL 8=SKIP 14=SKIP" "$T/night/night.log" && grep -q "1=TIMEOUT\|\"status\": \"TIMEOUT\"" "$T/nightto/steps.jsonl"'
+check "a step that left gradle config is FAIL, its result moved out of bench/, the queue stopped (#254)" \
+  '[ "$(wc -l < "$T/nightcfg/steps.jsonl")" -eq 1 ] && grep -q "\"status\": \"FAIL\".*invalid: the step left ~/.gradle/init.d/x.gradle " "$T/nightcfg/steps.jsonl" && ls "$T/nightcfg/invalid/" | grep -q "^frontier-m-base-" && grep -q "stopping the queue" "$T/nightcfg/night.log" && [ "$rc_cfg" = 3 ]'
 check "step 6 recorded exit 3" 'grep -q "\"n\": \"6\".*\"rc\": \"3\"" "$T/night/steps.jsonl"'
 check "cost cap recorded on the skipped cloud steps" 'grep -q "\"n\": \"14\".*cost cap" "$T/night/steps.jsonl"'
 check "timed-out tree all dead (TERM-ignoring child, setsid stray)" \
