@@ -1578,7 +1578,8 @@ def pg_live_check(tmp):
             assert ok, (stmt, err)
         for stmt in ("COPY (SELECT 1) TO PROGRAM 'true'", "SELECT pg_read_file('/etc/hosts')",
                      "SELECT lo_export(lo_create(0), '/dev/null')", "CREATE ROLE live_su SUPERUSER",
-                     "ALTER ROLE postgres PASSWORD 'x'", "GRANT pg_execute_server_program TO bench"):
+                     "ALTER ROLE postgres PASSWORD 'x'", "GRANT pg_execute_server_program TO bench",
+                     "GRANT pg_read_server_files TO bench", "GRANT pg_write_server_files TO bench"):
             ok, err = sql(stmt)
             assert not ok and ("permission denied" in err or "must be" in err or "privilege" in err), (stmt, err)
         r = subprocess.run(["psql", "-h", "127.0.0.1", "-p", str(H["pg_port"]), "-U", "postgres", "-d", "postgres",
