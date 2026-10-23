@@ -375,15 +375,21 @@
       "create-file": {
         "delegate": "trusted",
         "delegate_k": 15,
-        "delegate_n": 20
+        "delegate_n": 20,
+        "source": "https://github.com/navikt/mlx-workspace/issues/126",
+        "date": "2026-10-23"
       },
       "edit-single": {
         "delegate": "trusted",
         "delegate_k": 48,
-        "delegate_n": 48
+        "delegate_n": 48,
+        "source": "https://github.com/navikt/mlx-workspace/pull/237",
+        "date": "2026-10-23"
       },
       "edit-multi-mechanical": {
-        "delegate": "cloud"
+        "delegate": "cloud",
+        "source": "owner decision",
+        "date": "2026-10-23"
       }
     }
   },
