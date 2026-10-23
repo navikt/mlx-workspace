@@ -137,6 +137,41 @@ def probe_tally(probe_rows, rows):
             "models": out}
 
 
+# Owner decisions (2026-10-23): delegate verdicts a person set by hand, applied over
+# the computed ones before the block reaches the manifest. Each carries the counts
+# its evidence reports. The computed verdicts stay in `models` as measured.
+MW = "https://github.com/navikt/mlx-workspace"
+OWNER_DECISIONS = {
+    "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit": {
+        # retry2, 15/20 verified against 5/20, judged per verified result. It fails the
+        # per-sample time rule (2.02x against 2x); the owner chose the
+        # per-verified-result reading.
+        "create-file": {"delegate": "trusted", "delegate_k": 15, "delegate_n": 20,
+                        "source": f"{MW}/issues/126", "date": "2026-10-23"},
+        # retry2, 48/48 verified, Wilson lower bound 0.967.
+        "edit-single": {"delegate": "trusted", "delegate_k": 48, "delegate_n": 48,
+                        "source": f"{MW}/pull/237", "date": "2026-10-23"},
+        # 35/35 clears the bar, but the owner keeps it on the cloud model.
+        "edit-multi-mechanical": {"delegate": "cloud", "source": "owner decision", "date": "2026-10-23"},
+    },
+}
+DECISION_META = {"source", "date"}
+DECISION_KEYS = {"delegate", "delegate_k", "delegate_n"}
+
+
+def apply_owner_decisions(blocks, decisions=None):
+    """Overlay the owner's delegate verdicts. Only enums and ints reach the block;
+    source and date stay in capabilities.json's owner_decisions."""
+    for m, per in (OWNER_DECISIONS if decisions is None else decisions).items():
+        if m not in blocks:  # a fixture bench without this model; main() refuses it for real
+            continue
+        for cls, over in per.items():
+            over = {k: v for k, v in over.items() if k not in DECISION_META}
+            assert set(over) <= DECISION_KEYS, over
+            blocks[m]["classes"][cls].update(over)  # KeyError on an unknown class
+    return blocks
+
+
 def manifest_block(per_class):
     """What nav-pilot reads: enums and integers, nothing else."""
     return {
@@ -179,7 +214,8 @@ def build():
             if v.get("exclude_from_bar")},
         # What model-manifest copies into each entry, by MLX_MODEL. A model with
         # no runs gets the unmeasured block: cloud everywhere, never no block.
-        "manifest_blocks": {m: manifest_block(v) for m, v in models.items()},
+        "manifest_blocks": apply_owner_decisions({m: manifest_block(v) for m, v in models.items()}),
+        "owner_decisions": OWNER_DECISIONS,
         "unmeasured_block": manifest_block({c: {"delegate": none, "local": none} for c in CLASSES}),
         "models": models,
         "delegate_probe": probe_tally(probe, rows),
@@ -225,9 +261,38 @@ def self_check():
           {"mode": "local", "condition": "cheap-ops profile=y temp=0"}]
     assert drop_measurement_only(rs, {"x"}) == rs[1:]
     assert {"qwen3.8-27b-8bit-mtplx", "qwen3.8-27b-8bit-rapid"} <= measurement_only_ids()
+    owner_check()
     overlay_check()
     frontier_check()
     print("✓ bench-capabilities self-check passed")
+
+
+def owner_check():
+    """Owner decisions change only the decided model's decided classes, keep measured
+    counts they do not set, carry no metadata into the block, and refuse a typo."""
+    import copy
+    cls5 = {c: {"delegate": {"verdict": "cloud", "k": 0, "n": 0},
+                "local": {"verdict": "cloud", "k": 0, "n": 0}} for c in CLASSES}
+    cls5["edit-multi-mechanical"]["delegate"] = {"verdict": "trusted", "k": 35, "n": 35}
+    blocks = {"m": manifest_block(copy.deepcopy(cls5)), "other": manifest_block(copy.deepcopy(cls5))}
+    before = copy.deepcopy(blocks)
+    dec = {"m": {"create-file": {"delegate": "trusted", "delegate_k": 15, "delegate_n": 20, "source": "s", "date": "d"},
+                 "edit-single": {"delegate": "trusted", "delegate_k": 48, "delegate_n": 48, "source": "s", "date": "d"},
+                 "edit-multi-mechanical": {"delegate": "cloud", "source": "s", "date": "d"}}}
+    out = apply_owner_decisions(blocks, dec)
+    assert out["other"] == before["other"]
+    changed = {c for c in CLASSES if out["m"]["classes"][c] != before["m"]["classes"][c]}
+    assert changed == {"create-file", "edit-single", "edit-multi-mechanical"}, changed
+    em = out["m"]["classes"]["edit-multi-mechanical"]
+    assert em["delegate"] == "cloud" and (em["delegate_k"], em["delegate_n"]) == (35, 35), em
+    assert all(isinstance(x, (str, int)) and k not in DECISION_META
+               for c in out["m"]["classes"].values() for k, x in c.items())
+    for bad in ({"m": {"create-fil": {"delegate": "trusted"}}}, {"m": {"debug": {"local": "trusted"}}}):
+        try:
+            apply_owner_decisions(copy.deepcopy(before), bad)
+            raise RuntimeError(f"accepted {bad}")
+        except (KeyError, AssertionError):
+            pass
 
 
 def overlay_check():
@@ -325,6 +390,8 @@ def main():
         self_check()
         return 0
     doc = build()
+    if missing := [m for m in OWNER_DECISIONS if m not in doc["manifest_blocks"]]:
+        raise SystemExit(f"✗ owner decision for a model with no bench rows: {missing}")
     text = json.dumps(doc, indent=2) + "\n"
     if args.check:
         if not OUT.exists() or OUT.read_text() != text:
@@ -344,6 +411,11 @@ def main():
             d, lo = v["delegate"], v["local"]
             print(f"  {m.split('/')[-1][:28]:28} {cls:22} "
                   f"{d['verdict']:>8} {d['k']:>3}/{d['n']:<3}   {lo['verdict']:>8} {lo['k']:>3}/{lo['n']:<3}")
+    for m, per in OWNER_DECISIONS.items():
+        for cls, over in per.items():
+            meas = doc["models"][m][cls]["delegate"]
+            print(f"  OWNER {m.split('/')[-1][:28]:28} {cls:22} delegate {meas['verdict']} "
+                  f"{meas['k']}/{meas['n']} -> {over['delegate']} ({over['source']}, {over['date']})")
     for m, per in doc["delegate_probe"]["models"].items():
         for cls, rs in per.items():
             for r in rs:

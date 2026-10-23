@@ -46,13 +46,16 @@ OFFERED = {
         "revision": "70a3aa32c7feef511182bf16aa332f37e8d82014",
         "default": True,
         "role": "Sub-agent worker for focused tasks",
-        "evidence": "reports/2026-09-23-local-model-evaluation/decision.md",
+        # A list of (label, url) renders as several links in the README.
+        "evidence": [("#126", "https://github.com/navikt/mlx-workspace/issues/126"),
+                     ("#237", "https://github.com/navikt/mlx-workspace/pull/237")],
         # Claim-injection flips 9/27 = 33% against Qwen3.8's 58%:
         # bench/decide-limits-20260925-014512.md.
         "recommended_for": ["decide-untrusted-evidence"],
-        # Written from manifest/capabilities.json, not from impressions: the one class
-        # that clears the bar is a delegated mechanical multi-file edit.
-        "expect": "Takes a scoped task from the main agent and returns in seconds. Measured strength: a mechanical change across several files, such as a rename or the same edit in many places, handed over by a cloud agent, which verified in 35 of 35 runs. Not yet trusted for answers and explanations about code, single-file edits, debugging or creating new files: too few measured runs, or too many failures. Keep those on the cloud model. Unreliable in long multi-turn work.",
+        # Written from manifest/capabilities.json and its owner decisions (2026-10-23).
+        # The two trusted counts come from bench-frontier retry2 runs with the model as
+        # the main agent, not from the hand-over path; the text says so.
+        "expect": "Takes a scoped task from the main agent and returns in seconds. Trusted, with one retry, for a single-file edit (48 of 48 verified) and a new file (15 of 20 verified); both were measured with the model as the main agent, not on the hand-over path. Changes across several files stay on the cloud model by decision. Not trusted for answers and explanations about code, or debugging. Unreliable in long multi-turn work.",
     },
     # Qwen3.8-27B, an 8-bit and a 4-bit build, offered on request and never as the
     # default. People are asking for it by name, and refusing to serve a model
@@ -298,7 +301,13 @@ MODE_WORDS = {"delegate": "handed over by the cloud agent", "local": "as the mai
 
 
 def trusted_for(m: dict) -> str:
-    out = [f"{CLASS_WORDS[c].capitalize()}, {MODE_WORDS[mode]} ({v[mode + '_k']}/{v[mode + '_n']} verified)"
+    owner = json.loads(CAPS.read_text()).get("owner_decisions", {}).get(m["model"], {})
+
+    def how(c, mode):  # an owner-decided delegate verdict was measured as the main agent
+        if mode == "delegate" and c in owner:
+            return "for hand-over by owner decision, measured as the main agent with one retry"
+        return MODE_WORDS[mode]
+    out = [f"{CLASS_WORDS[c].capitalize()}, {how(c, mode)} ({v[mode + '_k']}/{v[mode + '_n']} verified)"
            for c, v in m.get("capabilities", {}).get("classes", {}).items()
            for mode in MODE_WORDS if v[mode] == "trusted"]
     return "; ".join(out) or "Nothing yet: every task class stays on the cloud model"
@@ -321,7 +330,7 @@ def row(m: dict) -> str:
         f"{m['min_ram_gb']} GB / {m['wired_limit_gb']} GB",
         f"`{m['min_nav_pilot']}`" if "min_nav_pilot" in m else "any",
         trusted_for(m),
-        f"[{Path(ev).name}]({ev}) |",
+        (", ".join(f"[{t}]({u})" for t, u in ev) if isinstance(ev, list) else f"[{Path(ev).name}]({ev})") + " |",
     ])
 
 
