@@ -137,6 +137,32 @@ def probe_tally(probe_rows, rows):
             "models": out}
 
 
+# Owner decisions (2026-10-23): delegate verdicts a person set by hand, applied over
+# the computed ones before the block reaches the manifest. Each carries the counts
+# its evidence reports. The computed verdicts stay in `models` as measured.
+OWNER_DECISIONS = {
+    "mlx-community/Qwen3.6-35B-A3B-OptiQ-4bit": {
+        # #126: retry2, 15/20 verified against 5/20, judged per verified result. It
+        # fails the per-sample time rule (2.02x against 2x); the owner chose the
+        # per-verified-result reading.
+        "create-file": {"delegate": "trusted", "delegate_k": 15, "delegate_n": 20},
+        # #237: retry2, 48/48 verified, Wilson lower bound 0.967.
+        "edit-single": {"delegate": "trusted", "delegate_k": 48, "delegate_n": 48},
+        # 35/35 clears the bar, but the owner keeps it on the cloud model.
+        "edit-multi-mechanical": {"delegate": "cloud"},
+    },
+}
+
+
+def apply_owner_decisions(blocks):
+    for m, per in OWNER_DECISIONS.items():
+        if m not in blocks:  # a fixture bench without this model
+            continue
+        for cls, over in per.items():
+            blocks[m]["classes"][cls].update(over)
+    return blocks
+
+
 def manifest_block(per_class):
     """What nav-pilot reads: enums and integers, nothing else."""
     return {
@@ -179,7 +205,8 @@ def build():
             if v.get("exclude_from_bar")},
         # What model-manifest copies into each entry, by MLX_MODEL. A model with
         # no runs gets the unmeasured block: cloud everywhere, never no block.
-        "manifest_blocks": {m: manifest_block(v) for m, v in models.items()},
+        "manifest_blocks": apply_owner_decisions({m: manifest_block(v) for m, v in models.items()}),
+        "owner_decisions": OWNER_DECISIONS,
         "unmeasured_block": manifest_block({c: {"delegate": none, "local": none} for c in CLASSES}),
         "models": models,
         "delegate_probe": probe_tally(probe, rows),
